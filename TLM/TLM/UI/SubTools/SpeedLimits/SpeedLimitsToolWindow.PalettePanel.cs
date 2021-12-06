@@ -8,12 +8,16 @@
     using TrafficManager.UI.Textures;
     using TrafficManager.Util;
     using UnityEngine;
-    using Debug = System.Diagnostics.Debug;
 
     /// <summary>Code handling speed palette panel.</summary>
     internal partial class SpeedLimitsToolWindow {
         internal class PalettePanel : UPanel {
             internal readonly List<SpeedLimitPaletteButton> PaletteButtons = new();
+
+            // Button quick access to use with keyboard shortcuts
+            internal SpeedLimitPaletteButton resetToDefaultButton_;
+            internal SpeedLimitPaletteButton unlimitedButton_;
+            internal Dictionary<int, SpeedLimitPaletteButton> everyTen_ = new();
 
             /// <summary>Create speeds palette based on the current options choices.</summary>
             /// <param name="window">Containing <see cref="SpeedLimitsToolWindow"/>.</param>
@@ -38,6 +42,7 @@
                 //-----------------------------------------
                 // the Current Selected Speed is highlighted
                 List<SetSpeedLimitAction> actions = new();
+
                 actions.Add(SetSpeedLimitAction.Unlimited()); // add: Unlimited
                 actions.Add(SetSpeedLimitAction.ResetToDefault()); // add: Default
                 actions.AddRange(PaletteGenerator.AllSpeedLimits(SpeedUnit.CurrentlyConfigured));
@@ -52,6 +57,20 @@
                         showMph: showMph,
                         actionOnClick: action);
                     this.PaletteButtons.Add(nextButton);
+
+                    // If this is a numbered button, and its a multiple of 10...
+                    if (action.Type == SetSpeedLimitAction.ActionType.SetOverride) {
+                        int number = (int)(showMph
+                                               ? action.GuardedValue.Override.GetMph()
+                                               : action.GuardedValue.Override.GetKmph());
+                        if (number % 10 == 0) {
+                            this.everyTen_.Add(number, nextButton);
+                        }
+                    } else if (action.Type == SetSpeedLimitAction.ActionType.Unlimited) {
+                        this.unlimitedButton_ = nextButton;
+                    } else if (action.Type == SetSpeedLimitAction.ActionType.ResetToDefault) {
+                        this.resetToDefaultButton_ = nextButton;
+                    }
                 }
             }
 
@@ -183,6 +202,12 @@
                         SpeedLimitPaletteButton.DEFAULT_WIDTH,
                         SpeedLimitPaletteButton.DEFAULT_HEIGHT));
                 return button;
+            }
+
+            public void TryClick(int speedNumber) {
+                if (this.everyTen_.ContainsKey(speedNumber)) {
+                    this.everyTen_[speedNumber].SimulateClick();
+                }
             }
         }
     }
