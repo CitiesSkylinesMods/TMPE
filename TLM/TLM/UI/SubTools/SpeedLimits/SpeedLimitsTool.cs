@@ -359,7 +359,13 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                 new MainMenu.OSD.Label(
                     localizedText: ColorKey("UI.Key:PageUp/PageDown switch underground")),
                 new MainMenu.OSD.Label(
-                    localizedText: ColorKey("UI.Key:[[/]] | [[\\]] Unlimited; [[Delete]] | [[Backspace]] Default; [[0]] .. [[9]] Select; [[+]] | [[-]] Change")),
+                    localizedText: ColorKey("UI.Key:Unlimited; Default; Select")),
+                new MainMenu.OSD.Shortcut(
+                    keybindSetting: KeybindSettingsBase.SpeedLimitsLess,
+                    localizedText: Translation.Options.Get("Keybind.SpeedLimits:Decrease selected speed")),
+                new MainMenu.OSD.Shortcut(
+                    keybindSetting: KeybindSettingsBase.SpeedLimitsMore,
+                    localizedText: Translation.Options.Get("Keybind.SpeedLimits:Increase selected speed")),
             };
             MainMenu.OSD.OnscreenDisplay.Display(items: items);
         }

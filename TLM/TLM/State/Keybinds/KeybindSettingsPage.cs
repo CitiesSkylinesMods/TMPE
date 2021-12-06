@@ -14,6 +14,10 @@ namespace TrafficManager.State.Keybinds {
             // Section: Lane Connector Tool
             keybindUi_.AddGroup(Translation.Options.Get("KeybindCategory:LaneConnector"),
                                 CreateUI_LaneConnector);
+
+            // Section: Speed Limits tool
+            keybindUi_.AddGroup(Translation.Options.Get("KeybindCategory:SpeedLimits"),
+                                CreateUI_SpeedLimits);
         }
 
         /// <summary>
@@ -46,19 +50,31 @@ namespace TrafficManager.State.Keybinds {
                             SpeedLimitsTool);
         }
 
-        /// <summary>
-        /// Fill Lane Connector keybinds section
-        /// </summary>
+        /// <summary>Fill Lane Connector keybinds section.</summary>
         private void CreateUI_LaneConnector() {
-            AddKeybindRowUI(Translation.Options.Get("Keybind.LaneConnector:Stay in lane"),
-                            LaneConnectorStayInLane);
+            AddKeybindRowUI(label: Translation.Options.Get("Keybind.LaneConnector:Stay in lane"),
+                            keybind: LaneConnectorStayInLane);
 
             // First key binding is readonly (editable1=false)
             AddAlternateKeybindUI(
-                Translation.Options.Get("Keybind.LaneConnector:Delete"),
-                RestoreDefaultsKey,
-                false,
-                true);
+                title: Translation.Options.Get("Keybind.LaneConnector:Delete"),
+                keybind: RestoreDefaultsKey,
+                editable1: false,
+                editable2: true);
+        }
+
+        /// <summary>Fill Lane Connector keybinds section.</summary>
+        private void CreateUI_SpeedLimits() {
+            AddAlternateKeybindUI(
+                title: Translation.Options.Get("Keybind.SpeedLimits:Decrease selected speed"),
+                keybind: SpeedLimitsLess,
+                editable1: true,
+                editable2: true);
+            AddAlternateKeybindUI(
+                title: Translation.Options.Get("Keybind.SpeedLimits:Increase selected speed"),
+                keybind: SpeedLimitsMore,
+                editable1: true,
+                editable2: true);
         }
     }
 }

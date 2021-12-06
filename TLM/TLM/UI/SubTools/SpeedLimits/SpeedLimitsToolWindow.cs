@@ -2,6 +2,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
     using ColossalFramework.UI;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.State;
+    using TrafficManager.State.Keybinds;
     using TrafficManager.U;
     using TrafficManager.U.Autosize;
     using TrafficManager.Util;
@@ -241,6 +242,18 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         }
 
         protected override void OnKeyUp(UIKeyEventParameter p) {
+            if (KeybindSettingsBase.SpeedLimitsLess.IsPressed(p)) {
+                this.palettePanel_.TryDecreaseSpeed();
+                p.Use();
+                return;
+            }
+
+            if (KeybindSettingsBase.SpeedLimitsMore.IsPressed(p)) {
+                this.palettePanel_.TryIncreaseSpeed();
+                p.Use();
+                return;
+            }
+
             switch (p.keycode) {
                 case KeyCode.Delete or KeyCode.Backspace:
                     this.palettePanel_.resetToDefaultButton_.SimulateClick();
@@ -248,36 +261,36 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                 case KeyCode.Slash or KeyCode.Backslash:
                     this.palettePanel_.unlimitedButton_.SimulateClick();
                     break;
-                // case KeyCode.Alpha1 or KeyCode.Keypad1:
-                //     this.palettePanel_.TryClick(10);
-                //     break;
-                // case KeyCode.Alpha2 or KeyCode.Keypad2:
-                //     this.palettePanel_.TryClick(20);
-                //     break;
-                // case KeyCode.Alpha3 or KeyCode.Keypad3:
-                //     this.palettePanel_.TryClick(30);
-                //     break;
-                // case KeyCode.Alpha4 or KeyCode.Keypad4:
-                //     this.palettePanel_.TryClick(40);
-                //     break;
-                // case KeyCode.Alpha5 or KeyCode.Keypad5:
-                //     this.palettePanel_.TryClick(50);
-                //     break;
-                // case KeyCode.Alpha6 or KeyCode.Keypad6:
-                //     this.palettePanel_.TryClick(60);
-                //     break;
-                // case KeyCode.Alpha7 or KeyCode.Keypad7:
-                //     this.palettePanel_.TryClick(70);
-                //     break;
-                // case KeyCode.Alpha8 or KeyCode.Keypad8:
-                //     this.palettePanel_.TryClick(80);
-                //     break;
-                // case KeyCode.Alpha9 or KeyCode.Keypad9:
-                //     this.palettePanel_.TryClick(90);
-                //     break;
-                // case KeyCode.Alpha0 or KeyCode.Keypad0:
-                //     this.palettePanel_.TryClick(100);
-                //     break;
+                case KeyCode.Alpha1 or KeyCode.Keypad1:
+                    if (p.alt) { this.palettePanel_.TryClick(10); }
+                    break;
+                case KeyCode.Alpha2 or KeyCode.Keypad2:
+                    if (p.alt) { this.palettePanel_.TryClick(20); }
+                    break;
+                case KeyCode.Alpha3 or KeyCode.Keypad3:
+                    if (p.alt) { this.palettePanel_.TryClick(30); }
+                    break;
+                case KeyCode.Alpha4 or KeyCode.Keypad4:
+                    if (p.alt) { this.palettePanel_.TryClick(40); }
+                    break;
+                case KeyCode.Alpha5 or KeyCode.Keypad5:
+                    if (p.alt) { this.palettePanel_.TryClick(50); }
+                    break;
+                case KeyCode.Alpha6 or KeyCode.Keypad6:
+                    if (p.alt) { this.palettePanel_.TryClick(60); }
+                    break;
+                case KeyCode.Alpha7 or KeyCode.Keypad7:
+                    if (p.alt) { this.palettePanel_.TryClick(70); }
+                    break;
+                case KeyCode.Alpha8 or KeyCode.Keypad8:
+                    if (p.alt) { this.palettePanel_.TryClick(80); }
+                    break;
+                case KeyCode.Alpha9 or KeyCode.Keypad9:
+                    if (p.alt) { this.palettePanel_.TryClick(90); }
+                    break;
+                case KeyCode.Alpha0 or KeyCode.Keypad0:
+                    if (p.alt) { this.palettePanel_.TryClick(100); }
+                    break;
                 default:
                     base.OnKeyUp(p);
                     return;
