@@ -90,7 +90,9 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                 parent: this,
                 t: string.Empty,
                 stack: UStackMode.None);
-            cursorTooltip_.SetTooltip(); // this will hide it, and update it after setup is done
+
+            // this will hide it, and update it after setup is done
+            cursorTooltip_.SetTooltip(t: null, show: false);
 
             // Force buttons resize and show the current speed limit on the palette
             this.UpdatePaletteButtonsOnClick();
