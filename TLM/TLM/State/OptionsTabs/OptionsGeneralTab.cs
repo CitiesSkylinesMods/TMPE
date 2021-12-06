@@ -184,11 +184,13 @@ namespace TrafficManager.State {
             var themeOptions = SpeedLimitTextures.ThemeNames
                                                     .Select(FormatThemeName)
                                                     .ToArray();
+            int selectedThemeIndex = SpeedLimitTextures.ThemeNames.FindIndex(x => x == mainConfig.RoadSignTheme);
+            int defaultGermanSignsThemeIndex = SpeedLimitTextures.ThemeNames.FindIndex(x => x == SpeedLimitTextures.GERMAN_KM_SIGNS);
             _roadSignsThemeDropdown
                 = generalGroup.AddDropdown(
                       text: Translation.SpeedLimits.Get("General.Dropdown:Road signs theme") + ":",
                       options: themeOptions,
-                      defaultSelection: SpeedLimitTextures.ThemeNames.FindIndex(x => x == mainConfig.RoadSignTheme),
+                      defaultSelection: selectedThemeIndex >= 0 ? selectedThemeIndex : defaultGermanSignsThemeIndex,
                       eventCallback: OnRoadSignsThemeChanged) as UIDropDown;
             _roadSignsThemeDropdown.width *= 2.0f;
         }

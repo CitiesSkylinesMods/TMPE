@@ -7,6 +7,7 @@ namespace TrafficManager.UI {
     using UnityEngine;
     using TrafficManager.Lifecycle;
     using JetBrains.Annotations;
+    using TrafficManager.State;
     using TrafficManager.U;
     using TrafficManager.UI.Textures;
 
