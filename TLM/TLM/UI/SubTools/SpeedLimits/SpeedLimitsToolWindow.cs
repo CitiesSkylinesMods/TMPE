@@ -248,7 +248,11 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
             base.OnResolutionChanged(previousResolution, currentResolution);
         }
 
-        protected override void OnKeyPress(UIKeyEventParameter p) {
+        protected override void OnKeyDown(UIKeyEventParameter p) {
+            if (p.used) {
+                return;
+            }
+
             if (KeybindSettingsBase.SpeedLimitsLess.IsPressed(p)) {
                 this.palettePanel_.TryDecreaseSpeed();
                 p.Use();
@@ -262,9 +266,6 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
             }
 
             switch (p.keycode) {
-                // case KeyCode.Escape:
-                //     parentTool_.DeactivateTool();
-                //     break;
                 case KeyCode.Delete or KeyCode.Backspace:
                     this.palettePanel_.resetToDefaultButton_.SimulateClick();
                     break;
@@ -302,7 +303,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                     if (p.alt) { this.palettePanel_.TryClick(100); }
                     break;
                 default:
-                    base.OnKeyPress(p);
+                    base.OnKeyDown(p);
                     return;
             }
 
