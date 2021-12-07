@@ -530,7 +530,7 @@
             colorController.SetGUIColor(
                 hovered: isHoveredHandle,
                 intersectsGuiWindows: args.IntersectsAnyUIRect(signScreenRect),
-                opacityMultiplier: Mathf.Sqrt(visibleScale));
+                opacityMultiplier: 1.0f); // Mathf.Sqrt(visibleScale) for fade
 
             NetSegment segment = segmentId.ToSegment();
             NetInfo neti = segment.Info;
@@ -722,7 +722,7 @@
                 colorController.SetGUIColor(
                     hovered: isHoveredHandle,
                     intersectsGuiWindows: args.IntersectsAnyUIRect(signScreenRect),
-                    opacityMultiplier: Mathf.Sqrt(visibleScale));
+                    opacityMultiplier: 1f); // Mathf.Sqrt(visibleScale) for fade
 
                 // Get speed limit override for the lane
                 GetSpeedLimitResult overrideSpeedlimit =
