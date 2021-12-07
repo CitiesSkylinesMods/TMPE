@@ -78,7 +78,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         private static string T(string key) => Translation.SpeedLimits.Get(key);
         private static string ColorKey(string key) => Translation.SpeedLimits.ColorizeKeybind(key);
 
-        public override void ActivateTool() {
+        public override void OnActivateTool() {
             if (this.Window == null
                 || GlobalConfig.Instance.Main.DisplaySpeedLimitsMph != this.Window.DisplaySpeedLimitsMph) {
                 // Avoid multiple window rebuilds, unless Mph setting has changed while the window was closed
@@ -87,6 +87,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
 
             this.Window.isEnabled = true;
             this.Window.Show();
+            this.Window.FocusWindow();
             this.overlay_.ResetCache();
 
             // this.fsm_ = InitFiniteStateMachine();
@@ -180,12 +181,16 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                                                   show: this.GetTooltipVisibility());
         }
 
-        public override void DeactivateTool() {
+        public override void OnDeactivateTool() {
             if (this.Window != null) {
                 this.Window.Hide();
                 this.Window.isEnabled = false;
             }
         }
+
+        // public void DeactivateTool() {
+        //     MainTool.SetToolMode(ToolMode.None);
+        // }
 
         /// <summary>Render overlay segments/lanes in non-GUI mode, as overlays.</summary>
         public override void RenderActiveToolOverlay(RenderManager.CameraInfo cameraInfo) {
@@ -391,7 +396,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
 
         /// <summary>Called by IObservable when observed event is fired (UI language change).</summary>
         public void OnUpdate(ModUI.EventPublishers.LanguageChangeNotification subject) {
-            this.DeactivateTool();
+            this.OnDeactivateTool();
         }
 
         /// <summary>Called by IObservable when observed event is fired (display MPH change).</summary>

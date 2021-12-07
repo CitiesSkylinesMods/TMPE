@@ -273,14 +273,14 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
         }
 
         /// <summary>Resets tool into its initial state for new use.</summary>
-        public override void ActivateTool() {
+        public override void OnActivateTool() {
             Log._Debug("LaneArrow: Activated tool");
             fsm_ = InitFiniteStateMachine();
             this.OnEnterSelectState(); // FSM does not call enter on initial state
         }
 
         /// <summary>Cleans up when tool is deactivated or user switched to another tool.</summary>
-        public override void DeactivateTool() {
+        public override void OnDeactivateTool() {
             Log._Debug("LaneArrow: Deactivated tool");
             DestroyToolWindow();
             SelectedNodeId = 0;
