@@ -47,12 +47,6 @@
             /// <summary>Choose what to display (hold Alt to display something else).</summary>
             public SpeedlimitsToolMode ToolMode;
 
-            /// <summary>
-            /// Set this to true to additionally show the other PerLane/PerSegment mode as small
-            /// icons together with the large icons.
-            /// </summary>
-            public bool ShowAltMode;
-
             /// <summary>Hovered SEGMENT speed limit handles (output after rendering).</summary>
             public List<OverlaySegmentSpeedlimitHandle> HoveredSegmentHandles;
 
@@ -73,7 +67,6 @@
                     ToolMode = SpeedlimitsToolMode.Segments,
                     HoveredSegmentHandles = new(),
                     HoveredLaneHandles = new(),
-                    ShowAltMode = false,
                 };
             }
 
@@ -142,11 +135,6 @@
         /// <param name="args">The state of the parent <see cref="SpeedLimitsTool"/>.</param>
         public void RenderBlueOverlays(RenderManager.CameraInfo cameraInfo,
                                        [NotNull] DrawArgs args) {
-            // If holding ALT, we do not accept clicks, so do not highlight anything
-            if (args.ShowAltMode) {
-                return;
-            }
-
             switch (args.ToolMode) {
                 // In segments mode, highlight the hovered segment
                 // In defaults mode, same, affects the hovered segment (but also all roads of that type)
@@ -369,12 +357,12 @@
                     SpeedlimitsToolMode.Segments => currentThemeTextures,
                     SpeedlimitsToolMode.Lanes => currentThemeTextures,
                     // Defaults can show normal textures if the user holds Alt
-                    SpeedlimitsToolMode.Defaults => args.ShowAltMode
+                    SpeedlimitsToolMode.Defaults => args.ToolMode == SpeedlimitsToolMode.Defaults
                                                         ? currentThemeTextures
                                                         : SpeedLimitTextures.RoadDefaults,
                     _ => throw new ArgumentOutOfRangeException(),
                 },
-                drawDefaults_ = (args.ToolMode == SpeedlimitsToolMode.Defaults) ^ args.ShowAltMode,
+                drawDefaults_ = args.ToolMode == SpeedlimitsToolMode.Defaults,
                 baseScreenSizeForSign_ = Constants.OverlaySignVisibleSize,
             };
 
