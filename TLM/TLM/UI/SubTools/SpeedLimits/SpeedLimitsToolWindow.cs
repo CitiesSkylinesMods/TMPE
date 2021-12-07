@@ -95,8 +95,15 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
             // this will hide it, and update it after setup is done
             cursorTooltip_.SetTooltip(t: null, show: false);
 
+            this.gameObject.AddComponent<CustomKeyHandler>();
+
             // Force buttons resize and show the current speed limit on the palette
             this.UpdatePaletteButtonsOnClick();
+            this.FocusWindow();
+        }
+
+        internal void FocusWindow() {
+            this.palettePanel_.resetToDefaultButton_.Focus();
         }
 
         /// <summary>
@@ -241,7 +248,11 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
             base.OnResolutionChanged(previousResolution, currentResolution);
         }
 
-        protected override void OnKeyUp(UIKeyEventParameter p) {
+        protected override void OnKeyDown(UIKeyEventParameter p) {
+            if (p.used) {
+                return;
+            }
+
             if (KeybindSettingsBase.SpeedLimitsLess.IsPressed(p)) {
                 this.palettePanel_.TryDecreaseSpeed();
                 p.Use();
@@ -292,7 +303,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                     if (p.alt) { this.palettePanel_.TryClick(100); }
                     break;
                 default:
-                    base.OnKeyUp(p);
+                    base.OnKeyDown(p);
                     return;
             }
 

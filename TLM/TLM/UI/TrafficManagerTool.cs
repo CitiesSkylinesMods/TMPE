@@ -322,7 +322,7 @@ namespace TrafficManager.UI {
                 activeLegacySubTool_?.Cleanup();
                 activeLegacySubTool_ = null;
 
-                activeSubTool_?.DeactivateTool();
+                activeSubTool_?.OnDeactivateTool();
                 activeSubTool_ = null;
                 toolMode_ = ToolMode.None;
             }
@@ -339,7 +339,7 @@ namespace TrafficManager.UI {
             SelectedSegmentId = 0;
 
             activeLegacySubTool_?.OnActivate();
-            activeSubTool_?.ActivateTool();
+            activeSubTool_?.OnActivateTool();
 
             if (activeLegacySubTool_ != null) {
                 ShowAdvisor(activeLegacySubTool_.GetTutorialKey());

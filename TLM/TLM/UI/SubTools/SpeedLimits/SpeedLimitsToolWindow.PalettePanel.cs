@@ -46,8 +46,8 @@
                 // the Current Selected Speed is highlighted
                 List<SetSpeedLimitAction> actions = new();
 
-                actions.Add(SetSpeedLimitAction.Unlimited()); // add: Unlimited
                 actions.Add(SetSpeedLimitAction.ResetToDefault()); // add: Default
+                actions.Add(SetSpeedLimitAction.Unlimited()); // add: Unlimited
                 actions.AddRange(PaletteGenerator.AllSpeedLimits(SpeedUnit.CurrentlyConfigured));
 
                 this.buttonsByNumber_ = new();

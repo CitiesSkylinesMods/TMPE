@@ -51,6 +51,8 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         /// <returns>Gets <see cref="showLimitsPerLane_"/> but also holding Ctrl would invert it.</returns>
         private bool GetShowLimitsPerLane() =>
             this.speedlimitsToolMode_ == SpeedlimitsToolMode.Lanes ^ Shortcuts.ControlIsPressed;
+        private bool GetShowDefaults() =>
+            this.speedlimitsToolMode_ == SpeedlimitsToolMode.Defaults ^ Shortcuts.AltIsPressed;
 
         /// <summary>Will edit entire road between two junctions by holding Shift.</summary>
         private bool GetMultiSegmentMode() => Shortcuts.ShiftIsPressed;
@@ -78,7 +80,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         private static string T(string key) => Translation.SpeedLimits.Get(key);
         private static string ColorKey(string key) => Translation.SpeedLimits.ColorizeKeybind(key);
 
-        public override void ActivateTool() {
+        public override void OnActivateTool() {
             if (this.Window == null
                 || GlobalConfig.Instance.Main.DisplaySpeedLimitsMph != this.Window.DisplaySpeedLimitsMph) {
                 // Avoid multiple window rebuilds, unless Mph setting has changed while the window was closed
@@ -87,6 +89,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
 
             this.Window.isEnabled = true;
             this.Window.Show();
+            this.Window.FocusWindow();
             this.overlay_.ResetCache();
 
             // this.fsm_ = InitFiniteStateMachine();
@@ -138,7 +141,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         private void UpdateModeInfoLabel() {
             this.Window.modeDescriptionWrapPanel_.UpdateModeInfoLabel(
                 multiSegmentMode: this.GetMultiSegmentMode(),
-                editDefaults: this.speedlimitsToolMode_ == SpeedlimitsToolMode.Defaults,
+                editDefaults: this.GetShowDefaults(),
                 showLanes: this.GetShowLimitsPerLane());
             this.Window.ForceUpdateLayout(); // The info label can get tall, need to move everything
         }
@@ -180,12 +183,16 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                                                   show: this.GetTooltipVisibility());
         }
 
-        public override void DeactivateTool() {
+        public override void OnDeactivateTool() {
             if (this.Window != null) {
                 this.Window.Hide();
                 this.Window.isEnabled = false;
             }
         }
+
+        // public void DeactivateTool() {
+        //     MainTool.SetToolMode(ToolMode.None);
+        // }
 
         /// <summary>Render overlay segments/lanes in non-GUI mode, as overlays.</summary>
         public override void RenderActiveToolOverlay(RenderManager.CameraInfo cameraInfo) {
@@ -234,6 +241,8 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
             if (ModUI.Instance.MainMenu != null) { // can be null if no tool selected
                 this.overlayDrawArgs_.UiWindowRects.Add(
                     ModUI.Instance.MainMenu.GetScreenRectInGuiSpace());
+                this.overlayDrawArgs_.UiWindowRects.Add(
+                    ModUI.Instance.MainMenu.OnscreenDisplayPanel.GetScreenRectInGuiSpace());
             }
 
             this.overlayDrawArgs_.Mouse = this.GetMouseForOverlay();
@@ -241,18 +250,22 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
             this.overlayDrawArgs_.MultiSegmentMode = this.GetMultiSegmentMode();
 
             var modeWithModifiers = this.speedlimitsToolMode_ switch {
-                SpeedlimitsToolMode.Segments => Shortcuts.ControlIsPressed
-                                                    ? SpeedlimitsToolMode.Lanes
-                                                    : SpeedlimitsToolMode.Segments,
-                SpeedlimitsToolMode.Lanes => Shortcuts.ControlIsPressed
-                                                 ? SpeedlimitsToolMode.Segments
-                                                 : SpeedlimitsToolMode.Lanes,
-                SpeedlimitsToolMode.Defaults => SpeedlimitsToolMode.Defaults,
+                SpeedlimitsToolMode.Segments => Shortcuts.AltIsPressed
+                                                    ? SpeedlimitsToolMode.Defaults
+                                                    : (Shortcuts.ControlIsPressed
+                                                           ? SpeedlimitsToolMode.Lanes
+                                                           : SpeedlimitsToolMode.Segments),
+                SpeedlimitsToolMode.Lanes => Shortcuts.AltIsPressed
+                                                 ? SpeedlimitsToolMode.Defaults
+                                                 : (Shortcuts.ControlIsPressed
+                                                        ? SpeedlimitsToolMode.Segments
+                                                        : SpeedlimitsToolMode.Lanes),
+                SpeedlimitsToolMode.Defaults => Shortcuts.AltIsPressed
+                                                    ? SpeedlimitsToolMode.Segments
+                                                    : SpeedlimitsToolMode.Defaults,
                 _ => throw new ArgumentOutOfRangeException()
             };
             this.overlayDrawArgs_.ToolMode = modeWithModifiers;
-
-            this.overlayDrawArgs_.ShowAltMode = interactive && Shortcuts.AltIsPressed;
         }
 
         /// <summary>Create value of null (if mouse is over some essential UI window) or return
@@ -292,11 +305,6 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                 return; // no click in the window
             }
 
-            // ------ Holding Alt will not process any clicks on signs -------
-            if (Shortcuts.AltIsPressed) {
-                return;
-            }
-
             // Go through recently rendered overlay speedlimit handles, which had mouse over them
             // Hovering multiple speed limits handles at once should set limits on multiple roads
             if (this.GetShowLimitsPerLane()) {
@@ -314,10 +322,9 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                 }
             } else {
                 // per segment
-                SetSpeedLimitTarget target =
-                    this.speedlimitsToolMode_ == SpeedlimitsToolMode.Defaults
-                        ? SetSpeedLimitTarget.SegmentDefault
-                        : SetSpeedLimitTarget.SegmentOverride;
+                SetSpeedLimitTarget target = this.GetShowDefaults()
+                                                 ? SetSpeedLimitTarget.SegmentDefault
+                                                 : SetSpeedLimitTarget.SegmentOverride;
 
                 foreach (var h in this.overlayDrawArgs_.HoveredSegmentHandles) {
                     h.Click(
@@ -391,7 +398,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
 
         /// <summary>Called by IObservable when observed event is fired (UI language change).</summary>
         public void OnUpdate(ModUI.EventPublishers.LanguageChangeNotification subject) {
-            this.DeactivateTool();
+            this.OnDeactivateTool();
         }
 
         /// <summary>Called by IObservable when observed event is fired (display MPH change).</summary>

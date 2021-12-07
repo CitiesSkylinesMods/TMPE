@@ -76,14 +76,14 @@
             if (this.IsResetToDefault()) {
                 this.ColorizeAllStates(Color.red); // Red for special buttons, when active
                 this.textScale = 2.0f * UIScaler.UIScale; // Bigger
-            } else
-            if (this.IsUnlimited()) {
-                this.ColorizeAllStates(Color.red); // Red for special buttons, when active
-                this.textScale = 2.8f * UIScaler.UIScale; // Even bigger than X
             } else {
                 // Blue for speed buttons, when active
                 this.ColorizeAllStates(new Color32(0, 128, 255, 255));
-                this.textScale = 2.0f * UIScaler.UIScale;
+                if (this.IsUnlimited()) {
+                    this.textScale = 2.8f * UIScaler.UIScale; // Even bigger than X
+                } else {
+                    this.textScale = 2.0f * UIScaler.UIScale;
+                }
             }
 
             // Can't set width directly, but can via the resizer
@@ -101,10 +101,12 @@
             // Special values (reset and default do not become larger)
             if (this.IsResetToDefault()) {
                 this.textScale = 1.6f * UIScaler.UIScale; // Bigger
-            } else if (this.IsUnlimited()) {
-                this.textScale = 2.4f * UIScaler.UIScale; // Even bigger than X
             } else {
-                this.textScale = UIScaler.UIScale;
+                if (this.IsUnlimited()) {
+                    this.textScale = 2.4f * UIScaler.UIScale; // Even bigger than X
+                } else {
+                    this.textScale = UIScaler.UIScale;
+                }
 
                 // Can't set width directly, but can via the resizer
                 var w = this.text.Length <= 2 ? DEFAULT_WIDTH_NARROW : DEFAULT_WIDTH;

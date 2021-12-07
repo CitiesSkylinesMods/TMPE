@@ -36,10 +36,10 @@ namespace TrafficManager.UI {
         /// Tool reset code, can be run multiple times during the gameplay.
         /// Brings the tool to initial clean state and informs it that it is activated now.
         /// </summary>
-        public abstract void ActivateTool();
+        public abstract void OnActivateTool();
 
         /// <summary>Tool has been switched off by user selecting another tool or hitting Esc.</summary>
-        public abstract void DeactivateTool();
+        public abstract void OnDeactivateTool();
 
         /// <summary>
         /// NOTE: This is Non-GUI overlay which cannot call GUI.DrawTexture and similar GUI calls.
