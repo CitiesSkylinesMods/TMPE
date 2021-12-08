@@ -98,13 +98,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
 
         /// <summary>Drop tool window if it existed, and create again.</summary>
         private void RecreateToolWindow() {
-            // Create a generic self-sizing window with padding of 4px.
-            if (this.Window) {
-                this.Window.Hide();
-
-                // The constructor of new window will try to delete it by name, but we can help it
-                UnityEngine.Object.Destroy(this.Window);
-            }
+            this.DestroyWindow();
 
             UBuilder b = new UBuilder();
             this.Window = b.CreateWindow<SpeedLimitsToolWindow>();
@@ -136,6 +130,18 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
 
             this.Window.modeButtonsPanel_.ToggleMphButton.uOnClick = this.OnClickToggleMphButton;
             this.UpdateCursorTooltip();
+        }
+
+        private void DestroyWindow() {
+            // Create a generic self-sizing window with padding of 4px.
+            if (this.Window != null) {
+                this.Window.Hide();
+
+                // The constructor of new window will try to delete it by name, but we can help it
+                UnityEngine.Object.Destroy(this.Window);
+            }
+
+            this.Window = null;
         }
 
         private void UpdateModeInfoLabel() {
@@ -189,10 +195,6 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                 this.Window.isEnabled = false;
             }
         }
-
-        // public void DeactivateTool() {
-        //     MainTool.SetToolMode(ToolMode.None);
-        // }
 
         /// <summary>Render overlay segments/lanes in non-GUI mode, as overlays.</summary>
         public override void RenderActiveToolOverlay(RenderManager.CameraInfo cameraInfo) {
@@ -398,11 +400,14 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
 
         /// <summary>Called by IObservable when observed event is fired (UI language change).</summary>
         public void OnUpdate(ModUI.EventPublishers.LanguageChangeNotification subject) {
-            this.OnDeactivateTool();
+            // All text labels on the window are changing, better to hide and rebuild the window
+            this.DestroyWindow();
+            MainTool.SetToolMode(ToolMode.None);
         }
 
         /// <summary>Called by IObservable when observed event is fired (display MPH change).</summary>
         public void OnUpdate(ModUI.EventPublishers.DisplayMphNotification subject) {
+            // Does not close window
             this.RecreateToolWindow();
         }
 
