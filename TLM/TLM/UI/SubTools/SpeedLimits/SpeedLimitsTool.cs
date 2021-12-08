@@ -235,16 +235,23 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         private void CreateOverlayDrawArgs(bool interactive) {
             this.overlayDrawArgs_.ClearHovered();
 
-            this.overlayDrawArgs_.UiWindowRects.Clear();
+            List<Rect> uiRects = this.overlayDrawArgs_.UiWindowRects;
+
+            uiRects.Clear();
+
             if (this.Window != null) {
-                this.overlayDrawArgs_.UiWindowRects.Add(this.Window.GetScreenRectInGuiSpace());
+                uiRects.Add(this.Window.GetScreenRectInGuiSpace());
             }
 
             if (ModUI.Instance.MainMenu != null) { // can be null if no tool selected
-                this.overlayDrawArgs_.UiWindowRects.Add(
+                uiRects.Add(
                     ModUI.Instance.MainMenu.GetScreenRectInGuiSpace());
-                this.overlayDrawArgs_.UiWindowRects.Add(
+                uiRects.Add(
                     ModUI.Instance.MainMenu.OnscreenDisplayPanel.GetScreenRectInGuiSpace());
+#if DEBUG
+                // In debug build include the right side debug panel and fade the overlays over it
+                uiRects.Add(ModUI.Instance.DebugMenu.GetScreenRectInGuiSpace());
+#endif
             }
 
             this.overlayDrawArgs_.Mouse = this.GetMouseForOverlay();
