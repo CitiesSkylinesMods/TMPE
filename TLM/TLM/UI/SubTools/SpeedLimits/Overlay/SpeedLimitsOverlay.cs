@@ -436,6 +436,11 @@
                     continue; // do not draw if too distant
                 }
 
+                // Place this check last as it might be expensive
+                if (!SpeedLimitManager.Instance.IsKnownNetinfoName(segment.Info.name)) {
+                    continue;
+                }
+
                 // Ignore: Not in screen segments
                 bool visible = GeometryUtil.WorldToScreenPoint(
                     worldPos: segment.m_bounds.center,

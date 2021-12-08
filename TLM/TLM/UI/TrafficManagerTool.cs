@@ -977,12 +977,12 @@ namespace TrafficManager.UI {
                 labelSb.AppendFormat("L idx {0}, id {1}", i, curLaneId);
 #if DEBUG
                 labelSb.AppendFormat(
-                    ", in: {0}, out: {1}, f: {2}, l: {3} km/h, rst: {4}, dir: {5}, fnl: {6}, " +
+                    ", in: {0}, out: {1}, f: {2}, l: {3}, rst: {4}, dir: {5}, fnl: {6}, " +
                     "pos: {7:0.##}, sim: {8} for {9}/{10}",
                     RoutingManager.Instance.CalcInnerSimilarLaneIndex(segmentId, i),
                     RoutingManager.Instance.CalcOuterSimilarLaneIndex(segmentId, i),
                     (NetLane.Flags)lanesBuffer[curLaneId].m_flags,
-                    SpeedLimitManager.Instance.GetCustomSpeedLimit(curLaneId),
+                    SpeedLimitManager.Instance.GetCustomSpeedLimit(curLaneId).ToString(),
                     VehicleRestrictionsManager.Instance.GetAllowedVehicleTypes(
                         segmentId,
                         segmentInfo,

@@ -1037,5 +1037,14 @@ namespace TrafficManager.Manager.Impl {
         public static bool IsValidRange(float speed) {
             return FloatUtil.IsZero(speed) || (speed >= MIN_SPEED && speed <= SpeedValue.UNLIMITED);
         }
+
+        /// <summary>
+        /// Used to check roads if they're a known and valid asset.
+        /// This will filter out helper roads which are created during public transport route setup.
+        /// </summary>
+        // ReSharper restore Unity.ExpensiveCode
+        public bool IsKnownNetinfoName(string infoName) {
+            return this.vanillaLaneSpeedLimitsByNetInfoName_.ContainsKey(infoName);
+        }
     } // end class
 }

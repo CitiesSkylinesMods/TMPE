@@ -16,8 +16,14 @@
         /// <param name="overrideValue">Speed limit override value, if exists.</param>
         /// <param name="defaultValue">Default speed value if known.</param>
         public GetSpeedLimitResult(SpeedValue? overrideValue, SpeedValue? defaultValue) {
-            OverrideValue = overrideValue;
-            DefaultValue = defaultValue;
+            this.OverrideValue = overrideValue;
+            this.DefaultValue = defaultValue;
+        }
+
+        public override string ToString() {
+            string ov = this.OverrideValue.HasValue ? $"Speed: {this.OverrideValue};" : string.Empty;
+            string dv = this.DefaultValue.HasValue ? $"Default: {this.DefaultValue}" : string.Empty;
+            return $"({ov} {dv})";
         }
     }
 }

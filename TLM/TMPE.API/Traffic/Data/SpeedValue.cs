@@ -137,5 +137,9 @@ namespace TrafficManager.API.Traffic.Data {
                        ? (int)this.GetMph() + " MPH"
                        : (int)this.GetKmph() + " km/h";
         }
+
+        public override string ToString() {
+            return this.FormatStr(false);
+        }
     }
 }
