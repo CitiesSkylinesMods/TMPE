@@ -435,12 +435,6 @@ namespace TrafficManager.Manager.Impl {
                 return;
             }
 
-            // Resharper warning: condition always false
-            // if (info.name == null) {
-            //    Log._DebugOnlyWarning($"SetCustomNetInfoSpeedLimitIndex: info.name is null!");
-            //    return;
-            // }
-
             string infoName = info.name;
             customLaneSpeedLimitByNetInfoName_[infoName] = customSpeedLimit;
             float gameSpeedLimit = ToGameSpeedLimit(customSpeedLimit);
@@ -498,6 +492,12 @@ namespace TrafficManager.Manager.Impl {
                     lane.m_speedLimit = gameSpeedLimit;
                 }
             }
+
+            for(ushort segmentId = 1; segmentId < NetManager.MAX_SEGMENT_COUNT; ++segmentId) {
+                if(segmentId.ToSegment().Info == info) {
+                    Notifier.Instance.OnSegmentModified(segmentId, this);
+                }
+            }
         }
 
         /// <summary>Sets the speed limit of a given lane.</summary>
@@ -514,6 +514,7 @@ namespace TrafficManager.Manager.Impl {
 
             if (action.Type == SetSpeedLimitAction.ActionType.ResetToDefault) {
                 Flags.RemoveLaneSpeedLimit(laneId);
+                Notifier.Instance.OnSegmentModified(segmentId, this);
                 return true;
             }
 
@@ -529,6 +530,7 @@ namespace TrafficManager.Manager.Impl {
 
             Flags.SetLaneSpeedLimit(segmentId, laneIndex, laneId, action);
 
+            Notifier.Instance.OnSegmentModified(segmentId, this);
             return true;
         }
 
@@ -617,6 +619,7 @@ namespace TrafficManager.Manager.Impl {
                 laneIndex++;
             }
 
+            Notifier.Instance.OnSegmentModified(segmentId, this);
             return true;
         }
 
