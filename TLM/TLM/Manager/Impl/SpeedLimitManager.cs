@@ -494,7 +494,8 @@ namespace TrafficManager.Manager.Impl {
             }
 
             for(ushort segmentId = 1; segmentId < NetManager.MAX_SEGMENT_COUNT; ++segmentId) {
-                if(segmentId.ToSegment().Info == info) {
+                ref var segment = ref segmentId.ToSegment();
+                if (segment.IsValid() && segment.Info == info) {
                     Notifier.Instance.OnSegmentModified(segmentId, this);
                 }
             }
