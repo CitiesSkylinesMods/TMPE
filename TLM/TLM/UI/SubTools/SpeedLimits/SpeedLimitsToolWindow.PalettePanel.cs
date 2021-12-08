@@ -47,8 +47,8 @@
                 List<SetSpeedLimitAction> actions = new();
 
                 actions.Add(SetSpeedLimitAction.ResetToDefault()); // add: Default
-                actions.Add(SetSpeedLimitAction.Unlimited()); // add: Unlimited
                 actions.AddRange(PaletteGenerator.AllSpeedLimits(SpeedUnit.CurrentlyConfigured));
+                actions.Add(SetSpeedLimitAction.Unlimited()); // add: Unlimited
 
                 this.buttonsByNumber_ = new();
                 this.PaletteButtons.Clear();
