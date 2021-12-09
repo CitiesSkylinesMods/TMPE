@@ -135,14 +135,14 @@ namespace TrafficManager.UI.SubTools {
             }
 
             SegmentLaneTraverser.Traverse(
-                renderInfo_.SegmentId,
-                SegmentTraverser.TraverseDirection.AnyDirection,
-                SegmentTraverser.TraverseSide.AnySide,
-                SegmentLaneTraverser.LaneStopCriterion.LaneCount,
-                SegmentTraverser.SegmentStopCriterion.Junction,
-                ParkingRestrictionsManager.LANE_TYPES,
-                ParkingRestrictionsManager.VEHICLE_TYPES,
-                LaneVisitor);
+                initialSegmentId: renderInfo_.SegmentId,
+                direction: SegmentTraverser.TraverseDirection.AnyDirection,
+                side: SegmentTraverser.TraverseSide.AnySide,
+                laneStopCrit: SegmentLaneTraverser.LaneStopCriterion.LaneCount,
+                segStopCrit: SegmentTraverser.SegmentStopCriterion.Junction,
+                laneTypeFilter: ParkingRestrictionsManager.LANE_TYPES,
+                vehicleTypeFilter: ParkingRestrictionsManager.VEHICLE_TYPES,
+                laneVisitor: LaneVisitor);
         }
 
         public override void RenderOverlay(RenderManager.CameraInfo cameraInfo) {
@@ -191,9 +191,6 @@ namespace TrafficManager.UI.SubTools {
                         continue;
                     }
 
-                    // if ((netManager.m_segments.m_buffer[segmentId].m_flags
-                    //     & NetSegment.Flags.Untouchable) != NetSegment.Flags.None)
-                    // continue;
                     Vector3 distToCamera = netSegment.m_bounds.center - camPos;
                     if (distToCamera.sqrMagnitude > TrafficManagerTool.MAX_OVERLAY_DISTANCE_SQR) {
                         continue; // do not draw if too distant
@@ -231,11 +228,11 @@ namespace TrafficManager.UI.SubTools {
 
                 // no parking restrictions overlay on selected segment when in vehicle restrictions mode
                 var dir = DrawParkingRestrictionHandles(
-                    segmentId,
-                    clicked,
-                    ref segmentId.ToSegment(),
-                    viewOnly,
-                    ref camPos);
+                    segmentId: segmentId,
+                    clicked: clicked,
+                    segment: ref segmentId.ToSegment(),
+                    viewOnly: viewOnly,
+                    camPos: ref camPos);
                 if (dir != NetInfo.Direction.None) {
                     renderInfo_.SegmentId = segmentId;
                     renderInfo_.FinalDirection = dir;
@@ -263,15 +260,15 @@ namespace TrafficManager.UI.SubTools {
 
             // draw parking restriction signs over mean middle points of lane beziers
             if (!segmentCenterByDir.TryGetValue(
-                    segmentId,
-                    out Dictionary<NetInfo.Direction, Vector3> segCenter))
+                    key: segmentId,
+                    value: out Dictionary<NetInfo.Direction, Vector3> segCenter))
             {
                 segCenter = new Dictionary<NetInfo.Direction, Vector3>();
                 segmentCenterByDir.Add(segmentId, segCenter);
                 GeometryUtil.CalculateSegmentCenterByDir(
-                    segmentId,
-                    segCenter,
-                    SIGN_SIZE * TrafficManagerTool.MAX_ZOOM);
+                    segmentId: segmentId,
+                    outputDict: segCenter,
+                    minDistance: SIGN_SIZE * TrafficManagerTool.MAX_ZOOM);
             }
 
             foreach (KeyValuePair<NetInfo.Direction, Vector3> e in segCenter) {
@@ -378,7 +375,7 @@ namespace TrafficManager.UI.SubTools {
 
         public void UpdateOnscreenDisplayPanel() {
             var items = new List<OsdItem>();
-            items.Add(new ModeDescription(localizedText: T("Parking.OnscreenHint.Mode:Click to toggle")));
+            items.Add(new Label(localizedText: T("Parking.OnscreenHint.Mode:Click to toggle")));
             items.Add(
                 new HardcodedMouseShortcut(
                     button: UIMouseButton.Left,

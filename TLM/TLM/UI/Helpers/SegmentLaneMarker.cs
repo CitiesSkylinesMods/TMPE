@@ -2,36 +2,37 @@ using ColossalFramework.Math;
 using UnityEngine;
 
 namespace TrafficManager.UI.Helpers {
-    using Util;
+    using TrafficManager.Util;
 
-    // code revived from the old Traffic++ mod : https://github.com/joaofarias/csl-traffic/blob/a4c5609e030c5bde91811796b9836aad60ddde20/CSL-Traffic/Tools/RoadCustomizerTool.cs
+    /// <summary>
+    /// code revived from the old Traffic++ mod:
+    /// https://github.com/joaofarias/csl-traffic/blob/a4c5609e030c5bde91811796b9836aad60ddde20/CSL-Traffic/Tools/RoadCustomizerTool.cs
+    /// </summary>
     internal class SegmentLaneMarker {
         internal SegmentLaneMarker(Bezier3 bezier) {
-            Bezier = bezier;
-            IsUnderground = CheckIsUnderground(Bezier.a) ||
-                            CheckIsUnderground(Bezier.d);
+            this.Bezier = bezier;
+            this.IsUnderground = InGameUtil.CheckIsUnderground(bezier.a) ||
+                                 InGameUtil.CheckIsUnderground(bezier.d);
             CalculateBounds();
         }
 
-        internal Bezier3 Bezier;
+        private Bezier3 Bezier;
+
+        /// <summary>Bezier size when drawing (thickness).</summary>
         internal float Size = 1.1f;
 
         private Bounds[] bounds;
 
-        public bool IsUnderground { get; private set; }
+        private bool IsUnderground { get; set; }
 
-        /// <summary>
-        ///  Intersects mouse ray with lane bounds.
-        /// </summary>
-        /// <param name="ray"></param>
-        /// <param name="hitH">vertical hit position of the raycast</param>
-        /// <param name="hitH">vertical raycast hit position.</param>
+        /// <summary>Intersects mouse ray with lane bounds.</summary>
         internal bool IntersectRay() {
             Ray mouseRay = InGameUtil.Instance.CachedMainCamera.ScreenPointToRay(Input.mousePosition);
 
-            foreach (Bounds bounds in bounds) {
-                if (bounds.IntersectRay(mouseRay))
+            foreach (Bounds eachBound in bounds) {
+                if (eachBound.IntersectRay(mouseRay)) {
                     return true;
+                }
             }
 
             return false;
@@ -64,9 +65,7 @@ namespace TrafficManager.UI.Helpers {
             }
         }
 
-        /// <summary>
-        /// Renders lane overlay.
-        /// </summary>
+        /// <summary>Renders lane overlay.</summary>
         internal void RenderOverlay(RenderManager.CameraInfo cameraInfo, Color color, bool enlarge = false, bool renderLimits = false) {
             float minH = Mathf.Min(Bezier.a.y, Bezier.d.y);
             float maxH = Mathf.Max(Bezier.a.y, Bezier.d.y);
@@ -74,22 +73,16 @@ namespace TrafficManager.UI.Helpers {
             float overdrawHeight = IsUnderground || renderLimits ? 0f : 5f;
             ColossalFramework.Singleton<ToolManager>.instance.m_drawCallData.m_overlayCalls++;
             RenderManager.instance.OverlayEffect.DrawBezier(
-                cameraInfo,
-                color,
-                Bezier,
-                enlarge ? Size * 1.41f : Size,
-                0,
-                0,
-                minH - overdrawHeight,
-                maxH + overdrawHeight,
-                IsUnderground || renderLimits,
-                false);
-        }
-
-        private bool CheckIsUnderground(Vector3 position) {
-            float maxY = position.y;
-            float sampledHeight = TerrainManager.instance.SampleDetailHeightSmooth(position);
-            return sampledHeight > maxY;
+                cameraInfo: cameraInfo,
+                color: color,
+                bezier: Bezier,
+                size: enlarge ? Size * 1.41f : Size,
+                cutStart: 0,
+                cutEnd: 0,
+                minY: minH - overdrawHeight,
+                maxY: maxH + overdrawHeight,
+                renderLimits: IsUnderground || renderLimits,
+                alphaBlend: false);
         }
     }
 }

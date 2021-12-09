@@ -12,6 +12,7 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
     using TrafficManager.Manager.Impl;
     using TrafficManager.State;
     using TrafficManager.U;
+    using TrafficManager.UI.Helpers;
     using TrafficManager.UI.MainMenu.OSD;
     using TrafficManager.UI.Textures;
     using TrafficManager.Util;
@@ -347,7 +348,7 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
                 && Cursor.visible
                 && Flags.MayHaveTrafficLight(HoveredNodeId))
             {
-                MainTool.DrawNodeCircle(cameraInfo, HoveredNodeId);
+                Highlight.DrawNodeCircle(cameraInfo, HoveredNodeId);
             }
 
             if (selectedNodeIds.Count <= 0) {
@@ -355,7 +356,7 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
             }
 
             foreach (ushort index in selectedNodeIds) {
-                MainTool.DrawNodeCircle(cameraInfo, index, true);
+                Highlight.DrawNodeCircle(cameraInfo, index, true);
             }
         }
 
@@ -1442,7 +1443,12 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
                                                ? TrafficLightTextures.ClockTest
                                                : TrafficLightTextures.ClockPlay)
                                         : TrafficLightTextures.ClockPause;
-                    MainTool.DrawGenericSquareOverlayTexture(tex, camPos, netNode.m_position, 120f, false);
+                    Highlight.DrawGenericSquareOverlayTexture(
+                        texture: tex,
+                        camPos: camPos,
+                        worldPos: netNode.m_position,
+                        size: 120f,
+                        canHover: false);
                 }
             }
         }

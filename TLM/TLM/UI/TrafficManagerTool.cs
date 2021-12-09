@@ -8,7 +8,6 @@ namespace TrafficManager.UI {
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.API.Util;
     using ColossalFramework;
-    using ColossalFramework.Math;
     using ColossalFramework.UI;
     using CSUtil.Commons;
     using JetBrains.Annotations;
@@ -76,7 +75,7 @@ namespace TrafficManager.UI {
         public const float DEBUG_CLOSE_LOD = 300f;
 
         /// <summary>Square of the distance, where overlays are not rendered.</summary>
-        public const float MAX_OVERLAY_DISTANCE_SQR = 450f * 450f;
+        public const float MAX_OVERLAY_DISTANCE_SQR = 600f * 600f;
 
         private IDictionary<ToolMode, LegacySubTool> legacySubTools_;
 
@@ -102,7 +101,7 @@ namespace TrafficManager.UI {
 
         private static IDisposable _confDisposable;
 
-        public bool IsUndergroundMode => InfoManager.instance.CurrentMode == InfoManager.InfoMode.Underground;
+        public static bool IsUndergroundMode => InfoManager.instance.CurrentMode == InfoManager.InfoMode.Underground;
 
         internal static float OverlayAlpha => TransparencyToAlpha(GlobalConfig.Instance.Main.OverlayTransparency);
 
@@ -123,8 +122,11 @@ namespace TrafficManager.UI {
                 Destroy(nopeCursor_);
                 nopeCursor_ = null;
             }
-            foreach (KeyValuePair<ToolMode, LegacySubTool> e in legacySubTools_) {
-                e.Value.OnDestroy();
+            foreach (var eachLegacyTool in legacySubTools_) {
+                eachLegacyTool.Value.OnDestroy();
+            }
+            foreach (var eachTool in subTools_) {
+                eachTool.Value.OnDestroy();
             }
             legacySubTools_.Clear();
             legacySubTools_ = null;
@@ -213,6 +215,7 @@ namespace TrafficManager.UI {
 
             subTools_ = new Dictionary<ToolMode, TrafficManagerSubTool> {
                 [ToolMode.LaneArrows] = new LaneArrowTool(this),
+                [ToolMode.SpeedLimits] = new SpeedLimitsTool(this),
             };
             legacySubTools_ = new Dictionary<ToolMode, LegacySubTool> {
                 [ToolMode.ToggleTrafficLight] = new ToggleTrafficLightsTool(this),
@@ -220,7 +223,6 @@ namespace TrafficManager.UI {
                 [ToolMode.ManualSwitch] = new ManualTrafficLightsTool(this),
                 [ToolMode.TimedTrafficLights] = timedLightsTool,
                 [ToolMode.VehicleRestrictions] = new VehicleRestrictionsTool(this),
-                [ToolMode.SpeedLimits] = new SpeedLimitsTool(this),
                 [ToolMode.LaneConnector] = new LaneConnectorTool(this),
                 [ToolMode.JunctionRestrictions] = new JunctionRestrictionsTool(this),
                 [ToolMode.ParkingRestrictions] = new ParkingRestrictionsTool(this),
@@ -320,7 +322,7 @@ namespace TrafficManager.UI {
                 activeLegacySubTool_?.Cleanup();
                 activeLegacySubTool_ = null;
 
-                activeSubTool_?.DeactivateTool();
+                activeSubTool_?.OnDeactivateTool();
                 activeSubTool_ = null;
                 toolMode_ = ToolMode.None;
             }
@@ -337,7 +339,7 @@ namespace TrafficManager.UI {
             SelectedSegmentId = 0;
 
             activeLegacySubTool_?.OnActivate();
-            activeSubTool_?.ActivateTool();
+            activeSubTool_?.OnActivateTool();
 
             if (activeLegacySubTool_ != null) {
                 ShowAdvisor(activeLegacySubTool_.GetTutorialKey());
@@ -389,6 +391,7 @@ namespace TrafficManager.UI {
 
         public override void RenderOverlay(RenderManager.CameraInfo cameraInfo) {
             RenderOverlayImpl(cameraInfo);
+
             if (GetToolMode() == ToolMode.None) {
                 DefaultRenderOverlay(cameraInfo);
             }
@@ -405,17 +408,23 @@ namespace TrafficManager.UI {
             }
 
             activeLegacySubTool_?.RenderOverlay(cameraInfo);
-            activeSubTool_?.RenderOverlay(cameraInfo);
+            activeSubTool_?.RenderActiveToolOverlay(cameraInfo);
 
-            ToolMode currentMode = GetToolMode();
+            ToolMode currentMode = this.GetToolMode();
 
             // For all _other_ legacy subtools let them render something too
-            foreach (KeyValuePair<ToolMode, LegacySubTool> e in legacySubTools_) {
-                if (e.Key == currentMode) {
+            foreach (var legacySubtool in this.legacySubTools_) {
+                if (legacySubtool.Key == currentMode) {
                     continue;
                 }
 
-                e.Value.RenderOverlayForOtherTools(cameraInfo);
+                legacySubtool.Value?.RenderOverlayForOtherTools(cameraInfo);
+            }
+
+            foreach (var subtool in this.subTools_) {
+                if (subtool.Key != this.GetToolMode()) {
+                    subtool.Value.RenderGenericInfoOverlay(cameraInfo);
+                }
             }
         }
 
@@ -428,8 +437,7 @@ namespace TrafficManager.UI {
             if (!TMPELifecycle.PlayMode) {
                 return; // world info view panels are not availble in edit mode
             }
-            SubTools.PrioritySigns.MassEditOverlay.Show
-                = ControlIsPressed || RoadSelectionPanels.Root.ShouldShowMassEditOverlay();
+            MassEditOverlay.Show = ControlIsPressed || RoadSelectionPanels.Root.ShouldShowMassEditOverlay();
 
             NetManager.instance.NetAdjust.PathVisible =
                 RoadSelectionPanels.Root.ShouldPathBeVisible();
@@ -437,11 +445,15 @@ namespace TrafficManager.UI {
                 base.RenderOverlay(cameraInfo); // render path.
             }
 
-            if (HoveredSegmentId == 0)
+            if (HoveredSegmentId == 0) {
                 return;
+            }
+
             var netAdjust = NetManager.instance?.NetAdjust;
-            if (netAdjust == null)
+
+            if (netAdjust == null) {
                 return;
+            }
 
             // use the same color as in NetAdjust
             ref NetSegment segment = ref HoveredSegmentId.ToSegment();
@@ -457,19 +469,19 @@ namespace TrafficManager.UI {
                 bool isRoundabout = RoundaboutMassEdit.Instance.TraverseLoop(HoveredSegmentId, out var segmentList);
                 if (!isRoundabout) {
                     var segments = SegmentTraverser.Traverse(
-                        HoveredSegmentId,
-                        TraverseDirection.AnyDirection,
-                        TraverseSide.Straight,
-                        SegmentStopCriterion.None,
-                        (_) => true);
+                        initialSegmentId: HoveredSegmentId,
+                        direction: TraverseDirection.AnyDirection,
+                        side: TraverseSide.Straight,
+                        stopCrit: SegmentStopCriterion.None,
+                        visitorFun: (_) => true);
                     segmentList = new List<ushort>(segmentList);
                 }
                 foreach (ushort segmentId in segmentList ?? Enumerable.Empty<ushort>()) {
                     NetTool.RenderOverlay(
-                        cameraInfo,
-                        ref segmentId.ToSegment(),
-                        color,
-                        color);
+                        cameraInfo: cameraInfo,
+                        segment: ref segmentId.ToSegment(),
+                        importantColor: color,
+                        nonImportantColor: color);
                 }
             } else {
                 NetTool.RenderOverlay(cameraInfo, ref segment, color, color);
@@ -584,8 +596,22 @@ namespace TrafficManager.UI {
                     DebugGuiDisplayBuildings();
                 }
 
-                foreach (KeyValuePair<ToolMode, LegacySubTool> en in legacySubTools_) {
-                    en.Value.ShowGUIOverlay(en.Key, en.Key != GetToolMode());
+                //----------------------
+                // Render legacy GUI overlay, and new style GUI mode overlays need to render too
+                ToolMode toolMode = this.GetToolMode();
+
+                foreach (KeyValuePair<ToolMode, LegacySubTool> en in this.legacySubTools_) {
+                    en.Value.ShowGUIOverlay(
+                        toolMode: en.Key,
+                        viewOnly: en.Key != toolMode);
+                }
+
+                foreach (KeyValuePair<ToolMode, TrafficManagerSubTool> st in this.subTools_) {
+                    if (st.Key == toolMode) {
+                        st.Value.RenderActiveToolOverlay_GUI();
+                    } else {
+                        st.Value.RenderGenericInfoOverlay_GUI();
+                    }
                 }
 
                 Color guiColor = GUI.color;
@@ -641,18 +667,18 @@ namespace TrafficManager.UI {
             return node.IsUndergroundNode() == IsUndergroundMode;
         }
 
-        public void DrawNodeCircle(RenderManager.CameraInfo cameraInfo,
-                                   ushort nodeId,
-                                   bool warning = false,
-                                   bool alpha = false,
-                                   bool overrideRenderLimits = false) {
-            DrawNodeCircle(
-                cameraInfo: cameraInfo,
-                nodeId: nodeId,
-                color: GetToolColor(warning: warning, error: false),
-                alpha: alpha,
-                overrideRenderLimits: overrideRenderLimits);
-        }
+        // public void DrawNodeCircle(RenderManager.CameraInfo cameraInfo,
+        //                            ushort nodeId,
+        //                            bool warning = false,
+        //                            bool alpha = false,
+        //                            bool overrideRenderLimits = false) {
+        //     DrawNodeCircle(
+        //         cameraInfo: cameraInfo,
+        //         nodeId: nodeId,
+        //         color: GetToolColor(warning: warning, error: false),
+        //         alpha: alpha,
+        //         overrideRenderLimits: overrideRenderLimits);
+        // }
 
         /// <summary>
         /// Gets the coordinates of the given node.
@@ -665,386 +691,6 @@ namespace TrafficManager.UI {
                 pos.y = terrainY;
             }
             return pos;
-        }
-
-        /// <returns>the average half width of all connected segments</returns>
-        private static float CalculateNodeRadius(ushort nodeId) {
-            float sumHalfWidth = 0;
-            int count = 0;
-            ref NetNode node = ref nodeId.ToNode();
-            for (int i = 0; i < 8; ++i) {
-                ushort segmentId = node.GetSegment(i);
-                if (segmentId != 0) {
-                    sumHalfWidth += segmentId.ToSegment().Info.m_halfWidth;
-                    count++;
-                }
-            }
-
-            return sumHalfWidth / count;
-        }
-
-        // TODO: move to UI.Helpers (Highlight)
-        public void DrawNodeCircle(RenderManager.CameraInfo cameraInfo,
-                                   ushort nodeId,
-                                   Color color,
-                                   bool alpha = false,
-                                   bool overrideRenderLimits = false) {
-            float r = CalculateNodeRadius(nodeId);
-            Vector3 pos = nodeId.ToNode().m_position;
-            bool renderLimits = TerrainManager.instance.SampleDetailHeightSmooth(pos) > pos.y;
-            DrawOverlayCircle(cameraInfo, color, pos, r * 2, alpha, renderLimits || overrideRenderLimits);
-        }
-
-        /// <summary>
-        /// Draws a half sausage at segment end.
-        /// </summary>
-        /// <param name="segmentId"></param>
-        /// <param name="cut">The lenght of the highlight [0~1] </param>
-        /// <param name="bStartNode">Determines the direction of the half sausage.</param>
-        // TODO: move to UI.Helpers (Highlight)
-        public void DrawCutSegmentEnd(RenderManager.CameraInfo cameraInfo,
-                       ushort segmentId,
-                       float cut,
-                       bool bStartNode,
-                       Color color,
-                       bool alpha = false) {
-            if (segmentId == 0) {
-                return;
-            }
-            ref NetSegment netSegment = ref segmentId.ToSegment();
-            float width = netSegment.Info.m_halfWidth;
-
-            bool IsMiddle(ushort nodeId) => (nodeId.ToNode().m_flags & NetNode.Flags.Middle) != 0;
-
-            Bezier3 bezier;
-            bezier.a = GetNodePos(netSegment.m_startNode);
-            bezier.d = GetNodePos(netSegment.m_endNode);
-
-            NetSegment.CalculateMiddlePoints(
-                bezier.a,
-                netSegment.m_startDirection,
-                bezier.d,
-                netSegment.m_endDirection,
-                IsMiddle(netSegment.m_startNode),
-                IsMiddle(netSegment.m_endNode),
-                out bezier.b,
-                out bezier.c);
-
-            if (bStartNode) {
-                bezier = bezier.Cut(0, cut);
-            } else {
-                bezier = bezier.Cut(1 - cut, 1);
-            }
-
-            Singleton<ToolManager>.instance.m_drawCallData.m_overlayCalls++;
-            Singleton<RenderManager>.instance.OverlayEffect.DrawBezier(
-                cameraInfo,
-                color,
-                bezier,
-                width * 2f,
-                bStartNode ? 0 : width,
-                bStartNode ? width : 0,
-                -1f,
-                1280f,
-                false,
-                alpha);
-        }
-
-        /// <summary>
-        /// similar to NetTool.RenderOverlay()
-        /// but with additional control over alphaBlend.
-        /// </summary>
-        // TODO: move to UI.Helpers (Highlight)
-        internal static void DrawSegmentOverlay(
-            RenderManager.CameraInfo cameraInfo,
-            ushort segmentId,
-            Color color,
-            bool alphaBlend) {
-            if (segmentId == 0) {
-                return;
-            }
-
-            ref NetSegment netSegment = ref segmentId.ToSegment();
-            float width = netSegment.Info.m_halfWidth;
-
-            bool IsMiddle(ushort nodeId) => (nodeId.ToNode().m_flags & NetNode.Flags.Middle) != 0;
-
-            Bezier3 bezier;
-            bezier.a = GetNodePos(netSegment.m_startNode);
-            bezier.d = GetNodePos(netSegment.m_endNode);
-
-            NetSegment.CalculateMiddlePoints(
-                bezier.a,
-                netSegment.m_startDirection,
-                bezier.d,
-                netSegment.m_endDirection,
-                IsMiddle(netSegment.m_startNode),
-                IsMiddle(netSegment.m_endNode),
-                out bezier.b,
-                out bezier.c);
-
-            Singleton<ToolManager>.instance.m_drawCallData.m_overlayCalls++;
-
-            Bounds bezierBounds = bezier.GetBounds();
-            Singleton<RenderManager>.instance.OverlayEffect.DrawBezier(
-                cameraInfo,
-                color,
-                bezier,
-                width * 2f,
-                0,
-                0,
-                bezierBounds.center.y - 1f,
-                bezierBounds.center.y + 1f,
-                false,
-                alphaBlend);
-        }
-
-        // TODO: move to UI.Helpers (Highlight)
-        private static void DrawOverlayCircle(RenderManager.CameraInfo cameraInfo,
-                                              Color color,
-                                              Vector3 position,
-                                              float width,
-                                              bool alpha,
-                                              bool renderLimits = false) {
-            float overdrawHeight = renderLimits ? 0f : 5f;
-            Singleton<ToolManager>.instance.m_drawCallData.m_overlayCalls++;
-            Singleton<RenderManager>.instance.OverlayEffect.DrawCircle(
-                cameraInfo,
-                color,
-                position,
-                width,
-                position.y - overdrawHeight,
-                position.y + overdrawHeight,
-                renderLimits,
-                alpha);
-        }
-
-        // TODO: move to UI.Helpers (Highlight)
-        public void DrawStaticSquareOverlayGridTexture(Texture2D texture,
-                                                       Vector3 camPos,
-                                                       Vector3 gridOrigin,
-                                                       float cellSize,
-                                                       Vector3 xu,
-                                                       Vector3 yu,
-                                                       uint x,
-                                                       uint y,
-                                                       float size) {
-            DrawGenericSquareOverlayGridTexture(
-                texture,
-                camPos,
-                gridOrigin,
-                cellSize,
-                xu,
-                yu,
-                x,
-                y,
-                size,
-                false);
-        }
-
-        [UsedImplicitly]
-        // TODO: move to UI.Helpers (Highlight)
-        public bool DrawHoverableSquareOverlayGridTexture(Texture2D texture,
-                                                          Vector3 camPos,
-                                                          Vector3 gridOrigin,
-                                                          float cellSize,
-                                                          Vector3 xu,
-                                                          Vector3 yu,
-                                                          uint x,
-                                                          uint y,
-                                                          float size) {
-            return DrawGenericSquareOverlayGridTexture(
-                texture,
-                camPos,
-                gridOrigin,
-                cellSize,
-                xu,
-                yu,
-                x,
-                y,
-                size,
-                true);
-        }
-
-        // TODO: move to UI.Helpers (Highlight)
-        public bool DrawGenericSquareOverlayGridTexture(Texture2D texture,
-                                                        Vector3 camPos,
-                                                        Vector3 gridOrigin,
-                                                        float cellSize,
-                                                        Vector3 xu,
-                                                        Vector3 yu,
-                                                        uint x,
-                                                        uint y,
-                                                        float size,
-                                                        bool canHover) {
-            return DrawGenericOverlayGridTexture(
-                texture,
-                camPos,
-                gridOrigin,
-                cellSize,
-                cellSize,
-                xu,
-                yu,
-                x,
-                y,
-                size,
-                size,
-                canHover);
-        }
-
-        // TODO: move to UI.Helpers (Highlight)
-        public void DrawStaticOverlayGridTexture(Texture2D texture,
-                                                 Vector3 camPos,
-                                                 Vector3 gridOrigin,
-                                                 float cellWidth,
-                                                 float cellHeight,
-                                                 Vector3 xu,
-                                                 Vector3 yu,
-                                                 uint x,
-                                                 uint y,
-                                                 float width,
-                                                 float height) {
-            DrawGenericOverlayGridTexture(
-                texture,
-                camPos,
-                gridOrigin,
-                cellWidth,
-                cellHeight,
-                xu,
-                yu,
-                x,
-                y,
-                width,
-                height,
-                false);
-        }
-
-        [UsedImplicitly]
-        // TODO: move to UI.Helpers (Highlight)
-        public bool DrawHoverableOverlayGridTexture(Texture2D texture,
-                                                    Vector3 camPos,
-                                                    Vector3 gridOrigin,
-                                                    float cellWidth,
-                                                    float cellHeight,
-                                                    Vector3 xu,
-                                                    Vector3 yu,
-                                                    uint x,
-                                                    uint y,
-                                                    float width,
-                                                    float height) {
-            return DrawGenericOverlayGridTexture(
-                texture,
-                camPos,
-                gridOrigin,
-                cellWidth,
-                cellHeight,
-                xu,
-                yu,
-                x,
-                y,
-                width,
-                height,
-                true);
-        }
-
-        // TODO: move to UI.Helpers (Highlight)
-        public bool DrawGenericOverlayGridTexture(Texture2D texture,
-                                                  Vector3 camPos,
-                                                  Vector3 gridOrigin,
-                                                  float cellWidth,
-                                                  float cellHeight,
-                                                  Vector3 xu,
-                                                  Vector3 yu,
-                                                  uint x,
-                                                  uint y,
-                                                  float width,
-                                                  float height,
-                                                  bool canHover) {
-            Vector3 worldPos =
-                gridOrigin + (cellWidth * x * xu) +
-                (cellHeight * y * yu); // grid position in game coordinates
-            return DrawGenericOverlayTexture(texture, camPos, worldPos, width, height, canHover);
-        }
-
-        // TODO: move to UI.Helpers (Highlight)
-        public void DrawStaticSquareOverlayTexture(Texture2D texture,
-                                                   Vector3 camPos,
-                                                   Vector3 worldPos,
-                                                   float size) {
-            DrawGenericOverlayTexture(texture, camPos, worldPos, size, size, false);
-        }
-
-        // TODO: move to UI.Helpers (Highlight)
-        public bool DrawHoverableSquareOverlayTexture(Texture2D texture,
-                                                      Vector3 camPos,
-                                                      Vector3 worldPos,
-                                                      float size) {
-            return DrawGenericOverlayTexture(texture, camPos, worldPos, size, size, true);
-        }
-
-        // TODO: move to UI.Helpers (Highlight)
-        public bool DrawGenericSquareOverlayTexture(Texture2D texture,
-                                                    Vector3 camPos,
-                                                    Vector3 worldPos,
-                                                    float size,
-                                                    bool canHover) {
-            return DrawGenericOverlayTexture(texture, camPos, worldPos, size, size, canHover);
-        }
-
-        // TODO: move to UI.Helpers (Highlight)
-        public void DrawStaticOverlayTexture(Texture2D texture,
-                                             Vector3 camPos,
-                                             Vector3 worldPos,
-                                             float width,
-                                             float height) {
-            DrawGenericOverlayTexture(texture, camPos, worldPos, width, height, false);
-        }
-
-        [UsedImplicitly]
-        // TODO: move to UI.Helpers (Highlight)
-        public bool DrawHoverableOverlayTexture(Texture2D texture,
-                                                Vector3 camPos,
-                                                Vector3 worldPos,
-                                                float width,
-                                                float height) {
-            return DrawGenericOverlayTexture(texture, camPos, worldPos, width, height, true);
-        }
-
-        // TODO: move to UI.Helpers (Highlight)
-        public bool DrawGenericOverlayTexture(Texture2D texture,
-                                              Vector3 camPos,
-                                              Vector3 worldPos,
-                                              float width,
-                                              float height,
-                                              bool canHover) {
-            // Is point in screen?
-            if (!GeometryUtil.WorldToScreenPoint(worldPos, out Vector3 screenPos)) {
-                return false;
-            }
-
-            float zoom = 1.0f / (worldPos - camPos).magnitude * 100f * GetBaseZoom();
-            width *= zoom;
-            height *= zoom;
-
-            Rect boundingBox = new Rect(
-                screenPos.x - (width / 2f),
-                screenPos.y - (height / 2f),
-                width,
-                height);
-
-            Color guiColor = GUI.color;
-            bool hovered = false;
-
-            if (canHover) {
-                hovered = IsMouseOver(boundingBox);
-            }
-
-            guiColor.a = GetHandleAlpha(hovered);
-
-            GUI.color = guiColor;
-            GUI.DrawTexture(boundingBox, texture);
-
-            return hovered;
         }
 
         /// <summary>Shows a tutorial message. Must be called by a Unity thread.</summary>
@@ -1071,30 +717,6 @@ namespace TrafficManager.UI {
                 GlobalConfig.WriteConfig();
             }
         }
-
-        // Does nothing
-        public override void SimulationStep() {
-            base.SimulationStep();
-
-            // currentFrame = Singleton<SimulationManager>.instance.m_currentFrameIndex >> 2;
-            //
-            // string displayToolTipText = tooltipText;
-            // if (displayToolTipText != null) {
-            //        if (currentFrame <= tooltipStartFrame + 50) {
-            //                ShowToolInfo(true, displayToolTipText, (Vector3)tooltipWorldPos);
-            //        } else {
-            //                //ShowToolInfo(false, tooltipText, (Vector3)tooltipWorldPos);
-            //                //ShowToolInfo(false, null, Vector3.zero);
-            //                tooltipStartFrame = 0;
-            //                tooltipText = null;
-            //                tooltipWorldPos = null;
-            //        }
-            // }
-        }
-
-        // public bool DoRayCast(RaycastInput input, out RaycastOutput output) {
-        //     return RayCast(input, out output);
-        // }
 
         private static Vector3 prevMousePosition;
 
@@ -1355,12 +977,12 @@ namespace TrafficManager.UI {
                 labelSb.AppendFormat("L idx {0}, id {1}", i, curLaneId);
 #if DEBUG
                 labelSb.AppendFormat(
-                    ", in: {0}, out: {1}, f: {2}, l: {3} km/h, rst: {4}, dir: {5}, fnl: {6}, " +
+                    ", in: {0}, out: {1}, f: {2}, l: {3}, rst: {4}, dir: {5}, fnl: {6}, " +
                     "pos: {7:0.##}, sim: {8} for {9}/{10}",
                     RoutingManager.Instance.CalcInnerSimilarLaneIndex(segmentId, i),
                     RoutingManager.Instance.CalcOuterSimilarLaneIndex(segmentId, i),
                     (NetLane.Flags)lanesBuffer[curLaneId].m_flags,
-                    SpeedLimitManager.Instance.GetCustomSpeedLimit(curLaneId),
+                    SpeedLimitManager.Instance.GetCustomSpeedLimit(curLaneId).ToString(),
                     VehicleRestrictionsManager.Instance.GetAllowedVehicleTypes(
                         segmentId,
                         segmentInfo,

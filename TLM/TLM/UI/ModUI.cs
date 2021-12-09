@@ -7,13 +7,13 @@ namespace TrafficManager.UI {
     using UnityEngine;
     using TrafficManager.Lifecycle;
     using JetBrains.Annotations;
-    using System.Collections;
+    using TrafficManager.U;
 
     /// <summary>
     /// Globally available UI manager class which contains the main menu button and the panel.
     /// Access via ThreadingExtension.ModUi.
     /// </summary>
-    public class ModUI : UICustomControl {
+    public partial class ModUI : UICustomControl {
         /// <summary>Singleton accessor.</summary>
         public static ModUI Instance { get; private set; }
 
@@ -54,45 +54,22 @@ namespace TrafficManager.UI {
 
         private bool _uiShown;
 
-        /// <summary>Event to be sent when UI scale changes in the General Options tab.</summary>
-        public struct UIScaleNotification { public float NewScale; }
-
-        public class UIScaleObservable : GenericObservable<UIScaleNotification> {
-        }
-
-        /// <summary>
-        /// Subscribe to this to get notifications in your UI about UI scale changes (slider in
-        /// General options tab).
-        /// </summary>
-        [NonSerialized]
-        public UIScaleObservable UiScaleObservable;
-
-        /// <summary>Event to be sent when UI transparency slider changes in the General Options tab.</summary>
-        public struct UIOpacityNotification { public U.UOpacityValue Opacity; }
-
-        public class UIOpacityObservable : GenericObservable<UIOpacityNotification> {
-        }
-
-        /// <summary>
-        /// Subscribe to this to get notifications in your UI about UI transparency changes
-        /// (slider in General options tab).
-        /// </summary>
-        [NonSerialized]
-        public UIOpacityObservable UiOpacityObservable;
+        /// <summary>Subscribe to UI events here.</summary>
+        public EventPublishers Events = new();
 
         [UsedImplicitly]
         public void Awake() {
             try {
                 Instance = this;
-                UiScaleObservable = new UIScaleObservable();
-                UiOpacityObservable = new UIOpacityObservable();
 
                 Log._Debug("##### Initializing ModUI.");
 
                 CreateMainMenuButtonAndWindow();
 #if DEBUG
                 UIView uiView = UIView.GetAView();
+                const string DEBUG_MENU_GAMEOBJECT_NAME = "TMPE_DebugMenu";
                 DebugMenu = (DebugMenuPanel)uiView.AddUIComponent(typeof(DebugMenuPanel));
+                UIUtil.MakeUniqueAndSetName(DebugMenu.gameObject, DEBUG_MENU_GAMEOBJECT_NAME);
 #endif
 
                 ToolMode = TrafficManagerMode.None;

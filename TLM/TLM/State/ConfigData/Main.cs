@@ -9,31 +9,37 @@ namespace TrafficManager.State.ConfigData {
         /// <summary>Whether floating keybinds panel is visible.</summary>
         public bool KeybindsPanelVisible = true;
 
-        /// <summary>Main menu button position.</summary>
+        /// <summary>Main menu button position X.</summary>
         public int MainMenuButtonX = 464;
+
+        /// <summary>Main menu button position Y.</summary>
         public int MainMenuButtonY = 10;
+
+        /// <summary>Main menu button is not movable.</summary>
         public bool MainMenuButtonPosLocked = false;
 
-        /// <summary>
-        /// Main menu position
-        /// </summary>
+        /// <summary>Main menu position X.</summary>
         public int MainMenuX = MainMenuWindow.DEFAULT_MENU_X;
+
+        /// <summary>Main menu position Y.</summary>
         public int MainMenuY = MainMenuWindow.DEFAULT_MENU_Y;
+
+        /// <summary>Main menu is not movable.</summary>
         public bool MainMenuPosLocked = false;
 
-        /// <summary>
-        /// Put button inisde UUI.
-        /// </summary>
+        /// <summary>Speed Limits tool window position X.</summary>
+        public int SpeedLimitsWindowX = 0;
+
+        /// <summary>Speed Limits tool window position Y.</summary>
+        public int SpeedLimitsWindowY = 0;
+
+        /// <summary>Put button inisde UUI.</summary>
         public bool UseUUI = false;
 
-        /// <summary>
-        /// Already displayed tutorial messages
-        /// </summary>
+        /// <summary>Already displayed tutorial messages.</summary>
         public string[] DisplayedTutorialMessages = new string[0];
 
-        /// <summary>
-        /// Determines if tutorial messages shall show up
-        /// </summary>
+        /// <summary>Determines if tutorial messages shall show up.</summary>
         public bool EnableTutorial = true;
 
         /// <summary>Determines if the main menu shall be displayed in a tiny format.</summary>
@@ -83,8 +89,8 @@ namespace TrafficManager.State.ConfigData {
         public bool DisplaySpeedLimitsMph = false;
 
         public SpeedUnit GetDisplaySpeedUnit() => DisplaySpeedLimitsMph
-            ? SpeedUnit.Mph
-            : SpeedUnit.Kmph;
+                                                      ? SpeedUnit.Mph
+                                                      : SpeedUnit.Kmph;
 
         /// <summary>
         /// Selected theme for road signs when MPH is active.

@@ -201,14 +201,14 @@ namespace TrafficManager.UI.SubTools {
                 }
             }
 
-            bool isUndergroundMode = MainTool.IsUndergroundMode;
+            bool isUndergroundMode = TrafficManagerTool.IsUndergroundMode;
             for (int cacheIndex = CachedVisibleNodeIds.Size - 1; cacheIndex >= 0; cacheIndex--) {
                 var nodeId = CachedVisibleNodeIds.Values[cacheIndex];
 
                 bool hasMarkers = currentLaneEnds.TryGetValue((ushort)nodeId, out List<LaneEnd> laneEnds);
                 bool isNodeVisible = MainTool.IsNodeVisible(nodeId);
                 if (!viewOnly && (GetSelectionMode() == SelectionMode.None)) {
-                    MainTool.DrawNodeCircle(
+                    Highlight.DrawNodeCircle(
                         cameraInfo: cameraInfo,
                         nodeId: (ushort)nodeId,
                         color: isNodeVisible? DefaultLaneEndColor : DefaultDisabledLaneEndColor,
@@ -421,10 +421,10 @@ namespace TrafficManager.UI.SubTools {
 
             if ((GetSelectionMode() == SelectionMode.None) && (HoveredNodeId != 0) && MainTool.IsNodeVisible(HoveredNodeId)) {
                 // draw hovered node
-                MainTool.DrawNodeCircle(
+                Highlight.DrawNodeCircle(
                     cameraInfo: cameraInfo,
-                    nodeId: HoveredNodeId,
-                    warning: Input.GetMouseButton(0),
+                    nodeId: this.HoveredNodeId,
+                    color: this.MainTool.GetToolColor(warning: Input.GetMouseButton(0), error: false),
                     alpha: true,
                     overrideRenderLimits: true);
             }
@@ -1304,7 +1304,7 @@ namespace TrafficManager.UI.SubTools {
                 middlePos2: out bezier.c);
             Bounds bounds = bezier.GetBounds();
 
-            float overdrawHeight = renderLimits && MainTool.IsUndergroundMode ? 0f : 2f;
+            float overdrawHeight = renderLimits && TrafficManagerTool.IsUndergroundMode ? 0f : 2f;
             // Draw black outline
             RenderManager.instance.OverlayEffect.DrawBezier(
                 cameraInfo: cameraInfo,
@@ -1452,14 +1452,14 @@ namespace TrafficManager.UI.SubTools {
             switch (m) {
                 case SelectionMode.None: {
                     var items = new List<OsdItem>();
-                    items.Add(new ModeDescription(localizedText: T("LaneConnector.Mode:Select")));
+                    items.Add(new Label(localizedText: T("LaneConnector.Mode:Select")));
                     OnscreenDisplay.Display(items);
                     return;
                 }
                 case SelectionMode.SelectTarget:
                 case SelectionMode.SelectSource: {
                     var items = new List<OsdItem>();
-                    items.Add(new ModeDescription(
+                    items.Add(new Label(
                                   m == SelectionMode.SelectSource
                                       ? T("LaneConnector.Mode:Source")
                                       : T("LaneConnector.Mode:Target")));

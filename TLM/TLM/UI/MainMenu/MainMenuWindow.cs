@@ -479,7 +479,7 @@ namespace TrafficManager.UI.MainMenu {
             } else if (KeybindSettingsBase.JunctionRestrictionsTool.IsPressed(Event.current)) {
                 ClickToolButton(ToolMode.JunctionRestrictions);
             } else if (KeybindSettingsBase.SpeedLimitsTool.IsPressed(Event.current)) {
-                ClickToolButton(ToolMode.JunctionRestrictions);
+                ClickToolButton(ToolMode.SpeedLimits);
             }
         }
 

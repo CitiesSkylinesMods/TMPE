@@ -3,6 +3,7 @@ namespace TrafficManager {
     using TrafficManager.API.Manager;
     using UnityEngine;
     using TrafficManager.API.Notifier;
+    using TrafficManager.U;
 
     public static class Constants {
         /// <summary>
@@ -22,8 +23,23 @@ namespace TrafficManager {
         public const float SPEED_TO_MPH = 32.06f; // 50 km/h converted to mph
 
         /// <summary>
-        /// The maximum amount of segments a node can hold.
+        /// Screen pixel size for overlay signs, such as one-per-segment speed limits.
         /// </summary>
+        public static float OverlaySignVisibleSize => 100.0f * UIScaler.UIScale;
+
+        /// <summary>
+        /// World size for clickable signs used in overlays. Larger than readonly signs.
+        /// This is used as offset in grids of signs such as lane speed limit signs.
+        /// </summary>
+        public const float OVERLAY_INTERACTIVE_SIGN_SIZE = 6.0f;
+
+        /// <summary>
+        /// World size for readonly signs used in overlays.
+        /// This is used as offset in grids of signs such as lane speed limit signs.
+        /// </summary>
+        public const float OVERLAY_READONLY_SIGN_SIZE = 3.8f;
+
+        /// <summary>The maximum amount of segments a node can hold.</summary>
         public const int MAX_SEGMENTS_OF_NODE = 8;
 
         public static float ByteToFloat(byte b) {

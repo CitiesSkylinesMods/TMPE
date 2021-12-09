@@ -1,6 +1,8 @@
 namespace TrafficManager.Util {
     using System.Collections.Generic;
     using ColossalFramework;
+    using ColossalFramework.Math;
+    using JetBrains.Annotations;
     using TrafficManager.U;
     using TrafficManager.UI;
     using UnityEngine;
@@ -25,19 +27,61 @@ namespace TrafficManager.Util {
             return screenPos.z >= 0;
         }
 
+        /// <summary>Extension method: Calculates bezier center for a segment.</summary>
+        internal static Vector3 GetCenter(this ref NetSegment segment) {
+            bool IsMiddle(ushort nodeId) => (nodeId.ToNode().m_flags & NetNode.Flags.Middle) != 0;
+
+            Bezier3 bezier;
+            bezier.a = segment.m_startNode.ToNode().GetPositionOnTerrain();
+            bezier.d = segment.m_endNode.ToNode().GetPositionOnTerrain();
+
+            NetSegment.CalculateMiddlePoints(
+                startPos: bezier.a,
+                startDir: segment.m_startDirection,
+                endPos: bezier.d,
+                endDir: segment.m_endDirection,
+                smoothStart: IsMiddle(segment.m_startNode),
+                smoothEnd: IsMiddle(segment.m_endNode),
+                middlePos1: out bezier.b,
+                middlePos2: out bezier.c);
+
+            // Return middle point between 0.0f and 1.0f
+            return bezier.Position(0.5f);
+        }
+
+        internal static bool IsBothEndsUnderground(this ref NetSegment segment) {
+            return segment.m_startNode.IsUndergroundNode() && segment.m_endNode.IsUndergroundNode();
+        }
+
+        [UsedImplicitly]
+        internal static bool IsEitherEndUnderground(this ref NetSegment segment) {
+            return segment.m_startNode.IsUndergroundNode() || segment.m_endNode.IsUndergroundNode();
+        }
+
+        /// <summary>Gets the coordinates of the given node taking the terrain into account.</summary>
+        internal static Vector3 GetPositionOnTerrain(this ref NetNode node) {
+            Vector3 pos = node.m_position;
+            float terrainY = Singleton<TerrainManager>.instance.SampleDetailHeightSmooth(pos);
+            if (terrainY > pos.y) {
+                pos.y = terrainY;
+            }
+
+            return pos;
+        }
+
         /// <summary>
         /// Calculates the center of each group of lanes in the same directions.
         /// </summary>
-        /// <param name="segmentId">segmentId</param>
-        /// <param name="segmentCenterByDir">output dictionary of (direction,center) pairs</param>
+        /// <param name="segmentId">The segment.</param>
+        /// <param name="outputDict">output dictionary of (direction,center) pairs</param>
         /// <param name="minDistance">minimum distance allowed between
-        /// centers of forward and backward directions.
+        /// centers of forward and backward directions.</param>
         internal static void CalculateSegmentCenterByDir(
             ushort segmentId,
-            Dictionary<NetInfo.Direction, Vector3> segmentCenterByDir,
+            [NotNull] Dictionary<NetInfo.Direction, Vector3> outputDict,
             float minDistance = 0f)
         {
-            segmentCenterByDir.Clear();
+            outputDict.Clear();
             NetManager netManager = Singleton<NetManager>.instance;
             ref NetSegment netSegment = ref segmentId.ToSegment();
 
@@ -57,11 +101,11 @@ namespace TrafficManager.Util {
                 Vector3 bezierCenter =
                     netManager.m_lanes.m_buffer[curLaneId].m_bezier.Position(0.5f);
 
-                if (!segmentCenterByDir.ContainsKey(dir)) {
-                    segmentCenterByDir[dir] = bezierCenter;
+                if (!outputDict.ContainsKey(dir)) {
+                    outputDict[dir] = bezierCenter;
                     numCentersByDir[dir] = 1;
                 } else {
-                    segmentCenterByDir[dir] += bezierCenter;
+                    outputDict[dir] += bezierCenter;
                     numCentersByDir[dir]++;
                 }
 
@@ -72,22 +116,22 @@ namespace TrafficManager.Util {
             }
 
             foreach (KeyValuePair<NetInfo.Direction, int> e in numCentersByDir) {
-                segmentCenterByDir[e.Key] /= (float)e.Value;
+                outputDict[e.Key] /= (float)e.Value;
             }
 
             if (minDistance > 0) {
-                bool b1 = segmentCenterByDir.TryGetValue(
-                    NetInfo.Direction.Forward,
-                    out Vector3 pos1);
-                bool b2 = segmentCenterByDir.TryGetValue(
-                    NetInfo.Direction.Backward,
-                    out Vector3 pos2);
+                bool b1 = outputDict.TryGetValue(
+                    key: NetInfo.Direction.Forward,
+                    value: out Vector3 pos1);
+                bool b2 = outputDict.TryGetValue(
+                    key: NetInfo.Direction.Backward,
+                    value: out Vector3 pos2);
                 Vector3 diff = pos1 - pos2;
                 float distance = diff.magnitude;
                 if (b1 && b2 && distance < minDistance) {
                     Vector3 move = diff * ((0.5f * minDistance) / distance);
-                    segmentCenterByDir[NetInfo.Direction.Forward] = pos1 + move;
-                    segmentCenterByDir[NetInfo.Direction.Backward] = pos2 - move;
+                    outputDict[NetInfo.Direction.Forward] = pos1 + move;
+                    outputDict[NetInfo.Direction.Backward] = pos2 - move;
                 }
             }
         }

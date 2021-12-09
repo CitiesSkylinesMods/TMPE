@@ -1,6 +1,6 @@
 namespace TrafficManager.U {
-    using ColossalFramework.UI;
     using System;
+    using ColossalFramework.UI;
     using TrafficManager.State;
     using TrafficManager.Util;
     using UnityEngine;
@@ -14,7 +14,7 @@ namespace TrafficManager.U {
 
         internal static Vector2 BaseResolution { get; private set; }
 
-        internal static float AspectRatio => Screen.width / (float)Screen.height;
+        // internal static float AspectRatio => Screen.width / (float)Screen.height;
 
         /// <summary>Shortcut to reach global main config containing GuiScale.</summary>
 
@@ -38,27 +38,24 @@ namespace TrafficManager.U {
             }
         }
 
-        internal static float UIAspectScale {
-            get {
-                var horizontalScale = Screen.width / MaxWidth;
-                var verticalScale = Screen.height / MaxHeight;
-                return Mathf.Min(horizontalScale, verticalScale);
-            }
+        private static float UIAspectScale() {
+            var horizontalScale = Screen.width / MaxWidth;
+            var verticalScale = Screen.height / MaxHeight;
+            return Mathf.Min(horizontalScale, verticalScale);
         }
 
         internal static float UIScale => Config.GuiScale * 0.01f;
 
-        internal static Matrix4x4 ScaleMatrix => Matrix4x4.Scale(Vector3.one * UIAspectScale);
+        internal static Matrix4x4 ScaleMatrix => Matrix4x4.Scale(Vector3.one * UIAspectScale());
 
         /// <summary>
         /// Mouse position in GUI space when GUI.matrix = ScaleMatrix
         /// </summary>
         internal static Vector2 MousePosition {
-
             get {
-                var mouse = Input.mousePosition;
+                Vector2 mouse = Input.mousePosition;
                 mouse.y = Screen.height - mouse.y;
-                return mouse / UIScaler.UIAspectScale;
+                return mouse * UIScale / UIAspectScale();
             }
         }
 
@@ -68,10 +65,9 @@ namespace TrafficManager.U {
         /// <param name="screenPos">Pixel position.</param>
         /// <returns>GUI space position.</returns>
         internal static Vector2 ScreenPointToGuiPoint(Vector2 screenPos) {
-            // TODO: Optimize, this is frequently called
             return new(
-                x: screenPos.x * BaseResolution.x / Screen.width,
-                y: screenPos.y * BaseResolution.y / Screen.height);
+                x: screenPos.x * Screen.width / BaseResolution.x,
+                y: screenPos.y * Screen.height / BaseResolution.y);
         }
 
         internal static void Reset() {

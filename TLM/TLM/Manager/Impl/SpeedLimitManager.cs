@@ -146,11 +146,12 @@ namespace TrafficManager.Manager.Impl {
                 laneIndex++;
             }
 
-            if (validLanes > 0) {
-                meanSpeedLimit = meanSpeedLimit.Scale(1.0f / validLanes);
+            switch (validLanes) {
+                case 0:
+                    return null;
+                case > 0:
+                    return meanSpeedLimit.Scale(1.0f / validLanes);
             }
-
-            return meanSpeedLimit;
         }
 
         /// <summary>
@@ -434,12 +435,6 @@ namespace TrafficManager.Manager.Impl {
                 return;
             }
 
-            // Resharper warning: condition always false
-            // if (info.name == null) {
-            //    Log._DebugOnlyWarning($"SetCustomNetInfoSpeedLimitIndex: info.name is null!");
-            //    return;
-            // }
-
             string infoName = info.name;
             customLaneSpeedLimitByNetInfoName_[infoName] = customSpeedLimit;
             float gameSpeedLimit = ToGameSpeedLimit(customSpeedLimit);
@@ -497,6 +492,13 @@ namespace TrafficManager.Manager.Impl {
                     lane.m_speedLimit = gameSpeedLimit;
                 }
             }
+
+            for(ushort segmentId = 1; segmentId < NetManager.MAX_SEGMENT_COUNT; ++segmentId) {
+                ref var segment = ref segmentId.ToSegment();
+                if (segment.IsValid() && segment.Info == info) {
+                    Notifier.Instance.OnSegmentModified(segmentId, this);
+                }
+            }
         }
 
         /// <summary>Sets the speed limit of a given lane.</summary>
@@ -511,10 +513,14 @@ namespace TrafficManager.Manager.Impl {
                 return false;
             }
 
-            Log._Assert(action.Override != null, "action.Override != null");
+            if (action.Type == SetSpeedLimitAction.ActionType.ResetToDefault) {
+                Flags.RemoveLaneSpeedLimit(laneId);
+                Notifier.Instance.OnSegmentModified(segmentId, this);
+                return true;
+            }
 
             if (action.Type != SetSpeedLimitAction.ActionType.ResetToDefault
-                && !IsValidRange(action.Override.Value.GameUnits)) {
+                && !IsValidRange(action.GuardedValue.Override.GameUnits)) {
                 return false;
             }
 
@@ -523,13 +529,16 @@ namespace TrafficManager.Manager.Impl {
                 return false;
             }
 
-            if (action.Type != SetSpeedLimitAction.ActionType.ResetToDefault) {
-                Flags.SetLaneSpeedLimit(segmentId, laneIndex, laneId, action);
-            } else {
-                Flags.RemoveLaneSpeedLimit(laneId);
-            }
+            Flags.SetLaneSpeedLimit(segmentId, laneIndex, laneId, action);
 
+            Notifier.Instance.OnSegmentModified(segmentId, this);
             return true;
+        }
+
+        public void ResetCustomDefaultSpeedlimit([NotNull] string netinfoName) {
+            if (this.customLaneSpeedLimitByNetInfoName_.ContainsKey(netinfoName)) {
+                this.customLaneSpeedLimitByNetInfoName_.Remove(netinfoName);
+            }
         }
 
         /// <summary>Sets speed limit for all configurable lanes.</summary>
@@ -562,10 +571,8 @@ namespace TrafficManager.Manager.Impl {
                 return false;
             }
 
-            Log._Assert(action.Override != null, "action.Override != null");
-
             if (action.Type == SetSpeedLimitAction.ActionType.SetOverride
-                && !IsValidRange(action.Override.Value.GameUnits)) {
+                && !IsValidRange(action.GuardedValue.Override.GameUnits)) {
                 return false;
             }
 
@@ -601,7 +608,7 @@ namespace TrafficManager.Manager.Impl {
                         Flags.RemoveLaneSpeedLimit(curLaneId);
                     } else {
                         bool showMph = GlobalConfig.Instance.Main.DisplaySpeedLimitsMph;
-                        string overrideStr = action.Override.Value.FormatStr(showMph);
+                        string overrideStr = action.GuardedValue.Override.FormatStr(showMph);
 
                         Log._Debug(
                             $"SpeedLimitManager: Setting lane {curLaneId} to {overrideStr}");
@@ -613,6 +620,7 @@ namespace TrafficManager.Manager.Impl {
                 laneIndex++;
             }
 
+            Notifier.Instance.OnSegmentModified(segmentId, this);
             return true;
         }
 
@@ -1028,6 +1036,15 @@ namespace TrafficManager.Manager.Impl {
 
         public static bool IsValidRange(float speed) {
             return FloatUtil.IsZero(speed) || (speed >= MIN_SPEED && speed <= SpeedValue.UNLIMITED);
+        }
+
+        /// <summary>
+        /// Used to check roads if they're a known and valid asset.
+        /// This will filter out helper roads which are created during public transport route setup.
+        /// </summary>
+        // ReSharper restore Unity.ExpensiveCode
+        public bool IsKnownNetinfoName(string infoName) {
+            return this.vanillaLaneSpeedLimitsByNetInfoName_.ContainsKey(infoName);
         }
     } // end class
 }

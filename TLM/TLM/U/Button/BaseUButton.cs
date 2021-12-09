@@ -82,9 +82,14 @@ namespace TrafficManager.U {
             UpdateButtonSkinAndTooltip();
         }
 
+        internal void UpdateButtonSkin() {
+            this.ApplyButtonSkin();
+            this.Invalidate();
+        }
+
         internal void UpdateButtonSkinAndTooltip() {
-            ApplyButtonSkin();
-            UpdateTooltip(refreshTooltip: true);
+            this.ApplyButtonSkin();
+            this.UpdateTooltip(refreshTooltip: true);
 
             this.isVisible = IsVisible();
             this.Invalidate();

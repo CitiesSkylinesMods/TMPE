@@ -10,6 +10,7 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.Manager.Impl;
     using TrafficManager.State;
+    using TrafficManager.UI.Helpers;
     using TrafficManager.UI.MainMenu.OSD;
     using TrafficManager.UI.Textures;
     using TrafficManager.Util;
@@ -209,8 +210,13 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                     massEditMode = PrioritySignsMassEditMode.Min;
                 }
             } else if (ControlIsPressed) {
-                MainTool.DrawNodeCircle(cameraInfo, HoveredNodeId, Input.GetMouseButton(0));
+                Highlight.DrawNodeCircle(
+                    cameraInfo: cameraInfo,
+                    nodeId: HoveredNodeId,
+                    warning: Input.GetMouseButton(0));
+
                 mode = ModifyMode.HighPriorityJunction;
+
                 if (mode != PrevHoveredState.Mode || HoveredNodeId != PrevHoveredState.NodeId) {
                     massEditMode = PrioritySignsMassEditMode.Min;
                 }
@@ -232,7 +238,10 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                     return;
                 }
 
-                MainTool.DrawNodeCircle(cameraInfo, HoveredNodeId, Input.GetMouseButton(0));
+                Highlight.DrawNodeCircle(
+                    cameraInfo: cameraInfo,
+                    nodeId: HoveredNodeId,
+                    warning: Input.GetMouseButton(0));
             }
 
             PrevHoveredState.Mode = mode;
@@ -346,12 +355,12 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                             showRemoveButton = true;
                         }
 
-                        if (MainTool.DrawGenericSquareOverlayTexture(
-                                RoadUI.PrioritySignTextures[sign],
-                                camPos,
-                                signPos,
-                                90f,
-                                !viewOnly) && clicked)
+                        if (Highlight.DrawGenericSquareOverlayTexture(
+                                texture: RoadUI.PrioritySignTextures[sign],
+                                camPos: camPos,
+                                worldPos: signPos,
+                                size: 90f,
+                                canHover: !viewOnly) && clicked)
                         {
                             PriorityType? newSign;
                             switch (sign) {
@@ -392,11 +401,11 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
 
                     // draw remove button and handle click
                     if (showRemoveButton
-                        && MainTool.DrawHoverableSquareOverlayTexture(
-                            RoadUI.SignClear,
-                            camPos,
-                            nodePos,
-                            90f)
+                        && Highlight.DrawHoverableSquareOverlayTexture(
+                            texture: RoadUI.SignClear,
+                            camPos: camPos,
+                            worldPos: nodePos,
+                            size: 90f)
                         && clicked)
                     {
                         prioMan.RemovePrioritySignsFromNode(nodeId);
@@ -505,7 +514,7 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
             if (SelectedNodeId == 0) {
                 // Select mode
                 var items = new List<OsdItem>();
-                items.Add(new ModeDescription(localizedText: T("Prio.OnscreenHint.Mode:Select")));
+                items.Add(new Label(localizedText: T("Prio.OnscreenHint.Mode:Select")));
                 items.Add(
                     new HardcodedMouseShortcut(
                         button: UIMouseButton.Left,
@@ -531,7 +540,7 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
             } else {
                 // Modify traffic light settings
                 var items = new List<OsdItem>();
-                items.Add(new ModeDescription(localizedText: T("Prio.OnscreenHint.Mode:Edit")));
+                items.Add(new Label(localizedText: T("Prio.OnscreenHint.Mode:Edit")));
                 // items.Add(OnscreenDisplay.RightClick_LeaveNode());
                 OnscreenDisplay.Display(items);
             }

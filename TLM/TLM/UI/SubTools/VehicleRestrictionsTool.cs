@@ -207,7 +207,11 @@ namespace TrafficManager.UI.SubTools {
                 // continues lane highlight requires lane alphaBlend == false.
                 // for such lane highlight to be on the top of segment highlight,
                 // the alphaBlend of segment highlight needs to be true.
-                TrafficManagerTool.DrawSegmentOverlay(cameraInfo, SelectedSegmentId, color, true);
+                Highlight.DrawSegmentOverlay(
+                    cameraInfo: cameraInfo,
+                    segmentId: SelectedSegmentId,
+                    color: color,
+                    alphaBlend: true);
 
                 if (overlayHandleHovered) {
                     if (RoadMode) {
@@ -468,10 +472,10 @@ namespace TrafficManager.UI.SubTools {
             }
 
             int numLanes = GeometryUtil.GetSegmentNumVehicleLanes(
-                segmentId,
-                null,
-                out int numDirections,
-                VehicleRestrictionsManager.VEHICLE_TYPES);
+                segmentId: segmentId,
+                nodeId: null,
+                numDirections: out int numDirections,
+                vehicleTypeFilter: VehicleRestrictionsManager.VEHICLE_TYPES);
 
             // draw vehicle restrictions over each lane
             NetInfo segmentInfo = segment.Info;
@@ -498,14 +502,14 @@ namespace TrafficManager.UI.SubTools {
             //     zero: {zero.ToString()} numLanes: {numLanes} numDirections: {numDirections}");*/
 
             uint x = 0;
-            Color guiColor = GUI.color;
+            Color guiColor = GUI.color; // TODO: Use OverlayHandleColorController
             ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
             IList<LanePos> sortedLanes = extSegmentManager.GetSortedLanes(
-                segmentId,
-                ref segment,
-                null,
-                VehicleRestrictionsManager.LANE_TYPES,
-                VehicleRestrictionsManager.VEHICLE_TYPES);
+                segmentId: segmentId,
+                segment: ref segment,
+                startNode: null,
+                laneTypeFilter: VehicleRestrictionsManager.LANE_TYPES,
+                vehicleTypeFilter: VehicleRestrictionsManager.VEHICLE_TYPES);
             bool hovered = false;
             HashSet<NetInfo.Direction> directions = new HashSet<NetInfo.Direction>();
             int sortedLaneIndex = -1;
@@ -565,8 +569,16 @@ namespace TrafficManager.UI.SubTools {
 
                 ++y;
 #endif
-                Color guiColor2 = GUI.color;
+                Color guiColor2 = GUI.color; // TODO: Use OverlayHandleColorController
+
                 GUI.color = GUI.color.WithAlpha(TrafficManagerTool.OverlayAlpha);
+                var gridRenderer = new Highlight.Grid(
+                    gridOrigin: zero,
+                    cellWidth: f,
+                    cellHeight: f,
+                    xu: xu,
+                    yu: yu);
+
                 foreach (ExtVehicleType vehicleType in possibleVehicleTypes) {
                     bool allowed = VehicleRestrictionsManager.Instance.IsAllowed(allowedTypes, vehicleType);
 
@@ -575,17 +587,15 @@ namespace TrafficManager.UI.SubTools {
                     }
 
 
-                    bool hoveredHandle = MainTool.DrawGenericSquareOverlayGridTexture(
-                        RoadUI.VehicleRestrictionTextures[vehicleType][allowed],
-                        camPos,
-                        zero,
-                        f,
-                        xu,
-                        yu,
-                        x,
-                        y,
-                        vehicleRestrictionsSignSize,
-                        !viewOnly);
+                    bool hoveredHandle = gridRenderer.DrawGenericOverlayGridTexture(
+                        texture: RoadUI.VehicleRestrictionTextures[vehicleType][allowed],
+                        camPos: camPos,
+                        x: x,
+                        y: y,
+                        width: this.vehicleRestrictionsSignSize,
+                        height: this.vehicleRestrictionsSignSize,
+                        canHover: !viewOnly,
+                        screenRect: out _);
 
                     if (hoveredHandle) {
                         hovered = true;
@@ -618,13 +628,13 @@ namespace TrafficManager.UI.SubTools {
                     ++y;
                 }
 
-                GUI.color = guiColor2;
+                GUI.color = guiColor2; // TODO: Use OverlayHandleColorController
 
                 ++x;
             }
 
             guiColor.a = 1f;
-            GUI.color = guiColor;
+            GUI.color = guiColor; // TODO: Use OverlayHandleColorController
 
             return hovered;
         }
@@ -633,12 +643,12 @@ namespace TrafficManager.UI.SubTools {
             if (SelectedSegmentId == 0) {
                 // Select mode
                 var items = new List<OsdItem>();
-                items.Add(new ModeDescription(localizedText: T("VR.OnscreenHint.Mode:Select segment")));
+                items.Add(new Label(localizedText: T("VR.OnscreenHint.Mode:Select segment")));
                 OnscreenDisplay.Display(items);
             } else {
                 // Modify traffic light settings
                 var items = new List<OsdItem>();
-                items.Add(new ModeDescription(localizedText: T("VR.OnscreenHint.Mode:Toggle restrictions")));
+                items.Add(new Label(localizedText: T("VR.OnscreenHint.Mode:Toggle restrictions")));
                 items.Add(
                     item: new Shortcut(
                         keybindSetting: KeybindSettingsBase.RestoreDefaultsKey,

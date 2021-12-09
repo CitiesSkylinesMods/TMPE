@@ -4,6 +4,7 @@ namespace TrafficManager.UI.SubTools {
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.Manager.Impl;
     using TrafficManager.State;
+    using TrafficManager.UI.Helpers;
     using TrafficManager.UI.MainMenu.OSD;
     using TrafficManager.UI.Textures;
     using TrafficManager.Util;
@@ -112,13 +113,14 @@ namespace TrafficManager.UI.SubTools {
                     overlayTex = TrafficLightTextures.TrafficLightDisabled;
                 }
 
-                MainTool.DrawGenericOverlayTexture(
-                    overlayTex,
-                    camPos,
-                    netNode.m_position,
-                    SIGN_SIZE,
-                    SIGN_SIZE,
-                    false);
+                Highlight.DrawGenericOverlayTexture(
+                    texture: overlayTex,
+                    camPos: camPos,
+                    worldPos: netNode.m_position,
+                    width: SIGN_SIZE,
+                    height: SIGN_SIZE,
+                    canHover: false,
+                    screenRect: out _);
             }
         }
 
@@ -129,7 +131,6 @@ namespace TrafficManager.UI.SubTools {
 
             // For current camera store its position and cast a ray via mouse position
             Vector3 camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
-            // Ray mouseRay = currentCamera.ScreenPointToRay(Input.mousePosition);
 
             // Check if camera pos/angle has changed then re-filter the visible nodes
             // Assumption: The states checked in this loop don't change while the tool is active
@@ -143,11 +144,11 @@ namespace TrafficManager.UI.SubTools {
 
             // Render the current hovered node as blue
             if ((HoveredNodeId != 0) && Flags.MayHaveTrafficLight(HoveredNodeId)) {
-                MainTool.DrawNodeCircle(
-                    cameraInfo,
-                    HoveredNodeId,
-                    Input.GetMouseButton(0),
-                    false);
+                Highlight.DrawNodeCircle(
+                    cameraInfo: cameraInfo,
+                    nodeId: HoveredNodeId,
+                    warning: Input.GetMouseButton(0),
+                    alpha: false);
             }
         }
 
@@ -198,7 +199,7 @@ namespace TrafficManager.UI.SubTools {
 
         public void UpdateOnscreenDisplayPanel() {
             var items = new List<OsdItem>();
-            items.Add(new ModeDescription(localizedText: T("ToggleTL.Mode:Click to toggle")));
+            items.Add(new Label(localizedText: T("ToggleTL.Mode:Click to toggle")));
             OnscreenDisplay.Display(items);
         }
 

@@ -183,12 +183,15 @@ namespace TrafficManager.State {
             if (newLanguageIndex <= 0) {
                 GlobalConfig.Instance.LanguageCode = null;
                 GlobalConfig.WriteConfig();
+
+                // TODO: Move this to the owner class and implement IObserver<ModUI.EventPublishers.LanguageChangeNotification>
                 Translation.SetCurrentLanguageToGameLanguage();
                 Options.RebuildMenu();
             } else if (newLanguageIndex - 1 < Translation.AvailableLanguageCodes.Count) {
                 string newLang = Translation.AvailableLanguageCodes[newLanguageIndex - 1];
                 GlobalConfig.Instance.LanguageCode = newLang;
                 GlobalConfig.WriteConfig();
+                // TODO: Move this to the owner class and implement IObserver<ModUI.EventPublishers.LanguageChangeNotification>
                 Translation.SetCurrentLanguageToTMPELanguage();
                 Options.RebuildMenu();
             } else {
@@ -196,6 +199,7 @@ namespace TrafficManager.State {
                 return;
             }
 
+            ModUI.Instance.Events.LanguageChanged();
             Options.RebuildOptions();
         }
 
@@ -272,8 +276,7 @@ namespace TrafficManager.State {
         }
 
         private static void OnGuiScaleChanged(float newVal) {
-            ModUI.Instance.UiScaleObservable.NotifyObservers(
-                new ModUI.UIScaleNotification { NewScale = newVal });
+            ModUI.Instance.Events.UiScaleChanged();
             SetGuiScale(newVal);
             _guiScaleSlider.tooltip
                 = string.Format(
@@ -325,6 +328,8 @@ namespace TrafficManager.State {
             Log._Debug($"Display MPH changed to {newValue}");
             GlobalConfig.Instance.Main.DisplaySpeedLimitsMph = newValue;
             GlobalConfig.WriteConfig();
+
+            ModUI.Instance.Events.DisplayMphChanged(newValue);
         }
 
         public static void SetDisplayInMph(bool value) {
@@ -386,10 +391,7 @@ namespace TrafficManager.State {
                 _guiOpacitySlider.value = val;
 
                 U.UOpacityValue opacity = UOpacityValue.FromOpacity(0.01f * val);
-                ModUI.Instance.UiOpacityObservable.NotifyObservers(
-                          new ModUI.UIOpacityNotification {
-                                                              Opacity = opacity,
-                                                          });
+                ModUI.Instance.Events.OpacityChanged(opacity);
             }
         }
 
@@ -399,8 +401,7 @@ namespace TrafficManager.State {
 
             if (changed && _guiScaleSlider != null) {
                 _guiScaleSlider.value = val;
-                ModUI.Instance.UiScaleObservable.NotifyObservers(
-                    new ModUI.UIScaleNotification { NewScale = val });
+                ModUI.Instance.Events.UiScaleChanged();
             }
         }
 
