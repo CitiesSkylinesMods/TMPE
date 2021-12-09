@@ -33,7 +33,7 @@
 
                 this.ResizeFunction(ButtonpanelResizeFn);
 
-                Vector2 buttonSize = new Vector2(50f, 50f);
+                Vector2 buttonSize = new Vector2(40f, 40f);
                 UITextureAtlas uiAtlas = window.GetUiAtlas();
                 LookupTable translation = Translation.SpeedLimits;
 

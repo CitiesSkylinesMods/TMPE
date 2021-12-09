@@ -98,13 +98,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
 
         /// <summary>Drop tool window if it existed, and create again.</summary>
         private void RecreateToolWindow() {
-            // Create a generic self-sizing window with padding of 4px.
-            if (this.Window) {
-                this.Window.Hide();
-
-                // The constructor of new window will try to delete it by name, but we can help it
-                UnityEngine.Object.Destroy(this.Window);
-            }
+            this.DestroyWindow();
 
             UBuilder b = new UBuilder();
             this.Window = b.CreateWindow<SpeedLimitsToolWindow>();
@@ -112,7 +106,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                 new UPadding(
                     top: UConst.UIPADDING,
                     right: UConst.UIPADDING,
-                    bottom: UConst.UIPADDING * 2,
+                    bottom: UConst.UIPADDING * 6,
                     left: UConst.UIPADDING));
             this.Window.SetupControls(b, parentTool: this);
 
@@ -136,6 +130,18 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
 
             this.Window.modeButtonsPanel_.ToggleMphButton.uOnClick = this.OnClickToggleMphButton;
             this.UpdateCursorTooltip();
+        }
+
+        private void DestroyWindow() {
+            // Create a generic self-sizing window with padding of 4px.
+            if (this.Window != null) {
+                this.Window.Hide();
+
+                // The constructor of new window will try to delete it by name, but we can help it
+                UnityEngine.Object.Destroy(this.Window);
+            }
+
+            this.Window = null;
         }
 
         private void UpdateModeInfoLabel() {
@@ -190,10 +196,6 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
             }
         }
 
-        // public void DeactivateTool() {
-        //     MainTool.SetToolMode(ToolMode.None);
-        // }
-
         /// <summary>Render overlay segments/lanes in non-GUI mode, as overlays.</summary>
         public override void RenderActiveToolOverlay(RenderManager.CameraInfo cameraInfo) {
             this.CreateOverlayDrawArgs(interactive: true);
@@ -233,16 +235,23 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         private void CreateOverlayDrawArgs(bool interactive) {
             this.overlayDrawArgs_.ClearHovered();
 
-            this.overlayDrawArgs_.UiWindowRects.Clear();
+            List<Rect> uiRects = this.overlayDrawArgs_.UiWindowRects;
+
+            uiRects.Clear();
+
             if (this.Window != null) {
-                this.overlayDrawArgs_.UiWindowRects.Add(this.Window.GetScreenRectInGuiSpace());
+                uiRects.Add(this.Window.GetScreenRectInGuiSpace());
             }
 
             if (ModUI.Instance.MainMenu != null) { // can be null if no tool selected
-                this.overlayDrawArgs_.UiWindowRects.Add(
+                uiRects.Add(
                     ModUI.Instance.MainMenu.GetScreenRectInGuiSpace());
-                this.overlayDrawArgs_.UiWindowRects.Add(
+                uiRects.Add(
                     ModUI.Instance.MainMenu.OnscreenDisplayPanel.GetScreenRectInGuiSpace());
+#if DEBUG
+                // In debug build include the right side debug panel and fade the overlays over it
+                uiRects.Add(ModUI.Instance.DebugMenu.GetScreenRectInGuiSpace());
+#endif
             }
 
             this.overlayDrawArgs_.Mouse = this.GetMouseForOverlay();
@@ -398,11 +407,14 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
 
         /// <summary>Called by IObservable when observed event is fired (UI language change).</summary>
         public void OnUpdate(ModUI.EventPublishers.LanguageChangeNotification subject) {
-            this.OnDeactivateTool();
+            // All text labels on the window are changing, better to hide and rebuild the window
+            this.DestroyWindow();
+            MainTool.SetToolMode(ToolMode.None);
         }
 
         /// <summary>Called by IObservable when observed event is fired (display MPH change).</summary>
         public void OnUpdate(ModUI.EventPublishers.DisplayMphNotification subject) {
+            // Does not close window
             this.RecreateToolWindow();
         }
 

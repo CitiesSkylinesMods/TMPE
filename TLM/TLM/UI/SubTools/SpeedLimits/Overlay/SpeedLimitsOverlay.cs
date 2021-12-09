@@ -3,13 +3,11 @@
     using System.Collections.Generic;
     using System.Linq;
     using ColossalFramework;
-    using CSUtil.Commons;
     using JetBrains.Annotations;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.Manager.Impl;
     using TrafficManager.State;
     using TrafficManager.Traffic;
-    using TrafficManager.U;
     using TrafficManager.UI.Helpers;
     using TrafficManager.UI.Textures;
     using TrafficManager.Util;
@@ -410,7 +408,7 @@
             this.segmentCenters_.Clear();
 
             for (uint segmentId = 1; segmentId < NetManager.MAX_SEGMENT_COUNT; ++segmentId) {
-                ref var segment = ref ((ushort)segmentId).ToSegment();
+                ref NetSegment segment = ref ((ushort)segmentId).ToSegment();
 
                 // Ignore: Bad segments
                 if (!segment.IsValid()) {
@@ -427,19 +425,28 @@
                     continue;
                 }
 
-                Vector3 distToCamera = segment.m_bounds.center - camPos;
+                {
+                    Vector3 distToCamera = segment.m_bounds.center - camPos;
 
-                // Ignore: Too far segments
-                if (distToCamera.sqrMagnitude > TrafficManagerTool.MAX_OVERLAY_DISTANCE_SQR) {
-                    continue; // do not draw if too distant
+                    // Ignore: Too far segments
+                    if (distToCamera.sqrMagnitude > TrafficManagerTool.MAX_OVERLAY_DISTANCE_SQR) {
+                        continue; // do not draw if too distant
+                    }
                 }
 
-                // Ignore: Not in screen segments
-                bool visible = GeometryUtil.WorldToScreenPoint(
-                    worldPos: segment.m_bounds.center,
-                    screenPos: out Vector3 _);
+                {
+                    // Ignore: Not in screen segments
+                    bool visible = GeometryUtil.WorldToScreenPoint(
+                        worldPos: segment.m_bounds.center,
+                        screenPos: out Vector3 _);
 
-                if (!visible) {
+                    if (!visible) {
+                        continue;
+                    }
+                }
+
+                // Place this check last as it might be expensive
+                if (!SpeedLimitManager.Instance.IsKnownNetinfoName(segment.Info.name)) {
                     continue;
                 }
 

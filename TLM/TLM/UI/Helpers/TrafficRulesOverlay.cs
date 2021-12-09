@@ -83,7 +83,7 @@ namespace TrafficManager.UI.Helpers {
 
                 dirX_ = (segmentEnd.LeftCorner - segmentEnd.RightCorner).normalized;
 
-                // for curved angled segements, corner1Direction may slightly differ from corner2Direction
+                // for curved angled segments, corner1Direction may slightly differ from corner2Direction
                 dirY_ = (segmentEnd.LeftCornerDir + segmentEnd.RightCornerDir) * 0.5f;
 
                 // origin point to start drawing sprites from.
@@ -138,19 +138,13 @@ namespace TrafficManager.UI.Helpers {
                 if (viewOnly_) {
                     // Readonly signs look grey-ish
                     guiColor = Color.Lerp(guiColor, Color.gray, 0.5f);
-                    guiColor.a = TrafficManagerTool.GetHandleAlpha(hovered: false);
-                } else {
-                    // Handles in edit mode are always visible. Hovered handles are also highlighted.
-                    guiColor.a = 1f;
-
-                    if (hoveredHandle) {
-                        guiColor = Color.Lerp(
-                            a: guiColor,
-                            b: new Color(r: 1f, g: .7f, b: 0f),
-                            t: 0.5f);
-                    }
+                } else if (hoveredHandle) {
+                    guiColor = Color.Lerp(
+                        a: guiColor,
+                        b: new Color(r: 1f, g: .7f, b: 0f),
+                        t: 0.5f);
                 }
-                // guiColor.a = TrafficManagerTool.GetHandleAlpha(hoveredHandle);
+                guiColor.a = TrafficManagerTool.GetHandleAlpha(hoveredHandle);
 
                 GUI.color = guiColor;
                 GUI.DrawTexture(boundingBox, signTexture);
