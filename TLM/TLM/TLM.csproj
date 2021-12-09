@@ -826,13 +826,6 @@
     <EmbeddedResource Include="Resources\RoadSelectionPanel\Clear-fg-normal.png" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\SpeedLimits\EditLanes-fg-normal.png" />
-    <EmbeddedResource Include="Resources\SpeedLimits\EditSegments-fg-normal.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\Underground.png" />
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="Resources\SpeedLimits\Kmph_Canada\0.png" />
     <EmbeddedResource Include="Resources\SpeedLimits\Kmph_Canada\10.png" />
     <EmbeddedResource Include="Resources\SpeedLimits\Kmph_Canada\100.png" />
