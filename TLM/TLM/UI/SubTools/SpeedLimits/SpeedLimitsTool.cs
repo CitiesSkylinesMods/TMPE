@@ -106,7 +106,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                 new UPadding(
                     top: UConst.UIPADDING,
                     right: UConst.UIPADDING,
-                    bottom: UConst.UIPADDING * 2,
+                    bottom: UConst.UIPADDING * 6,
                     left: UConst.UIPADDING));
             this.Window.SetupControls(b, parentTool: this);
 
