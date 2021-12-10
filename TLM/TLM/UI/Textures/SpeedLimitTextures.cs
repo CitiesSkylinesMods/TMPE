@@ -21,16 +21,19 @@ namespace TrafficManager.UI.Textures {
 
             private string PathPrefix;
 
-            public bool SupportsKmph;
+            // Kmph sign sets include range for MPH, but not all pictures are good to go with Kmph or Mph setting.
+            // For example Canadian signs have all values to show MPH, but make no sense because the sign says km/h.
 
-            /// <summary>
-            /// Kmph sign sets include range for MPH, but not all pictures are good to go with Kmph or Mph setting.
-            /// For example Canadian signs have all values to show MPH, but make no sense because the sign says km/h.
-            /// </summary>
-            public bool SupportsMph;
+            /// <summary>Whether km/h signs range is supported from 5 to 140 step 5.</summary>
+            public readonly bool SupportsKmph;
 
-            public bool AttemptedToLoad = false;
+            /// <summary>Whether MPH signs range is supported from 5 to 90 step 5.</summary>
+            public readonly bool SupportsMph;
+
             public readonly string Name;
+
+            /// <summary>Set to true if an attempt to find and load textures was made.</summary>
+            public bool AttemptedToLoad = false;
 
             public RoadSignTheme(string name,
                                  bool supportsMph,

@@ -43,11 +43,6 @@ namespace TrafficManager.State {
 
         private static UICheckBox _displayMphToggle;
 
-        // [Obsolete("To be removed")]
-        // private static UIDropDown _roadSignsMphThemeDropdown;
-        // [Obsolete("To be removed")]
-        // private static int _roadSignMphStyleInt;
-
         private static UIDropDown _roadSignsThemeDropdown;
 
         private static UICheckBox _useUUI;
@@ -371,25 +366,6 @@ namespace TrafficManager.State {
             }
         }
 
-        // private static void OnRoadSignsMphThemeChanged(int newRoadSignStyle) {
-        //     if (!Options.IsGameLoaded()) {
-        //         return;
-        //     }
-        //
-        //     // The UI order is: US, UK, German
-        //     var newStyle = MphSignStyle.RoundGerman;
-        //     switch (newRoadSignStyle) {
-        //         case 1:
-        //             newStyle = MphSignStyle.RoundUK;
-        //             break;
-        //         case 0:
-        //             newStyle = MphSignStyle.SquareUS;
-        //             break;
-        //     }
-        //
-        //     Log._Debug($"Road Sign theme changed to {newStyle}");
-        //     GlobalConfig.Instance.Main.MphRoadSignStyle = newStyle;
-        // }
         private static void OnRoadSignsThemeChanged(int newThemeIndex) {
             if (!Options.IsGameLoaded()) {
                 return;

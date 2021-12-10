@@ -146,12 +146,7 @@ namespace TrafficManager.Manager.Impl {
                 laneIndex++;
             }
 
-            switch (validLanes) {
-                case 0:
-                    return null;
-                case > 0:
-                    return meanSpeedLimit.Scale(1.0f / validLanes);
-            }
+            return validLanes == 0 ? null : meanSpeedLimit.Scale(1.0f / validLanes);
         }
 
         /// <summary>
