@@ -152,6 +152,7 @@
     <Compile Include="Manager\Impl\GetSegmentLaneIdsEnumerator.cs" />
     <Compile Include="Manager\Impl\LaneIdAndIndex.cs" />
     <Compile Include="Manager\Impl\LanePos.cs" />
+    <Compile Include="Manager\Impl\SpeedLimitManagerExt.cs" />
     <Compile Include="Notifier.cs" />
     <Compile Include="Patch\CustomPathFindPatchAttribute.cs" />
     <Compile Include="Patch\PatchCommons.cs" />

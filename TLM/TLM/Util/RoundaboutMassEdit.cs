@@ -28,7 +28,7 @@ namespace TrafficManager.Util {
 
             if (OptionsMassEditTab.RoundAboutQuickFix_RealisticSpeedLimits) {
                 SpeedValue? targetSpeed = CalculatePreferedSpeed(segmentId);
-                float defaultSpeed = SpeedLimitManager.Instance.GetCustomNetInfoSpeedLimit(segmentId.ToSegment().Info);
+                float defaultSpeed = SpeedLimitManager.Instance.GetCustomNetinfoSpeedLimit(segmentId.ToSegment().Info);
 
                 if (targetSpeed != null && targetSpeed.Value.GetKmph() < defaultSpeed) {
                     SpeedLimitManager.Instance.SetSegmentSpeedLimit(

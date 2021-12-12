@@ -420,7 +420,7 @@
                 }
 
                 // Ignore: Can't have speed limits set
-                if (!speedLimitManager.MayHaveCustomSpeedLimits(ref segment)) {
+                if (!segment.MayHaveCustomSpeedLimits()) {
                     continue;
                 }
 
@@ -532,7 +532,7 @@
             NetSegment segment = segmentId.ToSegment();
             NetInfo neti = segment.Info;
             var defaultSpeedLimit = new SpeedValue(
-                gameUnits: SpeedLimitManager.Instance.GetCustomNetInfoSpeedLimit(info: neti));
+                gameUnits: SpeedLimitManager.Instance.GetCustomNetinfoSpeedLimit(info: neti));
 
             // Render override if interactive, or if readonly info layer and override exists
             if (drawEnv.drawDefaults_) {

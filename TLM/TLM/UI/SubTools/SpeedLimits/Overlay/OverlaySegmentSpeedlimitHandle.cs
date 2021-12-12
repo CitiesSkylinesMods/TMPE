@@ -2,6 +2,7 @@
     using System;
     using ColossalFramework;
     using CSUtil.Commons;
+    using JetBrains.Annotations;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.Manager.Impl;
     using TrafficManager.State;
@@ -112,7 +113,6 @@
                     break;
                 case SetSpeedLimitTarget.SegmentDefault:
                 case SetSpeedLimitTarget.LaneDefault:
-                    // SpeedLimitManager.Instance.FixCurrentSpeedLimits(netInfo);
                     SetDefaultSpeedLimit(segmentId, netInfo, action);
                     break;
                 default:
@@ -122,20 +122,21 @@
             }
         }
 
-        internal static void SetDefaultSpeedLimit(ushort segmentId, NetInfo netInfo, SetSpeedLimitAction action) {
+        internal static void SetDefaultSpeedLimit(ushort segmentId,
+                                                  [NotNull] NetInfo netInfo,
+                                                  SetSpeedLimitAction action) {
             switch (action.Type) {
                 case SetSpeedLimitAction.ActionType.SetOverride:
                 case SetSpeedLimitAction.ActionType.Unlimited:
-                    SpeedValue value = action.GuardedValue.Override;
                     bool displayMph = GlobalConfig.Instance.Main.DisplaySpeedLimitsMph;
+                    SpeedValue value = action.GuardedValue.Override;
                     Log.Info($"Setting speed limit for netinfo '{netInfo.name}' seg={segmentId} to={value.FormatStr(displayMph)}");
-                    SpeedLimitManager.Instance.SetCustomNetInfoSpeedLimit(
-                        info: netInfo,
+                    SpeedLimitManager.Instance.SetCustomNetinfoSpeedLimit(
+                        netinfo: netInfo,
                         customSpeedLimit: value.GameUnits);
                     break;
                 case SetSpeedLimitAction.ActionType.ResetToDefault:
-                    Log.Info($"Setting default speed limit for netinfo '{netInfo.name}' seg={segmentId}");
-                    SpeedLimitManager.Instance.ResetCustomDefaultSpeedlimit(netInfo.name);
+                    SpeedLimitManager.Instance.ResetCustomNetinfoSpeedLimit(netInfo);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
