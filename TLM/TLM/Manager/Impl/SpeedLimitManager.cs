@@ -417,8 +417,6 @@ namespace TrafficManager.Manager.Impl {
                 return;
             }
 
-            Log.Info($"Resetting custom default speed for netinfo '{netinfo.name}'");
-
             var vanillaSpeedLimit = GetVanillaNetInfoSpeedLimit(netinfo);
 
             HashSet<string> relatedNetinfoNames = new();
@@ -492,16 +490,13 @@ namespace TrafficManager.Manager.Impl {
                 if (d == finalDir && laneInfo.MayHaveCustomSpeedLimits()) {
                     if (action.Type == SetSpeedLimitAction.ActionType.ResetToDefault) {
                         // Setting to 'Default' will instead remove the override
-                        Log._Debug(
-                            $"SpeedLimitManager: Setting speed limit of lane {curLaneId} " +
-                            $"to default");
+                        Log._Debug($"SpeedLimitManager: Setting speed limit of lane {curLaneId} to default");
                         RemoveLaneSpeedLimit(curLaneId);
                     } else {
                         bool showMph = GlobalConfig.Instance.Main.DisplaySpeedLimitsMph;
                         string overrideStr = action.GuardedValue.Override.FormatStr(showMph);
 
-                        Log._Debug(
-                            $"SpeedLimitManager: Setting lane {curLaneId} to {overrideStr}");
+                        Log._Debug($"SpeedLimitManager: Setting lane {curLaneId} to {overrideStr}");
                         SetLaneSpeedLimit(curLaneId, action);
                     }
                 }

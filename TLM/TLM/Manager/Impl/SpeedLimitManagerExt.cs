@@ -12,6 +12,11 @@
                 return false;
             }
 
+            // Collapsed roads cannot have speed limit, but will be restored if you upgrade in place
+            if ((segment.m_flags & NetSegment.Flags.Collapsed) != NetSegment.Flags.None) {
+                return false;
+            }
+
             ItemClass connectionClass = segment.Info.GetConnectionClass();
             ItemClass.SubService subService = connectionClass.m_subService;
             ItemClass.Service service = connectionClass.m_service;

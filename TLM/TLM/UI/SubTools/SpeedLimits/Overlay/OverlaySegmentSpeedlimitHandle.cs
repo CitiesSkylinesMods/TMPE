@@ -113,16 +113,15 @@
                     break;
                 case SetSpeedLimitTarget.SegmentDefault:
                 case SetSpeedLimitTarget.LaneDefault:
-                    SetDefaultSpeedLimit(segmentId, netInfo, action);
+                    ApplyDefaultSpeedLimit(segmentId, netInfo, action);
                     break;
                 default:
-                    Log.Error(
-                        $"Target for SEGMENT speed handle click is not supported {nameof(target)}");
+                    Log.Error($"Target for SEGMENT speed handle click is not supported {nameof(target)}");
                     throw new NotSupportedException();
             }
         }
 
-        internal static void SetDefaultSpeedLimit(ushort segmentId,
+        internal static void ApplyDefaultSpeedLimit(ushort segmentId,
                                                   [NotNull] NetInfo netInfo,
                                                   SetSpeedLimitAction action) {
             switch (action.Type) {
@@ -130,12 +129,13 @@
                 case SetSpeedLimitAction.ActionType.Unlimited:
                     bool displayMph = GlobalConfig.Instance.Main.DisplaySpeedLimitsMph;
                     SpeedValue value = action.GuardedValue.Override;
-                    Log.Info($"Setting speed limit for netinfo '{netInfo.name}' seg={segmentId} to={value.FormatStr(displayMph)}");
+                    Log._Debug($"Setting speed limit for netinfo '{netInfo.name}' seg={segmentId} to={value.FormatStr(displayMph)}");
                     SpeedLimitManager.Instance.SetCustomNetinfoSpeedLimit(
                         netinfo: netInfo,
                         customSpeedLimit: value.GameUnits);
                     break;
                 case SetSpeedLimitAction.ActionType.ResetToDefault:
+                    Log._Debug($"Resetting custom default speed for netinfo '{netInfo.name}'");
                     SpeedLimitManager.Instance.ResetCustomNetinfoSpeedLimit(netInfo);
                     break;
                 default:
