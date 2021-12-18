@@ -145,8 +145,8 @@ namespace TrafficManager.Manager.Impl {
         /// <param name="dedicatedTurningLanes">
         /// Narrow down updated roads to those that can have dedicated turning lanes.
         /// </param>
-        public void UpdateDedicatedTurningLanePolicy() {
-            Log.Info("UpdateAllDefaults(dedicatedTurningLanes:{dedicatedTurningLanes}) was called.");
+        public void UpdateDedicatedTurningLanePolicy(bool recalculateRoutings) {
+            Log.Info("UpdateDedicatedTurningLanePolicy() was called.");
             SimulationManager.instance.AddAction(delegate () {
                 try {
                     Log._Debug($"Executing UpdateDedicatedTurningLanePolicy() in simulation thread ...");
@@ -174,6 +174,9 @@ namespace TrafficManager.Manager.Impl {
 
                         ai.UpdateLanes(segmentId, ref netSegment, true);
                         NetManager.instance.UpdateSegmentRenderer(segmentId, true);
+                        if (recalculateRoutings) {
+                            RoutingManager.Instance.RequestRecalculation(segmentId, false);
+                        }
                     }
                 } catch(Exception ex) {
                     ex.LogException();
@@ -216,7 +219,7 @@ namespace TrafficManager.Manager.Impl {
             base.OnLevelLoading();
             if (OptionsVehicleRestrictionsTab.DedicatedTurningLanes) {
                 // update dedicated turning lanes after patch has been applied.
-                UpdateDedicatedTurningLanePolicy();
+                UpdateDedicatedTurningLanePolicy(false);
             }
         }
 

@@ -40,7 +40,7 @@ namespace TrafficManager.State {
             JunctionRestrictionsManager.Instance.UpdateAllDefaults();
 
         static void UpdateDedicatedTurningLanePolicyHandler(bool value) =>
-            LaneArrowManager.Instance.UpdateDedicatedTurningLanePolicy();
+            LaneArrowManager.Instance.UpdateDedicatedTurningLanePolicy(true);
 
         internal static void MakeSettings_VehicleRestrictions(ExtUITabstrip tabStrip) {
             UIHelper panelHelper = tabStrip.AddTabPage(Translation.Options.Get("Tab:Policies & Restrictions"));

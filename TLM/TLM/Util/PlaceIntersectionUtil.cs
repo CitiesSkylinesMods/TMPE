@@ -54,9 +54,9 @@ namespace TrafficManager.Util {
                 Asset2Data.Select(item => item.Key).ToSTR());
 
             if (Asset2Data.TryGetValue(intersectionInfo, out var assetData)) {
-                Log.Info("PlaceIntersectionUtil.ApplyTrafficRules(): assetData =" + assetData);
+                Log._Debug("PlaceIntersectionUtil.ApplyTrafficRules(): assetData =" + assetData);
             } else {
-                Log.Info("PlaceIntersectionUtil.ApplyTrafficRules(): assetData not found (the asset does not have TMPE data)");
+                Log._Debug("PlaceIntersectionUtil.ApplyTrafficRules(): assetData not found (the asset does not have TMPE data)");
                 return;
             }
 
