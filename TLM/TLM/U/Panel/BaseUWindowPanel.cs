@@ -7,6 +7,7 @@ namespace TrafficManager.U.Panel {
     using TrafficManager.State;
     using TrafficManager.U.Autosize;
     using TrafficManager.UI;
+    using TrafficManager.Util;
     using UnityEngine;
 
     /// <summary>
@@ -112,9 +113,14 @@ namespace TrafficManager.U.Panel {
             base.OnDestroy();
         }
 
-        // protected override void OnResolutionChanged(Vector2 previousResolution, Vector2 currentResolution) {
-        //     Log._Debug("Changed");
-        //     base.OnResolutionChanged(previousResolution, currentResolution);
-        // }
+        /// <summary>
+        /// moves the center of the window to a position in the world (e.g. node).
+        /// </summary>
+        public void MoveCenterToWorldPosition(Vector3 worldPos) {
+            GeometryUtil.WorldToScreenPoint(worldPos, out Vector3 screenPos);
+            screenPos /= GetUIView().inputScale;
+            screenPos -= (Vector3)size * 0.5f;
+            relativePosition = screenPos.RoundToInt();
+        }
     }
 }
