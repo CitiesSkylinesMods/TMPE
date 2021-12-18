@@ -146,7 +146,7 @@ namespace TrafficManager.Manager.Impl {
         /// Narrow down updated roads to those that can have dedicated turning lanes.
         /// </param>
         public void UpdateDedicatedTurningLanePolicy(bool recalculateRoutings) {
-            Log.Info("UpdateDedicatedTurningLanePolicy() was called.");
+            Log.Info($"UpdateDedicatedTurningLanePolicy(recalculateRoutings:{recalculateRoutings}) was called.");
             SimulationManager.instance.AddAction(delegate () {
                 try {
                     Log._Debug($"Executing UpdateDedicatedTurningLanePolicy() in simulation thread ...");
