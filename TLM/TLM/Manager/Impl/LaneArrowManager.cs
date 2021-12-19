@@ -141,9 +141,12 @@ namespace TrafficManager.Manager.Impl {
             }
         }
 
-        /// <summary>updates all road segments. Call this when policy changes.</summary>
-        /// <param name="dedicatedTurningLanes">
-        /// Narrow down updated roads to those that can have dedicated turning lanes.
+        /// <summary>
+        /// Updates all road relevant segments so that the dedicated turning lane policy would take effect.
+        /// </summary>
+        /// <param name="recalculateRoutings">
+        /// also recalculate lane transitions in routing manager.
+        /// Current car paths will not be recalculated (to save time). New paths will follow the new lane routings.
         /// </param>
         public void UpdateDedicatedTurningLanePolicy(bool recalculateRoutings) {
             Log.Info($"UpdateDedicatedTurningLanePolicy(recalculateRoutings:{recalculateRoutings}) was called.");
