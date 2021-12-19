@@ -114,7 +114,7 @@ namespace TrafficManager.U.Panel {
         }
 
         /// <summary>
-        /// moves the center of the window to a position in the world (e.g. node).
+        /// Moves the center of the window to a position in the world (e.g. node).
         /// </summary>
         public void MoveCenterToWorldPosition(Vector3 worldPos) {
             GeometryUtil.WorldToScreenPoint(worldPos, out Vector3 screenPos);
