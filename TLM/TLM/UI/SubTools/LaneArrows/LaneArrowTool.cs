@@ -460,17 +460,11 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
         }
 
         private void RepositionWindowToNode() {
-            if (ToolWindow == null || SelectedNodeId == 0) {
+            if (!ToolWindow || SelectedNodeId == 0) {
                 return;
             }
 
-            Vector3 nodePos = SelectedNodeId.ToNode().m_position;
-
-            // Cast to screen and center the window on node
-            GeometryUtil.WorldToScreenPoint(nodePos, out Vector3 screenPixelPos);
-            Vector2 guiPosition = UIScaler.ScreenPointToGuiPoint(screenPixelPos);
-            ToolWindow.absolutePosition =
-                guiPosition - new Vector2(ToolWindow.size.x * 0.5f, ToolWindow.size.y * 0.5f);
+            ToolWindow.MoveCenterToWorldPosition(SelectedNodeId.ToNode().m_position);
         }
 
         /// <summary>
