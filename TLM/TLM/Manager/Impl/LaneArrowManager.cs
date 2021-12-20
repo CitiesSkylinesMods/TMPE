@@ -141,12 +141,15 @@ namespace TrafficManager.Manager.Impl {
             }
         }
 
-        /// <summary>updates all road segments. Call this when policy changes.</summary>
-        /// <param name="dedicatedTurningLanes">
-        /// Narrow down updated roads to those that can have dedicated turning lanes.
+        /// <summary>
+        /// Updates all road relevant segments so that the dedicated turning lane policy would take effect.
+        /// </summary>
+        /// <param name="recalculateRoutings">
+        /// also recalculate lane transitions in routing manager.
+        /// Current car paths will not be recalculated (to save time). New paths will follow the new lane routings.
         /// </param>
-        public void UpdateDedicatedTurningLanePolicy() {
-            Log.Info("UpdateAllDefaults(dedicatedTurningLanes:{dedicatedTurningLanes}) was called.");
+        public void UpdateDedicatedTurningLanePolicy(bool recalculateRoutings) {
+            Log.Info($"UpdateDedicatedTurningLanePolicy(recalculateRoutings:{recalculateRoutings}) was called.");
             SimulationManager.instance.AddAction(delegate () {
                 try {
                     Log._Debug($"Executing UpdateDedicatedTurningLanePolicy() in simulation thread ...");
@@ -174,6 +177,9 @@ namespace TrafficManager.Manager.Impl {
 
                         ai.UpdateLanes(segmentId, ref netSegment, true);
                         NetManager.instance.UpdateSegmentRenderer(segmentId, true);
+                        if (recalculateRoutings) {
+                            RoutingManager.Instance.RequestRecalculation(segmentId, false);
+                        }
                     }
                 } catch(Exception ex) {
                     ex.LogException();
@@ -216,7 +222,7 @@ namespace TrafficManager.Manager.Impl {
             base.OnLevelLoading();
             if (OptionsVehicleRestrictionsTab.DedicatedTurningLanes) {
                 // update dedicated turning lanes after patch has been applied.
-                UpdateDedicatedTurningLanePolicy();
+                UpdateDedicatedTurningLanePolicy(false);
             }
         }
 
