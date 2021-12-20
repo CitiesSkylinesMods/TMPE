@@ -137,6 +137,8 @@ namespace TrafficManager.Manager.Impl {
             return false;
         }
 
+        public bool HasConnections(uint laneId, bool startNode) => HasConnections(laneId, laneId.ToLane().GetNodeId(startNode));
+
         /// <summary>
         /// Determines if the given lane has incoming/outgoing connections
         /// </summary>
