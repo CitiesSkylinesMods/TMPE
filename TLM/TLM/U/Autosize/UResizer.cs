@@ -68,8 +68,8 @@ namespace TrafficManager.U.Autosize {
 
                 UIComponent childUiComponent = child.gameObject.GetComponent<UIComponent>();
                 UBoundingBox? childBox = UpdateControlRecursive(
-                    childUiComponent,
-                    previousChild);
+                    current: childUiComponent,
+                    previousSibling: previousChild);
 
                 // if child contributes to our bounding box, we can update our box
                 if (childBox != null) {

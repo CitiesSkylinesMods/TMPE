@@ -25,13 +25,13 @@ namespace TrafficManager.State {
         private static UICheckBox _evacBussesMayIgnoreRulesToggle;
 
         public static CheckboxOption NoDoubleCrossings =
-            new CheckboxOption("NoDoubleCrossings") {
+            new CheckboxOption(nameof(NoDoubleCrossings)) {
                 Label = "VR.Option:No double crossings", // at a segment to segment transition, only the smaller segment gets crossings
                 Handler = JunctionRestrictionsUpdateHandler,
             };
 
         public static CheckboxOption DedicatedTurningLanes =
-            new CheckboxOption("DedicatedTurningLanes") {
+            new CheckboxOption(nameof(DedicatedTurningLanes)) {
                 Label = "VR.Option:Dedicated turning lanes",
                 Handler = UpdateDedicatedTurningLanePolicyHandler,
         };
@@ -79,6 +79,7 @@ namespace TrafficManager.State {
                       Options.allowFarTurnOnRed,
                       OnAllowFarTurnOnRedChanged) as UICheckBox;
             Options.Indent(_allowFarTurnOnRedToggle);
+            Options.AllowTextWrap(_allowFarTurnOnRedToggle, indented: true);
             _allowLaneChangesWhileGoingStraightToggle
                 = atJunctionsGroup.AddCheckbox(
                       Translation.Options.Get("VR.Checkbox:Vehicles going straight may change lanes at junctions"),
@@ -89,6 +90,7 @@ namespace TrafficManager.State {
                       Translation.Options.Get("VR.Checkbox:Vehicles follow priority rules at junctions with timedTL"),
                       Options.trafficLightPriorityRules,
                       OnTrafficLightPriorityRulesChanged) as UICheckBox;
+            Options.AllowTextWrap(_trafficLightPriorityRulesToggle);
             _automaticallyAddTrafficLightsIfApplicableToggle
                 = atJunctionsGroup.AddCheckbox(
                       Translation.Options.Get("VR.Checkbox:Automatically add traffic lights if applicable"),

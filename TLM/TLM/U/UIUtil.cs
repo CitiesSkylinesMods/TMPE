@@ -3,6 +3,7 @@ namespace TrafficManager.U {
     using System.Linq;
     using ColossalFramework.UI;
     using CSUtil.Commons;
+    using JetBrains.Annotations;
     using UnityEngine;
 
     /// <summary>
@@ -38,7 +39,7 @@ namespace TrafficManager.U {
         /// <param name="window">Parent to be moved.</param>
         /// <param name="alwaysVisible">Object to be clamped to screen.</param>
         /// <returns>True if the position changed.</returns>
-        public static bool ClampToScreen(UIComponent window, UIComponent alwaysVisible) {
+        public static bool ClampToScreen(UIComponent window, [NotNull] UIComponent alwaysVisible) {
             Rect origRect = new Rect(
                 position: alwaysVisible.absolutePosition,
                 size: alwaysVisible.size);
@@ -71,10 +72,12 @@ namespace TrafficManager.U {
 
         /// <summary>
         /// Replace special markup with UI shortcut color tag (orange). And place closing tag.
+        /// NOTE: You can use Translation.`DictionaryName`.ColorizeKeybind, to translate a string AND
+        ///     colorize at the same time.
         /// </summary>
         /// <param name="s">String with keybind wrapped in [[Ctrl]] double square brackets.</param>
         /// <returns>Updated string.</returns>
-        public static string ColorizeKeybind(string s) {
+        public static string ColorizeKeybind([NotNull] string s) {
             return s.Replace("[[", UConst.GetKeyboardShortcutColorTagOpener())
                     .Replace("]]", UConst.KEYBOARD_SHORTCUT_CLOSING_TAG);
         }

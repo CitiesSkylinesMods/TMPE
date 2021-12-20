@@ -4,12 +4,14 @@ namespace TrafficManager.UI.MainMenu.OSD {
     using TrafficManager.U.Autosize;
 
     /// <summary>
-    /// Displays a single text row, no markup, help text for the current edit mode.
+    /// Displays a single text row, markup enabled, help text for the current edit mode or manually
+    /// configured key shortcut. Use Translation.Get() or Translation.ColorizeKeybind() and let
+    /// the translators provide key in double [[ ]].
     /// </summary>
-    public class ModeDescription : OsdItem {
+    public class Label : OsdItem {
         private readonly string localizedText_;
 
-        public ModeDescription(string localizedText) {
+        public Label(string localizedText) {
             localizedText_ = localizedText;
         }
 
@@ -19,7 +21,7 @@ namespace TrafficManager.UI.MainMenu.OSD {
                 parent,
                 this.localizedText_,
                 stack: UStackMode.NewRowBelow,
-                processMarkup: false);
+                processMarkup: true);
 
             l.opacity = 0.8f;
         }

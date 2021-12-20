@@ -8,10 +8,10 @@ namespace TrafficManager.UI {
     using UnityEngine;
 
     [Obsolete("Refactor tools to the new TrafficManagerSubTool class instead of LegacySubTool")]
-    public abstract class LegacySubTool : IObserver<ModUI.UIOpacityNotification> {
+    public abstract class LegacySubTool : IObserver<ModUI.EventPublishers.UIOpacityNotification> {
         public LegacySubTool(TrafficManagerTool mainTool) {
             MainTool = mainTool;
-            uiTransparencyUnbsubscriber_ = ModUI.Instance.UiOpacityObservable.Subscribe(this);
+            uiTransparencyUnbsubscriber_ = ModUI.Instance.Events.UiOpacity.Subscribe(this);
         }
 
         protected TrafficManagerTool MainTool { get; }
@@ -204,7 +204,7 @@ namespace TrafficManager.UI {
             }
         }
 
-        public void OnUpdate(ModUI.UIOpacityNotification subject) {
+        public void OnUpdate(ModUI.EventPublishers.UIOpacityNotification subject) {
             Texture2D windowTexture = windowTexture_;
             windowTexture_ = null;
             windowStyle_ = null; // rebuild style with new window texture

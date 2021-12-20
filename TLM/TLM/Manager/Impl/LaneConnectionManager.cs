@@ -31,6 +31,9 @@ namespace TrafficManager.Manager.Impl {
                                                              | VehicleInfo.VehicleType.Monorail
                                                              | VehicleInfo.VehicleType.Trolleybus;
         private ConnectionData connections_;
+        public NetInfo.LaneType LaneTypes => LANE_TYPES;
+
+        public VehicleInfo.VehicleType VehicleTypes => VEHICLE_TYPES;
 
         static LaneConnectionManager() {
             Instance = new LaneConnectionManager();

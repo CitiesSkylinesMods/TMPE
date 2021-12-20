@@ -1,11 +1,13 @@
 namespace TrafficManager.U.Panel {
     using System;
     using ColossalFramework.UI;
+    using CSUtil.Commons;
     using JetBrains.Annotations;
     using TrafficManager.API.Util;
     using TrafficManager.State;
     using TrafficManager.U.Autosize;
     using TrafficManager.UI;
+    using TrafficManager.Util;
     using UnityEngine;
 
     /// <summary>
@@ -15,24 +17,23 @@ namespace TrafficManager.U.Panel {
     public abstract class BaseUWindowPanel
         : UIPanel,
           ISmartSizableControl,
-          IObserver<ModUI.UIScaleNotification>,
-          IObserver<ModUI.UIOpacityNotification>
-    {
+          IObserver<ModUI.EventPublishers.UIScaleNotification>,
+          IObserver<ModUI.EventPublishers.UIOpacityNotification> {
         private readonly UResizerConfig resizerConfig_ = new();
 
         /// <summary>On destroy this will unsubscribe from the UI Scale observable.</summary>
         [UsedImplicitly]
-        private IDisposable uiScaleUnbsubscriber_;
+        private IDisposable uiScaleUnsubscriber_;
 
         /// <summary>On destroy this will unsubscribe from the UI Transparency observable.</summary>
         [UsedImplicitly]
-        private IDisposable uiTransparencyUnbsubscriber_;
+        private IDisposable uiTransparencyUnsubscriber_;
 
         /// <summary>Call this from your form constructor to enable tracking UI Scale changes.</summary>
         public override void Start() {
             base.Start();
-            uiScaleUnbsubscriber_ = ModUI.Instance.UiScaleObservable.Subscribe(this);
-            uiTransparencyUnbsubscriber_ = ModUI.Instance.UiOpacityObservable.Subscribe(this);
+            uiScaleUnsubscriber_ = ModUI.Instance.Events.UiScale.Subscribe(this);
+            uiTransparencyUnsubscriber_ = ModUI.Instance.Events.UiOpacity.Subscribe(this);
         }
 
         public UResizerConfig GetResizerConfig() {
@@ -50,8 +51,7 @@ namespace TrafficManager.U.Panel {
         /// <param name="currentResolution">New.</param>
         protected override void OnResolutionChanged(Vector2 previousResolution,
                                                     Vector2 currentResolution) {
-            // Call resize on all controls and recalculate again
-            UResizer.UpdateControlRecursive(this, null);
+            UResizer.UpdateControl(this); // force window relayout
         }
 
         /// <summary>
@@ -59,9 +59,8 @@ namespace TrafficManager.U.Panel {
         /// Called from ModUI when UI scale slider in General tab was modified.
         /// </summary>
         /// <param name="optionsEvent">New UI scale.</param>
-        public void OnUpdate(ModUI.UIScaleNotification optionsEvent) {
-            // Call resize on all controls and recalculate again
-            UResizer.UpdateControlRecursive(this, null);
+        public void OnUpdate(ModUI.EventPublishers.UIScaleNotification optionsEvent) {
+            UResizer.UpdateControl(this); // force window relayout
         }
 
         /// <summary>
@@ -69,7 +68,7 @@ namespace TrafficManager.U.Panel {
         /// Called from ModUI when UI scale slider in General tab was modified.
         /// </summary>
         /// <param name="optionsEvent">Event with the new UI opacity.</param>
-        public void OnUpdate(ModUI.UIOpacityNotification optionsEvent) {
+        public void OnUpdate(ModUI.EventPublishers.UIOpacityNotification optionsEvent) {
             // incoming range: 0..100 convert to 0..1f
             SetOpacity(optionsEvent.Opacity);
         }
@@ -109,9 +108,19 @@ namespace TrafficManager.U.Panel {
 
         /// <summary>Called by UnityEngine when component gets destroyed</summary>
         public override void OnDestroy() {
-            uiScaleUnbsubscriber_.Dispose();
-            uiTransparencyUnbsubscriber_.Dispose();
+            uiScaleUnsubscriber_.Dispose();
+            uiTransparencyUnsubscriber_.Dispose();
             base.OnDestroy();
+        }
+
+        /// <summary>
+        /// Moves the center of the window to a position in the world (e.g. node).
+        /// </summary>
+        public void MoveCenterToWorldPosition(Vector3 worldPos) {
+            GeometryUtil.WorldToScreenPoint(worldPos, out Vector3 screenPos);
+            screenPos /= GetUIView().inputScale;
+            screenPos -= (Vector3)size * 0.5f;
+            relativePosition = screenPos.RoundToInt();
         }
     }
 }

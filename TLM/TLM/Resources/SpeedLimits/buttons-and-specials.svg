@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="210mm"
+   height="297mm"
+   viewBox="0 0 210 297"
+   version="1.1"
+   id="svg8"
+   inkscape:version="1.0.2-2 (e86c870879, 2021-01-15)"
+   sodipodi:docname="buttons-and-specials.svg">
+  <defs
+     id="defs2" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="5.6568542"
+     inkscape:cx="52.46883"
+     inkscape:cy="53.590937"
+     inkscape:document-units="mm"
+     inkscape:current-layer="layer1"
+     inkscape:document-rotation="0"
+     showgrid="false"
+     inkscape:window-width="2560"
+     inkscape:window-height="1417"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1" />
+  <metadata
+     id="metadata5">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <path
+       id="path10"
+       style="color:#000000;overflow:visible;fill:#ececec;stroke:#000000;stroke-width:0.264583;stroke-miterlimit:4;stroke-dasharray:none;stop-color:#000000"
+       d="m 10.134339,7.4200717 a 5.7379775,5.7379775 0 0 0 -5.7379293,5.7382703 5.7379775,5.7379775 0 0 0 5.7379293,5.73793 5.7379775,5.7379775 0 0 0 5.737929,-5.73793 5.7379775,5.7379775 0 0 0 -5.737929,-5.7382703 z m -0.0058,1.7558876 a 3.9823966,3.9823966 0 0 1 0.0058,0 3.9823966,3.9823966 0 0 1 3.982383,3.9823827 3.9823966,3.9823966 0 0 1 -3.982383,3.982384 3.9823966,3.9823966 0 0 1 -3.9823836,-3.982384 3.9823966,3.9823966 0 0 1 3.9765696,-3.9823827 z"
+       inkscape:export-xdpi="432.67984"
+       inkscape:export-ydpi="432.67984" />
+    <text
+       xml:space="preserve"
+       style="color:#000000;font-size:2.64583px;line-height:125%;font-family:'DIN 1451 Engschrift';-inkscape-font-specification:'DIN 1451 Engschrift';text-decoration:none;text-decoration-line:none;text-decoration-color:#000000;overflow:visible;fill:#000000;stroke:none;stroke-width:0.264583;stroke-miterlimit:4;stroke-dasharray:none;stop-color:#000000"
+       x="1.7481399"
+       y="4.0159969"
+       id="text842"><tspan
+         sodipodi:role="line"
+         id="tspan840"
+         x="1.7481399"
+         y="4.0159969"
+         style="font-size:2.64583px;fill:#000000;stroke:none;stroke-width:0.264583">Use this as &quot;no speed limit set&quot; icon</tspan></text>
+  </g>
+</svg>

@@ -10,6 +10,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
     using TrafficManager.State.Keybinds;
     using TrafficManager.U;
     using TrafficManager.U.Autosize;
+    using TrafficManager.UI.Helpers;
     using TrafficManager.UI.MainMenu;
     using TrafficManager.UI.MainMenu.OSD;
     using TrafficManager.Util;
@@ -272,14 +273,14 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
         }
 
         /// <summary>Resets tool into its initial state for new use.</summary>
-        public override void ActivateTool() {
+        public override void OnActivateTool() {
             Log._Debug("LaneArrow: Activated tool");
             fsm_ = InitFiniteStateMachine();
             this.OnEnterSelectState(); // FSM does not call enter on initial state
         }
 
         /// <summary>Cleans up when tool is deactivated or user switched to another tool.</summary>
-        public override void DeactivateTool() {
+        public override void OnDeactivateTool() {
             Log._Debug("LaneArrow: Deactivated tool");
             DestroyToolWindow();
             SelectedNodeId = 0;
@@ -422,7 +423,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                 case State.Select: {
                     var items = new List<OsdItem>();
                     items.Add(
-                        new MainMenu.OSD.ModeDescription(
+                        new MainMenu.OSD.Label(
                             localizedText: T("LaneArrows.Mode:Select")));
                     items.Add(
                         new MainMenu.OSD.HardcodedMouseShortcut(
@@ -459,17 +460,11 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
         }
 
         private void RepositionWindowToNode() {
-            if (ToolWindow == null || SelectedNodeId == 0) {
+            if (!ToolWindow || SelectedNodeId == 0) {
                 return;
             }
 
-            Vector3 nodePos = SelectedNodeId.ToNode().m_position;
-
-            // Cast to screen and center the window on node
-            GeometryUtil.WorldToScreenPoint(nodePos, out Vector3 screenPixelPos);
-            Vector2 guiPosition = UIScaler.ScreenPointToGuiPoint(screenPixelPos);
-            ToolWindow.absolutePosition =
-                guiPosition - new Vector2(ToolWindow.size.x * 0.5f, ToolWindow.size.y * 0.5f);
+            ToolWindow.MoveCenterToWorldPosition(SelectedNodeId.ToNode().m_position);
         }
 
         /// <summary>
@@ -546,10 +541,10 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                 HasSegmentEndLaneArrows(segmentId, segment.m_endNode);
             float cut = con ? 1f : 0.5f;
 
-            MainTool.DrawCutSegmentEnd(cameraInfo, segmentId, cut, bStartNode, color, alpha);
+            Highlight.DrawCutSegmentEnd(cameraInfo, segmentId, cut, bStartNode, color, alpha);
         }
 
-        public override void RenderOverlay(RenderManager.CameraInfo cameraInfo) {
+        public override void RenderActiveToolOverlay(RenderManager.CameraInfo cameraInfo) {
             switch (fsm_.State) {
                 case State.Select:
                     RenderOverlay_Select(cameraInfo);
@@ -561,6 +556,19 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
             }
         }
 
+        public override void RenderActiveToolOverlay_GUI() {
+            // No GUI-specific info overlay for lane arrows
+        }
+
+        /// <summary>No generic overlay for other tool modes is provided by this tool, render nothing.</summary>
+        public override void RenderGenericInfoOverlay(RenderManager.CameraInfo cameraInfo) {
+            // No info overlay for other tools
+        }
+
+        public override void RenderGenericInfoOverlay_GUI() {
+            // No GUI-specific info overlay to show while other tools active
+        }
+
         /// <summary>Render info overlay for active tool, when UI is in Select state.</summary>
         /// <param name="cameraInfo">The camera.</param>
         private void RenderOverlay_Select(RenderManager.CameraInfo cameraInfo) {
@@ -568,7 +576,10 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
 
             // If CTRL is held, and hovered something: Draw hovered node
             if (SeparateNodeLanesModifierIsPressed && HoveredNodeId != 0) {
-                MainTool.DrawNodeCircle(cameraInfo, HoveredNodeId, Input.GetMouseButton(0));
+                Highlight.DrawNodeCircle(
+                    cameraInfo: cameraInfo,
+                    nodeId: HoveredNodeId,
+                    warning: Input.GetMouseButton(0));
                 return;
             }
 

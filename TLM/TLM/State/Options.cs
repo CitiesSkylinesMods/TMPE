@@ -11,9 +11,12 @@ namespace TrafficManager.State {
     using UnityEngine;
     using TrafficManager.Lifecycle;
     using System;
+    using JetBrains.Annotations;
     using UI.Textures;
 
     public class Options : MonoBehaviour {
+        private const int CHECKBOX_LABEL_MAX_WIDTH = 695;
+        private const int CHECKBOX_LABEL_MAX_WIDTH_INDENTED = 680;
 #if DEBUG
         private static List<UICheckBox> debugSwitchFields = new List<UICheckBox>();
         private static List<UITextField> debugValueFields = new List<UITextField>();
@@ -26,14 +29,10 @@ namespace TrafficManager.State {
         public static bool individualDrivingStyle = true;
         public static int recklessDrivers = 3;
 
-        /// <summary>
-        /// Option: buses may ignore lane arrows
-        /// </summary>
+        /// <summary>Option: buses may ignore lane arrows.</summary>
         public static bool relaxedBusses;
 
-        /// <summary>
-        /// debug option: all vehicles may ignore lane arrows
-        /// </summary>
+        /// <summary>debug option: all vehicles may ignore lane arrows.</summary>
         public static bool allRelaxed;
         public static bool evacBussesMayIgnoreRules;
         public static bool prioritySignsOverlay;
@@ -96,11 +95,16 @@ namespace TrafficManager.State {
         public static bool junctionRestrictionsEnabled = true;
         public static bool turnOnRedEnabled = true;
         public static bool laneConnectorEnabled = true;
+
+        [UsedImplicitly]
         public static bool scanForKnownIncompatibleModsEnabled = true;
+
+        [UsedImplicitly]
         public static bool ignoreDisabledModsEnabled;
 
         public static VehicleRestrictionsAggression vehicleRestrictionsAggression =
             VehicleRestrictionsAggression.Medium;
+
         public static bool RoundAboutQuickFix_DedicatedExitLanes = true;
         public static bool RoundAboutQuickFix_StayInLaneMainR = true;
         public static bool RoundAboutQuickFix_StayInLaneNearRabout = true;
@@ -165,6 +169,29 @@ namespace TrafficManager.State {
 
             if (check != null) {
                 check.relativePosition += new Vector3(22.0f, 0);
+            }
+        }
+
+        /// <summary>
+        /// Allows long checkbox label text to wrap and adds padding to checkbox
+        /// </summary>
+        /// <param name="checkBox">Checkbox instance</param>
+        /// <param name="indented">Is checkbox indented</param>
+        public static void AllowTextWrap(UICheckBox checkBox, bool indented = false) {
+            UILabel label = checkBox.label;
+            bool requireTextWrap;
+            int maxWidth = indented ? CHECKBOX_LABEL_MAX_WIDTH_INDENTED : CHECKBOX_LABEL_MAX_WIDTH;
+            using (UIFontRenderer renderer = label.ObtainRenderer()) {
+                Vector2 size = renderer.MeasureString(label.text);
+                requireTextWrap = size.x > maxWidth;
+            }
+            label.autoSize = false;
+            label.wordWrap = true;
+            label.verticalAlignment = UIVerticalAlignment.Middle;
+            label.textAlignment = UIHorizontalAlignment.Left;
+            label.size = new Vector2(maxWidth, requireTextWrap ? 40 : 20);
+            if (requireTextWrap) {
+                checkBox.height = 42; // set new height + top/bottom 1px padding
             }
         }
 
