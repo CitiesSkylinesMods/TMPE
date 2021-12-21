@@ -15,6 +15,8 @@ namespace TrafficManager.State {
     using UI.Textures;
 
     public class Options : MonoBehaviour {
+        private const int CHECKBOX_LABEL_MAX_WIDTH = 695;
+        private const int CHECKBOX_LABEL_MAX_WIDTH_INDENTED = 680;
 #if DEBUG
         private static List<UICheckBox> debugSwitchFields = new List<UICheckBox>();
         private static List<UITextField> debugValueFields = new List<UITextField>();
@@ -167,6 +169,29 @@ namespace TrafficManager.State {
 
             if (check != null) {
                 check.relativePosition += new Vector3(22.0f, 0);
+            }
+        }
+
+        /// <summary>
+        /// Allows long checkbox label text to wrap and adds padding to checkbox
+        /// </summary>
+        /// <param name="checkBox">Checkbox instance</param>
+        /// <param name="indented">Is checkbox indented</param>
+        public static void AllowTextWrap(UICheckBox checkBox, bool indented = false) {
+            UILabel label = checkBox.label;
+            bool requireTextWrap;
+            int maxWidth = indented ? CHECKBOX_LABEL_MAX_WIDTH_INDENTED : CHECKBOX_LABEL_MAX_WIDTH;
+            using (UIFontRenderer renderer = label.ObtainRenderer()) {
+                Vector2 size = renderer.MeasureString(label.text);
+                requireTextWrap = size.x > maxWidth;
+            }
+            label.autoSize = false;
+            label.wordWrap = true;
+            label.verticalAlignment = UIVerticalAlignment.Middle;
+            label.textAlignment = UIHorizontalAlignment.Left;
+            label.size = new Vector2(maxWidth, requireTextWrap ? 40 : 20);
+            if (requireTextWrap) {
+                checkBox.height = 42; // set new height + top/bottom 1px padding
             }
         }
 
