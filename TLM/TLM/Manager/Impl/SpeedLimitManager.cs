@@ -56,15 +56,6 @@ namespace TrafficManager.Manager.Impl {
         /// <summary>For each NetInfo name: game default speed limit.</summary>
         private readonly Dictionary<string, float[]> vanillaLaneSpeedLimits_ = new();
 
-        /// <summary>
-        /// For each NetInfo name: list of child NetInfo names.
-        /// Netinfos are grouped together, roads of same type but different builds (slope, bridge
-        /// etc) have different netinfo names, but belong to the same asset.
-        /// </summary>
-        private readonly Dictionary<string, List<string>> childNetinfoNames_ = new();
-
-        /// <summary>For each <see cref="NetInfo"/> name store its parent name.</summary>
-        private readonly Dictionary<string, string> parentNetinfoNames_ = new();
 
         private List<NetInfo> customizableNetInfos_ = new();
 
@@ -285,27 +276,10 @@ namespace TrafficManager.Manager.Impl {
                        : speedLimit;
         }
 
-        /// <summary>
-        /// Go into parent netinfo names and child netinfo names, and restore the collection of all
-        /// netinfo names belonging to the same asset.
-        /// </summary>
-        /// <param name="netinfoName">The name to begin from.</param>
-        /// <param name="result">The resulting name set, also used to avoid infinite loops.</param>
-        private void GetRelatedNetinfos(string netinfoName, [NotNull] HashSet<string> result) {
-            if (result.Contains(netinfoName)) {
-                return; // avoid infinite loops
-            }
-
-            result.Add(netinfoName);
-
-            if (this.parentNetinfoNames_.TryGetValue(netinfoName, out string parentNetinfoName)) {
-                GetRelatedNetinfos(parentNetinfoName, result);
-            }
-
-            if (this.childNetinfoNames_.TryGetValue(netinfoName, out var childNetinfoNames)) {
-                foreach (var childName in childNetinfoNames) {
-                    GetRelatedNetinfos(childName, result);
-                }
+        internal IEnumerable<NetInfo> GetCustomisableRelatives(NetInfo netinfo) {
+            foreach(var netinfo2 in netinfo.GetRelatives()) {
+                if (customizableNetInfos_.Contains(netinfo2))
+                    yield return netinfo2;
             }
         }
 
@@ -322,14 +296,13 @@ namespace TrafficManager.Manager.Impl {
 
             float gameSpeedLimit = ToGameSpeedLimit(customSpeedLimit);
 
-            HashSet<string> relatedNetinfoNames = new();
-            this.GetRelatedNetinfos(netinfo.name, relatedNetinfoNames);
 
-            foreach (var netinfoName in relatedNetinfoNames) {
-                customLaneSpeedLimit_[netinfoName] = customSpeedLimit;
+            foreach (var netinfo2 in GetCustomisableRelatives(netinfo)) {
+                string netinfoName = netinfo2.name;
+                customLaneSpeedLimit_[netinfo2.name] = customSpeedLimit;
 
 #if DEBUGLOAD
-                Log._Debug($"Updating parent NetInfo {infoName}: Setting speed limit to {gameSpeedLimit}");
+                Log._Debug($"Updating parent NetInfo {netinfoName}: Setting speed limit to {gameSpeedLimit}");
 #endif
                 // save speed limit in all NetInfos
                 if (this.netInfoByName_.TryGetValue(netinfoName, out var relatedNetinfo)) {
@@ -419,10 +392,8 @@ namespace TrafficManager.Manager.Impl {
 
             var vanillaSpeedLimit = GetVanillaNetInfoSpeedLimit(netinfo);
 
-            HashSet<string> relatedNetinfoNames = new();
-            this.GetRelatedNetinfos(netinfo.name, relatedNetinfoNames);
-
-            foreach (var netinfoName in relatedNetinfoNames) {
+            foreach (var netinfo2 in GetCustomisableRelatives(netinfo)) {
+                string netinfoName = netinfo2.name;
                 if (this.customLaneSpeedLimit_.ContainsKey(netinfoName)) {
                     this.customLaneSpeedLimit_.Remove(netinfoName);
                 }
@@ -526,8 +497,6 @@ namespace TrafficManager.Manager.Impl {
             this.vanillaLaneSpeedLimits_.Clear();
             this.customizableNetInfos_.Clear();
             this.customLaneSpeedLimit_.Clear();
-            this.childNetinfoNames_.Clear();
-            this.parentNetinfoNames_.Clear();
             this.netInfoByName_.Clear();
 
             List<NetInfo> mainNetInfos = new List<NetInfo>();
@@ -686,43 +655,6 @@ namespace TrafficManager.Manager.Impl {
             }
 
             mainNetInfos.Sort(CompareNetinfos);
-
-            // identify parent NetInfos
-            int x = 0;
-            while (x < mainNetInfos.Count) {
-                NetInfo info = mainNetInfos[x];
-                string infoName = info.name;
-
-                // find parent with prefix name
-                bool foundParent = false;
-                foreach (NetInfo parentInfo in mainNetInfos) {
-                    if (info.m_placementStyle == ItemClass.Placement.Procedural
-                        && !infoName.Equals(parentInfo.name)
-                        && infoName.StartsWith(parentInfo.name)) {
-                        Log._Trace($"Identified child NetInfo {infoName} of parent {parentInfo.name}");
-
-                        if (!childNetinfoNames_.TryGetValue(
-                                parentInfo.name,
-                                out List<string> childNetInfoNames)) {
-                            childNetinfoNames_[parentInfo.name] = childNetInfoNames = new();
-                        }
-
-                        childNetInfoNames.Add(info.name);
-                        parentNetinfoNames_.Add(info.name, parentInfo.name);
-
-                        netInfoByName_[infoName] = info;
-                        foundParent = true;
-                        break;
-                    }
-                }
-
-                if (foundParent) {
-                    mainNetInfos.RemoveAt(x);
-                } else {
-                    ++x;
-                }
-            }
-
             customizableNetInfos_ = mainNetInfos;
         }
 
