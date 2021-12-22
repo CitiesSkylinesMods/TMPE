@@ -302,7 +302,7 @@ namespace TrafficManager.Manager.Impl {
                 customLaneSpeedLimit_[netinfo2.name] = customSpeedLimit;
 
 #if DEBUGLOAD
-                Log._Debug($"Updating parent NetInfo {netinfoName}: Setting speed limit to {gameSpeedLimit}");
+                Log._Debug($"Updating NetInfo {netinfoName}: Setting speed limit to {gameSpeedLimit}");
 #endif
                 // save speed limit in all NetInfos
                 if (this.netInfoByName_.TryGetValue(netinfoName, out var relatedNetinfo)) {
