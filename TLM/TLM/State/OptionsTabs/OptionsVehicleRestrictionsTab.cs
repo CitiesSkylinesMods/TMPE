@@ -40,7 +40,7 @@ namespace TrafficManager.State {
             JunctionRestrictionsManager.Instance.UpdateAllDefaults();
 
         static void UpdateDedicatedTurningLanePolicyHandler(bool value) =>
-            LaneArrowManager.Instance.UpdateDedicatedTurningLanePolicy();
+            LaneArrowManager.Instance.UpdateDedicatedTurningLanePolicy(true);
 
         internal static void MakeSettings_VehicleRestrictions(ExtUITabstrip tabStrip) {
             UIHelper panelHelper = tabStrip.AddTabPage(Translation.Options.Get("Tab:Policies & Restrictions"));
@@ -79,6 +79,7 @@ namespace TrafficManager.State {
                       Options.allowFarTurnOnRed,
                       OnAllowFarTurnOnRedChanged) as UICheckBox;
             Options.Indent(_allowFarTurnOnRedToggle);
+            Options.AllowTextWrap(_allowFarTurnOnRedToggle, indented: true);
             _allowLaneChangesWhileGoingStraightToggle
                 = atJunctionsGroup.AddCheckbox(
                       Translation.Options.Get("VR.Checkbox:Vehicles going straight may change lanes at junctions"),
@@ -89,6 +90,7 @@ namespace TrafficManager.State {
                       Translation.Options.Get("VR.Checkbox:Vehicles follow priority rules at junctions with timedTL"),
                       Options.trafficLightPriorityRules,
                       OnTrafficLightPriorityRulesChanged) as UICheckBox;
+            Options.AllowTextWrap(_trafficLightPriorityRulesToggle);
             _automaticallyAddTrafficLightsIfApplicableToggle
                 = atJunctionsGroup.AddCheckbox(
                       Translation.Options.Get("VR.Checkbox:Automatically add traffic lights if applicable"),
