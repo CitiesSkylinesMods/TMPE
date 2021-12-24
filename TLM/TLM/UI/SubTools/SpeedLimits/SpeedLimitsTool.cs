@@ -408,16 +408,22 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         /// <summary>Called by IObservable when observed event is fired (UI language change).</summary>
         public void OnUpdate(ModUI.EventPublishers.LanguageChangeNotification subject) {
             // All text labels on the window are changing
-            // Close window, deactivate tool
-            this.DestroyWindow();
-            MainTool.SetToolMode(ToolMode.None);
+            this.RecreateToolWindow_KeepVisibility();
         }
 
         /// <summary>Called by IObservable when observed event is fired (display MPH change).</summary>
         public void OnUpdate(ModUI.EventPublishers.DisplayMphNotification subject) {
-            // Close window, deactivate tool
-            this.DestroyWindow();
-            MainTool.SetToolMode(ToolMode.None);
+            this.RecreateToolWindow_KeepVisibility();
+        }
+
+        /// <summary>Recreate tool window but hide it if it was previously hidden.</summary>
+        private void RecreateToolWindow_KeepVisibility() {
+            // If window was created and visible, keep it visible after, otherwise hide
+            if (MainTool.GetToolMode() == ToolMode.SpeedLimits) {
+                this.RecreateToolWindow();
+            } else {
+                this.DestroyWindow();
+            }
         }
 
         /// <summary>Called by the MainTool when it is disposed of by Unity.</summary>

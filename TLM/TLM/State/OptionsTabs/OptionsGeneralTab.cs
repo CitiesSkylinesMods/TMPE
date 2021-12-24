@@ -210,7 +210,8 @@ namespace TrafficManager.State {
                 return;
             }
 
-            ModUI.Instance.Events.LanguageChanged();
+            // Events will be null when mod is not fully loaded and language changed in main menu
+            ModUI.Instance.Events?.LanguageChanged();
             Options.RebuildOptions();
         }
 
