@@ -117,7 +117,7 @@ namespace TrafficManager.Util {
             }
 
             if (SeparateLanes) {
-                SeparateTurningLanesUtil.SeparateNode(nodeId, out _);
+                SeparateTurningLanesUtil.SeparateNode(nodeId, out _, false);
             }
 
             //Is it special case:

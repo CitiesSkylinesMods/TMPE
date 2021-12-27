@@ -301,6 +301,9 @@ namespace TrafficManager.State {
             Options.banRegularTrafficOnBusLanes = newValue;
             VehicleRestrictionsManager.Instance.ClearCache();
             ModUI.GetTrafficManagerTool()?.InitializeSubTools();
+            if (DedicatedTurningLanes) {
+                LaneArrowManager.Instance.UpdateDedicatedTurningLanePolicy(false);
+            }
         }
 
         private static void OnHighwayRulesChanged(bool newHighwayRules) {
