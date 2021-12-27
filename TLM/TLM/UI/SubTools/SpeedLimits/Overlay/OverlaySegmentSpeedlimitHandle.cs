@@ -2,6 +2,7 @@
     using System;
     using ColossalFramework;
     using CSUtil.Commons;
+    using JetBrains.Annotations;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.Manager.Impl;
     using TrafficManager.State;
@@ -112,30 +113,30 @@
                     break;
                 case SetSpeedLimitTarget.SegmentDefault:
                 case SetSpeedLimitTarget.LaneDefault:
-                    // SpeedLimitManager.Instance.FixCurrentSpeedLimits(netInfo);
-                    SetDefaultSpeedLimit(segmentId, netInfo, action);
+                    ApplyDefaultSpeedLimit(segmentId, netInfo, action);
                     break;
                 default:
-                    Log.Error(
-                        $"Target for SEGMENT speed handle click is not supported {nameof(target)}");
+                    Log.Error($"Target for SEGMENT speed handle click is not supported {nameof(target)}");
                     throw new NotSupportedException();
             }
         }
 
-        internal static void SetDefaultSpeedLimit(ushort segmentId, NetInfo netInfo, SetSpeedLimitAction action) {
+        internal static void ApplyDefaultSpeedLimit(ushort segmentId,
+                                                  [NotNull] NetInfo netInfo,
+                                                  SetSpeedLimitAction action) {
             switch (action.Type) {
                 case SetSpeedLimitAction.ActionType.SetOverride:
                 case SetSpeedLimitAction.ActionType.Unlimited:
-                    SpeedValue value = action.GuardedValue.Override;
                     bool displayMph = GlobalConfig.Instance.Main.DisplaySpeedLimitsMph;
-                    Log.Info($"Setting speed limit for netinfo '{netInfo.name}' seg={segmentId} to={value.FormatStr(displayMph)}");
-                    SpeedLimitManager.Instance.SetCustomNetInfoSpeedLimit(
-                        info: netInfo,
+                    SpeedValue value = action.GuardedValue.Override;
+                    Log._Debug($"Setting speed limit for netinfo '{netInfo.name}' seg={segmentId} to={value.FormatStr(displayMph)}");
+                    SpeedLimitManager.Instance.SetCustomNetinfoSpeedLimit(
+                        netinfo: netInfo,
                         customSpeedLimit: value.GameUnits);
                     break;
                 case SetSpeedLimitAction.ActionType.ResetToDefault:
-                    Log.Info($"Setting default speed limit for netinfo '{netInfo.name}' seg={segmentId}");
-                    SpeedLimitManager.Instance.ResetCustomDefaultSpeedlimit(netInfo.name);
+                    Log._Debug($"Resetting custom default speed for netinfo '{netInfo.name}'");
+                    SpeedLimitManager.Instance.ResetCustomNetinfoSpeedLimit(netInfo);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
