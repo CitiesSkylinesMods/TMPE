@@ -166,6 +166,7 @@ namespace TrafficManager.UI.Textures {
         private const string MPH_UK_THEME = "MPH_UK";
         private const string MPH_US_THEME = "MPH_US";
         private const string KMPH_CANADA_THEME = "Kmph_Canada";
+        private const string KMPH_SWEDEN_THEME = "Kmph_Sweden";
         private const string DEFAULT_KMPH_THEME = KMPH_GERMANY_THEME;
         private const string DEFAULT_MPH_THEME = MPH_UK_THEME;
 
@@ -215,7 +216,7 @@ namespace TrafficManager.UI.Textures {
                     supportsKmph: true,
                     supportsMph: false,
                     size: new IntVector2(200),
-                    pathPrefix: "SpeedLimits.Kmph_Germany"));
+                    pathPrefix: "SpeedLimits." + KMPH_GERMANY_THEME));
             Themes.Add(
                 MPH_UK_THEME,
                 new RoadSignTheme(
@@ -223,7 +224,7 @@ namespace TrafficManager.UI.Textures {
                     supportsKmph: false,
                     supportsMph: true,
                     size: new IntVector2(200),
-                    pathPrefix: "SpeedLimits.MPH_UK"));
+                    pathPrefix: "SpeedLimits." + MPH_UK_THEME));
             Themes.Add(
                 MPH_US_THEME,
                 new RoadSignTheme(
@@ -231,7 +232,7 @@ namespace TrafficManager.UI.Textures {
                     supportsKmph: false,
                     supportsMph: true,
                     size: new IntVector2(200, 250),
-                    pathPrefix: "SpeedLimits.MPH_US"));
+                    pathPrefix: "SpeedLimits." + MPH_US_THEME));
             Themes.Add(
                 KMPH_CANADA_THEME,
                 new RoadSignTheme(
@@ -239,7 +240,15 @@ namespace TrafficManager.UI.Textures {
                     supportsKmph: true,
                     supportsMph: false,
                     size: new IntVector2(200, 250),
-                    pathPrefix: "SpeedLimits.Kmph_Canada"));
+                    pathPrefix: "SpeedLimits." + KMPH_CANADA_THEME));
+            Themes.Add(
+                KMPH_SWEDEN_THEME,
+                new RoadSignTheme(
+                    name: KMPH_SWEDEN_THEME,
+                    supportsKmph: true,
+                    supportsMph: false,
+                    size: new IntVector2(200, 200),
+                    pathPrefix: "SpeedLimits." + KMPH_SWEDEN_THEME));
 
             ThemeNames = Themes.Keys.ToList();
             ThemeNames.Sort();
