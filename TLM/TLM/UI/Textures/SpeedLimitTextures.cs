@@ -6,6 +6,7 @@ namespace TrafficManager.UI.Textures {
     using CSUtil.Commons;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.State;
+    using TrafficManager.State.ConfigData;
     using TrafficManager.Util;
     using UnityEngine;
 
@@ -161,21 +162,40 @@ namespace TrafficManager.UI.Textures {
             }
         }
 
-        public const string GERMAN_KM_SIGNS = "Kmph_Germany";
+        private const string KMPH_GERMANY_THEME = "Kmph_Germany";
         private const string MPH_UK_THEME = "MPH_UK";
         private const string MPH_US_THEME = "MPH_US";
         private const string KMPH_CANADA_THEME = "Kmph_Canada";
+        private const string DEFAULT_KMPH_THEME = KMPH_GERMANY_THEME;
+        private const string DEFAULT_MPH_THEME = MPH_UK_THEME;
+
+        public static string GetDefaultThemeName(bool mph) {
+            return mph ? DEFAULT_MPH_THEME : DEFAULT_KMPH_THEME;
+        }
+
+        public static int FindDefaultThemeIndex(bool mph) {
+            if (mph) {
+                return ThemeNames.FindIndex(x => x == DEFAULT_MPH_THEME);
+            }
+
+            return ThemeNames.FindIndex(x => x == DEFAULT_KMPH_THEME);
+        }
 
         private static RoadSignTheme LoadCurrentTheme() {
-            string selectedThemeName = GlobalConfig.Instance.Main.RoadSignTheme;
+            Main confMain = GlobalConfig.Instance.Main;
+            string selectedThemeName = confMain.RoadSignTheme;
 
             if (Themes.ContainsKey(selectedThemeName)) {
                 return Themes[selectedThemeName].Load();
             }
 
-            GlobalConfig.Instance.Main.RoadSignTheme = GERMAN_KM_SIGNS;
-            Log.Info($"Road Sign theme changed to default ({GERMAN_KM_SIGNS})");
-            return Themes[GERMAN_KM_SIGNS].Load();
+            bool confMainDisplaySpeedLimitsMph = confMain.DisplaySpeedLimitsMph;
+            string defaultTheme = GetDefaultThemeName(confMainDisplaySpeedLimitsMph);
+
+            confMain.RoadSignTheme = defaultTheme;
+            Log.Info($"Road Sign theme changed to default ({defaultTheme})");
+
+            return Themes[defaultTheme].Load();
         }
 
         // TODO: Split loading here into dynamic sections, static enforces everything to stay in this ctor
@@ -189,11 +209,11 @@ namespace TrafficManager.UI.Textures {
             RoadDefaults.Load();
 
             Themes.Add(
-                GERMAN_KM_SIGNS,
+                KMPH_GERMANY_THEME,
                 new RoadSignTheme(
-                    name: GERMAN_KM_SIGNS,
+                    name: KMPH_GERMANY_THEME,
                     supportsKmph: true,
-                    supportsMph: true,
+                    supportsMph: false,
                     size: new IntVector2(200),
                     pathPrefix: "SpeedLimits.Kmph_Germany"));
             Themes.Add(
@@ -240,20 +260,27 @@ namespace TrafficManager.UI.Textures {
         /// Or false if the `newTheme` key isn't a valid theme name.</returns>
         public static bool OnThemeChanged(string newTheme, bool mphEnabled) {
             if (!Themes.ContainsKey(newTheme)) {
-                newTheme = GERMAN_KM_SIGNS;
+                var defaultTheme = GetDefaultThemeName(mphEnabled);
+                Log.Error($"Theme changing to {newTheme} but it isn't known to texture manager, so instead we change to {defaultTheme}");
+                newTheme = defaultTheme;
             }
 
+            bool canChange = mphEnabled
+                                 ? Themes[newTheme].SupportsMph
+                                 : Themes[newTheme].SupportsKmph;
+
             if (activeTheme_ == null || activeTheme_.Name != newTheme) {
-                bool canChange = mphEnabled
-                                     ? Themes[newTheme].SupportsMph
-                                     : Themes[newTheme].SupportsKmph;
-                if (canChange) {
-                    activeTheme_?.Unload();
-                    activeTheme_ = Themes[newTheme];
-                    activeTheme_.Load();
-                    return true;
-                }
+                activeTheme_?.Unload();
             }
+
+            if (canChange) {
+                activeTheme_ = Themes[newTheme];
+                activeTheme_.Load();
+                return true;
+            }
+
+            var unitStr = mphEnabled ? "MPH" : "KM/H";
+            Log.Error($"Theme changing to {newTheme} but it doesn't support {unitStr} signs, so no action was taken");
 
             return false;
         }

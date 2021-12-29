@@ -180,12 +180,12 @@ namespace TrafficManager.State {
                                                     .Select(FormatThemeName)
                                                     .ToArray();
             int selectedThemeIndex = SpeedLimitTextures.ThemeNames.FindIndex(x => x == mainConfig.RoadSignTheme);
-            int defaultGermanSignsThemeIndex = SpeedLimitTextures.ThemeNames.FindIndex(x => x == SpeedLimitTextures.GERMAN_KM_SIGNS);
+            int defaultSignsThemeIndex = SpeedLimitTextures.FindDefaultThemeIndex(GlobalConfig.Instance.Main.DisplaySpeedLimitsMph);
             _roadSignsThemeDropdown
                 = generalGroup.AddDropdown(
                       text: Translation.SpeedLimits.Get("General.Dropdown:Road signs theme") + ":",
                       options: themeOptions,
-                      defaultSelection: selectedThemeIndex >= 0 ? selectedThemeIndex : defaultGermanSignsThemeIndex,
+                      defaultSelection: selectedThemeIndex >= 0 ? selectedThemeIndex : defaultSignsThemeIndex,
                       eventCallback: OnRoadSignsThemeChanged) as UIDropDown;
             _roadSignsThemeDropdown.width *= 2.0f;
         }
@@ -336,29 +336,28 @@ namespace TrafficManager.State {
             GlobalConfig.WriteConfig();
         }
 
-        private static void OnDisplayMphChanged(bool newValue) {
-            bool supportedByTheme = newValue
+        private static void OnDisplayMphChanged(bool newMphValue) {
+            bool supportedByTheme = newMphValue
                                         ? SpeedLimitTextures.ActiveTheme.SupportsMph
                                         : SpeedLimitTextures.ActiveTheme.SupportsKmph;
             Main mainConfig = GlobalConfig.Instance.Main;
 
             if (!supportedByTheme) {
                 // Reset to German road signs theme
-                _roadSignsThemeDropdown.selectedIndex = SpeedLimitTextures.ThemeNames.FindIndex(
-                    x => x == SpeedLimitTextures.GERMAN_KM_SIGNS);
-                mainConfig.RoadSignTheme = SpeedLimitTextures.GERMAN_KM_SIGNS;
+                _roadSignsThemeDropdown.selectedIndex = SpeedLimitTextures.FindDefaultThemeIndex(newMphValue);
+                mainConfig.RoadSignTheme = SpeedLimitTextures.GetDefaultThemeName(newMphValue);
                 Log.Info(
-                    $"Display MPH changed to {newValue}, but was not supported by current theme, "
+                    $"Display MPH changed to {newMphValue}, but was not supported by current theme, "
                     + "so theme was also reset to German_Kmph");
             } else {
-                Log.Info($"Display MPH changed to {newValue}");
+                Log.Info($"Display MPH changed to {newMphValue}");
             }
 
-            mainConfig.DisplaySpeedLimitsMph = newValue;
+            mainConfig.DisplaySpeedLimitsMph = newMphValue;
 
             GlobalConfig.WriteConfig();
 
-            ModUI.Instance.Events.DisplayMphChanged(newValue);
+            ModUI.Instance.Events.DisplayMphChanged(newMphValue);
         }
 
         public static void SetDisplayInMph(bool value) {
