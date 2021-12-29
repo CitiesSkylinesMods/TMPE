@@ -210,9 +210,11 @@ namespace TrafficManager.State {
                 return;
             }
 
-            // Events will be null when mod is not fully loaded and language changed in main menu
-            ModUI.Instance.Events?.LanguageChanged();
-            Options.RebuildOptions();
+            if (Options.IsGameLoaded(false)) {
+                // Events will be null when mod is not fully loaded and language changed in main menu
+                ModUI.Instance.Events.LanguageChanged();
+                Options.RebuildOptions();
+            }
         }
 
         private static void OnLockButtonChanged(bool newValue) {
@@ -357,7 +359,9 @@ namespace TrafficManager.State {
 
             GlobalConfig.WriteConfig();
 
-            ModUI.Instance.Events.DisplayMphChanged(newMphValue);
+            if (Options.IsGameLoaded(false)) {
+                ModUI.Instance.Events.DisplayMphChanged(newMphValue);
+            }
         }
 
         public static void SetDisplayInMph(bool value) {
