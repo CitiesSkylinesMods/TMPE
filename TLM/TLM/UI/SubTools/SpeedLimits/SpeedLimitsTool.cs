@@ -138,7 +138,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                 this.Window.Hide();
 
                 // The constructor of new window will try to delete it by name, but we can help it
-                UnityEngine.Object.Destroy(this.Window);
+                UnityEngine.Object.Destroy(this.Window.gameObject);
             }
 
             this.Window = null;

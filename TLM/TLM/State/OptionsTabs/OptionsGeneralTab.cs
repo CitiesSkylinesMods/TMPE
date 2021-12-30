@@ -213,8 +213,8 @@ namespace TrafficManager.State {
             if (Options.IsGameLoaded(false)) {
                 // Events will be null when mod is not fully loaded and language changed in main menu
                 ModUI.Instance.Events.LanguageChanged();
-                Options.RebuildOptions();
             }
+            Options.RebuildOptions();
         }
 
         private static void OnLockButtonChanged(bool newValue) {
