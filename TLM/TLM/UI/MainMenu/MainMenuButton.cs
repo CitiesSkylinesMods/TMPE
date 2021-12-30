@@ -81,6 +81,7 @@
 
         public override void OnDestroy() {
             confDisposable_?.Dispose();
+            base.OnDestroy();
         }
 
         internal void SetPosLock(bool lck) {

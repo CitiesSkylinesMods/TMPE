@@ -428,8 +428,9 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
 
         /// <summary>Called by the MainTool when it is disposed of by Unity.</summary>
         public override void OnDestroy() {
-            this.languageChangeUnsubscriber_.Dispose();
-            this.displayMphChangeUnsubscriber_.Dispose();
+            this.languageChangeUnsubscriber_?.Dispose();
+            this.displayMphChangeUnsubscriber_?.Dispose();
+            base.OnDestroy();
         }
 
         /// <summary>
