@@ -108,8 +108,8 @@ namespace TrafficManager.U.Panel {
 
         /// <summary>Called by UnityEngine when component gets destroyed</summary>
         public override void OnDestroy() {
-            uiScaleUnsubscriber_.Dispose();
-            uiTransparencyUnsubscriber_.Dispose();
+            uiScaleUnsubscriber_?.Dispose();
+            uiTransparencyUnsubscriber_?.Dispose();
             base.OnDestroy();
         }
 

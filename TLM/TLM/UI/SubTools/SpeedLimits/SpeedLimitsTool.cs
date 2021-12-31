@@ -138,7 +138,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                 this.Window.Hide();
 
                 // The constructor of new window will try to delete it by name, but we can help it
-                UnityEngine.Object.Destroy(this.Window);
+                UnityEngine.Object.Destroy(this.Window.gameObject);
             }
 
             this.Window = null;
@@ -407,21 +407,30 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
 
         /// <summary>Called by IObservable when observed event is fired (UI language change).</summary>
         public void OnUpdate(ModUI.EventPublishers.LanguageChangeNotification subject) {
-            // All text labels on the window are changing, better to hide and rebuild the window
-            this.DestroyWindow();
-            MainTool.SetToolMode(ToolMode.None);
+            // All text labels on the window are changing
+            this.RecreateToolWindow_KeepVisibility();
         }
 
         /// <summary>Called by IObservable when observed event is fired (display MPH change).</summary>
         public void OnUpdate(ModUI.EventPublishers.DisplayMphNotification subject) {
-            // Does not close window
-            this.RecreateToolWindow();
+            this.RecreateToolWindow_KeepVisibility();
+        }
+
+        /// <summary>Recreate tool window but hide it if it was previously hidden.</summary>
+        private void RecreateToolWindow_KeepVisibility() {
+            // If window was created and visible, keep it visible after, otherwise hide
+            if (MainTool.GetToolMode() == ToolMode.SpeedLimits) {
+                this.RecreateToolWindow();
+            } else {
+                this.DestroyWindow();
+            }
         }
 
         /// <summary>Called by the MainTool when it is disposed of by Unity.</summary>
         public override void OnDestroy() {
-            this.languageChangeUnsubscriber_.Dispose();
-            this.displayMphChangeUnsubscriber_.Dispose();
+            this.languageChangeUnsubscriber_?.Dispose();
+            this.displayMphChangeUnsubscriber_?.Dispose();
+            base.OnDestroy();
         }
 
         /// <summary>
@@ -429,7 +438,9 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         /// This is called from this.Window's UIComponent.OnResolutionChanged
         /// </summary>
         public void OnResolutionChanged() {
-            this.RecreateToolWindow();
+            // Close window, deactivate tool
+            this.DestroyWindow();
+            MainTool.SetToolMode(ToolMode.None);
         }
     } // end class
 }

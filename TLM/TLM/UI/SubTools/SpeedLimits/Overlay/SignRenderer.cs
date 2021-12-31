@@ -43,9 +43,9 @@
         /// <summary>Draw large rect with the speed value or unlimited.</summary>
         /// <param name="speedlimit">Show this speed.</param>
         public void DrawLargeTexture(SpeedValue? speedlimit,
-                                     IDictionary<int, Texture2D> textureSource) {
+                                     SpeedLimitTextures.RoadSignTheme theme) {
             Texture2D tex = speedlimit.HasValue
-                                ? SpeedLimitTextures.GetSpeedLimitTexture(speedlimit.Value, textureSource)
+                                ? theme.GetTexture(speedlimit.Value)
                                 : SpeedLimitTextures.NoOverride;
 
             GUI.DrawTexture(
@@ -60,9 +60,9 @@
         }
 
         internal static Texture2D ChooseTexture(SpeedValue? speedlimit,
-                                                IDictionary<int, Texture2D> textureSource) {
+                                                SpeedLimitTextures.RoadSignTheme theme) {
             return speedlimit.HasValue
-                       ? SpeedLimitTextures.GetSpeedLimitTexture(speedlimit.Value, textureSource)
+                       ? theme.GetTexture(speedlimit.Value)
                        : SpeedLimitTextures.NoOverride;
         }
 

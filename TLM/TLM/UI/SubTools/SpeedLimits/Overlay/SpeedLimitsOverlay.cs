@@ -3,13 +3,11 @@
     using System.Collections.Generic;
     using System.Linq;
     using ColossalFramework;
-    using CSUtil.Commons;
     using JetBrains.Annotations;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.Manager.Impl;
     using TrafficManager.State;
     using TrafficManager.Traffic;
-    using TrafficManager.U;
     using TrafficManager.UI.Helpers;
     using TrafficManager.UI.Textures;
     using TrafficManager.Util;
@@ -87,8 +85,7 @@
         /// and to carry drawing state between multiple calls without using class fields.</summary>
         private class DrawEnv {
             public Vector2 signsThemeAspectRatio_;
-            public IDictionary<int,Texture2D> largeSignsTextures_;
-            public IDictionary<int,Texture2D> currentThemeTextures_;
+            public SpeedLimitTextures.RoadSignTheme largeSignsTextures_;
 
             /// <summary>
             /// This is set to true if the user will see blue default signs, or the user is holding
@@ -349,16 +346,15 @@
             }
 
             bool hover = false;
-            IDictionary<int, Texture2D> currentThemeTextures = SpeedLimitTextures.GetTextureSource();
             DrawEnv drawEnv = new DrawEnv {
-                signsThemeAspectRatio_ = SpeedLimitTextures.GetTextureAspectRatio(),
-                currentThemeTextures_ = currentThemeTextures,
+                signsThemeAspectRatio_ = SpeedLimitTextures.ActiveTheme.GetAspectRatio(),
                 largeSignsTextures_ = args.ToolMode switch {
-                    SpeedlimitsToolMode.Segments => currentThemeTextures,
-                    SpeedlimitsToolMode.Lanes => currentThemeTextures,
+                    SpeedlimitsToolMode.Segments => SpeedLimitTextures.ActiveTheme,
+                    SpeedlimitsToolMode.Lanes => SpeedLimitTextures.ActiveTheme,
+
                     // Defaults can show normal textures if the user holds Alt
                     SpeedlimitsToolMode.Defaults => args.ToolMode == SpeedlimitsToolMode.Defaults
-                                                        ? currentThemeTextures
+                                                        ? SpeedLimitTextures.ActiveTheme
                                                         : SpeedLimitTextures.RoadDefaults,
                     _ => throw new ArgumentOutOfRangeException(),
                 },
@@ -544,7 +540,7 @@
                     size: size * SpeedLimitTextures.DefaultSpeedlimitsAspectRatio());
                 squareSignRenderer.DrawLargeTexture(
                     speedlimit: defaultSpeedLimit,
-                    textureSource: SpeedLimitTextures.RoadDefaults);
+                    theme: SpeedLimitTextures.RoadDefaults);
             } else {
                 //-------------------------------------
                 // Draw override, if exists, otherwise draw circle and small blue default
@@ -565,13 +561,13 @@
                         size: size * SpeedLimitTextures.DefaultSpeedlimitsAspectRatio());
                     Texture2D chosenTexture = SignRenderer.ChooseTexture(
                         speedlimit: defaultSpeedLimit,
-                        textureSource: SpeedLimitTextures.RoadDefaults);
+                        theme: SpeedLimitTextures.RoadDefaults);
                     squareSignRenderer.DrawLargeTexture(chosenTexture);
                     // squareSignRenderer.DrawSmallTexture_BottomRight(chosenTexture);
                 } else {
                     signRenderer.DrawLargeTexture(
                         speedlimit: drawSpeedlimit,
-                        textureSource: drawEnv.largeSignsTextures_);
+                        theme: drawEnv.largeSignsTextures_);
                 }
             }
 
@@ -738,7 +734,7 @@
                         size: size * SpeedLimitTextures.DefaultSpeedlimitsAspectRatio());
                     Texture2D chosenTexture = SignRenderer.ChooseTexture(
                         speedlimit: overrideSpeedlimit.DefaultValue,
-                        textureSource: SpeedLimitTextures.RoadDefaults);
+                        theme: SpeedLimitTextures.RoadDefaults);
                     squareSignRenderer.DrawLargeTexture(chosenTexture);
                     // squareSignRenderer.DrawSmallTexture_BottomRight(chosenTexture);
                 } else {
@@ -747,7 +743,7 @@
                     //-------------------------------------
                     signRenderer.DrawLargeTexture(
                         speedlimit: overrideSpeedlimit.OverrideValue.Value,
-                        textureSource: drawEnv.largeSignsTextures_);
+                        theme: drawEnv.largeSignsTextures_);
                 }
 
                 if (args.IsInteractive
