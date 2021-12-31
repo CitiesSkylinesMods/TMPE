@@ -7,6 +7,7 @@ namespace TrafficManager.UI.Textures {
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.State;
     using TrafficManager.State.ConfigData;
+    using TrafficManager.UI.SubTools.SpeedLimits;
     using TrafficManager.Util;
     using UnityEngine;
 
@@ -171,6 +172,7 @@ namespace TrafficManager.UI.Textures {
         private const string KMPH_BRAZIL_THEME = "Kmph_Brazil";
         private const string KMPH_FRANCE_THEME = "Kmph_France";
         private const string KMPH_INDONESIA_THEME = "Kmph_Indonesia";
+        private const string KMPH_JAPAN_THEME = "Kmph_Japan";
 
         private const string DEFAULT_KMPH_THEME = KMPH_GERMANY_THEME;
         private const string DEFAULT_MPH_THEME = MPH_UK_THEME;
@@ -214,70 +216,27 @@ namespace TrafficManager.UI.Textures {
                 pathPrefix: "SpeedLimits.RoadDefaults");
             RoadDefaults.Load();
 
-            Themes.Add(
-                KMPH_GERMANY_THEME,
-                new RoadSignTheme(
-                    name: KMPH_GERMANY_THEME,
-                    supportsKmph: true,
-                    supportsMph: false,
-                    size: new IntVector2(200),
-                    pathPrefix: "SpeedLimits." + KMPH_GERMANY_THEME));
-            Themes.Add(
-                MPH_UK_THEME,
-                new RoadSignTheme(
-                    name: MPH_UK_THEME,
-                    supportsKmph: false,
-                    supportsMph: true,
-                    size: new IntVector2(200),
-                    pathPrefix: "SpeedLimits." + MPH_UK_THEME));
-            Themes.Add(
-                MPH_US_THEME,
-                new RoadSignTheme(
-                    name: MPH_US_THEME,
-                    supportsKmph: false,
-                    supportsMph: true,
-                    size: new IntVector2(200, 250),
-                    pathPrefix: "SpeedLimits." + MPH_US_THEME));
-            Themes.Add(
-                KMPH_CANADA_THEME,
-                new RoadSignTheme(
-                    name: KMPH_CANADA_THEME,
-                    supportsKmph: true,
-                    supportsMph: false,
-                    size: new IntVector2(200, 250),
-                    pathPrefix: "SpeedLimits." + KMPH_CANADA_THEME));
-            Themes.Add(
-                KMPH_SWEDEN_THEME,
-                new RoadSignTheme(
-                    name: KMPH_SWEDEN_THEME,
-                    supportsKmph: true,
-                    supportsMph: false,
-                    size: new IntVector2(200, 200),
-                    pathPrefix: "SpeedLimits." + KMPH_SWEDEN_THEME));
-            Themes.Add(
-                KMPH_BRAZIL_THEME,
-                new RoadSignTheme(
-                    name: KMPH_BRAZIL_THEME,
-                    supportsKmph: true,
-                    supportsMph: false,
-                    size: new IntVector2(200, 200),
-                    pathPrefix: "SpeedLimits." + KMPH_BRAZIL_THEME));
-            Themes.Add(
-                KMPH_FRANCE_THEME,
-                new RoadSignTheme(
-                    name: KMPH_FRANCE_THEME,
-                    supportsKmph: true,
-                    supportsMph: false,
-                    size: new IntVector2(200, 200),
-                    pathPrefix: "SpeedLimits." + KMPH_FRANCE_THEME));
-            Themes.Add(
-                KMPH_INDONESIA_THEME,
-                new RoadSignTheme(
-                    name: KMPH_INDONESIA_THEME,
-                    supportsKmph: true,
-                    supportsMph: false,
-                    size: new IntVector2(200, 200),
-                    pathPrefix: "SpeedLimits." + KMPH_INDONESIA_THEME));
+            void NewTheme(string name, SpeedUnit unit, int height = 200) {
+                Themes.Add(
+                    name,
+                    new RoadSignTheme(
+                        name: name,
+                        supportsKmph: unit == SpeedUnit.Kmph,
+                        supportsMph: unit == SpeedUnit.Mph,
+                        size: new IntVector2(200, height),
+                        pathPrefix: "SpeedLimits." + name));
+            }
+
+            NewTheme(name: MPH_UK_THEME, unit: SpeedUnit.Mph);
+            NewTheme(name: MPH_US_THEME, unit: SpeedUnit.Mph, height: 250);
+
+            NewTheme(name: KMPH_BRAZIL_THEME, unit: SpeedUnit.Kmph);
+            NewTheme(name: KMPH_CANADA_THEME, unit: SpeedUnit.Kmph, height: 250);
+            NewTheme(name: KMPH_FRANCE_THEME, unit: SpeedUnit.Kmph);
+            NewTheme(name: KMPH_GERMANY_THEME, unit: SpeedUnit.Kmph);
+            NewTheme(name: KMPH_INDONESIA_THEME, unit: SpeedUnit.Kmph);
+            NewTheme(name: KMPH_JAPAN_THEME, unit: SpeedUnit.Kmph);
+            NewTheme(name: KMPH_SWEDEN_THEME, unit: SpeedUnit.Kmph);
 
             ThemeNames = Themes.Keys.ToList();
             ThemeNames.Sort();

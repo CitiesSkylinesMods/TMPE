@@ -25,8 +25,8 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="2.0000002"
-     inkscape:cx="293.34728"
-     inkscape:cy="369.41603"
+     inkscape:cx="340.09728"
+     inkscape:cy="283.91604"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -134,10 +134,10 @@
     <flowRoot
        xml:space="preserve"
        id="flowRoot44"
-       style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:13.3333px;line-height:125%;font-family:ClearviewHwy;-inkscape-font-specification:ClearviewHwy;text-indent:0;text-align:center;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:normal;word-spacing:normal;text-transform:none;writing-mode:lr-tb;direction:ltr;baseline-shift:baseline;text-anchor:middle;white-space:normal;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:#cccccc;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate;"
+       style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:13.3333px;line-height:125%;font-family:ClearviewHwy;-inkscape-font-specification:ClearviewHwy;text-indent:0;text-align:center;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:normal;word-spacing:normal;text-transform:none;writing-mode:lr-tb;direction:ltr;baseline-shift:baseline;text-anchor:middle;white-space:normal;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:#cccccc;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
        transform="matrix(0.26458333,0,0,0.26458333,72.777493,20.579753)"><flowRegion
          id="flowRegion46"
-         style="-inkscape-font-specification:ClearviewHwy;font-family:ClearviewHwy;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;"><rect
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:ClearviewHwy;-inkscape-font-specification:ClearviewHwy"><rect
            id="rect48"
            width="437.9447"
            height="234.91525"
@@ -145,18 +145,20 @@
            y="-71.480316"
            style="-inkscape-font-specification:ClearviewHwy;font-family:ClearviewHwy;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;" /></flowRegion><flowPara
          id="flowPara50"
-         style="font-size:13.3333px;text-align:start;text-anchor:start;stroke:none;-inkscape-font-specification:ClearviewHwy;font-family:ClearviewHwy;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;">These signs are using ClearView Hwy font for Indonesian Road Signs</flowPara><flowPara
-         style="font-size:13.3333px;text-align:start;text-anchor:start;stroke:none;-inkscape-font-specification:ClearviewHwy;font-family:ClearviewHwy;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:13.3333px;font-family:ClearviewHwy;-inkscape-font-specification:ClearviewHwy;text-align:start;text-anchor:start;stroke:none">These signs are using ClearView Hwy (2W variant)</flowPara><flowPara
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:13.3333px;font-family:ClearviewHwy;-inkscape-font-specification:ClearviewHwy;text-align:start;text-anchor:start;stroke:none"
+         id="flowPara2171">font for Indonesian Road Signs</flowPara><flowPara
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:13.3333px;font-family:ClearviewHwy;-inkscape-font-specification:ClearviewHwy;text-align:start;text-anchor:start;stroke:none"
          id="flowPara72" /><flowPara
-         style="font-size:13.3333px;text-align:start;text-anchor:start;stroke:none;-inkscape-font-specification:ClearviewHwy;font-family:ClearviewHwy;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:13.3333px;font-family:ClearviewHwy;-inkscape-font-specification:ClearviewHwy;text-align:start;text-anchor:start;stroke:none"
          id="flowPara74">1. Use Inkscape editor and open the file</flowPara><flowPara
-         style="font-size:13.3333px;text-align:start;text-anchor:start;stroke:none;-inkscape-font-specification:ClearviewHwy;font-family:ClearviewHwy;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:13.3333px;font-family:ClearviewHwy;-inkscape-font-specification:ClearviewHwy;text-align:start;text-anchor:start;stroke:none"
          id="flowPara82">2. Select road sign</flowPara><flowPara
-         style="font-size:13.3333px;text-align:start;text-anchor:start;stroke:none;-inkscape-font-specification:ClearviewHwy;font-family:ClearviewHwy;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:13.3333px;font-family:ClearviewHwy;-inkscape-font-specification:ClearviewHwy;text-align:start;text-anchor:start;stroke:none"
          id="flowPara88">3. Menu &quot;File&quot; → Export (panel can be conveniently docked)</flowPara><flowPara
-         style="font-size:13.3333px;text-align:start;text-anchor:start;stroke:none;-inkscape-font-specification:ClearviewHwy;font-family:ClearviewHwy;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:13.3333px;font-family:ClearviewHwy;-inkscape-font-specification:ClearviewHwy;text-align:start;text-anchor:start;stroke:none"
          id="flowPara521">4. Ensure you are exporting &quot;Selection&quot; of square size</flowPara><flowPara
-         style="font-size:13.3333px;text-align:start;text-anchor:start;stroke:none;-inkscape-font-specification:ClearviewHwy;font-family:ClearviewHwy;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:13.3333px;font-family:ClearviewHwy;-inkscape-font-specification:ClearviewHwy;text-align:start;text-anchor:start;stroke:none"
          id="flowPara2494">5. Set Image Size to 200x200 px</flowPara></flowRoot>
     <flowRoot
        transform="matrix(0.18200626,0,0,0.18200626,-17.148029,17.456711)"
@@ -174,7 +176,9 @@
          style="font-size:16px;text-align:start;text-anchor:start;stroke:none"
          id="flowPara1445">It feels like font size and position for numbers and &quot;km&quot; are totally arbitrary on all signs examples which i could find. But at least the number is always off-center</flowPara></flowRoot>
     <g
-       id="g2119">
+       id="g2119"
+       inkscape:export-xdpi="260.66666"
+       inkscape:export-ydpi="260.66666">
       <circle
          style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:0.424483;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
          id="circle2496"
@@ -223,7 +227,9 @@
          transform="rotate(-45)" />
     </g>
     <g
-       id="g1837">
+       id="g1837"
+       inkscape:export-xdpi="260.66666"
+       inkscape:export-ydpi="260.66666">
       <circle
          r="9.7442446"
          cy="65.248291"
@@ -264,7 +270,9 @@
            style="stroke-width:0.2">5</tspan></text>
     </g>
     <g
-       id="g1848">
+       id="g1848"
+       inkscape:export-xdpi="260.66666"
+       inkscape:export-ydpi="260.66666">
       <circle
          style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#d81e00;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.0836929;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
          id="circle1556"
@@ -307,7 +315,9 @@
    id="tspan1858">1</tspan>0</tspan></text>
     </g>
     <g
-       id="g1858">
+       id="g1858"
+       inkscape:export-xdpi="260.66666"
+       inkscape:export-ydpi="260.66666">
       <circle
          r="9.7442446"
          cy="65.248291"
@@ -348,7 +358,9 @@
            style="stroke-width:0.2">15</tspan></text>
     </g>
     <g
-       id="g1869">
+       id="g1869"
+       inkscape:export-xdpi="260.66666"
+       inkscape:export-ydpi="260.66666">
       <circle
          style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#d81e00;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.0836929;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
          id="circle1524"
@@ -393,7 +405,9 @@
    id="tspan1856">2</tspan>0</tspan></text>
     </g>
     <g
-       id="g1880">
+       id="g1880"
+       inkscape:export-xdpi="260.66666"
+       inkscape:export-ydpi="260.66666">
       <circle
          r="9.7442446"
          cy="65.248291"
@@ -436,7 +450,9 @@
              id="tspan1948">25</tspan></tspan></text>
     </g>
     <g
-       id="g1891">
+       id="g1891"
+       inkscape:export-xdpi="260.66666"
+       inkscape:export-ydpi="260.66666">
       <circle
          style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#d81e00;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.0836929;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
          id="circle2097"
@@ -479,7 +495,9 @@
    id="tspan1974">3</tspan>0</tspan></text>
     </g>
     <g
-       id="g1901">
+       id="g1901"
+       inkscape:export-xdpi="260.66666"
+       inkscape:export-ydpi="260.66666">
       <circle
          r="9.7442446"
          cy="65.248291"
@@ -520,7 +538,9 @@
            style="letter-spacing:-1.18798px;stroke-width:0.2">35</tspan></text>
     </g>
     <g
-       id="g1911">
+       id="g1911"
+       inkscape:export-xdpi="260.66666"
+       inkscape:export-ydpi="260.66666">
       <circle
          style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#d81e00;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.0836929;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
          id="circle2129"
@@ -561,7 +581,9 @@
            style="letter-spacing:-1.18798px;stroke-width:0.2">40</tspan></text>
     </g>
     <g
-       id="g1997">
+       id="g1997"
+       inkscape:export-xdpi="260.66666"
+       inkscape:export-ydpi="260.66666">
       <circle
          style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#d81e00;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.0836929;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
          id="circle2193"
@@ -604,7 +626,9 @@
            style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:86.8336px;font-family:ClearviewHwy;-inkscape-font-specification:'ClearviewHwy, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#000000;stroke:none">km</flowPara></flowRoot>
     </g>
     <g
-       id="g1986">
+       id="g1986"
+       inkscape:export-xdpi="260.66666"
+       inkscape:export-ydpi="260.66666">
       <circle
          r="9.7442446"
          cy="88.928497"
@@ -647,7 +671,9 @@
    id="tspan1105">5</tspan>0</tspan></text>
     </g>
     <g
-       id="g1975">
+       id="g1975"
+       inkscape:export-xdpi="260.66666"
+       inkscape:export-ydpi="260.66666">
       <circle
          style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#d81e00;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.0836929;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
          id="circle2161"
@@ -690,7 +716,9 @@
    id="tspan1183">5</tspan>5</tspan></text>
     </g>
     <g
-       id="g1964">
+       id="g1964"
+       inkscape:export-xdpi="260.66666"
+       inkscape:export-ydpi="260.66666">
       <circle
          r="9.7442446"
          cy="88.928497"
@@ -733,7 +761,9 @@
    id="tspan1247">6</tspan>0</tspan></text>
     </g>
     <g
-       id="g1953">
+       id="g1953"
+       inkscape:export-xdpi="260.66666"
+       inkscape:export-ydpi="260.66666">
       <circle
          style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#d81e00;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.0836929;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
          id="circle2207"
@@ -776,7 +806,9 @@
              id="tspan1227">65</tspan></tspan></text>
     </g>
     <g
-       id="g1942">
+       id="g1942"
+       inkscape:export-xdpi="260.66666"
+       inkscape:export-ydpi="260.66666">
       <circle
          r="9.7442446"
          cy="88.928497"
@@ -817,7 +849,9 @@
            style="letter-spacing:-1.18798px;stroke-width:0.2">70</tspan></text>
     </g>
     <g
-       id="g1932">
+       id="g1932"
+       inkscape:export-xdpi="260.66666"
+       inkscape:export-ydpi="260.66666">
       <circle
          style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#d81e00;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.0836929;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
          id="circle2239"
@@ -860,7 +894,9 @@
    id="tspan1397">7</tspan>5</tspan></text>
     </g>
     <g
-       id="g1921">
+       id="g1921"
+       inkscape:export-xdpi="260.66666"
+       inkscape:export-ydpi="260.66666">
       <circle
          r="9.7442446"
          cy="88.928497"
@@ -902,7 +938,9 @@
            style="letter-spacing:-1.1407px;stroke-width:0.19204">80</tspan></text>
     </g>
     <g
-       id="g2008">
+       id="g2008"
+       inkscape:export-xdpi="260.66666"
+       inkscape:export-ydpi="260.66666">
       <circle
          r="9.7442446"
          cy="113.27016"
@@ -945,7 +983,9 @@
            style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:86.8336px;font-family:ClearviewHwy;-inkscape-font-specification:'ClearviewHwy, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#000000;stroke:none">km</flowPara></flowRoot>
     </g>
     <g
-       id="g2050">
+       id="g2050"
+       inkscape:export-xdpi="260.66666"
+       inkscape:export-ydpi="260.66666">
       <circle
          style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#d81e00;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.0836929;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
          id="circle2317"
@@ -989,7 +1029,9 @@
    id="tspan1635">9</tspan>0</tspan></text>
     </g>
     <g
-       id="g2061">
+       id="g2061"
+       inkscape:export-xdpi="260.66666"
+       inkscape:export-ydpi="260.66666">
       <circle
          r="9.7442446"
          cy="113.27016"
@@ -1032,7 +1074,9 @@
    id="tspan1689">9</tspan>5</tspan></text>
     </g>
     <g
-       id="g2071">
+       id="g2071"
+       inkscape:export-xdpi="260.66666"
+       inkscape:export-ydpi="260.66666">
       <circle
          style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#d81e00;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.0836929;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
          id="circle2285"
@@ -1074,7 +1118,9 @@
            style="letter-spacing:-0.880355px;stroke-width:0.160353">100</tspan></text>
     </g>
     <g
-       id="g2081">
+       id="g2081"
+       inkscape:export-xdpi="260.66666"
+       inkscape:export-ydpi="260.66666">
       <circle
          r="9.7442446"
          cy="113.27016"
@@ -1116,7 +1162,9 @@
            style="letter-spacing:-0.880355px;stroke-width:0.160353">105</tspan></text>
     </g>
     <g
-       id="g2091">
+       id="g2091"
+       inkscape:export-xdpi="260.66666"
+       inkscape:export-ydpi="260.66666">
       <circle
          style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#d81e00;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.0836929;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
          id="circle2349"
@@ -1158,7 +1206,9 @@
            style="letter-spacing:-0.919929px;stroke-width:0.167561">110</tspan></text>
     </g>
     <g
-       id="g2101">
+       id="g2101"
+       inkscape:export-xdpi="260.66666"
+       inkscape:export-ydpi="260.66666">
       <circle
          r="9.7442446"
          cy="113.27016"
@@ -1200,49 +1250,56 @@
            style="letter-spacing:-0.950733px;stroke-width:0.173172">115</tspan></text>
     </g>
     <g
-       id="g2111">
-      <circle
-         style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#d81e00;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.0836929;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
-         id="circle2381"
-         cx="177.504"
-         cy="113.27016"
-         r="9.7442446" />
-      <circle
-         style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:#cccccc;stroke-width:0.0665318;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
-         id="circle2383"
-         cx="177.504"
-         cy="113.27016"
-         r="7.7462068" />
-      <flowRoot
-         xml:space="preserve"
-         id="flowRoot1775"
-         style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:86.8336px;line-height:125%;font-family:ClearviewHwy;-inkscape-font-specification:'ClearviewHwy, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-indent:0;text-align:center;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:normal;word-spacing:normal;text-transform:none;writing-mode:lr-tb;direction:ltr;baseline-shift:baseline;text-anchor:middle;white-space:normal;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
-         transform="matrix(0.03928058,0,0,0.0436451,175.45411,103.60992)"><flowRegion
-           id="flowRegion1771"
-           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:86.8336px;font-family:ClearviewHwy;-inkscape-font-specification:'ClearviewHwy, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;text-anchor:middle;fill:#000000;stroke:none"><rect
-             id="rect1769"
-             width="174.64287"
-             height="103.21429"
-             x="72.14286"
-             y="101.09111"
-             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:86.83360408px;font-family:ClearviewHwy;-inkscape-font-specification:'ClearviewHwy, Normal';text-align:center;text-anchor:middle;fill:#000000;stroke:none;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;" /></flowRegion><flowPara
-           id="flowPara1773"
-           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:86.8336px;font-family:ClearviewHwy;-inkscape-font-specification:'ClearviewHwy, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#000000;stroke:none">km</flowPara></flowRoot>
-      <text
-         xml:space="preserve"
-         style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:8.86677px;line-height:125%;font-family:ClearviewHwy;-inkscape-font-specification:ClearviewHwy;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-decoration:none;text-decoration-line:none;text-decoration-color:#000000;letter-spacing:-0.919929px;overflow:visible;fill:#000000;stroke-width:0.167561;stop-color:#000000"
-         x="181.55705"
-         y="108.80219"
-         id="text1779"
-         transform="scale(0.93623543,1.0681074)"><tspan
-           sodipodi:role="line"
-           id="tspan1777"
+       id="g2111"
+       inkscape:export-xdpi="260.66666"
+       inkscape:export-ydpi="260.66666">
+      <g
+         id="g2169">
+        <circle
+           style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#d81e00;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.0836929;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+           id="circle2381"
+           cx="177.504"
+           cy="113.27016"
+           r="9.7442446" />
+        <circle
+           style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:#cccccc;stroke-width:0.0665318;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+           id="circle2383"
+           cx="177.504"
+           cy="113.27016"
+           r="7.7462068" />
+        <flowRoot
+           xml:space="preserve"
+           id="flowRoot1775"
+           style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:86.8336px;line-height:125%;font-family:ClearviewHwy;-inkscape-font-specification:'ClearviewHwy, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-indent:0;text-align:center;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:normal;word-spacing:normal;text-transform:none;writing-mode:lr-tb;direction:ltr;baseline-shift:baseline;text-anchor:middle;white-space:normal;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+           transform="matrix(0.03928058,0,0,0.0436451,175.45411,103.60992)"><flowRegion
+             id="flowRegion1771"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:86.8336px;font-family:ClearviewHwy;-inkscape-font-specification:'ClearviewHwy, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;text-anchor:middle;fill:#000000;stroke:none"><rect
+               id="rect1769"
+               width="174.64287"
+               height="103.21429"
+               x="72.14286"
+               y="101.09111"
+               style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:86.83360408px;font-family:ClearviewHwy;-inkscape-font-specification:'ClearviewHwy, Normal';text-align:center;text-anchor:middle;fill:#000000;stroke:none;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;" /></flowRegion><flowPara
+             id="flowPara1773"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:86.8336px;font-family:ClearviewHwy;-inkscape-font-specification:'ClearviewHwy, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#000000;stroke:none">km</flowPara></flowRoot>
+        <text
+           xml:space="preserve"
+           style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:8.86677px;line-height:125%;font-family:ClearviewHwy;-inkscape-font-specification:ClearviewHwy;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-decoration:none;text-decoration-line:none;text-decoration-color:#000000;letter-spacing:-0.919929px;overflow:visible;fill:#000000;stroke-width:0.167561;stop-color:#000000"
            x="181.55705"
            y="108.80219"
-           style="letter-spacing:-0.919929px;stroke-width:0.167561">120</tspan></text>
+           id="text1779"
+           transform="scale(0.93623543,1.0681074)"><tspan
+             sodipodi:role="line"
+             id="tspan1777"
+             x="181.55705"
+             y="108.80219"
+             style="letter-spacing:-0.919929px;stroke-width:0.167561">120</tspan></text>
+      </g>
     </g>
     <g
-       id="g2159">
+       id="g2159"
+       inkscape:export-xdpi="260.66666"
+       inkscape:export-ydpi="260.66666">
       <circle
          r="9.7442446"
          cy="136.95038"
@@ -1284,7 +1341,9 @@
            style="letter-spacing:-0.940829px;stroke-width:0.171368">125</tspan></text>
     </g>
     <g
-       id="g2149">
+       id="g2149"
+       inkscape:export-xdpi="260.66666"
+       inkscape:export-ydpi="260.66666">
       <circle
          style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#d81e00;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.0836929;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
          id="circle2432"
@@ -1326,7 +1385,9 @@
            style="letter-spacing:-0.903842px;stroke-width:0.164631">130</tspan></text>
     </g>
     <g
-       id="g2139">
+       id="g2139"
+       inkscape:export-xdpi="260.66666"
+       inkscape:export-ydpi="260.66666">
       <circle
          r="9.7442446"
          cy="136.95038"
@@ -1368,7 +1429,9 @@
            style="letter-spacing:-0.932391px;stroke-width:0.169831">135</tspan></text>
     </g>
     <g
-       id="g2129">
+       id="g2129"
+       inkscape:export-xdpi="260.66666"
+       inkscape:export-ydpi="260.66666">
       <circle
          style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#d81e00;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.0836929;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
          id="circle1336"
