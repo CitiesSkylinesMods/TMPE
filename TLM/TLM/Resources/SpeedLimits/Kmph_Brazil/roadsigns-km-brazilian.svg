@@ -1,0 +1,1514 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="210mm"
+   height="297mm"
+   viewBox="0 0 210 297"
+   version="1.1"
+   id="svg8"
+   inkscape:version="1.0.2-2 (e86c870879, 2021-01-15)"
+   sodipodi:docname="roadsigns-km-brazilian.svg">
+  <defs
+     id="defs2" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="8"
+     inkscape:cx="122.61833"
+     inkscape:cy="218.71675"
+     inkscape:document-units="mm"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     showguides="true"
+     inkscape:guide-bbox="true"
+     inkscape:window-width="2560"
+     inkscape:window-height="1417"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:document-rotation="0">
+    <sodipodi:guide
+       position="22.006305,149.12979"
+       orientation="1,0"
+       id="guide523"
+       inkscape:locked="false" />
+    <sodipodi:guide
+       position="43.708591,173.12392"
+       orientation="-1,0"
+       id="guide525"
+       inkscape:locked="false" />
+    <sodipodi:guide
+       position="66.135845,172.3054"
+       orientation="1,0"
+       id="guide527"
+       inkscape:locked="false" />
+    <sodipodi:guide
+       position="87.838131,176.8423"
+       orientation="1,0"
+       id="guide529"
+       inkscape:locked="false" />
+    <sodipodi:guide
+       position="110.00814,176.74876"
+       orientation="1,0"
+       id="guide531"
+       inkscape:locked="false" />
+    <sodipodi:guide
+       position="132.15476,172.67958"
+       orientation="1,0"
+       id="guide533"
+       inkscape:locked="false" />
+    <sodipodi:guide
+       position="155.26021,172.23524"
+       orientation="1,0"
+       id="guide535"
+       inkscape:locked="false" />
+    <sodipodi:guide
+       position="177.54714,171.18288"
+       orientation="1,0"
+       id="guide537"
+       inkscape:locked="false" />
+    <sodipodi:guide
+       position="192.61667,180.98021"
+       orientation="0,-1"
+       id="guide1649" />
+    <sodipodi:guide
+       position="191.02917,205.32188"
+       orientation="0,-1"
+       id="guide1653" />
+    <sodipodi:guide
+       position="77.059896,229.79583"
+       orientation="0,-1"
+       id="guide1655" />
+    <sodipodi:guide
+       position="35.454167,157.82917"
+       orientation="0,-1"
+       id="guide1657" />
+  </sodipodi:namedview>
+  <metadata
+     id="metadata5">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:groupmode="layer"
+     id="layer2"
+     inkscape:label="Under">
+    <image
+       width="18.520834"
+       height="18.520834"
+       preserveAspectRatio="none"
+       style="image-rendering:optimizeQuality"
+       xlink:href="data:image/png;base64,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 "
+       id="image1080"
+       x="3.3685389"
+       y="24.189232" />
+  </g>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <g
+       id="g42"
+       transform="matrix(0.50757377,0,0,0.50757377,-2.4183239,11.994101)"
+       inkscape:export-filename="X:\Projects\TMPE\TLM\TLM\Resources\SpeedLimits\RoadDefaults\140.png"
+       inkscape:export-xdpi="161.75"
+       inkscape:export-ydpi="161.75" />
+    <flowRoot
+       xml:space="preserve"
+       id="flowRoot44"
+       style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:10px;line-height:125%;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-indent:0;text-align:center;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:normal;word-spacing:normal;text-transform:none;writing-mode:lr-tb;direction:ltr;baseline-shift:baseline;text-anchor:middle;white-space:normal;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:#cccccc;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+       transform="matrix(0.26458333,0,0,0.26458333,67.485827,20.447461)"><flowRegion
+         id="flowRegion46"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:10px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal"><rect
+           id="rect48"
+           width="437.9447"
+           height="234.91525"
+           x="104"
+           y="-71.480316"
+           style="-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-family:'Highway Gothic Expanded';font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:10.00000013px;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;" /></flowRegion><flowPara
+         id="flowPara50"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:10px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;text-anchor:start;stroke:none">These signs are using Highway Gothic Expanded font</flowPara><flowPara
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:10px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;text-anchor:start;stroke:none"
+         id="flowPara247">(developed by US Federal Highway Administration)</flowPara><flowPara
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:10px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;text-anchor:start;stroke:none"
+         id="flowPara72" /><flowPara
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:10px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;text-anchor:start;stroke:none"
+         id="flowPara74">1. Use Inkscape editor and open the file</flowPara><flowPara
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:10px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;text-anchor:start;stroke:none"
+         id="flowPara82">2. Select road sign</flowPara><flowPara
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:10px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;text-anchor:start;stroke:none"
+         id="flowPara88">3. Menu &quot;File&quot; → Export (panel can be conveniently docked)</flowPara><flowPara
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:10px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;text-anchor:start;stroke:none"
+         id="flowPara521">4. Ensure you are exporting &quot;Selection&quot; of square size</flowPara><flowPara
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:10px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;text-anchor:start;stroke:none"
+         id="flowPara2494">5. Set Image Size to 200x200 px</flowPara></flowRoot>
+    <flowRoot
+       transform="matrix(0.18200626,0,0,0.18200626,-24.953237,32.537959)"
+       style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:14.537px;line-height:125%;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-indent:0;text-align:center;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:normal;word-spacing:normal;text-transform:none;writing-mode:lr-tb;direction:ltr;baseline-shift:baseline;text-anchor:middle;white-space:normal;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:#cccccc;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+       id="flowRoot70"
+       xml:space="preserve"><flowRegion
+         id="flowRegion66"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:14.537px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal"><rect
+           y="-71.480316"
+           x="104"
+           height="114"
+           width="334"
+           id="rect64"
+           style="-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-family:'Highway Gothic Expanded';font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:14.53704578px;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;" /></flowRegion><flowPara
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:14.537px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke:none"
+         id="flowPara1409">Image from Wikipedia for Speedlimit</flowPara></flowRoot>
+    <flowRoot
+       transform="matrix(0.08306321,0,0,0.09981678,75.337014,121.64215)"
+       style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:94.7757px;line-height:0;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-indent:0;text-align:center;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:normal;word-spacing:normal;text-transform:none;writing-mode:lr-tb;direction:ltr;baseline-shift:baseline;text-anchor:middle;white-space:normal;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+       id="flowRoot1346"
+       xml:space="preserve"><flowRegion
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:94.7757px;line-height:125%;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;text-anchor:middle;fill:#000000;stroke:none"
+         id="flowRegion1342"><rect
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:94.77570408px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;text-anchor:middle;fill:#000000;stroke:none;stroke-width:1;"
+           y="101.09111"
+           x="72.14286"
+           height="103.21429"
+           width="174.64287"
+           id="rect1340" /></flowRegion><flowPara
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:94.7757px;line-height:125%;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;letter-spacing:0px;fill:#000000;stroke:none"
+         id="flowPara1344">1<flowSpan
+   style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:94.7757px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;letter-spacing:-4.38766px"
+   id="flowSpan1783">4</flowSpan>0</flowPara></flowRoot>
+    <flowRoot
+       transform="matrix(0.07960694,0,0,0.09477434,74.447267,98.589024)"
+       style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:99.3533px;line-height:125%;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-indent:0;text-align:center;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:normal;word-spacing:normal;text-transform:none;writing-mode:lr-tb;direction:ltr;baseline-shift:baseline;text-anchor:middle;white-space:normal;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+       id="flowRoot2295"
+       xml:space="preserve"><flowRegion
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:99.3533px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;text-anchor:middle;fill:#000000;stroke:none"
+         id="flowRegion2291"><rect
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:99.35330145px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;text-anchor:middle;fill:#000000;stroke:none;"
+           y="101.09111"
+           x="72.14286"
+           height="98.279167"
+           width="194.38332"
+           id="rect2289" /></flowRegion><flowPara
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:99.3533px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#000000;stroke:none"
+         id="flowPara2293"><flowSpan
+   style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:99.3533px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;letter-spacing:-0.147137px"
+   id="flowSpan2482">1</flowSpan><flowSpan
+   style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:99.3533px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;letter-spacing:-4.93465px"
+   id="flowSpan1885">0</flowSpan>0</flowPara></flowRoot>
+    <flowRoot
+       xml:space="preserve"
+       id="flowRoot2343"
+       style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:95.9823px;line-height:125%;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-indent:0;text-align:center;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:normal;word-spacing:normal;text-transform:none;writing-mode:lr-tb;direction:ltr;baseline-shift:baseline;text-anchor:middle;white-space:normal;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+       transform="matrix(0.0852969,0,0,0.09477434,96.471423,98.589024)"><flowRegion
+         id="flowRegion2339"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:95.9823px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;text-anchor:middle;fill:#000000;stroke:none"><rect
+           id="rect2337"
+           width="174.64287"
+           height="103.21429"
+           x="72.14286"
+           y="101.09111"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:95.98229819px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';text-align:center;text-anchor:middle;fill:#000000;stroke:none;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;" /></flowRegion><flowPara
+         id="flowPara2341"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:95.9823px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#000000;stroke:none"><flowSpan
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:95.9823px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;letter-spacing:-4.35524px"
+           id="flowSpan2484">1</flowSpan><flowSpan
+           id="flowSpan1579"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:95.9823px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;letter-spacing:-6.47401px">0</flowSpan><flowSpan
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:95.9823px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;letter-spacing:-0.0882819px"
+           id="flowSpan1319">5</flowSpan></flowPara></flowRoot>
+    <flowRoot
+       transform="matrix(0.09269075,0,0,0.09477434,117.61306,98.589024)"
+       style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:92.0745px;line-height:125%;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-indent:0;text-align:center;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:normal;word-spacing:normal;text-transform:none;writing-mode:lr-tb;direction:ltr;baseline-shift:baseline;text-anchor:middle;white-space:normal;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+       id="flowRoot2359"
+       xml:space="preserve"><flowRegion
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:92.0745px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;text-anchor:middle;fill:#000000;stroke:none"
+         id="flowRegion2355"><rect
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:92.07454261px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';text-align:center;text-anchor:middle;fill:#000000;stroke:none;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;"
+           y="101.09111"
+           x="72.14286"
+           height="103.21429"
+           width="174.64287"
+           id="rect2353" /></flowRegion><flowPara
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:92.0745px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#000000;stroke:none"
+         id="flowPara2357">110</flowPara></flowRoot>
+    <flowRoot
+       transform="matrix(0.08529691,0,0,0.09477434,164.19507,98.644509)"
+       style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:95.9823px;line-height:125%;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-indent:0;text-align:center;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:normal;word-spacing:normal;text-transform:none;writing-mode:lr-tb;direction:ltr;baseline-shift:baseline;text-anchor:middle;white-space:normal;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+       id="flowRoot2391"
+       xml:space="preserve"><flowRegion
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:95.9823px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;text-anchor:middle;fill:#000000;stroke:none"
+         id="flowRegion2387"><rect
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:95.98229257px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';text-align:center;text-anchor:middle;fill:#000000;stroke:none;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;"
+           y="101.09111"
+           x="72.14286"
+           height="103.21429"
+           width="174.64287"
+           id="rect2385" /></flowRegion><flowPara
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:95.9823px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#000000;stroke:none"
+         id="flowPara2389">1<flowSpan
+   style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:95.9823px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;letter-spacing:-8.32793px"
+   id="flowSpan1659">2</flowSpan>0</flowPara></flowRoot>
+    <flowRoot
+       xml:space="preserve"
+       id="flowRoot2426"
+       style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:91.1336px;line-height:125%;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-indent:0;text-align:center;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:normal;word-spacing:normal;text-transform:none;writing-mode:lr-tb;direction:ltr;baseline-shift:baseline;text-anchor:middle;white-space:normal;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+       transform="matrix(0.0898351,0,0,0.09981678,51.819286,121.59549)"><flowRegion
+         id="flowRegion2420"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:91.1336px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;text-anchor:middle;fill:#000000;stroke:none"><rect
+           id="rect2418"
+           width="174.64287"
+           height="103.21429"
+           x="72.14286"
+           y="101.09111"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:91.13356236px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';text-align:center;text-anchor:middle;fill:#000000;stroke:none;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;" /></flowRegion><flowPara
+         id="flowPara2424"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:91.1336px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;letter-spacing:0px;fill:#000000;stroke:none">135</flowPara></flowRoot>
+    <flowRoot
+       transform="matrix(0.0898351,0,0,0.09981678,30.357313,121.54861)"
+       style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:91.1336px;line-height:125%;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-indent:0;text-align:center;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:normal;word-spacing:normal;text-transform:none;writing-mode:lr-tb;direction:ltr;baseline-shift:baseline;text-anchor:middle;white-space:normal;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+       id="flowRoot2444"
+       xml:space="preserve"><flowRegion
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:91.1336px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;text-anchor:middle;fill:#000000;stroke:none"
+         id="flowRegion2438"><rect
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:91.13356236px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';text-align:center;text-anchor:middle;fill:#000000;stroke:none;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;"
+           y="101.09111"
+           x="72.14286"
+           height="103.21429"
+           width="174.64287"
+           id="rect2436" /></flowRegion><flowPara
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:91.1336px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;letter-spacing:0px;fill:#000000;stroke:none"
+         id="flowPara2442">1<flowSpan
+   style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:91.1336px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;letter-spacing:-6.06314px"
+   id="flowSpan1727">3</flowSpan>0</flowPara></flowRoot>
+    <g
+       id="g1525"
+       inkscape:export-xdpi="260.66666"
+       inkscape:export-ydpi="260.66666">
+      <circle
+         r="9.7442446"
+         cy="65.248291"
+         cx="21.92901"
+         id="circle1572"
+         style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#c50000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.0836929;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate" />
+      <circle
+         r="7.6643949"
+         cy="65.248291"
+         cx="21.92901"
+         id="circle1574"
+         style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:#cccccc;stroke-width:0.0658292;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate" />
+      <flowRoot
+         xml:space="preserve"
+         id="flowRoot1582"
+         style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:77.7457px;line-height:125%;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-indent:0;text-align:center;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:normal;word-spacing:normal;text-transform:none;writing-mode:lr-tb;direction:ltr;baseline-shift:baseline;text-anchor:middle;white-space:normal;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+         transform="matrix(0.11583529,0,0,0.12870589,3.487173,44.868935)"><flowRegion
+           id="flowRegion1578"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:77.7457px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;text-anchor:middle;fill:#000000;stroke:#000000"><rect
+             id="rect1576"
+             width="174.64287"
+             height="103.21429"
+             x="72.14286"
+             y="101.09111"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:77.74566598px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';text-align:center;text-anchor:middle;fill:#000000;stroke:#000000;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;" /></flowRegion><flowPara
+           id="flowPara1580"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:77.7457px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#000000;stroke:#000000">5</flowPara></flowRoot>
+      <text
+         xml:space="preserve"
+         style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;line-height:125%;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-decoration:none;text-decoration-line:none;text-decoration-color:#000000;overflow:visible;fill:#000000;stroke:none;stroke-width:0.4;stop-color:#000000"
+         x="18.558891"
+         y="70.180725"
+         id="text528"><tspan
+           sodipodi:role="line"
+           id="tspan526"
+           x="18.558891"
+           y="70.180725"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke:none;stroke-width:0.4">km/h</tspan></text>
+    </g>
+    <g
+       id="g1535">
+      <circle
+         style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#c50000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.0836929;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+         id="circle1556"
+         cx="43.624844"
+         cy="65.248291"
+         r="9.7442446" />
+      <circle
+         style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:#cccccc;stroke-width:0.0658291;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+         id="circle1558"
+         cx="43.624844"
+         cy="65.248291"
+         r="7.6643949" />
+      <flowRoot
+         transform="matrix(0.13132565,0,0,0.12870589,22.654297,45.442997)"
+         style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:73.0166px;line-height:125%;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-indent:0;text-align:center;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:normal;word-spacing:normal;text-transform:none;writing-mode:lr-tb;direction:ltr;baseline-shift:baseline;text-anchor:middle;white-space:normal;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+         id="flowRoot1566"
+         xml:space="preserve"><flowRegion
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:73.0166px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;text-anchor:middle;fill:#000000;stroke:#000000"
+           id="flowRegion1562"><rect
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:73.01664332px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';text-align:center;text-anchor:middle;fill:#000000;stroke:#000000;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;"
+             y="101.09111"
+             x="72.14286"
+             height="103.21429"
+             width="174.64287"
+             id="rect1560" /></flowRegion><flowPara
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:73.0166px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#000000;stroke:#000000"
+           id="flowPara1564">10</flowPara></flowRoot>
+      <text
+         xml:space="preserve"
+         style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;line-height:125%;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-decoration:none;text-decoration-line:none;text-decoration-color:#000000;overflow:visible;fill:#000000;stroke:none;stroke-width:0.4;stop-color:#000000"
+         x="40.254723"
+         y="70.147652"
+         id="text532"><tspan
+           sodipodi:role="line"
+           id="tspan530"
+           x="40.254723"
+           y="70.147652"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke:none;stroke-width:0.4">km/h</tspan></text>
+    </g>
+    <g
+       id="g1545">
+      <circle
+         r="9.7442446"
+         cy="65.248291"
+         cx="66.114426"
+         id="circle1540"
+         style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#c50000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.0836929;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate" />
+      <circle
+         r="7.6643949"
+         cy="65.248291"
+         cx="66.114426"
+         id="circle1542"
+         style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:#cccccc;stroke-width:0.0658291;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate" />
+      <flowRoot
+         xml:space="preserve"
+         id="flowRoot1550"
+         style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:71.7437px;line-height:125%;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-indent:0;text-align:center;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:normal;word-spacing:normal;text-transform:none;writing-mode:lr-tb;direction:ltr;baseline-shift:baseline;text-anchor:middle;white-space:normal;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+         transform="matrix(0.13602718,0,0,0.12870588,44.366405,45.524967)"><flowRegion
+           id="flowRegion1546"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:71.7437px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;text-anchor:middle;fill:#000000;stroke:#000000"><rect
+             id="rect1544"
+             width="174.64287"
+             height="103.21429"
+             x="72.14286"
+             y="101.09111"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:71.74370364px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';text-align:center;text-anchor:middle;fill:#000000;stroke:#000000;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;" /></flowRegion><flowPara
+           id="flowPara1548"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:71.7437px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#000000;stroke:#000000">15</flowPara></flowRoot>
+      <text
+         xml:space="preserve"
+         style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;line-height:125%;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-decoration:none;text-decoration-line:none;text-decoration-color:#000000;overflow:visible;fill:#000000;stroke:none;stroke-width:0.4;stop-color:#000000"
+         x="62.711235"
+         y="69.883072"
+         id="text536"><tspan
+           sodipodi:role="line"
+           id="tspan534"
+           x="62.711235"
+           y="69.883072"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke:none;stroke-width:0.4">km/h</tspan></text>
+    </g>
+    <g
+       id="g1556">
+      <circle
+         style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#c50000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.0836929;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+         id="circle1524"
+         cx="87.810257"
+         cy="65.248291"
+         r="9.7442446"
+         inkscape:export-xdpi="260.66666"
+         inkscape:export-ydpi="260.66666" />
+      <circle
+         style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:#cccccc;stroke-width:0.0658291;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+         id="circle1526"
+         cx="87.810257"
+         cy="65.248291"
+         r="7.6643949" />
+      <flowRoot
+         transform="matrix(0.10499423,0,0,0.12870588,71.171158,44.543484)"
+         style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:81.6609px;line-height:125%;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-indent:0;text-align:center;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:-4.60671px;word-spacing:normal;text-transform:none;writing-mode:lr-tb;direction:ltr;baseline-shift:baseline;text-anchor:middle;white-space:normal;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+         id="flowRoot1534"
+         xml:space="preserve"><flowRegion
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:81.6609px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;letter-spacing:-4.60671px;text-anchor:middle;fill:#000000;stroke:#000000"
+           id="flowRegion1530"><rect
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:81.66085424px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';text-align:center;text-anchor:middle;fill:#000000;stroke:#000000;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;letter-spacing:-4.60671211px;"
+             y="101.09111"
+             x="72.14286"
+             height="103.21429"
+             width="174.64287"
+             id="rect1528" /></flowRegion><flowPara
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:81.6609px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;letter-spacing:-4.60671px;fill:#000000;stroke:#000000"
+           id="flowPara1532"><flowSpan
+   style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:81.6609px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;letter-spacing:-4.60671px;stroke:#000000"
+   id="flowSpan1097">2</flowSpan>0</flowPara></flowRoot>
+      <text
+         xml:space="preserve"
+         style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;line-height:125%;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-decoration:none;text-decoration-line:none;text-decoration-color:#000000;overflow:visible;fill:#000000;stroke:none;stroke-width:0.4;stop-color:#000000"
+         x="84.407074"
+         y="70.279945"
+         id="text540"><tspan
+           sodipodi:role="line"
+           id="tspan538"
+           x="84.407074"
+           y="70.279945"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke:none;stroke-width:0.4">km/h</tspan></text>
+    </g>
+    <g
+       id="g1566">
+      <circle
+         r="9.7442446"
+         cy="65.248291"
+         cx="110.03526"
+         id="circle2075"
+         style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#c50000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.0836929;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate" />
+      <circle
+         r="7.6643949"
+         cy="65.248291"
+         cx="110.03526"
+         id="circle2077"
+         style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:#cccccc;stroke-width:0.0658291;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate" />
+      <flowRoot
+         xml:space="preserve"
+         id="flowRoot2085"
+         style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:80.3379px;line-height:125%;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-indent:0;text-align:center;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:normal;word-spacing:normal;text-transform:none;writing-mode:lr-tb;direction:ltr;baseline-shift:baseline;text-anchor:middle;white-space:normal;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+         transform="matrix(0.10848069,0,0,0.12870588,92.602727,44.561132)"><flowRegion
+           id="flowRegion2081"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:80.3379px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;text-anchor:middle;fill:#000000;stroke:#000000"><rect
+             id="rect2079"
+             width="174.64287"
+             height="103.21429"
+             x="72.14286"
+             y="101.09111"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:80.33788861px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';text-align:center;text-anchor:middle;fill:#000000;stroke:#000000;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;" /></flowRegion><flowPara
+           id="flowPara2083"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:80.3379px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#000000;stroke:#000000">25</flowPara></flowRoot>
+      <text
+         xml:space="preserve"
+         style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;line-height:125%;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-decoration:none;text-decoration-line:none;text-decoration-color:#000000;overflow:visible;fill:#000000;stroke:none;stroke-width:0.4;stop-color:#000000"
+         x="106.59705"
+         y="70.246872"
+         id="text544"><tspan
+           sodipodi:role="line"
+           id="tspan542"
+           x="106.59705"
+           y="70.246872"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke:none;stroke-width:0.4">km/h</tspan></text>
+    </g>
+    <g
+       id="g1576">
+      <circle
+         style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#c50000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.0836929;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+         id="circle2097"
+         cx="132.12796"
+         cy="65.248291"
+         r="9.7442446" />
+      <circle
+         style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:#cccccc;stroke-width:0.0658291;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+         id="circle2099"
+         cx="132.12796"
+         cy="65.248291"
+         r="7.6643949" />
+      <flowRoot
+         transform="matrix(0.11583529,0,0,0.12870589,113.91655,44.815411)"
+         style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:77.7457px;line-height:125%;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-indent:0;text-align:center;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:normal;word-spacing:normal;text-transform:none;writing-mode:lr-tb;direction:ltr;baseline-shift:baseline;text-anchor:middle;white-space:normal;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+         id="flowRoot2107"
+         xml:space="preserve"><flowRegion
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:77.7457px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;text-anchor:middle;fill:#000000;stroke:#000000"
+           id="flowRegion2103"><rect
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:77.74566598px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';text-align:center;text-anchor:middle;fill:#000000;stroke:#000000;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;"
+             y="101.09111"
+             x="72.14286"
+             height="103.21429"
+             width="174.64287"
+             id="rect2101" /></flowRegion><flowPara
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:77.7457px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#000000;stroke:#000000"
+           id="flowPara2105">30</flowPara></flowRoot>
+      <text
+         xml:space="preserve"
+         style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;line-height:125%;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-decoration:none;text-decoration-line:none;text-decoration-color:#000000;overflow:visible;fill:#000000;stroke:none;stroke-width:0.4;stop-color:#000000"
+         x="128.68976"
+         y="70.246872"
+         id="text548"><tspan
+           sodipodi:role="line"
+           id="tspan546"
+           x="128.68976"
+           y="70.246872"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke:none;stroke-width:0.4">km/h</tspan></text>
+    </g>
+    <g
+       id="g1586">
+      <circle
+         r="9.7442446"
+         cy="65.248291"
+         cx="155.27901"
+         id="circle2113"
+         style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#c50000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.0836929;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate" />
+      <circle
+         r="7.6643949"
+         cy="65.248291"
+         cx="155.27901"
+         id="circle2115"
+         style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:#cccccc;stroke-width:0.0658291;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate" />
+      <flowRoot
+         xml:space="preserve"
+         id="flowRoot2123"
+         style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:77.7457px;line-height:125%;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-indent:0;text-align:center;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:normal;word-spacing:normal;text-transform:none;writing-mode:lr-tb;direction:ltr;baseline-shift:baseline;text-anchor:middle;white-space:normal;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+         transform="matrix(0.1158353,0,0,0.12870588,136.64255,45.013003)"><flowRegion
+           id="flowRegion2119"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:77.7457px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;text-anchor:middle;fill:#000000;stroke:#000000"><rect
+             id="rect2117"
+             width="174.64287"
+             height="103.21429"
+             x="72.14286"
+             y="101.09111"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:77.74566229px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';text-align:center;text-anchor:middle;fill:#000000;stroke:#000000;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;" /></flowRegion><flowPara
+           id="flowPara2121"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:77.7457px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#000000;stroke:#000000">35</flowPara></flowRoot>
+      <text
+         xml:space="preserve"
+         style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;line-height:125%;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-decoration:none;text-decoration-line:none;text-decoration-color:#000000;overflow:visible;fill:#000000;stroke:none;stroke-width:0.4;stop-color:#000000"
+         x="151.80537"
+         y="70.246872"
+         id="text556"><tspan
+           sodipodi:role="line"
+           id="tspan554"
+           x="151.80537"
+           y="70.246872"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke:none;stroke-width:0.4">km/h</tspan></text>
+    </g>
+    <g
+       id="g1596">
+      <circle
+         style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#c50000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.0836929;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+         id="circle2129"
+         cx="177.504"
+         cy="65.248291"
+         r="9.7442446" />
+      <circle
+         style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:#cccccc;stroke-width:0.0658291;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+         id="circle2131"
+         cx="177.504"
+         cy="65.248291"
+         r="7.6643949" />
+      <flowRoot
+         transform="matrix(0.10937748,0,0,0.12870588,159.73791,44.733828)"
+         style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:80.0079px;line-height:125%;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-indent:0;text-align:center;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:normal;word-spacing:normal;text-transform:none;writing-mode:lr-tb;direction:ltr;baseline-shift:baseline;text-anchor:middle;white-space:normal;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+         id="flowRoot2139"
+         xml:space="preserve"><flowRegion
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:80.0079px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;text-anchor:middle;fill:#000000;stroke:#000000"
+           id="flowRegion2135"><rect
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:80.00786556px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';text-align:center;text-anchor:middle;fill:#000000;stroke:#000000;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;"
+             y="101.09111"
+             x="72.14286"
+             height="103.21429"
+             width="174.64287"
+             id="rect2133" /></flowRegion><flowPara
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:80.0079px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#000000;stroke:#000000"
+           id="flowPara2137">40</flowPara></flowRoot>
+      <text
+         xml:space="preserve"
+         style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;line-height:125%;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-decoration:none;text-decoration-line:none;text-decoration-color:#000000;overflow:visible;fill:#000000;stroke:none;stroke-width:0.4;stop-color:#000000"
+         x="174.04643"
+         y="70.246872"
+         id="text560"><tspan
+           sodipodi:role="line"
+           id="tspan558"
+           x="174.04643"
+           y="70.246872"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke:none;stroke-width:0.4">km/h</tspan></text>
+    </g>
+    <g
+       id="g1678">
+      <circle
+         style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#c50000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.0836929;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+         id="circle2193"
+         cx="21.92901"
+         cy="88.928497"
+         r="9.7442446" />
+      <circle
+         style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:#cccccc;stroke-width:0.0658291;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+         id="circle2195"
+         cx="21.92901"
+         cy="88.92849"
+         r="7.6643949" />
+      <flowRoot
+         transform="matrix(0.11228736,0,0,0.12870588,3.9763015,69.202205)"
+         style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:78.9644px;line-height:125%;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-indent:0;text-align:center;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:normal;word-spacing:normal;text-transform:none;writing-mode:lr-tb;direction:ltr;baseline-shift:baseline;text-anchor:middle;white-space:normal;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+         id="flowRoot2203"
+         xml:space="preserve"><flowRegion
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:78.9644px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;text-anchor:middle;fill:#000000;stroke:#000000"
+           id="flowRegion2199"><rect
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:78.9643738px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';text-align:center;text-anchor:middle;fill:#000000;stroke:#000000;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;"
+             y="101.09111"
+             x="72.14286"
+             height="103.21429"
+             width="174.64287"
+             id="rect2197" /></flowRegion><flowPara
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:78.9644px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#000000;stroke:#000000"
+           id="flowPara2201">45</flowPara></flowRoot>
+      <text
+         xml:space="preserve"
+         style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;line-height:125%;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-decoration:none;text-decoration-line:none;text-decoration-color:#000000;overflow:visible;fill:#000000;stroke:none;stroke-width:0.4;stop-color:#000000"
+         x="18.75733"
+         y="94.191666"
+         id="text568"><tspan
+           sodipodi:role="line"
+           id="tspan566"
+           x="18.75733"
+           y="94.191666"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke:none;stroke-width:0.4">km/h</tspan></text>
+    </g>
+    <g
+       id="g1656">
+      <circle
+         style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#c50000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.0836929;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+         id="circle2161"
+         cx="66.114426"
+         cy="88.928497"
+         r="9.7442446" />
+      <circle
+         style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:#cccccc;stroke-width:0.0658291;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+         id="circle2163"
+         cx="66.114426"
+         cy="88.928497"
+         r="7.6643949" />
+      <flowRoot
+         transform="matrix(0.11206137,0,0,0.12870588,48.511525,69.201657)"
+         style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:79.044px;line-height:125%;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-indent:0;text-align:center;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:normal;word-spacing:normal;text-transform:none;writing-mode:lr-tb;direction:ltr;baseline-shift:baseline;text-anchor:middle;white-space:normal;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+         id="flowRoot2171"
+         xml:space="preserve"><flowRegion
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:79.044px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;text-anchor:middle;fill:#000000;stroke:#000000"
+           id="flowRegion2167"><rect
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:79.04395772px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';text-align:center;text-anchor:middle;fill:#000000;stroke:#000000;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;"
+             y="101.09111"
+             x="72.14286"
+             height="103.21429"
+             width="174.64287"
+             id="rect2165" /></flowRegion><flowPara
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:79.044px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#000000;stroke:#000000"
+           id="flowPara2169">55</flowPara></flowRoot>
+      <text
+         xml:space="preserve"
+         style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;line-height:125%;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-decoration:none;text-decoration-line:none;text-decoration-color:#000000;overflow:visible;fill:#000000;stroke:none;stroke-width:0.4;stop-color:#000000"
+         x="62.744308"
+         y="94.191666"
+         id="text576"><tspan
+           sodipodi:role="line"
+           id="tspan574"
+           x="62.744308"
+           y="94.191666"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke:none;stroke-width:0.4">km/h</tspan></text>
+    </g>
+    <g
+       id="g1646">
+      <circle
+         r="9.7442446"
+         cy="88.928497"
+         cx="87.810257"
+         id="circle2145"
+         style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#c50000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.0836929;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate" />
+      <circle
+         r="7.6643949"
+         cy="88.928497"
+         cx="87.810257"
+         id="circle2147"
+         style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:#cccccc;stroke-width:0.0658291;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate" />
+      <flowRoot
+         xml:space="preserve"
+         id="flowRoot2155"
+         style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:80.0741px;line-height:125%;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-indent:0;text-align:center;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:normal;word-spacing:normal;text-transform:none;writing-mode:lr-tb;direction:ltr;baseline-shift:baseline;text-anchor:middle;white-space:normal;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+         transform="matrix(0.10919658,0,0,0.12870589,70.516524,69.205551)"><flowRegion
+           id="flowRegion2151"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:80.0741px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;text-anchor:middle;fill:#000000;stroke:#000000"><rect
+             id="rect2149"
+             width="174.64287"
+             height="103.21429"
+             x="72.14286"
+             y="101.09111"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:80.07410863px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';text-align:center;text-anchor:middle;fill:#000000;stroke:#000000;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;" /></flowRegion><flowPara
+           id="flowPara2153"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:80.0741px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#000000;stroke:#000000">60</flowPara></flowRoot>
+      <text
+         xml:space="preserve"
+         style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;line-height:125%;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-decoration:none;text-decoration-line:none;text-decoration-color:#000000;overflow:visible;fill:#000000;stroke:none;stroke-width:0.4;stop-color:#000000"
+         x="84.440147"
+         y="94.191666"
+         id="text580"><tspan
+           sodipodi:role="line"
+           id="tspan578"
+           x="84.440147"
+           y="94.191666"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke:none;stroke-width:0.4">km/h</tspan></text>
+    </g>
+    <g
+       id="g1636">
+      <circle
+         style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#c50000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.0836929;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+         id="circle2207"
+         cx="110.03526"
+         cy="88.928497"
+         r="9.7442446" />
+      <circle
+         style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:#cccccc;stroke-width:0.0658291;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+         id="circle2209"
+         cx="110.03526"
+         cy="88.928497"
+         r="7.6643949" />
+      <flowRoot
+         transform="matrix(0.1158353,0,0,0.12870588,91.640384,69.166103)"
+         style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:77.7457px;line-height:125%;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-indent:0;text-align:center;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:normal;word-spacing:normal;text-transform:none;writing-mode:lr-tb;direction:ltr;baseline-shift:baseline;text-anchor:middle;white-space:normal;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+         id="flowRoot2217"
+         xml:space="preserve"><flowRegion
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:77.7457px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;text-anchor:middle;fill:#000000;stroke:#000000"
+           id="flowRegion2213"><rect
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:77.74566229px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';text-align:center;text-anchor:middle;fill:#000000;stroke:#000000;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;"
+             y="101.09111"
+             x="72.14286"
+             height="103.21429"
+             width="174.64287"
+             id="rect2211" /></flowRegion><flowPara
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:77.7457px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#000000;stroke:#000000"
+           id="flowPara2215">65</flowPara></flowRoot>
+      <text
+         xml:space="preserve"
+         style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;line-height:125%;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-decoration:none;text-decoration-line:none;text-decoration-color:#000000;overflow:visible;fill:#000000;stroke:none;stroke-width:0.4;stop-color:#000000"
+         x="106.53285"
+         y="94.191666"
+         id="text584"><tspan
+           sodipodi:role="line"
+           id="tspan582"
+           x="106.53285"
+           y="94.191666"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke:none;stroke-width:0.4">km/h</tspan></text>
+    </g>
+    <g
+       id="g1626">
+      <circle
+         r="9.7442446"
+         cy="88.928497"
+         cx="132.12796"
+         id="circle2223"
+         style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#c50000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.0836929;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate" />
+      <circle
+         r="7.6643949"
+         cy="88.928497"
+         cx="132.12796"
+         id="circle2225"
+         style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:#cccccc;stroke-width:0.0658291;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate" />
+      <flowRoot
+         xml:space="preserve"
+         id="flowRoot2233"
+         style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:80.1443px;line-height:125%;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-indent:0;text-align:center;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:normal;word-spacing:normal;text-transform:none;writing-mode:lr-tb;direction:ltr;baseline-shift:baseline;text-anchor:middle;white-space:normal;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+         transform="matrix(0.10110653,0,0,0.12878398,116.26794,69.195309)"><flowRegion
+           id="flowRegion2229"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:80.1443px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;text-anchor:middle;fill:#000000;stroke:#000000"><rect
+             id="rect2227"
+             width="174.64287"
+             height="103.21429"
+             x="72.14286"
+             y="101.09111"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:80.1443457px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';text-align:center;text-anchor:middle;fill:#000000;stroke:#000000;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;" /></flowRegion><flowPara
+           id="flowPara2231"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:80.1443px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#000000;stroke:#000000">70</flowPara></flowRoot>
+      <text
+         xml:space="preserve"
+         style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;line-height:125%;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-decoration:none;text-decoration-line:none;text-decoration-color:#000000;overflow:visible;fill:#000000;stroke:none;stroke-width:0.4;stop-color:#000000"
+         x="128.7191"
+         y="94.191666"
+         id="text588"><tspan
+           sodipodi:role="line"
+           id="tspan586"
+           x="128.7191"
+           y="94.191666"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke:none;stroke-width:0.4">km/h</tspan></text>
+    </g>
+    <g
+       id="g1616">
+      <circle
+         style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#c50000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.0836929;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+         id="circle2239"
+         cx="155.27901"
+         cy="88.928497"
+         r="9.7442446" />
+      <circle
+         style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:#cccccc;stroke-width:0.0658291;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+         id="circle2241"
+         cx="155.27901"
+         cy="88.928497"
+         r="7.6643949" />
+      <flowRoot
+         transform="matrix(0.10973476,0,0,0.12880528,138.04396,69.469177)"
+         style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:76.5093px;line-height:125%;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-indent:0;text-align:center;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:normal;word-spacing:normal;text-transform:none;writing-mode:lr-tb;direction:ltr;baseline-shift:baseline;text-anchor:middle;white-space:normal;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+         id="flowRoot2249"
+         xml:space="preserve"><flowRegion
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:76.5093px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;text-anchor:middle;fill:#000000;stroke:#000000"
+           id="flowRegion2245"><rect
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:76.50931877px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';text-align:center;text-anchor:middle;fill:#000000;stroke:#000000;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;"
+             y="101.09111"
+             x="72.14286"
+             height="103.21429"
+             width="174.64287"
+             id="rect2243" /></flowRegion><flowPara
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:76.5093px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#000000;stroke:#000000"
+           id="flowPara2247">75</flowPara></flowRoot>
+      <text
+         xml:space="preserve"
+         style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;line-height:125%;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-decoration:none;text-decoration-line:none;text-decoration-color:#000000;overflow:visible;fill:#000000;stroke:none;stroke-width:0.4;stop-color:#000000"
+         x="151.8347"
+         y="94.14489"
+         id="text592"><tspan
+           sodipodi:role="line"
+           id="tspan590"
+           x="151.8347"
+           y="94.14489"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke:none;stroke-width:0.4">km/h</tspan></text>
+    </g>
+    <g
+       id="g1606">
+      <circle
+         r="9.7442446"
+         cy="88.928497"
+         cx="177.504"
+         id="circle2255"
+         style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#c50000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.0836929;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate" />
+      <circle
+         r="7.6643949"
+         cy="88.928497"
+         cx="177.504"
+         id="circle2257"
+         style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:#cccccc;stroke-width:0.0658291;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate" />
+      <flowRoot
+         xml:space="preserve"
+         id="flowRoot2265"
+         style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:77.7457px;line-height:125%;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-indent:0;text-align:center;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:normal;word-spacing:normal;text-transform:none;writing-mode:lr-tb;direction:ltr;baseline-shift:baseline;text-anchor:middle;white-space:normal;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+         transform="matrix(0.1158353,0,0,0.12870588,159.06148,69.223224)"><flowRegion
+           id="flowRegion2261"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:77.7457px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;text-anchor:middle;fill:#000000;stroke:#000000"><rect
+             id="rect2259"
+             width="174.64287"
+             height="103.21429"
+             x="72.14286"
+             y="101.09111"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:77.74566229px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';text-align:center;text-anchor:middle;fill:#000000;stroke:#000000;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;" /></flowRegion><flowPara
+           id="flowPara2263"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:77.7457px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#000000;stroke:#000000">80</flowPara></flowRoot>
+      <text
+         xml:space="preserve"
+         style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;line-height:125%;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-decoration:none;text-decoration-line:none;text-decoration-color:#000000;overflow:visible;fill:#000000;stroke:none;stroke-width:0.4;stop-color:#000000"
+         x="174.12253"
+         y="94.168282"
+         id="text596"><tspan
+           sodipodi:role="line"
+           id="tspan594"
+           x="174.12253"
+           y="94.168282"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke:none;stroke-width:0.4">km/h</tspan></text>
+    </g>
+    <g
+       id="g1668">
+      <circle
+         r="9.7442446"
+         cy="88.928497"
+         cx="43.624844"
+         id="circle2177"
+         style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#c50000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.0836929;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate" />
+      <circle
+         r="7.6643949"
+         cy="88.928497"
+         cx="43.624844"
+         id="circle2179"
+         style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:#cccccc;stroke-width:0.0658291;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate" />
+      <flowRoot
+         xml:space="preserve"
+         id="flowRoot2187"
+         style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:80.4601px;line-height:125%;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-indent:0;text-align:center;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:normal;word-spacing:normal;text-transform:none;writing-mode:lr-tb;direction:ltr;baseline-shift:baseline;text-anchor:middle;white-space:normal;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+         transform="matrix(0.10815152,0,0,0.12870589,26.640621,69.2047)"><flowRegion
+           id="flowRegion2183"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:80.4601px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;text-anchor:middle;fill:#000000;stroke:#000000"><rect
+             id="rect2181"
+             width="174.64287"
+             height="103.21429"
+             x="72.14286"
+             y="101.09111"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:80.4600558px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';text-align:center;text-anchor:middle;fill:#000000;stroke:#000000;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;" /></flowRegion><flowPara
+           id="flowPara2185"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:80.4601px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#000000;stroke:#000000">50</flowPara></flowRoot>
+      <text
+         xml:space="preserve"
+         style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;line-height:125%;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-decoration:none;text-decoration-line:none;text-decoration-color:#000000;overflow:visible;fill:#000000;stroke:none;stroke-width:0.4;stop-color:#000000"
+         x="40.453163"
+         y="94.191666"
+         id="text572"><tspan
+           sodipodi:role="line"
+           id="tspan570"
+           x="40.453163"
+           y="94.191666"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke:none;stroke-width:0.4">km/h</tspan></text>
+      <text
+         xml:space="preserve"
+         style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;line-height:125%;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-decoration:none;text-decoration-line:none;text-decoration-color:#000000;overflow:visible;fill:#000000;stroke:none;stroke-width:0.4;stop-color:#000000"
+         x="40.453163"
+         y="94.191666"
+         id="text600"><tspan
+           sodipodi:role="line"
+           id="tspan598"
+           x="40.453163"
+           y="94.191666"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke:none;stroke-width:0.4">km/h</tspan></text>
+    </g>
+    <g
+       id="g1688">
+      <circle
+         r="9.7442446"
+         cy="113.27016"
+         cx="21.92901"
+         id="circle2271"
+         style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#c50000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.0836929;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate" />
+      <circle
+         r="7.6643949"
+         cy="113.27015"
+         cx="21.92901"
+         id="circle2273"
+         style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:#cccccc;stroke-width:0.0658291;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate" />
+      <flowRoot
+         xml:space="preserve"
+         id="flowRoot2281"
+         style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:77.7457px;line-height:125%;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-indent:0;text-align:center;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:normal;word-spacing:normal;text-transform:none;writing-mode:lr-tb;direction:ltr;baseline-shift:baseline;text-anchor:middle;white-space:normal;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+         transform="matrix(0.1158353,0,0,0.12870588,3.4583343,93.562347)"><flowRegion
+           id="flowRegion2277"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:77.7457px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;text-anchor:middle;fill:#000000;stroke:#000000"><rect
+             id="rect2275"
+             width="174.64287"
+             height="103.21429"
+             x="72.14286"
+             y="101.09111"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:77.74566229px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';text-align:center;text-anchor:middle;fill:#000000;stroke:#000000;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;" /></flowRegion><flowPara
+           id="flowPara2279"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:77.7457px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#000000;stroke:#000000">85</flowPara></flowRoot>
+      <text
+         xml:space="preserve"
+         style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;line-height:125%;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-decoration:none;text-decoration-line:none;text-decoration-color:#000000;overflow:visible;fill:#000000;stroke:none;stroke-width:0.4;stop-color:#000000"
+         x="18.56749"
+         y="118.53333"
+         id="text604"><tspan
+           sodipodi:role="line"
+           id="tspan602"
+           x="18.56749"
+           y="118.53333"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke:none;stroke-width:0.4">km/h</tspan></text>
+    </g>
+    <g
+       id="g1698">
+      <circle
+         style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#c50000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.0836929;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+         id="circle2317"
+         cx="43.624844"
+         cy="113.27016"
+         r="9.7442446" />
+      <circle
+         style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:#cccccc;stroke-width:0.0658291;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+         id="circle2319"
+         cx="43.624844"
+         cy="113.27016"
+         r="7.6643949" />
+      <flowRoot
+         transform="matrix(0.11417909,0,0,0.12870589,25.67723,93.427845)"
+         style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:78.3075px;line-height:125%;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-indent:0;text-align:center;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:normal;word-spacing:normal;text-transform:none;writing-mode:lr-tb;direction:ltr;baseline-shift:baseline;text-anchor:middle;white-space:normal;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+         id="flowRoot2327"
+         xml:space="preserve"><flowRegion
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:78.3075px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;text-anchor:middle;fill:#000000;stroke:#000000"
+           id="flowRegion2323"><rect
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:78.30749874px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';text-align:center;text-anchor:middle;fill:#000000;stroke:#000000;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;"
+             y="101.09111"
+             x="72.14286"
+             height="103.21429"
+             width="174.64287"
+             id="rect2321" /></flowRegion><flowPara
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:78.3075px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#000000;stroke:#000000"
+           id="flowPara2325">90</flowPara></flowRoot>
+      <text
+         xml:space="preserve"
+         style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;line-height:125%;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-decoration:none;text-decoration-line:none;text-decoration-color:#000000;overflow:visible;fill:#000000;stroke:none;stroke-width:0.4;stop-color:#000000"
+         x="40.356869"
+         y="118.53333"
+         id="text608"><tspan
+           sodipodi:role="line"
+           id="tspan606"
+           x="40.356869"
+           y="118.53333"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke:none;stroke-width:0.4">km/h</tspan></text>
+    </g>
+    <g
+       id="g1708">
+      <circle
+         r="9.7442446"
+         cy="113.27016"
+         cx="66.114426"
+         id="circle2301"
+         style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#c50000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.0836929;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate" />
+      <circle
+         r="7.6643949"
+         cy="113.27016"
+         cx="66.114426"
+         id="circle2303"
+         style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:#cccccc;stroke-width:0.0658291;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate" />
+      <flowRoot
+         xml:space="preserve"
+         id="flowRoot2311"
+         style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:77.7457px;line-height:125%;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-indent:0;text-align:center;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:normal;word-spacing:normal;text-transform:none;writing-mode:lr-tb;direction:ltr;baseline-shift:baseline;text-anchor:middle;white-space:normal;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+         transform="matrix(0.1158353,0,0,0.12870588,47.576928,93.559618)"><flowRegion
+           id="flowRegion2307"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:77.7457px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;text-anchor:middle;fill:#000000;stroke:#000000"><rect
+             id="rect2305"
+             width="174.64287"
+             height="103.21429"
+             x="72.14286"
+             y="101.09111"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:77.74566229px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';text-align:center;text-anchor:middle;fill:#000000;stroke:#000000;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;" /></flowRegion><flowPara
+           id="flowPara2309"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:77.7457px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#000000;stroke:#000000">95</flowPara></flowRoot>
+      <text
+         xml:space="preserve"
+         style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;line-height:125%;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-decoration:none;text-decoration-line:none;text-decoration-color:#000000;overflow:visible;fill:#000000;stroke:none;stroke-width:0.4;stop-color:#000000"
+         x="62.694782"
+         y="118.53333"
+         id="text612"><tspan
+           sodipodi:role="line"
+           id="tspan610"
+           x="62.694782"
+           y="118.53333"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke:none;stroke-width:0.4">km/h</tspan></text>
+    </g>
+    <g
+       id="g1718">
+      <circle
+         style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#c50000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.0836929;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+         id="circle2285"
+         cx="87.810257"
+         cy="113.27016"
+         r="9.7442446" />
+      <circle
+         style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:#cccccc;stroke-width:0.0658291;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+         id="circle2287"
+         cx="87.810257"
+         cy="113.27016"
+         r="7.6643949" />
+      <flowRoot
+         xml:space="preserve"
+         id="flowRoot482"
+         style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:90.1551px;line-height:125%;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-indent:0;text-align:center;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:normal;word-spacing:normal;text-transform:none;writing-mode:lr-tb;direction:ltr;baseline-shift:baseline;text-anchor:middle;white-space:normal;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+         transform="matrix(0.09344964,0,0,0.11490155,73.190151,94.776512)"><flowRegion
+           id="flowRegion478"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:90.1551px;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;text-anchor:middle;fill:#000000;stroke:#000000"><rect
+             id="rect476"
+             width="174.64287"
+             height="103.21429"
+             x="72.14286"
+             y="101.09111"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:90.1551447px;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';text-align:center;text-anchor:middle;fill:#000000;stroke:#000000;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;" /></flowRegion><flowPara
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:90.1551px;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#000000;stroke:#000000"
+           id="flowPara522">100</flowPara></flowRoot>
+      <text
+         xml:space="preserve"
+         style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;line-height:125%;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-decoration:none;text-decoration-line:none;text-decoration-color:#000000;overflow:visible;fill:#000000;stroke:none;stroke-width:0.4;stop-color:#000000"
+         x="84.624481"
+         y="118.53333"
+         id="text616"><tspan
+           sodipodi:role="line"
+           id="tspan614"
+           x="84.624481"
+           y="118.53333"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke:none;stroke-width:0.4">km/h</tspan></text>
+    </g>
+    <g
+       id="g1728">
+      <circle
+         r="9.7442446"
+         cy="113.27016"
+         cx="110.03526"
+         id="circle2333"
+         style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#c50000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.0836929;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate" />
+      <circle
+         r="7.6643949"
+         cy="113.27016"
+         cx="110.03526"
+         id="circle2335"
+         style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:#cccccc;stroke-width:0.0658291;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate" />
+      <flowRoot
+         xml:space="preserve"
+         id="flowRoot474"
+         style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:90.1551px;line-height:125%;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-indent:0;text-align:center;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:normal;word-spacing:normal;text-transform:none;writing-mode:lr-tb;direction:ltr;baseline-shift:baseline;text-anchor:middle;white-space:normal;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+         transform="matrix(0.09030488,0,0,0.11496059,95.688156,94.767422)"><flowRegion
+           id="flowRegion470"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:90.1551px;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;text-anchor:middle;fill:#000000;stroke:#000000"><rect
+             id="rect468"
+             width="174.64287"
+             height="103.21429"
+             x="72.14286"
+             y="101.09111"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:90.1551447px;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';text-align:center;text-anchor:middle;fill:#000000;stroke:#000000;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;" /></flowRegion><flowPara
+           id="flowPara472"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:90.1551px;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#000000;stroke:#000000">105</flowPara></flowRoot>
+      <text
+         xml:space="preserve"
+         style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;line-height:125%;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-decoration:none;text-decoration-line:none;text-decoration-color:#000000;overflow:visible;fill:#000000;stroke:none;stroke-width:0.4;stop-color:#000000"
+         x="106.81072"
+         y="118.53333"
+         id="text620"><tspan
+           sodipodi:role="line"
+           id="tspan618"
+           x="106.81072"
+           y="118.53333"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke:none;stroke-width:0.4">km/h</tspan></text>
+    </g>
+    <g
+       id="g1738">
+      <circle
+         style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#c50000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.0836929;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+         id="circle2349"
+         cx="132.12796"
+         cy="113.27016"
+         r="9.7442446" />
+      <circle
+         style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:#cccccc;stroke-width:0.0658291;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+         id="circle2351"
+         cx="132.12796"
+         cy="113.27016"
+         r="7.6643949" />
+      <flowRoot
+         xml:space="preserve"
+         id="flowRoot466"
+         style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:90.1551px;line-height:125%;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-indent:0;text-align:center;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:normal;word-spacing:normal;text-transform:none;writing-mode:lr-tb;direction:ltr;baseline-shift:baseline;text-anchor:middle;white-space:normal;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+         transform="matrix(0.11721134,0,0,0.11490155,113.44005,94.776512)"><flowRegion
+           id="flowRegion462"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:90.1551px;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;text-anchor:middle;fill:#000000;stroke:#000000"><rect
+             id="rect460"
+             width="174.64287"
+             height="103.21429"
+             x="72.14286"
+             y="101.09111"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:90.1551447px;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';text-align:center;text-anchor:middle;fill:#000000;stroke:#000000;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;" /></flowRegion><flowPara
+           id="flowPara464"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:90.1551px;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#000000;stroke:#000000">110</flowPara></flowRoot>
+      <text
+         xml:space="preserve"
+         style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;line-height:125%;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-decoration:none;text-decoration-line:none;text-decoration-color:#000000;overflow:visible;fill:#000000;stroke:none;stroke-width:0.4;stop-color:#000000"
+         x="128.76309"
+         y="118.53333"
+         id="text624"><tspan
+           sodipodi:role="line"
+           id="tspan622"
+           x="128.76309"
+           y="118.53333"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke:none;stroke-width:0.4">km/h</tspan></text>
+    </g>
+    <g
+       id="g1748">
+      <circle
+         r="9.7442446"
+         cy="113.27016"
+         cx="155.27901"
+         id="circle2365"
+         style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#c50000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.0836929;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate" />
+      <circle
+         r="7.6643949"
+         cy="113.27016"
+         cx="155.27901"
+         id="circle2367"
+         style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:#cccccc;stroke-width:0.0658291;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate" />
+      <flowRoot
+         xml:space="preserve"
+         id="flowRoot2375"
+         style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:90.1551px;line-height:125%;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-indent:0;text-align:center;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:normal;word-spacing:normal;text-transform:none;writing-mode:lr-tb;direction:ltr;baseline-shift:baseline;text-anchor:middle;white-space:normal;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+         transform="matrix(0.11298143,0,0,0.11493564,137.08504,94.771246)"><flowRegion
+           id="flowRegion2371"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:90.1551px;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;text-anchor:middle;fill:#000000;stroke:#000000"><rect
+             id="rect2369"
+             width="174.64287"
+             height="103.21429"
+             x="72.14286"
+             y="101.09111"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:90.1551447px;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';text-align:center;text-anchor:middle;fill:#000000;stroke:#000000;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;" /></flowRegion><flowPara
+           id="flowPara2373"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:90.1551px;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#000000;stroke:#000000">115</flowPara></flowRoot>
+      <text
+         xml:space="preserve"
+         style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;line-height:125%;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-decoration:none;text-decoration-line:none;text-decoration-color:#000000;overflow:visible;fill:#000000;stroke:none;stroke-width:0.4;stop-color:#000000"
+         x="151.83194"
+         y="118.55672"
+         id="text628"><tspan
+           sodipodi:role="line"
+           id="tspan626"
+           x="151.83194"
+           y="118.55672"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke:none;stroke-width:0.4">km/h</tspan></text>
+    </g>
+    <g
+       id="g1758">
+      <circle
+         style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#c50000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.0836929;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+         id="circle2381"
+         cx="177.504"
+         cy="113.27016"
+         r="9.7442446" />
+      <circle
+         style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:#cccccc;stroke-width:0.0658291;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+         id="circle2383"
+         cx="177.504"
+         cy="113.27016"
+         r="7.6643949" />
+      <flowRoot
+         xml:space="preserve"
+         id="flowRoot490"
+         style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:90.1551px;line-height:125%;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-indent:0;text-align:center;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:normal;word-spacing:normal;text-transform:none;writing-mode:lr-tb;direction:ltr;baseline-shift:baseline;text-anchor:middle;white-space:normal;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+         transform="matrix(0.09824747,0,0,0.11490155,162.12999,94.776512)"><flowRegion
+           id="flowRegion486"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:90.1551px;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;text-anchor:middle;fill:#000000;stroke:#000000"><rect
+             id="rect484"
+             width="174.64287"
+             height="103.21429"
+             x="72.14286"
+             y="101.09111"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:90.1551447px;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';text-align:center;text-anchor:middle;fill:#000000;stroke:#000000;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;" /></flowRegion><flowPara
+           id="flowPara488"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:90.1551px;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#000000;stroke:#000000">120</flowPara></flowRoot>
+      <text
+         xml:space="preserve"
+         style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;line-height:125%;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-decoration:none;text-decoration-line:none;text-decoration-color:#000000;overflow:visible;fill:#000000;stroke:none;stroke-width:0.4;stop-color:#000000"
+         x="174.09637"
+         y="118.55672"
+         id="text632"><tspan
+           sodipodi:role="line"
+           id="tspan630"
+           x="174.09637"
+           y="118.55672"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke:none;stroke-width:0.4">km/h</tspan></text>
+    </g>
+    <g
+       id="g1807">
+      <circle
+         r="9.7442446"
+         cy="136.95038"
+         cx="22.006504"
+         id="circle2450"
+         style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#c50000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.0836929;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate" />
+      <circle
+         r="7.6643949"
+         cy="136.95038"
+         cx="22.006504"
+         id="circle2452"
+         style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:#cccccc;stroke-width:0.0658291;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate" />
+      <flowRoot
+         xml:space="preserve"
+         id="flowRoot2462"
+         style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:91.1336px;line-height:125%;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-indent:0;text-align:center;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:normal;word-spacing:normal;text-transform:none;writing-mode:lr-tb;direction:ltr;baseline-shift:baseline;text-anchor:middle;white-space:normal;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+         transform="matrix(0.09274685,0,0,0.10979846,7.2981285,118.84645)"><flowRegion
+           id="flowRegion2456"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:91.1336px;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;text-anchor:middle;fill:#000000;stroke:#000000"><rect
+             id="rect2454"
+             width="174.64287"
+             height="103.21429"
+             x="72.14286"
+             y="101.09111"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:91.13355667px;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';text-align:center;text-anchor:middle;fill:#000000;stroke:#000000;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;" /></flowRegion><flowPara
+           id="flowPara2460"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:91.1336px;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;letter-spacing:0px;fill:#000000;stroke:#000000">1<flowSpan
+   style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:91.1336px;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;letter-spacing:-6.06314px;stroke:#000000"
+   id="flowSpan1827">2</flowSpan>5</flowPara></flowRoot>
+      <text
+         xml:space="preserve"
+         style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;line-height:125%;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-decoration:none;text-decoration-line:none;text-decoration-color:#000000;overflow:visible;fill:#000000;stroke:none;stroke-width:0.4;stop-color:#000000"
+         x="18.578955"
+         y="141.94896"
+         id="text664"><tspan
+           sodipodi:role="line"
+           id="tspan662"
+           x="18.578955"
+           y="141.94896"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke:none;stroke-width:0.4">km/h</tspan></text>
+    </g>
+    <g
+       id="g1796">
+      <circle
+         style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#c50000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.0836929;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+         id="circle2432"
+         cx="43.702335"
+         cy="136.95038"
+         r="9.7442446" />
+      <circle
+         style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:#cccccc;stroke-width:0.0658291;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+         id="circle2434"
+         cx="43.702335"
+         cy="136.95038"
+         r="7.6643949" />
+      <flowRoot
+         xml:space="preserve"
+         id="flowRoot500"
+         style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:91.1336px;line-height:125%;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-indent:0;text-align:center;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:normal;word-spacing:normal;text-transform:none;writing-mode:lr-tb;direction:ltr;baseline-shift:baseline;text-anchor:middle;white-space:normal;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+         transform="matrix(0.09313339,0,0,0.10979846,29.116389,118.71416)"><flowRegion
+           id="flowRegion494"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:91.1336px;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;text-anchor:middle;fill:#000000;stroke:#000000"><rect
+             id="rect492"
+             width="174.64287"
+             height="103.21429"
+             x="72.14286"
+             y="101.09111"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:91.13355667px;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';text-align:center;text-anchor:middle;fill:#000000;stroke:#000000;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;" /></flowRegion><flowPara
+           id="flowPara498"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:91.1336px;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;letter-spacing:0px;fill:#000000;stroke:#000000">130</flowPara></flowRoot>
+      <text
+         xml:space="preserve"
+         style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;line-height:125%;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-decoration:none;text-decoration-line:none;text-decoration-color:#000000;overflow:visible;fill:#000000;stroke:none;stroke-width:0.4;stop-color:#000000"
+         x="40.254726"
+         y="141.98203"
+         id="text668"><tspan
+           sodipodi:role="line"
+           id="tspan666"
+           x="40.254726"
+           y="141.98203"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke:none;stroke-width:0.4">km/h</tspan></text>
+    </g>
+    <g
+       id="g1786">
+      <circle
+         r="9.7442446"
+         cy="136.95038"
+         cx="66.191917"
+         id="circle2414"
+         style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#c50000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.0836929;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate" />
+      <circle
+         r="7.6643949"
+         cy="136.95038"
+         cx="66.191917"
+         id="circle2416"
+         style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:#cccccc;stroke-width:0.0658291;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate" />
+      <flowRoot
+         xml:space="preserve"
+         id="flowRoot510"
+         style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:91.1336px;line-height:125%;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-indent:0;text-align:center;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:normal;word-spacing:normal;text-transform:none;writing-mode:lr-tb;direction:ltr;baseline-shift:baseline;text-anchor:middle;white-space:normal;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+         transform="matrix(0.09011466,0,0,0.10979846,51.730511,118.71416)"><flowRegion
+           id="flowRegion504"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:91.1336px;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;text-anchor:middle;fill:#000000;stroke:#000000"><rect
+             id="rect502"
+             width="174.64287"
+             height="103.21429"
+             x="72.14286"
+             y="101.09111"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:91.13355667px;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';text-align:center;text-anchor:middle;fill:#000000;stroke:#000000;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;" /></flowRegion><flowPara
+           id="flowPara508"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:91.1336px;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;letter-spacing:0px;fill:#000000;stroke:#000000">135</flowPara></flowRoot>
+      <text
+         xml:space="preserve"
+         style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;line-height:125%;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-decoration:none;text-decoration-line:none;text-decoration-color:#000000;overflow:visible;fill:#000000;stroke:none;stroke-width:0.4;stop-color:#000000"
+         x="62.744308"
+         y="141.94896"
+         id="text672"><tspan
+           sodipodi:role="line"
+           id="tspan670"
+           x="62.744308"
+           y="141.94896"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke:none;stroke-width:0.4">km/h</tspan></text>
+    </g>
+    <g
+       id="g1776">
+      <circle
+         style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#c50000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.0836929;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+         id="circle1336"
+         cx="87.92083"
+         cy="136.95038"
+         r="9.7442446" />
+      <circle
+         style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:#cccccc;stroke-width:0.0658291;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+         id="circle1338"
+         cx="87.92083"
+         cy="136.95038"
+         r="7.6643949" />
+      <flowRoot
+         xml:space="preserve"
+         id="flowRoot520"
+         style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:91.1336px;line-height:125%;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-indent:0;text-align:center;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:normal;word-spacing:normal;text-transform:none;writing-mode:lr-tb;direction:ltr;baseline-shift:baseline;text-anchor:middle;white-space:normal;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+         transform="matrix(0.08673688,0,0,0.10983725,74.284493,118.70817)"><flowRegion
+           id="flowRegion514"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:91.1336px;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;text-anchor:middle;fill:#000000;stroke:#000000"><rect
+             id="rect512"
+             width="174.64287"
+             height="103.21429"
+             x="72.14286"
+             y="101.09111"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:91.13355667px;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';text-align:center;text-anchor:middle;fill:#000000;stroke:#000000;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;" /></flowRegion><flowPara
+           id="flowPara518"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:91.1336px;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;letter-spacing:0px;fill:#000000;stroke:#000000">140</flowPara></flowRoot>
+      <text
+         xml:space="preserve"
+         style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;line-height:125%;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-decoration:none;text-decoration-line:none;text-decoration-color:#000000;overflow:visible;fill:#000000;stroke:none;stroke-width:0.4;stop-color:#000000"
+         x="84.407074"
+         y="141.98203"
+         id="text676"><tspan
+           sodipodi:role="line"
+           id="tspan674"
+           x="84.407074"
+           y="141.98203"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;font-family:'Highway Gothic Wide';-inkscape-font-specification:'Highway Gothic Wide, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke:none;stroke-width:0.4">km/h</tspan></text>
+    </g>
+    <g
+       id="g1766">
+      <circle
+         style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.0836929;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+         id="circle448"
+         cx="177.96703"
+         cy="137.2811"
+         r="9.7442446" />
+      <circle
+         style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:#cccccc;stroke-width:0.0658291;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+         id="circle450"
+         cx="177.96703"
+         cy="137.2811"
+         r="7.6643949" />
+      <rect
+         style="color:#000000;overflow:visible;fill:#000000;stroke-width:0.0341985;stop-color:#000000"
+         id="rect1505"
+         width="18.609287"
+         height="0.36888695"
+         x="19.228008"
+         y="223.15123"
+         transform="rotate(-45)" />
+      <rect
+         style="color:#000000;overflow:visible;fill:#000000;stroke-width:0.0341985;stop-color:#000000"
+         id="rect1511"
+         width="18.609287"
+         height="0.36888695"
+         x="19.228008"
+         y="223.88899"
+         transform="rotate(-45)" />
+      <rect
+         style="color:#000000;overflow:visible;fill:#000000;stroke-width:0.0341985;stop-color:#000000"
+         id="rect1513"
+         width="18.609287"
+         height="0.36888695"
+         x="19.228008"
+         y="222.41347"
+         transform="rotate(-45)" />
+      <rect
+         style="color:#000000;overflow:visible;fill:#000000;stroke-width:0.0341985;stop-color:#000000"
+         id="rect1515"
+         width="18.609287"
+         height="0.36888695"
+         x="19.228008"
+         y="221.6757"
+         transform="rotate(-45)" />
+    </g>
+  </g>
+</svg>

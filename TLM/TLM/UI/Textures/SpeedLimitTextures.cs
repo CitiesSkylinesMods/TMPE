@@ -167,6 +167,8 @@ namespace TrafficManager.UI.Textures {
         private const string MPH_US_THEME = "MPH_US";
         private const string KMPH_CANADA_THEME = "Kmph_Canada";
         private const string KMPH_SWEDEN_THEME = "Kmph_Sweden";
+        private const string KMPH_BRAZIL_THEME = "Kmph_Brazil";
+
         private const string DEFAULT_KMPH_THEME = KMPH_GERMANY_THEME;
         private const string DEFAULT_MPH_THEME = MPH_UK_THEME;
 
@@ -249,6 +251,14 @@ namespace TrafficManager.UI.Textures {
                     supportsMph: false,
                     size: new IntVector2(200, 200),
                     pathPrefix: "SpeedLimits." + KMPH_SWEDEN_THEME));
+            Themes.Add(
+                KMPH_BRAZIL_THEME,
+                new RoadSignTheme(
+                    name: KMPH_BRAZIL_THEME,
+                    supportsKmph: true,
+                    supportsMph: false,
+                    size: new IntVector2(200, 200),
+                    pathPrefix: "SpeedLimits." + KMPH_BRAZIL_THEME));
 
             ThemeNames = Themes.Keys.ToList();
             ThemeNames.Sort();
