@@ -43,7 +43,8 @@ namespace TrafficManager.UI.Textures {
                                  string pathPrefix) {
                 Log._DebugIf(
                     this.TextureSize.x <= this.TextureSize.y,
-                    () => $"Constructing a road sign theme {pathPrefix}: Portrait oriented size not supported");
+                    () =>
+                        $"Constructing a road sign theme {pathPrefix}: Portrait oriented size not supported");
 
                 this.Name = name;
                 this.SupportsMph = supportsMph;
@@ -145,7 +146,7 @@ namespace TrafficManager.UI.Textures {
 
         public static readonly Texture2D Clear;
 
-        public static readonly Dictionary<string, RoadSignTheme> Themes = new ();
+        public static readonly Dictionary<string, RoadSignTheme> Themes = new();
 
         private static RoadSignTheme activeTheme_ = null;
 
@@ -169,6 +170,7 @@ namespace TrafficManager.UI.Textures {
         private const string KMPH_SWEDEN_THEME = "Kmph_Sweden";
         private const string KMPH_BRAZIL_THEME = "Kmph_Brazil";
         private const string KMPH_FRANCE_THEME = "Kmph_France";
+        private const string KMPH_INDONESIA_THEME = "Kmph_Indonesia";
 
         private const string DEFAULT_KMPH_THEME = KMPH_GERMANY_THEME;
         private const string DEFAULT_MPH_THEME = MPH_UK_THEME;
@@ -268,6 +270,14 @@ namespace TrafficManager.UI.Textures {
                     supportsMph: false,
                     size: new IntVector2(200, 200),
                     pathPrefix: "SpeedLimits." + KMPH_FRANCE_THEME));
+            Themes.Add(
+                KMPH_INDONESIA_THEME,
+                new RoadSignTheme(
+                    name: KMPH_INDONESIA_THEME,
+                    supportsKmph: true,
+                    supportsMph: false,
+                    size: new IntVector2(200, 200),
+                    pathPrefix: "SpeedLimits." + KMPH_INDONESIA_THEME));
 
             ThemeNames = Themes.Keys.ToList();
             ThemeNames.Sort();
@@ -289,7 +299,8 @@ namespace TrafficManager.UI.Textures {
         public static bool OnThemeChanged(string newTheme, bool mphEnabled) {
             if (!Themes.ContainsKey(newTheme)) {
                 var defaultTheme = GetDefaultThemeName(mphEnabled);
-                Log.Error($"Theme changing to {newTheme} but it isn't known to texture manager, so instead we change to {defaultTheme}");
+                Log.Error(
+                    $"Theme changing to {newTheme} but it isn't known to texture manager, so instead we change to {defaultTheme}");
                 newTheme = defaultTheme;
             }
 
@@ -308,7 +319,8 @@ namespace TrafficManager.UI.Textures {
             }
 
             var unitStr = mphEnabled ? "MPH" : "KM/H";
-            Log.Error($"Theme changing to {newTheme} but it doesn't support {unitStr} signs, so no action was taken");
+            Log.Error(
+                $"Theme changing to {newTheme} but it doesn't support {unitStr} signs, so no action was taken");
 
             return false;
         }

@@ -959,6 +959,37 @@
     <EmbeddedResource Include="Resources\SpeedLimits\Kmph_France\90.png" />
     <EmbeddedResource Include="Resources\SpeedLimits\Kmph_France\95.png" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\SpeedLimits\Kmph_Indonesia\0.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Kmph_Indonesia\10.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Kmph_Indonesia\100.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Kmph_Indonesia\105.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Kmph_Indonesia\110.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Kmph_Indonesia\115.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Kmph_Indonesia\120.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Kmph_Indonesia\125.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Kmph_Indonesia\130.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Kmph_Indonesia\135.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Kmph_Indonesia\140.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Kmph_Indonesia\15.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Kmph_Indonesia\20.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Kmph_Indonesia\25.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Kmph_Indonesia\30.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Kmph_Indonesia\35.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Kmph_Indonesia\40.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Kmph_Indonesia\45.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Kmph_Indonesia\5.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Kmph_Indonesia\50.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Kmph_Indonesia\55.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Kmph_Indonesia\60.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Kmph_Indonesia\65.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Kmph_Indonesia\70.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Kmph_Indonesia\75.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Kmph_Indonesia\80.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Kmph_Indonesia\85.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Kmph_Indonesia\90.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Kmph_Indonesia\95.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="PostBuildMacros">
     <!-- Code from https://superuser.com/questions/82231/how-do-i-do-comments-at-a-windows-command-prompt -->
