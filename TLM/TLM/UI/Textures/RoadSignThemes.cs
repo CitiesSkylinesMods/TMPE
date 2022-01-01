@@ -152,8 +152,18 @@ namespace TrafficManager.UI.Textures {
                 foreach (var texture in this.Textures) {
                     UnityEngine.Object.Destroy(texture.Value);
                 }
-
                 this.Textures.Clear();
+
+                foreach (var texture in this.priority_) {
+                    UnityEngine.Object.Destroy(texture.Value);
+                }
+                this.priority_.Clear();
+
+                foreach (var texture in this.parking_) {
+                    UnityEngine.Object.Destroy(texture.Value);
+                }
+                this.parking_.Clear();
+
                 this.AttemptedToLoad = false;
             }
 
@@ -317,12 +327,22 @@ namespace TrafficManager.UI.Textures {
 
         public static Vector2 DefaultSpeedlimitsAspectRatio() => Vector2.one;
 
+        /// <summary>
+        /// Reports the success of theme change. ForceMph/ForceKmph require the caller to also
+        /// change display units because the currently selected display units are not supported.
+        /// </summary>
+        public enum ChangeThemeResult {
+            Success,
+            ForceMph,
+            ForceKmph,
+        }
+
         /// <summary>Called from Options General tab and attempts to change the theme.</summary>
         /// <param name="newTheme">New string key.</param>
         /// <param name="mphEnabled">Whether config is set to showing MPH</param>
         /// <returns>False if the new theme doesn't support km/h and the settings require km/h.
         /// Or false if the `newTheme` key isn't a valid theme name.</returns>
-        public static bool OnThemeChanged(string newTheme, bool mphEnabled) {
+        public static ChangeThemeResult ChangeTheme(string newTheme, bool mphEnabled) {
             if (!Themes.ContainsKey(newTheme)) {
                 var defaultTheme = GetDefaultThemeName(mphEnabled);
                 Log.Error(
@@ -330,25 +350,23 @@ namespace TrafficManager.UI.Textures {
                 newTheme = defaultTheme;
             }
 
-            bool canChange = mphEnabled
-                                 ? Themes[newTheme].SupportsMph
-                                 : Themes[newTheme].SupportsKmph;
-
-            if (activeTheme_ == null || activeTheme_.Name != newTheme) {
-                activeTheme_?.Unload();
-            }
-
-            if (canChange) {
+            if (activeTheme_ != null && activeTheme_.Name != newTheme) {
+                activeTheme_.Unload();
                 activeTheme_ = Themes[newTheme];
                 activeTheme_.Load();
-                return true;
+
+                if (mphEnabled && !activeTheme_.SupportsMph) {
+                    // Theme requires KM/H display to be on
+                    return ChangeThemeResult.ForceKmph;
+                }
+
+                if (!mphEnabled && !activeTheme_.SupportsKmph) {
+                    // Theme requires MPH display to be on
+                    return ChangeThemeResult.ForceMph;
+                }
             }
 
-            var unitStr = mphEnabled ? "MPH" : "KM/H";
-            Log.Error(
-                $"Theme changing to {newTheme} but it doesn't support {unitStr} signs, so no action was taken");
-
-            return false;
+            return ChangeThemeResult.Success;
         }
     }
 }

@@ -1032,7 +1032,6 @@
     <EmbeddedResource Include="Resources\SignThemes\Kmph_France\Yield.png" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\SignThemes\Kmph_Indonesia\NoParking.png" />
     <EmbeddedResource Include="Resources\SignThemes\Kmph_Indonesia\Parking.png" />
     <EmbeddedResource Include="Resources\SignThemes\Kmph_Indonesia\RightOfWay.png" />
     <EmbeddedResource Include="Resources\SignThemes\Kmph_Indonesia\Stop.png" />
@@ -1042,7 +1041,6 @@
     <EmbeddedResource Include="Resources\SignThemes\Kmph_Japan\NoParking.png" />
     <EmbeddedResource Include="Resources\SignThemes\Kmph_Japan\Parking.png" />
     <EmbeddedResource Include="Resources\SignThemes\Kmph_Japan\Stop.png" />
-    <EmbeddedResource Include="Resources\SignThemes\Kmph_Japan\YIeld.png" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\SignThemes\Kmph_Sweden\NoParking.png" />
@@ -1062,6 +1060,9 @@
     <EmbeddedResource Include="Resources\SignThemes\MPH_US\Parking.png" />
     <EmbeddedResource Include="Resources\SignThemes\MPH_US\Stop.png" />
     <EmbeddedResource Include="Resources\SignThemes\MPH_US\Yield.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_Japan\Yield.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="PostBuildMacros">

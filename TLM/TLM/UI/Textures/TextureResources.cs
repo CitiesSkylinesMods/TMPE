@@ -30,6 +30,7 @@ namespace TrafficManager.UI.Textures {
                         throw new Exception($"Resource stream {resourceName} not found!");
                     }
 
+                    Log._Debug($"Resource {resourceName} not found (not an error)");
                     return null;
                 }
 
@@ -50,6 +51,8 @@ namespace TrafficManager.UI.Textures {
 #else
                     Log.Warning($"Failed to load texture {resourceName}: " + e);
 #endif
+                } else {
+                    Log._Debug($"Resource {resourceName} failed to load (not an error)");
                 }
 
                 return null;

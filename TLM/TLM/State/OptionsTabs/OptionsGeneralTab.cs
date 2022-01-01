@@ -378,29 +378,36 @@ namespace TrafficManager.State {
             var newTheme = RoadSignThemes.ThemeNames[newThemeIndex];
 
             Main mainConfig = GlobalConfig.Instance.Main;
-            if (RoadSignThemes.OnThemeChanged(
-                newTheme: newTheme,
-                mphEnabled: mainConfig.DisplaySpeedLimitsMph))
-            {
-                Log.Info($"Road Sign theme changed to {newTheme}");
-                mainConfig.RoadSignTheme = newTheme;
-            } else {
-                Log.Info(
-                    $"Road Sign theme was not changed to {newTheme} (doesn't support MPH={mainConfig.DisplaySpeedLimitsMph}). "
-                    + "Toggling MPH and trying once again.");
-
-                bool invertedMph = !mainConfig.DisplaySpeedLimitsMph;
-                if (RoadSignThemes.OnThemeChanged(
-                    newTheme: newTheme,
-                    mphEnabled: invertedMph))
-                {
-                    Log.Info($"Road Sign theme changed to {newTheme}. ShowMPH config value is now {invertedMph}.");
-                    _displayMphToggle.isChecked = invertedMph;
-                    mainConfig.DisplaySpeedLimitsMph = invertedMph;
+            switch (RoadSignThemes.ChangeTheme(
+                        newTheme: newTheme,
+                        mphEnabled: mainConfig.DisplaySpeedLimitsMph)) {
+                case RoadSignThemes.ChangeThemeResult.Success:
+                    Log.Info($"Road Sign theme changed to {newTheme}");
                     mainConfig.RoadSignTheme = newTheme;
-                }
+                    break;
+                case RoadSignThemes.ChangeThemeResult.ForceKmph:
+                    mainConfig.DisplaySpeedLimitsMph = false;
+                    _displayMphToggle.isChecked = false;
+
+                    Log.Info($"Road Sign theme was changed to {newTheme} AND display switched to km/h");
+
+                    if (Options.IsGameLoaded(false)) {
+                        ModUI.Instance.Events.DisplayMphChanged(false);
+                    }
+                    break;
+                case RoadSignThemes.ChangeThemeResult.ForceMph:
+                    mainConfig.DisplaySpeedLimitsMph = true;
+                    _displayMphToggle.isChecked = true;
+
+                    Log.Info($"Road Sign theme was changed to {newTheme} AND display switched to MPH");
+
+                    if (Options.IsGameLoaded(false)) {
+                        ModUI.Instance.Events.DisplayMphChanged(true);
+                    }
+                    break;
             }
 
+            mainConfig.RoadSignTheme = newTheme;
             GlobalConfig.WriteConfig();
         }
 
