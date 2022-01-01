@@ -141,8 +141,8 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="8.0000008"
-     inkscape:cx="225.30629"
-     inkscape:cy="618.73574"
+     inkscape:cx="437.05627"
+     inkscape:cy="652.23573"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -1619,7 +1619,9 @@
          id="path3884" />
     </g>
     <g
-       id="g1432">
+       id="g1432"
+       inkscape:export-xdpi="261.09"
+       inkscape:export-ydpi="261.09">
       <rect
          style="color:#000000;overflow:visible;fill:#ffdd55;fill-opacity:0;stroke:none;stroke-width:0.851179;stop-color:#000000"
          id="rect1423"
@@ -1657,7 +1659,9 @@
          inkscape:connector-curvature="0" />
     </g>
     <g
-       id="g1419">
+       id="g1419"
+       inkscape:export-xdpi="244.88"
+       inkscape:export-ydpi="244.88">
       <path
          sodipodi:type="star"
          style="fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:0.0345741;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
@@ -1710,7 +1714,9 @@
          d="m 85.500099,167.38532 c -0.0077,-0.56967 -0.168898,-1.02185 -0.483679,-1.35654 -0.314789,-0.33467 -0.737127,-0.50584 -1.267015,-0.51352 h -1.989424 v 6.66458 h 0.954924 v -2.92446 h 1.0345 c 0.564703,-0.002 0.996988,-0.16205 1.296856,-0.47995 0.29986,-0.31789 0.451139,-0.78126 0.453838,-1.39011 z m -0.935029,0 c -0.0012,0.30526 -0.07585,0.54026 -0.223811,0.705 -0.147967,0.16476 -0.361829,0.24806 -0.641589,0.24993 h -0.984765 v -1.88996 h 0.984765 c 0.262352,0.004 0.471242,0.0904 0.626668,0.25863 0.155421,0.16828 0.234998,0.39374 0.238732,0.6764 z" />
     </g>
     <g
-       id="g1366">
+       id="g1366"
+       inkscape:export-xdpi="205.62"
+       inkscape:export-ydpi="205.62">
       <rect
          style="color:#000000;overflow:visible;fill:#ffe680;fill-opacity:0;stroke:none;stroke-width:1.29048;stop-color:#000000"
          id="rect1359"
@@ -1747,7 +1753,9 @@
            style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:20.8937px;font-family:ClearviewHwy;-inkscape-font-specification:'ClearviewHwy, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#ffffff;stroke-width:4.04927">P</tspan></text>
     </g>
     <g
-       id="g1397">
+       id="g1397"
+       inkscape:export-xdpi="205.62"
+       inkscape:export-ydpi="205.62">
       <rect
          style="color:#000000;overflow:visible;fill:#ffe680;fill-opacity:0;stroke:none;stroke-width:1.29048;stop-color:#000000"
          id="rect1368"
