@@ -29,7 +29,7 @@ namespace TrafficManager.UI.Textures {
 
             public Texture2D Parking(bool p) => this.parking_.ContainsKey(p)
                                                     ? this.parking_[p]
-                                                    : RoadUI.ParkingRestrictionTextures[true];
+                                                    : RoadUI.ParkingRestrictionTextures[p];
 
             /// <summary>This list of required speed signs is used for loading.</summary>
             private List<int> SignValues = new();
