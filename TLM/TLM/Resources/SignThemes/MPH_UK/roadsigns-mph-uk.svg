@@ -307,8 +307,8 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="8.2054256"
-     inkscape:cx="146.16853"
-     inkscape:cy="165.93621"
+     inkscape:cx="47.150936"
+     inkscape:cy="163.69758"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -400,7 +400,8 @@
     <g
        id="g1469"
        inkscape:export-xdpi="209.39949"
-       inkscape:export-ydpi="209.39949">
+       inkscape:export-ydpi="209.39949"
+       transform="translate(20.378793,1.289797)">
       <rect
          style="color:#000000;overflow:visible;fill:#ffa417;fill-opacity:0;stroke-width:0.0574775;stop-color:#000000"
          id="rect1456"
@@ -697,7 +698,7 @@
     <g
        inkscape:label="Layer 1"
        id="layer1-8"
-       transform="matrix(0.02118203,0,0,0.02118203,43.45635,98.837963)"
+       transform="matrix(0.02118203,0,0,0.02118203,63.835143,100.12776)"
        inkscape:export-xdpi="237.4514"
        inkscape:export-ydpi="237.4514">
       <rect
@@ -747,7 +748,7 @@
     </g>
     <g
        id="g1420"
-       transform="matrix(0.03780513,0,0,0.03780513,69.592734,30.254313)"
+       transform="matrix(0.03780513,0,0,0.03780513,89.971527,31.54411)"
        inkscape:export-xdpi="223.94424"
        inkscape:export-ydpi="223.94424">
       <g
@@ -774,7 +775,8 @@
     <g
        id="g1480"
        inkscape:export-xdpi="211.42969"
-       inkscape:export-ydpi="211.42969">
+       inkscape:export-ydpi="211.42969"
+       transform="translate(20.378793,1.289797)">
       <circle
          style="fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:#e6e6e6;stroke-width:0.0502427"
          id="circle1474"
@@ -801,6 +803,65 @@
          x="49.993793"
          y="98.189621"
          transform="rotate(-45)" />
+    </g>
+    <g
+       id="g1122"
+       inkscape:export-xdpi="228.54797"
+       inkscape:export-ydpi="228.54797">
+      <rect
+         style="color:#000000;overflow:visible;fill:#aa8800;fill-opacity:0;stroke:#b3b3b3;stroke-width:0.054618;stroke-opacity:0;stop-color:#000000"
+         id="rect1090"
+         width="22.176884"
+         height="22.172663"
+         x="1.8434871"
+         y="29.691107" />
+      <g
+         inkscape:label="Layer 1"
+         id="layer1-0"
+         transform="matrix(0.02755056,0,0,0.02755056,3.2225125,43.708053)">
+        <rect
+           style="fill:#000000;fill-rule:evenodd;stroke:none;stroke-width:1.1507"
+           id="rect10586"
+           width="705"
+           height="805"
+           x="1"
+           y="-509"
+           rx="50.5"
+           ry="50.5" />
+        <rect
+           style="fill:#ffffff;fill-rule:evenodd;stroke:none;stroke-width:1.14304"
+           id="rect11197"
+           width="700"
+           height="800"
+           x="3.5"
+           y="-506.5"
+           rx="48"
+           ry="48" />
+        <rect
+           style="fill:#01619e;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:1.06954"
+           id="rect11421"
+           width="652"
+           height="752"
+           x="27.5"
+           y="-482.5"
+           rx="24"
+           ry="24" />
+        <path
+           id="rect8683"
+           style="fill:#ffffff;fill-rule:evenodd;stroke:none;stroke-width:0.49239"
+           d="m 176.833,-255.83303 v 373.33301 h 93.33399 l -10e-6,-373.33301 93.33301,93.33301 v -140 l -140,-140.00001 -139.99999,140 v 140 z"
+           sodipodi:nodetypes="cccccccccc" />
+        <path
+           id="rect39"
+           style="fill:#ffffff;fill-rule:evenodd;stroke:none;stroke-width:0.533854"
+           d="M 416.50002,9.187036 479.833,72.520031 V -169.49997 l 79.334,2e-5 -10e-6,242.019981 63.333,-63.333005 -10e-6,117.627004 L 519.5,229.81398 416.5,126.814 Z"
+           sodipodi:nodetypes="cccccccccc" />
+        <path
+           id="path2109"
+           style="fill:#e31017;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0.49239"
+           d="m 614.50001,28.500338 -63.333,63.332938 3.6e-4,-253.333286 h -63.33465 l 2.9e-4,253.333286 -63.33296,-63.332908 3.2e-4,95.000262 94.99964,94.99965 94.9996,-94.99964 z"
+           sodipodi:nodetypes="cccccccccc" />
+      </g>
     </g>
   </g>
 </svg>
