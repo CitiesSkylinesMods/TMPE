@@ -102,31 +102,36 @@ namespace TrafficManager.UI.Textures {
                     LoadDllResource(
                         resourceName: $"{this.PathPrefix}.RightOfWay.png",
                         size: squareSpecialSize,
-                        mip: true));
+                        mip: true,
+                        failIfNotFound: false));
                 LoadPrioritySign(
                     PriorityType.Yield,
                     LoadDllResource(
                         resourceName: $"{this.PathPrefix}.Yield.png",
                         size: squareSpecialSize,
-                        mip: true));
+                        mip: true,
+                        failIfNotFound: false));
                 LoadPrioritySign(
                     PriorityType.Stop,
                     LoadDllResource(
                         resourceName: $"{this.PathPrefix}.Stop.png",
                         size: squareSpecialSize,
-                        mip: true));
+                        mip: true,
+                        failIfNotFound: false));
                 LoadParkingSign(
                     true,
                     LoadDllResource(
                         resourceName: $"{this.PathPrefix}.Parking.png",
                         size: squareSpecialSize,
-                        mip: true));
+                        mip: true,
+                        failIfNotFound: false));
                 LoadParkingSign(
                     false,
                     LoadDllResource(
                         resourceName: $"{this.PathPrefix}.NoParking.png",
                         size: squareSpecialSize,
-                        mip: true));
+                        mip: true,
+                        failIfNotFound: false));
 
                 return this;
             }

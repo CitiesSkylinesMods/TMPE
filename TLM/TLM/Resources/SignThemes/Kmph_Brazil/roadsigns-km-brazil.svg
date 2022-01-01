@@ -16,7 +16,12 @@
    inkscape:version="1.0.2-2 (e86c870879, 2021-01-15)"
    sodipodi:docname="roadsigns-km-brazilian.svg">
   <defs
-     id="defs2" />
+     id="defs2">
+	
+	
+	
+	
+</defs>
   <sodipodi:namedview
      id="base"
      pagecolor="#ffffff"
@@ -24,9 +29,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="8"
-     inkscape:cx="615.36833"
-     inkscape:cy="548.59175"
+     inkscape:zoom="1.4142136"
+     inkscape:cx="350.50994"
+     inkscape:cy="447.14107"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -134,46 +139,46 @@
     <flowRoot
        xml:space="preserve"
        id="flowRoot44"
-       style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:10px;line-height:125%;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-indent:0;text-align:center;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:normal;word-spacing:normal;text-transform:none;writing-mode:lr-tb;direction:ltr;baseline-shift:baseline;text-anchor:middle;white-space:normal;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:#cccccc;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+       style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:9.99998392px;line-height:125%;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-indent:0;text-align:center;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:normal;word-spacing:normal;text-transform:none;writing-mode:lr-tb;direction:ltr;baseline-shift:baseline;text-anchor:middle;white-space:normal;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:#cccccc;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate;"
        transform="matrix(0.26458333,0,0,0.26458333,67.485827,20.447461)"><flowRegion
          id="flowRegion46"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:10px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal"><rect
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:9.99998392px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;"><rect
            id="rect48"
            width="437.9447"
            height="234.91525"
            x="104"
            y="-71.480316"
-           style="-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-family:'Highway Gothic Expanded';font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:10.00000013px;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;" /></flowRegion><flowPara
+           style="-inkscape-font-specification:'sans-serif, Normal';font-family:sans-serif;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:9.99998392px;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;" /></flowRegion><flowPara
          id="flowPara50"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:10px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;text-anchor:start;stroke:none">These signs are using Highway Gothic Expanded font</flowPara><flowPara
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:10px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;text-anchor:start;stroke:none"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:9.99998392px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;text-anchor:start;stroke:none;">These signs are using Highway Gothic Expanded font</flowPara><flowPara
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:9.99998392px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;text-anchor:start;stroke:none;"
          id="flowPara247">(developed by US Federal Highway Administration)</flowPara><flowPara
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:10px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;text-anchor:start;stroke:none"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:9.99998392px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;text-anchor:start;stroke:none;"
          id="flowPara72" /><flowPara
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:10px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;text-anchor:start;stroke:none"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:9.99998392px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;text-anchor:start;stroke:none;"
          id="flowPara74">1. Use Inkscape editor and open the file</flowPara><flowPara
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:10px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;text-anchor:start;stroke:none"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:9.99998392px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;text-anchor:start;stroke:none;"
          id="flowPara82">2. Select road sign</flowPara><flowPara
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:10px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;text-anchor:start;stroke:none"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:9.99998392px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;text-anchor:start;stroke:none;"
          id="flowPara88">3. Menu &quot;File&quot; → Export (panel can be conveniently docked)</flowPara><flowPara
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:10px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;text-anchor:start;stroke:none"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:9.99998392px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;text-anchor:start;stroke:none;"
          id="flowPara521">4. Ensure you are exporting &quot;Selection&quot; of square size</flowPara><flowPara
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:10px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;text-anchor:start;stroke:none"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:9.99998392px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;text-anchor:start;stroke:none;"
          id="flowPara2494">5. Set Image Size to 200x200 px</flowPara></flowRoot>
     <flowRoot
        transform="matrix(0.18200626,0,0,0.18200626,-24.953237,32.537959)"
-       style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:14.537px;line-height:125%;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-indent:0;text-align:center;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:normal;word-spacing:normal;text-transform:none;writing-mode:lr-tb;direction:ltr;baseline-shift:baseline;text-anchor:middle;white-space:normal;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:#cccccc;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+       style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:14.53702221px;line-height:125%;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-indent:0;text-align:center;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:normal;word-spacing:normal;text-transform:none;writing-mode:lr-tb;direction:ltr;baseline-shift:baseline;text-anchor:middle;white-space:normal;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:#cccccc;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate;"
        id="flowRoot70"
        xml:space="preserve"><flowRegion
          id="flowRegion66"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:14.537px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal"><rect
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:14.53702221px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;"><rect
            y="-71.480316"
            x="104"
            height="114"
            width="334"
            id="rect64"
-           style="-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-family:'Highway Gothic Expanded';font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:14.53704578px;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;" /></flowRegion><flowPara
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:14.537px;font-family:'Highway Gothic Expanded';-inkscape-font-specification:'Highway Gothic Expanded, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke:none"
+           style="-inkscape-font-specification:'sans-serif, Normal';font-family:sans-serif;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:14.53702221px;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;" /></flowRegion><flowPara
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:14.53702221px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke:none;"
          id="flowPara1409">Image from Wikipedia for Speedlimit</flowPara></flowRoot>
     <flowRoot
        transform="matrix(0.08306321,0,0,0.09981678,75.337014,121.64215)"
@@ -1567,6 +1572,142 @@
          x="19.228008"
          y="221.6757"
          transform="rotate(-45)" />
+    </g>
+    <flowRoot
+       transform="matrix(0.18200626,0,0,0.18200626,-26.193661,164.13227)"
+       style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:13.3333px;line-height:125%;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-indent:0;text-align:center;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:normal;word-spacing:normal;text-transform:none;writing-mode:lr-tb;direction:ltr;baseline-shift:baseline;text-anchor:middle;white-space:normal;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:#cccccc;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+       id="flowRoot70-5"
+       xml:space="preserve"><flowRegion
+         id="flowRegion66-7"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:13.3333px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal"><rect
+           y="-71.480316"
+           x="104"
+           height="30.954788"
+           width="817.75159"
+           id="rect64-8"
+           style="-inkscape-font-specification:'sans-serif, Normal';font-family:sans-serif;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:13.33329926px;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;" /></flowRegion><flowPara
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:13.3333px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke:none"
+         id="flowPara68-4">Images from Wikipedia; Make sure signs have a shape which gives them contrast outline</flowPara></flowRoot>
+    <g
+       id="g1320">
+      <polygon
+         fill="#d92827"
+         points="14.748,0.132 25.061,0.25 35.25,0.25 42.445,7.506 49.76,14.881 49.641,25.183 49.641,35.483 42.445,42.742 35.13,50 24.938,50 14.627,49.883 7.435,42.624 0.24,35.366 0.24,25.066 0.24,14.765 7.554,7.506 "
+         id="polygon1198"
+         transform="matrix(0.37657306,0,0,0.37657306,14.224799,160.17296)"
+         style="fill:#c50000;fill-opacity:1" />
+      <path
+         fill="#ffffff"
+         d="m 15.037444,166.0411 v 7.14133 l 5.012187,5.06905 h 7.088235 l 5.057376,-5.02574 v -7.14021 l -5.012187,-5.06942 -7.088612,-0.0437 z m 4.876621,12.47549 -5.147377,-5.24604 v -7.36163 l 5.192566,-5.2016 h 7.359743 l 5.191813,5.24566 -0.04481,7.40606 -5.192189,5.20161 z"
+         id="path1200"
+         style="stroke-width:0.376573" />
+      <path
+         fill="#ffffff"
+         d="m 17.837264,169.96612 h -0.959131 v 2.74183 H 15.99281 v -6.24848 h 1.844454 c 0.96817,0 1.62303,0.6993 1.62303,1.75332 0,1.13801 -0.581052,1.75333 -1.62303,1.75333 z m -0.04594,-2.62999 h -0.913189 v 1.77216 h 0.913189 c 0.516659,0 0.802101,-0.32649 0.802101,-0.89512 0,-0.52268 -0.322723,-0.87704 -0.802101,-0.87704 z"
+         id="path1202"
+         style="stroke-width:0.376573" />
+      <path
+         fill="#ffffff"
+         d="m 22.661165,172.70795 -0.433435,-1.70663 h -1.328174 l -0.405945,1.70663 H 19.59925 l 1.540184,-6.24848 h 0.866871 l 1.540184,6.24848 z m -1.106748,-4.38331 -0.433436,1.79964 h 0.885324 z"
+         id="path1204"
+         style="stroke-width:0.376573" />
+      <path
+         fill="#ffffff"
+         d="m 26.71987,172.70795 -0.82093,-2.93765 h -0.848419 v 2.93765 h -0.8857 v -6.24848 h 1.844455 c 0.96817,0 1.623407,0.66202 1.623407,1.66935 0,0.74599 -0.304648,1.28675 -0.8857,1.51081 l 0.8857,3.06794 H 26.71987 Z m -0.756536,-5.37182 h -0.912813 v 1.57596 h 0.912813 c 0.516659,0 0.802478,-0.27979 0.802478,-0.78327 0,-0.48465 -0.3231,-0.79269 -0.802478,-0.79269 z"
+         id="path1206"
+         style="stroke-width:0.376573" />
+      <path
+         fill="#ffffff"
+         d="m 28.445327,172.70795 v -6.24848 h 2.904885 v 0.87666 h -2.019561 v 1.57596 h 1.281854 v 0.85821 h -1.281854 v 2.06099 h 2.259438 v 0.87666 z"
+         id="path1208"
+         style="stroke-width:0.376573" />
+    </g>
+    <g
+       id="g1301">
+      <circle
+         style="color:#000000;overflow:visible;fill:#0000ff;fill-opacity:0;stroke-width:0.221327;stop-color:#000000"
+         id="path1266"
+         cx="52.083782"
+         cy="169.4584"
+         r="12.012682" />
+      <path
+         id="path3067"
+         inkscape:connector-curvature="0"
+         sodipodi:nodetypes="cccccccccccccccccccccccccccccccccccccccc"
+         fill="#ef2c30"
+         d="m 63.773002,162.07356 0.0934,-0.22172 0.07012,-0.23337 0.01164,-0.23362 -0.01164,-0.2331 -0.07012,-0.23336 -0.0934,-0.22173 -0.140229,-0.19843 -0.17489,-0.16325 -0.186795,-0.1397 -0.221721,-0.0937 -0.233363,-0.0699 -0.233627,-0.0236 H 41.631082 l -0.245004,0.0233 -0.221721,0.0699 -0.221985,0.0939 -0.198438,0.1397 -0.163247,0.16325 -0.139965,0.19843 -0.10504,0.22173 -0.05847,0.23362 -0.02328,0.2331 0.02328,0.23363 0.05847,0.23336 0.10504,0.22172 10.481468,18.14486 0.128323,0.19844 0.17489,0.16325 0.198437,0.1397 0.209815,0.0934 0.233627,0.0704 0.233362,0.0236 0.245004,-0.0236 0.233628,-0.0704 0.210079,-0.0934 0.198437,-0.1397 0.163513,-0.16325 0.139964,-0.19844 z"
+         style="stroke-width:0.264583;fill:#c50000;fill-opacity:1" />
+      <path
+         id="path3361"
+         inkscape:connector-curvature="0"
+         sodipodi:nodetypes="cccc"
+         fill="#ffffff"
+         d="m 43.708591,162.58711 8.392318,14.53912 8.40396,-14.53912 H 43.708591"
+         style="stroke-width:0.264583" />
+    </g>
+    <g
+       id="g1355"
+       inkscape:export-xdpi="260.66666"
+       inkscape:export-ydpi="260.66666">
+      <circle
+         style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#c50000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.0836929;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+         id="circle1274"
+         cx="79.314751"
+         cy="170.15862"
+         r="9.7442446" />
+      <circle
+         style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:#cccccc;stroke-width:0.0658291;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+         id="circle1276"
+         cx="79.314751"
+         cy="170.15862"
+         r="7.6643949" />
+      <text
+         xml:space="preserve"
+         style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:11.8581px;line-height:125%;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-decoration:none;text-decoration-line:none;text-decoration-color:#000000;overflow:visible;fill:#000000;fill-opacity:1;stroke-width:0.577;stop-color:#000000;stroke:#000000;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
+         x="75.40654"
+         y="174.46017"
+         id="text1332"><tspan
+           sodipodi:role="line"
+           id="tspan1330"
+           x="75.40654"
+           y="174.46017"
+           style="fill:#000000;fill-opacity:1;stroke-width:0.577;stroke:#000000;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none">E</tspan></text>
+    </g>
+    <g
+       id="g1362"
+       inkscape:export-xdpi="260.66666"
+       inkscape:export-ydpi="260.66666">
+      <circle
+         style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#c50000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.0836929;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+         id="circle1334"
+         cx="103.54273"
+         cy="170.15862"
+         r="9.7442446" />
+      <circle
+         style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:#cccccc;stroke-width:0.0658291;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+         id="circle1337"
+         cx="103.54273"
+         cy="170.15862"
+         r="7.6643949" />
+      <text
+         xml:space="preserve"
+         style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:11.8581px;line-height:125%;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-decoration:none;text-decoration-line:none;text-decoration-color:#000000;overflow:visible;fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0.577;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;stop-color:#000000"
+         x="99.634521"
+         y="174.46017"
+         id="text1341"><tspan
+           sodipodi:role="line"
+           id="tspan1339"
+           x="99.634521"
+           y="174.46017"
+           style="fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0.577;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1">E</tspan></text>
+      <rect
+         style="color:#000000;overflow:visible;fill:#c50000;fill-opacity:1;stroke:none;stroke-width:0.577001;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;stop-color:#000000"
+         id="rect1343"
+         width="17.065624"
+         height="2.1166666"
+         x="185.01042"
+         y="45.713837"
+         transform="rotate(45)" />
     </g>
   </g>
 </svg>

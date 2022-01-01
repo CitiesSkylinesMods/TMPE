@@ -1012,6 +1012,25 @@
     <EmbeddedResource Include="Resources\SignThemes\Kmph_Germany\Stop.png" />
     <EmbeddedResource Include="Resources\SignThemes\Kmph_Germany\Yield.png" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_Brazil\NoParking.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_Brazil\Parking.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_Brazil\Stop.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_Brazil\Yield.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_Canada\NoParking.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_Canada\Parking.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_Canada\Stop.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_Canada\Yield.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_France\NoParking.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_France\Parking.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_France\RightOfWay.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_France\Stop.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_France\Yield.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="PostBuildMacros">
     <!-- Code from https://superuser.com/questions/82231/how-do-i-do-comments-at-a-windows-command-prompt -->
