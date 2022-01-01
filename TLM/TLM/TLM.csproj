@@ -889,7 +889,6 @@
     <Analyzer Include="..\packages\StyleCop.Analyzers.1.1.118\analyzers\dotnet\cs\StyleCop.Analyzers.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Resources\SignThemes" />
     <Folder Include="Traffic\Data\" />
   </ItemGroup>
   <ItemGroup>
@@ -1063,6 +1062,41 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\SignThemes\Kmph_Japan\Yield.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_SouthKorea\0.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_SouthKorea\10.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_SouthKorea\100.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_SouthKorea\105.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_SouthKorea\110.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_SouthKorea\115.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_SouthKorea\120.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_SouthKorea\125.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_SouthKorea\130.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_SouthKorea\135.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_SouthKorea\140.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_SouthKorea\15.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_SouthKorea\20.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_SouthKorea\25.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_SouthKorea\30.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_SouthKorea\35.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_SouthKorea\40.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_SouthKorea\45.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_SouthKorea\5.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_SouthKorea\50.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_SouthKorea\55.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_SouthKorea\60.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_SouthKorea\65.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_SouthKorea\70.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_SouthKorea\75.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_SouthKorea\80.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_SouthKorea\85.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_SouthKorea\90.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_SouthKorea\95.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_SouthKorea\NoParking.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_SouthKorea\Parking.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_SouthKorea\Stop.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_SouthKorea\Yield.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="PostBuildMacros">
