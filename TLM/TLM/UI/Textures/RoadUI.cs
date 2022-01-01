@@ -1,4 +1,5 @@
 namespace TrafficManager.UI.Textures {
+    using System;
     using static TextureResources;
     using System.Collections.Generic;
     using TrafficManager.API.Traffic.Enums;
@@ -7,7 +8,9 @@ namespace TrafficManager.UI.Textures {
 
     /// <summary>UI Textures for controlling road segments.</summary>
     public static class RoadUI {
+        [Obsolete("These are now available via RoadSignThemes.ActiveTheme.Priority(PriorityType p)")]
         public static readonly IDictionary<PriorityType, Texture2D> PrioritySignTextures;
+
         public static readonly Texture2D SignClear;
 
         /// <summary>Smaller Arrow-Down sign to be rendered as half-size for underground nodes.</summary>
@@ -15,6 +18,8 @@ namespace TrafficManager.UI.Textures {
 
         public static readonly IDictionary<ExtVehicleType, IDictionary<bool, Texture2D>> VehicleRestrictionTextures;
         public static readonly IDictionary<ExtVehicleType, Texture2D> VehicleInfoSignTextures;
+
+        [Obsolete("These are now available via RoadSignThemes.ActiveTheme.Parking(bool)")]
         public static readonly IDictionary<bool, Texture2D> ParkingRestrictionTextures;
 
         static RoadUI() {

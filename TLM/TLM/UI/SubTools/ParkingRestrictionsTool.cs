@@ -306,7 +306,7 @@ namespace TrafficManager.UI.SubTools {
                 }
 
                 GUI.color = GUI.color.WithAlpha(TrafficManagerTool.OverlayAlpha);
-                GUI.DrawTexture(boundingBox, RoadUI.ParkingRestrictionTextures[allowed]);
+                GUI.DrawTexture(boundingBox, RoadSignThemes.ActiveTheme.Parking(allowed));
                 GUI.color = guiColor;
 
                 if (hoveredHandle && clicked && !IsCursorInPanel() &&

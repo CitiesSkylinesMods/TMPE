@@ -234,7 +234,7 @@ namespace TrafficManager.UI {
             }
             TMPELifecycle.Instance.TranslationDatabase.ReloadTutorialTranslations();
             TMPELifecycle.Instance.TranslationDatabase.ReloadGuideTranslations();
-            SpeedLimitTextures.OnThemeChanged(
+            RoadSignThemes.OnThemeChanged(
                 newTheme: GlobalConfig.Instance.Main.RoadSignTheme,
                 mphEnabled: GlobalConfig.Instance.Main.DisplaySpeedLimitsMph);
         }

@@ -43,10 +43,10 @@
         /// <summary>Draw large rect with the speed value or unlimited.</summary>
         /// <param name="speedlimit">Show this speed.</param>
         public void DrawLargeTexture(SpeedValue? speedlimit,
-                                     SpeedLimitTextures.RoadSignTheme theme) {
+                                     RoadSignThemes.RoadSignTheme theme) {
             Texture2D tex = speedlimit.HasValue
                                 ? theme.GetTexture(speedlimit.Value)
-                                : SpeedLimitTextures.NoOverride;
+                                : RoadSignThemes.NoOverride;
 
             GUI.DrawTexture(
                 position: this.screenRect_,
@@ -60,10 +60,10 @@
         }
 
         internal static Texture2D ChooseTexture(SpeedValue? speedlimit,
-                                                SpeedLimitTextures.RoadSignTheme theme) {
+                                                RoadSignThemes.RoadSignTheme theme) {
             return speedlimit.HasValue
                        ? theme.GetTexture(speedlimit.Value)
-                       : SpeedLimitTextures.NoOverride;
+                       : RoadSignThemes.NoOverride;
         }
 
         /// <summary>Draws the small texture in the Bottom-Right corner.</summary>

@@ -5,18 +5,31 @@ namespace TrafficManager.UI.Textures {
     using System.Linq;
     using CSUtil.Commons;
     using TrafficManager.API.Traffic.Data;
+    using TrafficManager.API.Traffic.Enums;
     using TrafficManager.State;
     using TrafficManager.State.ConfigData;
     using TrafficManager.UI.SubTools.SpeedLimits;
     using TrafficManager.Util;
     using UnityEngine;
 
-    public static class SpeedLimitTextures {
+    public static class RoadSignThemes {
         public class RoadSignTheme {
             private IntVector2 TextureSize;
 
             /// <summary>Speed limit signs from 5 to 140 km (from 5 to 90 mph) and zero for no limit.</summary>
             public readonly Dictionary<int, Texture2D> Textures = new();
+
+            private Dictionary<PriorityType, Texture2D> priority_ = new();
+
+            public Texture2D Priority(PriorityType p) => this.priority_.ContainsKey(p)
+                                                             ? this.priority_[p]
+                                                             : RoadUI.PrioritySignTextures[p];
+
+            private Dictionary<bool, Texture2D> parking_ = new();
+
+            public Texture2D Parking(bool p) => this.parking_.ContainsKey(p)
+                                                    ? this.parking_[p]
+                                                    : RoadUI.ParkingRestrictionTextures[true];
 
             /// <summary>This list of required speed signs is used for loading.</summary>
             private List<int> SignValues = new();
@@ -79,10 +92,55 @@ namespace TrafficManager.UI.Textures {
                         resourceName: $"{this.PathPrefix}.{speedLimit}.png",
                         size: this.TextureSize,
                         mip: true);
-                    this.Textures.Add(speedLimit, resource ? resource : SpeedLimitTextures.Clear);
+                    this.Textures.Add(speedLimit, resource ? resource : RoadSignThemes.Clear);
                 }
 
+                var squareSpecialSize = new IntVector2(200);
+
+                LoadPrioritySign(
+                    PriorityType.Main,
+                    LoadDllResource(
+                        resourceName: $"{this.PathPrefix}.RightOfWay.png",
+                        size: squareSpecialSize,
+                        mip: true));
+                LoadPrioritySign(
+                    PriorityType.Yield,
+                    LoadDllResource(
+                        resourceName: $"{this.PathPrefix}.Yield.png",
+                        size: squareSpecialSize,
+                        mip: true));
+                LoadPrioritySign(
+                    PriorityType.Stop,
+                    LoadDllResource(
+                        resourceName: $"{this.PathPrefix}.Stop.png",
+                        size: squareSpecialSize,
+                        mip: true));
+                LoadParkingSign(
+                    true,
+                    LoadDllResource(
+                        resourceName: $"{this.PathPrefix}.Parking.png",
+                        size: squareSpecialSize,
+                        mip: true));
+                LoadParkingSign(
+                    false,
+                    LoadDllResource(
+                        resourceName: $"{this.PathPrefix}.NoParking.png",
+                        size: squareSpecialSize,
+                        mip: true));
+
                 return this;
+            }
+
+            private void LoadPrioritySign(PriorityType p, Texture2D tex) {
+                if (tex != null) {
+                    this.priority_[p] = tex;
+                }
+            }
+
+            private void LoadParkingSign(bool allow, Texture2D tex) {
+                if (tex != null) {
+                    this.parking_[allow] = tex;
+                }
             }
 
             public void Unload() {
@@ -126,7 +184,7 @@ namespace TrafficManager.UI.Textures {
                     return this.Textures[trimIndex];
                 }
                 catch (KeyNotFoundException) {
-                    return SpeedLimitTextures.NoOverride;
+                    return RoadSignThemes.NoOverride;
                 }
             }
         }
@@ -139,7 +197,11 @@ namespace TrafficManager.UI.Textures {
         internal const ushort UPPER_MPH = 90;
         internal const ushort MPH_STEP = 5;
 
-        /// <summary>Displayed in Override view for Speed Limits tool, when there's no override.</summary>
+        /// <summary>
+        /// Displayed in Override view for Speed Limits tool, when there's no override.
+        /// This is rather never displayed because there is always either override or default speed
+        /// limit value to show, but is still present for "safety".
+        /// </summary>
         public static readonly Texture2D NoOverride;
 
         /// <summary>Blue textures for road/lane default speed limits. Always loaded.</summary>
@@ -207,13 +269,13 @@ namespace TrafficManager.UI.Textures {
         }
 
         // TODO: Split loading here into dynamic sections, static enforces everything to stay in this ctor
-        static SpeedLimitTextures() {
+        static RoadSignThemes() {
             RoadDefaults = new RoadSignTheme(
                 name: "Defaults",
                 supportsKmph: true,
                 supportsMph: true,
                 size: new IntVector2(200),
-                pathPrefix: "SpeedLimits.RoadDefaults");
+                pathPrefix: "SignThemes.RoadDefaults");
             RoadDefaults.Load();
 
             void NewTheme(string name, SpeedUnit unit, int height = 200) {
@@ -224,7 +286,7 @@ namespace TrafficManager.UI.Textures {
                         supportsKmph: unit == SpeedUnit.Kmph,
                         supportsMph: unit == SpeedUnit.Mph,
                         size: new IntVector2(200, height),
-                        pathPrefix: "SpeedLimits." + name));
+                        pathPrefix: "SignThemes." + name));
             }
 
             NewTheme(name: MPH_UK_THEME, unit: SpeedUnit.Mph);
