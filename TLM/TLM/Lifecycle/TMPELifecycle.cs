@@ -108,6 +108,7 @@ namespace TrafficManager.Lifecycle {
 
             // Texture managers
             RegisteredManagers.Add(RoadSignThemes.Instance);
+            RegisteredManagers.Add(JunctionRestrictions.Instance);
 
             // depends on TurnOnRedManager, TrafficLightManager, TrafficLightSimulationManager
             RegisteredManagers.Add(JunctionRestrictionsManager.Instance);

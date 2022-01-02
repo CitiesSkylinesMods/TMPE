@@ -13,6 +13,10 @@ namespace TrafficManager.UI.Textures {
     using TrafficManager.Util;
     using UnityEngine;
 
+    /// <summary>
+    /// Singleton which manages road signs themes dynamically loaded and freed as the user .
+    /// The textures are loaded when OnLevelLoaded event is fired from the <see cref="Lifecycle.TMPELifecycle"/>.
+    /// </summary>
     public class RoadSignThemes : AbstractCustomManager {
         public static RoadSignThemes Instance = new();
 
