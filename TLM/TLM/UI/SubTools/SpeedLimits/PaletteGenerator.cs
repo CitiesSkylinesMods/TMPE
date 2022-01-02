@@ -19,17 +19,17 @@
 
             switch (unit) {
                 case SpeedUnit.Kmph:
-                    for (var km = SpeedLimitTextures.KMPH_STEP;
-                         km <= SpeedLimitTextures.UPPER_KMPH;
-                         km += SpeedLimitTextures.KMPH_STEP) {
+                    for (var km = RoadSignThemes.KMPH_STEP;
+                         km <= RoadSignThemes.UPPER_KMPH;
+                         km += RoadSignThemes.KMPH_STEP) {
                         result.Add(SetSpeedLimitAction.SetOverride(SpeedValue.FromKmph(km)));
                     }
 
                     break;
                 case SpeedUnit.Mph:
-                    for(var mi = SpeedLimitTextures.MPH_STEP;
-                        mi <= SpeedLimitTextures.UPPER_MPH;
-                        mi += SpeedLimitTextures.MPH_STEP) {
+                    for(var mi = RoadSignThemes.MPH_STEP;
+                        mi <= RoadSignThemes.UPPER_MPH;
+                        mi += RoadSignThemes.MPH_STEP) {
                         result.Add(SetSpeedLimitAction.SetOverride(SpeedValue.FromMph(mi)));
                     }
 

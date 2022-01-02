@@ -10,7 +10,8 @@ namespace TrafficManager.UI.Textures {
     public static class TextureResources {
         internal static Texture2D LoadDllResource(string resourceName,
                                                   IntVector2 size,
-                                                  bool mip = false) {
+                                                  bool mip = false,
+                                                  bool failIfNotFound = true) {
 #if DEBUG
             bool debug = DebugSwitch.ResourceLoading.Get();
 #endif
@@ -25,7 +26,12 @@ namespace TrafficManager.UI.Textures {
                     myAssembly.GetManifestResourceStream(
                         "TrafficManager.Resources." + resourceName);
                 if (myStream == null) {
-                    throw new Exception($"Resource stream {resourceName} not found!");
+                    if (failIfNotFound) {
+                        throw new Exception($"Resource stream {resourceName} not found!");
+                    }
+
+                    Log._Debug($"Resource {resourceName} not found (not an error)");
+                    return null;
                 }
 
                 var texture = new Texture2D(
@@ -39,11 +45,16 @@ namespace TrafficManager.UI.Textures {
                 return texture;
             }
             catch (Exception e) {
+                if (failIfNotFound) {
 #if DEBUG
-                Log.Error("Failed to load texture " + e);
+                    Log.Error($"Failed to load texture {resourceName}: " + e);
 #else
-                Log.Warning("Failed to load texture " + e);
+                    Log.Warning($"Failed to load texture {resourceName}: " + e);
 #endif
+                } else {
+                    Log._Debug($"Resource {resourceName} failed to load (not an error)");
+                }
+
                 return null;
             }
         }

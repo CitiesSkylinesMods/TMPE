@@ -356,7 +356,7 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                         }
 
                         if (Highlight.DrawGenericSquareOverlayTexture(
-                                texture: RoadUI.PrioritySignTextures[sign],
+                                texture: RoadSignThemes.ActiveTheme.Priority(sign),
                                 camPos: camPos,
                                 worldPos: signPos,
                                 size: 90f,

@@ -234,7 +234,10 @@ namespace TrafficManager.UI {
             }
             TMPELifecycle.Instance.TranslationDatabase.ReloadTutorialTranslations();
             TMPELifecycle.Instance.TranslationDatabase.ReloadGuideTranslations();
-            SpeedLimitTextures.OnThemeChanged(
+
+            // Do not handle ChangeTheme result assuming that savegame always has the selected theme
+            // and MPH display in a consistent state
+            RoadSignThemes.ChangeTheme(
                 newTheme: GlobalConfig.Instance.Main.RoadSignTheme,
                 mphEnabled: GlobalConfig.Instance.Main.DisplaySpeedLimitsMph);
         }
