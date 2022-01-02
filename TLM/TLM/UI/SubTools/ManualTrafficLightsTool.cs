@@ -81,6 +81,7 @@ namespace TrafficManager.UI.SubTools {
                 CustomSegmentLightsManager customTrafficLightsManager = CustomSegmentLightsManager.Instance;
                 TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance;
                 JunctionRestrictionsManager junctionRestrictionsManager = JunctionRestrictionsManager.Instance;
+                var textures = TrafficLightTextures.Instance;
 
                 if (!tlsMan.HasManualSimulation(SelectedNodeId)) {
                     return;
@@ -168,7 +169,7 @@ namespace TrafficManager.UI.SubTools {
                             case RoadBaseAI.TrafficLightState.Green: {
                                 GUI.DrawTexture(
                                     myRect3,
-                                    TrafficLightTextures.PedestrianGreenLight);
+                                    textures.PedestrianGreenLight);
                                 break;
                             }
 
@@ -176,7 +177,7 @@ namespace TrafficManager.UI.SubTools {
                             default: {
                                 GUI.DrawTexture(
                                     myRect3,
-                                    TrafficLightTextures.PedestrianRedLight);
+                                    textures.PedestrianRedLight);
                                 break;
                             }
                         }
@@ -205,7 +206,7 @@ namespace TrafficManager.UI.SubTools {
                             modeWidth,
                             modeHeight);
 
-                        GUI.DrawTexture(myRect1, TrafficLightTextures.LightMode);
+                        GUI.DrawTexture(myRect1, textures.LightMode);
 
                         hoveredSegment = GetHoveredSegment(
                             myRect1,
@@ -409,8 +410,8 @@ namespace TrafficManager.UI.SubTools {
             GUI.DrawTexture(
                 myRect2,
                 segmentLights.ManualPedestrianMode
-                    ? TrafficLightTextures.PedestrianModeManual
-                    : TrafficLightTextures.PedestrianModeAutomatic);
+                    ? TrafficLightTextures.Instance.PedestrianModeManual
+                    : TrafficLightTextures.Instance.PedestrianModeAutomatic);
 
             if (!myRect2.Contains(Event.current.mousePosition)) {
                 return hoveredSegment;
@@ -493,7 +494,7 @@ namespace TrafficManager.UI.SubTools {
                 modeWidth,
                 modeHeight);
 
-            GUI.DrawTexture(myRectCounter, TrafficLightTextures.LightCounter);
+            GUI.DrawTexture(myRectCounter, TrafficLightTextures.Instance.LightCounter);
 
             float counterSize = 20f * zoom;
 
@@ -539,12 +540,12 @@ namespace TrafficManager.UI.SubTools {
 
             switch (segmentDict.LightMain) {
                 case RoadBaseAI.TrafficLightState.Green: {
-                    GUI.DrawTexture(myRect4, TrafficLightTextures.GreenLight);
+                    GUI.DrawTexture(myRect4, TrafficLightTextures.Instance.GreenLight);
                     break;
                 }
 
                 case RoadBaseAI.TrafficLightState.Red: {
-                    GUI.DrawTexture(myRect4, TrafficLightTextures.RedLight);
+                    GUI.DrawTexture(myRect4, TrafficLightTextures.Instance.RedLight);
                     break;
                 }
             }
@@ -589,12 +590,12 @@ namespace TrafficManager.UI.SubTools {
 
                 switch (segmentDict.LightLeft) {
                     case RoadBaseAI.TrafficLightState.Green: {
-                        GUI.DrawTexture(myRect4, TrafficLightTextures.GreenLightLeft);
+                        GUI.DrawTexture(myRect4, TrafficLightTextures.Instance.GreenLightLeft);
                         break;
                     }
 
                     case RoadBaseAI.TrafficLightState.Red: {
-                        GUI.DrawTexture(myRect4, TrafficLightTextures.RedLightLeft);
+                        GUI.DrawTexture(myRect4, TrafficLightTextures.Instance.RedLightLeft);
                         break;
                     }
                 }
@@ -623,36 +624,36 @@ namespace TrafficManager.UI.SubTools {
             if (hasForwardSegment && hasRightSegment) {
                 switch (segmentDict.LightMain) {
                     case RoadBaseAI.TrafficLightState.Green: {
-                        GUI.DrawTexture(myRect5, TrafficLightTextures.GreenLightForwardRight);
+                        GUI.DrawTexture(myRect5, TrafficLightTextures.Instance.GreenLightForwardRight);
                         break;
                     }
 
                     case RoadBaseAI.TrafficLightState.Red: {
-                        GUI.DrawTexture(myRect5, TrafficLightTextures.RedLightForwardRight);
+                        GUI.DrawTexture(myRect5, TrafficLightTextures.Instance.RedLightForwardRight);
                         break;
                     }
                 }
             } else if (!hasRightSegment) {
                 switch (segmentDict.LightMain) {
                     case RoadBaseAI.TrafficLightState.Green: {
-                        GUI.DrawTexture(myRect5, TrafficLightTextures.GreenLightStraight);
+                        GUI.DrawTexture(myRect5, TrafficLightTextures.Instance.GreenLightStraight);
                         break;
                     }
 
                     case RoadBaseAI.TrafficLightState.Red: {
-                        GUI.DrawTexture(myRect5, TrafficLightTextures.RedLightStraight);
+                        GUI.DrawTexture(myRect5, TrafficLightTextures.Instance.RedLightStraight);
                         break;
                     }
                 }
             } else {
                 switch (segmentDict.LightMain) {
                     case RoadBaseAI.TrafficLightState.Green: {
-                        GUI.DrawTexture(myRect5, TrafficLightTextures.GreenLightRight);
+                        GUI.DrawTexture(myRect5, TrafficLightTextures.Instance.GreenLightRight);
                         break;
                     }
 
                     case RoadBaseAI.TrafficLightState.Red: {
-                        GUI.DrawTexture(myRect5, TrafficLightTextures.RedLightRight);
+                        GUI.DrawTexture(myRect5, TrafficLightTextures.Instance.RedLightRight);
                         break;
                     }
                 }
@@ -696,12 +697,12 @@ namespace TrafficManager.UI.SubTools {
             if (hasForwardSegment && hasLeftSegment) {
                 switch (segmentDict.LightLeft) {
                     case RoadBaseAI.TrafficLightState.Green: {
-                        GUI.DrawTexture(myRect4, TrafficLightTextures.GreenLightForwardLeft);
+                        GUI.DrawTexture(myRect4, TrafficLightTextures.Instance.GreenLightForwardLeft);
                         break;
                     }
 
                     case RoadBaseAI.TrafficLightState.Red: {
-                        GUI.DrawTexture(myRect4, TrafficLightTextures.RedLightForwardLeft);
+                        GUI.DrawTexture(myRect4, TrafficLightTextures.Instance.RedLightForwardLeft);
                         break;
                     }
                 }
@@ -716,12 +717,12 @@ namespace TrafficManager.UI.SubTools {
 
                 switch (segmentDict.LightMain) {
                     case RoadBaseAI.TrafficLightState.Green: {
-                        GUI.DrawTexture(myRect4, TrafficLightTextures.GreenLightStraight);
+                        GUI.DrawTexture(myRect4, TrafficLightTextures.Instance.GreenLightStraight);
                         break;
                     }
 
                     case RoadBaseAI.TrafficLightState.Red: {
-                        GUI.DrawTexture(myRect4, TrafficLightTextures.RedLightStraight);
+                        GUI.DrawTexture(myRect4, TrafficLightTextures.Instance.RedLightStraight);
                         break;
                     }
                 }
@@ -736,12 +737,12 @@ namespace TrafficManager.UI.SubTools {
 
                 switch (segmentDict.LightMain) {
                     case RoadBaseAI.TrafficLightState.Green: {
-                        GUI.DrawTexture(myRect4, TrafficLightTextures.GreenLightLeft);
+                        GUI.DrawTexture(myRect4, TrafficLightTextures.Instance.GreenLightLeft);
                         break;
                     }
 
                     case RoadBaseAI.TrafficLightState.Red: {
-                        GUI.DrawTexture(myRect4, TrafficLightTextures.RedLightLeft);
+                        GUI.DrawTexture(myRect4, TrafficLightTextures.Instance.RedLightLeft);
                         break;
                     }
                 }
@@ -776,12 +777,12 @@ namespace TrafficManager.UI.SubTools {
 
             switch (segmentDict.LightRight) {
                 case RoadBaseAI.TrafficLightState.Green: {
-                    GUI.DrawTexture(myRect5, TrafficLightTextures.GreenLightRight);
+                    GUI.DrawTexture(myRect5, TrafficLightTextures.Instance.GreenLightRight);
                     break;
                 }
 
                 case RoadBaseAI.TrafficLightState.Red: {
-                    GUI.DrawTexture(myRect5, TrafficLightTextures.RedLightRight);
+                    GUI.DrawTexture(myRect5, TrafficLightTextures.Instance.RedLightRight);
                     break;
                 }
             }
@@ -833,10 +834,10 @@ namespace TrafficManager.UI.SubTools {
 
             switch (segmentDict.LightLeft) {
                 case RoadBaseAI.TrafficLightState.Green:
-                    GUI.DrawTexture(myRect4, TrafficLightTextures.GreenLightLeft);
+                    GUI.DrawTexture(myRect4, TrafficLightTextures.Instance.GreenLightLeft);
                     break;
                 case RoadBaseAI.TrafficLightState.Red:
-                    GUI.DrawTexture(myRect4, TrafficLightTextures.RedLightLeft);
+                    GUI.DrawTexture(myRect4, TrafficLightTextures.Instance.RedLightLeft);
                     break;
             }
 
@@ -887,12 +888,12 @@ namespace TrafficManager.UI.SubTools {
 
             switch (segmentDict.LightMain) {
                 case RoadBaseAI.TrafficLightState.Green: {
-                    GUI.DrawTexture(myRect6, TrafficLightTextures.GreenLightStraight);
+                    GUI.DrawTexture(myRect6, TrafficLightTextures.Instance.GreenLightStraight);
                     break;
                 }
 
                 case RoadBaseAI.TrafficLightState.Red: {
-                    GUI.DrawTexture(myRect6, TrafficLightTextures.RedLightStraight);
+                    GUI.DrawTexture(myRect6, TrafficLightTextures.Instance.RedLightStraight);
                     break;
                 }
             }
@@ -932,12 +933,12 @@ namespace TrafficManager.UI.SubTools {
 
             switch (segmentDict.LightRight) {
                 case RoadBaseAI.TrafficLightState.Green: {
-                    GUI.DrawTexture(myRect5, TrafficLightTextures.GreenLightRight);
+                    GUI.DrawTexture(myRect5, TrafficLightTextures.Instance.GreenLightRight);
                     break;
                 }
 
                 case RoadBaseAI.TrafficLightState.Red: {
-                    GUI.DrawTexture(myRect5, TrafficLightTextures.RedLightRight);
+                    GUI.DrawTexture(myRect5, TrafficLightTextures.Instance.RedLightRight);
                     break;
                 }
             }
