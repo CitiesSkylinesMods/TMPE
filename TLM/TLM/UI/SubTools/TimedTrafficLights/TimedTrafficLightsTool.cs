@@ -1459,7 +1459,7 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
             JunctionRestrictionsManager junctionRestrictionsManager = JunctionRestrictionsManager.Instance;
             ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
             IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
-
+            var vehicleInfoSignTextures = RoadUI.Instance.VehicleInfoSignTextures;
             var hoveredSegment = false;
 
             foreach (ushort nodeId in selectedNodeIds) {
@@ -1703,8 +1703,7 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
                                 guiColor.a = TrafficManagerTool.GetHandleAlpha(false);
                                 GUI.DrawTexture(
                                     infoRect,
-                                    RoadUI.VehicleInfoSignTextures[
-                                        TrafficManagerTool.InfoSignsToDisplay[k]]);
+                                    vehicleInfoSignTextures[TrafficManagerTool.InfoSignsToDisplay[k]]);
                                 ++numInfos;
                             }
                         }

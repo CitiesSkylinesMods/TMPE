@@ -75,6 +75,7 @@ namespace TrafficManager.UI.SubTools {
             ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
             IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
             var hoveredSegment = false;
+            var vehicleInfoSignTextures = RoadUI.Instance.VehicleInfoSignTextures;
 
             if (SelectedNodeId != 0) {
                 CustomSegmentLightsManager customTrafficLightsManager = CustomSegmentLightsManager.Instance;
@@ -245,7 +246,7 @@ namespace TrafficManager.UI.SubTools {
 
                                 GUI.DrawTexture(
                                     infoRect,
-                                    RoadUI.VehicleInfoSignTextures[TrafficManagerTool.InfoSignsToDisplay[k]]);
+                                    vehicleInfoSignTextures[TrafficManagerTool.InfoSignsToDisplay[k]]);
 
                                 ++numInfos;
                             }

@@ -575,7 +575,7 @@
                 //-----------------------
                 // Draw small arrow down
                 //-----------------------
-                signRenderer.DrawSmallTexture_TopLeft(RoadUI.Underground);
+                signRenderer.DrawSmallTexture_TopLeft(RoadUI.Instance.Underground);
             }
 
             if (!isHoveredHandle) {
@@ -611,6 +611,7 @@
             [NotNull] DrawEnv drawEnv,
             [NotNull] DrawArgs args)
         {
+            var vehicleInfoSignTextures = RoadUI.Instance.VehicleInfoSignTextures;
             bool ret = false;
             ref NetSegment segment = ref segmentId.ToSegment();
 
@@ -750,8 +751,7 @@
                     && !onlyMonorailLanes
                     && ((laneInfo.m_vehicleType & VehicleInfo.VehicleType.Monorail) != VehicleInfo.VehicleType.None))
                 {
-                    Texture2D tex1 = RoadUI.VehicleInfoSignTextures[
-                        LegacyExtVehicleType.ToNew(old: ExtVehicleType.PassengerTrain)];
+                    Texture2D tex1 = vehicleInfoSignTextures[LegacyExtVehicleType.ToNew(old: ExtVehicleType.PassengerTrain)];
 
                     // TODO: Replace with direct call to GUI.DrawTexture as in the func above
                     grid.DrawStaticSquareOverlayGridTexture(
@@ -767,7 +767,7 @@
                     //-------------------------------------
                     // Draw arrow down
                     //-------------------------------------
-                    signRenderer.DrawSmallTexture_TopLeft(RoadUI.Underground);
+                    signRenderer.DrawSmallTexture_TopLeft(RoadUI.Instance.Underground);
                 }
 
                 if (isHoveredHandle) {

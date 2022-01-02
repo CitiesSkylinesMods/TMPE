@@ -30,13 +30,13 @@ namespace TrafficManager.UI.Textures {
 
             public Texture2D Priority(PriorityType p) => this.priority_.ContainsKey(p)
                                                              ? this.priority_[p]
-                                                             : RoadUI.PrioritySignTextures[p];
+                                                             : RoadUI.Instance.PrioritySignTextures[p];
 
             private Dictionary<bool, Texture2D> parking_ = new();
 
             public Texture2D Parking(bool p) => this.parking_.ContainsKey(p)
                                                     ? this.parking_[p]
-                                                    : RoadUI.ParkingRestrictionTextures[p];
+                                                    : RoadUI.Instance.ParkingRestrictionTextures[p];
 
             /// <summary>This list of required speed signs is used for loading.</summary>
             private List<int> SignValues = new();
