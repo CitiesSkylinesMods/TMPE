@@ -355,7 +355,7 @@
                     // Defaults can show normal textures if the user holds Alt
                     SpeedlimitsToolMode.Defaults => args.ToolMode == SpeedlimitsToolMode.Defaults
                                                         ? RoadSignThemes.ActiveTheme
-                                                        : RoadSignThemes.RoadDefaults,
+                                                        : RoadSignThemes.Instance.RoadDefaults,
                     _ => throw new ArgumentOutOfRangeException(),
                 },
                 drawDefaults_ = args.ToolMode == SpeedlimitsToolMode.Defaults,
@@ -540,7 +540,7 @@
                     size: size * RoadSignThemes.DefaultSpeedlimitsAspectRatio());
                 squareSignRenderer.DrawLargeTexture(
                     speedlimit: defaultSpeedLimit,
-                    theme: RoadSignThemes.RoadDefaults);
+                    theme: RoadSignThemes.Instance.RoadDefaults);
             } else {
                 //-------------------------------------
                 // Draw override, if exists, otherwise draw circle and small blue default
@@ -561,7 +561,7 @@
                         size: size * RoadSignThemes.DefaultSpeedlimitsAspectRatio());
                     Texture2D chosenTexture = SignRenderer.ChooseTexture(
                         speedlimit: defaultSpeedLimit,
-                        theme: RoadSignThemes.RoadDefaults);
+                        theme: RoadSignThemes.Instance.RoadDefaults);
                     squareSignRenderer.DrawLargeTexture(chosenTexture);
                     // squareSignRenderer.DrawSmallTexture_BottomRight(chosenTexture);
                 } else {
@@ -734,7 +734,7 @@
                         size: size * RoadSignThemes.DefaultSpeedlimitsAspectRatio());
                     Texture2D chosenTexture = SignRenderer.ChooseTexture(
                         speedlimit: overrideSpeedlimit.DefaultValue,
-                        theme: RoadSignThemes.RoadDefaults);
+                        theme: RoadSignThemes.Instance.RoadDefaults);
                     squareSignRenderer.DrawLargeTexture(chosenTexture);
                     // squareSignRenderer.DrawSmallTexture_BottomRight(chosenTexture);
                 } else {

@@ -6,13 +6,16 @@ namespace TrafficManager.UI.Textures {
     using CSUtil.Commons;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.API.Traffic.Enums;
+    using TrafficManager.Manager;
     using TrafficManager.State;
     using TrafficManager.State.ConfigData;
     using TrafficManager.UI.SubTools.SpeedLimits;
     using TrafficManager.Util;
     using UnityEngine;
 
-    public static class RoadSignThemes {
+    public class RoadSignThemes : AbstractCustomManager {
+        public static RoadSignThemes Instance = new();
+
         public class RoadSignTheme {
             private IntVector2 TextureSize;
 
@@ -92,7 +95,9 @@ namespace TrafficManager.UI.Textures {
                         resourceName: $"{this.PathPrefix}.{speedLimit}.png",
                         size: this.TextureSize,
                         mip: true);
-                    this.Textures.Add(speedLimit, resource ? resource : RoadSignThemes.Clear);
+                    this.Textures.Add(
+                        speedLimit,
+                        resource ? resource : RoadSignThemes.Instance.Clear);
                 }
 
                 var squareSpecialSize = new IntVector2(200);
@@ -152,16 +157,19 @@ namespace TrafficManager.UI.Textures {
                 foreach (var texture in this.Textures) {
                     UnityEngine.Object.Destroy(texture.Value);
                 }
+
                 this.Textures.Clear();
 
                 foreach (var texture in this.priority_) {
                     UnityEngine.Object.Destroy(texture.Value);
                 }
+
                 this.priority_.Clear();
 
                 foreach (var texture in this.parking_) {
                     UnityEngine.Object.Destroy(texture.Value);
                 }
+
                 this.parking_.Clear();
 
                 this.AttemptedToLoad = false;
@@ -199,7 +207,7 @@ namespace TrafficManager.UI.Textures {
                     return this.Textures[trimIndex];
                 }
                 catch (KeyNotFoundException) {
-                    return RoadSignThemes.NoOverride;
+                    return RoadSignThemes.Instance.NoOverride;
                 }
             }
         }
@@ -217,27 +225,27 @@ namespace TrafficManager.UI.Textures {
         /// This is rather never displayed because there is always either override or default speed
         /// limit value to show, but is still present for "safety".
         /// </summary>
-        public static readonly Texture2D NoOverride;
+        public Texture2D NoOverride;
 
         /// <summary>Blue textures for road/lane default speed limits. Always loaded.</summary>
-        public static readonly RoadSignTheme RoadDefaults;
+        public readonly RoadSignTheme RoadDefaults;
 
-        public static readonly Texture2D Clear;
+        public Texture2D Clear;
 
-        public static readonly Dictionary<string, RoadSignTheme> Themes = new();
+        public readonly Dictionary<string, RoadSignTheme> Themes = new();
 
-        private static RoadSignTheme activeTheme_ = null;
+        private RoadSignTheme activeTheme_ = null;
 
         /// <summary>Names from <see cref="Themes"/> sorted.</summary>
-        public static readonly List<string> ThemeNames;
+        internal readonly List<string> ThemeNames = new();
 
         public static RoadSignTheme ActiveTheme {
             get {
-                if (activeTheme_ == null || !activeTheme_.AttemptedToLoad) {
-                    activeTheme_ = LoadCurrentTheme();
+                if (Instance.activeTheme_ == null || !Instance.activeTheme_.AttemptedToLoad) {
+                    Instance.activeTheme_ = Instance.LoadCurrentTheme();
                 }
 
-                return activeTheme_;
+                return Instance.activeTheme_;
             }
         }
 
@@ -255,11 +263,11 @@ namespace TrafficManager.UI.Textures {
         private const string DEFAULT_KMPH_THEME = KMPH_GERMANY_THEME;
         private const string DEFAULT_MPH_THEME = MPH_UK_THEME;
 
-        public static string GetDefaultThemeName(bool mph) {
+        public string GetDefaultThemeName(bool mph) {
             return mph ? DEFAULT_MPH_THEME : DEFAULT_KMPH_THEME;
         }
 
-        public static int FindDefaultThemeIndex(bool mph) {
+        public int FindDefaultThemeIndex(bool mph) {
             if (mph) {
                 return ThemeNames.FindIndex(x => x == DEFAULT_MPH_THEME);
             }
@@ -267,7 +275,7 @@ namespace TrafficManager.UI.Textures {
             return ThemeNames.FindIndex(x => x == DEFAULT_KMPH_THEME);
         }
 
-        private static RoadSignTheme LoadCurrentTheme() {
+        private RoadSignTheme LoadCurrentTheme() {
             Main confMain = GlobalConfig.Instance.Main;
             string selectedThemeName = confMain.RoadSignTheme;
 
@@ -285,14 +293,13 @@ namespace TrafficManager.UI.Textures {
         }
 
         // TODO: Split loading here into dynamic sections, static enforces everything to stay in this ctor
-        static RoadSignThemes() {
+        private RoadSignThemes() {
             RoadDefaults = new RoadSignTheme(
                 name: "Defaults",
                 supportsKmph: true,
                 supportsMph: true,
                 size: new IntVector2(200),
                 pathPrefix: "SignThemes.RoadDefaults");
-            RoadDefaults.Load();
 
             void NewTheme(string name, SpeedUnit unit, int height = 200) {
                 Themes.Add(
@@ -319,12 +326,6 @@ namespace TrafficManager.UI.Textures {
 
             ThemeNames = Themes.Keys.ToList();
             ThemeNames.Sort();
-
-            NoOverride = LoadDllResource(
-                resourceName: "SpeedLimits.NoOverride.png",
-                size: new IntVector2(200));
-
-            Clear = LoadDllResource("clear.png", new IntVector2(256));
         }
 
         public static Vector2 DefaultSpeedlimitsAspectRatio() => Vector2.one;
@@ -344,7 +345,7 @@ namespace TrafficManager.UI.Textures {
         /// <param name="mphEnabled">Whether config is set to showing MPH</param>
         /// <returns>False if the new theme doesn't support km/h and the settings require km/h.
         /// Or false if the `newTheme` key isn't a valid theme name.</returns>
-        public static ChangeThemeResult ChangeTheme(string newTheme, bool mphEnabled) {
+        public ChangeThemeResult ChangeTheme(string newTheme, bool mphEnabled) {
             if (!Themes.ContainsKey(newTheme)) {
                 var defaultTheme = GetDefaultThemeName(mphEnabled);
                 Log.Error(
@@ -369,6 +370,33 @@ namespace TrafficManager.UI.Textures {
             }
 
             return ChangeThemeResult.Success;
+        }
+
+        /// <summary>Called by the lifecycle when textures are to be loaded.</summary>
+        public override void OnLevelLoading() {
+            RoadDefaults.Load();
+
+            NoOverride = LoadDllResource(
+                resourceName: "SpeedLimits.NoOverride.png",
+                size: new IntVector2(200));
+            Clear = LoadDllResource(resourceName: "clear.png", size: new IntVector2(256));
+
+            base.OnLevelLoading();
+        }
+
+        /// <summary>Called by the lifecycle when textures are to be unloaded.</summary>
+        public override void OnLevelUnloading() {
+            // Let all themes know its time to unload, even the ones not loaded
+            RoadDefaults.Unload();
+
+            foreach (var theme in Themes) {
+                theme.Value.Unload();
+            }
+
+            UnityEngine.Object.Destroy(Clear);
+            UnityEngine.Object.Destroy(NoOverride);
+
+            base.OnLevelUnloading();
         }
     }
 }

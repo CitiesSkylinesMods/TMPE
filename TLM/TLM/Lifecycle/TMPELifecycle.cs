@@ -17,6 +17,7 @@ namespace TrafficManager.Lifecycle {
     using UnityEngine.SceneManagement;
     using UnityEngine;
     using JetBrains.Annotations;
+    using TrafficManager.UI.Textures;
 
     /// <summary>
     /// Do not use Singleton<TMPELifecycle>.instance to prevent memory leak.
@@ -104,6 +105,9 @@ namespace TrafficManager.Lifecycle {
             RegisteredManagers.Add(UtilityManager.Instance);
             RegisteredManagers.Add(VehicleRestrictionsManager.Instance);
             RegisteredManagers.Add(ExtVehicleManager.Instance);
+
+            // Texture managers
+            RegisteredManagers.Add(RoadSignThemes.Instance);
 
             // depends on TurnOnRedManager, TrafficLightManager, TrafficLightSimulationManager
             RegisteredManagers.Add(JunctionRestrictionsManager.Instance);
