@@ -89,8 +89,8 @@
                         : actionOnClick.GuardedValue.Override;
 
                 int speedInteger = showMph
-                                       ? speedValue.ToMphRounded(SpeedLimitTextures.MPH_STEP).Mph
-                                       : speedValue.ToKmphRounded(SpeedLimitTextures.KMPH_STEP).Kmph;
+                                       ? speedValue.ToMphRounded(RoadSignThemes.MPH_STEP).Mph
+                                       : speedValue.ToKmphRounded(RoadSignThemes.KMPH_STEP).Kmph;
 
                 //--------------------------------
                 // Create vertical combo:
@@ -220,7 +220,7 @@
                 int number = (int)(showMph
                                        ? this.parentTool_.SelectedAction.GuardedValue.Override.GetMph()
                                        : this.parentTool_.SelectedAction.GuardedValue.Override.GetKmph());
-                int step = showMph ? SpeedLimitTextures.MPH_STEP : SpeedLimitTextures.KMPH_STEP;
+                int step = showMph ? RoadSignThemes.MPH_STEP : RoadSignThemes.KMPH_STEP;
                 TryClick(number - step);
             }
 
@@ -232,7 +232,7 @@
                 int number = (int)(showMph
                                        ? this.parentTool_.SelectedAction.GuardedValue.Override.GetMph()
                                        : this.parentTool_.SelectedAction.GuardedValue.Override.GetKmph());
-                int step = showMph ? SpeedLimitTextures.MPH_STEP : SpeedLimitTextures.KMPH_STEP;
+                int step = showMph ? RoadSignThemes.MPH_STEP : RoadSignThemes.KMPH_STEP;
                 TryClick(number + step);
             }
         }
