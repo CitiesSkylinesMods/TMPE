@@ -53,7 +53,55 @@ namespace TrafficManager.State {
         internal static void MakeSettings_General(ExtUITabstrip tabStrip) {
             UIHelper panelHelper = tabStrip.AddTabPage(T("Tab:General"));
 
-            UIHelperBase generalGroup = panelHelper.AddGroup(T("Tab:General"));
+            // Group: Localisation
+
+            // TODO: Add translation key "General.Group:Localisation"
+            UIHelperBase groupLocalisation = panelHelper.AddGroup(T("General.Group:Localisation"));
+            AddLanguageDropdown(groupLocalisation,
+                GlobalConfig.Instance.LanguageCode);
+            // TODO: Ditch separate MPH vs. km/h setting; selected icon theme should determine that? #1221
+            AddMphCheckbox(groupLocalisation,
+                GlobalConfig.Instance.Main.DisplaySpeedLimitsMph);
+            AddIconThemeDropdown(groupLocalisation,
+                GlobalConfig.Instance.Main.RoadSignTheme);
+
+            // Group: Interface
+
+            // TODO: Add translation key "General.Group:Interface"
+            UIHelperBase groupInterface = panelHelper.AddGroup(T("General.Group:Interface"));
+            AddPositionLockSettings(groupInterface,
+                GlobalConfig.Instance.Main.MainMenuButtonPosLocked,
+                GlobalConfig.Instance.Main.MainMenuPosLocked);
+            AddUuiCheckbox(groupInterface,
+                GlobalConfig.Instance.Main.UseUUI);
+            AddGuiScaleSlider(groupInterface,
+                GlobalConfig.Instance.Main.GuiScale);
+            // TODO: These should either be both `opacity` or both `transparency`
+            AddGuiTransparencySliders(groupInterface,
+                GlobalConfig.Instance.Main.GuiOpacity,
+                GlobalConfig.Instance.Main.OverlayTransparency);
+            AddTutorialCheckbox(groupInterface,
+                GlobalConfig.Instance.Main.EnableTutorial);
+
+            // Group: Simulation
+
+            UIHelperBase groupSimulation = panelHelper.AddGroup(T("General.Group:Simulation"));
+            AddSimAccuracyDropdown(groupSimulation,
+                (int)Options.simulationAccuracy);
+            AddInstantEffectCheckbox(groupSimulation,
+                Options.instantEffects);
+
+            // Group: Compatibility
+
+            // TODO: Add translation key "General.Group:Compatibility"
+            UIHelperBase groupCompatibility = panelHelper.AddGroup(T("General.Group:Compatibility"));
+            AddModCheckerCheckboxes(groupCompatibility,
+                GlobalConfig.Instance.Main.ScanForKnownIncompatibleModsAtStartup,
+                GlobalConfig.Instance.Main.IgnoreDisabledMods,
+                GlobalConfig.Instance.Main.ShowCompatibilityCheckErrorMessage);
+        }
+
+        private static void AddLanguageDropdown(UIHelperBase group, string? currentLangCode) {
             string[] languageLabels = new string[Translation.AvailableLanguageCodes.Count + 1];
             languageLabels[0] = T("General.Dropdown.Option:Game language");
 
@@ -64,10 +112,9 @@ namespace TrafficManager.State {
             }
 
             int languageIndex = 0;
-            string curLangCode = GlobalConfig.Instance.LanguageCode;
 
-            if (curLangCode != null) {
-                languageIndex = Translation.AvailableLanguageCodes.IndexOf(curLangCode);
+            if (currentLangCode != null) {
+                languageIndex = Translation.AvailableLanguageCodes.IndexOf(currentLangCode);
                 if (languageIndex < 0) {
                     languageIndex = 0;
                 } else {
@@ -75,103 +122,21 @@ namespace TrafficManager.State {
                 }
             }
 
-            _languageDropdown = generalGroup.AddDropdown(
+            _languageDropdown = group.AddDropdown(
                                     text: T("General.Dropdown:Select language") + ":",
                                     options: languageLabels,
                                     defaultSelection: languageIndex,
                                     eventCallback: OnLanguageChanged) as UIDropDown;
-            _lockButtonToggle = generalGroup.AddCheckbox(
-                                    text: T("General.Checkbox:Lock main menu button position"),
-                                    defaultValue: GlobalConfig.Instance.Main.MainMenuButtonPosLocked,
-                                    eventCallback: OnLockButtonChanged) as UICheckBox;
-            _lockMenuToggle = generalGroup.AddCheckbox(
-                                  text: T("General.Checkbox:Lock main menu window position"),
-                                  defaultValue: GlobalConfig.Instance.Main.MainMenuPosLocked,
-                                  eventCallback: OnLockMenuChanged) as UICheckBox;
-
-            _useUUI = generalGroup.AddCheckbox(
-                text: T("General.Checkbox:Use UnifiedUI"),
-                defaultValue: GlobalConfig.Instance.Main.UseUUI,
-                eventCallback: OnUseUUIChanged) as UICheckBox;
-
-            _guiScaleSlider = generalGroup.AddSlider(
-                                  text: T("General.Slider:GUI scale") + ":",
-                                  min: 50,
-                                  max: 200,
-                                  step: 5,
-                                  defaultValue: GlobalConfig.Instance.Main.GuiScale,
-                                  eventCallback: OnGuiScaleChanged) as UISlider;
-            _guiScaleSlider.parent.Find<UILabel>("Label").width = 500;
-
-            _guiOpacitySlider = generalGroup.AddSlider(
-                                        text: T("General.Slider:Window transparency") + ":",
-                                        min: 0,
-                                        max: 100,
-                                        step: 5,
-                                        defaultValue: GlobalConfig.Instance.Main.GuiOpacity,
-                                        eventCallback: OnGuiOpacityChanged) as UISlider;
-            _guiOpacitySlider.parent.Find<UILabel>("Label").width = 500;
-
-            _overlayTransparencySlider = generalGroup.AddSlider(
-                                             text: T("General.Slider:Overlay transparency") + ":",
-                                             min: 0,
-                                             max: 100,
-                                             step: 5,
-                                             defaultValue: GlobalConfig.Instance.Main.OverlayTransparency,
-                                             eventCallback: OnOverlayTransparencyChanged) as UISlider;
-            _overlayTransparencySlider.parent.Find<UILabel>("Label").width = 500;
-            _enableTutorialToggle = generalGroup.AddCheckbox(
-                                        T("General.Checkbox:Enable tutorials"),
-                                        GlobalConfig.Instance.Main.EnableTutorial,
-                                        OnEnableTutorialsChanged) as UICheckBox;
-            _showCompatibilityCheckErrorToggle
-                = generalGroup.AddCheckbox(
-                      T("General.Checkbox:Notify me about TM:PE startup conflicts"),
-                      GlobalConfig.Instance.Main.ShowCompatibilityCheckErrorMessage,
-                      OnShowCompatibilityCheckErrorChanged) as UICheckBox;
-            _scanForKnownIncompatibleModsToggle
-                = generalGroup.AddCheckbox(
-                      Translation.ModConflicts.Get("Checkbox:Scan for known incompatible mods on startup"),
-                      GlobalConfig.Instance.Main.ScanForKnownIncompatibleModsAtStartup,
-                      OnScanForKnownIncompatibleModsChanged) as UICheckBox;
-            _ignoreDisabledModsToggle = generalGroup.AddCheckbox(
-                                            text: Translation.ModConflicts.Get("Checkbox:Ignore disabled mods"),
-                                            defaultValue: GlobalConfig.Instance.Main.IgnoreDisabledMods,
-                                            eventCallback: OnIgnoreDisabledModsChanged) as UICheckBox;
-            Options.Indent(_ignoreDisabledModsToggle);
-
-            // General: Speed Limits
-            SetupSpeedLimitsPanel(generalGroup);
-
-            // General: Simulation
-            UIHelperBase simGroup = panelHelper.AddGroup(T("General.Group:Simulation"));
-            string[] simPrecisionOptions = new[] {
-                T("General.Dropdown.Option:Very low"),
-                T("General.Dropdown.Option:Low"),
-                T("General.Dropdown.Option:Medium"),
-                T("General.Dropdown.Option:High"),
-                T("General.Dropdown.Option:Very high"),
-            };
-            _simulationAccuracyDropdown = simGroup.AddDropdown(
-                                              text: T("General.Dropdown:Simulation accuracy") + ":",
-                                              options: simPrecisionOptions,
-                                              defaultSelection: (int)Options.simulationAccuracy,
-                                              eventCallback: OnSimulationAccuracyChanged) as UIDropDown;
-
-            _instantEffectsToggle = simGroup.AddCheckbox(
-                                       text: T("General.Checkbox:Apply AI changes right away"),
-                                       defaultValue: Options.instantEffects,
-                                       eventCallback: OnInstantEffectsChanged) as UICheckBox;
         }
 
-        private static void SetupSpeedLimitsPanel(UIHelperBase generalGroup) {
-            Main mainConfig = GlobalConfig.Instance.Main;
-
-            _displayMphToggle = generalGroup.AddCheckbox(
+        private static void AddMphCheckbox(UIHelperBase group, bool DisplaySpeedLimitsMph) {
+            _displayMphToggle = group.AddCheckbox(
                                     text: Translation.SpeedLimits.Get("Checkbox:Display speed limits mph"),
-                                    defaultValue: mainConfig.DisplaySpeedLimitsMph,
+                                    defaultValue: DisplaySpeedLimitsMph,
                                     eventCallback: OnDisplayMphChanged) as UICheckBox;
+        }
 
+        private static void AddIconThemeDropdown(UIHelperBase group, string? roadSignTheme) {
             string FormatThemeName(string themeName) {
                 return Translation.SpeedLimits.Get($"RoadSignTheme:{themeName}");
             }
@@ -179,15 +144,120 @@ namespace TrafficManager.State {
             var themeOptions = RoadSignThemes.ThemeNames
                                                     .Select(FormatThemeName)
                                                     .ToArray();
-            int selectedThemeIndex = RoadSignThemes.ThemeNames.FindIndex(x => x == mainConfig.RoadSignTheme);
+            int selectedThemeIndex = RoadSignThemes.ThemeNames.FindIndex(x => x == roadSignTheme);
             int defaultSignsThemeIndex = RoadSignThemes.FindDefaultThemeIndex(GlobalConfig.Instance.Main.DisplaySpeedLimitsMph);
+
             _roadSignsThemeDropdown
-                = generalGroup.AddDropdown(
+                = group.AddDropdown(
                       text: Translation.SpeedLimits.Get("General.Dropdown:Road signs theme") + ":",
                       options: themeOptions,
                       defaultSelection: selectedThemeIndex >= 0 ? selectedThemeIndex : defaultSignsThemeIndex,
                       eventCallback: OnRoadSignsThemeChanged) as UIDropDown;
             _roadSignsThemeDropdown.width *= 2.0f;
+        }
+
+        private static void AddPositionLockSettings(UIHelperBase group, bool buttonLocked, bool toolbarLocked) {
+            _lockButtonToggle = group.AddCheckbox(
+                                    text: T("General.Checkbox:Lock main menu button position"),
+                                    defaultValue: buttonLocked,
+                                    eventCallback: OnLockButtonChanged) as UICheckBox;
+
+            _lockMenuToggle = group.AddCheckbox(
+                                  text: T("General.Checkbox:Lock main menu window position"),
+                                  defaultValue: toolbarLocked,
+                                  eventCallback: OnLockMenuChanged) as UICheckBox;
+        }
+
+        private static void AddUuiCheckbox(UIHelperBase group, bool useUUI) {
+            _useUUI = group.AddCheckbox(
+                text: T("General.Checkbox:Use UnifiedUI"),
+                defaultValue: useUUI,
+                eventCallback: OnUseUUIChanged) as UICheckBox;
+        }
+
+        private static void AddGuiScaleSlider(UIHelperBase group, float guiScale) {
+            _guiScaleSlider = group.AddSlider(
+                                  text: T("General.Slider:GUI scale") + ":",
+                                  min: 50,
+                                  max: 200,
+                                  step: 5,
+                                  defaultValue: guiScale,
+                                  eventCallback: OnGuiScaleChanged) as UISlider;
+            _guiScaleSlider.parent.Find<UILabel>("Label").width = 500;
+        }
+
+        private static void AddGuiTransparencySliders(UIHelperBase group, byte guiOpacity, byte overlayTransparency) {
+            _guiOpacitySlider = group.AddSlider(
+                                        text: T("General.Slider:Window transparency") + ":",
+                                        min: 0,
+                                        max: 100,
+                                        step: 5,
+                                        defaultValue: guiOpacity,
+                                        eventCallback: OnGuiOpacityChanged) as UISlider;
+            _guiOpacitySlider.parent.Find<UILabel>("Label").width = 500;
+
+            _overlayTransparencySlider = group.AddSlider(
+                                             text: T("General.Slider:Overlay transparency") + ":",
+                                             min: 0,
+                                             max: 100,
+                                             step: 5,
+                                             defaultValue: overlayTransparency,
+                                             eventCallback: OnOverlayTransparencyChanged) as UISlider;
+            _overlayTransparencySlider.parent.Find<UILabel>("Label").width = 500;
+        }
+
+        private static void AddTutorialCheckbox(UIHelperBase group, bool enableTutorial) {
+            _enableTutorialToggle = group.AddCheckbox(
+                                        T("General.Checkbox:Enable tutorials"),
+                                        enableTutorial,
+                                        OnEnableTutorialsChanged) as UICheckBox;
+        }
+
+        private static void AddModCheckerCheckboxes(UIHelperBase group, bool scanMods, bool ignoreDisabled, bool reportUnexpected) {
+            _scanForKnownIncompatibleModsToggle
+                = group.AddCheckbox(
+                    Translation.ModConflicts.Get("Checkbox:Scan for known incompatible mods on startup"),
+                    scanMods,
+                    OnScanForKnownIncompatibleModsChanged) as UICheckBox;
+
+            _ignoreDisabledModsToggle
+                = group.AddCheckbox(
+                    text: Translation.ModConflicts.Get("Checkbox:Ignore disabled mods"),
+                    defaultValue: ignoreDisabled,
+                    eventCallback: OnIgnoreDisabledModsChanged) as UICheckBox;
+            Options.Indent(_ignoreDisabledModsToggle);
+
+            _showCompatibilityCheckErrorToggle
+                = group.AddCheckbox(
+                    T("General.Checkbox:Notify me about TM:PE startup conflicts"),
+                    reportUnexpected,
+                    OnShowCompatibilityCheckErrorChanged) as UICheckBox;
+        }
+
+
+        private static void AddSimAccuracyDropdown(UIHelperBase group, int simulationAccuracy) {
+            string[] simPrecisionOptions = new[] {
+                T("General.Dropdown.Option:Very low"),
+                T("General.Dropdown.Option:Low"),
+                T("General.Dropdown.Option:Medium"),
+                T("General.Dropdown.Option:High"),
+                T("General.Dropdown.Option:Very high"),
+            };
+
+            _simulationAccuracyDropdown
+                = group.AddDropdown(
+                    text: T("General.Dropdown:Simulation accuracy") + ":",
+                    options: simPrecisionOptions,
+                    defaultSelection: simulationAccuracy,
+                    eventCallback: OnSimulationAccuracyChanged) as UIDropDown;
+        }
+
+        private static void AddInstantEffectCheckbox(UIHelperBase group, bool instantEffects) {
+            _instantEffectsToggle
+                = group.AddCheckbox(
+                    text: T("General.Checkbox:Apply AI changes right away"),
+                    defaultValue: instantEffects,
+                    eventCallback: OnInstantEffectsChanged) as UICheckBox;
         }
 
         private static void OnLanguageChanged(int newLanguageIndex) {
