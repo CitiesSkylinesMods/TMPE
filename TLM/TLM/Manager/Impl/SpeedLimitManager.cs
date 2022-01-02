@@ -50,8 +50,6 @@ namespace TrafficManager.Manager.Impl {
         /// <summary>For each NetInfo name: custom speed limit.</summary>
         private readonly Dictionary<string, float> customLaneSpeedLimit_ = new();
 
-        private static bool DebugSpeedLimits => DebugSwitch.SpeedLimits.Get();
-
         private SpeedLimitManager() {
             laneSpeedLimitArray_ = new float?[NetManager.MAX_SEGMENT_COUNT][];
         }
@@ -480,19 +478,24 @@ namespace TrafficManager.Manager.Impl {
                 return false;
             }
 
+#if DEBUG
+            bool debugSpeedLimits = DebugSwitch.SpeedLimits.Get();
+#endif
+
             // Must be road or track based:
             if (netinfo.m_netAI is not RoadBaseAI or TrainTrackBaseAI or MetroTrackAI) {
-                if (DebugSpeedLimits) {
+#if DEBUG
+                if (debugSpeedLimits)
                     Log._Debug($"Skipped NetInfo '{netinfo.name}' because m_netAI is not applicable: {netinfo.m_netAI}");
-                }
-
+#endif
                 return false;
             }
 
             if (!netinfo.m_vehicleTypes.IsFlagSet(VEHICLE_TYPES) || !netinfo.m_laneTypes.IsFlagSet(LANE_TYPES)) {
-                if (DebugSpeedLimits) {
+#if DEBUG
+                if (debugSpeedLimits)
                     Log._Debug($"Skipped decorative NetInfo '{netinfo.name}' with m_vehicleType={netinfo.m_vehicleTypes} and m_laneTypes={netinfo.m_laneTypes}");
-                }
+#endif
 
                 return false;
             }
