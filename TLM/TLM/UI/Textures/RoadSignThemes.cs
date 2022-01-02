@@ -296,7 +296,6 @@ namespace TrafficManager.UI.Textures {
             return Themes[defaultTheme].Load();
         }
 
-        // TODO: Split loading here into dynamic sections, static enforces everything to stay in this ctor
         private RoadSignThemes() {
             RoadDefaults = new RoadSignTheme(
                 name: "Defaults",
