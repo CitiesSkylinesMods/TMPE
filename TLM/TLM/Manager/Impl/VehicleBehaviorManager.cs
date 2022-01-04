@@ -2486,9 +2486,7 @@ namespace TrafficManager.Manager.Impl {
 #endif
                     NetInfo.Lane next1LaneInfo =
                         next1SegInfo.m_lanes[currentFwdTransitions[i].laneIndex];
-                    float next1MaxSpeed = SpeedLimitManager.Instance.GetLockFreeGameSpeedLimit(
-                        currentFwdTransitions[i].segmentId,
-                        currentFwdTransitions[i].laneIndex,
+                    float next1MaxSpeed = SpeedLimitManager.Instance.GetFastGameSpeedLimit(
                         currentFwdTransitions[i].laneId,
                         next1LaneInfo);
                     float targetSpeed = Math.Min(

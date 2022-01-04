@@ -957,11 +957,7 @@ namespace TrafficManager.Custom.PathFinding {
 #endif
 
                 // NON-STOCK CODE START
-                prevMaxSpeed = speedLimitManager.GetLockFreeGameSpeedLimit(
-                    prevSegmentId,
-                    prevLaneIndex,
-                    item.LaneId,
-                    prevLaneInfo);
+                prevMaxSpeed = speedLimitManager.GetFastGameSpeedLimit(item.LaneId, prevLaneInfo);
                 prevLaneSpeed = CalculateLaneSpeed(
                     prevMaxSpeed,
                     connectOffset,
@@ -2182,11 +2178,7 @@ namespace TrafficManager.Custom.PathFinding {
             }
 
             // NON-STOCK CODE START
-            float nextMaxSpeed = speedLimitManager.GetLockFreeGameSpeedLimit(
-                nextSegmentId,
-                (byte)nextLaneIndex,
-                nextLaneId,
-                nextLaneInfo);
+            float nextMaxSpeed = speedLimitManager.GetFastGameSpeedLimit(nextLaneId, nextLaneInfo);
 
             // NON-STOCK CODE END
 
@@ -2716,11 +2708,7 @@ namespace TrafficManager.Custom.PathFinding {
 
                         float nextMaxSpeed;
                         // NON-STOCK CODE START
-                        nextMaxSpeed = speedLimitManager.GetLockFreeGameSpeedLimit(
-                            nextSegmentId,
-                            (byte)nextLaneIndex,
-                            nextLaneId,
-                            nextLaneInfo);
+                        nextMaxSpeed = speedLimitManager.GetFastGameSpeedLimit(nextLaneId, nextLaneInfo);
                         // NON-STOCK CODE END
 
                         float transitionCostOverMeanMaxSpeed =
@@ -3309,7 +3297,7 @@ namespace TrafficManager.Custom.PathFinding {
             }
 
             // NON-STOCK CODE START
-            float nextMaxSpeed = speedLimitManager.GetLockFreeGameSpeedLimit(nextSegmentId, (byte)nextLaneIndex, nextLaneId, nextLaneInfo);
+            float nextMaxSpeed = speedLimitManager.GetFastGameSpeedLimit(nextLaneId, nextLaneInfo);
 
             // NON-STOCK CODE END
 

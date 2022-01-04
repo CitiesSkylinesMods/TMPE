@@ -37,9 +37,7 @@ namespace TrafficManager.Patch._VehicleAI {
                                                       NetInfo info,
                                                       out float maxSpeed) {
             if (info.m_lanes != null && info.m_lanes.Length > position.m_lane) {
-                float laneSpeedLimit = SpeedLimitManager.Instance.GetLockFreeGameSpeedLimit(
-                    position.m_segment,
-                    position.m_lane,
+                float laneSpeedLimit = SpeedLimitManager.Instance.GetFastGameSpeedLimit(
                     laneId,
                     info.m_lanes[position.m_lane]);
                 maxSpeed = CalculateTargetSpeed(
