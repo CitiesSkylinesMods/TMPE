@@ -46,9 +46,7 @@ namespace TrafficManager.Custom.PathFinding {
             VehicleRestrictionsManager.Instance;
 #endif
 
-#if SPEEDLIMITS
         private readonly SpeedLimitManager speedLimitManager = SpeedLimitManager.Instance;
-#endif
 
 #if CUSTOMTRAFFICLIGHTS
         private readonly CustomSegmentLightsManager customTrafficLightsManager =
@@ -959,15 +957,11 @@ namespace TrafficManager.Custom.PathFinding {
 #endif
 
                 // NON-STOCK CODE START
-#if SPEEDLIMITS
                 prevMaxSpeed = speedLimitManager.GetLockFreeGameSpeedLimit(
                     prevSegmentId,
                     prevLaneIndex,
                     item.LaneId,
                     prevLaneInfo);
-#else
-		prevMaxSpeed = prevLaneInfo.m_speedLimit;
-#endif
                 prevLaneSpeed = CalculateLaneSpeed(
                     prevMaxSpeed,
                     connectOffset,
@@ -2187,7 +2181,6 @@ namespace TrafficManager.Custom.PathFinding {
                 return;
             }
 
-#if SPEEDLIMITS
             // NON-STOCK CODE START
             float nextMaxSpeed = speedLimitManager.GetLockFreeGameSpeedLimit(
                 nextSegmentId,
@@ -2196,9 +2189,6 @@ namespace TrafficManager.Custom.PathFinding {
                 nextLaneInfo);
 
             // NON-STOCK CODE END
-#else
-            var nextMaxSpeed = nextLaneInfo.m_speedLimit;
-#endif
 
             nextItem.ComparisonValue = comparisonValue +
                                        (distance /
@@ -2725,7 +2715,6 @@ namespace TrafficManager.Custom.PathFinding {
                         }
 
                         float nextMaxSpeed;
-#if SPEEDLIMITS
                         // NON-STOCK CODE START
                         nextMaxSpeed = speedLimitManager.GetLockFreeGameSpeedLimit(
                             nextSegmentId,
@@ -2733,9 +2722,6 @@ namespace TrafficManager.Custom.PathFinding {
                             nextLaneId,
                             nextLaneInfo);
                         // NON-STOCK CODE END
-#else
-						nextMaxSpeed = nextLaneInfo.m_speedLimit;
-#endif
 
                         float transitionCostOverMeanMaxSpeed =
                             transitionCost / ((prevMaxSpeed + nextMaxSpeed) * 0.5f * maxLength_);
@@ -3322,14 +3308,10 @@ namespace TrafficManager.Custom.PathFinding {
                 return;
             }
 
-#if SPEEDLIMITS
             // NON-STOCK CODE START
             float nextMaxSpeed = speedLimitManager.GetLockFreeGameSpeedLimit(nextSegmentId, (byte)nextLaneIndex, nextLaneId, nextLaneInfo);
 
             // NON-STOCK CODE END
-#else
-            var nextMaxSpeed = nextLaneInfo.m_speedLimit;
-#endif
 
             nextItem.ComparisonValue = comparisonValue +
                                        distance /
