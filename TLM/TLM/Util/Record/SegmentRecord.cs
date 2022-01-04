@@ -4,6 +4,7 @@ namespace TrafficManager.Util.Record {
     using System.Linq;
     using TrafficManager.Manager.Impl;
     using TrafficManager.State;
+    using TrafficManager.Util.Extensions;
 
     [Serializable]
     public class SegmentRecord : IRecordable {

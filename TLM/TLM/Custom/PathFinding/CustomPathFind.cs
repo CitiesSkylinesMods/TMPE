@@ -20,6 +20,7 @@ namespace TrafficManager.Custom.PathFinding {
 #if DEBUG
     using System.Collections.Generic;
     using State.ConfigData;
+    using TrafficManager.Util.Extensions;
 #endif
 
     /// <summary>

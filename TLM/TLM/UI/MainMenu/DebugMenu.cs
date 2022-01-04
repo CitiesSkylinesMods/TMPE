@@ -14,6 +14,7 @@ namespace TrafficManager.UI.MainMenu {
     using TrafficManager.Util;
     using TrafficManager.Lifecycle;
     using TrafficManager.Manager.Impl;
+    using TrafficManager.Util.Extensions;
 
 #if DEBUG // whole class coverage
     public class DebugMenuPanel : UIPanel
@@ -191,9 +192,10 @@ namespace TrafficManager.UI.MainMenu {
         private void ClickGoToNode(UIComponent component, UIMouseEventParameter eventParam) {
             ushort nodeId = Convert.ToUInt16(_goToField.text);
 
-            if ((nodeId.ToNode().m_flags & NetNode.Flags.Created) != NetNode.Flags.None) {
-                CSUtil.CameraControl.CameraController.Instance.GoToNode(nodeId);
+            if ((nodeId.ToNode().m_flags & NetNode.Flags.Created) == NetNode.Flags.None) {
+                return;
             }
+            CSUtil.CameraControl.CameraController.Instance.GoToNode(nodeId);
         }
 
         private void ClickPrintDebugInfo(UIComponent component, UIMouseEventParameter eventParam) {

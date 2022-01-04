@@ -14,6 +14,7 @@ namespace TrafficManager.TrafficLight.Impl {
     using TrafficManager.State.ConfigData;
     using TrafficManager.Util;
     using TrafficManager.Manager.Impl;
+    using TrafficManager.Util.Extensions;
 
     /// <summary>
     /// Represents the set of custom traffic lights located at a node

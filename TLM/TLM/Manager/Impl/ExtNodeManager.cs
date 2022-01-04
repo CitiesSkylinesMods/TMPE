@@ -7,6 +7,7 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.Util;
     using ColossalFramework;
     using TrafficManager.Util.Extensions;
+    using TrafficManager.Util.Iterators;
 
     public class ExtNodeManager
         : AbstractCustomManager,

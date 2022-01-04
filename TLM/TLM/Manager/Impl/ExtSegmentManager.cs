@@ -8,6 +8,7 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.State.ConfigData;
     using TrafficManager.Util;
     using TrafficManager.Util.Extensions;
+    using TrafficManager.Util.Iterators;
 
     public class ExtSegmentManager
         : AbstractCustomManager,
@@ -32,43 +33,14 @@ namespace TrafficManager.Manager.Impl {
         /// </summary>
         public ExtSegment[] ExtSegments { get; }
 
-        public ushort GetHeadNode(ref NetSegment segment) {
-            // tail node>-------->head node
-            bool invert = (segment.m_flags & NetSegment.Flags.Invert) != NetSegment.Flags.None;
-            invert = invert ^ (Singleton<SimulationManager>.instance.m_metaData.m_invertTraffic == SimulationMetaData.MetaBool.True);
-            if (invert) {
-                return segment.m_startNode;
-            } else {
-                return segment.m_endNode;
-            }
-        }
+        [Obsolete]
+        public ushort GetHeadNode(ushort segmentId) => segmentId.ToSegment().GetHeadNode();
 
-        public ushort GetHeadNode(ushort segmentId) =>
-            GetHeadNode(ref segmentId.ToSegment());
+        [Obsolete]
+        public ushort GetTailNode(ushort segmentId) => segmentId.ToSegment().GetTailNode();
 
-        public ushort GetTailNode(ref NetSegment segment) {
-            bool invert = (segment.m_flags & NetSegment.Flags.Invert) != NetSegment.Flags.None;
-            invert = invert ^ (Singleton<SimulationManager>.instance.m_metaData.m_invertTraffic == SimulationMetaData.MetaBool.True);
-            if (!invert) {
-                return segment.m_startNode;
-            } else {
-                return segment.m_endNode;
-            }//endif
-        }
-
-        public ushort GetTailNode(ushort segmentId) =>
-            GetTailNode(ref segmentId.ToSegment());
-
-        public bool? IsStartNode(ushort segmentId, ushort nodeId) {
-            ref NetSegment segment = ref segmentId.ToSegment();
-            if (segment.m_startNode == nodeId) {
-                return true;
-            } else if (segment.m_endNode == nodeId) {
-                return false;
-            } else {
-                return null;
-            }
-        }
+        [Obsolete]
+        public bool? IsStartNode(ushort segmentId, ushort nodeId) => segmentId.ToSegment().IsStartNode(nodeId);
 
         public void PublishSegmentChanges(ushort segmentId) {
             Log._Debug($"NetService.PublishSegmentChanges({segmentId}) called.");

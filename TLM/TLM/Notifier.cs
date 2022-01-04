@@ -3,6 +3,7 @@ namespace TrafficManager
     using System;
     using TrafficManager.API.Notifier;
     using TrafficManager.Util;
+    using TrafficManager.Util.Extensions;
 
     public class Notifier : INotifier
     {

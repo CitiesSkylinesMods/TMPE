@@ -5,6 +5,7 @@ namespace TrafficManager.Util {
     using TrafficManager.State.Asset;
     using TrafficManager.Util;
     using TrafficManager.Lifecycle;
+    using TrafficManager.Util.Extensions;
 
     public static class PlaceIntersectionUtil {
         ///<summary>maps old netowkr ids to new network ids</summary>

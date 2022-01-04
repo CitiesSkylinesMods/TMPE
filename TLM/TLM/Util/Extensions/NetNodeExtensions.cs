@@ -1,5 +1,12 @@
 namespace TrafficManager.Util.Extensions {
+    using ColossalFramework;
     public static class NetNodeExtensions {
+        private static NetNode[] _nodeBuffer = Singleton<NetManager>.instance.m_nodes.m_buffer;
+
+        internal static ref NetNode ToNode(this ushort nodeId) => ref _nodeBuffer[nodeId];
+        internal static bool IsJunction(this ref NetNode node) =>
+            (node.m_flags & NetNode.Flags.Junction) != NetNode.Flags.None;
+
         /// <summary>
         /// Checks if the netNode is Created, but neither Collapsed nor Deleted.
         /// </summary>
@@ -9,5 +16,8 @@ namespace TrafficManager.Util.Extensions {
             netNode.m_flags.CheckFlags(
                 required: NetNode.Flags.Created,
                 forbidden: NetNode.Flags.Collapsed | NetNode.Flags.Deleted);
+
+        internal static bool IsUnderground(this ref NetNode netNode) =>
+            netNode.m_flags.IsFlagSet(NetNode.Flags.Underground);
     }
 }

@@ -4,6 +4,7 @@ namespace TrafficManager.State.Asset {
     using System.Linq;
     using CSUtil.Commons;
     using TrafficManager.Util;
+    using TrafficManager.Util.Extensions;
 
     [Serializable]
     public class SegmentNetworkIDs {
