@@ -1,6 +1,7 @@
 using BenchmarkDotNet.Attributes;
 using System.Collections.Generic;
 using TrafficManager.Manager.Impl;
+using TrafficManager.Util.Iterators;
 
 namespace Benchmarks {
     public class GetNodeSegmentIdsEnumerablePerfTests {
