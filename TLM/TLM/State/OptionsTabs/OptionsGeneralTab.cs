@@ -59,6 +59,7 @@ namespace TrafficManager.State {
             UIHelperBase groupLocalisation = panelHelper.AddGroup(T("General.Group:Localisation"));
             AddLanguageDropdown(groupLocalisation,
                 GlobalConfig.Instance.LanguageCode);
+            AddCrowdinButton(groupLocalisation);
             // TODO: Ditch separate MPH vs. km/h setting; selected icon theme should determine that? #1221
             AddMphCheckbox(groupLocalisation,
                 GlobalConfig.Instance.Main.DisplaySpeedLimitsMph);
@@ -128,6 +129,21 @@ namespace TrafficManager.State {
                                     defaultSelection: languageIndex,
                                     eventCallback: OnLanguageChanged) as UIDropDown;
         }
+
+        private static void AddCrowdinButton(UIHelperBase group) {
+            UIButton button = group.AddButton(
+                                    text: T("General.Button:Help us translate on https://crowdin.com/project/tmpe"),
+                                    eventCallback: OpenCrowdinInBrowser) as UIButton;
+            button.textScale = 0.8f;
+        }
+
+        private static void OpenCrowdinInBrowser() {
+            if (TMPELifecycle.InGameOrEditor()) {
+                SimulationManager.instance.SimulationPaused = true;
+            }
+            Application.OpenURL("https://crowdin.com/project/tmpe");
+        }
+
 
         private static void AddMphCheckbox(UIHelperBase group, bool DisplaySpeedLimitsMph) {
             _displayMphToggle = group.AddCheckbox(
