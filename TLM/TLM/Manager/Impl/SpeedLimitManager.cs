@@ -295,7 +295,7 @@ namespace TrafficManager.Manager.Impl {
                 Log._Debug($"Updating NetInfo {relatedNetinfo.name}: Setting speed limit to {gameSpeedLimit}");
 #endif
                 this.customLaneSpeedLimit_[relatedNetinfo.name] = customSpeedLimit;
-                this.UpdateNetinfoSpeedLimit(relatedNetinfo, gameSpeedLimit);
+                this.UpdateNetinfo(relatedNetinfo);
             }
         }
 
@@ -304,25 +304,10 @@ namespace TrafficManager.Manager.Impl {
             Log.NotImpl("InternalPrintDebugInfo for SpeedLimitManager");
         }
 
-        private void UpdateNetinfoSpeedLimit(NetInfo info, float gameSpeedLimit) {
+        private void UpdateNetinfo(NetInfo info) {
             if (info == null) {
-                Log._DebugOnlyWarning($"SpeedLimitManager.UpdateNetinfoSpeedLimit: info is null!");
+                Log._DebugOnlyWarning($"SpeedLimitManager.UpdateNetinfo: info is null!");
                 return;
-            }
-
-            if (info.m_lanes == null) {
-                Log._DebugOnlyWarning($"SpeedLimitManager.UpdateNetinfoSpeedLimit: info.lanes is null!");
-                return;
-            }
-
-            Log._Trace($"Updating speed limit of NetInfo {info.name} to {gameSpeedLimit}");
-
-            var mask = this.VehicleTypes;
-
-            foreach (NetInfo.Lane lane in info.m_lanes) {
-                if ((lane.m_vehicleType & mask) != VehicleInfo.VehicleType.None) {
-                    lane.m_speedLimit = gameSpeedLimit;
-                }
             }
 
             for(ushort segmentId = 1; segmentId < NetManager.MAX_SEGMENT_COUNT; ++segmentId) {
@@ -386,7 +371,7 @@ namespace TrafficManager.Manager.Impl {
                     this.customLaneSpeedLimit_.Remove(netinfoName);
                 }
 
-                this.UpdateNetinfoSpeedLimit(relatedNetinfo, vanillaSpeedLimit);
+                this.UpdateNetinfo(relatedNetinfo);
             }
         }
 

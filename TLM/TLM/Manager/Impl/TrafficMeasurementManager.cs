@@ -89,7 +89,7 @@ namespace TrafficManager.Manager.Impl {
                         segmentId,
                         laneIndex,
                         laneId,
-                        laneInfo);
+                        laneInfo));
 
                 if (laneVehicleSpeedLimit <= 0) {
                     // fallback: custom lanes may not have valid values set for speed limit
