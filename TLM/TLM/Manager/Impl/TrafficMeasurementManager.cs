@@ -85,13 +85,11 @@ namespace TrafficManager.Manager.Impl {
             if (currentBuf > 0) {
                 uint laneVehicleSpeedLimit = Math.Min(
                     3u * 8u,
-                    (uint)((Options.customSpeedLimitsEnabled
-                                ? SpeedLimitManager.Instance.GetLockFreeGameSpeedLimit(
-                                    segmentId,
-                                    laneIndex,
-                                    laneId,
-                                    laneInfo)
-                                : laneInfo.m_speedLimit) * 8f));
+                    (uint)SpeedLimitManager.Instance.GetLockFreeGameSpeedLimit(
+                        segmentId,
+                        laneIndex,
+                        laneId,
+                        laneInfo);
 
                 if (laneVehicleSpeedLimit <= 0) {
                     // fallback: custom lanes may not have valid values set for speed limit
