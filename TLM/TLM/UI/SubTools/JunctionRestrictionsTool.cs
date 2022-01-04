@@ -41,7 +41,7 @@ namespace TrafficManager.UI.SubTools {
                     ushort segmentId = node.GetSegment(i);
                     if (segmentId != 0) {
                         // TODO: #568 provide unified delete key for all managers.
-                        bool startNode = (bool)extSegmentManager.IsStartNode(segmentId, SelectedNodeId);
+                        bool startNode = (bool)segmentId.ToSegment().IsStartNode(SelectedNodeId);
                         JunctionRestrictionsManager.Instance.ClearSegmentEnd(segmentId, startNode);
                     }
                 }

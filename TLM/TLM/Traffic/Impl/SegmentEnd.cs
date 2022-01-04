@@ -335,7 +335,7 @@ namespace TrafficManager.Traffic.Impl {
 
                 int index0 = segEndMan.GetIndex(
                     segId,
-                    (bool)extSegmentManager.IsStartNode(segId, NodeId));
+                    (bool)segId.ToSegment().IsStartNode(NodeId));
 
                 if (!segEndMan.ExtSegmentEnds[index0].outgoing) {
                     continue;

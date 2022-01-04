@@ -11,6 +11,7 @@ namespace TrafficManager.UI.SubTools {
     using TrafficManager.UI.MainMenu.OSD;
     using TrafficManager.UI.Textures;
     using TrafficManager.Util;
+    using TrafficManager.Util.Extensions;
     using UnityEngine;
 
     public class ManualTrafficLightsTool
@@ -101,10 +102,7 @@ namespace TrafficManager.UI.SubTools {
                         continue;
                     }
 
-                    bool startNode =
-                        (bool)extSegmentManager.IsStartNode(
-                            segmentId,
-                            SelectedNodeId);
+                    bool startNode = segmentId.ToSegment().IsStartNode(SelectedNodeId).Value;
                     Vector3 position = CalculateNodePositionForSegment(ref selectedNode, ref segmentId.ToSegment());
                     ICustomSegmentLights segmentLights =
                         customTrafficLightsManager.GetSegmentLights(segmentId, startNode, false);

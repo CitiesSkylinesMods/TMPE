@@ -1489,7 +1489,7 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
                         continue;
                     }
 
-                    bool startNode = (bool)extSegmentManager.IsStartNode(srcSegmentId, nodeId);
+                    bool startNode = (bool)srcSegmentId.ToSegment().IsStartNode(nodeId);
 
                     ICustomSegmentLights liveSegmentLights =
                         customTrafficLightsManager.GetSegmentLights(srcSegmentId, startNode, false);

@@ -8,6 +8,7 @@ namespace TrafficManager.UI.Helpers {
     using TrafficManager.UI.SubTools.PrioritySigns;
     using TrafficManager.UI.Textures;
     using TrafficManager.Util;
+    using TrafficManager.Util.Extensions;
     using UnityEngine;
 
     /// <summary>
@@ -193,7 +194,7 @@ namespace TrafficManager.UI.Helpers {
                 }
 
                 bool isStartNode =
-                    (bool)extSegmentManager.IsStartNode(segmentId, nodeId);
+                    (bool)segmentId.ToSegment().IsStartNode(nodeId);
 
                 bool isIncoming = segEndMan
                                   .ExtSegmentEnds[segEndMan.GetIndex(segmentId, isStartNode)]

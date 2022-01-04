@@ -456,16 +456,16 @@ namespace TrafficManager.UI.SubTools {
             ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
 
             int sourceCount = segments
-                .Where(segmentId => segmentId != 0 && extSegmentManager.GetHeadNode(segmentId) == nodeId)
+                .Where(segmentId => segmentId != 0 && segmentId.ToSegment().GetHeadNode() == nodeId)
                 .Count();
 
             int targetCount = segments
-                .Where(segmentId => segmentId != 0 && extSegmentManager.GetTailNode(segmentId) == nodeId)
+                .Where(segmentId => segmentId != 0 && segmentId.ToSegment().GetTailNode() == nodeId)
                 .Count();
 
             if (sourceCount == 1) {
                 ushort sourceSegment = segments.FirstOrDefault(
-                    segmentId => segmentId != 0 && extSegmentManager.GetHeadNode(segmentId) == nodeId);
+                    segmentId => segmentId != 0 && segmentId.ToSegment().GetHeadNode() == nodeId);
                 Assert(sourceSegment != 0, "sourceSegment != 0");
 
                 ushort outerSegment = sourceSegment.ToSegment().GetNearSegment(nodeId);
@@ -480,7 +480,7 @@ namespace TrafficManager.UI.SubTools {
                 return true;
             } else if (targetCount == 1) {
                 ushort targetSegment = segments.FirstOrDefault(
-                    segmentId => segmentId != 0 && extSegmentManager.GetTailNode(segmentId) == nodeId);
+                    segmentId => segmentId != 0 && segmentId.ToSegment().GetTailNode() == nodeId);
                 Assert(targetSegment != 0, "targetSegment != 0");
 
                 ushort outerSegment = targetSegment.ToSegment().GetFarSegment(nodeId);
@@ -517,7 +517,7 @@ namespace TrafficManager.UI.SubTools {
             if (n == 2) {
                 segments.Add(0);
                 segments.Add(0);
-                if(extSegmentManager.GetHeadNode(segments[1]) == extSegmentManager.GetTailNode(segments[0])) {
+                if(segments[1].ToSegment().GetHeadNode() == segments[0].ToSegment().GetTailNode()) {
                     segments.Swap(0, 1);
                 }
                 ret = true;
@@ -543,14 +543,14 @@ namespace TrafficManager.UI.SubTools {
                     bool oneway = segMan.CalculateIsOneWay(segments[0]) &&
                                   segMan.CalculateIsOneWay(segments[1]);
                     if (oneway) {
-                        if (extSegmentManager.GetTailNode(segments[0]) == nodeId) {
+                        if (segments[0].ToSegment().GetHeadNode() == nodeId) {
                             segments.Swap(0, 1);
                         }
 
                         // if the near side segment to segments[2] is going toward the junction
                         // then we know segment[2] is connected from inside.
                         var nearSegment = segments[2].ToSegment().GetNearSegment(nodeId);
-                        bool connectedFromInside = extSegmentManager.GetHeadNode(nearSegment) == nodeId;
+                        bool connectedFromInside = nearSegment.ToSegment().GetHeadNode() == nodeId;
                         if (connectedFromInside) {
                             segments.Swap(2, 3);
                         }
@@ -809,7 +809,7 @@ namespace TrafficManager.UI.SubTools {
             return extSegmentManager.GetSortedLanes(
                                 segmentId,
                                 ref segmentId.ToSegment(),
-                                ExtSegmentManager.Instance.IsStartNode(segmentId, nodeId) ^ (!toward),
+                                segmentId.ToSegment().IsStartNode(nodeId) ^ (!toward),
                                 LaneConnectionManager.LANE_TYPES,
                                 LaneConnectionManager.VEHICLE_TYPES,
                                 true).Count;
@@ -1086,7 +1086,7 @@ namespace TrafficManager.UI.SubTools {
 
             float offset = node.CountSegments() <= 2 ? 3 : 1;
 
-            bool isUnderground = nodeId.IsUndergroundNode();
+            bool isUnderground = nodeId.ToNode().IsUnderground();
 
             for (int segmentIndex = 0; segmentIndex < Constants.MAX_SEGMENTS_OF_NODE; segmentIndex++) {
                 ushort segmentId = node.GetSegment(segmentIndex);

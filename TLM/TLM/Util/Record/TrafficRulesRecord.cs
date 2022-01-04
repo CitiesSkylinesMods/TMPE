@@ -6,6 +6,7 @@ namespace TrafficManager.Util.Record {
     using TrafficManager.Manager.Impl;
     using static Shortcuts;
     using TrafficManager.State;
+    using TrafficManager.Util.Extensions;
 
     [Serializable]
     public class TrafficRulesRecord : IRecordable {
@@ -58,7 +59,7 @@ namespace TrafficManager.Util.Record {
             for(int i = 0; i < 8; ++i) {
                 ushort segmentId = node.GetSegment(i);
                 if (segmentId == 0) continue;
-                bool startNode = (bool)extSegmentManager.IsStartNode(segmentId, nodeId);
+                bool startNode = (bool)segmentId.ToSegment().IsStartNode(nodeId);
                 int index = SegmentEndManager.Instance.GetIndex(segmentId, startNode);
                 SegmentEndIndeces.Add(index);
             }

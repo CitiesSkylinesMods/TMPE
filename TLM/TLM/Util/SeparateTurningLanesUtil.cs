@@ -9,6 +9,7 @@ namespace TrafficManager.Util {
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.Manager.Impl;
     using TrafficManager.State;
+    using TrafficManager.Util.Extensions;
     using UnityEngine;
     using static TrafficManager.Util.Shortcuts;
 
@@ -55,7 +56,7 @@ namespace TrafficManager.Util {
             return extSegmentManager.GetSortedLanes(
                 segmentId,
                 ref segmentId.ToSegment(),
-                ExtSegmentManager.Instance.IsStartNode(segmentId, nodeId),
+                segmentId.ToSegment().IsStartNode(nodeId),
                 NetInfo.LaneType.TransportVehicle,
                 LaneArrowManager.VEHICLE_TYPES,
                 sort: false);
@@ -148,7 +149,7 @@ namespace TrafficManager.Util {
             bool altBus) {
 
             if (!builtIn) {
-                LaneArrowManager.Instance.ResetLaneArrows(segmentId, ExtSegmentManager.Instance.IsStartNode(segmentId, nodeId));
+                LaneArrowManager.Instance.ResetLaneArrows(segmentId, segmentId.ToSegment().IsStartNode(nodeId));
             }
 
             var busLanes = GetBusLanes(segmentId, nodeId);

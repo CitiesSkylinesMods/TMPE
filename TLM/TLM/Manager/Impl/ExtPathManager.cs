@@ -6,6 +6,7 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.API.Manager;
     using TrafficManager.Util;
     using UnityEngine;
+    using TrafficManager.Util.Extensions;
 
     public class ExtPathManager
         : AbstractCustomManager,

@@ -329,7 +329,7 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                             continue;
                         }
 
-                        bool startNode = (bool)extSegmentManager.IsStartNode(segmentId, nodeId);
+                        bool startNode = (bool)segmentId.ToSegment().IsStartNode(nodeId);
                         ExtSegment seg = segMan.ExtSegments[segmentId];
                         ExtSegmentEnd segEnd = segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segmentId, startNode)];
 
@@ -455,7 +455,7 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                     continue;
                 }
 
-                bool otherStartNode = (bool)extSegmentManager.IsStartNode(otherSegmentId, nodeId);
+                bool otherStartNode = (bool)otherSegmentId.ToSegment().IsStartNode(nodeId);
 
                 if (TrafficPriorityManager.Instance.GetPrioritySign(otherSegmentId, otherStartNode)
                     == PriorityType.None)

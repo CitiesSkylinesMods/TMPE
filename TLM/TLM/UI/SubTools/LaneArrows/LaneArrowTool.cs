@@ -162,7 +162,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                 LaneArrowManager.VEHICLE_TYPES,
                 true);
 
-            bool? startNode = ExtSegmentManager.Instance.IsStartNode(SelectedSegmentId, SelectedNodeId);
+            bool? startNode = SelectedSegmentId.ToSegment().IsStartNode(SelectedNodeId);
             if (startNode == null) {
                 Log.Error(
                     $"LaneArrowTool._guiLaneChangeWindow: Segment {SelectedSegmentId} " +
@@ -601,7 +601,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                 if ((hoveredSegment.m_startNode == HoveredNodeId || hoveredSegment.m_endNode == HoveredNodeId)
                     && (nodeFlags & NetNode.Flags.Junction) != NetNode.Flags.None)
                 {
-                    bool bStartNode = (bool)ExtSegmentManager.Instance.IsStartNode(HoveredSegmentId, HoveredNodeId);
+                    bool bStartNode = HoveredSegmentId.ToSegment().IsStartNode(HoveredNodeId).Value;
                     Color color = MainTool.GetToolColor(leftMouseDown, false);
                     bool alpha = !SeparateSegmentLanesModifierIsPressed;
                     DrawSegmentEnd(cameraInfo, HoveredSegmentId, bStartNode, color, alpha);
@@ -616,14 +616,14 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
 
             if (SelectedSegmentId != 0) {
                 Color color = MainTool.GetToolColor(true, false);
-                bool bStartNode = (bool)ExtSegmentManager.Instance.IsStartNode(SelectedSegmentId, SelectedNodeId);
+                bool bStartNode = SelectedSegmentId.ToSegment().IsStartNode(SelectedNodeId).Value;
                 bool alpha = !altDown && HoveredSegmentId == SelectedSegmentId;
                 DrawSegmentEnd(cameraInfo, SelectedSegmentId, bStartNode, color, alpha);
             }
         }
 
         private void OnResetToDefaultPressed() {
-            bool? startNode = ExtSegmentManager.Instance.IsStartNode(SelectedSegmentId, SelectedNodeId);
+            bool? startNode = SelectedSegmentId.ToSegment().IsStartNode(SelectedNodeId).Value;
             if (!CanReset(SelectedSegmentId, (bool)startNode)) {
                 return;
             }

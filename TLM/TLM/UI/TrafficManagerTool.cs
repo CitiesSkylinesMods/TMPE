@@ -31,6 +31,7 @@ namespace TrafficManager.UI {
     using static TrafficManager.Util.SegmentTraverser;
     using TrafficManager.UI.Textures;
     using TrafficManager.State.Keybinds;
+    using TrafficManager.Util.Extensions;
 
     [UsedImplicitly]
     public class TrafficManagerTool
@@ -664,7 +665,7 @@ namespace TrafficManager.UI {
         }
 
         public bool IsNodeVisible(ushort node) {
-            return node.IsUndergroundNode() == IsUndergroundMode;
+            return node.ToNode().IsUnderground() == IsUndergroundMode;
         }
 
         // public void DrawNodeCircle(RenderManager.CameraInfo cameraInfo,

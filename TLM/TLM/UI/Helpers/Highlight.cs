@@ -1,7 +1,8 @@
-﻿namespace TrafficManager.UI.Helpers {
+namespace TrafficManager.UI.Helpers {
     using ColossalFramework;
     using ColossalFramework.Math;
     using TrafficManager.Util;
+    using TrafficManager.Util.Extensions;
     using UnityEngine;
 
     /// <summary>
@@ -147,7 +148,7 @@
             InfoManager.instance.CurrentMode == InfoManager.InfoMode.Underground;
 
         public static bool IsNodeVisible(ushort node) {
-            return node.IsUndergroundNode() == IsUndergroundMode;
+            return node.ToNode().IsUnderground() == IsUndergroundMode;
         }
 
         //--- Use DrawNodeCircle with color instead of warning, and call tool.GetToolColor to get the color

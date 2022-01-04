@@ -14,6 +14,7 @@ namespace TrafficManager.TrafficLight.Impl {
     using TrafficManager.State.ConfigData;
     using TrafficManager.Util;
     using TrafficManager.Manager.Impl;
+    using TrafficManager.Util.Extensions;
 
     /// <summary>
     /// Represents the set of custom traffic lights located at a node
@@ -500,7 +501,7 @@ namespace TrafficManager.TrafficLight.Impl {
                     // ExtSegment otherSeg = segMan.ExtSegments[otherSegmentId];
                     int index0 = segEndMan.GetIndex(
                         otherSegmentId,
-                        (bool)extSegmentManager.IsStartNode(otherSegmentId, NodeId));
+                        otherSegmentId.ToSegment().IsStartNode(NodeId).Value);
 
                     if (!segEndMan.ExtSegmentEnds[index0].incoming) {
                         continue;

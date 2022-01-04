@@ -32,43 +32,7 @@ namespace TrafficManager.Manager.Impl {
         /// </summary>
         public ExtSegment[] ExtSegments { get; }
 
-        public ushort GetHeadNode(ref NetSegment segment) {
-            // tail node>-------->head node
-            bool invert = (segment.m_flags & NetSegment.Flags.Invert) != NetSegment.Flags.None;
-            invert = invert ^ (Singleton<SimulationManager>.instance.m_metaData.m_invertTraffic == SimulationMetaData.MetaBool.True);
-            if (invert) {
-                return segment.m_startNode;
-            } else {
-                return segment.m_endNode;
-            }
-        }
 
-        public ushort GetHeadNode(ushort segmentId) =>
-            GetHeadNode(ref segmentId.ToSegment());
-
-        public ushort GetTailNode(ref NetSegment segment) {
-            bool invert = (segment.m_flags & NetSegment.Flags.Invert) != NetSegment.Flags.None;
-            invert = invert ^ (Singleton<SimulationManager>.instance.m_metaData.m_invertTraffic == SimulationMetaData.MetaBool.True);
-            if (!invert) {
-                return segment.m_startNode;
-            } else {
-                return segment.m_endNode;
-            }//endif
-        }
-
-        public ushort GetTailNode(ushort segmentId) =>
-            GetTailNode(ref segmentId.ToSegment());
-
-        public bool? IsStartNode(ushort segmentId, ushort nodeId) {
-            ref NetSegment segment = ref segmentId.ToSegment();
-            if (segment.m_startNode == nodeId) {
-                return true;
-            } else if (segment.m_endNode == nodeId) {
-                return false;
-            } else {
-                return null;
-            }
-        }
 
         public void PublishSegmentChanges(ushort segmentId) {
             Log._Debug($"NetService.PublishSegmentChanges({segmentId}) called.");

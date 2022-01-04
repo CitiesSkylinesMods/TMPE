@@ -136,7 +136,7 @@ namespace TrafficManager.Manager.Impl {
         public bool SetSegmentLights(ushort nodeId,
                                      ushort segmentId,
                                      ICustomSegmentLights lights) {
-            bool? startNode = ExtSegmentManager.Instance.IsStartNode(segmentId, nodeId);
+            bool? startNode = segmentId.ToSegment().IsStartNode(nodeId);
             if (startNode == null) {
                 return false;
             }
@@ -318,7 +318,7 @@ namespace TrafficManager.Manager.Impl {
         }
 
         public ICustomSegmentLights GetSegmentLights(ushort nodeId, ushort segmentId) {
-            bool? startNode = ExtSegmentManager.Instance.IsStartNode(segmentId, nodeId);
+            bool? startNode = segmentId.ToSegment().IsStartNode(nodeId);
             return startNode == null ? null : GetSegmentLights(segmentId, (bool)startNode, false);
         }
 

@@ -9,6 +9,7 @@ namespace TrafficManager.Util {
     using TrafficManager.API.TrafficLight;
     using TrafficManager.Manager.Impl;
     using UnityEngine;
+    using TrafficManager.Util.Extensions;
 
     public static class AutoTimedTrafficLights {
         /// <summary>
@@ -218,7 +219,7 @@ namespace TrafficManager.Util {
         /// <param name="segmentId"></param>
         /// <param name="m">Determines which directions are green</param>
         private static void SetupHelper(ITimedTrafficLightsStep step, ushort nodeId, ushort segmentId, GreenDir m) {
-            bool startNode = (bool)ExtSegmentManager.Instance.IsStartNode(segmentId, nodeId);
+            bool startNode = segmentId.ToSegment().IsStartNode(nodeId).Value;
             ref NetNode netNode = ref nodeId.ToNode();
 
             //get step data for side seg
@@ -400,7 +401,7 @@ namespace TrafficManager.Util {
             return extSegmentManager.GetSortedLanes(
                                 segmentId,
                                 ref segmentId.ToSegment(),
-                                extSegmentManager.IsStartNode(segmentId, nodeId) ^ (!outgoing),
+                                segmentId.ToSegment().IsStartNode(nodeId) ^ (!outgoing),
                                 LaneArrowManager.LANE_TYPES,
                                 LaneArrowManager.VEHICLE_TYPES,
                                 true).Count;

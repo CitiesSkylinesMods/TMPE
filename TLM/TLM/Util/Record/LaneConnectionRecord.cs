@@ -5,6 +5,7 @@ namespace TrafficManager.Util.Record {
     using System.Linq;
     using TrafficManager.Manager.Impl;
     using TrafficManager.State;
+    using TrafficManager.Util.Extensions;
     using static TrafficManager.Util.Shortcuts;
 
     [Serializable]
@@ -102,7 +103,7 @@ namespace TrafficManager.Util.Record {
                     var laneData = new LaneConnectionRecord {
                         LaneId = laneIdAndIndex.laneId,
                         LaneIndex = (byte)laneIdAndIndex.laneIndex,
-                        StartNode = (bool)extSegmentManager.IsStartNode(segmentId, nodeId),
+                        StartNode = (bool)segmentId.ToSegment().IsStartNode(nodeId),
                     };
                     ret.Add(laneData);
                 }

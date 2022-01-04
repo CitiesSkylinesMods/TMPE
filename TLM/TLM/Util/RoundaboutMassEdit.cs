@@ -12,6 +12,7 @@ namespace TrafficManager.Util {
     using UnityEngine;
     using static TrafficManager.Util.Shortcuts;
     using static UI.SubTools.LaneConnectorTool;
+    using TrafficManager.Util.Extensions;
 
     public class RoundaboutMassEdit {
         public static RoundaboutMassEdit Instance = new RoundaboutMassEdit();
@@ -42,9 +43,10 @@ namespace TrafficManager.Util {
                 }
             }
 
-            ushort nodeId = ExtSegmentManager.Instance.GetHeadNode(segmentId);
-
-            if (OptionsMassEditTab.RoundAboutQuickFix_StayInLaneMainR && !HasJunctionFlag(nodeId)) {
+            ushort nodeId = segmentId.ToSegment().GetHeadNode();
+            ref NetNode netNode = ref nodeId.ToNode();
+            bool isJunction = netNode.IsJunction();
+            if (OptionsMassEditTab.RoundAboutQuickFix_StayInLaneMainR && isJunction) {
                 StayInLane(nodeId, StayInLaneMode.Both);
             }
 
@@ -53,12 +55,12 @@ namespace TrafficManager.Util {
             bool isStraight = segEndMan.GetDirection(segmentId, nextSegmentId, nodeId) == ArrowDirection.Forward;
 
             if (OptionsMassEditTab.RoundAboutQuickFix_DedicatedExitLanes &&
-                HasJunctionFlag(nodeId) &&
+                isJunction &&
                 SeparateTurningLanesUtil.CanChangeLanes(
                     segmentId, nodeId) == SetLaneArrow_Result.Success &&
                     isStraight) {
 
-                bool startNode = (bool)ExtSegmentManager.Instance.IsStartNode(segmentId, nodeId);
+                bool startNode = segmentId.ToSegment().IsStartNode(nodeId).Value;
                 ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
                 IList<LanePos> laneList =
                     extSegmentManager.GetSortedLanes(
@@ -73,7 +75,7 @@ namespace TrafficManager.Util {
                 // check for exits.
                 segEndMan.CalculateOutgoingLeftStraightRightSegments(
                     ref GetSegEnd(segmentId, nodeId),
-                    ref nodeId.ToNode(),
+                    ref netNode,
                     out bool bLeft,
                     out bool bForward,
                     out bool bRight);
@@ -140,7 +142,7 @@ namespace TrafficManager.Util {
         }
 
         internal static void FixRulesMinor(ushort segmentId, ushort nodeId) {
-            bool startNode = (bool)ExtSegmentManager.Instance.IsStartNode(segmentId, nodeId);
+            bool startNode = segmentId.ToSegment().IsStartNode(nodeId).Value;
             bool isHighway = ExtNodeManager.JunctionHasOnlyHighwayRoads(nodeId);
 
             if (OptionsMassEditTab.RoundAboutQuickFix_NoCrossYieldR) {
@@ -178,7 +180,7 @@ namespace TrafficManager.Util {
             ref NetSegment seg = ref segmentId.ToSegment();
             ushort otherNodeId = seg.GetOtherNode(nodeId);
             if (OptionsMassEditTab.RoundAboutQuickFix_StayInLaneNearRabout &&
-                !HasJunctionFlag(otherNodeId) &&
+                !otherNodeId.ToNode().IsJunction() &&
                 seg.m_averageLength < shortUnit * meterPerUnit) {
                 StayInLane(otherNodeId, StayInLaneMode.Both);
             }
@@ -228,7 +230,7 @@ namespace TrafficManager.Util {
                 ushort nextSegId = segList[(i + 1) % count];
                 FixSegmentRoundabout(segId, nextSegId);
                 FixRulesRoundabout(segId);
-                FixMinor(ExtSegmentManager.Instance.GetHeadNode(segId));
+                FixMinor(segId.ToSegment().GetHeadNode());
             }
             return record;
         }
@@ -270,7 +272,7 @@ namespace TrafficManager.Util {
                 for (int i = 0; i < lastN; ++i) {
                     ushort prevSegmentID = segList[i];
                     ushort nextSegmentID = segList[(i + 1) % n];
-                    ushort headNodeID = extSegmentManager.GetHeadNode(prevSegmentID);
+                    ushort headNodeID = prevSegmentID.ToSegment().GetHeadNode();
                     bool isRoundabout = IsPartofRoundabout(nextSegmentID, prevSegmentID, headNodeID);
                     if (!isRoundabout) {
                         //Log._Debug($"segments {prevSegmentID} and {nextSegmentID} with node:{headNodeID} are not part of a roundabout");
@@ -317,7 +319,7 @@ namespace TrafficManager.Util {
         /// LHT is the oposite.
         /// </summary>
         private static List<ushort> GetSortedSegments(ushort segmentId) {
-            ushort headNodeId = ExtSegmentManager.Instance.GetHeadNode(segmentId);
+            ushort headNodeId = segmentId.ToSegment().GetHeadNode();
             var list0 = GetSortedSegmentsHelper(headNodeId, segmentId, ArrowDirection.Forward);
             var list1 = GetSortedSegmentsHelper(headNodeId, segmentId, ArrowDirection.Left);
             var list2 = GetSortedSegmentsHelper(headNodeId, segmentId, ArrowDirection.Right);
@@ -370,7 +372,7 @@ namespace TrafficManager.Util {
         private static bool IsPartofRoundabout(ushort nextSegmentId, ushort prevSegmentId, ushort headNodeId) {
             bool ret = nextSegmentId != 0 && nextSegmentId != prevSegmentId;
             ret &= segMan.CalculateIsOneWay(nextSegmentId);
-            ret &= headNodeId == ExtSegmentManager.Instance.GetTailNode(nextSegmentId);
+            ret &= headNodeId == nextSegmentId.ToSegment().GetHeadNode();
             return ret;
         }
 
@@ -380,9 +382,9 @@ namespace TrafficManager.Util {
         /// </summary>
         private bool Contains(ushort segmentId) {
             ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
-            ushort nodeId = extSegmentManager.GetHeadNode(segmentId);
+            ushort nodeId = segmentId.ToSegment().GetHeadNode();
             foreach (ushort segId in segmentList_) {
-                if (extSegmentManager.GetHeadNode(segId) == nodeId) {
+                if (segId.ToSegment().GetHeadNode() == nodeId) {
                     return true;
                 }
             }

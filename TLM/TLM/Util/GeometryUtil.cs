@@ -7,6 +7,7 @@ namespace TrafficManager.Util {
     using TrafficManager.UI;
     using UnityEngine;
     using TrafficManager.Util;
+    using TrafficManager.Util.Extensions;
 
     /// <summary>
     /// Helper functions to handle coordinates and transformations, as well as road geometry
@@ -50,12 +51,12 @@ namespace TrafficManager.Util {
         }
 
         internal static bool IsBothEndsUnderground(this ref NetSegment segment) {
-            return segment.m_startNode.IsUndergroundNode() && segment.m_endNode.IsUndergroundNode();
+            return segment.m_startNode.ToNode().IsUnderground() && segment.m_endNode.ToNode().IsUnderground();
         }
 
         [UsedImplicitly]
         internal static bool IsEitherEndUnderground(this ref NetSegment segment) {
-            return segment.m_startNode.IsUndergroundNode() || segment.m_endNode.IsUndergroundNode();
+            return segment.m_startNode.ToNode().IsUnderground() || segment.m_endNode.ToNode().IsUnderground();
         }
 
         /// <summary>Gets the coordinates of the given node taking the terrain into account.</summary>

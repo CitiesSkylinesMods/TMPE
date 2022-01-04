@@ -4,6 +4,7 @@ namespace TrafficManager.Util.Record {
     using TrafficManager.Manager.Impl;
     using static TrafficManager.Util.Shortcuts;
     using TrafficManager.State;
+    using TrafficManager.Util.Extensions;
 
     [Serializable]
     public class NodeRecord : IRecordable {

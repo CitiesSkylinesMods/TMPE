@@ -6,6 +6,7 @@ namespace TrafficManager.Patch._VehicleAI._PassengerCarAI {
     using JetBrains.Annotations;
     using Manager.Impl;
     using State;
+    using TrafficManager.Util.Extensions;
     using Util;
 
     [UsedImplicitly]
