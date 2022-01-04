@@ -192,10 +192,9 @@ namespace TrafficManager.UI.MainMenu {
         private void ClickGoToNode(UIComponent component, UIMouseEventParameter eventParam) {
             ushort nodeId = Convert.ToUInt16(_goToField.text);
 
-            if ((nodeId.ToNode().m_flags & NetNode.Flags.Created) == NetNode.Flags.None) {
-                return;
+            if ((nodeId.ToNode().m_flags & NetNode.Flags.Created) != NetNode.Flags.None) {
+                CSUtil.CameraControl.CameraController.Instance.GoToNode(nodeId);
             }
-            CSUtil.CameraControl.CameraController.Instance.GoToNode(nodeId);
         }
 
         private void ClickPrintDebugInfo(UIComponent component, UIMouseEventParameter eventParam) {
