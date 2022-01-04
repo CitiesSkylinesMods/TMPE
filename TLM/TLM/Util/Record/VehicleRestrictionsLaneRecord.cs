@@ -38,7 +38,7 @@ namespace TrafficManager.Util.Record {
         }
 
         public void Transfer(ushort segmentId, byte laneIndex, uint laneId) {
-            var laneInfo = GetLaneInfo(segmentId, laneIndex);
+            var laneInfo = segmentId.ToSegment().GetLaneInfo(laneIndex);
             var segmentInfo = segmentId.ToSegment().Info;
             if (allowedVehicleTypes_ == null) {
                 VehicleRestrictionsManager.Instance.ClearVehicleRestrictions(segmentId, laneIndex, laneId);

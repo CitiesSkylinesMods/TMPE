@@ -2,8 +2,6 @@ namespace TrafficManager.Util {
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Reflection;
-    using System.Diagnostics;
     using ColossalFramework;
     using ColossalFramework.Math;
     using CSUtil.Commons;
@@ -51,9 +49,6 @@ namespace TrafficManager.Util {
 
         [Obsolete]
         internal static bool IsUndergroundNode(this ushort node) => node.ToNode().IsUnderground();
-
-        internal static NetInfo.Lane GetLaneInfo(ushort segmentId, int laneIndex) =>
-            segmentId.ToSegment().Info.m_lanes[laneIndex];
 
         internal static ref ExtSegmentEnd GetSegEnd(ushort segmentId, ushort nodeId) =>
             ref _segEndBuff[segEndMan.GetIndex(segmentId, nodeId)];

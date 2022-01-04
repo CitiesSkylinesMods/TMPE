@@ -34,7 +34,7 @@ namespace TrafficManager.Util.Record {
 
         public void Transfer(uint laneId) {
             ushort segmentId = laneId.ToLane().m_segment;
-            var laneInfo = GetLaneInfo(segmentId, LaneIndex);
+            var laneInfo = segmentId.ToSegment().GetLaneInfo(LaneIndex);
             SpeedLimitManager.Instance.SetLaneSpeedLimit(
                 segmentId: segmentId,
                 laneIndex: this.LaneIndex,
