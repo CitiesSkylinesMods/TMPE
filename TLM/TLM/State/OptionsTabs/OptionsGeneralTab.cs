@@ -60,6 +60,7 @@ namespace TrafficManager.State {
             AddLanguageDropdown(groupLocalisation,
                 GlobalConfig.Instance.LanguageCode);
             AddCrowdinButton(groupLocalisation);
+            AddLocalisationWikiButton(groupLocalisation);
             // TODO: Ditch separate MPH vs. km/h setting; selected icon theme should determine that? #1221
             AddMphCheckbox(groupLocalisation,
                 GlobalConfig.Instance.Main.DisplaySpeedLimitsMph);
@@ -132,8 +133,9 @@ namespace TrafficManager.State {
 
         private static void AddCrowdinButton(UIHelperBase group) {
             UIButton button = group.AddButton(
-                                    text: T("General.Button:Help us translate on https://crowdin.com/project/tmpe"),
+                                    text: T("General.Button:Help us translate on Crowdin"),
                                     eventCallback: OpenCrowdinInBrowser) as UIButton;
+            button.tooltip = "https://crowdin.com/project/tmpe";
             button.textScale = 0.8f;
         }
 
@@ -144,6 +146,20 @@ namespace TrafficManager.State {
             Application.OpenURL("https://crowdin.com/project/tmpe");
         }
 
+        private static void AddLocalisationWikiButton(UIHelperBase group) {
+            UIButton button = group.AddButton(
+                                    text: T("General.Button:View localisation guide"),
+                                    eventCallback: OpenLocalisationWikiInBrowser) as UIButton;
+            button.tooltip = "https://github.com/CitiesSkylinesMods/TMPE/wiki/Localisation";
+            button.textScale = 0.8f;
+        }
+
+        private static void OpenLocalisationWikiInBrowser() {
+            if (TMPELifecycle.InGameOrEditor()) {
+                SimulationManager.instance.SimulationPaused = true;
+            }
+            Application.OpenURL("https://github.com/CitiesSkylinesMods/TMPE/wiki/Localisation");
+        }
 
         private static void AddMphCheckbox(UIHelperBase group, bool DisplaySpeedLimitsMph) {
             _displayMphToggle = group.AddCheckbox(
