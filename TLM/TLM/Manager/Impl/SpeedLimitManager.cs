@@ -220,21 +220,26 @@ namespace TrafficManager.Manager.Impl {
         /// <summary>
         /// Determines the game default speed limit of the given NetInfo.
         /// </summary>
-        /// <param name="info">the NetInfo of which the game default speed limit should be determined</param>
+        /// <param name="netinfo">the NetInfo of which the game default speed limit should be determined</param>
         /// <returns>The vanilla speed limit, in game units.</returns>
-        private float GetVanillaNetInfoSpeedLimit(NetInfo info) {
-            if (info == null) {
-                Log._DebugOnlyWarning("SpeedLimitManager.GetVanillaNetInfoSpeedLimit: info is null!");
+        private float GetVanillaNetInfoSpeedLimit(NetInfo netinfo) {
+            if (netinfo == null) {
+                Log._DebugOnlyWarning("SpeedLimitManager.GetVanillaNetInfoSpeedLimit: netinfo is null!");
                 return 0f;
             }
 
-            if (info.m_netAI == null) {
-                Log._DebugOnlyWarning("SpeedLimitManager.GetVanillaNetInfoSpeedLimit: info.m_netAI is null!");
+            if (netinfo.m_netAI == null) {
+                Log._DebugOnlyWarning($"SpeedLimitManager.GetVanillaNetInfoSpeedLimit: netinfo.m_netAI is null for{netinfo.name}!");
+                return 0f;
+            }
+
+            if (netinfo.m_lanes == null) {
+                Log._DebugOnlyWarning($"SpeedLimitManager.GetVanillaNetInfoSpeedLimit: netinfo.m_lanes is null for {netinfo.name}!");
                 return 0f;
             }
 
             float? maxSpeedLimit = null;
-            foreach (var lane in info?.m_lanes ?? Enumerable.Empty<NetInfo.Lane>()) {
+            foreach (var lane in netinfo?.m_lanes ?? Enumerable.Empty<NetInfo.Lane>()) {
                 float speedLimit = lane.m_speedLimit;
                 if (maxSpeedLimit == null || speedLimit > maxSpeedLimit) {
                     maxSpeedLimit = speedLimit;
