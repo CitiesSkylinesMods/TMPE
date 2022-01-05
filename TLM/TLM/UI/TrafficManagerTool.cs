@@ -296,6 +296,7 @@ namespace TrafficManager.UI {
             }
 
             SetToolMode_DeactivateTool();
+
             // Try figure out whether legacy subtool or a new subtool is selected
             if (!legacySubTools_.TryGetValue(newToolMode, out activeLegacySubTool_)
                 && !subTools_.TryGetValue(newToolMode, out activeSubTool_)) {

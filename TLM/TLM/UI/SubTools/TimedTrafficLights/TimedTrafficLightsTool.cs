@@ -1263,23 +1263,23 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
         private void DrawStraightLightTexture(RoadBaseAI.TrafficLightState state, Rect rect) {
             switch (state) {
                 case RoadBaseAI.TrafficLightState.Green: {
-                    GUI.DrawTexture(rect, TrafficLightTextures.GreenLightStraight);
+                    GUI.DrawTexture(rect, TrafficLightTextures.Instance.GreenLightStraight);
                     break;
                 }
 
                 case RoadBaseAI.TrafficLightState.GreenToRed: {
-                    GUI.DrawTexture(rect, TrafficLightTextures.YellowLight);
+                    GUI.DrawTexture(rect, TrafficLightTextures.Instance.YellowLight);
                     break;
                 }
 
                 // also: case RoadBaseAI.TrafficLightState.Red:
                 default: {
-                    GUI.DrawTexture(rect, TrafficLightTextures.RedLightStraight);
+                    GUI.DrawTexture(rect, TrafficLightTextures.Instance.RedLightStraight);
                     break;
                 }
 
                 case RoadBaseAI.TrafficLightState.RedToGreen: {
-                    GUI.DrawTexture(rect, TrafficLightTextures.YellowLightStraight);
+                    GUI.DrawTexture(rect, TrafficLightTextures.Instance.YellowLightStraight);
                     break;
                 }
             }
@@ -1288,23 +1288,23 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
         private void DrawForwardLeftLightTexture(RoadBaseAI.TrafficLightState state, Rect rect) {
             switch (state) {
                 case RoadBaseAI.TrafficLightState.Green: {
-                    GUI.DrawTexture(rect, TrafficLightTextures.GreenLightForwardLeft);
+                    GUI.DrawTexture(rect, TrafficLightTextures.Instance.GreenLightForwardLeft);
                     break;
                 }
 
                 case RoadBaseAI.TrafficLightState.GreenToRed: {
-                    GUI.DrawTexture(rect, TrafficLightTextures.YellowLight);
+                    GUI.DrawTexture(rect, TrafficLightTextures.Instance.YellowLight);
                     break;
                 }
 
                 // also: case RoadBaseAI.TrafficLightState.Red:
                 default: {
-                    GUI.DrawTexture(rect, TrafficLightTextures.RedLightForwardLeft);
+                    GUI.DrawTexture(rect, TrafficLightTextures.Instance.RedLightForwardLeft);
                     break;
                 }
 
                 case RoadBaseAI.TrafficLightState.RedToGreen: {
-                    GUI.DrawTexture(rect, TrafficLightTextures.YellowLightForwardLeft);
+                    GUI.DrawTexture(rect, TrafficLightTextures.Instance.YellowLightForwardLeft);
                     break;
                 }
             }
@@ -1313,23 +1313,23 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
         private void DrawForwardRightLightTexture(RoadBaseAI.TrafficLightState state, Rect rect) {
             switch (state) {
                 case RoadBaseAI.TrafficLightState.Green: {
-                    GUI.DrawTexture(rect, TrafficLightTextures.GreenLightForwardRight);
+                    GUI.DrawTexture(rect, TrafficLightTextures.Instance.GreenLightForwardRight);
                     break;
                 }
 
                 case RoadBaseAI.TrafficLightState.GreenToRed: {
-                    GUI.DrawTexture(rect, TrafficLightTextures.YellowLight);
+                    GUI.DrawTexture(rect, TrafficLightTextures.Instance.YellowLight);
                     break;
                 }
 
                 // also: case RoadBaseAI.TrafficLightState.Red:
                 default: {
-                    GUI.DrawTexture(rect, TrafficLightTextures.RedLightForwardRight);
+                    GUI.DrawTexture(rect, TrafficLightTextures.Instance.RedLightForwardRight);
                     break;
                 }
 
                 case RoadBaseAI.TrafficLightState.RedToGreen: {
-                    GUI.DrawTexture(rect, TrafficLightTextures.YellowLightForwardRight);
+                    GUI.DrawTexture(rect, TrafficLightTextures.Instance.YellowLightForwardRight);
                     break;
                 }
             }
@@ -1338,23 +1338,23 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
         private void DrawLeftLightTexture(RoadBaseAI.TrafficLightState state, Rect rect) {
             switch (state) {
                 case RoadBaseAI.TrafficLightState.Green: {
-                    GUI.DrawTexture(rect, TrafficLightTextures.GreenLightLeft);
+                    GUI.DrawTexture(rect, TrafficLightTextures.Instance.GreenLightLeft);
                     break;
                 }
 
                 case RoadBaseAI.TrafficLightState.GreenToRed: {
-                    GUI.DrawTexture(rect, TrafficLightTextures.YellowLight);
+                    GUI.DrawTexture(rect, TrafficLightTextures.Instance.YellowLight);
                     break;
                 }
 
                 // also: case RoadBaseAI.TrafficLightState.Red:
                 default: {
-                    GUI.DrawTexture(rect, TrafficLightTextures.RedLightLeft);
+                    GUI.DrawTexture(rect, TrafficLightTextures.Instance.RedLightLeft);
                     break;
                 }
 
                 case RoadBaseAI.TrafficLightState.RedToGreen: {
-                    GUI.DrawTexture(rect, TrafficLightTextures.YellowLightLeft);
+                    GUI.DrawTexture(rect, TrafficLightTextures.Instance.YellowLightLeft);
                     break;
                 }
             }
@@ -1363,23 +1363,23 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
         private void DrawRightLightTexture(RoadBaseAI.TrafficLightState state, Rect rect) {
             switch (state) {
                 case RoadBaseAI.TrafficLightState.Green: {
-                    GUI.DrawTexture(rect, TrafficLightTextures.GreenLightRight);
+                    GUI.DrawTexture(rect, TrafficLightTextures.Instance.GreenLightRight);
                     break;
                 }
 
                 case RoadBaseAI.TrafficLightState.GreenToRed: {
-                    GUI.DrawTexture(rect, TrafficLightTextures.YellowLight);
+                    GUI.DrawTexture(rect, TrafficLightTextures.Instance.YellowLight);
                     break;
                 }
 
                 // also: case RoadBaseAI.TrafficLightState.Red:
                 default: {
-                    GUI.DrawTexture(rect, TrafficLightTextures.RedLightRight);
+                    GUI.DrawTexture(rect, TrafficLightTextures.Instance.RedLightRight);
                     break;
                 }
 
                 case RoadBaseAI.TrafficLightState.RedToGreen: {
-                    GUI.DrawTexture(rect, TrafficLightTextures.YellowLightRight);
+                    GUI.DrawTexture(rect, TrafficLightTextures.Instance.YellowLightRight);
                     break;
                 }
             }
@@ -1388,23 +1388,23 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
         private void DrawMainLightTexture(RoadBaseAI.TrafficLightState state, Rect rect) {
             switch (state) {
                 case RoadBaseAI.TrafficLightState.Green: {
-                    GUI.DrawTexture(rect, TrafficLightTextures.GreenLight);
+                    GUI.DrawTexture(rect, TrafficLightTextures.Instance.GreenLight);
                     break;
                 }
 
                 case RoadBaseAI.TrafficLightState.GreenToRed: {
-                    GUI.DrawTexture(rect, TrafficLightTextures.YellowLight);
+                    GUI.DrawTexture(rect, TrafficLightTextures.Instance.YellowLight);
                     break;
                 }
 
                 // also: case RoadBaseAI.TrafficLightState.Red:
                 default: {
-                    GUI.DrawTexture(rect, TrafficLightTextures.RedLight);
+                    GUI.DrawTexture(rect, TrafficLightTextures.Instance.RedLight);
                     break;
                 }
 
                 case RoadBaseAI.TrafficLightState.RedToGreen: {
-                    GUI.DrawTexture(rect, TrafficLightTextures.YellowRedLight);
+                    GUI.DrawTexture(rect, TrafficLightTextures.Instance.YellowRedLight);
                     break;
                 }
             }
@@ -1440,9 +1440,9 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
 
                     Texture2D tex = timedNode.IsStarted()
                                         ? (timedNode.IsInTestMode()
-                                               ? TrafficLightTextures.ClockTest
-                                               : TrafficLightTextures.ClockPlay)
-                                        : TrafficLightTextures.ClockPause;
+                                               ? TrafficLightTextures.Instance.ClockTest
+                                               : TrafficLightTextures.Instance.ClockPlay)
+                                        : TrafficLightTextures.Instance.ClockPause;
                     Highlight.DrawGenericSquareOverlayTexture(
                         texture: tex,
                         camPos: camPos,
@@ -1459,7 +1459,7 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
             JunctionRestrictionsManager junctionRestrictionsManager = JunctionRestrictionsManager.Instance;
             ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
             IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
-
+            var vehicleInfoSignTextures = RoadUI.Instance.VehicleInfoSignTextures;
             var hoveredSegment = false;
 
             foreach (ushort nodeId in selectedNodeIds) {
@@ -1568,8 +1568,8 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
                             GUI.DrawTexture(
                                 myRect2,
                                 liveSegmentLights.ManualPedestrianMode
-                                    ? TrafficLightTextures.PedestrianModeManual
-                                    : TrafficLightTextures.PedestrianModeAutomatic);
+                                    ? TrafficLightTextures.Instance.PedestrianModeManual
+                                    : TrafficLightTextures.Instance.PedestrianModeAutomatic);
 
                             if (myRect2.Contains(Event.current.mousePosition) &&
                                 !IsCursorInPanel()) {
@@ -1601,13 +1601,13 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
 
                         switch (liveSegmentLights.PedestrianLightState) {
                             case RoadBaseAI.TrafficLightState.Green: {
-                                GUI.DrawTexture(myRect3, TrafficLightTextures.PedestrianGreenLight);
+                                GUI.DrawTexture(myRect3, TrafficLightTextures.Instance.PedestrianGreenLight);
                                 break;
                             }
 
                             // also: case RoadBaseAI.TrafficLightState.Red:
                             default: {
-                                GUI.DrawTexture(myRect3, TrafficLightTextures.PedestrianRedLight);
+                                GUI.DrawTexture(myRect3, TrafficLightTextures.Instance.PedestrianRedLight);
                                 break;
                             }
                         }
@@ -1662,7 +1662,7 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
                                 modeWidth,
                                 modeHeight);
 
-                            GUI.DrawTexture(myRect1, TrafficLightTextures.LightMode);
+                            GUI.DrawTexture(myRect1, TrafficLightTextures.Instance.LightMode);
 
                             if (myRect1.Contains(Event.current.mousePosition) &&
                                 !IsCursorInPanel()) {
@@ -1703,8 +1703,7 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
                                 guiColor.a = TrafficManagerTool.GetHandleAlpha(false);
                                 GUI.DrawTexture(
                                     infoRect,
-                                    RoadUI.VehicleInfoSignTextures[
-                                        TrafficManagerTool.InfoSignsToDisplay[k]]);
+                                    vehicleInfoSignTextures[TrafficManagerTool.InfoSignsToDisplay[k]]);
                                 ++numInfos;
                             }
                         }

@@ -105,6 +105,12 @@ namespace TrafficManager.Lifecycle {
             RegisteredManagers.Add(VehicleRestrictionsManager.Instance);
             RegisteredManagers.Add(ExtVehicleManager.Instance);
 
+            // Texture managers
+            RegisteredManagers.Add(UI.Textures.RoadSignThemes.Instance);
+            RegisteredManagers.Add(UI.Textures.JunctionRestrictions.Instance);
+            RegisteredManagers.Add(UI.Textures.RoadUI.Instance);
+            RegisteredManagers.Add(UI.Textures.TrafficLightTextures.Instance);
+
             // depends on TurnOnRedManager, TrafficLightManager, TrafficLightSimulationManager
             RegisteredManagers.Add(JunctionRestrictionsManager.Instance);
         }
@@ -141,8 +147,9 @@ namespace TrafficManager.Lifecycle {
 
 #if DEBUG
                 const bool installHarmonyASAP = false; // set true for fast testing
-                if (installHarmonyASAP)
+                if (installHarmonyASAP) {
                     HarmonyHelper.DoOnHarmonyReady(Patcher.Install);
+                }
 #endif
             } catch (Exception ex) {
                 ex.LogException(true);

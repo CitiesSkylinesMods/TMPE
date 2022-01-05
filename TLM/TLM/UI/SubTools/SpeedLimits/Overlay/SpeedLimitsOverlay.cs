@@ -355,7 +355,7 @@
                     // Defaults can show normal textures if the user holds Alt
                     SpeedlimitsToolMode.Defaults => args.ToolMode == SpeedlimitsToolMode.Defaults
                                                         ? RoadSignThemes.ActiveTheme
-                                                        : RoadSignThemes.RoadDefaults,
+                                                        : RoadSignThemes.Instance.RoadDefaults,
                     _ => throw new ArgumentOutOfRangeException(),
                 },
                 drawDefaults_ = args.ToolMode == SpeedlimitsToolMode.Defaults,
@@ -540,7 +540,7 @@
                     size: size * RoadSignThemes.DefaultSpeedlimitsAspectRatio());
                 squareSignRenderer.DrawLargeTexture(
                     speedlimit: defaultSpeedLimit,
-                    theme: RoadSignThemes.RoadDefaults);
+                    theme: RoadSignThemes.Instance.RoadDefaults);
             } else {
                 //-------------------------------------
                 // Draw override, if exists, otherwise draw circle and small blue default
@@ -561,7 +561,7 @@
                         size: size * RoadSignThemes.DefaultSpeedlimitsAspectRatio());
                     Texture2D chosenTexture = SignRenderer.ChooseTexture(
                         speedlimit: defaultSpeedLimit,
-                        theme: RoadSignThemes.RoadDefaults);
+                        theme: RoadSignThemes.Instance.RoadDefaults);
                     squareSignRenderer.DrawLargeTexture(chosenTexture);
                     // squareSignRenderer.DrawSmallTexture_BottomRight(chosenTexture);
                 } else {
@@ -575,7 +575,7 @@
                 //-----------------------
                 // Draw small arrow down
                 //-----------------------
-                signRenderer.DrawSmallTexture_TopLeft(RoadUI.Underground);
+                signRenderer.DrawSmallTexture_TopLeft(RoadUI.Instance.Underground);
             }
 
             if (!isHoveredHandle) {
@@ -611,6 +611,7 @@
             [NotNull] DrawEnv drawEnv,
             [NotNull] DrawArgs args)
         {
+            var vehicleInfoSignTextures = RoadUI.Instance.VehicleInfoSignTextures;
             bool ret = false;
             ref NetSegment segment = ref segmentId.ToSegment();
 
@@ -734,7 +735,7 @@
                         size: size * RoadSignThemes.DefaultSpeedlimitsAspectRatio());
                     Texture2D chosenTexture = SignRenderer.ChooseTexture(
                         speedlimit: overrideSpeedlimit.DefaultValue,
-                        theme: RoadSignThemes.RoadDefaults);
+                        theme: RoadSignThemes.Instance.RoadDefaults);
                     squareSignRenderer.DrawLargeTexture(chosenTexture);
                     // squareSignRenderer.DrawSmallTexture_BottomRight(chosenTexture);
                 } else {
@@ -750,8 +751,7 @@
                     && !onlyMonorailLanes
                     && ((laneInfo.m_vehicleType & VehicleInfo.VehicleType.Monorail) != VehicleInfo.VehicleType.None))
                 {
-                    Texture2D tex1 = RoadUI.VehicleInfoSignTextures[
-                        LegacyExtVehicleType.ToNew(old: ExtVehicleType.PassengerTrain)];
+                    Texture2D tex1 = vehicleInfoSignTextures[LegacyExtVehicleType.ToNew(old: ExtVehicleType.PassengerTrain)];
 
                     // TODO: Replace with direct call to GUI.DrawTexture as in the func above
                     grid.DrawStaticSquareOverlayGridTexture(
@@ -767,7 +767,7 @@
                     //-------------------------------------
                     // Draw arrow down
                     //-------------------------------------
-                    signRenderer.DrawSmallTexture_TopLeft(RoadUI.Underground);
+                    signRenderer.DrawSmallTexture_TopLeft(RoadUI.Instance.Underground);
                 }
 
                 if (isHoveredHandle) {

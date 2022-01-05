@@ -90,6 +90,7 @@ namespace TrafficManager.UI.SubTools {
 
         public override void OnToolGUI(Event e) {
             Vector3 camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
+            var textures = TrafficLightTextures.Instance;
 
             //--------------------------------
             // Render all visible node states
@@ -101,16 +102,16 @@ namespace TrafficManager.UI.SubTools {
                 // Check whether there is a traffic light and CAN be any at all
                 Texture2D overlayTex;
                 if (TrafficLightSimulationManager.Instance.HasTimedSimulation(nodeId)) {
-                    overlayTex = TrafficLightTextures.TrafficLightEnabledTimed;
+                    overlayTex = textures.TrafficLightEnabledTimed;
                 } else
                 if (TrafficLightManager.Instance.HasTrafficLight(
                     nodeId,
                     ref netNode)) {
                     // Render traffic light icon
-                    overlayTex = TrafficLightTextures.TrafficLightEnabled;
+                    overlayTex = textures.TrafficLightEnabled;
                 } else {
                     // Render traffic light possible but disabled icon
-                    overlayTex = TrafficLightTextures.TrafficLightDisabled;
+                    overlayTex = textures.TrafficLightDisabled;
                 }
 
                 Highlight.DrawGenericOverlayTexture(

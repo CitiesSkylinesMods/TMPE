@@ -1,5 +1,6 @@
 namespace TrafficManager.State {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using TrafficManager.API.Traffic.Enums;
     using ColossalFramework.UI;
@@ -176,17 +177,18 @@ namespace TrafficManager.State {
                 return Translation.SpeedLimits.Get($"RoadSignTheme:{themeName}");
             }
 
-            var themeOptions = RoadSignThemes.ThemeNames
-                                                    .Select(FormatThemeName)
-                                                    .ToArray();
-            int selectedThemeIndex = RoadSignThemes.ThemeNames.FindIndex(x => x == mainConfig.RoadSignTheme);
-            int defaultSignsThemeIndex = RoadSignThemes.FindDefaultThemeIndex(GlobalConfig.Instance.Main.DisplaySpeedLimitsMph);
+            List<string> themeNames = RoadSignThemes.Instance.ThemeNames;
+            var themeOptions = themeNames.Select(FormatThemeName).ToArray();
+            int selectedThemeIndex = themeNames.FindIndex(x => x == mainConfig.RoadSignTheme);
+            int defaultSignsThemeIndex = RoadSignThemes.Instance.FindDefaultThemeIndex(GlobalConfig.Instance.Main.DisplaySpeedLimitsMph);
+
             _roadSignsThemeDropdown
                 = generalGroup.AddDropdown(
                       text: Translation.SpeedLimits.Get("General.Dropdown:Road signs theme") + ":",
                       options: themeOptions,
                       defaultSelection: selectedThemeIndex >= 0 ? selectedThemeIndex : defaultSignsThemeIndex,
                       eventCallback: OnRoadSignsThemeChanged) as UIDropDown;
+
             _roadSignsThemeDropdown.width *= 2.0f;
         }
 
@@ -346,8 +348,8 @@ namespace TrafficManager.State {
 
             if (!supportedByTheme) {
                 // Reset to German road signs theme
-                _roadSignsThemeDropdown.selectedIndex = RoadSignThemes.FindDefaultThemeIndex(newMphValue);
-                mainConfig.RoadSignTheme = RoadSignThemes.GetDefaultThemeName(newMphValue);
+                _roadSignsThemeDropdown.selectedIndex = RoadSignThemes.Instance.FindDefaultThemeIndex(newMphValue);
+                mainConfig.RoadSignTheme = RoadSignThemes.Instance.GetDefaultThemeName(newMphValue);
                 Log.Info(
                     $"Display MPH changed to {newMphValue}, but was not supported by current theme, "
                     + "so theme was also reset to German_Kmph");
@@ -375,10 +377,10 @@ namespace TrafficManager.State {
                 return;
             }
 
-            var newTheme = RoadSignThemes.ThemeNames[newThemeIndex];
+            var newTheme = RoadSignThemes.Instance.ThemeNames[newThemeIndex];
 
             Main mainConfig = GlobalConfig.Instance.Main;
-            switch (RoadSignThemes.ChangeTheme(
+            switch (RoadSignThemes.Instance.ChangeTheme(
                         newTheme: newTheme,
                         mphEnabled: mainConfig.DisplaySpeedLimitsMph)) {
                 case RoadSignThemes.ChangeThemeResult.Success:

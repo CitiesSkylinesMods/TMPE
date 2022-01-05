@@ -46,7 +46,7 @@
                                      RoadSignThemes.RoadSignTheme theme) {
             Texture2D tex = speedlimit.HasValue
                                 ? theme.GetTexture(speedlimit.Value)
-                                : RoadSignThemes.NoOverride;
+                                : RoadSignThemes.Instance.NoOverride;
 
             GUI.DrawTexture(
                 position: this.screenRect_,
@@ -63,7 +63,7 @@
                                                 RoadSignThemes.RoadSignTheme theme) {
             return speedlimit.HasValue
                        ? theme.GetTexture(speedlimit.Value)
-                       : RoadSignThemes.NoOverride;
+                       : RoadSignThemes.Instance.NoOverride;
         }
 
         /// <summary>Draws the small texture in the Bottom-Right corner.</summary>
