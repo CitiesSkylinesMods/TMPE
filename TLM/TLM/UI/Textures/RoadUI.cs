@@ -3,26 +3,49 @@ namespace TrafficManager.UI.Textures {
     using static TextureResources;
     using System.Collections.Generic;
     using TrafficManager.API.Traffic.Enums;
+    using TrafficManager.Manager;
     using TrafficManager.Util;
     using UnityEngine;
 
-    /// <summary>UI Textures for controlling road segments.</summary>
-    public static class RoadUI {
-        [Obsolete("These are now available via RoadSignThemes.ActiveTheme.Priority(PriorityType p)")]
-        public static readonly IDictionary<PriorityType, Texture2D> PrioritySignTextures;
+    /// <summary>
+    /// Singleton which manages UI Textures for controlling road segments.
+    /// The textures are loaded when OnLevelLoaded event is fired from the <see cref="Lifecycle.TMPELifecycle"/>.
+    /// </summary>
+    public class RoadUI : AbstractCustomManager {
+        public static RoadUI Instance = new();
 
-        public static readonly Texture2D SignClear;
+        [Obsolete("These are now available via RoadSignThemes.ActiveTheme.Priority(PriorityType p)")]
+        public IDictionary<PriorityType, Texture2D> PrioritySignTextures;
+
+        public Texture2D SignClear;
 
         /// <summary>Smaller Arrow-Down sign to be rendered as half-size for underground nodes.</summary>
-        public static readonly Texture2D Underground;
+        public Texture2D Underground;
 
-        public static readonly IDictionary<ExtVehicleType, IDictionary<bool, Texture2D>> VehicleRestrictionTextures;
-        public static readonly IDictionary<ExtVehicleType, Texture2D> VehicleInfoSignTextures;
+        public IDictionary<ExtVehicleType, IDictionary<bool, Texture2D>> VehicleRestrictionTextures;
+        public IDictionary<ExtVehicleType, Texture2D> VehicleInfoSignTextures;
 
         [Obsolete("These are now available via RoadSignThemes.ActiveTheme.Parking(bool)")]
-        public static readonly IDictionary<bool, Texture2D> ParkingRestrictionTextures;
+        public IDictionary<bool, Texture2D> ParkingRestrictionTextures;
 
-        static RoadUI() {
+        public void ReloadTexturesWithTranslation() {
+            IntVector2 size = new IntVector2(200);
+            Texture2D stopTexture = PrioritySignTextures[PriorityType.Stop];
+            if (stopTexture) {
+                UnityEngine.GameObject.Destroy(stopTexture);
+            }
+
+            PrioritySignTextures[PriorityType.Stop] = LoadDllResource(Translation.GetTranslatedFileName("RoadUI.sign_stop.png"), size);
+
+            Texture2D yieldTexture = PrioritySignTextures[PriorityType.Yield];
+            if (yieldTexture) {
+                UnityEngine.GameObject.Destroy(yieldTexture);
+            }
+
+            PrioritySignTextures[PriorityType.Yield] = LoadDllResource(Translation.GetTranslatedFileName("RoadUI.sign_yield.png"), size);
+        }
+
+        public override void OnLevelLoading() {
             IntVector2 size = new IntVector2(200);
 
             // priority signs
@@ -80,21 +103,37 @@ namespace TrafficManager.UI.Textures {
             VehicleInfoSignTextures[ExtVehicleType.Service] = LoadDllResource("RoadUI.service_infosign.png", signSize);
             VehicleInfoSignTextures[ExtVehicleType.Taxi] = LoadDllResource("RoadUI.taxi_infosign.png", signSize);
             VehicleInfoSignTextures[ExtVehicleType.Tram] = LoadDllResource("RoadUI.tram_infosign.png", signSize);
-       }
 
-        public static void ReloadTexturesWithTranslation() {
-            IntVector2 size = new IntVector2(200);
-            Texture2D stopTexture = PrioritySignTextures[PriorityType.Stop];
-            if (stopTexture)
-                UnityEngine.GameObject.Destroy(stopTexture);
+            base.OnLevelLoading();
+        }
 
-            PrioritySignTextures[PriorityType.Stop] = LoadDllResource(Translation.GetTranslatedFileName("RoadUI.sign_stop.png"), size);
+        public override void OnLevelUnloading() {
+            foreach (var t in PrioritySignTextures) {
+                UnityEngine.Object.Destroy(t.Value);
+            }
+            PrioritySignTextures.Clear();
 
-            Texture2D yieldTexture = PrioritySignTextures[PriorityType.Yield];
-            if (yieldTexture)
-                UnityEngine.GameObject.Destroy(yieldTexture);
+            foreach (var vrt in VehicleRestrictionTextures) {
+                foreach (var t in vrt.Value) {
+                    UnityEngine.Object.Destroy(t.Value);
+                }
+            }
+            VehicleRestrictionTextures.Clear();
 
-            PrioritySignTextures[PriorityType.Yield] = LoadDllResource(Translation.GetTranslatedFileName("RoadUI.sign_yield.png"), size);
+            foreach (var t in VehicleInfoSignTextures) {
+                UnityEngine.Object.Destroy(t.Value);
+            }
+            VehicleInfoSignTextures.Clear();
+
+            foreach (var t in ParkingRestrictionTextures) {
+                UnityEngine.Object.Destroy(t.Value);
+            }
+            ParkingRestrictionTextures.Clear();
+
+            UnityEngine.Object.Destroy(SignClear);
+            UnityEngine.Object.Destroy(Underground);
+
+            base.OnLevelUnloading();
         }
     }
 }
