@@ -402,7 +402,7 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                     // draw remove button and handle click
                     if (showRemoveButton
                         && Highlight.DrawHoverableSquareOverlayTexture(
-                            texture: RoadUI.SignClear,
+                            texture: RoadUI.Instance.SignClear,
                             camPos: camPos,
                             worldPos: nodePos,
                             size: 90f)

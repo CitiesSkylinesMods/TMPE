@@ -134,8 +134,8 @@ namespace TrafficManager.State {
                     ModUI.Instance.MainMenuButton.UpdateButtonSkinAndTooltip();
                 }
 
-                RoadUI.ReloadTexturesWithTranslation();
-                TrafficLightTextures.ReloadTexturesWithTranslation();
+                RoadUI.Instance.ReloadTexturesWithTranslation();
+                TrafficLightTextures.Instance.ReloadTexturesWithTranslation();
                 TMPELifecycle.Instance.TranslationDatabase.ReloadTutorialTranslations();
                 TMPELifecycle.Instance.TranslationDatabase.ReloadGuideTranslations();
             } else {

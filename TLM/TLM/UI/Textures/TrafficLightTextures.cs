@@ -1,4 +1,5 @@
 namespace TrafficManager.UI.Textures {
+    using TrafficManager.Manager;
     using TrafficManager.Util;
     using UnityEngine;
     using static TextureResources;
@@ -6,50 +7,52 @@ namespace TrafficManager.UI.Textures {
     /// <summary>
     /// Textures for UI controlling the traffic lights
     /// </summary>
-    public static class TrafficLightTextures {
-        public static readonly Texture2D RedLight;
-        public static readonly Texture2D RedLightForwardLeft;
-        public static readonly Texture2D RedLightForwardRight;
-        public static readonly Texture2D RedLightLeft;
-        public static readonly Texture2D RedLightRight;
-        public static readonly Texture2D RedLightStraight;
-        public static readonly Texture2D PedestrianRedLight;
+    public class TrafficLightTextures : AbstractCustomManager {
+        public static TrafficLightTextures Instance = new();
 
-        public static readonly Texture2D YellowLight;
-        public static readonly Texture2D YellowLightForwardLeft;
-        public static readonly Texture2D YellowLightForwardRight;
-        public static readonly Texture2D YellowLightLeft;
-        public static readonly Texture2D YellowLightRight;
-        public static readonly Texture2D YellowLightStraight;
-        public static readonly Texture2D YellowRedLight;
+        public Texture2D RedLight;
+        public Texture2D RedLightForwardLeft;
+        public Texture2D RedLightForwardRight;
+        public Texture2D RedLightLeft;
+        public Texture2D RedLightRight;
+        public Texture2D RedLightStraight;
+        public Texture2D PedestrianRedLight;
 
-        public static readonly Texture2D GreenLight;
-        public static readonly Texture2D GreenLightForwardLeft;
-        public static readonly Texture2D GreenLightForwardRight;
-        public static readonly Texture2D GreenLightLeft;
-        public static readonly Texture2D GreenLightRight;
-        public static readonly Texture2D GreenLightStraight;
-        public static readonly Texture2D PedestrianGreenLight;
+        public Texture2D YellowLight;
+        public Texture2D YellowLightForwardLeft;
+        public Texture2D YellowLightForwardRight;
+        public Texture2D YellowLightLeft;
+        public Texture2D YellowLightRight;
+        public Texture2D YellowLightStraight;
+        public Texture2D YellowRedLight;
+
+        public Texture2D GreenLight;
+        public Texture2D GreenLightForwardLeft;
+        public Texture2D GreenLightForwardRight;
+        public Texture2D GreenLightLeft;
+        public Texture2D GreenLightRight;
+        public Texture2D GreenLightStraight;
+        public Texture2D PedestrianGreenLight;
 
         //--------------------------
         // Timed TL Editor
         //--------------------------
-        public static Texture2D LightMode;
-        public static Texture2D LightCounter;
-        public static readonly Texture2D ClockPlay;
-        public static readonly Texture2D ClockPause;
-        public static readonly Texture2D ClockTest;
-        public static Texture2D PedestrianModeAutomatic;
-        public static Texture2D PedestrianModeManual;
+        public Texture2D LightMode;
+        public Texture2D LightCounter;
+        public Texture2D ClockPlay;
+        public Texture2D ClockPause;
+        public Texture2D ClockTest;
+        public Texture2D PedestrianModeAutomatic;
+        public Texture2D PedestrianModeManual;
 
         //--------------------------
         // Toggle TL Tool
         //--------------------------
-        public static readonly Texture2D TrafficLightEnabled;
-        public static readonly Texture2D TrafficLightEnabledTimed;
-        public static readonly Texture2D TrafficLightDisabled;
+        public Texture2D TrafficLightEnabled;
+        public Texture2D TrafficLightEnabledTimed;
+        public Texture2D TrafficLightDisabled;
 
-        static TrafficLightTextures() {
+        public override void OnLevelLoading() {
             IntVector2 tlSize = new IntVector2(103, 243);
 
             RedLight = LoadDllResource("TrafficLights.light_1_1.png", tlSize);
@@ -108,9 +111,51 @@ namespace TrafficManager.UI.Textures {
             TrafficLightEnabled = LoadDllResource("TrafficLights.IconJunctionTrafficLights.png", toggleSize);
             TrafficLightEnabledTimed = LoadDllResource("TrafficLights.IconJunctionTimedTL.png", toggleSize);
             TrafficLightDisabled = LoadDllResource("TrafficLights.IconJunctionNoTrafficLights.png", toggleSize);
+
+            base.OnLevelLoading();
         }
 
-        public static void ReloadTexturesWithTranslation() {
+        public override void OnLevelUnloading() {
+            UnityEngine.Object.Destroy(RedLight);
+            UnityEngine.Object.Destroy(RedLightForwardLeft);
+            UnityEngine.Object.Destroy(RedLightForwardRight);
+            UnityEngine.Object.Destroy(RedLightLeft);
+            UnityEngine.Object.Destroy(RedLightRight);
+            UnityEngine.Object.Destroy(RedLightStraight);
+            UnityEngine.Object.Destroy(PedestrianRedLight);
+
+            UnityEngine.Object.Destroy(YellowLight);
+            UnityEngine.Object.Destroy(YellowLightForwardLeft);
+            UnityEngine.Object.Destroy(YellowLightForwardRight);
+            UnityEngine.Object.Destroy(YellowLightLeft);
+            UnityEngine.Object.Destroy(YellowLightRight);
+            UnityEngine.Object.Destroy(YellowLightStraight);
+            UnityEngine.Object.Destroy(YellowRedLight);
+
+            UnityEngine.Object.Destroy(GreenLight);
+            UnityEngine.Object.Destroy(GreenLightForwardLeft);
+            UnityEngine.Object.Destroy(GreenLightForwardRight);
+            UnityEngine.Object.Destroy(GreenLightLeft);
+            UnityEngine.Object.Destroy(GreenLightRight);
+            UnityEngine.Object.Destroy(GreenLightStraight);
+            UnityEngine.Object.Destroy(PedestrianGreenLight);
+
+            UnityEngine.Object.Destroy(LightMode);
+            UnityEngine.Object.Destroy(LightCounter);
+            UnityEngine.Object.Destroy(ClockPlay);
+            UnityEngine.Object.Destroy(ClockPause);
+            UnityEngine.Object.Destroy(ClockTest);
+            UnityEngine.Object.Destroy(PedestrianModeAutomatic);
+            UnityEngine.Object.Destroy(PedestrianModeManual);
+
+            UnityEngine.Object.Destroy(TrafficLightEnabled);
+            UnityEngine.Object.Destroy(TrafficLightEnabledTimed);
+            UnityEngine.Object.Destroy(TrafficLightDisabled);
+
+            base.OnLevelUnloading();
+        }
+
+        public void ReloadTexturesWithTranslation() {
             if (LightMode) UnityEngine.GameObject.Destroy(LightMode);
             if (LightCounter) UnityEngine.GameObject.Destroy(LightCounter);
             if (PedestrianModeAutomatic) UnityEngine.GameObject.Destroy(PedestrianModeAutomatic);
@@ -118,7 +163,7 @@ namespace TrafficManager.UI.Textures {
             LoadTexturesWithTranslation();
         }
 
-        private static void LoadTexturesWithTranslation() {
+        private void LoadTexturesWithTranslation() {
             // light mode
             IntVector2 tlModeSize = new IntVector2(103, 95);
 
