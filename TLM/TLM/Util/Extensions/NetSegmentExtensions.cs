@@ -4,6 +4,7 @@ namespace TrafficManager.Util.Extensions {
     using System.Collections.Generic;
     using TrafficManager.Manager.Impl;
     using TrafficManager.Util.Iterators;
+    using static Shortcuts;
 
     public static class NetSegmentExtensions {
         private static NetSegment[] _segBuffer = Singleton<NetManager>.instance.m_segments.m_buffer;
@@ -13,24 +14,22 @@ namespace TrafficManager.Util.Extensions {
         public static ushort GetNodeId(this ref NetSegment segment, bool startNode) =>
             startNode ? segment.m_startNode : segment.m_endNode;
 
-        public static ushort GetHeadNode(this ref NetSegment segment) {
+        public static ushort GetHeadNode(this ref NetSegment netSegment) {
             // tail node>-------->head node
-            bool invert = (segment.m_flags & NetSegment.Flags.Invert) != NetSegment.Flags.None;
-            invert = invert ^ (Singleton<SimulationManager>.instance.m_metaData.m_invertTraffic == SimulationMetaData.MetaBool.True);
+            bool invert = netSegment.m_flags.IsFlagSet(NetSegment.Flags.Invert) ^ LHT;
             if (invert) {
-                return segment.m_startNode;
+                return netSegment.m_startNode;
             } else {
-                return segment.m_endNode;
+                return netSegment.m_endNode;
             }
         }
 
-        public static ushort GetTailNode(this ref NetSegment segment) {
-            bool invert = (segment.m_flags & NetSegment.Flags.Invert) != NetSegment.Flags.None;
-            invert = invert ^ (Singleton<SimulationManager>.instance.m_metaData.m_invertTraffic == SimulationMetaData.MetaBool.True);
+        public static ushort GetTailNode(this ref NetSegment netSegment) {
+            bool invert = netSegment.m_flags.IsFlagSet(NetSegment.Flags.Invert) ^ LHT;
             if (!invert) {
-                return segment.m_startNode;
+                return netSegment.m_startNode;
             } else {
-                return segment.m_endNode;
+                return netSegment.m_endNode;
             }//endif
         }
 
@@ -72,7 +71,6 @@ namespace TrafficManager.Util.Extensions {
         /// Assembles a geometrically sorted list of lanes for the given segment.
         /// If the <paramref name="startNode"/> parameter is set only lanes supporting traffic to flow towards the given node are added to the list, otherwise all matched lanes are added.
         /// </summary>
-        /// <param name="segmentId">segment id</param>
         /// <param name="netSegment">segment data</param>
         /// <param name="startNode">reference node (optional)</param>
         /// <param name="laneTypeFilter">lane type filter, lanes must match this filter mask</param>

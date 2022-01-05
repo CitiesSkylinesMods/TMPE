@@ -4,8 +4,7 @@ namespace TrafficManager.Util.Extensions {
         private static NetNode[] _nodeBuffer = Singleton<NetManager>.instance.m_nodes.m_buffer;
 
         internal static ref NetNode ToNode(this ushort nodeId) => ref _nodeBuffer[nodeId];
-        internal static bool IsJunction(this ref NetNode node) =>
-            (node.m_flags & NetNode.Flags.Junction) != NetNode.Flags.None;
+        internal static bool IsJunction(this ref NetNode netNode) => netNode.m_flags.IsFlagSet(NetNode.Flags.Junction);
 
         /// <summary>
         /// Checks if the netNode is Created, but neither Collapsed nor Deleted.
