@@ -69,7 +69,7 @@ namespace TrafficManager.Manager.Impl {
         /// <param name="finalDir">Direction.</param>
         /// <returns>Mean speed limit, average for custom and default lane speeds or null
         ///     if cannot be determined.</returns>
-        public SpeedValue? GetCustomSpeedLimit(ushort segmentId, NetInfo.Direction finalDir) {
+        public SpeedValue? CalculateCustomSpeedLimit(ushort segmentId, NetInfo.Direction finalDir) {
             // calculate the currently set mean speed limit
             if (segmentId == 0) {
                 return null;
@@ -99,7 +99,7 @@ namespace TrafficManager.Manager.Impl {
                     goto nextIter;
                 }
 
-                SpeedValue? setSpeedLimit = this.GetLaneSpeedLimit(curLaneId);
+                SpeedValue? setSpeedLimit = this.CalculateLaneSpeedLimit(curLaneId);
 
                 if (setSpeedLimit.HasValue) {
                     // custom speed limit
@@ -128,11 +128,11 @@ namespace TrafficManager.Manager.Impl {
         /// </summary>
         /// <param name="laneId">Interested in this lane</param>
         /// <returns>Speed limit if set for lane, otherwise 0</returns>
-        public GetSpeedLimitResult GetCustomSpeedLimit(uint laneId) {
+        public GetSpeedLimitResult CalculateCustomSpeedLimit(uint laneId) {
             //----------------------------------------
             // check custom speed limit for the lane
             //----------------------------------------
-            SpeedValue? overrideValue = this.GetLaneSpeedLimit(laneId);
+            SpeedValue? overrideValue = this.CalculateLaneSpeedLimit(laneId);
 
             //----------------------------
             // check default speed limit
@@ -183,8 +183,8 @@ namespace TrafficManager.Manager.Impl {
         /// <summary>Determines the currently set speed limit for the given lane.</summary>
         /// <param name="laneId">The lane id.</param>
         /// <returns>Game units.</returns>
-        public float GetGameSpeedLimit(uint laneId) {
-            GetSpeedLimitResult overrideSpeedLimit = this.GetCustomSpeedLimit(laneId);
+        public float CalculateGameSpeedLimit(uint laneId) {
+            GetSpeedLimitResult overrideSpeedLimit = this.CalculateCustomSpeedLimit(laneId);
             if (overrideSpeedLimit.DefaultValue != null) {
                 SpeedValue activeLimit = overrideSpeedLimit.OverrideValue ?? overrideSpeedLimit.DefaultValue.Value;
                 return ToGameSpeedLimit(activeLimit.GameUnits);
@@ -193,7 +193,15 @@ namespace TrafficManager.Manager.Impl {
             return 0f;
         }
 
-        public float GetLockFreeGameSpeedLimit(ushort segmentId,
+        public float GetGameSpeedLimit(uint laneId) {
+            return GetGameSpeedLimit(
+                segmentId: laneId.ToLane().m_segment,
+                laneIndex: (byte)LaneUtil.GetLaneIndex(laneId),
+                laneId: laneId,
+                laneInfo: LaneUtil.GetLaneInfo(laneId));
+        }
+
+        public float GetGameSpeedLimit(ushort segmentId,
                                                byte laneIndex,
                                                uint laneId,
                                                NetInfo.Lane laneInfo) {
@@ -265,7 +273,7 @@ namespace TrafficManager.Manager.Impl {
         /// </summary>
         /// <param name="info">the NetInfo of which the custom speed limit should be determined</param>
         /// <returns>-1 if no custom speed limit was set</returns>
-        public float GetCustomNetinfoSpeedLimit(NetInfo info) {
+        public float CalculateCustomNetinfoSpeedLimit(NetInfo info) {
             if (info == null) {
                 Log._DebugOnlyWarning($"SpeedLimitManager.GetCustomNetinfoSpeedLimit: info is null!");
                 return -1f;
@@ -702,7 +710,7 @@ namespace TrafficManager.Manager.Impl {
                                                             .m_buffer[laneSpeedLimit.laneId]
                                                             .m_segment;
                     NetInfo info = segmentId.ToSegment().Info;
-                    float customSpeedLimit = GetCustomNetinfoSpeedLimit(info);
+                    float customSpeedLimit = CalculateCustomNetinfoSpeedLimit(info);
 #if DEBUG
                     Log._DebugIf(
                         debugSpeedLimits,
@@ -947,7 +955,7 @@ namespace TrafficManager.Manager.Impl {
             }
         }
 
-        public SpeedValue? GetLaneSpeedLimit(uint laneId) {
+        public SpeedValue? CalculateLaneSpeedLimit(uint laneId) {
             lock(laneSpeedLimitLock_) {
                 if (laneId <= 0 || !laneSpeedLimit_.TryGetValue(laneId, out float gameUnitsOverride)) {
                     return null;

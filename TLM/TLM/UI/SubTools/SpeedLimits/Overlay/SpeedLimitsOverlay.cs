@@ -528,7 +528,7 @@
             NetSegment segment = segmentId.ToSegment();
             NetInfo neti = segment.Info;
             var defaultSpeedLimit = new SpeedValue(
-                gameUnits: SpeedLimitManager.Instance.GetCustomNetinfoSpeedLimit(info: neti));
+                gameUnits: SpeedLimitManager.Instance.CalculateCustomNetinfoSpeedLimit(info: neti));
 
             // Render override if interactive, or if readonly info layer and override exists
             if (drawEnv.drawDefaults_) {
@@ -547,9 +547,9 @@
                 // Get speed limit override for segment
                 //-------------------------------------
                 SpeedValue? overrideSpeedlimitForward =
-                    SpeedLimitManager.Instance.GetCustomSpeedLimit(segmentId, finalDir: NetInfo.Direction.Forward);
+                    SpeedLimitManager.Instance.CalculateCustomSpeedLimit(segmentId, finalDir: NetInfo.Direction.Forward);
                 SpeedValue? overrideSpeedlimitBack =
-                    SpeedLimitManager.Instance.GetCustomSpeedLimit(segmentId, finalDir: NetInfo.Direction.Backward);
+                    SpeedLimitManager.Instance.CalculateCustomSpeedLimit(segmentId, finalDir: NetInfo.Direction.Backward);
                 SpeedValue? drawSpeedlimit = GetAverageSpeedlimit(
                     forward: overrideSpeedlimitForward,
                     back: overrideSpeedlimitBack);
@@ -720,7 +720,7 @@
 
                 // Get speed limit override for the lane
                 GetSpeedLimitResult overrideSpeedlimit =
-                    SpeedLimitManager.Instance.GetCustomSpeedLimit(laneId);
+                    SpeedLimitManager.Instance.CalculateCustomSpeedLimit(laneId);
 
                 if (!overrideSpeedlimit.OverrideValue.HasValue
                     || (overrideSpeedlimit.DefaultValue.HasValue &&

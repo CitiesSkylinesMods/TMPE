@@ -86,7 +86,7 @@ namespace TrafficManager.Manager.Impl {
                 uint laneVehicleSpeedLimit = Math.Min(
                     3u * 8u,
                     (uint)((Options.customSpeedLimitsEnabled
-                                ? SpeedLimitManager.Instance.GetLockFreeGameSpeedLimit(
+                                ? SpeedLimitManager.Instance.GetGameSpeedLimit(
                                     segmentId,
                                     laneIndex,
                                     laneId,
