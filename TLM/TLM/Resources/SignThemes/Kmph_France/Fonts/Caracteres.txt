@@ -1,0 +1,44 @@
+
+--------------------------------------------------------------------------------
+Lettrages de la signalisation directionelle française en format TrueType pour PC
+--------------------------------------------------------------------------------
+
+- Caracteres L1: polices noires sur fond blanc; utilisées pour la signalisation des destinations proches
+
+- Caracteres L2: polices blanches sur fond vert (routes nationales) ou bleu (autoroutes); utilisées pour la signalisation des grandes destinations
+
+- Caracteres L4: polices noires italiques sur fons blanc; utilisées pour la signalisation secondaire en agglomération pour indiquer des quartiers, des institutions importantes et des lieux interessants
+
+
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+----------------------------------------------------------------------
+Schriften der französischen Straßenbeschilderung im PC-TrueType-Format
+----------------------------------------------------------------------
+
+- Caracteres L1: schwarze Schrift auf weißem Grund; verwendet für Hinweise auf Orte in der näheren Umgebung
+
+- Caracteres L2: weiße Schrift auf grünem (Routes Nationales) oder blauem (Autoroutes) Grund; Hinweise auf Fernziele
+
+- Caracteres L4: schwarze Schrift auf weißem Grund, kursiv; verwendet innerorts für Hinweise auf Stadtteile oder öffentliche Einrichtungen
+
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+----------------------------------------------------
+fonts of french road signs in truetype format for PC
+----------------------------------------------------
+
+- Caracteres L1: black typeface on white background; used on road signs which hint at nearer places
+
+- Caracteres L2: white typeface on green background (Routes Nationales) or blue backgrounds (Autoroutes); used on road signs which hint at distant places
+
+- Caracteres L4: black typeface on white background, italic; used on road signs inside cities to hint at near places and public facilities
+
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+F.R. 31-01-2004

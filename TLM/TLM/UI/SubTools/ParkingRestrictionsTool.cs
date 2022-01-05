@@ -58,9 +58,12 @@ namespace TrafficManager.UI.SubTools {
         /// </summary>
         private CameraTransformValue LastCachedCamera { get; set; }
 
+        private bool forceCameraCacheReset_ = false;
+
         public override void OnActivate() {
             base.OnActivate();
             MainTool.RequestOnscreenDisplayUpdate();
+            this.forceCameraCacheReset_ = true;
         }
 
         public override void OnPrimaryClickOverlay() { }
@@ -180,10 +183,11 @@ namespace TrafficManager.UI.SubTools {
             Transform currentCameraTransform = InGameUtil.Instance.CachedCameraTransform;
             Vector3 camPos = currentCameraTransform.position;
 
-            if (!LastCachedCamera.Equals(currentCamera)) {
+            if (!LastCachedCamera.Equals(currentCamera) || this.forceCameraCacheReset_) {
                 // cache visible segments
                 LastCachedCamera = currentCamera;
                 CachedVisibleSegmentIds.Clear();
+                forceCameraCacheReset_ = false;
 
                 for (uint segmentId = 1; segmentId < NetManager.MAX_SEGMENT_COUNT; ++segmentId) {
                     ref NetSegment netSegment = ref ((ushort)segmentId).ToSegment();
@@ -306,7 +310,7 @@ namespace TrafficManager.UI.SubTools {
                 }
 
                 GUI.color = GUI.color.WithAlpha(TrafficManagerTool.OverlayAlpha);
-                GUI.DrawTexture(boundingBox, RoadUI.ParkingRestrictionTextures[allowed]);
+                GUI.DrawTexture(boundingBox, RoadSignThemes.ActiveTheme.Parking(allowed));
                 GUI.color = guiColor;
 
                 if (hoveredHandle && clicked && !IsCursorInPanel() &&

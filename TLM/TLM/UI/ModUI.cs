@@ -7,7 +7,9 @@ namespace TrafficManager.UI {
     using UnityEngine;
     using TrafficManager.Lifecycle;
     using JetBrains.Annotations;
+    using TrafficManager.State;
     using TrafficManager.U;
+    using TrafficManager.UI.Textures;
 
     /// <summary>
     /// Globally available UI manager class which contains the main menu button and the panel.
@@ -232,6 +234,12 @@ namespace TrafficManager.UI {
             }
             TMPELifecycle.Instance.TranslationDatabase.ReloadTutorialTranslations();
             TMPELifecycle.Instance.TranslationDatabase.ReloadGuideTranslations();
+
+            // Do not handle ChangeTheme result assuming that savegame always has the selected theme
+            // and MPH display in a consistent state
+            RoadSignThemes.ChangeTheme(
+                newTheme: GlobalConfig.Instance.Main.RoadSignTheme,
+                mphEnabled: GlobalConfig.Instance.Main.DisplaySpeedLimitsMph);
         }
 
         public static void DisableTool() {

@@ -92,10 +92,16 @@ namespace TrafficManager.State.ConfigData {
                                                       ? SpeedUnit.Mph
                                                       : SpeedUnit.Kmph;
 
+        // /// <summary>Selected theme for road signs when MPH is active.</summary>
+        // [Obsolete("This now becomes RoadSignTheme")]
+        // public MphSignStyle MphRoadSignStyle = MphSignStyle.SquareUS;
+
         /// <summary>
-        /// Selected theme for road signs when MPH is active.
+        /// String key in SpeedLimitsTextures.Themes. Some themes support only MPH, and
+        /// some support both Km/h and MPH, changing this might affect
+        /// <see cref="DisplaySpeedLimitsMph"/>.
         /// </summary>
-        public MphSignStyle MphRoadSignStyle = MphSignStyle.SquareUS;
+        public string RoadSignTheme = string.Empty;
 
         public void AddDisplayedTutorialMessage(string messageKey) {
             HashSet<string> newMessages = DisplayedTutorialMessages != null

@@ -13,6 +13,7 @@ namespace TrafficManager.UI.MainMenu {
     using UnityEngine;
     using TrafficManager.Util;
     using TrafficManager.Lifecycle;
+    using TrafficManager.Manager.Impl;
 
 #if DEBUG // whole class coverage
     public class DebugMenuPanel : UIPanel
@@ -354,6 +355,7 @@ namespace TrafficManager.UI.MainMenu {
         private void ClickPrintFlagsDebugInfo(UIComponent component,
                                               UIMouseEventParameter eventParam) {
             Flags.PrintDebugInfo();
+            SpeedLimitManager.Instance.PrintDebugInfo();
         }
 
         [UsedImplicitly]

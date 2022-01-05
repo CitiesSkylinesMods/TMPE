@@ -67,7 +67,7 @@ namespace TrafficManager.Util {
         /// <summary>
         /// separates turning lanes for all segments attached to nodeId,
         /// </summary>
-        public static void SeparateNode(ushort nodeId, out SetLaneArrow_Result res, bool alternativeMode = true) {
+        public static void SeparateNode(ushort nodeId, out SetLaneArrow_Result res, bool alternativeMode) {
             if (nodeId == 0) {
                 res = SetLaneArrow_Result.Invalid;
                 return;
@@ -113,9 +113,9 @@ namespace TrafficManager.Util {
                 nodeId,
                 out res,
                 builtIn: false,
-                alt2: alternativeMode && !hasBus,
-                alt3: alternativeMode && !hasBus,
-                altBus: alternativeMode);
+                alt2: alternativeMode,
+                alt3: alternativeMode,
+                altBus: !Options.banRegularTrafficOnBusLanes);
         }
 
         internal static void SeparateSegmentLanesBuiltIn(
@@ -128,7 +128,7 @@ namespace TrafficManager.Util {
                 builtIn: true,
                 alt2: true,
                 alt3: true,
-                altBus: false);
+                altBus: !Options.banRegularTrafficOnBusLanes);
         }
 
         /// <summary>
@@ -138,7 +138,7 @@ namespace TrafficManager.Util {
         /// <param name="alt2">alternativ mode for two lanes(true => dedicated far turn)</param>
         /// <param name="alt3">alternative mode for 3+ lanes(true => favour forward)</param>
         /// <param name="altBus">false => treat bus lanes differently</param>
-        private static void SeparateSegmentLanes(
+        public static void SeparateSegmentLanes(
             ushort segmentId,
             ushort nodeId,
             out SetLaneArrow_Result res,

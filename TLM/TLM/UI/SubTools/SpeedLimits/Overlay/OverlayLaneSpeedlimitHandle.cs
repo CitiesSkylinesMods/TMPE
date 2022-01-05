@@ -192,7 +192,7 @@
                     break;
                 case SetSpeedLimitTarget.LaneDefault:
                     // TODO: The speed limit manager only supports default speed limit overrides per road type, not per lane
-                    OverlaySegmentSpeedlimitHandle.SetDefaultSpeedLimit(segmentId, netInfo, action);
+                    OverlaySegmentSpeedlimitHandle.ApplyDefaultSpeedLimit(segmentId, netInfo, action);
                     break;
                 default:
                     Log.Error(

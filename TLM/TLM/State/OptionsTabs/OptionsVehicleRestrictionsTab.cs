@@ -40,7 +40,7 @@ namespace TrafficManager.State {
             JunctionRestrictionsManager.Instance.UpdateAllDefaults();
 
         static void UpdateDedicatedTurningLanePolicyHandler(bool value) =>
-            LaneArrowManager.Instance.UpdateDedicatedTurningLanePolicy();
+            LaneArrowManager.Instance.UpdateDedicatedTurningLanePolicy(true);
 
         internal static void MakeSettings_VehicleRestrictions(ExtUITabstrip tabStrip) {
             UIHelper panelHelper = tabStrip.AddTabPage(Translation.Options.Get("Tab:Policies & Restrictions"));
@@ -301,6 +301,9 @@ namespace TrafficManager.State {
             Options.banRegularTrafficOnBusLanes = newValue;
             VehicleRestrictionsManager.Instance.ClearCache();
             ModUI.GetTrafficManagerTool()?.InitializeSubTools();
+            if (DedicatedTurningLanes) {
+                LaneArrowManager.Instance.UpdateDedicatedTurningLanePolicy(false);
+            }
         }
 
         private static void OnHighwayRulesChanged(bool newHighwayRules) {

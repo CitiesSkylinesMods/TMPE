@@ -174,7 +174,7 @@ namespace TrafficManager.State {
                 return;
             }
 
-            Flags.ResetSpeedLimits();
+            SpeedLimitManager.Instance.ResetSpeedLimits();
         }
 
         private static void OnClickReloadGlobalConf() {
@@ -182,7 +182,7 @@ namespace TrafficManager.State {
         }
 
         private static void OnClickResetGlobalConf() {
-            GlobalConfig.Reset(null, true);
+            GlobalConfig.Reset(oldConfig: null, resetAll: true);
         }
 
 #if QUEUEDSTATS

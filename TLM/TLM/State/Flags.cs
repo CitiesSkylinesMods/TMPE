@@ -21,12 +21,6 @@ namespace TrafficManager.State {
         /// </summary>
         private static LaneArrows?[] laneArrowFlags;
 
-        /// <summary>For each lane: Defines the currently set speed limit. Units: Game speed units (1.0 = 50 km/h).</summary>
-        private static readonly Dictionary<uint, float> laneSpeedLimit;
-
-        /// <summary>For faster, lock-free access, 1st index: segment id, 2nd index: lane index.</summary>
-        internal static readonly float?[][] laneSpeedLimitArray;
-
         /// <summary>
         /// For each lane: Defines the lane arrows which are set in highway rule mode (they are not saved)
         /// </summary>
@@ -37,16 +31,13 @@ namespace TrafficManager.State {
         /// </summary>
         internal static ExtVehicleType?[][] laneAllowedVehicleTypesArray; // for faster, lock-free access, 1st index: segment id, 2nd index: lane index
 
-        private static object laneSpeedLimitLock = new object();
-
         static Flags() {
-            laneSpeedLimitArray = new float?[NetManager.MAX_SEGMENT_COUNT][];
-            laneSpeedLimit = new Dictionary<uint, float>();
             laneAllowedVehicleTypesArray = new ExtVehicleType?[NetManager.MAX_SEGMENT_COUNT][];
             laneArrowFlags = new LaneArrows?[NetManager.MAX_LANE_COUNT];
             highwayLaneArrowFlags = new LaneArrows?[NetManager.MAX_LANE_COUNT];
         }
 
+        /// <summary>Called from Debug Panel.</summary>
         internal static void PrintDebugInfo() {
             Log.Info("------------------------");
             Log.Info("--- LANE ARROW FLAGS ---");
@@ -64,24 +55,6 @@ namespace TrafficManager.State {
 
                 if (laneArrowFlags[i] != null) {
                     Log.Info($"\tcustom arrows: {laneArrowFlags[i]}");
-                }
-            }
-
-            Log.Info("-------------------------");
-            Log.Info("--- LANE SPEED LIMITS ---");
-            Log.Info("-------------------------");
-            for (uint i = 0; i < laneSpeedLimitArray.Length; ++i) {
-                if (laneSpeedLimitArray[i] == null) {
-                    continue;
-                }
-
-                ref NetSegment netSegment = ref ((ushort)i).ToSegment();
-
-                Log.Info($"Segment {i}: valid? {netSegment.IsValid()}");
-                for (int x = 0; x < laneSpeedLimitArray[i].Length; ++x) {
-                    if (laneSpeedLimitArray[i][x] == null)
-                        continue;
-                    Log.Info($"\tLane idx {x}: {laneSpeedLimitArray[i][x]}");
                 }
             }
 
@@ -207,106 +180,6 @@ namespace TrafficManager.State {
 
             ref NetSegment netSegment = ref segmentId.ToSegment();
             return (netSegment.m_flags & (NetSegment.Flags.Created | NetSegment.Flags.Deleted)) == NetSegment.Flags.Created;
-        }
-
-        public static void SetLaneSpeedLimit(uint laneId, SetSpeedLimitAction action) {
-            if (!CheckLane(laneId)) {
-                return;
-            }
-
-            ushort segmentId = Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_segment;
-            ref NetSegment netSegment = ref segmentId.ToSegment();
-            NetInfo segmentInfo = netSegment.Info;
-            uint curLaneId = netSegment.m_lanes;
-            uint laneIndex = 0;
-
-            while (laneIndex < segmentInfo.m_lanes.Length && curLaneId != 0u) {
-                if (curLaneId == laneId) {
-                    SetLaneSpeedLimit(segmentId, laneIndex, laneId, action);
-                    return;
-                }
-
-                laneIndex++;
-                curLaneId = Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_nextLane;
-            }
-        }
-
-        public static void RemoveLaneSpeedLimit(uint laneId) {
-            SetLaneSpeedLimit(laneId, SetSpeedLimitAction.ResetToDefault());
-        }
-
-        public static void SetLaneSpeedLimit(ushort segmentId,
-                                             uint laneIndex,
-                                             uint laneId,
-                                             SetSpeedLimitAction action) {
-            if (segmentId <= 0 || laneId <= 0) {
-                return;
-            }
-
-            ref NetSegment netSegment = ref segmentId.ToSegment();
-
-            if ((netSegment.m_flags & (NetSegment.Flags.Created | NetSegment.Flags.Deleted)) != NetSegment.Flags.Created) {
-                return;
-            }
-
-            NetLane[] lanesBuffer = Singleton<NetManager>.instance.m_lanes.m_buffer;
-
-            if (((NetLane.Flags)lanesBuffer[laneId].m_flags &
-                 (NetLane.Flags.Created | NetLane.Flags.Deleted)) != NetLane.Flags.Created) {
-                return;
-            }
-
-            NetInfo segmentInfo = netSegment.Info;
-            if (laneIndex >= segmentInfo.m_lanes.Length) {
-                return;
-            }
-
-            lock(laneSpeedLimitLock) {
-#if DEBUGFLAGS
-                Log._Debug(
-                    $"Flags.setLaneSpeedLimit: setting speed limit of lane index {laneIndex} @ seg. " +
-                    $"{segmentId} to {speedLimit}");
-#endif
-                switch (action.Type) {
-                    case SetSpeedLimitAction.ActionType.ResetToDefault: {
-                        laneSpeedLimit.Remove(laneId);
-
-                        if (laneSpeedLimitArray[segmentId] == null) {
-                            return;
-                        }
-
-                        if (laneIndex >= laneSpeedLimitArray[segmentId].Length) {
-                            return;
-                        }
-
-                        laneSpeedLimitArray[segmentId][laneIndex] = null;
-                        break;
-                    }
-                    case SetSpeedLimitAction.ActionType.Unlimited:
-                    case SetSpeedLimitAction.ActionType.SetOverride: {
-                        float gameUnits = action.GuardedValue.Override.GameUnits;
-                        laneSpeedLimit[laneId] = gameUnits;
-
-                        // save speed limit into the fast-access array.
-                        // (1) ensure that the array is defined and large enough
-                        //-----------------------------------------------------
-                        if (laneSpeedLimitArray[segmentId] == null) {
-                            laneSpeedLimitArray[segmentId] = new float?[segmentInfo.m_lanes.Length];
-                        } else if (laneSpeedLimitArray[segmentId].Length < segmentInfo.m_lanes.Length) {
-                            float?[] oldArray = laneSpeedLimitArray[segmentId];
-                            laneSpeedLimitArray[segmentId] = new float?[segmentInfo.m_lanes.Length];
-                            Array.Copy(sourceArray: oldArray,
-                                       destinationArray: laneSpeedLimitArray[segmentId],
-                                       length: oldArray.Length);
-                        }
-
-                        // (2) insert the custom speed limit
-                        //-----------------------------------------------------
-                        laneSpeedLimitArray[segmentId][laneIndex] = gameUnits;
-                        break;
-                    }
-                }
-            }
         }
 
         public static void SetLaneAllowedVehicleTypes(uint laneId, ExtVehicleType vehicleTypes) {
@@ -597,27 +470,6 @@ namespace TrafficManager.State {
             return false;
         }
 
-        public static SpeedValue? GetLaneSpeedLimit(uint laneId) {
-            lock(laneSpeedLimitLock) {
-                if (laneId <= 0 || !laneSpeedLimit.TryGetValue(laneId, out float gameUnitsOverride)) {
-                    return null;
-                }
-
-                // assumption: speed limit is stored in km/h
-                return new SpeedValue(gameUnitsOverride);
-            }
-        }
-
-        internal static IDictionary<uint, float> GetAllLaneSpeedLimits() {
-            IDictionary<uint, float> ret;
-
-            lock(laneSpeedLimitLock) {
-                ret = new Dictionary<uint, float>(laneSpeedLimit);
-            }
-
-            return ret;
-        }
-
         internal static IDictionary<uint, ExtVehicleType> GetAllLaneAllowedVehicleTypes() {
             IDictionary<uint, ExtVehicleType> ret = new Dictionary<uint, ExtVehicleType>();
             ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
@@ -788,27 +640,7 @@ namespace TrafficManager.State {
             }
         }
 
-        public static void ResetSpeedLimits() {
-            lock(laneSpeedLimitLock) {
-                laneSpeedLimit.Clear();
-
-                uint segmentsCount = Singleton<NetManager>.instance.m_segments.m_size;
-
-                for (int i = 0; i < segmentsCount; ++i) {
-                    laneSpeedLimitArray[i] = null;
-                }
-            }
-        }
-
         internal static void OnLevelUnloading() {
-            for (uint i = 0; i < laneSpeedLimitArray.Length; ++i) {
-                laneSpeedLimitArray[i] = null;
-            }
-
-            lock (laneSpeedLimitLock) {
-                laneSpeedLimit.Clear();
-            }
-
             for (uint i = 0; i < laneAllowedVehicleTypesArray.Length; ++i) {
                 laneAllowedVehicleTypesArray[i] = null;
             }

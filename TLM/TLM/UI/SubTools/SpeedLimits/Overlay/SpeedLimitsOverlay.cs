@@ -3,13 +3,11 @@
     using System.Collections.Generic;
     using System.Linq;
     using ColossalFramework;
-    using CSUtil.Commons;
     using JetBrains.Annotations;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.Manager.Impl;
     using TrafficManager.State;
     using TrafficManager.Traffic;
-    using TrafficManager.U;
     using TrafficManager.UI.Helpers;
     using TrafficManager.UI.Textures;
     using TrafficManager.Util;
@@ -87,8 +85,7 @@
         /// and to carry drawing state between multiple calls without using class fields.</summary>
         private class DrawEnv {
             public Vector2 signsThemeAspectRatio_;
-            public IDictionary<int,Texture2D> largeSignsTextures_;
-            public IDictionary<int,Texture2D> currentThemeTextures_;
+            public RoadSignThemes.RoadSignTheme largeSignsTextures_;
 
             /// <summary>
             /// This is set to true if the user will see blue default signs, or the user is holding
@@ -349,17 +346,16 @@
             }
 
             bool hover = false;
-            IDictionary<int, Texture2D> currentThemeTextures = SpeedLimitTextures.GetTextureSource();
             DrawEnv drawEnv = new DrawEnv {
-                signsThemeAspectRatio_ = SpeedLimitTextures.GetTextureAspectRatio(),
-                currentThemeTextures_ = currentThemeTextures,
+                signsThemeAspectRatio_ = RoadSignThemes.ActiveTheme.GetAspectRatio(),
                 largeSignsTextures_ = args.ToolMode switch {
-                    SpeedlimitsToolMode.Segments => currentThemeTextures,
-                    SpeedlimitsToolMode.Lanes => currentThemeTextures,
+                    SpeedlimitsToolMode.Segments => RoadSignThemes.ActiveTheme,
+                    SpeedlimitsToolMode.Lanes => RoadSignThemes.ActiveTheme,
+
                     // Defaults can show normal textures if the user holds Alt
                     SpeedlimitsToolMode.Defaults => args.ToolMode == SpeedlimitsToolMode.Defaults
-                                                        ? currentThemeTextures
-                                                        : SpeedLimitTextures.RoadDefaults,
+                                                        ? RoadSignThemes.ActiveTheme
+                                                        : RoadSignThemes.RoadDefaults,
                     _ => throw new ArgumentOutOfRangeException(),
                 },
                 drawDefaults_ = args.ToolMode == SpeedlimitsToolMode.Defaults,
@@ -420,7 +416,7 @@
                 }
 
                 // Ignore: Can't have speed limits set
-                if (!speedLimitManager.MayHaveCustomSpeedLimits(ref segment)) {
+                if (!segment.MayHaveCustomSpeedLimits()) {
                     continue;
                 }
 
@@ -506,7 +502,7 @@
             [NotNull] DrawArgs args)
         {
             Vector2 largeRatio = drawEnv.drawDefaults_
-                                     ? SpeedLimitTextures.DefaultSpeedlimitsAspectRatio()
+                                     ? RoadSignThemes.DefaultSpeedlimitsAspectRatio()
                                      : drawEnv.signsThemeAspectRatio_;
 
             // TODO: Replace formula in visibleScale and size to use Constants.OVERLAY_INTERACTIVE_SIGN_SIZE and OVERLAY_READONLY_SIGN_SIZE
@@ -532,7 +528,7 @@
             NetSegment segment = segmentId.ToSegment();
             NetInfo neti = segment.Info;
             var defaultSpeedLimit = new SpeedValue(
-                gameUnits: SpeedLimitManager.Instance.GetCustomNetInfoSpeedLimit(info: neti));
+                gameUnits: SpeedLimitManager.Instance.GetCustomNetinfoSpeedLimit(info: neti));
 
             // Render override if interactive, or if readonly info layer and override exists
             if (drawEnv.drawDefaults_) {
@@ -541,10 +537,10 @@
                 //-------------------------------------
                 squareSignRenderer.Reset(
                     screenPos,
-                    size: size * SpeedLimitTextures.DefaultSpeedlimitsAspectRatio());
+                    size: size * RoadSignThemes.DefaultSpeedlimitsAspectRatio());
                 squareSignRenderer.DrawLargeTexture(
                     speedlimit: defaultSpeedLimit,
-                    textureSource: SpeedLimitTextures.RoadDefaults);
+                    theme: RoadSignThemes.RoadDefaults);
             } else {
                 //-------------------------------------
                 // Draw override, if exists, otherwise draw circle and small blue default
@@ -562,16 +558,16 @@
                     // No value, no override
                     squareSignRenderer.Reset(
                         screenPos,
-                        size: size * SpeedLimitTextures.DefaultSpeedlimitsAspectRatio());
+                        size: size * RoadSignThemes.DefaultSpeedlimitsAspectRatio());
                     Texture2D chosenTexture = SignRenderer.ChooseTexture(
                         speedlimit: defaultSpeedLimit,
-                        textureSource: SpeedLimitTextures.RoadDefaults);
+                        theme: RoadSignThemes.RoadDefaults);
                     squareSignRenderer.DrawLargeTexture(chosenTexture);
                     // squareSignRenderer.DrawSmallTexture_BottomRight(chosenTexture);
                 } else {
                     signRenderer.DrawLargeTexture(
                         speedlimit: drawSpeedlimit,
-                        textureSource: drawEnv.largeSignsTextures_);
+                        theme: drawEnv.largeSignsTextures_);
                 }
             }
 
@@ -677,7 +673,7 @@
 
             // Defaults have 1:1 ratio (square textures)
             Vector2 largeRatio = drawEnv.drawDefaults_
-                                     ? SpeedLimitTextures.DefaultSpeedlimitsAspectRatio()
+                                     ? RoadSignThemes.DefaultSpeedlimitsAspectRatio()
                                      : drawEnv.signsThemeAspectRatio_;
 
             // Signs are rendered in a grid starting from col 0
@@ -735,10 +731,10 @@
                     //-------------------------------------
                     squareSignRenderer.Reset(
                         screenPos,
-                        size: size * SpeedLimitTextures.DefaultSpeedlimitsAspectRatio());
+                        size: size * RoadSignThemes.DefaultSpeedlimitsAspectRatio());
                     Texture2D chosenTexture = SignRenderer.ChooseTexture(
                         speedlimit: overrideSpeedlimit.DefaultValue,
-                        textureSource: SpeedLimitTextures.RoadDefaults);
+                        theme: RoadSignThemes.RoadDefaults);
                     squareSignRenderer.DrawLargeTexture(chosenTexture);
                     // squareSignRenderer.DrawSmallTexture_BottomRight(chosenTexture);
                 } else {
@@ -747,7 +743,7 @@
                     //-------------------------------------
                     signRenderer.DrawLargeTexture(
                         speedlimit: overrideSpeedlimit.OverrideValue.Value,
-                        textureSource: drawEnv.largeSignsTextures_);
+                        theme: drawEnv.largeSignsTextures_);
                 }
 
                 if (args.IsInteractive

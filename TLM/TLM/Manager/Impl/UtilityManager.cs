@@ -58,6 +58,7 @@ namespace TrafficManager.Manager.Impl {
             Log._Debug("=== Flags.PrintDebugInfo() ===");
             try {
                 Flags.PrintDebugInfo();
+                SpeedLimitManager.Instance.PrintDebugInfo();
             }
             catch (Exception e) {
                 Log.Error($"Error occurred while printing debug info for flags: {e}");
