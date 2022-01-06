@@ -31,8 +31,7 @@ namespace TrafficManager.Util {
             try {
                 return segmentId.ToSegment().GetLaneInfo(laneIndex);
             } catch (Exception ex) {
-                new Exception($"laneId:{laneId} segmentId:{segmentId} laneIndex:{laneIndex}", ex).LogException();
-                return null;
+                throw new Exception($"laneId:{laneId} segmentId:{segmentId} laneIndex:{laneIndex}", ex);
             }
         }
     }
