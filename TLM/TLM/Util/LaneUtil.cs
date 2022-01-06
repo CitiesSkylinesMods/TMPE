@@ -15,7 +15,6 @@ namespace TrafficManager.Util {
                     if (curLaneId == laneId) {
                         return laneIndex;
                     }
-                    laneIndex++;
                     curLaneId = curLaneId.ToLane().m_nextLane;
                 }
             }
