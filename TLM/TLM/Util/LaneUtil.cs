@@ -1,4 +1,5 @@
 namespace TrafficManager.Util {
+    using System;
     using TrafficManager.Util.Extensions;
     public static class LaneUtil {
         /// <summary>
@@ -14,7 +15,6 @@ namespace TrafficManager.Util {
                     if (curLaneId == laneId) {
                         return laneIndex;
                     }
-                    laneIndex++;
                     curLaneId = curLaneId.ToLane().m_nextLane;
                 }
             }
@@ -28,7 +28,12 @@ namespace TrafficManager.Util {
         public static NetInfo.Lane GetLaneInfo(uint laneId) {
             int laneIndex = GetLaneIndex(laneId);
             ushort segmentId = laneId.ToLane().m_segment;
-            return segmentId.ToSegment().GetLaneInfo(laneIndex);
+            try {
+                return segmentId.ToSegment().GetLaneInfo(laneIndex);
+            } catch (Exception ex) {
+                new Exception($"laneId:{laneId} segmentId:{segmentId} laneIndex:{laneIndex}", ex).LogException();
+                return null;
+            }
         }
     }
 }
