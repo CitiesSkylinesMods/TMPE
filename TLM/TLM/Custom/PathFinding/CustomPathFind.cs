@@ -961,7 +961,7 @@ namespace TrafficManager.Custom.PathFinding {
 
                 // NON-STOCK CODE START
 #if SPEEDLIMITS
-                prevMaxSpeed = speedLimitManager.GetLockFreeGameSpeedLimit(
+                prevMaxSpeed = speedLimitManager.GetGameSpeedLimit(
                     prevSegmentId,
                     prevLaneIndex,
                     item.LaneId,
@@ -2190,7 +2190,7 @@ namespace TrafficManager.Custom.PathFinding {
 
 #if SPEEDLIMITS
             // NON-STOCK CODE START
-            float nextMaxSpeed = speedLimitManager.GetLockFreeGameSpeedLimit(
+            float nextMaxSpeed = speedLimitManager.GetGameSpeedLimit(
                 nextSegmentId,
                 (byte)nextLaneIndex,
                 nextLaneId,
@@ -2728,7 +2728,7 @@ namespace TrafficManager.Custom.PathFinding {
                         float nextMaxSpeed;
 #if SPEEDLIMITS
                         // NON-STOCK CODE START
-                        nextMaxSpeed = speedLimitManager.GetLockFreeGameSpeedLimit(
+                        nextMaxSpeed = speedLimitManager.GetGameSpeedLimit(
                             nextSegmentId,
                             (byte)nextLaneIndex,
                             nextLaneId,
@@ -3325,7 +3325,7 @@ namespace TrafficManager.Custom.PathFinding {
 
 #if SPEEDLIMITS
             // NON-STOCK CODE START
-            float nextMaxSpeed = speedLimitManager.GetLockFreeGameSpeedLimit(nextSegmentId, (byte)nextLaneIndex, nextLaneId, nextLaneInfo);
+            float nextMaxSpeed = speedLimitManager.GetGameSpeedLimit(nextSegmentId, (byte)nextLaneIndex, nextLaneId, nextLaneInfo);
 
             // NON-STOCK CODE END
 #else

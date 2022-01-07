@@ -984,7 +984,7 @@ namespace TrafficManager.UI {
                     RoutingManager.Instance.CalcInnerSimilarLaneIndex(segmentId, i),
                     RoutingManager.Instance.CalcOuterSimilarLaneIndex(segmentId, i),
                     (NetLane.Flags)lanesBuffer[curLaneId].m_flags,
-                    SpeedLimitManager.Instance.GetCustomSpeedLimit(curLaneId).ToString(),
+                    SpeedLimitManager.Instance.CalculateCustomSpeedLimit(curLaneId).ToString(),
                     VehicleRestrictionsManager.Instance.GetAllowedVehicleTypes(
                         segmentId,
                         segmentInfo,

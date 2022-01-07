@@ -39,7 +39,7 @@ namespace TrafficManager.Patch._VehicleAI {
                                                       out float maxSpeed) {
             if (info.m_lanes != null && info.m_lanes.Length > position.m_lane) {
                 float laneSpeedLimit = Options.customSpeedLimitsEnabled
-                                           ? SpeedLimitManager.Instance.GetLockFreeGameSpeedLimit(
+                                           ? SpeedLimitManager.Instance.GetGameSpeedLimit(
                                                position.m_segment,
                                                position.m_lane,
                                                laneId,
