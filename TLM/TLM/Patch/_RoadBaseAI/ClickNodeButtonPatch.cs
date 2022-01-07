@@ -8,6 +8,7 @@ namespace TrafficManager.Patch._RoadBaseAI {
     using TrafficManager.UI;
     using TrafficManager.UI.SubTools;
     using TrafficManager.Util;
+    using TrafficManager.Util.Extensions;
 
     [UsedImplicitly]
     [HarmonyPatch(typeof(RoadBaseAI), nameof(RoadBaseAI.ClickNodeButton))]

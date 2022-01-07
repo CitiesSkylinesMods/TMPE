@@ -9,6 +9,7 @@ namespace TrafficManager.Util {
     using TrafficManager.API.TrafficLight;
     using TrafficManager.Manager.Impl;
     using UnityEngine;
+    using TrafficManager.Util.Extensions;
 
     public static class AutoTimedTrafficLights {
         /// <summary>

@@ -16,6 +16,7 @@ namespace TrafficManager.Custom.PathFinding {
     using TrafficManager.State;
     using UnityEngine;
     using TrafficManager.Util;
+    using TrafficManager.Util.Extensions;
 
 #if DEBUG
     using System.Collections.Generic;

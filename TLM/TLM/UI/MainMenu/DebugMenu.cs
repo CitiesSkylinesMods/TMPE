@@ -14,6 +14,7 @@ namespace TrafficManager.UI.MainMenu {
     using TrafficManager.Util;
     using TrafficManager.Lifecycle;
     using TrafficManager.Manager.Impl;
+    using TrafficManager.Util.Extensions;
 
 #if DEBUG // whole class coverage
     public class DebugMenuPanel : UIPanel

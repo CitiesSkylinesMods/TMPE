@@ -6,6 +6,7 @@ namespace TrafficManager.Patch._VehicleAI._TrainAI {
     using HarmonyLib;
     using JetBrains.Annotations;
     using Manager.Impl;
+    using TrafficManager.Util.Extensions;
     using UnityEngine;
     using Util;
 

@@ -3,6 +3,7 @@ namespace TrafficManager.Patch._VehicleAI {
     using Manager.Impl;
     using State;
     using TrafficManager.Util;
+    using TrafficManager.Util.Extensions;
     using UnityEngine;
 
     public class VehicleAICommons {

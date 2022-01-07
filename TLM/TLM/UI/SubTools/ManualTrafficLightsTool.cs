@@ -11,6 +11,7 @@ namespace TrafficManager.UI.SubTools {
     using TrafficManager.UI.MainMenu.OSD;
     using TrafficManager.UI.Textures;
     using TrafficManager.Util;
+    using TrafficManager.Util.Extensions;
     using UnityEngine;
 
     public class ManualTrafficLightsTool

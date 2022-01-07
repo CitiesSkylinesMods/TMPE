@@ -7,6 +7,7 @@ namespace TrafficManager.Util {
     using TrafficManager.UI;
     using UnityEngine;
     using TrafficManager.Util;
+    using TrafficManager.Util.Extensions;
 
     /// <summary>
     /// Helper functions to handle coordinates and transformations, as well as road geometry

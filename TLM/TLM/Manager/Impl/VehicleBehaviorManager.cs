@@ -12,6 +12,7 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.UI.SubTools.SpeedLimits;
     using TrafficManager.Util;
     using UnityEngine;
+    using TrafficManager.Util.Extensions;
 
     public class VehicleBehaviorManager : AbstractCustomManager, IVehicleBehaviorManager {
         public const float MIN_SPEED = 8f * 0.2f; // 10 km/h

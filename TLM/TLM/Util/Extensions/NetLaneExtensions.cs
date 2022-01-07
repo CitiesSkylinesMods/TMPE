@@ -1,5 +1,11 @@
 namespace TrafficManager.Util.Extensions {
+    using ColossalFramework;
+
     public static class NetLaneExtensions {
+        private static NetLane[] _laneBuffer = Singleton<NetManager>.instance.m_lanes.m_buffer;
+
+        internal static ref NetLane ToLane(this uint laneId) => ref _laneBuffer[laneId];
+
         /// <summary>
         /// Checks if the netLane is Created, but not Deleted.
         /// </summary>

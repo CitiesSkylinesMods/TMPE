@@ -9,6 +9,7 @@ namespace TrafficManager.Patch._VehicleAI._TrainAI {
     using Manager.Impl;
     using State;
     using State.ConfigData;
+    using TrafficManager.Util.Extensions;
     using UnityEngine;
     using Util;
 

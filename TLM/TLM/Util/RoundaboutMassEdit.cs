@@ -12,6 +12,7 @@ namespace TrafficManager.Util {
     using UnityEngine;
     using static TrafficManager.Util.Shortcuts;
     using static UI.SubTools.LaneConnectorTool;
+    using TrafficManager.Util.Extensions;
 
     public class RoundaboutMassEdit {
         public static RoundaboutMassEdit Instance = new RoundaboutMassEdit();

@@ -11,6 +11,7 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.State;
     using UnityEngine;
     using TrafficManager.Util;
+    using TrafficManager.Util.Extensions;
 
     public class ExtVehicleManager
         : AbstractCustomManager,

@@ -4,6 +4,7 @@ namespace TrafficManager.Patch._VehicleAI._TrainAI{
     using JetBrains.Annotations;
     using Manager.Impl;
     using State;
+    using TrafficManager.Util.Extensions;
     using Util;
 
     [UsedImplicitly]

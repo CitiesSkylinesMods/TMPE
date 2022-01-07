@@ -7,6 +7,7 @@ namespace TrafficManager.Patch._CitizenAI._HumanAI {
     using Manager.Impl;
     using State;
     using State.ConfigData;
+    using TrafficManager.Util.Extensions;
     using Util;
 
     [UsedImplicitly]
