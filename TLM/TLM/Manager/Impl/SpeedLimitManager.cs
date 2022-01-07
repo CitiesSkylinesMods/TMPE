@@ -53,10 +53,50 @@ namespace TrafficManager.Manager.Impl {
         /// <summary>For each NetInfo name: game default speed limit.</summary>
         private readonly Dictionary<string, float[]> vanillaLaneSpeedLimits_ = new();
 
-        private List<NetInfo> customizableNetInfos_ = new();
-
         private SpeedLimitManager() {
             laneSpeedLimitArray_ = new float?[NetManager.MAX_SEGMENT_COUNT][];
+        }
+
+        /// <summary>determine vanilla speed limits and customizable NetInfos</summary>
+        public bool IsCustomisable(NetInfo netinfo) {
+            if (!netinfo) {
+                Log.Warning("Skipped NetINfo with null info");
+                return false;
+            }
+
+            if (string.IsNullOrEmpty(netinfo.name)) {
+                Log.Warning("Skipped NetINfo with empty name");
+                return false;
+            }
+
+            if (netinfo.m_netAI == null) {
+                Log.Warning($"Skipped NetInfo '{netinfo.name}' with null AI");
+                return false;
+            }
+
+#if DEBUG
+            bool debugSpeedLimits = DebugSwitch.SpeedLimits.Get();
+#endif
+
+            // Must be road or track based:
+            if (netinfo.m_netAI is not RoadBaseAI or TrainTrackBaseAI or MetroTrackAI) {
+#if DEBUG
+                if (debugSpeedLimits)
+                    Log._Debug($"Skipped NetInfo '{netinfo.name}' because m_netAI is not applicable: {netinfo.m_netAI}");
+#endif
+                return false;
+            }
+
+            if (!netinfo.m_vehicleTypes.IsFlagSet(VEHICLE_TYPES) || !netinfo.m_laneTypes.IsFlagSet(LANE_TYPES)) {
+#if DEBUG
+                if (debugSpeedLimits)
+                    Log._Debug($"Skipped decorative NetInfo '{netinfo.name}' with m_vehicleType={netinfo.m_vehicleTypes} and m_laneTypes={netinfo.m_laneTypes}");
+#endif
+
+                return false;
+            }
+
+            return true;
         }
 
         /// <summary>Determines the currently set speed limit for the given segment and lane
@@ -282,7 +322,7 @@ namespace TrafficManager.Manager.Impl {
 
         internal IEnumerable<NetInfo> GetCustomisableRelatives(NetInfo netinfo) {
             foreach(var netinfo2 in netinfo.GetRelatives()) {
-                if (customizableNetInfos_.Contains(netinfo2))
+                if (IsCustomisable(netinfo2))
                     yield return netinfo2;
             }
         }
@@ -492,165 +532,21 @@ namespace TrafficManager.Manager.Impl {
 
             // todo: move this to a Reset() or Clear() method?
             this.vanillaLaneSpeedLimits_.Clear();
-            this.customizableNetInfos_.Clear();
             this.customLaneSpeedLimit_.Clear();
 
-            List<NetInfo> mainNetInfos = new List<NetInfo>();
-
-            // Basic logging to help road/track asset creators see if their netinfo is wrong
-            // 6000 is rougly 120 lines; should be more than enough for most users
-            StringBuilder log = new StringBuilder(6000);
-
-            log.AppendFormat(
-                "SpeedLimitManager.OnBeforeLoadData: {0} NetInfos loaded. Verifying...\n",
-                numLoaded);
 
             for (uint i = 0; i < numLoaded; ++i) {
                 NetInfo info = PrefabCollection<NetInfo>.GetLoaded(i);
-
-                // Basic validity checks to see if this NetInfo is something speed limits can be applied to...
-
-                // Something in the workshop has null NetInfos in it...
-                if (info == null) {
-                    Log.InfoFormat(
-                        "SpeedLimitManager.OnBeforeLoadData: NetInfo #{0} is null!",
-                        i);
-                    continue;
-                }
-
-                string infoName = info.name;
-
-                // We need a valid name
-                if (string.IsNullOrEmpty(infoName)) {
-                    log.AppendFormat(
-                        "- Skipped: NetInfo #{0} - name is empty!\n",
-                        i);
-                    continue;
-                }
-
-                // Make sure it's valid AI
-                if (info.m_netAI == null) {
-                    log.AppendFormat(
-                        "- Skipped: NetInfo #{0} ({1}) - m_netAI is null.\n",
-                        i,
-                        infoName);
-                    continue;
-                }
-
-                // Must be road or track based
-                if (!(info.m_netAI is RoadBaseAI || info.m_netAI is TrainTrackBaseAI ||
-                      info.m_netAI is MetroTrackAI)) {
-#if DEBUG
-                    // Only outputting these in debug as there are loads of them
-                    Log._DebugIf(
-                        debugSpeedLimits,
-                        () =>
-                            $"- Skipped: NetInfo #{i} ({infoName}) - m_netAI is not applicable: {info.m_netAI}.");
-#endif
-                    continue;
-                }
-
-                // If it requires DLC, check the DLC is active
-                if ((info.m_dlcRequired & dlcMask) != info.m_dlcRequired) {
-                    log.AppendFormat(
-                        "- Skipped: NetInfo #{0} ({1}) - required DLC not active.\n",
-                        i,
-                        infoName);
-                    continue;
-                }
-
-                // #510: Filter out decorative networks (`None`) and bike paths (`Bicycle`)
-                if (info.m_vehicleTypes == VehicleInfo.VehicleType.None ||
-                    info.m_vehicleTypes == VehicleInfo.VehicleType.Bicycle) {
-                    log.AppendFormat(
-                        "- Skipped: NetInfo #{0} ({1}) - no vehicle support (decorative or bike path?)\n",
-                        i,
-                        infoName);
-                    continue;
-                }
-
-                if (!vanillaLaneSpeedLimits_.ContainsKey(infoName)) {
-                    if (info.m_lanes == null) {
-                        log.AppendFormat(
-                            "- Skipped: NetInfo #{0} ({1}) - m_lanes is null!\n",
-                            i,
-                            infoName);
-
-                        Log.Warning(
-                            $"SpeedLimitManager.OnBeforeLoadData: NetInfo @ {i} ({infoName}) lanes is null!");
-                        continue;
-                    }
-
-                    Log._Trace($"- Loaded road NetInfo: {infoName}");
-
-                    mainNetInfos.Add(info);
-
+                if (IsCustomisable(info)) {
                     float[] vanillaLaneSpeedLimits = new float[info.m_lanes.Length];
 
                     for (var k = 0; k < info.m_lanes.Length; ++k) {
                         vanillaLaneSpeedLimits[k] = info.m_lanes[k].m_speedLimit;
                     }
 
-                    vanillaLaneSpeedLimits_[infoName] = vanillaLaneSpeedLimits;
+                    vanillaLaneSpeedLimits_[info.name] = vanillaLaneSpeedLimits;
                 }
             }
-
-            log.Append("SpeedLimitManager.OnBeforeLoadData: Scan complete.\n");
-            Log.Info(log.ToString());
-
-            int CompareNetinfos(NetInfo a, NetInfo b) {
-                bool aRoad = a.m_netAI is RoadBaseAI;
-                bool bRoad = b.m_netAI is RoadBaseAI;
-
-                if (aRoad != bRoad) {
-                    return aRoad ? -1 : 1;
-                }
-
-                bool aTrain = a.m_netAI is TrainTrackBaseAI;
-                bool bTrain = b.m_netAI is TrainTrackBaseAI;
-
-                if (aTrain != bTrain) {
-                    return aTrain ? 1 : -1;
-                }
-
-                bool aMetro = a.m_netAI is MetroTrackAI;
-                bool bMetro = b.m_netAI is MetroTrackAI;
-
-                if (aMetro != bMetro) {
-                    return aMetro ? 1 : -1;
-                }
-
-                if (aRoad && bRoad) {
-                    bool aHighway = ((RoadBaseAI)a.m_netAI).m_highwayRules;
-                    bool bHighway = ((RoadBaseAI)b.m_netAI).m_highwayRules;
-
-                    if (aHighway != bHighway) {
-                        return aHighway ? 1 : -1;
-                    }
-                }
-
-                int aNumVehicleLanes = 0;
-                foreach (NetInfo.Lane lane in a.m_lanes) {
-                    if ((lane.m_laneType & LANE_TYPES) != NetInfo.LaneType.None) {
-                        ++aNumVehicleLanes;
-                    }
-                }
-
-                int bNumVehicleLanes = 0;
-                foreach (NetInfo.Lane lane in b.m_lanes) {
-                    if ((lane.m_laneType & LANE_TYPES) != NetInfo.LaneType.None) ++bNumVehicleLanes;
-                }
-
-                int res = aNumVehicleLanes.CompareTo(bNumVehicleLanes);
-                if (res == 0) {
-                    return a.name.CompareTo(b.name);
-                }
-
-                return res;
-            }
-
-            mainNetInfos.Sort(CompareNetinfos);
-            customizableNetInfos_ = mainNetInfos;
         }
 
         protected override void HandleInvalidSegment(ref ExtSegment extSegment) {
