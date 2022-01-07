@@ -1,5 +1,5 @@
 namespace TrafficManager.API.Manager {
-    using JetBrains.Annotations;
+    using System;
 
     public interface ISpeedLimitManager {
         // TODO define me!
@@ -9,7 +9,7 @@ namespace TrafficManager.API.Manager {
         public VehicleInfo.VehicleType VehicleTypes { get; }
 
         /// <returns>The override or default road speed limit, in the game units.</returns>
-        [UsedImplicitly]
+        [Obsolete]
         float GetGameSpeedLimit(uint laneId);
 
         /// <returns>The override or default road speed limit, in the game units.</returns>
