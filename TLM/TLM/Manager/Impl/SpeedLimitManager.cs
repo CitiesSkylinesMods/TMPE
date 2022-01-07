@@ -535,13 +535,6 @@ namespace TrafficManager.Manager.Impl {
             ResetSpeedLimits();
         }
 
-        public override void OnAfterLoadData() {
-            base.OnAfterLoadData();
-            for (uint laneId = 0; laneId < NetManager.instance.m_laneCount; ++laneId) {
-                cachedLaneSpeedLimits_[laneId] = CalculateGameSpeedLimit(laneId);
-            }
-        }
-
         protected override void HandleInvalidSegment(ref ExtSegment extSegment) {
             ref NetSegment netSegment = ref extSegment.segmentId.ToSegment();
 
@@ -816,8 +809,14 @@ namespace TrafficManager.Manager.Impl {
             lock (laneSpeedLimitLock_) {
                 laneOverrideSpeedLimit_.Clear();
                 customNetinfoSpeedLimits_.Clear();
-                for (uint laneId = 0; laneId < NetManager.instance.m_laneCount; ++laneId) {
-                    cachedLaneSpeedLimits_[laneId] = CalculateGameSpeedLimit(laneId);
+                for (ushort segmentId = 1; segmentId < NetManager.instance.m_segmentCount; ++segmentId) {
+                    ref NetSegment netSegment = ref segmentId.ToSegment();
+                    if (netSegment.IsValid()) {
+                        foreach (var laneIdAndIndex in netSegment.GetSegmentLaneIdsAndLaneIndexes()) {
+                            var laneInfo = netSegment.GetLaneInfo(laneIdAndIndex.laneIndex);
+                            cachedLaneSpeedLimits_[laneIdAndIndex.laneId] = laneInfo.m_speedLimit;
+                        }
+                    }
                 }
             }
         }
