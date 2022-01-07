@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.UI.SubTools.SpeedLimits.Overlay {
+namespace TrafficManager.UI.SubTools.SpeedLimits.Overlay {
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -446,7 +446,7 @@
                 }
 
                 // Place this check last as it might be expensive
-                if (!SpeedLimitManager.Instance.IsKnownNetinfoName(segment.Info.name)) {
+                if (!SpeedLimitManager.Instance.IsCustomisable(segment.Info)) {
                     continue;
                 }
 
