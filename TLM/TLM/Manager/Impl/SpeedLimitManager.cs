@@ -48,14 +48,10 @@ namespace TrafficManager.Manager.Impl {
         public static readonly SpeedLimitManager Instance = new();
 
         /// <summary>For each NetInfo name: custom speed limit.</summary>
-        private readonly Dictionary<string, float> customLaneSpeedLimit_ = new();
-
-        /// <summary>NetInfo lookup by name.</summary>
-        private readonly Dictionary<string, NetInfo> netInfoByName_ = new();
+        private readonly Dictionary<NetInfo, float> customLaneSpeedLimit_ = new();
 
         /// <summary>For each NetInfo name: game default speed limit.</summary>
         private readonly Dictionary<string, float[]> vanillaLaneSpeedLimits_ = new();
-
 
         private List<NetInfo> customizableNetInfos_ = new();
 
@@ -279,7 +275,7 @@ namespace TrafficManager.Manager.Impl {
                 return -1f;
             }
 
-            return !customLaneSpeedLimit_.TryGetValue(info.name, out float speedLimit)
+            return !customLaneSpeedLimit_.TryGetValue(info, out float speedLimit)
                        ? GetVanillaNetInfoSpeedLimit(info)
                        : speedLimit;
         }
@@ -305,17 +301,14 @@ namespace TrafficManager.Manager.Impl {
             float gameSpeedLimit = ToGameSpeedLimit(customSpeedLimit);
 
 
-            foreach (var netinfo2 in GetCustomisableRelatives(netinfo)) {
-                string netinfoName = netinfo2.name;
-                customLaneSpeedLimit_[netinfo2.name] = customSpeedLimit;
+            foreach (var relatedNetinfo in GetCustomisableRelatives(netinfo)) {
+                customLaneSpeedLimit_[relatedNetinfo] = customSpeedLimit;
 
 #if DEBUGLOAD
-                Log._Debug($"Updating NetInfo {netinfoName}: Setting speed limit to {gameSpeedLimit}");
+                Log._Debug($"Updating NetInfo {relatedNetinfo.name}: Setting speed limit to {gameSpeedLimit}");
 #endif
                 // save speed limit in all NetInfos
-                if (this.netInfoByName_.TryGetValue(netinfoName, out var relatedNetinfo)) {
-                    UpdateNetinfoSpeedLimit(relatedNetinfo, gameSpeedLimit);
-                }
+                UpdateNetinfoSpeedLimit(relatedNetinfo, gameSpeedLimit);
             }
         }
 
@@ -400,15 +393,11 @@ namespace TrafficManager.Manager.Impl {
 
             var vanillaSpeedLimit = GetVanillaNetInfoSpeedLimit(netinfo);
 
-            foreach (var netinfo2 in GetCustomisableRelatives(netinfo)) {
-                string netinfoName = netinfo2.name;
-                if (this.customLaneSpeedLimit_.ContainsKey(netinfoName)) {
-                    this.customLaneSpeedLimit_.Remove(netinfoName);
+            foreach (var relatedNetinfo in GetCustomisableRelatives(netinfo)) {
+                if (this.customLaneSpeedLimit_.ContainsKey(relatedNetinfo)) {
+                    this.customLaneSpeedLimit_.Remove(relatedNetinfo);
                 }
-
-                if (this.netInfoByName_.TryGetValue(netinfoName, out var relatedNetinfo)) {
-                    this.UpdateNetinfoSpeedLimit(relatedNetinfo, vanillaSpeedLimit);
-                }
+                this.UpdateNetinfoSpeedLimit(relatedNetinfo, vanillaSpeedLimit);
             }
         }
 
@@ -505,7 +494,6 @@ namespace TrafficManager.Manager.Impl {
             this.vanillaLaneSpeedLimits_.Clear();
             this.customizableNetInfos_.Clear();
             this.customLaneSpeedLimit_.Clear();
-            this.netInfoByName_.Clear();
 
             List<NetInfo> mainNetInfos = new List<NetInfo>();
 
@@ -595,7 +583,6 @@ namespace TrafficManager.Manager.Impl {
 
                     Log._Trace($"- Loaded road NetInfo: {infoName}");
 
-                    netInfoByName_[infoName] = info;
                     mainNetInfos.Add(info);
 
                     float[] vanillaLaneSpeedLimits = new float[info.m_lanes.Length];
@@ -791,7 +778,7 @@ namespace TrafficManager.Manager.Impl {
         public bool LoadData([NotNull] Dictionary<string, float> data) {
             Log.Info($"Loading custom default speed limit data. {data.Count} elements");
             foreach (KeyValuePair<string, float> e in data) {
-                if (!netInfoByName_.TryGetValue(e.Key, out NetInfo netInfo)) {
+                if (PrefabCollection<NetInfo>.FindLoaded(e.Key) is not NetInfo netInfo) {
                     continue;
                 }
 
@@ -811,15 +798,14 @@ namespace TrafficManager.Manager.Impl {
         private Dictionary<string, float> SaveCustomDefaultLimits(ref bool success) {
             var result = new Dictionary<string, float>();
 
-            foreach (KeyValuePair<string, float> e in customLaneSpeedLimit_) {
+            foreach (var pair in customLaneSpeedLimit_) {
                 try {
-                    float gameSpeedLimit = ToGameSpeedLimit(e.Value);
-
-                    result.Add(e.Key, gameSpeedLimit);
+                    float gameSpeedLimit = ToGameSpeedLimit(pair.Value);
+                    result.Add(pair.Key?.name, gameSpeedLimit);
                 }
                 catch (Exception ex) {
                     Log.Error(
-                        $"Exception occurred while saving custom default speed limits @ {e.Key}: {ex}");
+                        $"Exception occurred while saving custom default speed limits @ {pair.Key?.name}: {ex}");
                     success = false;
                 }
             }
