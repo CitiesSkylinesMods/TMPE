@@ -55,13 +55,12 @@ namespace TrafficManager.State {
 
             // Group: Localisation
 
-            // TODO: Add translation key "General.Group:Localisation"
             UIHelperBase groupLocalisation = panelHelper.AddGroup(T("General.Group:Localisation"));
             AddLanguageDropdown(groupLocalisation,
                 GlobalConfig.Instance.LanguageCode);
             AddCrowdinButton(groupLocalisation);
             AddLocalisationWikiButton(groupLocalisation);
-            // TODO: Ditch separate MPH vs. km/h setting; selected icon theme should determine that? #1221
+            // TODO: #1221 Ditch separate MPH vs. km/h setting; selected icon theme should determine that?
             AddMphCheckbox(groupLocalisation,
                 GlobalConfig.Instance.Main.DisplaySpeedLimitsMph);
             AddIconThemeDropdown(groupLocalisation,
@@ -69,7 +68,6 @@ namespace TrafficManager.State {
 
             // Group: Interface
 
-            // TODO: Add translation key "General.Group:Interface"
             UIHelperBase groupInterface = panelHelper.AddGroup(T("General.Group:Interface"));
             AddPositionLockSettings(groupInterface,
                 GlobalConfig.Instance.Main.MainMenuButtonPosLocked,
@@ -78,7 +76,7 @@ namespace TrafficManager.State {
                 GlobalConfig.Instance.Main.UseUUI);
             AddGuiScaleSlider(groupInterface,
                 GlobalConfig.Instance.Main.GuiScale);
-            // TODO: These should either be both `opacity` or both `transparency`
+            // TODO: #1268 These should both be `opacity`
             AddGuiTransparencySliders(groupInterface,
                 GlobalConfig.Instance.Main.GuiOpacity,
                 GlobalConfig.Instance.Main.OverlayTransparency);
@@ -95,7 +93,6 @@ namespace TrafficManager.State {
 
             // Group: Compatibility
 
-            // TODO: Add translation key "General.Group:Compatibility"
             UIHelperBase groupCompatibility = panelHelper.AddGroup(T("General.Group:Compatibility"));
             AddModCheckerCheckboxes(groupCompatibility,
                 GlobalConfig.Instance.Main.ScanForKnownIncompatibleModsAtStartup,
