@@ -358,7 +358,7 @@ namespace TrafficManager.Manager.Impl {
                 Log._Debug($"Updating NetInfo {relatedNetinfo.name}: Setting speed limit to {gameSpeedLimit}");
 #endif
                 // save speed limit in all NetInfos
-                UpdateNetinfoSpeedLimit(relatedNetinfo, gameSpeedLimit);
+                UpdateNetinfo(relatedNetinfo);
             }
         }
 
@@ -367,22 +367,22 @@ namespace TrafficManager.Manager.Impl {
             Log.NotImpl("InternalPrintDebugInfo for SpeedLimitManager");
         }
 
-        private void UpdateNetinfoSpeedLimit(NetInfo info, float gameSpeedLimit) {
-            if (info == null) {
+        private void UpdateNetinfo(NetInfo netinfo) {
+            if (netinfo == null) {
                 Log._DebugOnlyWarning($"SpeedLimitManager.UpdateNetinfoSpeedLimit: info is null!");
                 return;
             }
 
-            if (info.m_lanes == null) {
+            if (netinfo.m_lanes == null) {
                 Log._DebugOnlyWarning($"SpeedLimitManager.UpdateNetinfoSpeedLimit: info.lanes is null!");
                 return;
             }
 
-            Log._Debug($"caching speed limits of segments of NetInfo {info.name}");
+            Log._Debug($"caching speed limits of segments of NetInfo {netinfo.name}");
 
             for(ushort segmentId = 1; segmentId < NetManager.MAX_SEGMENT_COUNT; ++segmentId) {
-                ref var segment = ref segmentId.ToSegment();
-                if (segment.IsValid() && segment.Info == info) {
+                ref var netSegment = ref segmentId.ToSegment();
+                if (netSegment.IsValid() && netSegment.Info == netinfo) {
                     CacheSegmentSpeeds(segmentId);
                     Notifier.Instance.OnSegmentModified(segmentId, this);
                 }
@@ -452,7 +452,7 @@ namespace TrafficManager.Manager.Impl {
                 if (this.customNetinfoSpeedLimits_.ContainsKey(relatedNetinfo)) {
                     this.customNetinfoSpeedLimits_.Remove(relatedNetinfo);
                 }
-                this.UpdateNetinfoSpeedLimit(relatedNetinfo, vanillaSpeedLimit);
+                this.UpdateNetinfo(relatedNetinfo);
             }
         }
 
@@ -539,18 +539,15 @@ namespace TrafficManager.Manager.Impl {
 
         protected override void HandleInvalidSegment(ref ExtSegment extSegment) {
             ref NetSegment netSegment = ref extSegment.segmentId.ToSegment();
+            foreach (var lane in netSegment.GetSegmentLaneIdsAndLaneIndexes()) {
+                SetLaneSpeedLimit(lane.laneId, SetSpeedLimitAction.ResetToDefault());
+            }
+        }
 
-            NetInfo segmentInfo = netSegment.Info;
-            uint curLaneId = netSegment.m_lanes;
-            int laneIndex = 0;
-
-            while (laneIndex < segmentInfo.m_lanes.Length && curLaneId != 0u) {
-                // NetInfo.Lane laneInfo = segmentInfo.m_lanes[laneIndex];
-                // float? setSpeedLimit = Flags.getLaneSpeedLimit(curLaneId);
-                SetLaneSpeedLimit(curLaneId, SetSpeedLimitAction.ResetToDefault());
-
-                curLaneId = Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_nextLane;
-                laneIndex++;
+        protected override void HandleValidSegment(ref ExtSegment extSegment) {
+            ref NetSegment netSegment = ref extSegment.segmentId.ToSegment();
+            foreach(var lane in netSegment.GetSegmentLaneIdsAndLaneIndexes()) {
+                cachedLaneSpeedLimits_[lane.laneId] = CalculateGameSpeedLimit(lane.laneId);
             }
         }
 
