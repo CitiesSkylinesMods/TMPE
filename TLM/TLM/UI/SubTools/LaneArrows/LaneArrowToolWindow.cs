@@ -106,7 +106,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                     parent: buttonRowPanel,
                     stack: i == 0 ? UStackMode.Below : UStackMode.ToTheRight);
                 buttonGroupPanel.name = buttonName;
-                buttonGroupPanel.atlas = TextureUtil.FindAtlas("Ingame");
+                buttonGroupPanel.atlas = TextureUtil.Ingame;
                 buttonGroupPanel.backgroundSprite = "GenericPanel";
 
                 int i1 = i; // copy of the loop variable, for the resizeFunction below

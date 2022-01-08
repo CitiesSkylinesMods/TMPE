@@ -1,8 +1,9 @@
-﻿namespace TrafficManager.U {
+namespace TrafficManager.U {
     using System.Collections.Generic;
     using System.Linq;
     using ColossalFramework.UI;
     using TrafficManager.Util;
+    using TrafficManager.Util.Extensions;
 
     /// <summary>
     /// Populates a set of spritedefs as your UI form is populated with controls. Allows to use
@@ -49,21 +50,9 @@
         /// Longer list of atlas keys can be loaded into one atlas.</summary>
         /// <returns>New UI atlas.</returns>
         public UITextureAtlas CreateAtlas() {
-            string fullName = $"TMPE_U_{this.atlasName_}";
-            UITextureAtlas foundAtlas = TextureUtil.FindAtlas(fullName);
-
-            // If is NOT the same as UI default, means the atlas is already loaded (return cached)
-            if (!System.Object.ReferenceEquals(foundAtlas, UIView.GetAView().defaultAtlas)) {
-#if DEBUG
-                // In debug build rebuild atlas, this will be slower but allows the developer to see
-                // the updated GUI textures.
-                UnityEngine.Object.Destroy(foundAtlas);
-#else
-                return foundAtlas;
-#endif
-            }
-
-            return TextureUtil.CreateAtlas(
+            string fullName = $"TMPE_U_rev{this.VersionOf().Revision}_{this.atlasName_}";
+            return TextureUtil.FindAtlasOrNull(fullName) ??
+                TextureUtil.CreateAtlas(
                 atlasName: fullName,
                 resourcePrefix: this.loadingPath_,
                 spriteDefs: spriteDefs_.ToArray(),
