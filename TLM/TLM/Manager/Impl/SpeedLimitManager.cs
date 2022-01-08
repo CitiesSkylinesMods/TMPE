@@ -97,16 +97,15 @@ namespace TrafficManager.Manager.Impl {
         }
 
         /// <summary>
-        /// Gets the game speed limit for the NetInfo and the lane.
+        /// Gets the speed limit value for the NetInfo and the lane.
         /// If customised returns the custom speed limit.
         /// Otherwise returns the lane speed limit.
-        /// Units: Game speed units (1.0 = 50 km/h).
         /// </summary>
-        public float GetDefaultGameSpeedLimit(NetInfo netinfo, NetInfo.Lane laneInfo) {
+        public SpeedValue GetDefaultSpeedLimit(NetInfo netinfo, NetInfo.Lane laneInfo) {
             if (customNetinfoSpeedLimits_.TryGetValue(netinfo, out float speedLimit)) {
-                return speedLimit;
+                return new SpeedValue(speedLimit);
             } else {
-                return laneInfo.m_speedLimit;
+                return new SpeedValue(laneInfo.m_speedLimit);
             }
         }
 
@@ -129,6 +128,10 @@ namespace TrafficManager.Manager.Impl {
             }
 
             NetInfo netinfo = netSegment.Info;
+            if(customNetinfoSpeedLimits_.TryGetValue(netinfo, out float customNetinfoSpeedLimit)) {
+                return new SpeedValue(customNetinfoSpeedLimit);
+            }
+
             uint curLaneId = netSegment.m_lanes;
             var laneIndex = 0;
             uint validLanes = 0;
@@ -152,8 +155,7 @@ namespace TrafficManager.Manager.Impl {
                     // custom speed limit
                     meanSpeedLimit += setSpeedLimit.Value;
                 } else {
-                    float speedLimit = GetDefaultGameSpeedLimit(netinfo, laneInfo);
-                    meanSpeedLimit += new SpeedValue(speedLimit);
+                    meanSpeedLimit += new SpeedValue(laneInfo.m_speedLimit);
                 }
 
                 ++validLanes;
@@ -202,7 +204,7 @@ namespace TrafficManager.Manager.Impl {
             while (laneIndex < netinfo.m_lanes.Length && curLaneId != 0u) {
                 if (curLaneId == laneId) {
                     NetInfo.Lane laneInfo = netinfo.m_lanes[laneIndex];
-                    SpeedValue knownDefault = new SpeedValue(GetDefaultGameSpeedLimit(netinfo, laneInfo));
+                    SpeedValue knownDefault = GetDefaultSpeedLimit(netinfo, laneInfo);
 
                     if (laneInfo.MayHaveCustomSpeedLimits()) {
                         // May possibly have override, also the default is known
