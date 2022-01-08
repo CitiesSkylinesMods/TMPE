@@ -46,6 +46,7 @@ namespace TrafficManager.UI {
 
             button.AlignTo(panel.component, UIAlignAnchor.TopRight);
             button.relativePosition += new Vector3(-button.width - 80f, 50f);
+            Log._Debug($"Added {button} to {panel}");
             return button;
         }
 

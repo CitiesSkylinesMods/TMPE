@@ -208,6 +208,7 @@ namespace TrafficManager.Lifecycle {
 
                 ModUI.OnLevelLoaded();
                 if (PlayMode) {
+                    Log._Debug("PlayMode");
                     UIView uiView = UIView.GetAView();
                     uiView.AddUIComponent(typeof(UITransportDemand));
                     uiView.gameObject.AddComponent<RemoveVehicleButtonExtender>();

@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.UI.MainMenu {
+namespace TrafficManager.UI.MainMenu {
     using TrafficManager.State;
     using TrafficManager.U;
     using TrafficManager.U.Autosize;
@@ -10,7 +10,7 @@
                 this.name = "TMPE_MainMenu_KeybindsPanel";
 
                 // the GenericPanel sprite is Light Silver, make it dark
-                this.atlas = TextureUtil.FindAtlas("Ingame");
+                this.atlas = TextureUtil.Ingame;
                 this.backgroundSprite = "GenericPanel";
                 this.color = new Color32(64, 64, 64, 240);
                 this.opacity = GlobalConfig.Instance.Main.KeybindsPanelVisible

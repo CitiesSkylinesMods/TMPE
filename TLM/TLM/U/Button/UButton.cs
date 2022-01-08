@@ -15,7 +15,7 @@ namespace TrafficManager.U {
         }
 
         private void SetupDefaultSprites() {
-            this.atlas = U.TextureUtil.FindAtlas("Ingame");
+            this.atlas = U.TextureUtil.Ingame;
             this.normalBgSprite = "ButtonMenu";
             this.hoveredBgSprite = "ButtonMenuHovered";
             this.pressedBgSprite = "ButtonMenuPressed";
