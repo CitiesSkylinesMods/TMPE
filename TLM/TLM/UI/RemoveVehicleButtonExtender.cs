@@ -108,11 +108,6 @@ namespace TrafficManager.UI {
             public override bool CanActivate() {
                 return false;
             }
-
-            protected override void OnVisibilityChanged() {
-                base.OnVisibilityChanged();
-                BringToFront();
-            }
         }
     }
 }
