@@ -10,6 +10,8 @@ namespace TrafficManager.U {
     using TrafficManager.Util;
 
     public static class TextureUtil {
+        public static UITextureAtlas Ingame => FindAtlas("Ingame");
+
         /// <summary>
         /// Initializes a new instance of the <see cref="UITextureAtlas"/> class from resource names list.
         /// NOTE: For UI sprites loading use <see cref="U.AtlasBuilder"/> instead, do not call this.
@@ -132,15 +134,18 @@ namespace TrafficManager.U {
         }
 
         public static UITextureAtlas FindAtlas(string name) {
-            UITextureAtlas[] atlases =
-                Resources.FindObjectsOfTypeAll(typeof(UITextureAtlas)) as UITextureAtlas[];
+            return FindAtlasOrNull(name) ?? UIView.GetAView().defaultAtlas;
+        }
+
+        public static UITextureAtlas FindAtlasOrNull(string name) {
+            UITextureAtlas[] atlases = Resources.FindObjectsOfTypeAll<UITextureAtlas>();
             for (int i = 0; i < atlases.Length; i++) {
                 if (atlases[i].name == name) {
                     return atlases[i];
                 }
             }
 
-            return UIView.GetAView().defaultAtlas;
+            return null;
         }
     } // end class
 }

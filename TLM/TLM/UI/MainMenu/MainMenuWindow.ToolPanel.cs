@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.UI.MainMenu {
+namespace TrafficManager.UI.MainMenu {
     using System.Collections.Generic;
     using System.Linq;
     using ColossalFramework.UI;
@@ -101,7 +101,7 @@
                 this.name = "TMPE_MainMenu_ExtraPanel";
 
                 // Silver background panel
-                this.atlas = TextureUtil.FindAtlas("Ingame");
+                this.atlas = TextureUtil.Ingame;
                 this.backgroundSprite = "GenericPanel";
 
                 // The panel will be Dark Silver at 50% dark 100% alpha
