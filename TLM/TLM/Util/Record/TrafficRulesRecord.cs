@@ -6,6 +6,7 @@ namespace TrafficManager.Util.Record {
     using TrafficManager.Manager.Impl;
     using static Shortcuts;
     using TrafficManager.State;
+    using TrafficManager.Util.Extensions;
 
     [Serializable]
     public class TrafficRulesRecord : IRecordable {

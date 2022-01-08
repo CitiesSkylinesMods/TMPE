@@ -1,7 +1,8 @@
-﻿namespace TrafficManager.UI.Helpers {
+namespace TrafficManager.UI.Helpers {
     using ColossalFramework;
     using ColossalFramework.Math;
     using TrafficManager.Util;
+    using TrafficManager.Util.Extensions;
     using UnityEngine;
 
     /// <summary>

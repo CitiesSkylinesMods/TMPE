@@ -12,6 +12,7 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.UI.SubTools.SpeedLimits;
     using TrafficManager.Util;
     using UnityEngine;
+    using TrafficManager.Util.Extensions;
 
     public class VehicleBehaviorManager : AbstractCustomManager, IVehicleBehaviorManager {
         public const float MIN_SPEED = 8f * 0.2f; // 10 km/h
@@ -2486,7 +2487,7 @@ namespace TrafficManager.Manager.Impl {
 #endif
                     NetInfo.Lane next1LaneInfo =
                         next1SegInfo.m_lanes[currentFwdTransitions[i].laneIndex];
-                    float next1MaxSpeed = SpeedLimitManager.Instance.GetLockFreeGameSpeedLimit(
+                    float next1MaxSpeed = SpeedLimitManager.Instance.GetGameSpeedLimit(
                         currentFwdTransitions[i].segmentId,
                         currentFwdTransitions[i].laneIndex,
                         currentFwdTransitions[i].laneId,

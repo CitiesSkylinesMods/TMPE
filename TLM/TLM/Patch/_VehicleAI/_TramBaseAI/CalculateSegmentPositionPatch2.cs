@@ -5,6 +5,7 @@ namespace TrafficManager.Patch._VehicleAI._TramBaseAI {
     using JetBrains.Annotations;
     using Manager.Impl;
     using State;
+    using TrafficManager.Util.Extensions;
     using UnityEngine;
     using Util;
 

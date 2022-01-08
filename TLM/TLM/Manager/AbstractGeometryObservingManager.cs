@@ -9,6 +9,7 @@ namespace TrafficManager.Manager {
     using TrafficManager.Geometry;
     using TrafficManager.State.ConfigData;
     using TrafficManager.Util;
+    using TrafficManager.Util.Extensions;
 
     public abstract class AbstractGeometryObservingManager : AbstractCustomManager, IObserver<GeometryUpdate> {
         private IDisposable geoUpdateUnsubscriber;

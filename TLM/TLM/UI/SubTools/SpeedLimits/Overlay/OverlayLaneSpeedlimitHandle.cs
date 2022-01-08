@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.UI.SubTools.SpeedLimits.Overlay {
+namespace TrafficManager.UI.SubTools.SpeedLimits.Overlay {
     using System;
     using System.Collections.Generic;
     using ColossalFramework;
@@ -6,6 +6,7 @@
     using TrafficManager.Manager.Impl;
     using TrafficManager.State;
     using TrafficManager.Util;
+    using TrafficManager.Util.Extensions;
 
     /// <summary>
     /// Describes a recently rendered speed icon on the speed limits overlay for a LANE.

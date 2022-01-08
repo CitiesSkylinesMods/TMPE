@@ -4,6 +4,7 @@ namespace TrafficManager.Util.Record {
     using TrafficManager.Manager.Impl;
     using static TrafficManager.Util.Shortcuts;
     using TrafficManager.State;
+    using TrafficManager.Util.Extensions;
 
     [Serializable]
     public class SpeedLimitLaneRecord : IRecordable {
@@ -20,7 +21,7 @@ namespace TrafficManager.Util.Record {
         InstanceID InstanceID => new InstanceID { NetLane = LaneId };
 
         public void Record() {
-            GetSpeedLimitResult gsl = SpeedLimitManager.Instance.GetCustomSpeedLimit(this.LaneId);
+            GetSpeedLimitResult gsl = SpeedLimitManager.Instance.CalculateCustomSpeedLimit(this.LaneId);
             this.speedLimit_ = gsl.OverrideValue.HasValue && gsl.OverrideValue.Value.GameUnits > 0f
                                    ? gsl.OverrideValue.Value.GameUnits
                                    : (float?)null;
@@ -33,7 +34,7 @@ namespace TrafficManager.Util.Record {
 
         public void Transfer(uint laneId) {
             ushort segmentId = laneId.ToLane().m_segment;
-            var laneInfo = GetLaneInfo(segmentId, LaneIndex);
+            var laneInfo = segmentId.ToSegment().GetLaneInfo(LaneIndex);
             SpeedLimitManager.Instance.SetLaneSpeedLimit(
                 segmentId: segmentId,
                 laneIndex: this.LaneIndex,

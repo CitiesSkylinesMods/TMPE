@@ -8,6 +8,7 @@ namespace TrafficManager.Util {
     using TrafficManager.Manager.Impl;
     using TrafficManager.State;
     using TrafficManager.UI.SubTools.PrioritySigns;
+    using TrafficManager.Util.Extensions;
     using TrafficManager.Util.Record;
     using UnityEngine;
     using static TrafficManager.Util.SegmentTraverser;

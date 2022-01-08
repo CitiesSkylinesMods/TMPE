@@ -1,5 +1,6 @@
 namespace TrafficManager.State {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using TrafficManager.API.Traffic.Enums;
     using ColossalFramework.UI;
@@ -445,8 +446,8 @@ namespace TrafficManager.State {
 
             if (!supportedByTheme) {
                 // Reset to German road signs theme
-                _roadSignsThemeDropdown.selectedIndex = RoadSignThemes.FindDefaultThemeIndex(newMphValue);
-                mainConfig.RoadSignTheme = RoadSignThemes.GetDefaultThemeName(newMphValue);
+                _roadSignsThemeDropdown.selectedIndex = RoadSignThemes.Instance.FindDefaultThemeIndex(newMphValue);
+                mainConfig.RoadSignTheme = RoadSignThemes.Instance.GetDefaultThemeName(newMphValue);
                 Log.Info(
                     $"Display MPH changed to {newMphValue}, but was not supported by current theme, "
                     + "so theme was also reset to German_Kmph");
@@ -474,10 +475,10 @@ namespace TrafficManager.State {
                 return;
             }
 
-            var newTheme = RoadSignThemes.ThemeNames[newThemeIndex];
+            var newTheme = RoadSignThemes.Instance.ThemeNames[newThemeIndex];
 
             Main mainConfig = GlobalConfig.Instance.Main;
-            switch (RoadSignThemes.ChangeTheme(
+            switch (RoadSignThemes.Instance.ChangeTheme(
                         newTheme: newTheme,
                         mphEnabled: mainConfig.DisplaySpeedLimitsMph)) {
                 case RoadSignThemes.ChangeThemeResult.Success:

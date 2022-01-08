@@ -12,6 +12,7 @@ namespace TrafficManager.Util {
     using UnityEngine;
     using static TrafficManager.Util.Shortcuts;
     using static UI.SubTools.LaneConnectorTool;
+    using TrafficManager.Util.Extensions;
 
     public class RoundaboutMassEdit {
         public static RoundaboutMassEdit Instance = new RoundaboutMassEdit();
@@ -28,7 +29,7 @@ namespace TrafficManager.Util {
 
             if (OptionsMassEditTab.RoundAboutQuickFix_RealisticSpeedLimits) {
                 SpeedValue? targetSpeed = CalculatePreferedSpeed(segmentId);
-                float defaultSpeed = SpeedLimitManager.Instance.GetCustomNetinfoSpeedLimit(segmentId.ToSegment().Info);
+                float defaultSpeed = SpeedLimitManager.Instance.CalculateCustomNetinfoSpeedLimit(segmentId.ToSegment().Info);
 
                 if (targetSpeed != null && targetSpeed.Value.GetKmph() < defaultSpeed) {
                     SpeedLimitManager.Instance.SetSegmentSpeedLimit(

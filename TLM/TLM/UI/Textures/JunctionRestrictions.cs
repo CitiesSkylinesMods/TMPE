@@ -1,4 +1,5 @@
 namespace TrafficManager.UI.Textures {
+    using TrafficManager.Manager;
     using TrafficManager.Util;
     using UnityEngine;
     using static TextureResources;
@@ -6,26 +7,29 @@ namespace TrafficManager.UI.Textures {
     /// <summary>
     /// Textures for UI controlling crossings, junctions and nodes
     /// </summary>
-    public static class JunctionRestrictions {
-        public static readonly Texture2D LaneChangeForbidden;
-        public static readonly Texture2D LaneChangeAllowed;
+    public class JunctionRestrictions : AbstractCustomManager {
+        public static JunctionRestrictions Instance = new();
 
-        public static readonly Texture2D UturnAllowed;
-        public static readonly Texture2D UturnForbidden;
+        public Texture2D LaneChangeForbidden;
+        public Texture2D LaneChangeAllowed;
 
-        public static readonly Texture2D RightOnRedForbidden;
-        public static readonly Texture2D RightOnRedAllowed;
+        public Texture2D UturnAllowed;
+        public Texture2D UturnForbidden;
 
-        public static readonly Texture2D LeftOnRedForbidden;
-        public static readonly Texture2D LeftOnRedAllowed;
+        public Texture2D RightOnRedForbidden;
+        public Texture2D RightOnRedAllowed;
 
-        public static readonly Texture2D EnterBlockedJunctionAllowed;
-        public static readonly Texture2D EnterBlockedJunctionForbidden;
+        public Texture2D LeftOnRedForbidden;
+        public Texture2D LeftOnRedAllowed;
 
-        public static readonly Texture2D PedestrianCrossingAllowed;
-        public static readonly Texture2D PedestrianCrossingForbidden;
+        public Texture2D EnterBlockedJunctionAllowed;
+        public Texture2D EnterBlockedJunctionForbidden;
 
-        static JunctionRestrictions() {
+        public Texture2D PedestrianCrossingAllowed;
+        public Texture2D PedestrianCrossingForbidden;
+
+        /// <summary>Called by the lifecycle when textures are to be loaded.</summary>
+        public override void OnLevelLoading() {
             IntVector2 size = new IntVector2(200);
 
             LaneChangeAllowed = LoadDllResource("JunctionRestrictions.lanechange_allowed.png", size);
@@ -44,6 +48,30 @@ namespace TrafficManager.UI.Textures {
 
             PedestrianCrossingAllowed = LoadDllResource("JunctionRestrictions.crossing_allowed.png", size);
             PedestrianCrossingForbidden = LoadDllResource("JunctionRestrictions.crossing_forbidden.png", size);
+
+            base.OnLevelLoading();
+        }
+
+        /// <summary>Called by the lifecycle when textures are to be unloaded.</summary>
+        public override void OnLevelUnloading() {
+            UnityEngine.Object.Destroy(LaneChangeAllowed);
+            UnityEngine.Object.Destroy(LaneChangeForbidden);
+
+            UnityEngine.Object.Destroy(UturnAllowed);
+            UnityEngine.Object.Destroy(UturnForbidden);
+
+            UnityEngine.Object.Destroy(RightOnRedAllowed);
+            UnityEngine.Object.Destroy(RightOnRedForbidden);
+            UnityEngine.Object.Destroy(LeftOnRedAllowed);
+            UnityEngine.Object.Destroy(LeftOnRedForbidden);
+
+            UnityEngine.Object.Destroy(EnterBlockedJunctionAllowed);
+            UnityEngine.Object.Destroy(EnterBlockedJunctionForbidden);
+
+            UnityEngine.Object.Destroy(PedestrianCrossingAllowed);
+            UnityEngine.Object.Destroy(PedestrianCrossingForbidden);
+
+            base.OnLevelUnloading();
         }
     }
 }

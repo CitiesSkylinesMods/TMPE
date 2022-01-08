@@ -2,6 +2,7 @@ namespace TrafficManager.Util {
     using System;
     using System.Collections.Generic;
     using TrafficManager.Manager.Impl;
+    using TrafficManager.Util.Extensions;
     using static SegmentTraverser;
 
     public class SegmentLaneTraverser {

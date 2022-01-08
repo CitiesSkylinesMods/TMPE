@@ -31,6 +31,7 @@ namespace TrafficManager.UI {
     using static TrafficManager.Util.SegmentTraverser;
     using TrafficManager.UI.Textures;
     using TrafficManager.State.Keybinds;
+    using TrafficManager.Util.Extensions;
 
     [UsedImplicitly]
     public class TrafficManagerTool
@@ -296,6 +297,7 @@ namespace TrafficManager.UI {
             }
 
             SetToolMode_DeactivateTool();
+
             // Try figure out whether legacy subtool or a new subtool is selected
             if (!legacySubTools_.TryGetValue(newToolMode, out activeLegacySubTool_)
                 && !subTools_.TryGetValue(newToolMode, out activeSubTool_)) {
@@ -982,7 +984,7 @@ namespace TrafficManager.UI {
                     RoutingManager.Instance.CalcInnerSimilarLaneIndex(segmentId, i),
                     RoutingManager.Instance.CalcOuterSimilarLaneIndex(segmentId, i),
                     (NetLane.Flags)lanesBuffer[curLaneId].m_flags,
-                    SpeedLimitManager.Instance.GetCustomSpeedLimit(curLaneId).ToString(),
+                    SpeedLimitManager.Instance.CalculateCustomSpeedLimit(curLaneId).ToString(),
                     VehicleRestrictionsManager.Instance.GetAllowedVehicleTypes(
                         segmentId,
                         segmentInfo,
