@@ -171,11 +171,10 @@ namespace TrafficManager.State {
                 return Translation.SpeedLimits.Get($"RoadSignTheme:{themeName}");
             }
 
-            var themeOptions = RoadSignThemes.ThemeNames
-                                                    .Select(FormatThemeName)
-                                                    .ToArray();
-            int selectedThemeIndex = RoadSignThemes.ThemeNames.FindIndex(x => x == roadSignTheme);
-            int defaultSignsThemeIndex = RoadSignThemes.FindDefaultThemeIndex(GlobalConfig.Instance.Main.DisplaySpeedLimitsMph);
+            var themeNames = RoadSignThemes.Instance.ThemeNames;
+            var themeOptions = themeNames.Select(FormatThemeName).ToArray();
+            int selectedThemeIndex = themeNames.FindIndex(x => x == roadSignTheme);
+            int defaultSignsThemeIndex = RoadSignThemes.Instance.FindDefaultThemeIndex(GlobalConfig.Instance.Main.DisplaySpeedLimitsMph);
 
             _roadSignsThemeDropdown
                 = group.AddDropdown(
@@ -183,6 +182,7 @@ namespace TrafficManager.State {
                       options: themeOptions,
                       defaultSelection: selectedThemeIndex >= 0 ? selectedThemeIndex : defaultSignsThemeIndex,
                       eventCallback: OnRoadSignsThemeChanged) as UIDropDown;
+
             _roadSignsThemeDropdown.width *= 2.0f;
         }
 
