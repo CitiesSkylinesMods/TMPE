@@ -10,7 +10,8 @@ namespace TrafficManager.U {
     using TrafficManager.Util;
 
     public static class TextureUtil {
-        public static UITextureAtlas Ingame => FindAtlas("Ingame");
+        public static UITextureAtlas Ingame =>
+            FindAtlasOrNull("Ingame") ?? UIView.GetAView().defaultAtlas;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UITextureAtlas"/> class from resource names list.
@@ -131,10 +132,6 @@ namespace TrafficManager.U {
             ret.Apply();
 
             return ret;
-        }
-
-        public static UITextureAtlas FindAtlas(string name) {
-            return FindAtlasOrNull(name) ?? UIView.GetAView().defaultAtlas;
         }
 
         public static UITextureAtlas FindAtlasOrNull(string name) {
