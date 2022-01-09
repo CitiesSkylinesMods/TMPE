@@ -11,6 +11,7 @@ namespace TrafficManager.UI {
         private IList<UIButton> buttons;
 
         public void Start() {
+            Log._Debug($"{GetType().Name} started.");
             buttons = new List<UIButton>();
 
             var citizenVehicleInfoPanel
@@ -55,6 +56,7 @@ namespace TrafficManager.UI {
             button.AlignTo(panel.component, UIAlignAnchor.TopRight);
             button.relativePosition += new Vector3(-button.width - 55f, 50f);
 
+            Log._Debug($"Added {button} to {panel}");
             return button;
         }
 
