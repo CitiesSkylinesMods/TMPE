@@ -12,6 +12,7 @@ namespace TrafficManager.UI.WhatsNew {
         private const int _defaultWidth = 600;
         private const int _defaultHeight = 450;
         private const string _bulletPointPrefix = " * ";
+        private readonly Color _secondaryTextColor = new Color32(180, 180, 180, 255);
 
         public override void Awake() {
             base.Awake();
@@ -79,31 +80,56 @@ namespace TrafficManager.UI.WhatsNew {
             UILabel title = panel.AddUIComponent<UILabel>();
             title.name = "Title";
             title.text = changelogEntry.Title.TrimStart();
-            title.textScale = isCurrentVersion ? 1.5f : 1.2f;
+            title.textScale = isCurrentVersion ? 1.3f : 1f;
             title.padding = new RectOffset(4, 0, 5, 0);
+            title.textColor = isCurrentVersion ? Color.white : _secondaryTextColor;
 
             UILabel build = panel.AddUIComponent<UILabel>();
             build.name = "BuildLabel";
             build.text = changelogEntry.Version.ToString();
-            build.textScale = isCurrentVersion ? 0.8f : 0.7f;
+            build.textScale = isCurrentVersion ? 0.8f : 0.65f;
+            build.textColor = isCurrentVersion ? Color.white : _secondaryTextColor;
             build.prefix = "v. ";
             build.suffix = isCurrentVersion ? " - current version" : string.Empty;
             build.padding = new RectOffset(6, 5, 0, 12);
 
-            var bulletPadding = new RectOffset(8, 0, 0, 5);
+            var bulletPadding = new RectOffset(7, 0, 0, 5);
             foreach (string text in changelogEntry.BulletPoints) {
-                UILabel point = panel.AddUIComponent<UILabel>();
-                point.name = "ChangelogEntryText";
-                point.prefix = _bulletPointPrefix;
-                point.text = text.TrimStart();
-                point.textScale = isCurrentVersion ? 1f : 0.9f;
-                point.padding = bulletPadding;
+                AddBulletPoint(panel, text, bulletPadding, isCurrentVersion);
             }
 
             UIPanel separator = panel.AddUIComponent<UIPanel>();
             separator.name = "Separator";
             separator.isInteractive = false;
             separator.height = isCurrentVersion ? 50 : 30;
+            panel.autoLayout = true;
+        }
+
+        private void AddBulletPoint(UIComponent parentPanel, string text, RectOffset bulletPadding, bool isCurrentVersion) {
+            // wrapper
+            UIPanel panel = parentPanel.AddUIComponent<UIPanel>();
+            panel.name = "ChangelogEntry";
+            panel.width = _defaultWidth - 10;
+            panel.autoLayoutDirection = LayoutDirection.Horizontal;
+            panel.autoLayoutStart = LayoutStart.TopLeft;
+            panel.autoLayoutPadding = bulletPadding;
+            panel.autoFitChildrenVertically = true;
+            // *
+            UILabel point = panel.AddUIComponent<UILabel>();
+            point.name = "ChangelogEntryPointChar";
+            point.text = _bulletPointPrefix;
+            point.textScale = isCurrentVersion ? 1f : 0.8f;
+            point.textColor = isCurrentVersion ? Color.white : _secondaryTextColor;
+            // text
+            UILabel label = panel.AddUIComponent<UILabel>();
+            label.name = "ChangelogEntryText";
+            label.wordWrap = true;
+            label.text = text.TrimStart();
+            label.textScale = isCurrentVersion ? 1f : 0.8f;
+            label.textColor = isCurrentVersion ? Color.white : _secondaryTextColor;
+            label.autoHeight = this;
+            label.width = _defaultWidth - 65;
+
             panel.autoLayout = true;
         }
 
@@ -158,14 +184,14 @@ namespace TrafficManager.UI.WhatsNew {
             thumbSprite.spriteName = "ScrollbarThumb";
             scrollbar.thumbObject = thumbSprite;
 
-            scrollbar.eventValueChanged += (component, value) => scrollablePanel.scrollPosition = new Vector2(0, value);
+            scrollbar.eventValueChanged += (_, value) => scrollablePanel.scrollPosition = new Vector2(0, value);
 
-            parentComponent.eventMouseWheel += (component, eventParam) =>
+            parentComponent.eventMouseWheel += (_, eventParam) =>
             {
                 scrollbar.value -= (int)eventParam.wheelDelta * scrollbar.incrementAmount;
             };
 
-            scrollablePanel.eventMouseWheel += (component, eventParam) =>
+            scrollablePanel.eventMouseWheel += (_, eventParam) =>
             {
                 scrollbar.value -= (int)eventParam.wheelDelta * scrollbar.incrementAmount;
             };

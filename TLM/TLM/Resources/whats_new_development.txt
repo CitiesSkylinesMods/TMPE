@@ -1,20 +1,129 @@
 [version]
+[number] 11.6.3.0
+[title] Traffic Manager 11.6.3
+[*] What's New panel #118
+[*] <to be added>
+[/version]
+
+[version]
 [number] 11.6.2.0
-[title] Title Text 1
-[*] Point 1
-[*] Point 2
-[*] Point 3
-[*] Point 4
-[*] Point 5
-[*] Point 6
-[*] Point 7
-[*] Point 8
-[*] Point 9
+[title] Traffic Manager 11.6.2 (8/Jan/2022)
+[*] New Speed Limits UI #1168
+[*] Road sign themes reloadable + Canadian signs #1215
+[*] New countries for speed limit designs #1260
+[*] Apply default speed limits to all elevations #1233
+[*] More API methods #1209
+[*] fixed: regression: Auto TTL should set-up dedicated turning lanes properly #1242
+[*] fixed: fix position of lane arrow tool for different resolutions. #1237
+[*] fixed: update routings after modifying dedicated turning lanes policy #1236
+[*] fixed: checkbox label text wrap for some very long options #1232
+[*] fixed: update SPEED_TO_MPH constant to correct value #1224
+[*] fixed: fixed JRM transparency #1217
+[*] fixed: U-turn policy on T junctions #1212
+[*] fixed: routing manager lane connection check #1210
+[*] fixed: recalculation after lane connection remove #1199
+[*] fixed: priority signs tool not working #1189
+[*] fixed: improved lifecycle of TMPE tool #1188
+[*] fixed: Trains are not counted as waiting at timed traffic lights at rail junctions #1184, #1173
+[*] fixed: update UUI version #1182
+[*] updated: mod compatibility: Replace hardcoded CitizenUnit buffer limits with buffer size detection #1192
+[*] updated: mod compatibility: Incompatible detector improvements, CSMultiplayer marked as incompatible #1196
+[*] updated: code clean up: Netutil cleanup #1273, Sl-cleanup #1275, Static texture classes are now proper CustomManagers #1265
+[*] updated: performance improvements: GetNode/Segment -> ToNode/Segment #1202, Refactoring/buffer to extension methods #1203, Converted almost all .m_segments.m_buffer[segmentId] calls to segment… #1204, Removed NetService and the GameBridge stuff #1194
+[*] updated: improvements with regards to memory efficiency, performance and overall code readability (Removed the ProcessCitizen and the CitizenHandler #1169, Switched from CO.IsFlagSet to Kian's IsFlagSet. #1186)
+[/version]
+
+[version]
+[number] 11.6.1.3
+[title] Traffic Manager 11.6.1.3 (14/Oct/2021)
+[*] fixed: cannot setup timed traffic lights on monorail nodes (#1160)
+[*] fixed: despawn off not working as expected (#1148)
+[*] updated: minor performance, memory efficiency improvements (#1161, #1162, #1164, #1165, thanks Egi)
+[/version]
+
+[version]
+[number] 11.6.1.2
+[title] Traffic Manager 11.6.1.2 (21/Sep/2021)
+[*] added: UnifiedUI mod integration, configuable in the mod options (#1153, thanks Kian)
+[*] added: GUI scaling for Traffic Lights and Speed Limits GUI (#1152 #1157, thanks Kian)
+[*] added: configurable TMPE.log path (#1151, thanks Kian)
+[*] fixed: reduced garbage memory generation (#1159, thanks Krzychu)
+[*] updated: internal performance improvements to lane iterations (#1156, thanks Egi)
+[*] updated: internal changes in handling invalid segments (#1154, thanks Egi)
+[*] updated: internal changes to building service ($1150, thanks Egi)
+[*] updated: performance improvements to Speed Limits GUI (#1149, thanks Egi)
+[/version]
+
+[version]
+[number] 11.6.1.1
+[title] Traffic Manager 11.6.1.1 (25/Aug/2021)
+[*] fixed: Comunity Content Pack detection (latest DLCs - Train Stations and Bridges & Piers)
+[*] fixed: incorrect height of vehicle restriction overlay when clicked on the water dam,
+[*] fixed: refreshing dedicated turning lanes after loading a savegame,
+[*] fixed: custom path-finding initialization and patching - rewritten execution flow,
+[*] updated: internal changes to speed limits code as part of changes required by new Speed Limits UI
 [/version]
 
 [version]
 [number] 11.6.1.0
-[title] Title Text 2
-[*] Point 1
-[*] Point 2
+[title] Traffic Manager 11.6.1.0 (10/Aug/2021)
+[*] added/updated: Indonesian translation, updates for other languages,
+[*] added: first version of Notifier API for use by other mods,
+[*] fixed: infinite loop when using shift modifier while changing speed limits,
+[*] fixed: overlay transparency and UI opacity settings,
+[*] fixed: half-segment detection when using lane arrow tool,
+[/version]
+
+[version]
+[number] 11.6.0.3
+[title] Traffic Manager 11.6.0.3 (17/Jun/2021)
+[*] fixed: rare bug preventing calculation of segment lane routings (invalid node/segment connection - unknown cause)
+[*] updated: custom PathFind performance improvements, lifted limit of threads for 8t+ CPUs, reduced simulation thread sleep multiplier for long pathfind queues,
+[/version]
+
+[version]
+[number] 11.6.0.2
+[title] Traffic Manager 11.6.0.2 (8/Jun/2021)
+[*] updated: lane connector tool improvements (new shape, changed interactions in over/under-ground mode) (#985, #282)
+[*] updated: performance improvements in network flag detection (#1118, thanks Kian!)
+[*] fixed: vehicle/cim path invalidation after loading savegame (#1117)
+[*] fixed: reloading textures with translation (Chinere priority signs/TTL) (#1121, #1099, thanks @TianQiBuTian for spotting the issue)
+[/version]
+
+[version]
+[number] 11.6.0.1
+[title] Traffic Manager 11.6.0.1 (28/May/2021)
+[*] hotfixes for Barges(Cargo Ferries)
+[*] hotfixes for Movable Bridge
+[*] unified alternative path position with 81-Tiles
+[/version]
+
+[version]
+[number] 11.6.0.0
+[title] Traffic Manager 11.6.0.0 (16/May/2021)
+[*] Full migration to Harmony - slight performance decrease
+[*] Map/Asset/Intersection Editor support
+[*] MoveIt copy&paste support (TimedTL not supported yet)
+[*] added: Priority signs - added Chinese textures (thanks TianQiBuTian!) (#1081)
+[*] added: Pedestrian crossing - no double crossing policy (thanks Kian!) (#936, #1003)
+[*] added: Dedicated turning lane policy for bus lanes (#1102, #1104),
+[*] added: Undo features for roundabouts and priority roads (#863, #860)
+[*] added: Roundabout setup - speeds based on road curvature (thanks scottmcm!) (#863, #793)
+[*] added: Roundabout setup - ban parking in/near roundabout (#863, #578)
+[*] added: Roundabout setup - allow/disallow enter blocked junction (#863, #578)
+[*] improved: Shift+Click speed limit on whole roundabout (thanks thebugfixnet for idea!) (#920, #869)
+[*] improved: GenericObservable - use locks; re-use existing list to reduce gc (thanks egi!) (#909)
+[*] improved: Parking AI and Pathfinder use cached spiral grid coords (thanks egi!) (#906)
+[*] improved: Bezier accuracy of lane overlays (thanks MacSergey for spotting!) (#932)
+[*] improved: Lane Connector tool performance (thanks egi!) (#1085)
+[*] improved: Compatibility with BloodyPenguin's Barges mod (#1103)
+[*] fixed: PostVanAI compatibility with 81 Tiles mod (#943, #895)
+[*] fixed: Stay-in-lane for MOM mod metro tracks (#919)
+[*] fixed: TMPE state changes after using free camera mode (thanks Biffa for spotting!) (#938)
+[*] fixed: Typo in priority roads tooltip locale id (thanks TianQiBuTian!) (#904)
+[*] updated: Icons for RoadSelectionPanel to optimized 8bit (thanks Chamëleon!) (#984)
+[*] updated: Spiral grid coords caching to reduce gc and improve performance (thanks egi!) (#906)
+[*] updated: Simplified spawn/despawn patches to Harmony prefixes (#943, #921, #864, #462)
+[*] updated: Improved Harmony error reporting (#933)
+[*] updated: Translation update - new languages: Arabic, Thai, Slovak
 [/version]
