@@ -113,11 +113,11 @@ namespace TrafficManager.UI.WhatsNew {
             _header.relativePosition = Vector2.zero;
 
             var title = _header.AddUIComponent<UILabel>();
-            title.text = "What's new in TM:PE";
             title.textScale = 1.35f;
             title.anchor = UIAnchorStyle.Top;
             title.textAlignment = UIHorizontalAlignment.Center;
             title.eventTextChanged += (_, _) => title.CenterToParent();
+            title.text = "What's new in TM:PE";
             title.MakePixelPerfect();
 
             var cancel = _header.AddUIComponent<UIButton>();
