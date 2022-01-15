@@ -9,6 +9,8 @@ namespace TrafficManager.Lifecycle {
     using TrafficManager.API.Manager;
     using TrafficManager.Manager.Impl;
     using TrafficManager.State;
+    using UI.WhatsNew;
+    using Util;
 
     [UsedImplicitly]
     public class SerializableDataExtension
@@ -272,6 +274,18 @@ namespace TrafficManager.Lifecycle {
             } else {
                 Log.Info("Segment-at-node structure undefined!");
             }
+
+            if (_configuration.VersionInfo != null) {
+                Log.Info($"Save game was created with TM:PE {_configuration.VersionInfo.assemblyVersion} - {_configuration.VersionInfo.releaseType}");
+                Log.Info($"Last What's new panel version: {_configuration.VersionInfo.lastWhatsNewVersion} (null - not shown or pre 11.6.2+), " +
+                         $"current What's New panel version: {WhatsNew.CurrentVersion}");
+                if (_configuration.VersionInfo.lastWhatsNewVersion != null &&
+                    WhatsNew.CurrentVersion <= _configuration.VersionInfo.lastWhatsNewVersion) {
+                    TMPELifecycle.Instance.WhatsNew.MarkAsShown();
+                }
+            } else {
+                Log.Info("Version info undefined!");
+            }
         }
 
         public static void Save() {
@@ -352,6 +366,17 @@ namespace TrafficManager.Lifecycle {
                 //------------------
                 configuration.LaneAllowedVehicleTypes = VehicleRestrictionsManager.Instance.SaveData(ref success);
                 configuration.ParkingRestrictions = ParkingRestrictionsManager.Instance.SaveData(ref success);
+
+                //------------------
+                // Version
+                //------------------
+                configuration.VersionInfo =
+                    new Configuration.VersionInfoData(VersionUtil.ModVersion) {
+                        // set current version if panel was shown otherwise set previous value
+                        lastWhatsNewVersion = TMPELifecycle.Instance.WhatsNew.Shown
+                                                  ? WhatsNew.CurrentVersion
+                                                  : _configuration.VersionInfo.lastWhatsNewVersion
+                    };
 
                 try {
                     // save options

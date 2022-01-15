@@ -414,6 +414,8 @@
     <Compile Include="UI\TrafficManagerSubTool.cs" />
     <Compile Include="UI\TransportDemandViewMode.cs" />
     <Compile Include="UI\UITransportDemand.cs" />
+    <Compile Include="UI\WhatsNew\WhatsNew.cs" />
+    <Compile Include="UI\WhatsNew\WhatsNewPanel.cs" />
     <Compile Include="Util\AutoTimedTrafficLights.cs" />
     <Compile Include="Util\Extensions\BuildingExtensions.cs" />
     <Compile Include="Util\Extensions\CitizenExtensions.cs" />
