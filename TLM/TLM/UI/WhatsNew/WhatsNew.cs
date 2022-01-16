@@ -5,6 +5,7 @@ namespace TrafficManager.UI.WhatsNew {
     using System.Reflection;
     using ColossalFramework.UI;
     using CSUtil.Commons;
+    using JetBrains.Annotations;
 
     public class WhatsNew {
 #if TEST || DEBUG
@@ -16,6 +17,7 @@ namespace TrafficManager.UI.WhatsNew {
         internal const string VERSION_START = "[version]";
         internal const string VERSION_NUMBER = "[number]";
         internal const string VERSION_TITLE = "[title]";
+        internal const string VERSION_LINK = "[link]";
         internal const string BULLET_POINT = "[*]";
 
         // bump and update what's new changelogs when new features added
@@ -66,6 +68,8 @@ namespace TrafficManager.UI.WhatsNew {
     public class ChangelogEntry {
         public Version Version { get; private set; }
         public string Title { get; private set; }
+        [CanBeNull]
+        public string Link { get; private set; }
         public string[] BulletPoints { get; private set; }
 
         public static List<ChangelogEntry> ParseChangelogs(string[] lines) {
@@ -74,13 +78,21 @@ namespace TrafficManager.UI.WhatsNew {
             int i = 0;
             while (i < lines.Length) {
                 string line = lines[i];
+                // reading [version]...
                 if (line.StartsWith(WhatsNew.VERSION_START)) {
                     ChangelogEntry entry = new ChangelogEntry();
+                    // reading [number]...
                     entry.Version = new Version(lines[++i].Substring(WhatsNew.VERSION_NUMBER.Length));
+                    // reading [title]...
                     entry.Title = lines[++i].Substring(WhatsNew.VERSION_TITLE.Length);
+                    // reading [link] (optional)...
+                    if (lines[i + 1].StartsWith(WhatsNew.VERSION_LINK)) {
+                        entry.Link = lines[++i].Substring(WhatsNew.VERSION_LINK.Length).Trim();
+                    }
                     i++;
                     points.Clear();
                     while (lines[i].StartsWith(WhatsNew.BULLET_POINT)) {
+                        // reading [*]...
                         points.Add(lines[i++].Substring(WhatsNew.BULLET_POINT.Length));
                     }
 
