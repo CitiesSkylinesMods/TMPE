@@ -13,6 +13,9 @@ namespace TrafficManager.UI.WhatsNew {
         private const int _defaultHeight = 450;
         private const string _bulletPointPrefix = " * ";
         private readonly Color _secondaryTextColor = new Color32(180, 180, 180, 255);
+        private readonly Color _linkSecondaryTextColor = new Color(0f, 0.43f, 0.86f);
+        private readonly Color _linkTextColorHover = new Color32(158, 219, 255, 255);
+        private readonly Color _linkTextColor = new Color(0f, 0.52f, 1f);
 
         public override void Awake() {
             base.Awake();
@@ -83,6 +86,9 @@ namespace TrafficManager.UI.WhatsNew {
             title.textScale = isCurrentVersion ? 1.3f : 1f;
             title.padding = new RectOffset(4, 0, 5, 0);
             title.textColor = isCurrentVersion ? Color.white : _secondaryTextColor;
+            if (!string.IsNullOrEmpty(changelogEntry.Link)) {
+                SetupLink(title, changelogEntry, isCurrentVersion);
+            }
 
             UILabel build = panel.AddUIComponent<UILabel>();
             build.name = "BuildLabel";
@@ -103,6 +109,15 @@ namespace TrafficManager.UI.WhatsNew {
             separator.isInteractive = false;
             separator.height = isCurrentVersion ? 50 : 30;
             panel.autoLayout = true;
+        }
+
+        private void SetupLink(UILabel title, ChangelogEntry changelogEntry, bool isCurrentVersion) {
+            string url = $"https://github.com/CitiesSkylinesMods/TMPE/blob/master/CHANGELOG.md#{changelogEntry.Link}";
+            title.tooltip = url;
+            title.textColor = isCurrentVersion ? _linkTextColor : _linkSecondaryTextColor;
+            title.eventMouseEnter += (label, _) => ((UILabel)label).textColor = _linkTextColorHover;
+            title.eventMouseLeave += (label, _) => ((UILabel)label).textColor = isCurrentVersion ? _linkTextColor : _linkSecondaryTextColor;
+            title.eventClicked += (_, _) => Application.OpenURL(url);
         }
 
         private void AddBulletPoint(UIComponent parentPanel, string text, RectOffset bulletPadding, bool isCurrentVersion) {
