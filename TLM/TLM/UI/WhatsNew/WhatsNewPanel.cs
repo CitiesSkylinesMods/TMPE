@@ -9,11 +9,14 @@ namespace TrafficManager.UI.WhatsNew {
     public class WhatsNewPanel : UIPanel {
         private UIDragHandle _header;
         private UIPanel _footerPanel;
-        private const int _defaultWidth = 600;
-        private const int _defaultHeight = 450;
-        private const string _bulletPointPrefix = " * ";
-        private readonly Color _secondaryTextColor = new Color32(180, 180, 180, 255);
-        private readonly Color _linkSecondaryTextColor = new Color(0f, 0.43f, 0.86f);
+        private const int _defaultWidth = 750;
+        private const int _defaultHeight = 500;
+
+        private readonly RectOffset _paddingZero = new RectOffset(0, 0, 0, 0);
+        private readonly RectOffset _pillTextPadding = new RectOffset(0, 0, 5, 0);
+        private readonly RectOffset _bulletListPadding = new RectOffset(8, 0, 0, 0);
+        private readonly Color32 _panelBgColor = new Color32(36,41,46, 255);
+        private readonly Color32 _textColor = new Color32(220, 220, 220, 255);
         private readonly Color _linkTextColorHover = new Color32(158, 219, 255, 255);
         private readonly Color _linkTextColor = new Color(0f, 0.52f, 1f);
 
@@ -25,8 +28,8 @@ namespace TrafficManager.UI.WhatsNew {
             isInteractive = true;
             anchor = UIAnchorStyle.Left | UIAnchorStyle.Top | UIAnchorStyle.Proportional;
             size = new Vector2(_defaultWidth, _defaultHeight);
-            backgroundSprite = "UnlockingPanel2";
-            color = new Color32(110, 150, 180, 255);
+            backgroundSprite = "GenericPanel";
+            color = _panelBgColor;
 
             AddHeader();
             AddFooter();
@@ -57,7 +60,7 @@ namespace TrafficManager.UI.WhatsNew {
             content.autoLayoutDirection = LayoutDirection.Vertical;
             content.scrollWheelDirection = UIOrientation.Vertical;
             content.clipChildren = true;
-            content.autoLayoutPadding = new RectOffset();
+            content.autoLayoutPadding = new RectOffset(0, 0, 10, 5);
             content.autoReset = true;
             content.size = new Vector2(_defaultWidth - 20, _defaultHeight - _header.height - _footerPanel.height);
             AddScrollbar(panel, content);
@@ -71,81 +74,119 @@ namespace TrafficManager.UI.WhatsNew {
         }
 
         private void AddChangelogEntry(ChangelogEntry changelogEntry, UIScrollablePanel uiScrollablePanel) {
-            UIPanel panel = uiScrollablePanel.AddUIComponent<UIPanel>();
-            panel.width = _defaultWidth - 5;
-            panel.autoLayoutDirection = LayoutDirection.Vertical;
-            panel.autoLayoutStart = LayoutStart.TopLeft;
-            panel.autoLayoutPadding = new RectOffset(5, 0, 0, 6);
-            panel.autoFitChildrenVertically = true;
+            UIPanel panel = AddRowAutoLayoutPanel(parentPanel: uiScrollablePanel,
+                                                  panelPadding: new RectOffset(5, 0, 0, 6),
+                                                  panelWidth: _defaultWidth - 5,
+                                                  vertical: true);
 
-            bool isCurrentVersion = WhatsNew.CurrentVersion.Equals(changelogEntry.Version);
+            AddVersionRow(panel, changelogEntry);
 
-            UILabel title = panel.AddUIComponent<UILabel>();
-            title.name = "Title";
-            title.text = changelogEntry.Title.TrimStart();
-            title.textScale = isCurrentVersion ? 1.3f : 1f;
-            title.padding = new RectOffset(4, 0, 5, 0);
-            title.textColor = isCurrentVersion ? Color.white : _secondaryTextColor;
-            if (!string.IsNullOrEmpty(changelogEntry.Link)) {
-                SetupLink(title, changelogEntry, isCurrentVersion);
+            foreach (ChangelogEntry.ChangeEntry changeEntry in changelogEntry.ChangeEntries) {
+                AddBulletPoint(panel, changeEntry, _bulletListPadding);
             }
 
-            UILabel build = panel.AddUIComponent<UILabel>();
-            build.name = "BuildLabel";
-            build.text = changelogEntry.Version.ToString();
-            build.textScale = isCurrentVersion ? 0.8f : 0.65f;
-            build.textColor = isCurrentVersion ? Color.white : _secondaryTextColor;
-            build.prefix = "v. ";
-            build.suffix = isCurrentVersion ? " - current version" : string.Empty;
-            build.padding = new RectOffset(6, 5, 0, 12);
-
-            var bulletPadding = new RectOffset(7, 0, 0, 5);
-            foreach (string text in changelogEntry.BulletPoints) {
-                AddBulletPoint(panel, text, bulletPadding, isCurrentVersion);
-            }
-
-            UIPanel separator = panel.AddUIComponent<UIPanel>();
-            separator.name = "Separator";
-            separator.isInteractive = false;
-            separator.height = isCurrentVersion ? 50 : 30;
+            AddSeparator(panel);
             panel.autoLayout = true;
         }
 
-        private void SetupLink(UILabel title, ChangelogEntry changelogEntry, bool isCurrentVersion) {
+        private void AddSeparator(UIComponent parentPanel) {
+            UIPanel separator = parentPanel.AddUIComponent<UIPanel>();
+            separator.name = "Separator";
+            separator.isInteractive = false;
+            separator.height = 30;
+        }
+
+        private void AddVersionRow(UIComponent parentPanel, ChangelogEntry changelogEntry) {
+            bool isCurrentVersion = WhatsNew.CurrentVersion.Equals(changelogEntry.Version);
+            // row: [version number] released xyz
+            UIPanel versionRow = AddRowAutoLayoutPanel(parentPanel: parentPanel,
+                                                       panelPadding: _paddingZero,
+                                                       panelWidth: _defaultWidth - 10);
+            versionRow.maximumSize = new Vector2(_defaultWidth - 10, 36);
+
+            // part: [version number]
+            UILabel versionLabel = AddKeywordLabel(versionRow, changelogEntry.Version.ToString(), MarkupKeyword.VersionStart);
+            versionLabel.name = "Version";
+            // part released xyz
+            UILabel title = versionRow.AddUIComponent<UILabel>();
+            title.name = "Released";
+            title.text = string.IsNullOrEmpty(changelogEntry.Released) ? "Not released yet" : changelogEntry.Released.TrimStart();
+            title.suffix = isCurrentVersion ? " - current version" : string.Empty;
+            title.textScale = 1.3f;
+            title.textColor = _textColor;
+            title.minimumSize = new Vector2(0, 36);
+            title.padding = new RectOffset(16, 0, 0, 0);
+            title.verticalAlignment = UIVerticalAlignment.Middle;
+            if (!string.IsNullOrEmpty(changelogEntry.Link)) {
+                SetupLink(title, changelogEntry);
+            }
+
+            versionRow.autoLayout = true;
+        }
+
+        private void SetupLink(UILabel title, ChangelogEntry changelogEntry) {
             string url = $"https://github.com/CitiesSkylinesMods/TMPE/blob/master/CHANGELOG.md#{changelogEntry.Link}";
             title.tooltip = url;
-            title.textColor = isCurrentVersion ? _linkTextColor : _linkSecondaryTextColor;
+            title.textColor = _linkTextColor;
             title.eventMouseEnter += (label, _) => ((UILabel)label).textColor = _linkTextColorHover;
-            title.eventMouseLeave += (label, _) => ((UILabel)label).textColor = isCurrentVersion ? _linkTextColor : _linkSecondaryTextColor;
+            title.eventMouseLeave += (label, _) => ((UILabel)label).textColor = _linkTextColor;
             title.eventClicked += (_, _) => Application.OpenURL(url);
         }
 
-        private void AddBulletPoint(UIComponent parentPanel, string text, RectOffset bulletPadding, bool isCurrentVersion) {
-            // wrapper
-            UIPanel panel = parentPanel.AddUIComponent<UIPanel>();
+        private void AddBulletPoint(UIComponent parentPanel, ChangelogEntry.ChangeEntry changeEntry, RectOffset bulletPadding) {
+            // row: [keyword] text what has been changed
+            UIPanel panel = AddRowAutoLayoutPanel(parentPanel: parentPanel,
+                                                  panelPadding: bulletPadding,
+                                                  panelWidth: _defaultWidth - 10);
             panel.name = "ChangelogEntry";
-            panel.width = _defaultWidth - 10;
-            panel.autoLayoutDirection = LayoutDirection.Horizontal;
-            panel.autoLayoutStart = LayoutStart.TopLeft;
-            panel.autoLayoutPadding = bulletPadding;
-            panel.autoFitChildrenVertically = true;
-            // *
-            UILabel point = panel.AddUIComponent<UILabel>();
-            point.name = "ChangelogEntryPointChar";
-            point.text = _bulletPointPrefix;
-            point.textScale = isCurrentVersion ? 1f : 0.8f;
-            point.textColor = isCurrentVersion ? Color.white : _secondaryTextColor;
-            // text
+            panel.padding = new RectOffset(20, 0, 0, 0);
+            // part: [fixed/updated/removed]
+            AddKeywordLabel(panel, changeEntry.Keyword.ToString(), changeEntry.Keyword);
+            // part: text
             UILabel label = panel.AddUIComponent<UILabel>();
             label.name = "ChangelogEntryText";
             label.wordWrap = true;
-            label.text = text.TrimStart();
-            label.textScale = isCurrentVersion ? 1f : 0.8f;
-            label.textColor = isCurrentVersion ? Color.white : _secondaryTextColor;
-            label.autoHeight = this;
-            label.width = _defaultWidth - 65;
-
+            label.text = changeEntry.Text;
+            label.textScale = 0.8f;
+            label.textColor = _textColor;
+            label.autoHeight = true;
+            label.width = _defaultWidth - 140;
+            label.minimumSize = new Vector2(0, 25);
+            label.verticalAlignment = UIVerticalAlignment.Middle;
+            // update layout
             panel.autoLayout = true;
+        }
+
+        private UILabel AddKeywordLabel(UIPanel panel, string text, MarkupKeyword keyword) {
+            bool isVersion = keyword == MarkupKeyword.VersionStart;
+            UILabel label = panel.AddUIComponent<UILabel>();
+            label.name = "ChangelogEntryKeyword";
+            label.text = text.ToUpper();
+            label.textScale = isVersion ? 1.2f : 0.7f;
+            label.textColor = Color.white;
+            label.backgroundSprite = "ButtonWhite";
+            label.colorizeSprites = true;
+            label.color = WhatsNewMarkup.GetColor(keyword);
+            label.minimumSize = isVersion
+                                    ? new Vector2(75, 36)
+                                    : new Vector2(85, 20);
+            label.textAlignment = UIHorizontalAlignment.Center;
+            label.verticalAlignment = UIVerticalAlignment.Middle;
+            label.padding = _pillTextPadding;
+
+            return label;
+        }
+
+        private UIPanel AddRowAutoLayoutPanel(UIComponent parentPanel, RectOffset panelPadding, float panelWidth, bool vertical = false) {
+            UIPanel panel = parentPanel.AddUIComponent<UIPanel>();
+            panel.autoLayout = false;
+            panel.autoLayoutDirection = vertical ? LayoutDirection.Vertical : LayoutDirection.Horizontal;
+            panel.autoLayoutStart = LayoutStart.TopLeft;
+            panel.autoLayoutPadding = panelPadding;
+            panel.autoFitChildrenVertically = true;
+            panel.autoFitChildrenHorizontally = true;
+            panel.width = panelWidth;
+            return panel;
         }
 
         private void AddHeader() {
