@@ -26,10 +26,10 @@ namespace TrafficManager.UI.WhatsNew {
             { MarkupKeyword.Removed, "[Removed]" },
         };
 
-        public static readonly Color32 FixedOrUpdatedColor = new Color32(3,102,214, 255);
-        public static readonly Color32 NewOrAddedColor = new Color32(40,167,69, 255);
-        public static readonly Color32 RemovedColor = new Color32(215,58,73, 255);
-        public static readonly Color32 VersionColor = new Color32(111,66,193, 255);
+        public static readonly Color32 FixedOrUpdatedColor = new Color32(3, 106, 225, 255);
+        public static readonly Color32 NewOrAddedColor = new Color32(40, 178, 72, 255);
+        public static readonly Color32 RemovedColor = new Color32(224, 61, 76, 255);
+        public static readonly Color32 VersionColor = new Color32(119, 69, 204, 255);
 
         public static Color32 GetColor(MarkupKeyword keyword) {
             switch (keyword) {

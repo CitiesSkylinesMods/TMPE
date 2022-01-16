@@ -15,7 +15,7 @@ namespace TrafficManager.UI.WhatsNew {
         private readonly RectOffset _paddingZero = new RectOffset(0, 0, 0, 0);
         private readonly RectOffset _pillTextPadding = new RectOffset(0, 0, 5, 0);
         private readonly RectOffset _bulletListPadding = new RectOffset(8, 0, 0, 0);
-        private readonly Color32 _panelBgColor = new Color32(36,41,46, 255);
+        private readonly Color32 _panelBgColor = new Color32(55, 55, 55, 255);
         private readonly Color32 _textColor = new Color32(220, 220, 220, 255);
         private readonly Color _linkTextColorHover = new Color32(158, 219, 255, 255);
         private readonly Color _linkTextColor = new Color(0f, 0.52f, 1f);
@@ -164,7 +164,7 @@ namespace TrafficManager.UI.WhatsNew {
             label.text = text.ToUpper();
             label.textScale = isVersion ? 1.2f : 0.7f;
             label.textColor = Color.white;
-            label.backgroundSprite = "ButtonWhite";
+            label.backgroundSprite = "TextFieldPanel";
             label.colorizeSprites = true;
             label.color = WhatsNewMarkup.GetColor(keyword);
             label.minimumSize = isVersion
@@ -263,9 +263,7 @@ namespace TrafficManager.UI.WhatsNew {
         private void HandleClose() {
             if (!gameObject) return;
 
-            if (TMPELifecycle.Instance.IsGameLoaded) {
-                TMPELifecycle.Instance.WhatsNew.MarkAsShown();
-            }
+            TMPELifecycle.Instance.WhatsNew.MarkAsShown();
 
             if (UIView.GetModalComponent() == this) {
                 UIView.PopModal();
