@@ -1,14 +1,12 @@
-[version]
-[number] 11.6.2.0
-[title] Traffic Manager 11.6.2
-[*] New speed limits panel and icon themes
-[*] Default speeds massively improved
-[*] Additional roundabout policies in settings
-[*] New dedicated turning lanes policy in settings
-[*] Map/Asset editor support
-[*] Accurate lane connector lines
-[*] Move It! mod integration
-[*] New languages: Arabic, Indonesian, Slovak, Thai
-[*] Pathfinder can use more threads on modern CPUs
-[*] 100+ bug fixes and performance improvements
-[/version]
+[Version] 11.6.2.0
+[New] New speed limits panel and icon themes
+[New] Default speeds massively improved
+[New] Additional roundabout policies in settings
+[New] New dedicated turning lanes policy in settings
+[New] Map/Asset editor support
+[New] Accurate lane connector lines
+[New] Move It! mod integration
+[Updated] New languages: Arabic, Indonesian, Slovak, Thai
+[New] Pathfinder can use more threads on modern CPUs
+[Fixed] 100+ bug fixes and performance improvements
+[/Version]

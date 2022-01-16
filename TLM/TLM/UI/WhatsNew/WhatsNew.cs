@@ -14,11 +14,6 @@ namespace TrafficManager.UI.WhatsNew {
         private const string INCOMPATIBLE_MODS_FILE = "whats_new_stable.txt";
 #endif
         private const string RESOURCES_PREFIX = "TrafficManager.Resources.";
-        internal const string VERSION_START = "[version]";
-        internal const string VERSION_NUMBER = "[number]";
-        internal const string VERSION_TITLE = "[title]";
-        internal const string VERSION_LINK = "[link]";
-        internal const string BULLET_POINT = "[*]";
 
         // bump and update what's new changelogs when new features added
         internal static readonly Version CurrentVersion = new Version(11,6,2, 0);
@@ -67,37 +62,58 @@ namespace TrafficManager.UI.WhatsNew {
 
     public class ChangelogEntry {
         public Version Version { get; private set; }
-        public string Title { get; private set; }
         [CanBeNull]
         public string Link { get; private set; }
-        public string[] BulletPoints { get; private set; }
+        [CanBeNull]
+        public string Released { get; private set; }
+        public ChangeEntry[] ChangeEntries { get; private set; }
 
         public static List<ChangelogEntry> ParseChangelogs(string[] lines) {
             List<ChangelogEntry> entries = new List<ChangelogEntry>();
-            List<string> points = new List<string>();
             int i = 0;
+            var keywordStrings = WhatsNewMarkup.MarkupKeywordsString;
             while (i < lines.Length) {
                 string line = lines[i];
-                // reading [version]...
-                if (line.StartsWith(WhatsNew.VERSION_START)) {
-                    ChangelogEntry entry = new ChangelogEntry();
-                    // reading [number]...
-                    entry.Version = new Version(lines[++i].Substring(WhatsNew.VERSION_NUMBER.Length));
-                    // reading [title]...
-                    entry.Title = lines[++i].Substring(WhatsNew.VERSION_TITLE.Length);
-                    // reading [link] (optional)...
-                    if (lines[i + 1].StartsWith(WhatsNew.VERSION_LINK)) {
-                        entry.Link = lines[++i].Substring(WhatsNew.VERSION_LINK.Length).Trim();
-                    }
-                    i++;
-                    points.Clear();
-                    while (lines[i].StartsWith(WhatsNew.BULLET_POINT)) {
-                        // reading [*]...
-                        points.Add(lines[i++].Substring(WhatsNew.BULLET_POINT.Length));
+
+                if (TryParseKeyword(line, out MarkupKeyword lineKeyword) && lineKeyword == MarkupKeyword.VersionStart) {
+                    ChangelogEntry changelog = new ChangelogEntry();
+                    // read version
+                    changelog.Version = new Version(lines[i++].Substring(keywordStrings[MarkupKeyword.VersionStart].Length).Trim());
+
+                    //get next line keyword
+                    TryParseKeyword(lines[i], out lineKeyword);
+                    // parse to the end of version section
+                    List<ChangeEntry> changeEntries = new List<ChangeEntry>();
+                    while (lineKeyword != MarkupKeyword.VersionEnd) {
+                        string text = lines[i].Substring(keywordStrings[lineKeyword].Length).Trim();
+                        Log.Info($"Keyword {lineKeyword}, text: {text}");
+                        switch (lineKeyword) {
+                            case MarkupKeyword.Link:
+                                changelog.Link = text;
+                                break;
+                            case MarkupKeyword.Released:
+                                changelog.Released = text;
+                                break;
+                            case MarkupKeyword.Unknown:
+                                //skip unknown entries
+                                break;
+                            default:
+                                changeEntries.Add(
+                                    new ChangeEntry() {
+                                        Keyword = lineKeyword,
+                                        Text = text
+                                    });
+                                break;
+                        }
+
+                        i++;
+                        TryParseKeyword(lines[i], out lineKeyword);
                     }
 
-                    entry.BulletPoints = points.ToArray();
-                    entries.Add(entry);
+
+                    changelog.ChangeEntries = changeEntries.ToArray();
+                    Array.Sort(changelog.ChangeEntries, ChangeEntry.KeywordComparer);
+                    entries.Add(changelog);
                 }
 
                 i++;
@@ -106,5 +122,32 @@ namespace TrafficManager.UI.WhatsNew {
             return entries;
         }
 
+        private static bool TryParseKeyword(string line, out MarkupKeyword keyword) {
+            if (!string.IsNullOrEmpty(line)) {
+                if(line.StartsWith("[") &&
+                    WhatsNewMarkup.MarkupKeywords.TryGetValue(
+                        line.Substring(0, line.IndexOf("]") + 1),
+                        out keyword)) {
+                    return true;
+                }
+                Log.Warning($"Couldn't parse line \"{line}\"");
+            }
+
+            keyword = MarkupKeyword.Unknown;
+            return false;
+        }
+
+        public struct ChangeEntry {
+            public MarkupKeyword Keyword;
+            public string Text;
+
+            private sealed class KeywordRelationalComparer : IComparer<ChangeEntry> {
+                public int Compare(ChangeEntry x, ChangeEntry y) {
+                    return x.Keyword.CompareTo(y.Keyword);
+                }
+            }
+
+            public static IComparer<ChangeEntry> KeywordComparer { get; } = new KeywordRelationalComparer();
+        }
     }
 }
