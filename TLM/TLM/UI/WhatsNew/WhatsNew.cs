@@ -11,9 +11,9 @@ namespace TrafficManager.UI.WhatsNew {
 
     public class WhatsNew {
 #if TEST || DEBUG
-        private const string INCOMPATIBLE_MODS_FILE = "whats_new_development.txt";
+        private const string WHATS_NEW_FILE = "whats_new_development.txt";
 #else
-        private const string INCOMPATIBLE_MODS_FILE = "whats_new_stable.txt";
+        private const string WHATS_NEW_FILE = "whats_new_stable.txt";
 #endif
         private const string RESOURCES_PREFIX = "TrafficManager.Resources.";
 
@@ -55,7 +55,7 @@ namespace TrafficManager.UI.WhatsNew {
             Log.Info("Loading What's New changelogs...");
             string[] lines;
             using (Stream st = Assembly.GetExecutingAssembly()
-                                       .GetManifestResourceStream(RESOURCES_PREFIX + INCOMPATIBLE_MODS_FILE))
+                                       .GetManifestResourceStream(RESOURCES_PREFIX + WHATS_NEW_FILE))
             {
                 using (var sr = new StreamReader(st)) {
                     lines = sr.ReadToEnd().Split(new[] { "\n", "\r\n" }, StringSplitOptions.None);
