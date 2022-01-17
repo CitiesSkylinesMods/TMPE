@@ -199,7 +199,7 @@ namespace TrafficManager.UI.WhatsNew {
             title.anchor = UIAnchorStyle.Top;
             title.textAlignment = UIHorizontalAlignment.Center;
             title.eventTextChanged += (_, _) => title.CenterToParent();
-            title.text = "What's new in " + TrafficManagerMod.ModName;
+            title.text = "What's New in " + TrafficManagerMod.ModName;
             title.MakePixelPerfect();
 
             var cancel = _header.AddUIComponent<UIButton>();
