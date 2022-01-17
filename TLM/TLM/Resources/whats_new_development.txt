@@ -6,117 +6,123 @@
 [Version] 11.6.2.0
 [Released] January 8th 2022
 [Link] tmpe-v1162-test-08012022
-[New] New Speed Limits UI #1168
-[New] Road sign themes reloadable + Canadian signs #1215
-[New] New countries for speed limit designs #1260
+[New] Speed Limits UI Overhaul #1168
+[New] Road sign icon themes for multiple countries #1215 #1260
+[New] Dynamic loading of road sign icon themes #1215
 [New] Apply default speed limits to all elevations #1233
-[New] More API methods #1209
-[Fixed] Regression: Auto TTL should set-up dedicated turning lanes properly #1242
-[Fixed] Fix position of lane arrow tool for different resolutions. #1237
+[New] Additional API methods for modders #1209
+[Fixed] Auto TTL should set-up dedicated turning lanes properly #1242
+[Fixed] Position of lane arrow tool for different resolutions #1237
 [Fixed] Update routings after modifying dedicated turning lanes policy #1236
 [Fixed] Checkbox label text wrap for some very long options #1232
 [Fixed] Update SPEED_TO_MPH constant to correct value #1224
-[Fixed] Fixed JRM transparency #1217
-[Fixed] U-turn policy on T junctions #1212
+[Fixed] Junction Restrictions transparency #1217
+[Fixed] U-turn policy on T-junctions #1212
 [Fixed] Routing manager lane connection check #1210
 [Fixed] Recalculation after lane connection remove #1199
-[Fixed] Priority signs tool not working #1189
-[Fixed] Improved lifecycle of TMPE tool #1188
-[Fixed] Trains are not counted as waiting at timed traffic lights at rail junctions #1184, #1173
-[Updated] Update UUI version #1182
-[Updated] Mod compatibility: Replace hardcoded CitizenUnit buffer limits with buffer size detection #1192
-[Updated] Mod compatibility: Incompatible detector improvements, CSMultiplayer marked as incompatible #1196
-[Updated] Code clean up: Netutil cleanup #1273, Sl-cleanup #1275, Static texture classes are now proper CustomManagers #1265
-[Updated] Performance improvements: GetNode/Segment -> ToNode/Segment #1202, Refactoring/buffer to extension methods #1203, Converted almost all .m_segments.m_buffer[segmentId] calls to segment… #1204,
-[Removed] Removed NetService and the GameBridge stuff #1194
-[Updated] Improvements with regards to memory efficiency, performance and overall code readability (Removed the ProcessCitizen and the CitizenHandler #1169, Switched from CO.IsFlagSet to Kian's IsFlagSet. #1186)
+[Fixed] Priority Signs tool not working #1189
+[Fixed] Lifecycle of TMPE tool #1188
+[Fixed] Trains not counted as waiting at timed traffic lights at rail junctions #1184 #1173
+[Mod] Updated: `UnifiedUI` latest version #1182
+[Mod] Compatible: `More CitizenUnits` #1192
+[Mod] Incompatible: `CSMultiplayer` #1196
+[Updated] Incompatible mod detector improvements #1196
+[Updated] Code clean-up: Netutil cleanup #1273, Sl-cleanup #1275, Static texture classes now CustomManagers #1265
+[Updated] Performance: GetNode/Segment -> ToNode/Segment #1202
+[Updated] Performance: Refactoring/buffer to extension methods #1203
+[Updated] Performance: Converted most .m_segments.m_buffer[segmentId] calls to segment #1204
+[Removed] Obsolete NetService and GameBridge code #1194
+[Updated] Memory efficiency, performance and overall code readability (Removed the ProcessCitizen and the CitizenHandler #1169, Switched from CO.IsFlagSet to Kian's IsFlagSet. #1186)
 [/Version]
 
 [Version] 11.6.1.3
 [Released] October 14th 2021
 [Link] tmpe-v1161-test-14102021
-[Fixed] Cannot setup timed traffic lights on monorail nodes (#1160)
-[Fixed] Despawn off not working as expected (#1148)
-[Updated] Minor performance, memory efficiency improvements (#1161, #1162, #1164, #1165, thanks Egi)
+[Fixed] Cannot setup timed traffic lights on monorail nodes #1160
+[Fixed] Despawn off not working as expected #1148
+[Updated] Performance, memory efficiency #1161 #1162 #1164 #1165 (thanks Egi)
 [/Version]
 
 [Version] 11.6.1.2
 [Released] September 21st 2021
-[New] UnifiedUI mod integration, configuable in the mod options (#1153, thanks Kian)
-[New] GUI scaling for Traffic Lights and Speed Limits GUI (#1152 #1157, thanks Kian)
-[New] Configurable TMPE.log path (#1151, thanks Kian)
-[Fixed] Reduced garbage memory generation (#1159, thanks Krzychu)
-[Updated] Internal performance improvements to lane iterations (#1156, thanks Egi)
-[Updated] Internal changes in handling invalid segments (#1154, thanks Egi)
-[Updated] Internal changes to building service ($1150, thanks Egi)
-[Updated] Performance improvements to Speed Limits GUI (#1149, thanks Egi)
+[Mod] Mew: `UnifiedUI` integration, configurable in mod options #1153 (thanks Kian)
+[New] GUI scaling for Traffic Lights and Speed Limits #1152 #1157 (thanks Kian)
+[New] Configurable TMPE.log path #1151 (thanks Kian)
+[Fixed] Reduced garbage memory generation #1159 (thanks Krzychu)
+[Updated] Performance: Lane iterations #1156 (thanks Egi)
+[Updated] Internal changes in handling invalid segments #1154 (thanks Egi)
+[Updated] Internal changes to building service #1150 (thanks Egi)
+[Updated] Performance: Speed Limits GUI #1149 (thanks Egi)
 [/Version]
 
 [Version] 11.6.1.1
 [Released] August 25th 2021
-[Fixed] Comunity Content Pack detection (latest DLCs - Train Stations and Bridges & Piers)
-[Fixed] Incorrect height of vehicle restriction overlay when clicked on the water dam,
-[Fixed] Refreshing dedicated turning lanes after loading a savegame,
-[Fixed] Custom path-finding initialization and patching - rewritten execution flow,
-[Updated] Internal changes to speed limits code as part of changes required by new Speed Limits UI
+[Fixed] Community Content Pack detection (DLCs: Train Stations; Bridges & Piers)
+[Fixed] Incorrect height of Vehicle Restrictions overlay for Hydro Dam
+[Fixed] Refreshing dedicated turning lanes after loading a savegame
+[Fixed] Custom path-finding initialization and patching - rewritten execution flow
+[Updated] Internal changes to Speed Limits code as part of changes required by new Speed Limits UI
 [/Version]
 
 [Version] 11.6.1.0
 [Released] August 10th 2021
-[Updated] New Indonesian translation, updates for other languages,
-[New] First version of Notifier API for use by other mods,
-[Fixed] Infinite loop when using shift modifier while changing speed limits,
-[Fixed] Overlay transparency and UI opacity settings,
-[Fixed] Half-segment detection when using lane arrow tool,
+[New] Language: Indonesian
+[Updated] Multiple languages
+[New] First version of Notifier API for use by other mods
+[Fixed] Infinite loop when using shift modifier while changing speed limits
+[Fixed] Overlay transparency and UI opacity settings
+[Fixed] Half-segment detection when using Lane Arrows tool
 [/Version]
 
 [Version] 11.6.0.3
 [Released] June 17th 2021
 [Link] tmpe-v1160-test-17062021
 [Fixed] Rare bug preventing calculation of segment lane routings (invalid node/segment connection - unknown cause)
-[Updated] Custom PathFind performance improvements, lifted limit of threads for 8t+ CPUs, reduced simulation thread sleep multiplier for long pathfind queues,
+[Updated] Performance: PathFind performance improvements
+[Updated] Lifted limit of threads for 8t+ CPUs
+[Updated] Reduced simulation thread sleep multiplier for long pathfind queues
 [/Version]
 
 [Version] 11.6.0.2
 [Released] June 8th 2021
-[Updated] lane connector tool improvements (new shape, changed interactions in over/under-ground mode) (#985, #282)
-[Updated] performance improvements in network flag detection (#1118, thanks Kian!)
-[Fixed] vehicle/cim path invalidation after loading savegame (#1117)
-[Fixed] reloading textures with translation (Chinere priority signs/TTL) (#1121, #1099, thanks @TianQiBuTian for spotting the issue)
+[Updated] Lane Connectors tool: New shape, changed interactions in over/under-ground mode #985 #282
+[Updated] Performance: Network flag detection #1118 (thanks Kian)
+[Fixed] Vehicle/cim path invalidation after loading savegame #1117
+[Fixed] Reloading localised textures for Priority Signs and TTL #1121 #1099 (thanks @TianQiBuTian for spotting the issue)
 [/Version]
 
 [Version] 11.6.0.1
 [Released] May 28th 2021
-[Updated] hotfixes for Barges(Cargo Ferries)
-[Updated] hotfixes for Movable Bridge
-[Updated] unified alternative path position with 81-Tiles
+[Mod] Hotfix: `Barges (Cargo Ferries)`
+[Mod] Compatible: `Movable Bridges`
+[Mod] Fixed: `81-Tiles` unified alternative path position
 [/Version]
 
 [Version] 11.6.0.0
 [Released] May 16th 2021
 [New] Full migration to Harmony - slight performance decrease
 [New] Map/Asset/Intersection Editor support
-[New] MoveIt copy&paste support (TimedTL not supported yet)
-[New] Priority signs - added Chinese textures (thanks TianQiBuTian!) (#1081)
-[New] Pedestrian crossing - no double crossing policy (thanks Kian!) (#936, #1003)
-[New] Dedicated turning lane policy for bus lanes (#1102, #1104),
-[New] Undo features for roundabouts and priority roads (#863, #860)
-[New] Roundabout setup - speeds based on road curvature (thanks scottmcm!) (#863, #793)
-[New] Roundabout setup - ban parking in/near roundabout (#863, #578)
-[New] Roundabout setup - allow/disallow enter blocked junction (#863, #578)
-[Updated] Shift+Click speed limit on whole roundabout (thanks thebugfixnet for idea!) (#920, #869)
-[Updated] GenericObservable - use locks; re-use existing list to reduce gc (thanks egi!) (#909)
-[Updated] Parking AI and Pathfinder use cached spiral grid coords (thanks egi!) (#906)
-[Updated] Bezier accuracy of lane overlays (thanks MacSergey for spotting!) (#932)
-[Updated] Lane Connector tool performance (thanks egi!) (#1085)
-[Updated] Compatibility with BloodyPenguin's Barges mod (#1103)
-[Fixed] PostVanAI compatibility with 81 Tiles mod (#943, #895)
-[Fixed] Stay-in-lane for MOM mod metro tracks (#919)
-[Fixed] TMPE state changes after using free camera mode (thanks Biffa for spotting!) (#938)
-[Fixed] Typo in priority roads tooltip locale id (thanks TianQiBuTian!) (#904)
-[Updated] Icons for RoadSelectionPanel to optimized 8bit (thanks Chamëleon!) (#984)
-[Updated] Spiral grid coords caching to reduce gc and improve performance (thanks egi!) (#906)
-[Updated] Simplified spawn/despawn patches to Harmony prefixes (#943, #921, #864, #462)
-[Updated] Improved Harmony error reporting (#933)
-[Updated] Translation update - new languages: Arabic, Thai, Slovak
+[Mod] New: `MoveIt` copy & paste support (TimedTL not supported yet)
+[New] Priority signs - added Chinese textures #1081 (thanks TianQiBuTian!)
+[New] Pedestrian crossing - no double crossing policy #936 #1003 (thanks Kian!)
+[New] Dedicated turning lane policy for bus lanes #1102 #1104
+[New] Undo features for roundabouts and priority roads #863 #860
+[New] Roundabout setup - speeds based on road curvature #863 #793 (thanks scottmcm!)
+[New] Roundabout setup - ban parking in/near roundabout #863 #578
+[New] Roundabout setup - allow/disallow enter blocked junction #863 #578
+[Updated] Shift+Click speed limit on whole roundabout #920 #869 (thanks thebugfixnet for idea!)
+[Updated] GenericObservable - use locks; re-use existing list to reduce gc #909 (thanks egi!)
+[Updated] Performance: Parking AI and Pathfinder use cached spiral grid coords #906 (thanks egi!)
+[Updated] Bezier accuracy of lane overlays #932 (thanks MacSergey for spotting!)
+[Updated] Performance: Lane Connector tool #1085 (thanks egi!)
+[Mod] Compatibile: `Barges (Cargo Ferries)` #1103
+[Mod] Fixed: `81 Tiles` PostVanAI #943 #895
+[Mod] Fixed: `MOM` stay-in-lane for metro tracks #919
+[Fixed] TMPE state changes after using free camera mode #938 (thanks Biffa for spotting!)
+[Fixed] Typo in priority roads tooltip locale id #904 (thanks TianQiBuTian!)
+[Updated] Icons for RoadSelectionPanel optimized for 8bit #984 (thanks Chamëleon!)
+[Updated] Simplified spawn/despawn patches to Harmony prefixes #943 #921 #864 #462
+[Updated] Improved Harmony error reporting #933
+[New] Languages: Arabic, Thai, Slovak
+[Updated] Multiple languages updated
 [/Version]
