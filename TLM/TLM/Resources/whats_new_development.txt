@@ -45,7 +45,7 @@
 
 [Version] 11.6.1.2
 [Released] September 21st 2021
-[Mod] Mew: `UnifiedUI` integration, configurable in mod options #1153 (thanks Kian)
+[Mod] New: `UnifiedUI` integration, configurable in mod options #1153 (thanks Kian)
 [New] GUI scaling for Traffic Lights and Speed Limits #1152 #1157 (thanks Kian)
 [New] Configurable TMPE.log path #1151 (thanks Kian)
 [Fixed] Reduced garbage memory generation #1159 (thanks Krzychu)
