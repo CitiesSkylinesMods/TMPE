@@ -93,7 +93,7 @@ namespace TrafficManager.UI.WhatsNew {
                     List<ChangeEntry> changeEntries = new List<ChangeEntry>();
                     while (lineKeyword != MarkupKeyword.VersionEnd) {
                         string text = lines[i].Substring(keywordStrings[lineKeyword].Length).Trim();
-                        Log.Info($"Keyword {lineKeyword}, text: {text}");
+                        Log._Debug($"Keyword {lineKeyword}, text: {text}");
                         switch (lineKeyword) {
                             case MarkupKeyword.Link:
                                 changelog.Link = text;
@@ -116,7 +116,6 @@ namespace TrafficManager.UI.WhatsNew {
                         i++;
                         TryParseKeyword(lines[i], out lineKeyword);
                     }
-
 
                     changelog.ChangeEntries = changeEntries.ToArray();
                     Array.Sort(changelog.ChangeEntries, ChangeEntry.KeywordComparer);
