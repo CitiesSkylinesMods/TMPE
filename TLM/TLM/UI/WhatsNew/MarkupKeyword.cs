@@ -4,6 +4,7 @@ namespace TrafficManager.UI.WhatsNew {
         Link,
         Released,
         New,
+        Mod,
         Fixed,
         Updated,
         Removed,

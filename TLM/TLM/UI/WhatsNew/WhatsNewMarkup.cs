@@ -10,6 +10,7 @@ namespace TrafficManager.UI.WhatsNew {
             { "[Link]", MarkupKeyword.Link },
             { "[Released]", MarkupKeyword.Released },
             { "[New]", MarkupKeyword.New },
+            { "[Mod]", MarkupKeyword.Mod },
             { "[Fixed]", MarkupKeyword.Fixed },
             { "[Updated]", MarkupKeyword.Updated },
             { "[Removed]", MarkupKeyword.Removed },
@@ -21,11 +22,13 @@ namespace TrafficManager.UI.WhatsNew {
             { MarkupKeyword.Link, "[Link]" },
             { MarkupKeyword.Released, "[Released]" },
             { MarkupKeyword.New, "[New]" },
+            { MarkupKeyword.Mod, "[Mod]" },
             { MarkupKeyword.Fixed, "[Fixed]" },
             { MarkupKeyword.Updated, "[Updated]" },
             { MarkupKeyword.Removed, "[Removed]" },
         };
 
+        public static readonly Color32 ModColor = new Color32(255, 196, 0, 255);
         public static readonly Color32 FixedOrUpdatedColor = new Color32(3, 106, 225, 255);
         public static readonly Color32 NewOrAddedColor = new Color32(40, 178, 72, 255);
         public static readonly Color32 RemovedColor = new Color32(224, 61, 76, 255);
@@ -37,6 +40,8 @@ namespace TrafficManager.UI.WhatsNew {
                     return FixedOrUpdatedColor;
                 case MarkupKeyword.New:
                     return NewOrAddedColor;
+                case MarkupKeyword.Mod:
+                    return ModColor;
                 case MarkupKeyword.Removed:
                     return RemovedColor;
                 case MarkupKeyword.Updated:
