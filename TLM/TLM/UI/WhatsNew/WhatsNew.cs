@@ -6,6 +6,8 @@ namespace TrafficManager.UI.WhatsNew {
     using ColossalFramework.UI;
     using CSUtil.Commons;
     using JetBrains.Annotations;
+    using Lifecycle;
+    using State;
 
     public class WhatsNew {
 #if TEST || DEBUG
@@ -18,7 +20,7 @@ namespace TrafficManager.UI.WhatsNew {
         // bump and update what's new changelogs when new features added
         internal static readonly Version CurrentVersion = new Version(11,6,2, 0);
 
-        internal bool Shown { get; private set; }
+        internal bool Shown => CurrentVersion == GlobalConfig.Instance.Main.LastWhatsNewPanelVersion;
         public List<ChangelogEntry> Changelogs { get; private set; }
 
         public WhatsNew() {
@@ -34,13 +36,18 @@ namespace TrafficManager.UI.WhatsNew {
                     UIView.PushModal(panel);
                     panel.CenterToParent();
                     panel.BringToFront();
+
+                    if (TMPELifecycle.PlayMode) {
+                        SimulationManager.instance.SimulationPaused = true;
+                    }
                 }
             }
         }
 
         public void MarkAsShown() {
-            Log.Info("What's New - mark as shown");
-            Shown = true;
+            Log.Info($"What's New - mark as shown. Version {CurrentVersion}");
+            GlobalConfig.Instance.Main.LastWhatsNewPanelVersion = CurrentVersion;
+            GlobalConfig.WriteConfig();
         }
 
 

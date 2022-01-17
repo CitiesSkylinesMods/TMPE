@@ -17,9 +17,11 @@ namespace TrafficManager.Lifecycle {
         : SerializableDataExtensionBase
     {
         private const string DATA_ID = "TrafficManager_v1.0";
+        private const string VERSION_INFO_DATA_ID = "TrafficManager_VersionInfo_v1.0";
 
         private static ISerializableData SerializableData => SimulationManager.instance.m_SerializableDataWrapper;
         private static Configuration _configuration;
+        private static VersionInfoConfiguration _versionInfoConfiguration;
 
         public override void OnLoadData() => Load();
         public override void OnSaveData() => Save();
@@ -50,6 +52,15 @@ namespace TrafficManager.Lifecycle {
             }
 
             Log.Info("Initialization done. Loading mod data now.");
+
+            try {
+                byte[] data = SerializableData.LoadData(VERSION_INFO_DATA_ID);
+                DeserializeVersionData(data);
+            }
+            catch (Exception e) {
+                Log.Error($"OnLoadData: Error while deserializing version data: {e}");
+                loadingSucceeded = false;
+            }
 
             try {
                 byte[] data = SerializableData.LoadData(DATA_ID);
@@ -102,6 +113,39 @@ namespace TrafficManager.Lifecycle {
             }
         }
 
+        private static void DeserializeVersionData(byte[] data) {
+            bool error = false;
+            try {
+                if (data != null && data.Length != 0) {
+                    Log.Info($"Loading VersionInfo Data! Length={data.Length}");
+                    var memoryStream = new MemoryStream();
+                    memoryStream.Write(data, 0, data.Length);
+                    memoryStream.Position = 0;
+
+                    var binaryFormatter = new BinaryFormatter();
+                    binaryFormatter.AssemblyFormat = System
+                                                     .Runtime.Serialization.Formatters
+                                                     .FormatterAssemblyStyle.Simple;
+                    _versionInfoConfiguration = (VersionInfoConfiguration)binaryFormatter.Deserialize(memoryStream);
+                } else {
+                    Log.Info("No VersionInfo data to deserialize!");
+                }
+            }
+            catch (Exception e) {
+                Log.Error($"Error deserializing data: {e}");
+                Log.Info(e.StackTrace);
+                error = true;
+            }
+
+            if (!error) {
+                ReportVersionInfo(out error);
+            }
+
+            if (error) {
+                throw new ApplicationException("An error occurred while loading version information");
+            }
+        }
+
         private static void DeserializeData(byte[] data) {
             bool error = false;
             try {
@@ -132,6 +176,22 @@ namespace TrafficManager.Lifecycle {
 
             if (error) {
                 throw new ApplicationException("An error occurred while loading");
+            }
+        }
+
+        private static void ReportVersionInfo(out bool error) {
+            error = false;
+            Log.Info("Reading VersionInfo from config");
+            if (_versionInfoConfiguration == null) {
+                Log.Warning("Version configuration NULL, Couldn't load data. Possibly a new game?");
+                return;
+            }
+
+            if (_versionInfoConfiguration.VersionInfo != null) {
+                VersionInfo versionInfo = _versionInfoConfiguration.VersionInfo;
+                Log.Info($"Save game was created with TM:PE {versionInfo.assemblyVersion} - {versionInfo.releaseType}");
+            } else {
+                Log.Info("Version info undefined!");
             }
         }
 
@@ -274,18 +334,6 @@ namespace TrafficManager.Lifecycle {
             } else {
                 Log.Info("Segment-at-node structure undefined!");
             }
-
-            if (_configuration.VersionInfo != null) {
-                Log.Info($"Save game was created with TM:PE {_configuration.VersionInfo.assemblyVersion} - {_configuration.VersionInfo.releaseType}");
-                Log.Info($"Last What's new panel version: {_configuration.VersionInfo.lastWhatsNewVersion} (null - not shown or pre 11.6.2+), " +
-                         $"current What's New panel version: {WhatsNew.CurrentVersion}");
-                if (_configuration.VersionInfo.lastWhatsNewVersion != null &&
-                    WhatsNew.CurrentVersion <= _configuration.VersionInfo.lastWhatsNewVersion) {
-                    TMPELifecycle.Instance.WhatsNew.MarkAsShown();
-                }
-            } else {
-                Log.Info("Version info undefined!");
-            }
         }
 
         public static void Save() {
@@ -370,13 +418,23 @@ namespace TrafficManager.Lifecycle {
                 //------------------
                 // Version
                 //------------------
-                configuration.VersionInfo =
-                    new Configuration.VersionInfoData(VersionUtil.ModVersion) {
-                        // set current version if panel was shown otherwise set previous value
-                        lastWhatsNewVersion = TMPELifecycle.Instance.WhatsNew.Shown
-                                                  ? WhatsNew.CurrentVersion
-                                                  : _configuration.VersionInfo.lastWhatsNewVersion
-                    };
+                VersionInfoConfiguration versionConfig = new VersionInfoConfiguration();
+                versionConfig.VersionInfo = new VersionInfo(VersionUtil.ModVersion);
+
+                var binaryFormatterVersion = new BinaryFormatter();
+                var memoryStreamVersion = new MemoryStream();
+
+                try {
+                    binaryFormatterVersion.Serialize(memoryStreamVersion, versionConfig);
+                    memoryStreamVersion.Position = 0;
+                    Log.Info($"Version data byte length {memoryStreamVersion.Length}");
+                    SerializableData.SaveData(VERSION_INFO_DATA_ID, memoryStreamVersion.ToArray());
+                } catch (Exception ex) {
+                    Log.Error("Unexpected error while saving version data: " + ex);
+                    success = false;
+                } finally {
+                    memoryStreamVersion.Close();
+                }
 
                 try {
                     // save options

@@ -257,31 +257,6 @@ namespace TrafficManager {
             }
         }
 
-        [Serializable]
-        public class VersionInfoData {
-            public Version assemblyVersion;
-            public ReleaseType releaseType;
-            [CanBeNull]
-            public Version lastWhatsNewVersion;
-
-            public VersionInfoData(Version assemblyVersion) {
-                this.assemblyVersion = assemblyVersion;
-#if DEBUG
-                releaseType = ReleaseType.Debug;
-#elif TEST
-                releaseType = ReleaseType.Test;
-#else
-                releaseType = ReleaseType.Stable;
-#endif
-                lastWhatsNewVersion = null;
-            }
-        }
-
-        public enum ReleaseType {
-            Test,
-            Debug,
-            Stable,
-        }
         /// <summary>
         /// Stored ext. citizen data
         /// </summary>
@@ -341,8 +316,6 @@ namespace TrafficManager {
         /// Parking restrictions
         /// </summary>
         public List<ParkingRestriction> ParkingRestrictions = new List<ParkingRestriction>();
-
-        public VersionInfoData VersionInfo = new VersionInfoData(VersionUtil.ModVersion);
 
         [Obsolete]
         public string NodeTrafficLights = string.Empty;
