@@ -128,10 +128,6 @@ namespace TrafficManager.Manager.Impl {
             }
 
             NetInfo netinfo = netSegment.Info;
-            if(customNetinfoSpeedLimits_.TryGetValue(netinfo, out float customNetinfoSpeedLimit)) {
-                return new SpeedValue(customNetinfoSpeedLimit);
-            }
-
             uint curLaneId = netSegment.m_lanes;
             var laneIndex = 0;
             uint validLanes = 0;
@@ -155,7 +151,7 @@ namespace TrafficManager.Manager.Impl {
                     // custom speed limit
                     meanSpeedLimit += setSpeedLimit.Value;
                 } else {
-                    meanSpeedLimit += new SpeedValue(laneInfo.m_speedLimit);
+                    meanSpeedLimit += GetDefaultSpeedLimit(netinfo, laneInfo);
                 }
 
                 ++validLanes;
