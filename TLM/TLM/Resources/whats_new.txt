@@ -1,6 +1,11 @@
 [Version] 11.6.3.0
-[New] What's New panel #118
-[New] <to be added>
+[New] What's New panel #118 #1284
+[New] Buttons for translators in mod options #1267 (pending)
+[Updated] Layout of mod options `General` tab #1267 #1262 #62 (pending)
+[Fixed] App mode detection #1290 #1289 #1286
+[Updated] Speed Limits manager for asset editor and future road mods :) #1277 #1285
+[Mod] Incompatible: `Traffic++ V2` (ancient mod, breaks game) #1287
+[Fixed] Versioned atlas to ensure textures load properly #1281
 [/Version]
 
 [Version] 11.6.2.0
@@ -98,6 +103,14 @@
 [Mod] Fixed: `81-Tiles` unified alternative path position
 [/Version]
 
+[Version] 11.5.2.1
+[Stable]
+[Released] May 27th 2021
+[Mod] Hotfix: `Barges (Cargo Ferries)`
+[Mod] Compatible: `Movable Bridges`
+[Mod] Fixed: `81-Tiles` unified alternative path position
+[/Version]
+
 [Version] 11.6.0.0
 [Released] May 16th 2021
 [New] Full migration to Harmony - slight performance decrease
@@ -115,6 +128,7 @@
 [Updated] Performance: Parking AI and Pathfinder use cached spiral grid coords #906 (thanks egi!)
 [Updated] Bezier accuracy of lane overlays #932 (thanks MacSergey for spotting!)
 [Updated] Performance: Lane Connector tool #1085 (thanks egi!)
+[Mod] Compatible: `Asset Color Expander` #1063 #1060
 [Mod] Compatibile: `Barges (Cargo Ferries)` #1103
 [Mod] Fixed: `81 Tiles` PostVanAI #943 #895
 [Mod] Fixed: `MOM` stay-in-lane for metro tracks #919
