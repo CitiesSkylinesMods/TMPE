@@ -65,6 +65,7 @@ namespace TrafficManager.UI.WhatsNew {
 
     public class ChangelogEntry {
         public Version Version { get; private set; }
+        public bool Stable { get; private set; }
         [CanBeNull]
         public string Link { get; private set; }
         [CanBeNull]
@@ -91,6 +92,10 @@ namespace TrafficManager.UI.WhatsNew {
                         string text = lines[i].Substring(keywordStrings[lineKeyword].Length).Trim();
                         Log._Debug($"Keyword {lineKeyword}, text: {text}");
                         switch (lineKeyword) {
+                            // TODO: Should we also check for VersionStart keyword and throw an error if encountered? (a changelog block missing the [/Version])
+                            case MarkupKeyword.Stable:
+                                changelog.Stable = true;
+                                break;
                             case MarkupKeyword.Link:
                                 changelog.Link = text;
                                 break;
