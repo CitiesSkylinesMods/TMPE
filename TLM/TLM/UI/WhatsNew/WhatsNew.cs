@@ -10,11 +10,7 @@ namespace TrafficManager.UI.WhatsNew {
     using State;
 
     public class WhatsNew {
-#if TEST || DEBUG
-        private const string WHATS_NEW_FILE = "whats_new_development.txt";
-#else
-        private const string WHATS_NEW_FILE = "whats_new_stable.txt";
-#endif
+        private const string WHATS_NEW_FILE = "whats_new.txt";
         private const string RESOURCES_PREFIX = "TrafficManager.Resources.";
 
         // bump and update what's new changelogs when new features added
