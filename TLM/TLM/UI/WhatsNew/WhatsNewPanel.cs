@@ -65,9 +65,13 @@ namespace TrafficManager.UI.WhatsNew {
             content.size = new Vector2(_defaultWidth - 20, _defaultHeight - _header.height - _footerPanel.height);
             AddScrollbar(panel, content);
 
+            var stableRelease = Util.VersionUtil.IsStableRelease;
+
             List<ChangelogEntry> changelogEntries = TMPELifecycle.Instance.WhatsNew.Changelogs;
             foreach (ChangelogEntry entry in changelogEntries) {
-                AddChangelogEntry(entry, content);
+                if (!stableRelease || entry.Stable) {
+                    AddChangelogEntry(entry, content);
+                }
             }
 
             content.autoLayout = true;
