@@ -51,3 +51,5 @@
 631930385;Realistic Vehicle Speeds
 1072157697;Cargo Info
 1558438291;Cities Multiplayer Mod (CSM) [Beta]
+2719881998;Traffic++ V2
+2719881745;Traffic++ V2
