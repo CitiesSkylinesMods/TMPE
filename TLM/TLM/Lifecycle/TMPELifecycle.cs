@@ -62,8 +62,12 @@ namespace TrafficManager.Lifecycle {
         /// <summary>
         /// determines whether Game mode as oppose to edit mode (eg asset editor).
         /// </summary>
-        internal static bool PlayMode => SceneManager.GetActiveScene().name.Equals("Ingame") ||
-                                         SceneManager.GetActiveScene().name.Equals("Game");
+        internal static bool PlayMode {
+            get {
+                string sceneName = SceneManager.GetActiveScene().name;
+                return sceneName.Equals("Game") || sceneName.Equals("Ingame");
+            }
+        }
 
         private static void CompatibilityCheck() {
             ModsCompatibilityChecker mcc = new ModsCompatibilityChecker();
