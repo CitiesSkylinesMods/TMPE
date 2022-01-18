@@ -7,6 +7,7 @@ namespace TrafficManager.UI.WhatsNew {
         public static readonly Dictionary<string, MarkupKeyword> MarkupKeywords = new() {
             { "[Version]", MarkupKeyword.VersionStart },
             { "[/Version]", MarkupKeyword.VersionEnd },
+            { "[Stable]", MarkupKeyword.Stable },
             { "[Link]", MarkupKeyword.Link },
             { "[Released]", MarkupKeyword.Released },
             { "[New]", MarkupKeyword.New },
@@ -19,6 +20,7 @@ namespace TrafficManager.UI.WhatsNew {
         public static readonly Dictionary<MarkupKeyword, string> MarkupKeywordsString = new() {
             { MarkupKeyword.VersionStart, "[Version]" },
             { MarkupKeyword.VersionEnd, "[/Version]" },
+            { MarkupKeyword.Stable, "[Stable]" },
             { MarkupKeyword.Link, "[Link]" },
             { MarkupKeyword.Released, "[Released]" },
             { MarkupKeyword.New, "[New]" },
@@ -48,6 +50,7 @@ namespace TrafficManager.UI.WhatsNew {
                     return FixedOrUpdatedColor;
                 case MarkupKeyword.VersionStart:
                 case MarkupKeyword.VersionEnd:
+                case MarkupKeyword.Stable:
                     return VersionColor;
                 default:
                     Log.Warning($"No custom color for markup keyword: {keyword}");

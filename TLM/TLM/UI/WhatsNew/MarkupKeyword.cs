@@ -3,6 +3,7 @@ namespace TrafficManager.UI.WhatsNew {
         Unknown,
         Link,
         Released,
+        Stable,
         New,
         Mod,
         Fixed,
