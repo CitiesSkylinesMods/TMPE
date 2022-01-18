@@ -227,7 +227,7 @@ namespace TrafficManager.UI.WhatsNew {
             cancel.eventClick += (_, _) => HandleClose();
         }
 
-        public void AddScrollbar(UIComponent parentComponent, UIScrollablePanel scrollablePanel) {
+        private void AddScrollbar(UIComponent parentComponent, UIScrollablePanel scrollablePanel) {
             var scrollbar = parentComponent.AddUIComponent<UIScrollbar>();
             scrollbar.orientation = UIOrientation.Vertical;
             scrollbar.pivot = UIPivotPoint.TopLeft;
