@@ -13,12 +13,17 @@ namespace TrafficManager.UI.WhatsNew {
         private const int _defaultHeight = 500;
 
         private readonly RectOffset _paddingZero = new RectOffset(0, 0, 0, 0);
-        private readonly RectOffset _pillTextPadding = new RectOffset(0, 0, 5, 0);
+        private readonly RectOffset _pillTextPadding = new RectOffset(4, 4, 5, 0);
         private readonly RectOffset _bulletListPadding = new RectOffset(8, 0, 0, 0);
+
         private readonly Color32 _panelBgColor = new Color32(55, 55, 55, 255);
         private readonly Color32 _textColor = new Color32(220, 220, 220, 255);
         private readonly Color _linkTextColorHover = new Color32(158, 219, 255, 255);
         private readonly Color _linkTextColor = new Color(0f, 0.52f, 1f);
+
+        // Used in AddKeywordLabel()
+        private readonly Vector2 _minVersionLabelSize = new(75, 36);
+        private readonly Vector2 _minKeywordLabelSize = new(85, 20);
 
         public override void Awake() {
             base.Awake();
@@ -180,9 +185,7 @@ namespace TrafficManager.UI.WhatsNew {
             label.backgroundSprite = "TextFieldPanel";
             label.colorizeSprites = true;
             label.color = WhatsNewMarkup.GetColor(keyword);
-            label.minimumSize = isVersion
-                                    ? new Vector2(75, 36)
-                                    : new Vector2(85, 20);
+            label.minimumSize = isVersion ? _minVersionLabelSize : _minKeywordLabelSize;
             label.textAlignment = UIHorizontalAlignment.Center;
             label.verticalAlignment = UIVerticalAlignment.Middle;
             label.padding = _pillTextPadding;
