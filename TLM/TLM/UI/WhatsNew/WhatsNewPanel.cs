@@ -102,6 +102,8 @@ namespace TrafficManager.UI.WhatsNew {
 
         private void AddVersionRow(UIComponent parentPanel, ChangelogEntry changelogEntry) {
             bool isCurrentVersion = WhatsNew.CurrentVersion.Equals(changelogEntry.Version);
+            string versionStr = changelogEntry.Version.ToString() + StableOrTest(changelogEntry);
+
             // row: [version number] released xyz
             UIPanel versionRow = AddRowAutoLayoutPanel(parentPanel: parentPanel,
                                                        panelPadding: _paddingZero,
@@ -109,7 +111,7 @@ namespace TrafficManager.UI.WhatsNew {
             versionRow.maximumSize = new Vector2(_defaultWidth - 10, 36);
 
             // part: [version number]
-            UILabel versionLabel = AddKeywordLabel(versionRow, changelogEntry.Version.ToString(), MarkupKeyword.VersionStart);
+            UILabel versionLabel = AddKeywordLabel(versionRow, versionStr, MarkupKeyword.VersionStart);
             versionLabel.name = "Version";
             // part released xyz
             UILabel title = versionRow.AddUIComponent<UILabel>();
@@ -127,6 +129,13 @@ namespace TrafficManager.UI.WhatsNew {
 
             versionRow.autoLayout = true;
         }
+
+        private string StableOrTest(ChangelogEntry changelogEntry) =>
+            changelogEntry.Stable
+                ? " STABLE"
+                : changelogEntry.Released != null
+                    ? " TEST"
+                    : string.Empty;
 
         private void SetupLink(UILabel title, ChangelogEntry changelogEntry) {
             string url = $"https://github.com/CitiesSkylinesMods/TMPE/blob/master/CHANGELOG.md#{changelogEntry.Link}";
