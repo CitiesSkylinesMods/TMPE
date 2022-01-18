@@ -22,7 +22,6 @@ namespace TrafficManager.UI.WhatsNew {
         private readonly Color _linkTextColor = new Color(0f, 0.52f, 1f);
 
         // Used in AddKeywordLabel()
-        private readonly Vector2 _minVersionLabelSize = new(75, 36);
         private readonly Vector2 _minKeywordLabelSize = new(85, 20);
 
         public override void Awake() {
@@ -107,16 +106,18 @@ namespace TrafficManager.UI.WhatsNew {
 
         private void AddVersionRow(UIComponent parentPanel, ChangelogEntry changelogEntry) {
             bool isCurrentVersion = WhatsNew.CurrentVersion.Equals(changelogEntry.Version);
-            string versionStr = changelogEntry.Version.ToString() + StableOrTest(changelogEntry);
+            string buildString = StableOrTest(changelogEntry);
+            bool wasReleased = !string.IsNullOrEmpty(buildString);
 
             // row: [version number] released xyz
             UIPanel versionRow = AddRowAutoLayoutPanel(parentPanel: parentPanel,
                                                        panelPadding: _paddingZero,
                                                        panelWidth: _defaultWidth - 10);
-            versionRow.maximumSize = new Vector2(_defaultWidth - 10, 36);
+            versionRow.maximumSize = new Vector2(_defaultWidth - 10, wasReleased? 46 : 36);
 
             // part: [version number]
-            UILabel versionLabel = AddKeywordLabel(versionRow, versionStr, MarkupKeyword.VersionStart);
+            // UILabel versionLabel = AddKeywordLabel(versionRow, versionStr, MarkupKeyword.VersionStart);
+            UIPanel versionLabel = AddVersionLabel(versionRow, changelogEntry, buildString, wasReleased);
             versionLabel.name = "Version";
             // part released xyz
             UILabel title = versionRow.AddUIComponent<UILabel>();
@@ -176,21 +177,58 @@ namespace TrafficManager.UI.WhatsNew {
         }
 
         private UILabel AddKeywordLabel(UIPanel panel, string text, MarkupKeyword keyword) {
-            bool isVersion = keyword == MarkupKeyword.VersionStart;
             UILabel label = panel.AddUIComponent<UILabel>();
             label.name = "ChangelogEntryKeyword";
             label.text = text.ToUpper();
-            label.textScale = isVersion ? 1.2f : 0.7f;
+            label.textScale = 0.7f;
             label.textColor = Color.white;
             label.backgroundSprite = "TextFieldPanel";
             label.colorizeSprites = true;
             label.color = WhatsNewMarkup.GetColor(keyword);
-            label.minimumSize = isVersion ? _minVersionLabelSize : _minKeywordLabelSize;
+            label.minimumSize = _minKeywordLabelSize;
             label.textAlignment = UIHorizontalAlignment.Center;
             label.verticalAlignment = UIVerticalAlignment.Middle;
             label.padding = _pillTextPadding;
 
             return label;
+        }
+
+        private UIPanel AddVersionLabel(UIPanel parentPanel, ChangelogEntry changelogEntry, string buildString, bool wasReleased) {
+            UIPanel panel = AddRowAutoLayoutPanel(parentPanel: parentPanel,
+                                                  panelPadding: _paddingZero,
+                                                  panelWidth: 100,
+                                                  vertical: true);
+            panel.backgroundSprite = "TextFieldPanel";
+            panel.color = WhatsNewMarkup.GetColor(MarkupKeyword.VersionStart);
+            panel.minimumSize = new Vector2(75, wasReleased ? 46 : 32);
+            panel.padding = new RectOffset(0, 0, 6, 0);
+            panel.height = wasReleased ? 45 : 36;
+
+            UILabel version = panel.AddUIComponent<UILabel>();
+            version.name = "ChangelogEntryVersionNumber";
+            version.text = changelogEntry.Version.ToString();
+            version.textScale = 1.2f;
+            version.textAlignment = UIHorizontalAlignment.Center;
+            version.verticalAlignment = UIVerticalAlignment.Top;
+            version.padding = new RectOffset();
+            version.autoSize = false;
+            version.width = 85;
+
+            if (wasReleased) {
+                UILabel build = panel.AddUIComponent<UILabel>();
+                build.name = "ChangelogEntryBuildType";
+                build.text = buildString;
+                build.textScale = 0.7f;
+                build.textAlignment = UIHorizontalAlignment.Center;
+                build.verticalAlignment = UIVerticalAlignment.Bottom;
+                build.padding = new RectOffset();
+                build.autoSize = false;
+                build.width = 85;
+            }
+
+            panel.autoLayout = true;
+
+            return panel;
         }
 
         private UIPanel AddRowAutoLayoutPanel(UIComponent parentPanel, RectOffset panelPadding, float panelWidth, bool vertical = false) {
