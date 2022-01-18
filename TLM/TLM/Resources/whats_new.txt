@@ -98,9 +98,7 @@
 
 [Version] 11.6.0.1
 [Released] May 28th 2021
-[Mod] Hotfix: `Barges (Cargo Ferries)`
-[Mod] Compatible: `Movable Bridges`
-[Mod] Fixed: `81-Tiles` unified alternative path position
+[Update] Merge changes from 11.5.2.1 STABLE release
 [/Version]
 
 [Version] 11.5.2.1
