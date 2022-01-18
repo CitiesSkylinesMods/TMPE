@@ -84,7 +84,7 @@ namespace TrafficManager.State {
                                     eventCallback: OnLanguageChanged) as UIDropDown;
 
             generalGroup.AddSpace(5);
-            generalGroup.AddButton("What's new in this version?", WhatsNew.OpenModal);
+            generalGroup.AddButton("What's New?", WhatsNew.OpenModal);
             generalGroup.AddSpace(10);
 
             _lockButtonToggle = generalGroup.AddCheckbox(
