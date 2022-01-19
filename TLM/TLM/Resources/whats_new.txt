@@ -1,4 +1,6 @@
 [Version] 11.6.3.0
+[Released] January 19th 2022
+[Link] tmpe-v1163-test-19012022
 [New] What's New panel #118 #1284 (krzychu124, aubergine18)
 [Fixed] App mode detection #1290 #1289 #1286 (krzychu124)
 [Updated] Speed Limits manager for asset editor and mods #1277 #1285 (kianzarrin, krzychu124)
