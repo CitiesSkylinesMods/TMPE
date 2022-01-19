@@ -29,6 +29,196 @@ This changelog includes all versions and major variants of the mod going all the
 
 </details>
 
+
+#### TM:PE 11.6.3.0 TEST, Soon
+
+- [New] What's New panel #118 #1284 (krzychu124, aubergine18)
+- [Mod] Incompatible: `Traffic++ V2` - ancient mod, breaks game #1287 (aubergine18)
+- [Fixed] App mode detection #1290 #1289 #1286 (krzychu124)
+- [Fixed] Versioned atlas to ensure textures load properly #1281 (kianzarrin)
+- [Updated] Speed Limits manager for asset editor and mods #1277 #1285 (kianzarrin, krzychu124)
+
+#### TM:PE 11.6.2.0 TEST, 08/01/2022
+
+- [New] Speed Limits UI Overhaul #1168 #389 (kvakvs)
+- [New] Road sign icon themes for multiple countries #1260 #1251 #1215 (Coreybpa, kvakvs, aubergine18)
+- [New] Dynamic loading of road sign icon themes #1215 (kvakvs)
+- [New] Default speeds apply to all elevations #1245 #1233 #1226 #1221 #1168 (kvakvs, kianzarrin)
+- [New] Additional API methods for modders #1209 (kianzarrin)
+- [Mod] Updated: `UnifiedUI` latest version #1182 (kianzarrin)
+- [Mod] Compatible: `More CitizenUnits` #1192 (algernon-A)
+- [Mod] Incompatible: `CSMultiplayer` #1196 (Krzychu124)
+- [Fixed] Auto TTL should set-up dedicated turning lanes properly #1242 #1241 (kianzarrin)
+- [Fixed] Position of lane arrow tool for different resolutions #1237 (kianzarrin)
+- [Fixed] Update routings after modifying dedicated turning lanes policy #1236 #1235 (kianzarrin)
+- [Fixed] Checkbox label text wrap for long captions #1232 #401 (aubergine18, krzychu124)
+- [Fixed] Update SPEED_TO_MPH constant to correct value #1224 #988 (Glenwing, aubergine18)
+- [Fixed] Junction Restrictions transparency #1217 #1216 (kianzarrin)
+- [Fixed] U-turn policy on T-junctions #1212 #900 #347 (SubaruSVX, yackimoff, kianzarrin)
+- [Fixed] Routing manager lane connection check #1210 (kianzarrin)
+- [Fixed] Recalculation after lane connection remove #1199 #1198 (kian, krzychu124)
+- [Fixed] Priority Signs tool not working #1189 (krzychu124)
+- [Fixed] Lifecycle of TMPE tool #1188 (kianzarrin)
+- [Fixed] Guard against null when disabling tool (kianzarrin)
+- [Fixed] Trains not counted as waiting at timed traffic lights at rail junctions #1184 #1173 (DarthJimbo, krzychu124)
+- [Fixed] Toolbar could be dragged through Speed Limits window #1168 #683 (aubergine18, kvakvs)
+- [Updated] Code clean-up: ResetIncomingHighwayLaneArrows #1166 #1178 (egi)
+- [Updated] Incompatible mod detector improvements #1196 (Krzychu124)
+- [Updated] Code clean-up: Netutil and Speed Limits #1273 #1275 (kianzarrin)
+- [Updated] Static texture classes now CustomManagers #1265 (kvakvs)
+- [Updated] Performance: GetNode/Segment -> ToNode/Segment #1202 (kianzarrin)
+- [Updated] Performance: Refactoring/buffer to extension methods #1203 (kianzarrin)
+- [Updated] Performance: Converted .m_segments.m_buffer[segmentId] calls to segment #1204 (egi)
+- [Updated] Performance: Refactoring IsValid #1201 #1197 #1175 (egi)
+- [Updated] Replace NetService with newer code #1185 #1183 (egi)
+- [Updated] Performance: Replace VehicleService with newer code #1176 (egi)
+- [Updated] Code clean-up: Removed indirection for simplicity #1179 #1172 #1171 (egi)
+- [Updated] Improve error logging of Traffic rules record #1200 (kianzarrin)
+- [Updated] Performance: Switched from CO.IsFlagSet to kianzarrin's IsFlagSet #1186 (egi)
+- [Updated] Performance: Removed the ProcessCitizen and the CitizenHandler #1169 #1170 (egi)
+- [Updated] Speed Limits manager now uses structures #1163 (kvakvs)
+- [Removed] Obsolete and unnecessary code #1194 #1185 #1183 #1177 #1176 #1174 (egi)
+
+#### TM:PE V11.6.1.3 TEST, 14/10/2021
+
+- [Fixed] Cannot setup timed traffic lights on monorail nodes #1160 PR??? (Adreos, krzychu124)
+- [Fixed] Despawn off not working as expected #1167 #1148 (OliverWieland, krzychu124)
+- [Fixed] Bug in ResetIncomingHighwayLaneArrows #1165 (krzychu124, egi)
+- [Updated] Performance, memory efficiency #1161 #1162 #1164 #1165 (thanks egi)
+
+#### TM:PE V11.6.1.2 TEST, 21/09/2021
+
+- [New] GUI scaling for Traffic Lights and Speed Limits #1157 #1152 #1157 #406 #299 (RenaKunisaki, aubergine18, kianzarrin)
+- [New] Configurable TMPE.log path #1151 (kianzarrin)
+- [Mod] New: `UnifiedUI` integration, configurable in mod options #1153 (kianzarrin)
+- [Fixed] Reduced garbage memory generation #1159 (krzychu124)
+- [Fixed] Speed Limits window constrained on QHD resolution #1152 #935 #573 (MacSergey, aubergine18, kianzarrin)
+- [Updated] Performance: Lane iterations #1156 (egi)
+- [Updated] Internal changes in handling invalid segments #1154 (egi)
+- [Updated] Internal changes to building service #1150 (egi)
+- [Updated] Performance: Speed Limits GUI #1149 (egi)
+- [Updated] Improved performance benchmarking #1155 (egi)
+- [Removed] Obsolete and unnecessary code #1156 #1154 #1155 (egi)
+
+#### TM:PE V11.6.1.1 TEST, 25/08/2021
+
+- [Fixed] Community Content Pack detection - Train Stations; Bridges & Piers #1144 (krzychu124)
+- [Fixed] Vehicle Restrictions overlay position on Hydro Dam #1142 #741 (aubergine18. krzychu124)
+- [Fixed] Refreshing dedicated turning lanes after loading a savegame #1140 #1137 (kianzarrin)
+- [Fixed] Custom path-finding initialization and patching - rewritten execution flow #1145 (krzychu124)
+- [Updated] Internal changes to Speed Limits code for Speed Limits UI #1143 (kvakvs)
+
+#### TM:PE V11.6.1.0 TEST, 10/08/2021
+- [New] Language: Indonesian #1135 (Fizzy_LaFizz)
+- [New] First version of Notifier API for use by other mods #1127 (kianzarrin)
+- [Fixed] Speed Limits inifinite loop when using Shift modifier #1131 #1128 (krzychu124, kianzarrin)
+- [Fixed] Overlay transparency and UI opacity settings #1129 (krzychu124)
+- [Fixed] Half-segment detection when using Lane Arrows tool #1138 #1141 (kianzarrin, krzychu124)
+- [Updated] Multiple languages #1135 (mjm92150, Ikki_di_Phoenix, GiorgioHerbie, vicugna-pacos, DNSE, JJTspanishguy, krzychu124, macsergey, Lasm Gratel, 許景翔 gk50125012, kevinlin18, Warintorn Choorasri, chameleon-tbn)
+
+#### TM:PE V11.6.0.3 TEST, 17/06/2021
+
+- [Fixed] Segment lane routing calculations broken by invalid node/segment connections #1125 #1124 (Kexik-png-jpeg-negr, krzychu124)
+- [Updated] Performance: PathFind performance improvements #1114 (krzychu124)
+- [Updated] Lifted limit of threads for 8t+ CPUs #1114 (krzychu124)
+- [Updated] Reduced simulation thread sleep multiplier for long pathfind queues #1114 (krzychu124)
+
+#### TM:PE V11.6.0.2 TEST, 08/06/2021
+
+- [Fixed] Vehicle/cim path invalidation after loading savegame #1117 (kianzarrin)
+- [Fixed] Reloading localised textures for Priority Signs and TTL #1121 #1099 (TianQiBuTian, krzychu124)
+- [Updated] Lane Connectors: New shape, changed interactions in over/under-ground mode #985 #282 #3 (krzychu124)
+- [Updated] Performance: Network flag detection #1118 (kianzarrin)
+
+#### TM:PE V11.6.0.1 TEST, 28/05/2021
+
+- [Updated] Merge changes from 11.5.2.2 STABLE release #1113 (krzychu124)
+
+#### TM:PE V11.5.2-hotfix-1 STABLE, 27/05/2021
+
+- [Mod] Compatible: `Barges (Cargo Ferries)` #1112 (krzychu124)
+- [Mod] Compatible: `Movable Bridges` #1112 (krzychu124)
+- [Mod] Compatible: `81-Tiles` #1112 (krzychu124)
+
+#### TM:PE V11.6.0 TEST, 16/05/2021
+
+- [New] Full migration to Harmony 2.x #1089 #1060 #1059 #947 #944 #943 #921 #895 #866 #865 #864 #783 #782 #462 (Krzychu124, kianzarrin)
+- [New] Map/Asset/Intersection Editor support, except for traffic lights #1011 #1004 #990 #989 #972 #971 #970 #969 #966 #965 #964 #963 #959 #956 #898 #600 #288 (kianzarrin, Strdate)
+- [Mod] New: `MoveIt` copy & paste support, except for traffic lights #1005 #981 #956 (kianzarrin)
+- [New] Chinese icons for Priority Signs and Timed Traffic Lights #1081 #998 (TianQiBuTian, egi)
+- [New] Pedestrian crossing - no double crossing policy #1003 #936 (kianzarrin)
+- [New] Dedicated turning lane policy for bus lanes #1102 #1104 (kianzarrin)
+- [New] Short-term Undo features for roundabouts and priority roads #863 #860 (kianzarrin)
+- [New] Roundabout setup - speeds based on road curvature #863 #793 (scottmcm, kianzarrin)
+- [New] Roundabout setup - ban parking in/near roundabout #863 #578 (kianzarrin)
+- [New] Roundabout setup - allow/disallow enter blocked junction #863 #578
+- [New] Languages: Arabic, Occitan, Romanian, Slovak, Thai #1047 #946 (Oxy_Q8, perry7484, MarkTrefi, Alexander Maximilian Hečko, Ryan Gleeson)
+- [Mod] Compatible: `Asset Color Expander` #1063 #1060 (klyte45, krzychu124)
+- [Mod] Fixed: `81 Tiles` PostVanAI #943 #895 #1105 (krzychu124)
+- [Mod] Fixed: `More Vehicles` Array Index error due to patch sequence #1093 #1092
+- [Mod] Fixed: `Dynamic Resolution` Inactive camera caching issue with lane connectors #1079 #1078 (krzychu124)
+- [Fixed] Game crash on Linux #1060 #1048 #817 (krzychu124)
+- [Fixed] Industries, etc., outside central 25 tile area not spawning vehicles #1097 (klyte45, krzychu124)
+- [Fixed] Cargo trucks ignoring lane routing #1105 (krzychu124)
+- [Fixed] Citizen Not Found error #1091 #1067 (meda22, krzychu124)
+- [Fixed] TMPE state changes after using free camera mode #938 (Biffa, kianzarrin)
+- [Fixed] Typo in priority roads tooltip locale code #904 (TianQiBuTian)
+- [Fixed] Asset data extension lifecycle for hotloading #1096 #1095 (kianzarrin)
+- [Fixed] Lane connector duplicate render bug #1094 (egi)
+- [Fixed] Overlays not clearned when switching tools by shortcut key #1065 #1080 (MacSergey, krzychu124)
+- [Updated] Performance: Parking AI and Pathfinder use cached spiral grid coords #906 #994 (egi)
+- [Updated] Bezier accuracy of lane overlays #932 (MacSergey, kianzarrin)
+- [Updated] Performance: Lane Connector tool #1086 #1085 (egi)
+- [Updated] Improved roundabout detection code #863 #578 (kianzarrin)
+- [Updated] Simplified spawn/despawn patches to Harmony prefixes #943 #921 #864 #462
+- [Updated] Improved Harmony error reporting #1076 #1075 #1074 #997 #974 #973 #933 (kianzarrin, dymanoid)
+- [Updated] Multiple languages updated #1090 #1047 (Warintorn Choorasri, AlexofCA, Lasm Gratel, AlexofCA)
+- [Updated] Switch from `.ruleset` to `.editorconfig` #1087 #1082 (egi)
+- [Updated] Lifecycle improvements #1077 #1068 #767 #773 (kianzarrin)
+- [Updated] Clean-up loading extension for path manager #1072 #730 (kianzarrin)
+- [Updated] Code clean-up via code analyzers #1085 #1083 #1071 #1070 #1069 #1058 #1022 #948 #941 #940 #931 #930 #928 #927 #926 #918 #917 (egi)
+- [Updated] Microsoft Unity Analyzers #950 #949 #922 #916 (aubergine18, egi)
+- [Updated] Performance: Removed unnecessary closures #1055 #1029 #1028 #1027 #1023 (egi)
+- [Updated] Performance: Unity profiler support and code improvements #1054 (krzychu124)
+- [Updated] Improved texture atlas loading #1044 (kvakvs)
+- [Updated] Replace Code Profiler with SkyTools.Benchmark #914 #907 (egi, dymanoid)
+- [Removed] Obsolete spiral loop code #1057 #1019 (egi)
+- [Removed] Empty Game Bridge project #1056 (egi)
+- [Removed] Various obsolete and non-referenced code #937 #929 #915 (egi)
+- [Removed] Obsolete Code Profiler and related benchmark code #914 (egi)
+- [Removed] Legacy detour code from Loading Extension #731 (kianzarrin)
+- [Meta] TM:PE v11 TEST workshop page replaces TM:PE v11 LABS workshop page
+- [Maintainer] krzychu1245 (GitHub user krzychu124)
+- [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
+- [GitHub] [CitiesSkylinesMods/TMPE](https://github.com/CitiesSkylinesMods/TMPE)
+
+#### TM:PE V11.5.2 STABLE, 12/05/2021
+
+- [Mod] Hotfix: `Barges (Cargo Ferries)` #1103 (krzychu124)
+- [Mod] Hotfix: `81-Tiles` unified alternative path position #1105 (krzychu124)
+- [Fixed] Cargo trucks not respecting lane routing #1105 (krzychu124)
+- [Fixed] Bug in outside connection detection #1105 (krzychu124)
+
+#### TM:PE V11.5.2 STABLE (Reverted), 09/05/2021
+
+- [Mod] Hotfix: `Barges (Cargo Ferries)` #1103 (krzychu124)
+- [Meta] Had bugs and was reverted to 11.5.1 STABLE Hotfix-1
+
+#### TM:PE V11.5.1-hotfix-1 STABLE, 21/11/2020
+
+- [Fixed] Right click mouse button closing lane connection tool #1037 (krzychu124)
+
+#### TM:PE V11.5.1 STABLE, 19/11/2020
+
+- [Meta] Includes all features from TM:PE 11.5.0 LABS
+- [New] Right-Click will exit tool and subsequently TM:PE toolbsar #1014 #1032 (HypoSim, krzychu124)
+- [New] Shift+Click speed limit on whole roundabout #920 #869 (thebugfixnet, kianzarrin)
+- [Mod] Fixed: `MOM` stay-in-lane for metro tracks #919 (kianzarrin)
+- [Fixed] Floating vehicles when Parking AI disabled #993 #846 (krzychu124)
+- [Fixed] Error thrown if segment info is null #957 (kianzarrin, thebugfixnet)
+- [Updated] Use locks and existing list in GenericObservable #909 (egi)
+- [Updated] RoadSelectionPanel icons optimized to 8bit #984 (Chamëleon)
+
 #### TM:PE V[11.4.0](https://github.com/CitiesSkylinesMods/TMPE/compare/11.3.2...11.4.0) STABLE, 22/05/2020
 
 - [New] State machine for dedicated turning lanes (#755, #567)
@@ -75,6 +265,7 @@ This changelog includes all versions and major variants of the mod going all the
 - [Updated] Ukrainian translations (kvakvs) (#720, #819, #851, #858)
 - [Removed] `LogicUtil.CheckFlags()` and associated files evicted (#852)
 - [Steam] [TM:PE v11 LABS](https://steamcommunity.com/sharedfiles/filedetails/?id=1806963141)
+- [Meta] This was the last release of TM:PE v11 LABS; subsequent betas were via TM:PE v11 TEST (11.6.0 onwards)
 
 #### TM:PE V[11.3.2](https://github.com/CitiesSkylinesMods/TMPE/compare/11.2.3...11.3.2) STABLE, 16/04/2020
 
