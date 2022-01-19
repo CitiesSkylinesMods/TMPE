@@ -111,15 +111,15 @@
 
 [Version] 11.6.0.1
 [Released] May 28th 2021
-[Updated] Merge changes from 11.5.2.1 STABLE release #1113 (krzychu124)
+[Updated] Merge changes from 11.5.2.2 STABLE release #1113 (krzychu124)
 [/Version]
 
-[Version] 11.5.2.1
+[Version] 11.5.2.2
 [Stable]
 [Released] May 27th 2021
-[Mod] Hotfix: `Barges (Cargo Ferries)` #1105 (krzychu124)
-[Mod] Compatible: `Movable Bridges` #1105 (krzychu124)
-[Mod] Fixed: `81-Tiles` unified alternative path position #1105 (krzychu124)
+[Mod] Compatible: `Barges (Cargo Ferries)` #1112 (krzychu124)
+[Mod] Compatible: `Movable Bridges` #1112 (krzychu124)
+[Mod] Compatible: `81-Tiles` #1112 (krzychu124)
 [/Version]
 
 [Version] 11.6.0.0
@@ -135,14 +135,10 @@
 [New] Roundabout setup - ban parking in/near roundabout #863 #578 (kianzarrin)
 [New] Roundabout setup - allow/disallow enter blocked junction #863 #578
 [New] Languages: Arabic, Occitan, Romanian, Slovak, Thai #1047 #946 (Oxy_Q8, perry7484, MarkTrefi, Alexander Maximilian Hečko, Ryan Gleeson)
-[New] Shift+Click speed limit on whole roundabout #920 #869 #793 (thebugfixnet, kianzarrin)
-[New] Right-Click will exit tool and subsequently TM:PE toolbsar #1014 #1032 (HypoSim, krzychu124)
-[Updated] GenericObservable - use locks; re-use existing list to reduce gc #909 (egi)
 [Updated] Performance: Parking AI and Pathfinder use cached spiral grid coords #906 #994 (egi)
 [Updated] Bezier accuracy of lane overlays #932 (MacSergey, kianzarrin)
 [Updated] Performance: Lane Connector tool #1086 #1085 (egi)
 [Updated] Improved roundabout detection code #863 #578 (kianzarrin)
-[Updated] Icons for RoadSelectionPanel optimized for 8bit #984 (Chamëleon)
 [Updated] Simplified spawn/despawn patches to Harmony prefixes #943 #921 #864 #462
 [Updated] Improved Harmony error reporting #1076 #1075 #1074 #997 #974 #973 #933 (kianzarrin, dymanoid)
 [Updated] Multiple languages updated #1090 #1047 (Warintorn Choorasri, AlexofCA, Lasm Gratel, AlexofCA)
@@ -156,13 +152,10 @@
 [Updated] Improved texture atlas loading #1044 (kvakvs)
 [Updated] Replace Code Profiler with SkyTools.Benchmark #914 #907 (egi, dymanoid)
 [Mod] Compatible: `Asset Color Expander` #1063 #1060 (klyte45, krzychu124)
-[Mod] Compatible: `Barges (Cargo Ferries)` #1103 (krzychu124)
 [Mod] Fixed: `81 Tiles` PostVanAI #943 #895 #1105 (krzychu124)
-[Mod] Fixed: `MOM` stay-in-lane for metro tracks #919 (kianzarrin)
 [Mod] Fixed: `More Vehicles` Array Index error due to patch sequence #1093 #1092
 [Mod] Fixed: `Dynamic Resolution` Inactive camera caching issue with lane connectors #1079 #1078 (krzychu124)
 [Fixed] Game crash on Linux #1060 #1048 #817 (krzychu124)
-[Fixed] Floating vehicles when Parking AI disabled #993 #846 (krzychu124)
 [Fixed] Industries, etc., outside central 25 tile area not spawning vehicles #1097 (klyte45, krzychu124)
 [Fixed] Cargo trucks ignoring lane routing #1105 (krzychu124)
 [Fixed] Citizen Not Found error #1091 #1067 (meda22, krzychu124)
@@ -171,10 +164,36 @@
 [Fixed] Asset data extension lifecycle for hotloading #1096 #1095 (kianzarrin)
 [Fixed] Lane connector duplicate render bug #1094 (egi)
 [Fixed] Overlays not clearned when switching tools by shortcut key #1065 #1080 (MacSergey, krzychu124)
-[Fixed] Error thrown if segment info is null #957 (kianzarrin, thebugfixnet)
 [Removed] Obsolete spiral loop code #1057 #1019 (egi)
 [Removed] Empty Game Bridge project #1056 (egi)
 [Removed] Various obsolete and non-referenced code #937 #929 #915 (egi)
 [Removed] Obsolete Code Profiler and related benchmark code #914 (egi)
 [Removed] Legacy detour code from Loading Extension #731 (kianzarrin)
+[/Version]
+
+[Version] 11.5.2.1
+[Stable]
+[Released] May 12th 2021
+[Mod] Hotfix: `Barges (Cargo Ferries)` #1103 (krzychu124)
+[Fixed] Cargo trucks not respecting lane routing #1105 (krzychu124)
+[Fixed] Bug in outside connection detection #1105 (krzychu124)
+[Mod] Hotfix: `81-Tiles` unified alternative path position #1105 (krzychu124)
+[/Version]
+
+[Version] 11.5.1.1
+[Stable]
+[Released] November 21st 2020
+[Fixed] Right click mouse button closing lane connection tool #1037 (krzychu124)
+[/Version]
+
+[Version] 11.5.1.0
+[Stable]
+[Released] November 19th 2020
+[New] Right-Click will exit tool and subsequently TM:PE toolbsar #1014 #1032 (HypoSim, krzychu124)
+[New] Shift+Click speed limit on whole roundabout #920 #869 (thebugfixnet, kianzarrin)
+[Mod] Fixed: `MOM` stay-in-lane for metro tracks #919 (kianzarrin)
+[Fixed] Floating vehicles when Parking AI disabled #993 #846 (krzychu124)
+[Fixed] Error thrown if segment info is null #957 (kianzarrin, thebugfixnet)
+[Updated] Use locks and existing list in GenericObservable #909 (egi)
+[Updated] RoadSelectionPanel icons optimized to 8bit #984 (Chamëleon)
 [/Version]
