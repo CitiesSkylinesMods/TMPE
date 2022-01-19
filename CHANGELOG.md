@@ -6,25 +6,28 @@
 
 This changelog includes all versions and major variants of the mod going all the way back to March 2015, just 4 days after Cities: Skylines was released!
 
-> **Legend:**
->  
+<details><summary>Evolution of TM:PE (click to show/hide)</summary>
+
 > * **C:SL** = Cities: Skylines game updates (for reference)
-> * **TM:PE** = Traffic Manager: President Edition
->     * TM:PE v11 STABLE - TM:PE versions 11.0 and above (stable releases)
->     * TM:PE v11 LABS - TM:PE versions 11.0 and above (test releases)
->     * TM:PE v11 ALPHA - TM:PE versions 11.0-alpha1 to 11.0-alpha12 (later renamed to TM:PE v11 LABS)
->     * TM:PE LABS - TM:PE versions 10.14 to 10.21.1 (later renamed to TM:PE v11 STABLE)
->     * TM:PE STABLE - TM:PE versions 10.14 to 10.20
-> * **TPP2** = Traffic++ V2
-> * **TM:IAI** = Traffic Manager + Improved AI
-> * **TMPlus** = Traffic Manager Plus
-> * **TPP:AI** - Traffic++ Improved AI
-> * **TPP** = Traffic++
-> * **TM** = Traffic Manager
-> * **CSLT** = Cities Skylines Traffic (later renamed to Traffic++)
 > * **TLM** = Traffic Lights Manager (later renamed to Traffic Manager)
+> * **CSLT** = Cities Skylines Traffic (later renamed to Traffic++)
+> * **TM** = Traffic Manager
+> * **TPP** = Traffic++
+> * **TPP:AI** - Traffic++ Improved AI
+> * **TMPlus** = Traffic Manager Plus
+> * **TM:IAI** = Traffic Manager + Improved AI
+> * **TPP2** = Traffic++ V2
+> * **TM:PE** = `Traffic Manager: President Edition` versions 1 to 10.14
+> * **TM:PE LABS** - TM:PE versions 10.14 to 10.21.1 (later renamed to TM:PE v11 STABLE)
+> * **TM:PE STABLE** - TM:PE versions 10.14 to 10.20
+> * **TM:PE v11 ALPHA** - TM:PE versions 11.0-alpha1 to 11.0-alpha12 (later renamed to TM:PE v11 LABS)
+> * **TM:PE v11 LABS** - TM:PE versions 11.0 to 11.5.0 (test releases)
+> * **[TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252) - TM:PE versions 11.0 and above (stable releases)**
+> * **[TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785) - TM:PE versions 11.6.0 and above (test releases)**
 >  
 > Date format: dd/mm/yyyy
+
+</details>
 
 #### TM:PE V[11.4.0](https://github.com/CitiesSkylinesMods/TMPE/compare/11.3.2...11.4.0) STABLE, 22/05/2020
 
