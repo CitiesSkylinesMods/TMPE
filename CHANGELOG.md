@@ -30,7 +30,7 @@ This changelog includes all versions and major variants of the mod going all the
 </details>
 
 
-#### TM:PE 11.6.3.0 TEST, Soon
+#### TM:PE 11.6.3.0 TEST, 19/01/2022
 
 - [New] What's New panel #118 #1284 (krzychu124, aubergine18)
 - [Mod] Incompatible: `Traffic++ V2` - ancient mod, breaks game #1287 (aubergine18)
