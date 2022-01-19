@@ -45,7 +45,7 @@ Recent updates (dd/mm/yyyy):
 - [Mod] Compatible: `Movable Bridges` #1112 (krzychu124)
 - [Mod] Compatible: `81-Tiles` #1112 (krzychu124)
 
-#### TM:PE 11.6.3.0 TEST, Soon
+#### TM:PE 11.6.3.0 TEST, 19/01/2022
 
 - [New] What's New panel #118 #1284 (krzychu124, aubergine18)
 - [Mod] Incompatible: `Traffic++ V2` - ancient mod, breaks game #1287 (aubergine18)
