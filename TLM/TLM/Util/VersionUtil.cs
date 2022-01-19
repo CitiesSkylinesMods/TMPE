@@ -59,6 +59,11 @@ namespace TrafficManager.Util {
         public static string VersionString => ModVersion.ToString(3);
 
         /// <summary>
+        /// Returns <c>true</c> if this is a STABLE/RELEASE build, otherwise <c>false</c>.
+        /// </summary>
+        public static bool IsStableRelease => BRANCH == "STABLE";
+
+        /// <summary>
         /// take first n components of the version.
         /// </summary>
         static Version Take(this Version version, int n) {

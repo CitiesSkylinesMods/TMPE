@@ -146,6 +146,9 @@
     <Compile Include="Manager\Impl\ExtSegmentEndManager.cs" />
     <Compile Include="Manager\Impl\ExtSegmentManager.cs" />
     <Compile Include="Manager\Impl\GeometryNotifier.cs" />
+    <Compile Include="State\VersionInfo.cs" />
+    <Compile Include="UI\WhatsNew\MarkupKeyword.cs" />
+    <Compile Include="UI\WhatsNew\WhatsNewMarkup.cs" />
     <Compile Include="Util\Extensions\VersionExtension.cs" />
     <Compile Include="Util\Iterators\GetNodeSegmentIdsEnumerable.cs" />
     <Compile Include="Util\Iterators\GetNodeSegmentIdsEnumerator.cs" />
@@ -414,6 +417,8 @@
     <Compile Include="UI\TrafficManagerSubTool.cs" />
     <Compile Include="UI\TransportDemandViewMode.cs" />
     <Compile Include="UI\UITransportDemand.cs" />
+    <Compile Include="UI\WhatsNew\WhatsNew.cs" />
+    <Compile Include="UI\WhatsNew\WhatsNewPanel.cs" />
     <Compile Include="Util\AutoTimedTrafficLights.cs" />
     <Compile Include="Util\Extensions\BuildingExtensions.cs" />
     <Compile Include="Util\Extensions\CitizenExtensions.cs" />
@@ -1102,6 +1107,9 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\SignThemes\Kmph_Indonesia\NoParking.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\whats_new.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="PostBuildMacros">
