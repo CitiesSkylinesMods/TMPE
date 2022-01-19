@@ -6,6 +6,7 @@ namespace TrafficManager {
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.State;
     using TrafficManager.Traffic;
+    using Util;
 
     [Serializable]
     public class Configuration {

@@ -17,6 +17,7 @@ namespace TrafficManager.Lifecycle {
     using UnityEngine.SceneManagement;
     using UnityEngine;
     using JetBrains.Annotations;
+    using UI.WhatsNew;
 
     /// <summary>
     /// Do not use Singleton<TMPELifecycle>.instance to prevent memory leak.
@@ -42,6 +43,8 @@ namespace TrafficManager.Lifecycle {
 
         public bool InGameHotReload { get; private set; }
         public bool IsGameLoaded { get; private set; }
+
+        public WhatsNew WhatsNew { get; private set; }
 
         public Dictionary<BuildingInfo, AssetData> Asset2Data { get; set; }
 
@@ -139,6 +142,9 @@ namespace TrafficManager.Lifecycle {
                     // or when game first loads if TM:PE was already enabled
                     LoadingManager.instance.m_introLoaded += CompatibilityCheck;
                 }
+
+                // initialize what's new panel data
+                WhatsNew = new WhatsNew();
 
                 HarmonyHelper.EnsureHarmonyInstalled();
                 LoadingManager.instance.m_levelPreLoaded += Preload;

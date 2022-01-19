@@ -126,6 +126,10 @@ namespace TrafficManager.UI {
             } else {
                 ShowMainMenu();
                 GetTrafficManagerTool()?.RequestOnscreenDisplayUpdate();
+
+                if (!TMPELifecycle.Instance.WhatsNew.Shown) {
+                    WhatsNew.WhatsNew.OpenModal();
+                }
             }
         }
 

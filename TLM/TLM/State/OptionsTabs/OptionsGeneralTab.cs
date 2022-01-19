@@ -15,6 +15,7 @@ namespace TrafficManager.State {
     using TrafficManager.Lifecycle;
     using TrafficManager.State.ConfigData;
     using TrafficManager.UI.Textures;
+    using UI.WhatsNew;
 
     public static class OptionsGeneralTab {
         private static UICheckBox _instantEffectsToggle;
@@ -81,6 +82,11 @@ namespace TrafficManager.State {
                                     options: languageLabels,
                                     defaultSelection: languageIndex,
                                     eventCallback: OnLanguageChanged) as UIDropDown;
+
+            generalGroup.AddSpace(5);
+            generalGroup.AddButton("What's New?", WhatsNew.OpenModal);
+            generalGroup.AddSpace(10);
+
             _lockButtonToggle = generalGroup.AddCheckbox(
                                     text: T("General.Checkbox:Lock main menu button position"),
                                     defaultValue: GlobalConfig.Instance.Main.MainMenuButtonPosLocked,
@@ -140,6 +146,7 @@ namespace TrafficManager.State {
                                             defaultValue: GlobalConfig.Instance.Main.IgnoreDisabledMods,
                                             eventCallback: OnIgnoreDisabledModsChanged) as UICheckBox;
             Options.Indent(_ignoreDisabledModsToggle);
+
 
             // General: Speed Limits
             SetupSpeedLimitsPanel(generalGroup);
