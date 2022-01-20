@@ -178,8 +178,6 @@ namespace TrafficManager.Util {
 
         /// <summary>
         /// Checks to see if game version is what TMPE expects, and if not warns users.
-        ///
-        /// This will be replaced as part of #699.
         /// </summary>
         public static void CheckGameVersion() {
             if (CurrentGameVersionU != EXPECTED_GAME_VERSION_U) {
