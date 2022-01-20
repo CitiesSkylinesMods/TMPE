@@ -29,15 +29,15 @@ namespace TrafficManager.Util {
             ReleaseType.Stable;
 #endif
 
-        /// <summary>
-        /// VersionB of the game changes with mod breaking game updates .
-        /// </summary>
-        private const int VERSION_COMPONENTS_COUNT = 2;
-
         // we could alternatively use BuildConfig.APPLICATION_VERSION because const values are evaluated at compile time.
         // but I have decided not to do this because I don't want this to happen automatically with a rebuild if
         // CS updates. these values should be changed manaually so as to force us to acknowledge that they have changed.
         public const uint EXPECTED_GAME_VERSION_U = 189262096U;
+
+        /// <summary>
+        /// VersionB of the game changes with mod breaking game updates.
+        /// </summary>
+        private const int VERSION_COMPONENTS_COUNT = 2;
 
         // see comments for EXPECTED_GAME_VERSION_U.
         public static Version ExpectedGameVersion => new Version(1, 13, 3, 9);
