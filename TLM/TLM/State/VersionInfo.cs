@@ -4,11 +4,6 @@ namespace TrafficManager.State {
     using Util;
 
     [Serializable]
-    public class VersionInfoConfiguration {
-        public VersionInfo VersionInfo = new VersionInfo(VersionUtil.ModVersion);
-    }
-
-    [Serializable]
     public class VersionInfo {
         public Version assemblyVersion;
         public ReleaseType releaseType;
@@ -26,5 +21,8 @@ namespace TrafficManager.State {
 
     }
 
+    [Serializable]
+    public class VersionInfoConfiguration {
+        public VersionInfo VersionInfo = new VersionInfo(VersionUtil.ModVersion);
     }
 }
