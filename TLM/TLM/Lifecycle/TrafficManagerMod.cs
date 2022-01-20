@@ -8,7 +8,7 @@ namespace TrafficManager.Lifecycle {
     using TrafficManager.Util;
 
     public class TrafficManagerMod : ILoadingExtension, IUserMod {
-        public static string ModName => $"TM:PE {VersionUtil.VersionString} {VersionUtil.BRANCH}";
+        public static string ModName => $"TM:PE {VersionUtil.VersionString} {VersionUtil.BRANCH.ToUpper()}";
 
         public string Name => ModName;
 

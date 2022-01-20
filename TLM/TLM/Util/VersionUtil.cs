@@ -72,7 +72,12 @@ namespace TrafficManager.Util {
         public static bool IsStableRelease => BRANCH == ReleaseType.Stable;
 
         /// <summary>
+        /// Converts a <see cref="ReleaseType"/> to uppercase string.
         /// </summary>
+        /// <param name="value">The value to convert.</param>
+        /// <returns>Uppercase string representation of the <paramref name="value"/>.</returns>
+        public static string ToUpper(this ReleaseType value) {
+            return value.ToString().ToUpper();
         }
 
         /// <summary>
