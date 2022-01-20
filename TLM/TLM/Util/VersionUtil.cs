@@ -19,13 +19,14 @@ namespace TrafficManager.Util {
     [SuppressMessage("Performance", "HAA0601:Value type to reference type conversion causing boxing allocation", Justification = "Not performance critical")]
     [SuppressMessage("Performance", "HAA0302:Display class allocation to capture closure", Justification = "Not performance critical")]
     public static class VersionUtil {
-        public const string BRANCH =
+
+        public const ReleaseType BRANCH =
 #if TEST
-            "TEST";
+            ReleaseType.Test;
 #elif DEBUG
-            "DEBUG";
+            ReleaseType.Debug;
 #else
-            "STABLE";
+            ReleaseType.Stable;
 #endif
 
         /// <summary>
@@ -66,9 +67,9 @@ namespace TrafficManager.Util {
         public static string VersionString => ModVersion.ToString(3);
 
         /// <summary>
-        /// Returns <c>true</c> if this is a STABLE/RELEASE build, otherwise <c>false</c>.
+        /// Returns <c>true</c> if <see cref="BRANCH"/> is <see cref="ReleaseType.Stable"/>, otherwise <c>false</c>.
         /// </summary>
-        public static bool IsStableRelease => BRANCH == "STABLE";
+        public static bool IsStableRelease => BRANCH == ReleaseType.Stable;
 
         /// <summary>
         /// take first n components of the version.
