@@ -5,10 +5,24 @@ namespace TrafficManager.Util {
     using TrafficManager.Lifecycle;
     using System.Diagnostics.CodeAnalysis;
 
-    // Use `VersionUtil.BRANCH` to get release type of current build.
+    /// <summary>
+    /// The three main types of TM:PE build.
+    /// </summary>
+    /// <remarks>Use `VersionUtil.BRANCH` to get release type of current build.</remarks>
     public enum ReleaseType {
+        /// <summary>
+        /// A TEST build for release to the TEST workshop page.
+        /// </summary>
         Test,
+
+        /// <summary>
+        /// A DEBUG build during development cycle.
+        /// </summary>
         Debug,
+
+        /// <summary>
+        /// A STABLE build for release to the STABLE workshop page.
+        /// </summary>
         Stable,
     }
 
@@ -18,8 +32,13 @@ namespace TrafficManager.Util {
     [SuppressMessage("Performance", "HAA0101:Array allocation for params parameter", Justification = "Not performance critical")]
     [SuppressMessage("Performance", "HAA0601:Value type to reference type conversion causing boxing allocation", Justification = "Not performance critical")]
     [SuppressMessage("Performance", "HAA0302:Display class allocation to capture closure", Justification = "Not performance critical")]
+    [SuppressMessage("StyleCop.CSharp.NamingRules", "SA1310:Field names should not contain underscore", Justification = "Reviewed.")]
     public static class VersionUtil {
 
+        /// <summary>
+        /// Specifies the <see cref="ReleaseType"/> of the build.
+        /// </summary>
+        /// <remarks>Use <see cref="ToUpper(ReleaseType)"/> extension if you want uppercase string.</remarks>
         public const ReleaseType BRANCH =
 #if TEST
             ReleaseType.Test;
@@ -29,46 +48,74 @@ namespace TrafficManager.Util {
             ReleaseType.Stable;
 #endif
 
-        // we could alternatively use BuildConfig.APPLICATION_VERSION because const values are evaluated at compile time.
-        // but I have decided not to do this because I don't want this to happen automatically with a rebuild if
-        // CS updates. these values should be changed manaually so as to force us to acknowledge that they have changed.
+        /// <summary>
+        /// Specifies the <see cref="BuildConfig.APPLICATION_VERSION"/> this TM:PE build is designed for.
+        /// </summary>
+        /// <remarks>
+        /// We manually specify value here to force us to consider the need for updates when game version changes.
+        /// </remarks>
         public const uint EXPECTED_GAME_VERSION_U = 189262096U;
 
         /// <summary>
-        /// VersionB of the game changes with mod breaking game updates.
+        /// <see cref="BuildConfig.APPLICATION_VERSION_B"/> changes when there are likely to be severe
+        /// breaking changes for mods.
         /// </summary>
         private const int VERSION_COMPONENTS_COUNT = 2;
 
-        // see comments for EXPECTED_GAME_VERSION_U.
+        /// <summary>
+        /// Gets the manually defined <see cref="BuildConfig.APPLICATION_VERSION"/> this TM:PE build is designed for.
+        /// </summary>
+        /// <remarks>
+        /// We manually specify value here to force us to consider the need for updates when game version changes.
+        /// </remarks>
         public static Version ExpectedGameVersion => new Version(1, 13, 3, 9);
 
+        /// <summary>
+        /// Gets <see cref="EXPECTED_GAME_VERSION_U"/> as a human-friendly string.
+        /// </summary>
         public static string ExpectedGameVersionString => BuildConfig.VersionToString(EXPECTED_GAME_VERSION_U, false);
 
-        // we cannot use BuildConfig.APPLICATION_VERSION directly (it would not make sense).
-        // because BuildConfig.APPLICATION_VERSION is const and constants are resolved at compile-time.
-        // this is important when game version changes but TMPE dll is old. at such circumstance
-        // if we use BuildConfig.APPLICATION_VERSION then we will not notice that game version has changed.
-        // using reflection is a WORKAROUND to force the compiler to get value dynamically at run-time.
+        /// <summary>
+        /// Gets the game version at runtime.
+        /// </summary>
+        /// <remarks>
+        /// The game version is a <c>const</c> which is resolved at compile-time and thus won't indicate
+        /// actual running version of the game should it subsequently be updated. To workaround this, we
+        /// use reflection to get the game version at runtime.
+        /// </remarks>
         public static uint CurrentGameVersionU =>
             (uint)typeof(BuildConfig).GetField(nameof(BuildConfig.APPLICATION_VERSION)).GetValue(null);
 
-        // see comments CurrentGameVersionU.
+        /// <summary>
+        /// Gets the game version at runtime.
+        /// </summary>
+        /// <remarks>
+        /// The game version is a <c>const</c> which is resolved at compile-time and thus won't indicate
+        /// actual running version of the game should it subsequently be updated. To workaround this, we
+        /// use reflection to get the game version at runtime.
+        /// </remarks>
         public static Version CurrentGameVersion => new Version(
             (int)(uint)typeof(BuildConfig).GetField(nameof(BuildConfig.APPLICATION_VERSION_A)).GetValue(null),
             (int)(uint)typeof(BuildConfig).GetField(nameof(BuildConfig.APPLICATION_VERSION_B)).GetValue(null),
             (int)(uint)typeof(BuildConfig).GetField(nameof(BuildConfig.APPLICATION_VERSION_C)).GetValue(null),
             (int)(uint)typeof(BuildConfig).GetField(nameof(BuildConfig.APPLICATION_BUILD_NUMBER)).GetValue(null));
 
-        // Use SharedAssemblyInfo.cs to modify TM:PE version
-        // External mods (eg. CSUR Toolbox) reference the versioning for compatibility purposes
+        /// <summary>
+        /// Gets the compile-time version of this TM:PE build from <c>SharedAssemblyInfo.cs</c>.
+        /// </summary>
+        /// <remarks>
+        /// External mods (eg. CSUR Toolbox) reference this value for compatibility purposes.
+        /// </remarks>
         public static Version ModVersion => typeof(TrafficManagerMod).Assembly.GetName().Version;
 
         /// <summary>
-        /// Get the Guid of this currently running instance of TM:PE.
+        /// Gets the Guid of the active instance of TM:PE.
         /// </summary>
         public static Guid TmpeGuid => Assembly.GetExecutingAssembly().ManifestModule.ModuleVersionId;
 
-        // used for in-game display
+        /// <summary>
+        /// Gets the <see cref="ModVersion"/> as a <c>string</c>; used for in-game display (mod options, toolbar, etc).
+        /// </summary>
         public static string VersionString => ModVersion.ToString(3);
 
         /// <summary>
