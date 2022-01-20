@@ -26,9 +26,5 @@ namespace TrafficManager.State {
 
     }
 
-    public enum ReleaseType {
-        Test,
-        Debug,
-        Stable,
     }
 }

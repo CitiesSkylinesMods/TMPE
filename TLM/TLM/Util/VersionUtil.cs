@@ -5,6 +5,13 @@ namespace TrafficManager.Util {
     using TrafficManager.Lifecycle;
     using System.Diagnostics.CodeAnalysis;
 
+    // Use `VersionUtil.BRANCH` to get release type of current build.
+    public enum ReleaseType {
+        Test,
+        Debug,
+        Stable,
+    }
+
     /// <summary>
     /// Much of this stuff will be replaced as part of PR #699.
     /// </summary>
