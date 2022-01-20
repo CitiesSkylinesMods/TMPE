@@ -2,11 +2,12 @@ namespace TrafficManager.Lifecycle {
     using ColossalFramework.Globalization;
     using ICities;
     using JetBrains.Annotations;
-    using System;
+    using System.Diagnostics.CodeAnalysis;
     using TrafficManager.State;
     using TrafficManager.UI;
     using TrafficManager.Util;
 
+    [SuppressMessage("StyleCop.CSharp.LayoutRules", "SA1502:Element should not be on a single line", Justification = "Reviewed.")]
     public class TrafficManagerMod : ILoadingExtension, IUserMod {
         public static string ModName => $"TM:PE {VersionUtil.VersionString} {VersionUtil.BRANCH.ToUpper()}";
 
