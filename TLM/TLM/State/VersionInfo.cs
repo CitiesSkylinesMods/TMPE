@@ -10,13 +10,7 @@ namespace TrafficManager.State {
 
         public VersionInfo(Version assemblyVersion) {
             this.assemblyVersion = assemblyVersion;
-#if DEBUG
-            releaseType = ReleaseType.Debug;
-#elif TEST
-            releaseType = ReleaseType.Test;
-#else
-            releaseType = ReleaseType.Stable;
-#endif
+            releaseType = VersionUtil.BRANCH;
         }
 
     }
