@@ -72,10 +72,7 @@ namespace TrafficManager.Util {
         public static bool IsStableRelease => BRANCH == ReleaseType.Stable;
 
         /// <summary>
-        /// take first n components of the version.
         /// </summary>
-        static Version Take(this Version version, int n) {
-            return new Version(version.ToString(n));
         }
 
         /// <summary>
@@ -159,6 +156,16 @@ namespace TrafficManager.Util {
                     Shortcuts.ShowErrorDialog("Your game should be updated", msg);
                 }
             }
+        }
+
+        /// <summary>
+        /// Take the first <paramref name="n"/> components of a <see cref="Version"/> and use that to construct a new <see cref="Version"/>.
+        /// </summary>
+        /// <param name="version">The source version.</param>
+        /// <param name="n">The number of components to take.</param>
+        /// <returns>A new version based on the first <paramref name="n"/> components of <paramref name="version"/>.</returns>
+        private static Version Take(this Version version, int n) {
+            return new Version(version.ToString(n));
         }
     }
 }
