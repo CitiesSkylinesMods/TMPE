@@ -63,6 +63,11 @@ namespace TrafficManager.Util {
         // External mods (eg. CSUR Toolbox) reference the versioning for compatibility purposes
         public static Version ModVersion => typeof(TrafficManagerMod).Assembly.GetName().Version;
 
+        /// <summary>
+        /// Get the Guid of this currently running instance of TM:PE.
+        /// </summary>
+        public static Guid TmpeGuid => Assembly.GetExecutingAssembly().ManifestModule.ModuleVersionId;
+
         // used for in-game display
         public static string VersionString => ModVersion.ToString(3);
 
@@ -105,9 +110,7 @@ namespace TrafficManager.Util {
         /// Log TMPE Guid.
         /// </summary>
         public static void LogTmpeGuid() {
-            Log.InfoFormat(
-                "Enabled TM:PE has GUID {0}",
-                Assembly.GetExecutingAssembly().ManifestModule.ModuleVersionId);
+            Log.InfoFormat("Enabled TM:PE has GUID {0}", TmpeGuid);
         }
 
         /// <summary>

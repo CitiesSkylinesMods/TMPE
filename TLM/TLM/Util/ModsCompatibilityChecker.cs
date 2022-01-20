@@ -64,7 +64,7 @@ namespace TrafficManager.Util {
         /// <exception cref="PathTooLongException">Path is too long (longer than the system-defined
         ///     maximum length).</exception>
         private Dictionary<PluginInfo, string> ScanForIncompatibleMods() {
-            Guid selfGuid = Assembly.GetExecutingAssembly().ManifestModule.ModuleVersionId;
+            var selfGuid = VersionUtil.TmpeGuid;
 
             // check known incompatible mods? (incompatible_mods.txt)
             bool checkKnown = GlobalConfig.Instance.Main.ScanForKnownIncompatibleModsAtStartup;
