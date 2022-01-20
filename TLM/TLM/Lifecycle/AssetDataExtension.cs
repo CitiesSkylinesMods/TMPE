@@ -21,7 +21,7 @@ namespace TrafficManager.Lifecycle {
             OnAssetSavedImpl(name, asset, out userData);
 
         public static void OnAssetLoadedImpl(string name, object asset, Dictionary<string, byte[]> userData) {
-            Log.Info($"AssetDataExtension.OnAssetLoadedImpl({name}, {asset}, userData) called");
+            Log._Debug($"AssetDataExtension.OnAssetLoadedImpl({name}, {asset}, userData) called");
             if (asset is BuildingInfo prefab) {
                 Log._Debug("AssetDataExtension.OnAssetLoadedImpl():  prefab is " + prefab);
                 if (userData.TryGetValue(TMPE_RECORD_ID, out byte[] data)) {
