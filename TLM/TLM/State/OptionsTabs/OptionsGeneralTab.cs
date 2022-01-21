@@ -15,6 +15,7 @@ namespace TrafficManager.State {
     using TrafficManager.Lifecycle;
     using TrafficManager.State.ConfigData;
     using TrafficManager.UI.Textures;
+    using UI.WhatsNew;
 
     public static class OptionsGeneralTab {
         private static UICheckBox _instantEffectsToggle;
@@ -59,6 +60,11 @@ namespace TrafficManager.State {
             UIHelperBase groupLocalisation = panelHelper.AddGroup(T("General.Group:Localisation"));
             AddLanguageDropdown(groupLocalisation,
                 GlobalConfig.Instance.LanguageCode);
+
+            generalGroup.AddSpace(5);
+            generalGroup.AddButton("What's New?", WhatsNew.OpenModal);
+            generalGroup.AddSpace(10);
+          
             AddCrowdinButton(groupLocalisation);
             AddLocalisationWikiButton(groupLocalisation);
             // TODO: #1221 Ditch separate MPH vs. km/h setting; selected icon theme should determine that?
@@ -263,7 +269,6 @@ namespace TrafficManager.State {
                     reportUnexpected,
                     OnShowCompatibilityCheckErrorChanged) as UICheckBox;
         }
-
 
         private static void AddSimAccuracyDropdown(UIHelperBase group, int simulationAccuracy) {
             string[] simPrecisionOptions = new[] {

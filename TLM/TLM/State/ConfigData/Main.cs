@@ -2,6 +2,8 @@ namespace TrafficManager.State.ConfigData {
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Xml.Serialization;
+    using JetBrains.Annotations;
     using TrafficManager.UI.MainMenu;
     using TrafficManager.UI.SubTools.SpeedLimits;
 
@@ -33,7 +35,7 @@ namespace TrafficManager.State.ConfigData {
         /// <summary>Speed Limits tool window position Y.</summary>
         public int SpeedLimitsWindowY = 0;
 
-        /// <summary>Put button inisde UUI.</summary>
+        /// <summary>Put button inside UUI.</summary>
         public bool UseUUI = false;
 
         /// <summary>Already displayed tutorial messages.</summary>
@@ -57,8 +59,8 @@ namespace TrafficManager.State.ConfigData {
         public float GuiScale = 100f;
 
         /// <summary>
-        /// if checked, size remains constnat but pixel count changes when resolution changes. Quality drops with lower resolutions.
-        /// if unchecked checked, size changes constnat but pixel count remains the same. Maintains same image quality for all resolution.
+        /// if checked, size remains constant but pixel count changes when resolution changes. Quality drops with lower resolutions.
+        /// if unchecked checked, size changes constant but pixel count remains the same. Maintains same image quality for all resolution.
         /// </summary>
         public bool GuiScaleToResolution = true;
 
@@ -102,6 +104,31 @@ namespace TrafficManager.State.ConfigData {
         /// <see cref="DisplaySpeedLimitsMph"/>.
         /// </summary>
         public string RoadSignTheme = string.Empty;
+
+        /// <summary>
+        /// Storing version of What's New panel opened last time
+        /// </summary>
+        [XmlIgnore]
+        [CanBeNull]
+        public Version LastWhatsNewPanelVersion = null;
+
+        /// <summary>
+        /// Property for proper Version serialization
+        /// </summary>
+        [UsedImplicitly]
+        [XmlElement(ElementName = nameof(LastWhatsNewPanelVersion))]
+        public string lastWhatsNewPanelVersion {
+            get {
+                if (this.LastWhatsNewPanelVersion == null)
+                    return string.Empty;
+                else
+                    return this.LastWhatsNewPanelVersion.ToString();
+            }
+            set {
+                if (!string.IsNullOrEmpty(value))
+                    this.LastWhatsNewPanelVersion = new Version(value);
+            }
+        }
 
         public void AddDisplayedTutorialMessage(string messageKey) {
             HashSet<string> newMessages = DisplayedTutorialMessages != null
