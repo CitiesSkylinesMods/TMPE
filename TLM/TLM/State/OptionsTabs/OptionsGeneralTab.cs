@@ -61,9 +61,9 @@ namespace TrafficManager.State {
             AddLanguageDropdown(groupLocalisation,
                 GlobalConfig.Instance.LanguageCode);
 
-            generalGroup.AddSpace(5);
-            generalGroup.AddButton("What's New?", WhatsNew.OpenModal);
-            generalGroup.AddSpace(10);
+            groupLocalisation.AddSpace(5);
+            groupLocalisation.AddButton("What's New?", WhatsNew.OpenModal);
+            groupLocalisation.AddSpace(10);
           
             AddCrowdinButton(groupLocalisation);
             AddLocalisationWikiButton(groupLocalisation);
