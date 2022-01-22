@@ -96,11 +96,30 @@ namespace TrafficManager.State {
         public static bool turnOnRedEnabled = true;
         public static bool laneConnectorEnabled = true;
 
-        [UsedImplicitly]
-        public static bool scanForKnownIncompatibleModsEnabled = true;
+        /* ---- start: global-only options ---- */
+        // These are shims to facilitate use of CheckboxOption prior to settings overhaul
 
         [UsedImplicitly]
+        public static bool DisplaySpeedLimitsMph;
+        [UsedImplicitly]
+        public static bool MainMenuButtonPosLocked;
+        [UsedImplicitly]
+        public static bool MainMenuPosLocked;
+        [UsedImplicitly]
+        public static bool scanForKnownIncompatibleModsEnabled = true;
+        [UsedImplicitly]
         public static bool ignoreDisabledModsEnabled;
+        public static bool UseUUI;
+        [UsedImplicitly]
+        public static bool EnableTutorial;
+        [UsedImplicitly]
+        public static bool ScanForKnownIncompatibleModsAtStartup;
+        [UsedImplicitly]
+        public static bool IgnoreDisabledMods;
+        [UsedImplicitly]
+        public static bool ShowCompatibilityCheckErrorMessage;
+
+        /* ---- end: global-only options ---- */
 
         public static VehicleRestrictionsAggression vehicleRestrictionsAggression =
             VehicleRestrictionsAggression.Medium;
