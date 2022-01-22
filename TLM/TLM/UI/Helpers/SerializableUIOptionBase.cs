@@ -36,6 +36,7 @@ namespace TrafficManager.UI.Helpers {
         public string Label;
         public string Tooltip;
         public bool Indent = false;
+        public virtual bool Enabled { get; set; }
 
         public void DefaultOnValueChanged(TVal newVal) {
             Options.IsGameLoaded(!GlobalOption);
