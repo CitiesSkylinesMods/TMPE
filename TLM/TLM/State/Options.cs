@@ -108,7 +108,6 @@ namespace TrafficManager.State {
         [UsedImplicitly]
         public static bool scanForKnownIncompatibleModsEnabled = true;
         [UsedImplicitly]
-        public static bool ignoreDisabledModsEnabled;
         public static bool UseUUI;
         [UsedImplicitly]
         public static bool EnableTutorial;
