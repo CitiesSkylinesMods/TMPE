@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.UI.SubTools.SpeedLimits {
+namespace TrafficManager.UI.SubTools.SpeedLimits {
     using ColossalFramework.UI;
     using TrafficManager.State;
 
@@ -8,8 +8,8 @@
             protected override bool IsVisible() => true;
 
             public override void HandleClick(UIMouseEventParameter p) {
-                bool mph = !GlobalConfig.Instance.Main.DisplaySpeedLimitsMph;
-                OptionsGeneralTab.SetDisplayInMph(mph);
+                bool newValue = !GlobalConfig.Instance.Main.DisplaySpeedLimitsMph;
+                OptionsGeneralTab.DisplaySpeedLimitsMph.Value = newValue;
             }
 
             /// <summary>Always clickable.</summary>
