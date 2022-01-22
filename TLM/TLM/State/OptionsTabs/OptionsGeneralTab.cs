@@ -138,21 +138,17 @@ namespace TrafficManager.State {
             AddIconThemeDropdown(group, GlobalConfig.Instance.Main.RoadSignTheme);
 
             // Group: Interface
-
-            UIHelperBase groupInterface = panelHelper.AddGroup(T("General.Group:Interface"));
-            AddPositionLockSettings(groupInterface,
-                GlobalConfig.Instance.Main.MainMenuButtonPosLocked,
-                GlobalConfig.Instance.Main.MainMenuPosLocked);
-            AddUuiCheckbox(groupInterface,
-                GlobalConfig.Instance.Main.UseUUI);
-            AddGuiScaleSlider(groupInterface,
+            group = tab.AddGroup(T("General.Group:Interface"));
+            MainMenuButtonPosLocked.AddUI(group);
+            MainMenuPosLocked.AddUI(group);
+            UseUUI.AddUI(group);
+            AddGuiScaleSlider(group,
                 GlobalConfig.Instance.Main.GuiScale);
-            // TODO: #1268 These should both be `opacity`
-            AddGuiTransparencySliders(groupInterface,
+            // TODO: #1268 These should both be `Opacity`
+            AddGuiTransparencySliders(group,
                 GlobalConfig.Instance.Main.GuiOpacity,
                 GlobalConfig.Instance.Main.OverlayTransparency);
-            AddTutorialCheckbox(groupInterface,
-                GlobalConfig.Instance.Main.EnableTutorial);
+            EnableTutorial.AddUI(group);
 
             // Group: Simulation
 
