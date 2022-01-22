@@ -116,6 +116,15 @@ namespace TrafficManager.State {
 
         internal static void MakeSettings_General(ExtUITabstrip tabStrip) {
             UIHelper panelHelper = tabStrip.AddTabPage(T("Tab:General"));
+            // Set checkbox values based on global config
+            DisplaySpeedLimitsMph.Value = GlobalConfig.Instance.Main.DisplaySpeedLimitsMph;
+            MainMenuButtonPosLocked.Value = GlobalConfig.Instance.Main.MainMenuButtonPosLocked;
+            MainMenuPosLocked.Value = GlobalConfig.Instance.Main.MainMenuPosLocked;
+            UseUUI.Value = GlobalConfig.Instance.Main.UseUUI;
+            EnableTutorial.Value = GlobalConfig.Instance.Main.EnableTutorial;
+            ScanForKnownIncompatibleModsAtStartup.Value = GlobalConfig.Instance.Main.ScanForKnownIncompatibleModsAtStartup;
+            IgnoreDisabledMods.Value = GlobalConfig.Instance.Main.IgnoreDisabledMods;
+            ShowCompatibilityCheckErrorMessage.Value = GlobalConfig.Instance.Main.ShowCompatibilityCheckErrorMessage;
 
             // Group: Localisation
 
