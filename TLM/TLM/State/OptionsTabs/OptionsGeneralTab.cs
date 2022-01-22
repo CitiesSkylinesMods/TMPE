@@ -157,12 +157,11 @@ namespace TrafficManager.State {
             InstantEffects.AddUI(group);
 
             // Group: Compatibility
-
-            UIHelperBase groupCompatibility = panelHelper.AddGroup(T("General.Group:Compatibility"));
-            AddModCheckerCheckboxes(groupCompatibility,
-                GlobalConfig.Instance.Main.ScanForKnownIncompatibleModsAtStartup,
-                GlobalConfig.Instance.Main.IgnoreDisabledMods,
-                GlobalConfig.Instance.Main.ShowCompatibilityCheckErrorMessage);
+            group = tab.AddGroup(T("General.Group:Compatibility"));
+            ScanForKnownIncompatibleModsAtStartup.AddUI(group);
+            IgnoreDisabledMods.AddUI(group);
+            IgnoreDisabledMods.Enabled = ScanForKnownIncompatibleModsAtStartup.Value;
+            ShowCompatibilityCheckErrorMessage.AddUI(group);
         }
 
         private static void AddLanguageDropdown(UIHelperBase group, string? currentLangCode) {
