@@ -41,6 +41,11 @@ namespace TrafficManager.UI.Helpers {
 
         public virtual bool Enabled { get; set; }
 
+        /// <summary>
+        /// Returns <c>true</c> if user is allowed to change the value in current context.
+        /// </summary>
+        protected bool IsValueChangeAllowed => GlobalOption || Options.IsGameLoaded(false);
+
         public void DefaultOnValueChanged(TVal newVal) {
             Options.IsGameLoaded(!GlobalOption);
             Log._Debug($"{Label} changed to {newVal}");

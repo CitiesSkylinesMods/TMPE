@@ -40,7 +40,6 @@ namespace TrafficManager.UI.Helpers {
         public override byte Save() => Value ? (byte)1 : (byte)0;
 
         public override void AddUI(UIHelperBase container) {
-            bool unalterable = !GlobalOption && !Options.IsGameLoaded(false);
             _ui = container.AddCheckbox(
                 T(Label),
                 Value,
@@ -49,7 +48,7 @@ namespace TrafficManager.UI.Helpers {
                 Options.Indent(_ui);
             }
             Options.AllowTextWrap(_ui, Indent);
-            if (unalterable) {
+            if (!IsValueChangeAllowed) {
                 Enabled = false;
                 _ui.tooltip = "This setting can only be changed in-game.";
             } else if (Tooltip != null) {
