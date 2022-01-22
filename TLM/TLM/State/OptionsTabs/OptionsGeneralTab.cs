@@ -152,7 +152,7 @@ namespace TrafficManager.State {
             group = tab.AddGroup(T("General.Group:Compatibility"));
             ScanForKnownIncompatibleModsAtStartup.AddUI(group);
             IgnoreDisabledMods.AddUI(group);
-            IgnoreDisabledMods.Enabled = ScanForKnownIncompatibleModsAtStartup.Value;
+            IgnoreDisabledMods.Enabled = ScanForKnownIncompatibleModsAtStartup;
             ShowCompatibilityCheckErrorMessage.AddUI(group);
         }
 
