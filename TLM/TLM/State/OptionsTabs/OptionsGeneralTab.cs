@@ -18,24 +18,22 @@ namespace TrafficManager.State {
     using UI.WhatsNew;
 
     public static class OptionsGeneralTab {
-        private static UICheckBox _instantEffectsToggle;
         // suppress "this option can only be set in-game" warning
         // when setting is changed from main menu.
         internal const bool GLOBAL_SETTING = true;
 
+        // Group: Localisation
         [UsedImplicitly]
         private static UIDropDown _languageDropdown;
-        private static UIDropDown _simulationAccuracyDropdown;
-
-        [UsedImplicitly]
-        private static UICheckBox _lockButtonToggle;
-
-        [UsedImplicitly]
-        private static UICheckBox _lockMenuToggle;
-
-        private static UISlider _guiOpacitySlider;
+        private static UICheckBox _displayMphToggle;
+        private static UIDropDown _roadSignsThemeDropdown;
+        // Group: Interface
         private static UISlider _guiScaleSlider;
+        private static UISlider _guiOpacitySlider;
         private static UISlider _overlayTransparencySlider;
+        // Group: Simulation
+        private static UIDropDown _simulationAccuracyDropdown;
+        // Group: Compatibility
 
         // GlobalConfig.Instance.Main.DisplaySpeedLimitsMph
         public static CheckboxOption DisplaySpeedLimitsMph =
@@ -45,8 +43,6 @@ namespace TrafficManager.State {
                 Translator = nameof(Translation.SpeedLimits),
             };
 
-        [UsedImplicitly]
-        private static UICheckBox _enableTutorialToggle;
         // GlobalConfig.Instance.Main.MainMenuButtonPosLocked
         public static CheckboxOption MainMenuButtonPosLocked =
             new(nameof(Options.MainMenuButtonPosLocked), GLOBAL_SETTING) {
@@ -54,8 +50,6 @@ namespace TrafficManager.State {
                 Handler = OnMainMenuButtonPosLockedChanged,
             };
 
-        [UsedImplicitly]
-        private static UICheckBox _showCompatibilityCheckErrorToggle;
         // GlobalConfig.Instance.Main.MainMenuPosLocked
         public static CheckboxOption MainMenuPosLocked =
             new(nameof(Options.MainMenuPosLocked), GLOBAL_SETTING) {
@@ -63,8 +57,6 @@ namespace TrafficManager.State {
                 Handler = OnMainMenuPosLockedChanged,
             };
 
-        private static UICheckBox _scanForKnownIncompatibleModsToggle;
-        private static UICheckBox _ignoreDisabledModsToggle;
         // GlobalConfig.Instance.Main.UseUUI
         public static CheckboxOption UseUUI =
             new(nameof(Options.UseUUI), GLOBAL_SETTING) {
@@ -72,7 +64,6 @@ namespace TrafficManager.State {
                 Handler = OnUseUUIChanged,
             };
 
-        private static UICheckBox _displayMphToggle;
         // GlobalConfig.Instance.Main.EnableTutorial
         public static CheckboxOption EnableTutorial =
             new(nameof(Options.EnableTutorial), GLOBAL_SETTING) {
@@ -80,14 +71,12 @@ namespace TrafficManager.State {
                 Handler = OnEnableTutorialChanged,
             };
 
-        private static UIDropDown _roadSignsThemeDropdown;
         public static CheckboxOption InstantEffects =
             new(nameof(Options.instantEffects)) {
                 Label = "General.Checkbox:Apply AI changes right away",
                 Handler = OnInstantEffectsChanged,
             };
 
-        private static UICheckBox _useUUI;
         // GlobalConfig.Instance.Main.ScanForKnownIncompatibleModsAtStartup
         public static CheckboxOption ScanForKnownIncompatibleModsAtStartup =
             new(nameof(Options.ScanForKnownIncompatibleModsAtStartup), GLOBAL_SETTING) {
@@ -115,7 +104,9 @@ namespace TrafficManager.State {
         private static string T(string key) => Translation.Options.Get(key);
 
         internal static void MakeSettings_General(ExtUITabstrip tabStrip) {
-            UIHelper panelHelper = tabStrip.AddTabPage(T("Tab:General"));
+            UIHelper tab = tabStrip.AddTabPage(T("Tab:General"));
+            UIHelperBase group;
+
             // Set checkbox values based on global config
             DisplaySpeedLimitsMph.Value = GlobalConfig.Instance.Main.DisplaySpeedLimitsMph;
             MainMenuButtonPosLocked.Value = GlobalConfig.Instance.Main.MainMenuButtonPosLocked;
@@ -126,7 +117,9 @@ namespace TrafficManager.State {
             IgnoreDisabledMods.Value = GlobalConfig.Instance.Main.IgnoreDisabledMods;
             ShowCompatibilityCheckErrorMessage.Value = GlobalConfig.Instance.Main.ShowCompatibilityCheckErrorMessage;
 
-            // Group: Localisation
+            tab.AddSpace(5);
+            tab.AddButton("What's New?", WhatsNew.OpenModal);
+            tab.AddSpace(10);
 
             // Group: Localisation
             group = tab.AddGroup(T("General.Group:Localisation"));
@@ -164,6 +157,8 @@ namespace TrafficManager.State {
             ShowCompatibilityCheckErrorMessage.AddUI(group);
         }
 
+        // Additional UI creation stuff:
+
         private static void AddLanguageDropdown(UIHelperBase group, string? currentLangCode) {
             string[] languageLabels = new string[Translation.AvailableLanguageCodes.Count + 1];
             languageLabels[0] = T("General.Dropdown.Option:Game language");
@@ -192,41 +187,35 @@ namespace TrafficManager.State {
                                     eventCallback: OnLanguageChanged) as UIDropDown;
         }
 
-        private static void AddCrowdinButton(UIHelperBase group) {
-            UIButton button = group.AddButton(
-                                    text: T("General.Button:Help us translate on Crowdin"),
-                                    eventCallback: OpenCrowdinInBrowser) as UIButton;
+        private static void AddLocalisationButtons(UIHelperBase group) {
+            UIButton button;
+
+            button = group.AddButton(
+                text: T("General.Button:Help us translate on Crowdin"),
+                eventCallback: OnCrowdinButonClick) as UIButton;
             button.tooltip = "https://crowdin.com/project/tmpe";
             button.textScale = 0.8f;
+
+            button = group.AddButton(
+                text: T("General.Button:View localisation guide"),
+                eventCallback: OnLocalisationWikiButtonClick) as UIButton;
+            button.tooltip = "https://github.com/CitiesSkylinesMods/TMPE/wiki/Localisation";
+            button.textScale = 0.8f;
+
         }
 
-        private static void OpenCrowdinInBrowser() {
+        private static void OnCrowdinButonClick() {
             if (TMPELifecycle.InGameOrEditor()) {
                 SimulationManager.instance.SimulationPaused = true;
             }
             Application.OpenURL("https://crowdin.com/project/tmpe");
         }
 
-        private static void AddLocalisationWikiButton(UIHelperBase group) {
-            UIButton button = group.AddButton(
-                                    text: T("General.Button:View localisation guide"),
-                                    eventCallback: OpenLocalisationWikiInBrowser) as UIButton;
-            button.tooltip = "https://github.com/CitiesSkylinesMods/TMPE/wiki/Localisation";
-            button.textScale = 0.8f;
-        }
-
-        private static void OpenLocalisationWikiInBrowser() {
+        private static void OnLocalisationWikiButtonClick() {
             if (TMPELifecycle.InGameOrEditor()) {
                 SimulationManager.instance.SimulationPaused = true;
             }
             Application.OpenURL("https://github.com/CitiesSkylinesMods/TMPE/wiki/Localisation");
-        }
-
-        private static void AddMphCheckbox(UIHelperBase group, bool DisplaySpeedLimitsMph) {
-            _displayMphToggle = group.AddCheckbox(
-                                    text: Translation.SpeedLimits.Get("Checkbox:Display speed limits mph"),
-                                    defaultValue: DisplaySpeedLimitsMph,
-                                    eventCallback: OnDisplayMphChanged) as UICheckBox;
         }
 
         private static void AddIconThemeDropdown(UIHelperBase group, string? roadSignTheme) {
@@ -247,25 +236,6 @@ namespace TrafficManager.State {
                       eventCallback: OnRoadSignsThemeChanged) as UIDropDown;
 
             _roadSignsThemeDropdown.width *= 2.0f;
-        }
-
-        private static void AddPositionLockSettings(UIHelperBase group, bool buttonLocked, bool toolbarLocked) {
-            _lockButtonToggle = group.AddCheckbox(
-                                    text: T("General.Checkbox:Lock main menu button position"),
-                                    defaultValue: buttonLocked,
-                                    eventCallback: OnLockButtonChanged) as UICheckBox;
-
-            _lockMenuToggle = group.AddCheckbox(
-                                  text: T("General.Checkbox:Lock main menu window position"),
-                                  defaultValue: toolbarLocked,
-                                  eventCallback: OnLockMenuChanged) as UICheckBox;
-        }
-
-        private static void AddUuiCheckbox(UIHelperBase group, bool useUUI) {
-            _useUUI = group.AddCheckbox(
-                text: T("General.Checkbox:Use UnifiedUI"),
-                defaultValue: useUUI,
-                eventCallback: OnUseUUIChanged) as UICheckBox;
         }
 
         private static void AddGuiScaleSlider(UIHelperBase group, float guiScale) {
@@ -299,34 +269,6 @@ namespace TrafficManager.State {
             _overlayTransparencySlider.parent.Find<UILabel>("Label").width = 500;
         }
 
-        private static void AddTutorialCheckbox(UIHelperBase group, bool enableTutorial) {
-            _enableTutorialToggle = group.AddCheckbox(
-                                        T("General.Checkbox:Enable tutorials"),
-                                        enableTutorial,
-                                        OnEnableTutorialsChanged) as UICheckBox;
-        }
-
-        private static void AddModCheckerCheckboxes(UIHelperBase group, bool scanMods, bool ignoreDisabled, bool reportUnexpected) {
-            _scanForKnownIncompatibleModsToggle
-                = group.AddCheckbox(
-                    Translation.ModConflicts.Get("Checkbox:Scan for known incompatible mods on startup"),
-                    scanMods,
-                    OnScanForKnownIncompatibleModsChanged) as UICheckBox;
-
-            _ignoreDisabledModsToggle
-                = group.AddCheckbox(
-                    text: Translation.ModConflicts.Get("Checkbox:Ignore disabled mods"),
-                    defaultValue: ignoreDisabled,
-                    eventCallback: OnIgnoreDisabledModsChanged) as UICheckBox;
-            Options.Indent(_ignoreDisabledModsToggle);
-
-            _showCompatibilityCheckErrorToggle
-                = group.AddCheckbox(
-                    T("General.Checkbox:Notify me about TM:PE startup conflicts"),
-                    reportUnexpected,
-                    OnShowCompatibilityCheckErrorChanged) as UICheckBox;
-        }
-
         private static void AddSimAccuracyDropdown(UIHelperBase group, int simulationAccuracy) {
             string[] simPrecisionOptions = new[] {
                 T("General.Dropdown.Option:Very low"),
@@ -344,13 +286,7 @@ namespace TrafficManager.State {
                     eventCallback: OnSimulationAccuracyChanged) as UIDropDown;
         }
 
-        private static void AddInstantEffectCheckbox(UIHelperBase group, bool instantEffects) {
-            _instantEffectsToggle
-                = group.AddCheckbox(
-                    text: T("General.Checkbox:Apply AI changes right away"),
-                    defaultValue: instantEffects,
-                    eventCallback: OnInstantEffectsChanged) as UICheckBox;
-        }
+        // Handlers: Localization
 
         private static void OnLanguageChanged(int newLanguageIndex) {
             if (newLanguageIndex <= 0) {
@@ -364,6 +300,7 @@ namespace TrafficManager.State {
                 string newLang = Translation.AvailableLanguageCodes[newLanguageIndex - 1];
                 GlobalConfig.Instance.LanguageCode = newLang;
                 GlobalConfig.WriteConfig();
+
                 // TODO: Move this to the owner class and implement IObserver<ModUI.EventPublishers.LanguageChangeNotification>
                 Translation.SetCurrentLanguageToTMPELanguage();
                 Options.RebuildMenu();
@@ -379,30 +316,98 @@ namespace TrafficManager.State {
             Options.RebuildOptions();
         }
 
-        private static void OnLockButtonChanged(bool newValue) {
-            Log._Debug($"Button lock changed to {newValue}");
+        private static void OnDisplaySpeedLimitsMphChange(bool newMphValue) {
+            bool supportedByTheme = newMphValue
+                                        ? RoadSignThemes.ActiveTheme.SupportsMph
+                                        : RoadSignThemes.ActiveTheme.SupportsKmph;
+
+            if (!supportedByTheme) {
+                // Reset to German road signs theme
+                _roadSignsThemeDropdown.selectedIndex = RoadSignThemes.Instance.FindDefaultThemeIndex(newMphValue);
+                GlobalConfig.Instance.Main.RoadSignTheme = RoadSignThemes.Instance.GetDefaultThemeName(newMphValue);
+                Log.Info(
+                    $"DisplaySpeedLimitsMph -> {newMphValue}, but was not supported by current theme, "
+                    + "so theme was also reset to German_Kmph");
+            } else {
+                Log.Info($"DisplaySpeedLimitsMph -> {newMphValue}");
+            }
+
+            GlobalConfig.Instance.Main.DisplaySpeedLimitsMph = newMphValue;
+            GlobalConfig.WriteConfig();
+
+            if (Options.IsGameLoaded(false)) {
+                ModUI.Instance.Events.DisplayMphChanged(newMphValue);
+            }
+        }
+
+        private static void OnRoadSignsThemeChanged(int newThemeIndex) {
+            if (!Options.IsGameLoaded()) {
+                return;
+            }
+
+            var newTheme = RoadSignThemes.Instance.ThemeNames[newThemeIndex];
+
+            Main mainConfig = GlobalConfig.Instance.Main;
+            switch (RoadSignThemes.Instance.ChangeTheme(
+                        newTheme: newTheme,
+                        mphEnabled: mainConfig.DisplaySpeedLimitsMph)) {
+                case RoadSignThemes.ChangeThemeResult.Success:
+                    Log.Info($"GlobalConfig.Instance.Main.RoadSignTheme -> {newTheme}");
+                    mainConfig.RoadSignTheme = newTheme;
+                    break;
+                case RoadSignThemes.ChangeThemeResult.ForceKmph:
+                    mainConfig.DisplaySpeedLimitsMph = false;
+                    _displayMphToggle.isChecked = false;
+
+                    Log.Info($"GlobalConfig.Instance.Main.RoadSignTheme -> {newTheme} AND display switched to km/h");
+
+                    if (Options.IsGameLoaded(false)) {
+                        ModUI.Instance.Events.DisplayMphChanged(false);
+                    }
+                    break;
+                case RoadSignThemes.ChangeThemeResult.ForceMph:
+                    mainConfig.DisplaySpeedLimitsMph = true;
+                    _displayMphToggle.isChecked = true;
+
+                    Log.Info($"GlobalConfig.Instance.Main.RoadSignTheme -> {newTheme} AND display switched to MPH");
+
+                    if (Options.IsGameLoaded(false)) {
+                        ModUI.Instance.Events.DisplayMphChanged(true);
+                    }
+                    break;
+            }
+
+            mainConfig.RoadSignTheme = newTheme;
+            GlobalConfig.WriteConfig();
+        }
+
+        // Handlers: Interface
+
+        private static void OnMainMenuButtonPosLockedChanged(bool newValue) {
+            Log._Debug($"GlobalConfig.Instance.Main.MainMenuButtonPosLocked -> {newValue}");
+            GlobalConfig.Instance.Main.MainMenuButtonPosLocked = newValue;
+            GlobalConfig.WriteConfig();
+
             if (Options.IsGameLoaded(false)) {
                 ModUI.Instance.MainMenuButton.SetPosLock(newValue);
             }
-
-            GlobalConfig.Instance.Main.MainMenuButtonPosLocked = newValue;
-            GlobalConfig.WriteConfig();
         }
 
-        private static void OnLockMenuChanged(bool newValue) {
-            Log._Debug($"Menu lock changed to {newValue}");
+        private static void OnMainMenuPosLockedChanged(bool newValue) {
+            Log._Debug($"GlobalConfig.Instance.Main.MainMenuPosLocked -> {newValue}");
+            GlobalConfig.Instance.Main.MainMenuPosLocked = newValue;
+            GlobalConfig.WriteConfig();
+
             if (Options.IsGameLoaded(false)) {
                 ModUI.Instance.MainMenu.SetPosLock(newValue);
             }
-
-            GlobalConfig.Instance.Main.MainMenuPosLocked = newValue;
-            GlobalConfig.WriteConfig();
         }
 
         private static void OnUseUUIChanged(bool newValue) {
-            Log._Debug($"Use UUI set to {newValue}");
+            Log._Debug($"GlobalConfig.Instance.Main.UseUUI -> {newValue}");
             GlobalConfig.Instance.Main.UseUUI = newValue;
             GlobalConfig.WriteConfig();
+
             var button = ModUI.GetTrafficManagerTool()?.UUIButton;
             if (button) {
                 button.isVisible = newValue;
@@ -410,26 +415,40 @@ namespace TrafficManager.State {
             ModUI.Instance?.MainMenuButton?.UpdateButtonSkinAndTooltip();
         }
 
-        private static void OnEnableTutorialsChanged(bool newValue) {
-            Log._Debug($"Enable tutorial messages changed to {newValue}");
-            GlobalConfig.Instance.Main.EnableTutorial = newValue;
-            GlobalConfig.WriteConfig();
+        public static void SetGuiScale(float val) {
+            bool changed = (int)val != (int)GlobalConfig.Instance.Main.GuiScale;
+            GlobalConfig.Instance.Main.GuiScale = val;
+
+            if (changed && _guiScaleSlider != null) {
+                _guiScaleSlider.value = val;
+                ModUI.Instance.Events.UiScaleChanged();
+            }
         }
 
-        private static void OnShowCompatibilityCheckErrorChanged(bool newValue) {
-            Log._Debug($"Show mod compatibility error changed to {newValue}");
-            GlobalConfig.Instance.Main.ShowCompatibilityCheckErrorMessage = newValue;
+        private static void OnGuiScaleChanged(float newVal) {
+            ModUI.Instance.Events.UiScaleChanged();
+            SetGuiScale(newVal);
+            _guiScaleSlider.tooltip
+                = string.Format(
+                    T("General.Tooltip.Format:GUI scale: {0}%"),
+                    GlobalConfig.Instance.Main.GuiScale);
+            if (TMPELifecycle.Instance.IsGameLoaded) {
+                _guiScaleSlider.RefreshTooltip();
+            }
+
             GlobalConfig.WriteConfig();
+            Log._Debug($"GlobalConfig.Instance.Main.GuiScale -> {GlobalConfig.Instance.Main.GuiScale}");
         }
 
-        private static void OnScanForKnownIncompatibleModsChanged(bool newValue) {
-            Log._Debug($"Show incompatible mod checker warnings changed to {newValue}");
-            GlobalConfig.Instance.Main.ScanForKnownIncompatibleModsAtStartup = newValue;
-            if (newValue) {
-                GlobalConfig.WriteConfig();
-            } else {
-                SetIgnoreDisabledMods(false);
-                OnIgnoreDisabledModsChanged(false);
+        public static void SetGuiTransparency(byte val) {
+            bool isChanged = val != GlobalConfig.Instance.Main.GuiOpacity;
+            GlobalConfig.Instance.Main.GuiOpacity = val;
+
+            if (isChanged && _guiOpacitySlider != null) {
+                _guiOpacitySlider.value = val;
+
+                U.UOpacityValue opacity = UOpacityValue.FromOpacity(0.01f * val);
+                ModUI.Instance.Events.OpacityChanged(opacity);
             }
         }
 
@@ -451,30 +470,13 @@ namespace TrafficManager.State {
             Log._Debug($"GuiTransparency changed to {GlobalConfig.Instance.Main.GuiOpacity}");
         }
 
-        private static void OnGuiScaleChanged(float newVal) {
-            ModUI.Instance.Events.UiScaleChanged();
-            SetGuiScale(newVal);
-            _guiScaleSlider.tooltip
-                = string.Format(
-                    T("General.Tooltip.Format:GUI scale: {0}%"),
-                    GlobalConfig.Instance.Main.GuiScale);
-            if (TMPELifecycle.Instance.IsGameLoaded) {
-                _guiScaleSlider.RefreshTooltip();
+        public static void SetOverlayTransparency(byte val) {
+            bool changed = val != GlobalConfig.Instance.Main.OverlayTransparency;
+            GlobalConfig.Instance.Main.OverlayTransparency = val;
+
+            if (changed && _overlayTransparencySlider != null) {
+                _overlayTransparencySlider.value = val;
             }
-
-            GlobalConfig.WriteConfig();
-            Log._Debug($"GuiScale changed to {GlobalConfig.Instance.Main.GuiScale}");
-        }
-
-        /// <summary>User clicked [scale GUI to screen resolution] checkbox.</summary>
-        private static void OnGuiScaleToResChanged(float newVal) {
-            SetGuiScale(newVal);
-            if (TMPELifecycle.Instance.IsGameLoaded) {
-                _guiScaleSlider.RefreshTooltip();
-            }
-
-            GlobalConfig.WriteConfig();
-            Log._Debug($"GuiScale changed to {GlobalConfig.Instance.Main.GuiScale}");
         }
 
         private static void OnOverlayTransparencyChanged(float newVal) {
@@ -491,143 +493,16 @@ namespace TrafficManager.State {
                 _overlayTransparencySlider.RefreshTooltip();
             }
 
-            Log._Debug($"Overlay transparency changed to {GlobalConfig.Instance.Main.OverlayTransparency}");
+            Log._Debug($"GlobalConfig.Instance.Main.OverlayTransparency -> {GlobalConfig.Instance.Main.OverlayTransparency}");
         }
 
-        private static void OnIgnoreDisabledModsChanged(bool newValue) {
-            Log._Debug($"Ignore disabled mods changed to {newValue}");
-            GlobalConfig.Instance.Main.IgnoreDisabledMods = newValue;
+        private static void OnEnableTutorialChanged(bool newValue) {
+            Log._Debug($"GlobalConfig.Instance.Main.EnableTutorial -> {newValue}");
+            GlobalConfig.Instance.Main.EnableTutorial = newValue;
             GlobalConfig.WriteConfig();
         }
 
-        private static void OnDisplayMphChanged(bool newMphValue) {
-            bool supportedByTheme = newMphValue
-                                        ? RoadSignThemes.ActiveTheme.SupportsMph
-                                        : RoadSignThemes.ActiveTheme.SupportsKmph;
-            Main mainConfig = GlobalConfig.Instance.Main;
-
-            if (!supportedByTheme) {
-                // Reset to German road signs theme
-                _roadSignsThemeDropdown.selectedIndex = RoadSignThemes.Instance.FindDefaultThemeIndex(newMphValue);
-                mainConfig.RoadSignTheme = RoadSignThemes.Instance.GetDefaultThemeName(newMphValue);
-                Log.Info(
-                    $"Display MPH changed to {newMphValue}, but was not supported by current theme, "
-                    + "so theme was also reset to German_Kmph");
-            } else {
-                Log.Info($"Display MPH changed to {newMphValue}");
-            }
-
-            mainConfig.DisplaySpeedLimitsMph = newMphValue;
-
-            GlobalConfig.WriteConfig();
-
-            if (Options.IsGameLoaded(false)) {
-                ModUI.Instance.Events.DisplayMphChanged(newMphValue);
-            }
-        }
-
-        public static void SetDisplayInMph(bool value) {
-            if (_displayMphToggle != null) {
-                _displayMphToggle.isChecked = value;
-            }
-        }
-
-        private static void OnRoadSignsThemeChanged(int newThemeIndex) {
-            if (!Options.IsGameLoaded()) {
-                return;
-            }
-
-            var newTheme = RoadSignThemes.Instance.ThemeNames[newThemeIndex];
-
-            Main mainConfig = GlobalConfig.Instance.Main;
-            switch (RoadSignThemes.Instance.ChangeTheme(
-                        newTheme: newTheme,
-                        mphEnabled: mainConfig.DisplaySpeedLimitsMph)) {
-                case RoadSignThemes.ChangeThemeResult.Success:
-                    Log.Info($"Road Sign theme changed to {newTheme}");
-                    mainConfig.RoadSignTheme = newTheme;
-                    break;
-                case RoadSignThemes.ChangeThemeResult.ForceKmph:
-                    mainConfig.DisplaySpeedLimitsMph = false;
-                    _displayMphToggle.isChecked = false;
-
-                    Log.Info($"Road Sign theme was changed to {newTheme} AND display switched to km/h");
-
-                    if (Options.IsGameLoaded(false)) {
-                        ModUI.Instance.Events.DisplayMphChanged(false);
-                    }
-                    break;
-                case RoadSignThemes.ChangeThemeResult.ForceMph:
-                    mainConfig.DisplaySpeedLimitsMph = true;
-                    _displayMphToggle.isChecked = true;
-
-                    Log.Info($"Road Sign theme was changed to {newTheme} AND display switched to MPH");
-
-                    if (Options.IsGameLoaded(false)) {
-                        ModUI.Instance.Events.DisplayMphChanged(true);
-                    }
-                    break;
-            }
-
-            mainConfig.RoadSignTheme = newTheme;
-            GlobalConfig.WriteConfig();
-        }
-
-        private static void OnSimulationAccuracyChanged(int newAccuracy) {
-            if (!Options.IsGameLoaded()) {
-                return;
-            }
-
-            Log._Debug($"Simulation accuracy changed to {newAccuracy}");
-            Options.simulationAccuracy = (SimulationAccuracy)newAccuracy;
-        }
-
-        private static void OnInstantEffectsChanged(bool newValue) {
-            if (!Options.IsGameLoaded()) {
-                return;
-            }
-
-            Log._Debug($"Instant effects changed to {newValue}");
-            Options.instantEffects = newValue;
-        }
-
-        public static void SetIgnoreDisabledMods(bool value) {
-            Options.ignoreDisabledModsEnabled = value;
-            if (_ignoreDisabledModsToggle != null) {
-                _ignoreDisabledModsToggle.isChecked = value;
-            }
-        }
-
-        public static void SetGuiTransparency(byte val) {
-            bool isChanged = val != GlobalConfig.Instance.Main.GuiOpacity;
-            GlobalConfig.Instance.Main.GuiOpacity = val;
-
-            if (isChanged && _guiOpacitySlider != null) {
-                _guiOpacitySlider.value = val;
-
-                U.UOpacityValue opacity = UOpacityValue.FromOpacity(0.01f * val);
-                ModUI.Instance.Events.OpacityChanged(opacity);
-            }
-        }
-
-        public static void SetGuiScale(float val) {
-            bool changed = (int)val != (int)GlobalConfig.Instance.Main.GuiScale;
-            GlobalConfig.Instance.Main.GuiScale = val;
-
-            if (changed && _guiScaleSlider != null) {
-                _guiScaleSlider.value = val;
-                ModUI.Instance.Events.UiScaleChanged();
-            }
-        }
-
-        public static void SetOverlayTransparency(byte val) {
-            bool changed = val != GlobalConfig.Instance.Main.OverlayTransparency;
-            GlobalConfig.Instance.Main.OverlayTransparency = val;
-
-            if (changed && _overlayTransparencySlider != null) {
-                _overlayTransparencySlider.value = val;
-            }
-        }
+        // Handlers: Simulation
 
         public static void SetSimulationAccuracy(SimulationAccuracy newAccuracy) {
             Options.simulationAccuracy = newAccuracy;
@@ -636,23 +511,54 @@ namespace TrafficManager.State {
             }
         }
 
-        public static void SetInstantEffects(bool value) {
-            Options.instantEffects = value;
-
-            if (_instantEffectsToggle != null) {
-                _instantEffectsToggle.isChecked = value;
+        private static void OnSimulationAccuracyChanged(int newAccuracy) {
+            if (!Options.IsGameLoaded()) {
+                return;
             }
+
+            Log._Debug($"Options.simulationAccuracy -> {newAccuracy}");
+            Options.simulationAccuracy = (SimulationAccuracy)newAccuracy;
         }
 
-        public static void SetScanForKnownIncompatibleMods(bool value) {
-            Options.scanForKnownIncompatibleModsEnabled = value;
-            if (_scanForKnownIncompatibleModsToggle != null) {
-                _scanForKnownIncompatibleModsToggle.isChecked = value;
+        private static void OnInstantEffectsChanged(bool newValue) {
+            Log._Debug($"Options.instantEffects -> {newValue}");
+            Options.instantEffects = newValue;
+        }
+
+        // Handlers: Compatibility
+
+        private static void OnShowCompatibilityCheckErrorMessageChanged(bool newValue) {
+            Log._Debug($"GlobalConfig.Instance.Main.ShowCompatibilityCheckErrorMessage -> {newValue}");
+            GlobalConfig.Instance.Main.ShowCompatibilityCheckErrorMessage = newValue;
+            GlobalConfig.WriteConfig();
+        }
+
+        private static void OnScanForKnownIncompatibleModsAtStartupChanged(bool newValue) {
+            Log._Debug($"GlobalConfig.Instance.Main.ScanForKnownIncompatibleModsAtStartup -> {newValue}");
+            GlobalConfig.Instance.Main.ScanForKnownIncompatibleModsAtStartup = newValue;
+            GlobalConfig.WriteConfig();
+
+            IgnoreDisabledMods.Enabled = newValue;
+        }
+
+        private static void OnIgnoreDisabledModsChanged(bool newValue) {
+            Log._Debug($"GlobalConfig.Instance.Main.IgnoreDisabledMods -> {newValue}");
+            GlobalConfig.Instance.Main.IgnoreDisabledMods = newValue;
+            GlobalConfig.WriteConfig();
+        }
+
+        // Obsolete?
+
+        /// <summary>User clicked [scale GUI to screen resolution] checkbox.</summary>
+        private static void OnGuiScaleToResChanged(float newVal) {
+            SetGuiScale(newVal);
+            if (TMPELifecycle.Instance.IsGameLoaded) {
+                _guiScaleSlider.RefreshTooltip();
             }
 
-            if (!value) {
-                SetIgnoreDisabledMods(false);
-            }
+            GlobalConfig.WriteConfig();
+            Log._Debug($"GlobalConfig.Instance.Main.GuiScale -> {GlobalConfig.Instance.Main.GuiScale}");
         }
+
     } // end class
 }
