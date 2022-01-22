@@ -14,7 +14,7 @@ namespace TrafficManager.UI.Helpers {
 
             ValueField = typeof(Options).GetField(fieldName, BindingFlags.Static | BindingFlags.Public);
             if (ValueField == null) {
-                throw new Exception($"{typeof(Options)}.{fieldName} does not exists");
+                throw new Exception($"{typeof(Options)}.{fieldName} does not exist");
             }
 
             GlobalOption = globalOption;
