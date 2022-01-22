@@ -128,21 +128,14 @@ namespace TrafficManager.State {
 
             // Group: Localisation
 
-            UIHelperBase groupLocalisation = panelHelper.AddGroup(T("General.Group:Localisation"));
-            AddLanguageDropdown(groupLocalisation,
-                GlobalConfig.Instance.LanguageCode);
-
-            groupLocalisation.AddSpace(5);
-            groupLocalisation.AddButton("What's New?", WhatsNew.OpenModal);
-            groupLocalisation.AddSpace(10);
-          
-            AddCrowdinButton(groupLocalisation);
-            AddLocalisationWikiButton(groupLocalisation);
-            // TODO: #1221 Ditch separate MPH vs. km/h setting; selected icon theme should determine that?
-            AddMphCheckbox(groupLocalisation,
-                GlobalConfig.Instance.Main.DisplaySpeedLimitsMph);
-            AddIconThemeDropdown(groupLocalisation,
-                GlobalConfig.Instance.Main.RoadSignTheme);
+            // Group: Localisation
+            group = tab.AddGroup(T("General.Group:Localisation"));
+            AddLanguageDropdown(group, GlobalConfig.Instance.LanguageCode);
+            AddCrowdinButton(group);
+            AddLocalisationWikiButton(group);
+            // TODO: #1221 Ditch separate MPH vs. km/h setting? selected icon theme should determine that?
+            DisplaySpeedLimitsMph.AddUI(group);
+            AddIconThemeDropdown(group, GlobalConfig.Instance.Main.RoadSignTheme);
 
             // Group: Interface
 
