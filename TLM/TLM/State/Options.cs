@@ -100,23 +100,21 @@ namespace TrafficManager.State {
         // These are shims to facilitate use of CheckboxOption prior to settings overhaul
 
         [UsedImplicitly]
-        public static bool DisplaySpeedLimitsMph;
+        public static bool DisplaySpeedLimitsMph; // GlobalConfig.Instance.Main.DisplaySpeedLimitsMph
         [UsedImplicitly]
-        public static bool MainMenuButtonPosLocked;
+        public static bool MainMenuButtonPosLocked; // GlobalConfig.Instance.Main.MainMenuButtonPosLocked
         [UsedImplicitly]
-        public static bool MainMenuPosLocked;
+        public static bool MainMenuPosLocked; // GlobalConfig.Instance.Main.MainMenuPosLocked
         [UsedImplicitly]
-        public static bool scanForKnownIncompatibleModsEnabled = true;
+        public static bool UseUUI; // GlobalConfig.Instance.Main.UseUUI
         [UsedImplicitly]
-        public static bool UseUUI;
+        public static bool EnableTutorial; // GlobalConfig.Instance.Main.EnableTutorial
         [UsedImplicitly]
-        public static bool EnableTutorial;
+        public static bool ScanForKnownIncompatibleModsAtStartup; // GlobalConfig.Instance.Main.ScanForKnownIncompatibleModsAtStartup
         [UsedImplicitly]
-        public static bool ScanForKnownIncompatibleModsAtStartup;
+        public static bool IgnoreDisabledMods; // GlobalConfig.Instance.Main.IgnoreDisabledMods
         [UsedImplicitly]
-        public static bool IgnoreDisabledMods;
-        [UsedImplicitly]
-        public static bool ShowCompatibilityCheckErrorMessage;
+        public static bool ShowCompatibilityCheckErrorMessage; // GlobalConfig.Instance.Main.ShowCompatibilityCheckErrorMessage
 
         /* ---- end: global-only options ---- */
 
