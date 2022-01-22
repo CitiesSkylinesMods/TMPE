@@ -124,8 +124,7 @@ namespace TrafficManager.State {
             // Group: Localisation
             group = tab.AddGroup(T("General.Group:Localisation"));
             AddLanguageDropdown(group, GlobalConfig.Instance.LanguageCode);
-            AddCrowdinButton(group);
-            AddLocalisationWikiButton(group);
+            AddLocalisationButtons(group);
             // TODO: #1221 Ditch separate MPH vs. km/h setting? selected icon theme should determine that?
             DisplaySpeedLimitsMph.AddUI(group);
             AddIconThemeDropdown(group, GlobalConfig.Instance.Main.RoadSignTheme);

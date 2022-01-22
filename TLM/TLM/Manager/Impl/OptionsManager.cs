@@ -42,6 +42,15 @@ namespace TrafficManager.Manager.Impl {
         }
 
         public bool LoadData(byte[] data) {
+            int LoadBool(int idx, ILegacySerializableOption opt) {
+                if (data.Length > idx) {
+                    opt.Load(data[idx]);
+                }
+                return idx + 1;
+            }
+
+            int index;
+
             if (data.Length >= 1) {
                 OptionsGeneralTab.SetSimulationAccuracy(ConvertToSimulationAccuracy(data[0]));
             }
@@ -158,9 +167,11 @@ namespace TrafficManager.Manager.Impl {
                 OptionsVehicleRestrictionsTab.SetEvacBussesMayIgnoreRules(data[28] == 1);
             }
 
-            if (data.Length >= 30) {
-                OptionsGeneralTab.SetInstantEffects(data[29] == 1);
-            }
+            _ = LoadBool(29, OptionsGeneralTab.InstantEffects);
+
+//            if (data.Length >= 30) {
+//                OptionsGeneralTab.SetInstantEffects(data[29] == 1);
+//            }
 
             if (data.Length >= 31) {
                 OptionsMaintenanceTab.SetParkingRestrictionsEnabled(data[30] == 1);
@@ -217,14 +228,7 @@ namespace TrafficManager.Manager.Impl {
                 OptionsVehicleRestrictionsTab.SetAddTrafficLightsIfApplicable(data[41] == 1);
             }
 
-            int LoadBool(int idx, ILegacySerializableOption opt) {
-                if (data.Length > idx) {
-                    opt.Load(data[idx]);
-                }
-                return idx + 1;
-            };
-
-            int index = 42;
+            index = 42;
             index = LoadBool(index, OptionsMassEditTab.RoundAboutQuickFix_StayInLaneMainR);
             index = LoadBool(index, OptionsMassEditTab.RoundAboutQuickFix_StayInLaneNearRabout);
             index = LoadBool(index, OptionsMassEditTab.RoundAboutQuickFix_DedicatedExitLanes);
@@ -278,7 +282,7 @@ namespace TrafficManager.Manager.Impl {
                 (byte)(Options.preferOuterLane ? 1 : 0),
                 (byte)(Options.individualDrivingStyle ? 1 : 0),
                 (byte)(Options.evacBussesMayIgnoreRules ? 1 : 0),
-                (byte)(Options.instantEffects ? 1 : 0),
+                OptionsGeneralTab.InstantEffects.Save(),
                 (byte)(Options.parkingRestrictionsEnabled ? 1 : 0),
                 (byte)(Options.parkingRestrictionsOverlay ? 1 : 0),
                 (byte)(Options.banRegularTrafficOnBusLanes ? 1 : 0),
