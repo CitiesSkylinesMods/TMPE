@@ -151,12 +151,10 @@ namespace TrafficManager.State {
             EnableTutorial.AddUI(group);
 
             // Group: Simulation
-
-            UIHelperBase groupSimulation = panelHelper.AddGroup(T("General.Group:Simulation"));
-            AddSimAccuracyDropdown(groupSimulation,
+            group = tab.AddGroup(T("General.Group:Simulation"));
+            AddSimAccuracyDropdown(group,
                 (int)Options.simulationAccuracy);
-            AddInstantEffectCheckbox(groupSimulation,
-                Options.instantEffects);
+            InstantEffects.AddUI(group);
 
             // Group: Compatibility
 
