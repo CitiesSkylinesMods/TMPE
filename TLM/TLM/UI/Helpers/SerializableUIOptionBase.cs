@@ -21,6 +21,8 @@ namespace TrafficManager.UI.Helpers {
         }
         private FieldInfo ValueField;
         public bool GlobalOption { get; private set; }
+        public string Translator { get; set; }
+
         private Options OptionInstance => Singleton<Options>.instance;
         public virtual TVal Value {
             get => (TVal)ValueField.GetValue(null);
@@ -43,5 +45,19 @@ namespace TrafficManager.UI.Helpers {
             Log._Debug($"{Label} changed to {newVal}");
             Value = newVal;
         }
+
+        protected string T(string key) {
+            if (string.IsNullOrEmpty(Translator)) {
+                return Translation.Options.Get(key);
+            }
+            PropertyInfo prop = typeof(Translation)
+                .GetProperty(Translator, BindingFlags.Static | BindingFlags.Public);
+            if (prop == null) {
+                throw new Exception($"{typeof(Translation)}.{Translator} does not exist");
+            }
+            Localization.LookupTable translator = (Localization.LookupTable)prop.GetValue(typeof(Translation), null);
+            return translator.Get(key);
+        }
+
     }
 }

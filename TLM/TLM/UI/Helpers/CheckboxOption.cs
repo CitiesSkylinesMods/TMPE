@@ -2,6 +2,8 @@ namespace TrafficManager.UI.Helpers {
     using ICities;
     using ColossalFramework.UI;
     using State;
+    using System.Reflection;
+    using System;
 
     public class CheckboxOption : SerializableUIOptionBase<bool, UICheckBox> {
         public CheckboxOption(string fieldName, bool globalOption = false)
@@ -40,7 +42,6 @@ namespace TrafficManager.UI.Helpers {
         public override byte Save() => Value ? (byte)1 : (byte)0;
 
         public override void AddUI(UIHelperBase container) {
-            string T(string key) => Translation.Options.Get(key);
             bool unalterable = !GlobalOption && !Options.IsGameLoaded(false);
             _ui = container.AddCheckbox(
                 T(Label),
