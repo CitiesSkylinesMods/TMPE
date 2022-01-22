@@ -2,8 +2,6 @@ namespace TrafficManager.UI.Helpers {
     using ICities;
     using ColossalFramework.UI;
     using State;
-    using System.Reflection;
-    using System;
 
     public class CheckboxOption : SerializableUIOptionBase<bool, UICheckBox> {
         public CheckboxOption(string fieldName, bool globalOption = false)
@@ -48,7 +46,7 @@ namespace TrafficManager.UI.Helpers {
                 Value,
                 this.OnValueChanged) as UICheckBox;
             if (Indent) {
-                State.Options.Indent(_ui);
+                Options.Indent(_ui);
             }
             Options.AllowTextWrap(_ui, Indent);
             if (unalterable) {

@@ -33,11 +33,12 @@ namespace TrafficManager.UI.Helpers {
         public abstract byte Save();
 
         //UI:
-        public abstract void AddUI(UIHelperBase container);
-        protected TUI _ui;
         public string Label;
         public string Tooltip;
         public bool Indent = false;
+        public abstract void AddUI(UIHelperBase container);
+        protected TUI _ui;
+
         public virtual bool Enabled { get; set; }
 
         public void DefaultOnValueChanged(TVal newVal) {
