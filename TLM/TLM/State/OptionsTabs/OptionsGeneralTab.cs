@@ -19,6 +19,9 @@ namespace TrafficManager.State {
 
     public static class OptionsGeneralTab {
         private static UICheckBox _instantEffectsToggle;
+        // suppress "this option can only be set in-game" warning
+        // when setting is changed from main menu.
+        internal const bool GLOBAL_SETTING = true;
 
         [UsedImplicitly]
         private static UIDropDown _languageDropdown;
@@ -34,21 +37,80 @@ namespace TrafficManager.State {
         private static UISlider _guiScaleSlider;
         private static UISlider _overlayTransparencySlider;
 
+        // GlobalConfig.Instance.Main.DisplaySpeedLimitsMph
+        public static CheckboxOption DisplaySpeedLimitsMph =
+            new(nameof(Options.DisplaySpeedLimitsMph), GLOBAL_SETTING) {
+                Label = "Checkbox:Display speed limits mph",
+                Handler = OnDisplaySpeedLimitsMphChange,
+                Translator = nameof(Translation.SpeedLimits),
+            };
+
         [UsedImplicitly]
         private static UICheckBox _enableTutorialToggle;
+        // GlobalConfig.Instance.Main.MainMenuButtonPosLocked
+        public static CheckboxOption MainMenuButtonPosLocked =
+            new(nameof(Options.MainMenuButtonPosLocked), GLOBAL_SETTING) {
+                Label = "General.Checkbox:Lock main menu button position",
+                Handler = OnMainMenuButtonPosLockedChanged,
+            };
 
         [UsedImplicitly]
         private static UICheckBox _showCompatibilityCheckErrorToggle;
+        // GlobalConfig.Instance.Main.MainMenuPosLocked
+        public static CheckboxOption MainMenuPosLocked =
+            new(nameof(Options.MainMenuPosLocked), GLOBAL_SETTING) {
+                Label = "General.Checkbox:Lock main menu window position",
+                Handler = OnMainMenuPosLockedChanged,
+            };
 
         private static UICheckBox _scanForKnownIncompatibleModsToggle;
         private static UICheckBox _ignoreDisabledModsToggle;
+        // GlobalConfig.Instance.Main.UseUUI
+        public static CheckboxOption UseUUI =
+            new(nameof(Options.UseUUI), GLOBAL_SETTING) {
+                Label = "General.Checkbox:Use UnifiedUI",
+                Handler = OnUseUUIChanged,
+            };
 
         private static UICheckBox _displayMphToggle;
+        // GlobalConfig.Instance.Main.EnableTutorial
+        public static CheckboxOption EnableTutorial =
+            new(nameof(Options.EnableTutorial), GLOBAL_SETTING) {
+                Label = "General.Checkbox:Enable tutorials",
+                Handler = OnEnableTutorialChanged,
+            };
 
         private static UIDropDown _roadSignsThemeDropdown;
+        public static CheckboxOption InstantEffects =
+            new(nameof(Options.instantEffects)) {
+                Label = "General.Checkbox:Apply AI changes right away",
+                Handler = OnInstantEffectsChanged,
+            };
 
         private static UICheckBox _useUUI;
+        // GlobalConfig.Instance.Main.ScanForKnownIncompatibleModsAtStartup
+        public static CheckboxOption ScanForKnownIncompatibleModsAtStartup =
+            new(nameof(Options.ScanForKnownIncompatibleModsAtStartup), GLOBAL_SETTING) {
+                Label = "Checkbox:Scan for known incompatible mods on startup",
+                Handler = OnScanForKnownIncompatibleModsAtStartupChanged,
+                Translator = nameof(Translation.ModConflicts),
+            };
 
+        // GlobalConfig.Instance.Main.IgnoreDisabledMods
+        public static CheckboxOption IgnoreDisabledMods =
+            new(nameof(Options.IgnoreDisabledMods), GLOBAL_SETTING) {
+                Label = "Checkbox:Ignore disabled mods",
+                Indent = true,
+                Handler = OnIgnoreDisabledModsChanged,
+                Translator = nameof(Translation.ModConflicts),
+            };
+
+        // GlobalConfig.Instance.Main.ShowCompatibilityCheckErrorMessage
+        public static CheckboxOption ShowCompatibilityCheckErrorMessage =
+            new(nameof(Options.ShowCompatibilityCheckErrorMessage), GLOBAL_SETTING) {
+                Label = "General.Checkbox:Notify me about TM:PE startup conflicts",
+                Handler = OnShowCompatibilityCheckErrorMessageChanged,
+            };
 
         private static string T(string key) => Translation.Options.Get(key);
 
