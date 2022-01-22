@@ -4,7 +4,8 @@ namespace TrafficManager.UI.Helpers {
     using State;
 
     public class CheckboxOption : SerializableUIOptionBase<bool, UICheckBox> {
-        public CheckboxOption(string fieldName) : base(fieldName) {
+        public CheckboxOption(string fieldName, bool globalOption = false)
+        : base(fieldName, globalOption) {
             OnValueChanged = DefaultOnValueChanged;
         }
 

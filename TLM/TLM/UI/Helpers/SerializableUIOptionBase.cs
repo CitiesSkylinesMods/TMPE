@@ -10,13 +10,17 @@ namespace TrafficManager.UI.Helpers {
     public abstract class SerializableUIOptionBase<TVal, TUI> : ILegacySerializableOption
         where TUI : UIComponent {
         //Data:
-        public SerializableUIOptionBase(string fieldName) {
+        public SerializableUIOptionBase(string fieldName, bool globalOption) {
+
             ValueField = typeof(Options).GetField(fieldName, BindingFlags.Static | BindingFlags.Public);
             if (ValueField == null) {
                 throw new Exception($"{typeof(Options)}.{fieldName} does not exists");
             }
+
+            GlobalOption = globalOption;
         }
         private FieldInfo ValueField;
+        public bool GlobalOption { get; private set; }
         private Options OptionInstance => Singleton<Options>.instance;
         public virtual TVal Value {
             get => (TVal)ValueField.GetValue(null);
@@ -34,7 +38,7 @@ namespace TrafficManager.UI.Helpers {
         public bool Indent = false;
 
         public void DefaultOnValueChanged(TVal newVal) {
-            Options.IsGameLoaded();
+            Options.IsGameLoaded(!GlobalOption);
             Log._Debug($"{Label} changed to {newVal}");
             Value = newVal;
         }
