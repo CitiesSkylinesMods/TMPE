@@ -38,6 +38,7 @@ This changelog includes all versions and major variants of the mod going all the
 * [Updated] Compatibility update for Airports DLC #1230 (krzychu124)
 * [Updated] Reduce logging from `AssetDataExtension` in release builds #1296 #1295 (aubergine18)
 * [Updated] Translations for multiple languages #1304 (Chamëleon, MenschLennart, John Deehe, Skazov, AlexofCA, CrankyAnt, Иван Соколов, AduitSSH, John Lok Ho, DNSE, shg166, GiorgioHerbie, footbool, krzychu124, aubergine18, Dmytro Lytovchenko, Fizzy_LaFizz, Vladimír Krajč, alvaroer, Mahmoud Al Gammal, ipd, 田七不甜, vitalii201, 許景翔, Mehmet Ömer Tüzer, vicugna-pacos, kianzarrin, Mbyron26, Headspike, lennier3, kevinlin18, Ikki_di_Phoenix)
+- [Steam] [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
 
 #### TM:PE 11.6.4.0 TEST, 25/01/2022
 
@@ -47,6 +48,7 @@ This changelog includes all versions and major variants of the mod going all the
 * [Updated] Compatibility update for Airports DLC #1230 (krzychu124)
 * [Updated] Reduce logging from `AssetDataExtension` in release builds #1296 #1295 (aubergine18)
 * [Updated] Translations for multiple languages #1304 (Chamëleon, MenschLennart, John Deehe, Skazov, AlexofCA, CrankyAnt, Иван Соколов, AduitSSH, John Lok Ho, DNSE, shg166, GiorgioHerbie, footbool, krzychu124, aubergine18, Dmytro Lytovchenko, Fizzy_LaFizz, Vladimír Krajč, alvaroer, Mahmoud Al Gammal, ipd, 田七不甜, vitalii201, 許景翔, Mehmet Ömer Tüzer, vicugna-pacos, kianzarrin, Mbyron26, Headspike, lennier3, kevinlin18, Ikki_di_Phoenix)
+- [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
 
 #### TM:PE 11.6.3.0 TEST, 19/01/2022
 
@@ -55,6 +57,7 @@ This changelog includes all versions and major variants of the mod going all the
 - [Fixed] App mode detection #1290 #1289 #1286 (krzychu124)
 - [Fixed] Versioned atlas to ensure textures load properly #1281 (kianzarrin)
 - [Updated] Speed Limits manager for asset editor and mods #1277 #1285 (kianzarrin, krzychu124)
+- [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
 
 #### TM:PE 11.6.2.0 TEST, 08/01/2022
 
@@ -96,6 +99,7 @@ This changelog includes all versions and major variants of the mod going all the
 - [Updated] Performance: Removed the ProcessCitizen and the CitizenHandler #1169 #1170 (egi)
 - [Updated] Speed Limits manager now uses structures #1163 (kvakvs)
 - [Removed] Obsolete and unnecessary code #1194 #1185 #1183 #1177 #1176 #1174 (egi)
+- [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
 
 #### TM:PE V11.6.1.3 TEST, 14/10/2021
 
@@ -103,6 +107,7 @@ This changelog includes all versions and major variants of the mod going all the
 - [Fixed] Despawn off not working as expected #1167 #1148 (OliverWieland, krzychu124)
 - [Fixed] Bug in ResetIncomingHighwayLaneArrows #1165 (krzychu124, egi)
 - [Updated] Performance, memory efficiency #1161 #1162 #1164 #1165 (thanks egi)
+- [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
 
 #### TM:PE V11.6.1.2 TEST, 21/09/2021
 
@@ -117,6 +122,7 @@ This changelog includes all versions and major variants of the mod going all the
 - [Updated] Performance: Speed Limits GUI #1149 (egi)
 - [Updated] Improved performance benchmarking #1155 (egi)
 - [Removed] Obsolete and unnecessary code #1156 #1154 #1155 (egi)
+- [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
 
 #### TM:PE V11.6.1.1 TEST, 25/08/2021
 
@@ -125,6 +131,7 @@ This changelog includes all versions and major variants of the mod going all the
 - [Fixed] Refreshing dedicated turning lanes after loading a savegame #1140 #1137 (kianzarrin)
 - [Fixed] Custom path-finding initialization and patching - rewritten execution flow #1145 (krzychu124)
 - [Updated] Internal changes to Speed Limits code for Speed Limits UI #1143 (kvakvs)
+- [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
 
 #### TM:PE V11.6.1.0 TEST, 10/08/2021
 - [New] Language: Indonesian #1135 (Fizzy_LaFizz)
@@ -133,6 +140,7 @@ This changelog includes all versions and major variants of the mod going all the
 - [Fixed] Overlay transparency and UI opacity settings #1129 (krzychu124)
 - [Fixed] Half-segment detection when using Lane Arrows tool #1138 #1141 (kianzarrin, krzychu124)
 - [Updated] Multiple languages #1135 (mjm92150, Ikki_di_Phoenix, GiorgioHerbie, vicugna-pacos, DNSE, JJTspanishguy, krzychu124, macsergey, Lasm Gratel, 許景翔 gk50125012, kevinlin18, Warintorn Choorasri, chameleon-tbn)
+- [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
 
 #### TM:PE V11.6.0.3 TEST, 17/06/2021
 
@@ -140,6 +148,7 @@ This changelog includes all versions and major variants of the mod going all the
 - [Updated] Performance: PathFind performance improvements #1114 (krzychu124)
 - [Updated] Lifted limit of threads for 8t+ CPUs #1114 (krzychu124)
 - [Updated] Reduced simulation thread sleep multiplier for long pathfind queues #1114 (krzychu124)
+- [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
 
 #### TM:PE V11.6.0.2 TEST, 08/06/2021
 
@@ -147,16 +156,19 @@ This changelog includes all versions and major variants of the mod going all the
 - [Fixed] Reloading localised textures for Priority Signs and TTL #1121 #1099 (TianQiBuTian, krzychu124)
 - [Updated] Lane Connectors: New shape, changed interactions in over/under-ground mode #985 #282 #3 (krzychu124)
 - [Updated] Performance: Network flag detection #1118 (kianzarrin)
+- [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
 
 #### TM:PE V11.6.0.1 TEST, 28/05/2021
 
 - [Updated] Merge changes from 11.5.2.2 STABLE release #1113 (krzychu124)
+- [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
 
 #### TM:PE V11.5.2-hotfix-1 STABLE, 27/05/2021
 
 - [Mod] Compatible: `Barges (Cargo Ferries)` #1112 (krzychu124)
 - [Mod] Compatible: `Movable Bridges` #1112 (krzychu124)
 - [Mod] Compatible: `81-Tiles` #1112 (krzychu124)
+- [Steam] [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
 
 #### TM:PE V11.6.0 TEST, 16/05/2021
 
@@ -216,15 +228,18 @@ This changelog includes all versions and major variants of the mod going all the
 - [Mod] Hotfix: `81-Tiles` unified alternative path position #1105 (krzychu124)
 - [Fixed] Cargo trucks not respecting lane routing #1105 (krzychu124)
 - [Fixed] Bug in outside connection detection #1105 (krzychu124)
+- [Steam] [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
 
 #### TM:PE V11.5.2 STABLE (Reverted), 09/05/2021
 
 - [Mod] Hotfix: `Barges (Cargo Ferries)` #1103 (krzychu124)
 - [Meta] Had bugs and was reverted to 11.5.1 STABLE Hotfix-1
+- [Steam] [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
 
 #### TM:PE V11.5.1-hotfix-1 STABLE, 21/11/2020
 
 - [Fixed] Right click mouse button closing lane connection tool #1037 (krzychu124)
+- [Steam] [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
 
 #### TM:PE V11.5.1 STABLE, 19/11/2020
 
@@ -236,6 +251,7 @@ This changelog includes all versions and major variants of the mod going all the
 - [Fixed] Error thrown if segment info is null #957 (kianzarrin, thebugfixnet)
 - [Updated] Use locks and existing list in GenericObservable #909 (egi)
 - [Updated] RoadSelectionPanel icons optimized to 8bit #984 (Chamëleon)
+- [Steam] [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
 
 #### TM:PE V[11.4.0](https://github.com/CitiesSkylinesMods/TMPE/compare/11.3.2...11.4.0) STABLE, 22/05/2020
 
