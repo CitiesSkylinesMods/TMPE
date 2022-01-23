@@ -29,7 +29,7 @@ This changelog includes all versions and major variants of the mod going all the
 
 </details>
 
-#### TM:PE 11.6.4.0 STABLE, 25/01/2022
+#### TM:PE V11.6.4.0 STABLE, 25/01/2022
 
 * [New] TM:PE 11.6 branch released as STABLE - huge thanks to our beta testers!
 * [Mod] Fixed: `Find It` traffic settings not copy/pasted in-game #1303 #1300 (krzychu124)
@@ -40,7 +40,7 @@ This changelog includes all versions and major variants of the mod going all the
 * [Updated] Translations for multiple languages #1304 (Chamëleon, MenschLennart, John Deehe, Skazov, AlexofCA, CrankyAnt, Иван Соколов, AduitSSH, John Lok Ho, DNSE, shg166, GiorgioHerbie, footbool, krzychu124, aubergine18, Dmytro Lytovchenko, Fizzy_LaFizz, Vladimír Krajč, alvaroer, Mahmoud Al Gammal, ipd, 田七不甜, vitalii201, 許景翔, Mehmet Ömer Tüzer, vicugna-pacos, kianzarrin, Mbyron26, Headspike, lennier3, kevinlin18, Ikki_di_Phoenix)
 - [Steam] [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
 
-#### TM:PE 11.6.4.0 TEST, 25/01/2022
+#### TM:PE V11.6.4.0 TEST, 25/01/2022
 
 * [Mod] Fixed: `Find It` traffic settings not copy/pasted in-game #1303 #1300 (krzychu124)
 * [Mod] Fixed: `Node Controller Renewal` silent fail place intersection #1307 (krzychu124)
@@ -50,7 +50,7 @@ This changelog includes all versions and major variants of the mod going all the
 * [Updated] Translations for multiple languages #1304 (Chamëleon, MenschLennart, John Deehe, Skazov, AlexofCA, CrankyAnt, Иван Соколов, AduitSSH, John Lok Ho, DNSE, shg166, GiorgioHerbie, footbool, krzychu124, aubergine18, Dmytro Lytovchenko, Fizzy_LaFizz, Vladimír Krajč, alvaroer, Mahmoud Al Gammal, ipd, 田七不甜, vitalii201, 許景翔, Mehmet Ömer Tüzer, vicugna-pacos, kianzarrin, Mbyron26, Headspike, lennier3, kevinlin18, Ikki_di_Phoenix)
 - [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
 
-#### TM:PE 11.6.3.0 TEST, 19/01/2022
+#### TM:PE V11.6.3.0 TEST, 19/01/2022
 
 - [New] What's New panel #118 #1284 (krzychu124, aubergine18)
 - [Mod] Incompatible: `Traffic++ V2` - ancient mod, breaks game #1287 (aubergine18)
@@ -59,7 +59,7 @@ This changelog includes all versions and major variants of the mod going all the
 - [Updated] Speed Limits manager for asset editor and mods #1277 #1285 (kianzarrin, krzychu124)
 - [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
 
-#### TM:PE 11.6.2.0 TEST, 08/01/2022
+#### TM:PE V[11.6.2.0](https://github.com/CitiesSkylinesMods/TMPE/compare/11.6.1-test...11.6.2-test) TEST, 08/01/2022
 
 - [New] Speed Limits UI Overhaul #1168 #389 (kvakvs)
 - [New] Road sign icon themes for multiple countries #1260 #1251 #1215 (Coreybpa, kvakvs, aubergine18)
@@ -133,7 +133,7 @@ This changelog includes all versions and major variants of the mod going all the
 - [Updated] Internal changes to Speed Limits code for Speed Limits UI #1143 (kvakvs)
 - [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
 
-#### TM:PE V11.6.1.0 TEST, 10/08/2021
+#### TM:PE V[11.6.1.0](https://github.com/CitiesSkylinesMods/TMPE/compare/11.6.0-test...11.6.1-test) TEST, 10/08/2021
 - [New] Language: Indonesian #1135 (Fizzy_LaFizz)
 - [New] First version of Notifier API for use by other mods #1127 (kianzarrin)
 - [Fixed] Speed Limits inifinite loop when using Shift modifier #1131 #1128 (krzychu124, kianzarrin)
@@ -170,7 +170,7 @@ This changelog includes all versions and major variants of the mod going all the
 - [Mod] Compatible: `81-Tiles` #1112 (krzychu124)
 - [Steam] [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
 
-#### TM:PE V11.6.0 TEST, 16/05/2021
+#### TM:PE V[11.6.0](https://github.com/CitiesSkylinesMods/TMPE/compare/11.5.2...11.6.0-test) TEST, 16/05/2021
 
 - [New] Full migration to Harmony 2.x #1089 #1060 #1059 #947 #944 #943 #921 #895 #866 #865 #864 #783 #782 #462 (Krzychu124, kianzarrin)
 - [New] Map/Asset/Intersection Editor support, except for traffic lights #1011 #1004 #990 #989 #972 #971 #970 #969 #966 #965 #964 #963 #959 #956 #898 #600 #288 (kianzarrin, Strdate)
@@ -222,7 +222,7 @@ This changelog includes all versions and major variants of the mod going all the
 - [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
 - [GitHub] [CitiesSkylinesMods/TMPE](https://github.com/CitiesSkylinesMods/TMPE)
 
-#### TM:PE V11.5.2 STABLE, 12/05/2021
+#### TM:PE V[11.5.2](https://github.com/CitiesSkylinesMods/TMPE/compare/11.5.1...11.5.2) STABLE, 12/05/2021
 
 - [Mod] Hotfix: `Barges (Cargo Ferries)` #1103 (krzychu124)
 - [Mod] Hotfix: `81-Tiles` unified alternative path position #1105 (krzychu124)
@@ -241,7 +241,7 @@ This changelog includes all versions and major variants of the mod going all the
 - [Fixed] Right click mouse button closing lane connection tool #1037 (krzychu124)
 - [Steam] [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
 
-#### TM:PE V11.5.1 STABLE, 19/11/2020
+#### TM:PE V[11.5.1](https://github.com/CitiesSkylinesMods/TMPE/compare/11.5.0...11.5.1) STABLE, 19/11/2020
 
 - [Meta] Includes all features from TM:PE 11.5.0 LABS
 - [New] Right-Click will exit tool and subsequently TM:PE toolbsar #1014 #1032 (HypoSim, krzychu124)
