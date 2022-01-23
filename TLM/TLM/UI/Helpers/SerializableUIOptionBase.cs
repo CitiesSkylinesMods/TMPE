@@ -19,9 +19,18 @@ namespace TrafficManager.UI.Helpers {
 
             GlobalOption = globalOption;
         }
+
+        /// <summary>
+        /// Custom translation delegate.
+        /// </summary>
+        /// <param name="key">The locale key to translate.</param>
+        /// <returns>Returns the translation for <paramref name="key"/>.</returns>
+        public delegate string TranslatorDelegate(string key);
+
+        public TranslatorDelegate Translator;
+
         private FieldInfo ValueField;
         public bool GlobalOption { get; private set; }
-        public string Translator { get; set; }
 
         private Options OptionInstance => Singleton<Options>.instance;
         public virtual TVal Value {
@@ -52,17 +61,13 @@ namespace TrafficManager.UI.Helpers {
             Value = newVal;
         }
 
+        /// <summary>Translate a locale key via <see cref="Translation.Options"/> or, if defined, custom <see cref="Translator"/>.</summary>
+        /// <param name="key">The locale key to translate.</param>
+        /// <returns>Returns the translation for <paramref name="key"/>.</returns>
         protected string T(string key) {
-            if (string.IsNullOrEmpty(Translator)) {
-                return Translation.Options.Get(key);
-            }
-            PropertyInfo prop = typeof(Translation)
-                .GetProperty(Translator, BindingFlags.Static | BindingFlags.Public);
-            if (prop == null) {
-                throw new Exception($"{typeof(Translation)}.{Translator} does not exist");
-            }
-            Localization.LookupTable translator = (Localization.LookupTable)prop.GetValue(typeof(Translation), null);
-            return translator.Get(key);
+            return Translator == null
+                ? Translation.Options.Get(key)
+                : Translator(key);
         }
 
     }
