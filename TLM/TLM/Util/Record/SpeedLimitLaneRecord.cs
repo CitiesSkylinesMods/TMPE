@@ -39,7 +39,7 @@ namespace TrafficManager.Util.Record {
                 segmentId: segmentId,
                 laneIndex: this.LaneIndex,
                 laneInfo: laneInfo,
-                laneId: this.LaneId,
+                laneId: laneId,
                 action: SetSpeedLimitAction.FromNullableFloat(this.speedLimit_));
         }
 

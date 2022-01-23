@@ -20,5 +20,11 @@ namespace TrafficManager.Lifecycle {
                 TrafficLightSimulationManager.Instance.SimulationStep();
             }
         }
+
+        public override void OnAfterSimulationTick() {
+            base.OnAfterSimulationTick();
+
+            UtilityManager.Instance.ProcessTransferRecordableQueue();
+        }
     } // end class
 }
