@@ -55,6 +55,10 @@ namespace TrafficManager.State {
             UIHelper tab = tabStrip.AddTabPage(T("Tab:General"));
             UIHelperBase group;
 
+            tab.AddSpace(5);
+            tab.AddButton("What's New?", WhatsNew.OpenModal);
+            tab.AddSpace(5);
+
             group = tab.AddGroup(T("General.Group:Localisation"));
 
             string[] languageLabels = new string[Translation.AvailableLanguageCodes.Count + 1];
@@ -83,10 +87,6 @@ namespace TrafficManager.State {
                                     options: languageLabels,
                                     defaultSelection: languageIndex,
                                     eventCallback: OnLanguageChanged) as UIDropDown;
-
-            group.AddSpace(5);
-            group.AddButton("What's New?", WhatsNew.OpenModal);
-            group.AddSpace(10);
 
             SetupSpeedLimitsPanel(group);
 
