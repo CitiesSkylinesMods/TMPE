@@ -33,8 +33,8 @@ This changelog includes all versions and major variants of the mod going all the
 
 * [New] TM:PE 11.6 branch released as STABLE - huge thanks to our beta testers!
 * [Mod] Fixed: `Find It` traffic settings not copy/pasted in-game #1303 #1300 (krzychu124)
-* [Mod] Fixed: `Node Controller Renewal` silent fail place intersection #1307 (krzychu124)
-* [Mod] Fixed: `Intersection Marking Tool` silent fail place intersection #1307 (krzychu124)
+* [Mod] Fixed: `Node Controller Renewal` silent fail place intersection #1308 #1307 (krzychu124)
+* [Mod] Fixed: `Intersection Marking Tool` silent fail place intersection #1308 #1307 (krzychu124)
 * [Updated] Compatibility update for Airports DLC #1230 (krzychu124)
 * [Updated] Reduce logging from `AssetDataExtension` in release builds #1296 #1295 (aubergine18)
 * [Updated] Translations for multiple languages #1304 (Chamëleon, MenschLennart, John Deehe, Skazov, AlexofCA, CrankyAnt, Иван Соколов, AduitSSH, John Lok Ho, DNSE, shg166, GiorgioHerbie, footbool, krzychu124, aubergine18, Dmytro Lytovchenko, Fizzy_LaFizz, Vladimír Krajč, alvaroer, Mahmoud Al Gammal, ipd, 田七不甜, vitalii201, 許景翔, Mehmet Ömer Tüzer, vicugna-pacos, kianzarrin, Mbyron26, Headspike, lennier3, kevinlin18, Ikki_di_Phoenix)
@@ -44,8 +44,8 @@ This changelog includes all versions and major variants of the mod going all the
 #### TM:PE V11.6.4.0 TEST, 25/01/2022
 
 * [Mod] Fixed: `Find It` traffic settings not copy/pasted in-game #1303 #1300 (krzychu124)
-* [Mod] Fixed: `Node Controller Renewal` silent fail place intersection #1307 (krzychu124)
-* [Mod] Fixed: `Intersection Marking Tool` silent fail place intersection #1307 (krzychu124)
+* [Mod] Fixed: `Node Controller Renewal` silent fail place intersection #1308 #1307 (krzychu124)
+* [Mod] Fixed: `Intersection Marking Tool` silent fail place intersection #1308 #1307 (krzychu124)
 * [Updated] Compatibility update for Airports DLC #1230 (krzychu124)
 * [Updated] Reduce logging from `AssetDataExtension` in release builds #1296 #1295 (aubergine18)
 * [Updated] Translations for multiple languages #1304 (Chamëleon, MenschLennart, John Deehe, Skazov, AlexofCA, CrankyAnt, Иван Соколов, AduitSSH, John Lok Ho, DNSE, shg166, GiorgioHerbie, footbool, krzychu124, aubergine18, Dmytro Lytovchenko, Fizzy_LaFizz, Vladimír Krajč, alvaroer, Mahmoud Al Gammal, ipd, 田七不甜, vitalii201, 許景翔, Mehmet Ömer Tüzer, vicugna-pacos, kianzarrin, Mbyron26, Headspike, lennier3, kevinlin18, Ikki_di_Phoenix)
