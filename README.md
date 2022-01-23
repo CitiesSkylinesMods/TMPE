@@ -42,7 +42,7 @@ Recent updates (dd/mm/yyyy):
 #### TM:PE V11.6.4.0 STABLE, 25/01/2022
 
 * [New] TM:PE 11.6 branch released as STABLE - huge thanks to our beta testers!
-* [Mod] Fixed: `Find It` traffic settings not copy/pasted in-game #1303 #1300 (krzychu124)
+* [Mod] Fixed: `Move It` traffic settings not copy/pasted in-game #1303 #1300 (krzychu124)
 * [Mod] Fixed: `Node Controller Renewal` silent fail place intersection #1308 #1307 (krzychu124)
 * [Mod] Fixed: `Intersection Marking Tool` silent fail place intersection #1308 #1307 (krzychu124)
 * [Updated] Compatibility update for Airports DLC #1230 (krzychu124)
@@ -52,7 +52,7 @@ Recent updates (dd/mm/yyyy):
 
 #### TM:PE V11.6.4.0 TEST, 25/01/2022
 
-* [Mod] Fixed: `Find It` traffic settings not copy/pasted in-game #1303 #1300 (krzychu124)
+* [Mod] Fixed: `Move It` traffic settings not copy/pasted in-game #1303 #1300 (krzychu124)
 * [Mod] Fixed: `Node Controller Renewal` silent fail place intersection #1308 #1307 (krzychu124)
 * [Mod] Fixed: `Intersection Marking Tool` silent fail place intersection #1308 #1307 (krzychu124)
 * [Updated] Compatibility update for Airports DLC #1230 (krzychu124)

@@ -3,7 +3,7 @@
 [Released] January 25th 2022
 [Link] tmpe-v1164-stable-25012022
 [New] TM:PE 11.6 branch released as STABLE - huge thanks to our beta testers!
-[Mod] Fixed: `Find It` traffic settings not copy/pasted in-game #1303 #1300 (krzychu124)
+[Mod] Fixed: `Move It` traffic settings not copy/pasted in-game #1303 #1300 (krzychu124)
 [Mod] Fixed: `Node Controller Renewal` silent fail place intersection #1308 #1307 (krzychu124)
 [Mod] Fixed: `Intersection Marking Tool` silent fail place intersection #1308 #1307 (krzychu124)
 [Updated] Compatibility update for Airports DLC #1230 (krzychu124)
