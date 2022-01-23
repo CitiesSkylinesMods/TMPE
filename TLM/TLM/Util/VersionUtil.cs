@@ -29,10 +29,10 @@ namespace TrafficManager.Util {
         // we could alternatively use BuildConfig.APPLICATION_VERSION because const values are evaluated at compile time.
         // but I have decided not to do this because I don't want this to happen automatically with a rebuild if
         // CS updates. these values should be changed manaually so as to force us to acknowledge that they have changed.
-        public const uint EXPECTED_GAME_VERSION_U = 189262096U;
+        public const uint EXPECTED_GAME_VERSION_U = 193061904u;
 
         // see comments for EXPECTED_GAME_VERSION_U.
-        public static Version ExpectedGameVersion => new Version(1, 13, 3, 9);
+        public static Version ExpectedGameVersion => new Version(1, 14, 0, 4);
 
         public static string ExpectedGameVersionString => BuildConfig.VersionToString(EXPECTED_GAME_VERSION_U, false);
 
@@ -122,8 +122,8 @@ namespace TrafficManager.Util {
         /// This will be replaced as part of #699.
         /// </summary>
         public static void CheckGameVersion() {
+            Log.Info($"Expected C:SL v{ExpectedGameVersionString} - Actual C:SL v{BuildConfig.applicationVersion}");
             if (CurrentGameVersionU != EXPECTED_GAME_VERSION_U) {
-                Log.Info($"Detected game version v{BuildConfig.applicationVersion}. TMPE built for {ExpectedGameVersionString}");
                 Log._Debug($"CurrentGameVersion={CurrentGameVersion} ExpectedGameVersion={ExpectedGameVersion}");
                 Version current = CurrentGameVersion.Take(VERSION_COMPONENTS_COUNT);
                 Version expected = ExpectedGameVersion.Take(VERSION_COMPONENTS_COUNT);
