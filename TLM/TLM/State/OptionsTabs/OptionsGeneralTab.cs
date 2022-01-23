@@ -49,13 +49,18 @@ namespace TrafficManager.State {
 
         private static UICheckBox _useUUI;
 
-
         private static string T(string key) => Translation.Options.Get(key);
 
         internal static void MakeSettings_General(ExtUITabstrip tabStrip) {
-            UIHelper panelHelper = tabStrip.AddTabPage(T("Tab:General"));
+            UIHelper tab = tabStrip.AddTabPage(T("Tab:General"));
+            UIHelperBase group;
 
-            UIHelperBase generalGroup = panelHelper.AddGroup(T("Tab:General"));
+            tab.AddSpace(5);
+            tab.AddButton("What's New?", WhatsNew.OpenModal);
+            tab.AddSpace(5);
+
+            group = tab.AddGroup(T("General.Group:Localisation"));
+
             string[] languageLabels = new string[Translation.AvailableLanguageCodes.Count + 1];
             languageLabels[0] = T("General.Dropdown.Option:Game language");
 
@@ -77,31 +82,31 @@ namespace TrafficManager.State {
                 }
             }
 
-            _languageDropdown = generalGroup.AddDropdown(
+            _languageDropdown = group.AddDropdown(
                                     text: T("General.Dropdown:Select language") + ":",
                                     options: languageLabels,
                                     defaultSelection: languageIndex,
                                     eventCallback: OnLanguageChanged) as UIDropDown;
 
-            generalGroup.AddSpace(5);
-            generalGroup.AddButton("What's New?", WhatsNew.OpenModal);
-            generalGroup.AddSpace(10);
+            SetupSpeedLimitsPanel(group);
 
-            _lockButtonToggle = generalGroup.AddCheckbox(
+            group = tab.AddGroup(T("General.Group:Interface"));
+
+            _lockButtonToggle = group.AddCheckbox(
                                     text: T("General.Checkbox:Lock main menu button position"),
                                     defaultValue: GlobalConfig.Instance.Main.MainMenuButtonPosLocked,
                                     eventCallback: OnLockButtonChanged) as UICheckBox;
-            _lockMenuToggle = generalGroup.AddCheckbox(
+            _lockMenuToggle = group.AddCheckbox(
                                   text: T("General.Checkbox:Lock main menu window position"),
                                   defaultValue: GlobalConfig.Instance.Main.MainMenuPosLocked,
                                   eventCallback: OnLockMenuChanged) as UICheckBox;
 
-            _useUUI = generalGroup.AddCheckbox(
+            _useUUI = group.AddCheckbox(
                 text: T("General.Checkbox:Use UnifiedUI"),
                 defaultValue: GlobalConfig.Instance.Main.UseUUI,
                 eventCallback: OnUseUUIChanged) as UICheckBox;
 
-            _guiScaleSlider = generalGroup.AddSlider(
+            _guiScaleSlider = group.AddSlider(
                                   text: T("General.Slider:GUI scale") + ":",
                                   min: 50,
                                   max: 200,
@@ -110,7 +115,7 @@ namespace TrafficManager.State {
                                   eventCallback: OnGuiScaleChanged) as UISlider;
             _guiScaleSlider.parent.Find<UILabel>("Label").width = 500;
 
-            _guiOpacitySlider = generalGroup.AddSlider(
+            _guiOpacitySlider = group.AddSlider(
                                         text: T("General.Slider:Window transparency") + ":",
                                         min: 0,
                                         max: 100,
@@ -119,7 +124,7 @@ namespace TrafficManager.State {
                                         eventCallback: OnGuiOpacityChanged) as UISlider;
             _guiOpacitySlider.parent.Find<UILabel>("Label").width = 500;
 
-            _overlayTransparencySlider = generalGroup.AddSlider(
+            _overlayTransparencySlider = group.AddSlider(
                                              text: T("General.Slider:Overlay transparency") + ":",
                                              min: 0,
                                              max: 100,
@@ -127,32 +132,13 @@ namespace TrafficManager.State {
                                              defaultValue: GlobalConfig.Instance.Main.OverlayTransparency,
                                              eventCallback: OnOverlayTransparencyChanged) as UISlider;
             _overlayTransparencySlider.parent.Find<UILabel>("Label").width = 500;
-            _enableTutorialToggle = generalGroup.AddCheckbox(
+            _enableTutorialToggle = group.AddCheckbox(
                                         T("General.Checkbox:Enable tutorials"),
                                         GlobalConfig.Instance.Main.EnableTutorial,
                                         OnEnableTutorialsChanged) as UICheckBox;
-            _showCompatibilityCheckErrorToggle
-                = generalGroup.AddCheckbox(
-                      T("General.Checkbox:Notify me about TM:PE startup conflicts"),
-                      GlobalConfig.Instance.Main.ShowCompatibilityCheckErrorMessage,
-                      OnShowCompatibilityCheckErrorChanged) as UICheckBox;
-            _scanForKnownIncompatibleModsToggle
-                = generalGroup.AddCheckbox(
-                      Translation.ModConflicts.Get("Checkbox:Scan for known incompatible mods on startup"),
-                      GlobalConfig.Instance.Main.ScanForKnownIncompatibleModsAtStartup,
-                      OnScanForKnownIncompatibleModsChanged) as UICheckBox;
-            _ignoreDisabledModsToggle = generalGroup.AddCheckbox(
-                                            text: Translation.ModConflicts.Get("Checkbox:Ignore disabled mods"),
-                                            defaultValue: GlobalConfig.Instance.Main.IgnoreDisabledMods,
-                                            eventCallback: OnIgnoreDisabledModsChanged) as UICheckBox;
-            Options.Indent(_ignoreDisabledModsToggle);
 
+            group = tab.AddGroup(T("General.Group:Simulation"));
 
-            // General: Speed Limits
-            SetupSpeedLimitsPanel(generalGroup);
-
-            // General: Simulation
-            UIHelperBase simGroup = panelHelper.AddGroup(T("General.Group:Simulation"));
             string[] simPrecisionOptions = new[] {
                 T("General.Dropdown.Option:Very low"),
                 T("General.Dropdown.Option:Low"),
@@ -160,16 +146,34 @@ namespace TrafficManager.State {
                 T("General.Dropdown.Option:High"),
                 T("General.Dropdown.Option:Very high"),
             };
-            _simulationAccuracyDropdown = simGroup.AddDropdown(
+            _simulationAccuracyDropdown = group.AddDropdown(
                                               text: T("General.Dropdown:Simulation accuracy") + ":",
                                               options: simPrecisionOptions,
                                               defaultSelection: (int)Options.simulationAccuracy,
                                               eventCallback: OnSimulationAccuracyChanged) as UIDropDown;
 
-            _instantEffectsToggle = simGroup.AddCheckbox(
+            _instantEffectsToggle = group.AddCheckbox(
                                        text: T("General.Checkbox:Apply AI changes right away"),
                                        defaultValue: Options.instantEffects,
                                        eventCallback: OnInstantEffectsChanged) as UICheckBox;
+
+            group = tab.AddGroup(T("General.Group:Compatibility"));
+
+            _scanForKnownIncompatibleModsToggle
+                = group.AddCheckbox(
+                      Translation.ModConflicts.Get("Checkbox:Scan for known incompatible mods on startup"),
+                      GlobalConfig.Instance.Main.ScanForKnownIncompatibleModsAtStartup,
+                      OnScanForKnownIncompatibleModsChanged) as UICheckBox;
+            _ignoreDisabledModsToggle = group.AddCheckbox(
+                                            text: Translation.ModConflicts.Get("Checkbox:Ignore disabled mods"),
+                                            defaultValue: GlobalConfig.Instance.Main.IgnoreDisabledMods,
+                                            eventCallback: OnIgnoreDisabledModsChanged) as UICheckBox;
+            Options.Indent(_ignoreDisabledModsToggle);
+            _showCompatibilityCheckErrorToggle
+                = group.AddCheckbox(
+                      T("General.Checkbox:Notify me about TM:PE startup conflicts"),
+                      GlobalConfig.Instance.Main.ShowCompatibilityCheckErrorMessage,
+                      OnShowCompatibilityCheckErrorChanged) as UICheckBox;
         }
 
         private static void SetupSpeedLimitsPanel(UIHelperBase generalGroup) {
