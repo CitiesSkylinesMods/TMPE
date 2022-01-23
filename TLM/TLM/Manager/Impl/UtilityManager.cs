@@ -3,17 +3,22 @@ namespace TrafficManager.Manager.Impl {
     using CSUtil.Commons;
     using System.Threading;
     using System;
+    using System.Collections.Generic;
     using JetBrains.Annotations;
     using TrafficManager.API.Manager;
     using TrafficManager.State;
     using UnityEngine;
     using TrafficManager.Lifecycle;
+    using Util.Record;
+
     public class UtilityManager : AbstractCustomManager, IUtilityManager {
         static UtilityManager() {
             Instance = new UtilityManager();
         }
 
         public static UtilityManager Instance { get; }
+
+        private readonly Queue<KeyValuePair<IRecordable, Dictionary<InstanceID, InstanceID>>> _transferRecordables = new ();
 
         public void ClearTraffic() {
             lock (Singleton<VehicleManager>.instance) {
@@ -177,6 +182,30 @@ namespace TrafficManager.Manager.Impl {
             if (!wasPausedBeforeReset) {
                 Log.Info("UtilityManager.RemoveStuckEntities(): Unpausing simulation.");
                 Singleton<SimulationManager>.instance.ForcedSimulationPaused = false;
+            }
+        }
+
+        /// <summary>
+        /// Queues Transfer recordables to be processed at the end of simulation step
+        /// </summary>
+        /// <param name="recordable">Settings record to by applied</param>
+        /// <param name="map">links between source and newly created clones</param>
+        public void QueueTransferRecordable(IRecordable recordable,
+                                            Dictionary<InstanceID, InstanceID> map) {
+            _transferRecordables.Enqueue(
+                new KeyValuePair<IRecordable, Dictionary<InstanceID, InstanceID>>(
+                    recordable,
+                    new Dictionary<InstanceID, InstanceID>(map)));
+        }
+
+
+        /// <summary>
+        /// Processes queued transfer recordables
+        /// </summary>
+        public void ProcessTransferRecordableQueue() {
+            while (_transferRecordables.Count > 0) {
+                KeyValuePair<IRecordable, Dictionary<InstanceID, InstanceID>> recordablePair = _transferRecordables.Dequeue();
+                recordablePair.Key.Transfer(recordablePair.Value);
             }
         }
     }
