@@ -4,6 +4,7 @@ namespace TrafficManager.State {
     using System.Collections.Generic;
     using TrafficManager.Util.Record;
     using CSUtil.Commons;
+    using Manager.Impl;
     using TrafficManager.Util;
 
     public class TMPEMoveItIntegrationFactory : IMoveItIntegrationFactory {
@@ -36,8 +37,8 @@ namespace TrafficManager.State {
         }
 
         public override void Paste(InstanceID targetInstanceID, object record, Dictionary<InstanceID, InstanceID> map) {
-            if(record is IRecordable r) {
-                r.Transfer(map);
+            if(record is IRecordable recordable) {
+                UtilityManager.Instance.QueueTransferRecordable(recordable, map);
             }
         }
 
