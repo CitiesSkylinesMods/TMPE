@@ -38,6 +38,7 @@ This changelog includes all versions and major variants of the mod going all the
 * [Updated] Compatibility update for Airports DLC #1230 (krzychu124)
 * [Updated] Reduce logging from `AssetDataExtension` in release builds #1296 #1295 (aubergine18)
 * [Updated] Translations for multiple languages #1304 (Chamëleon, MenschLennart, John Deehe, Skazov, AlexofCA, CrankyAnt, Иван Соколов, AduitSSH, John Lok Ho, DNSE, shg166, GiorgioHerbie, footbool, krzychu124, aubergine18, Dmytro Lytovchenko, Fizzy_LaFizz, Vladimír Krajč, alvaroer, Mahmoud Al Gammal, ipd, 田七不甜, vitalii201, 許景翔, Mehmet Ömer Tüzer, vicugna-pacos, kianzarrin, Mbyron26, Headspike, lennier3, kevinlin18, Ikki_di_Phoenix)
+* [Updated] Reorganise General options tab #1306 #1262 (aubergine18)
 - [Steam] [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
 
 #### TM:PE V11.6.4.0 TEST, 25/01/2022
@@ -48,6 +49,7 @@ This changelog includes all versions and major variants of the mod going all the
 * [Updated] Compatibility update for Airports DLC #1230 (krzychu124)
 * [Updated] Reduce logging from `AssetDataExtension` in release builds #1296 #1295 (aubergine18)
 * [Updated] Translations for multiple languages #1304 (Chamëleon, MenschLennart, John Deehe, Skazov, AlexofCA, CrankyAnt, Иван Соколов, AduitSSH, John Lok Ho, DNSE, shg166, GiorgioHerbie, footbool, krzychu124, aubergine18, Dmytro Lytovchenko, Fizzy_LaFizz, Vladimír Krajč, alvaroer, Mahmoud Al Gammal, ipd, 田七不甜, vitalii201, 許景翔, Mehmet Ömer Tüzer, vicugna-pacos, kianzarrin, Mbyron26, Headspike, lennier3, kevinlin18, Ikki_di_Phoenix)
+* [Updated] Reorganise General options tab #1306 #1262 (aubergine18)
 - [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
 
 #### TM:PE V11.6.3.0 TEST, 19/01/2022
