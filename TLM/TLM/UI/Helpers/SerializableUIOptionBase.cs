@@ -43,6 +43,7 @@ namespace TrafficManager.UI.Helpers {
         /// <param name="key">The locale key to translate.</param>
         /// <returns>Returns the translation for <paramref name="key"/>.</returns>
         public delegate string TranslatorDelegate(string key);
+        public string FieldName => _fieldInfo.Name;
 
         /// <summary>Returns <c>true</c> if user can change the setting in the current <see cref="_scope"/>.</summary>
         /// <remarks>When not in scope, the UI component should be made read-only (<seealso cref="ReadOnlyUI"/>).</remarks>
