@@ -4,12 +4,12 @@ namespace TrafficManager.UI.Helpers {
     using State;
 
     public class CheckboxOption : SerializableUIOptionBase<bool, UICheckBox> {
-        public CheckboxOption(string fieldName, bool globalOption = false)
-        : base(fieldName, globalOption) {
+        public CheckboxOption(string fieldName, Options.PersistTo scope = Options.PersistTo.Savegame)
+        : base(fieldName, scope) {
             OnValueChanged = DefaultOnValueChanged;
         }
 
-        public event ICities.OnCheckChanged OnValueChanged;
+        public event OnCheckChanged OnValueChanged;
 
         public OnCheckChanged Handler {
             set => OnValueChanged += value;

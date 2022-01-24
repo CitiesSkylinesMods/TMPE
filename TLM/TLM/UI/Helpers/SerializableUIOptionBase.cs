@@ -11,19 +11,19 @@ namespace TrafficManager.UI.Helpers {
         where TUI : UIComponent {
 
         /* Data: */
-        public SerializableUIOptionBase(string fieldName, bool globalOption) {
+        public SerializableUIOptionBase(string fieldName, Options.PersistTo scope) {
 
             ValueField = typeof(Options).GetField(fieldName, BindingFlags.Static | BindingFlags.Public);
             if (ValueField == null) {
                 throw new Exception($"{typeof(Options)}.{fieldName} does not exist");
             }
 
-            GlobalOption = globalOption;
+            Scope = scope;
         }
 
         public TranslatorDelegate Translator;
         private FieldInfo ValueField;
-        public bool GlobalOption { get; private set; }
+        public Options.PersistTo Scope { get; private set; }
 
         /// <summary>Gets or sets the value of the field this option represents.</summary>
         public virtual TVal Value {
@@ -57,10 +57,12 @@ namespace TrafficManager.UI.Helpers {
         /// <summary>
         /// Returns <c>true</c> if user is allowed to change the value in current context.
         /// </summary>
-        protected bool IsValueChangeAllowed => GlobalOption || Options.IsGameLoaded(false);
+        protected bool IsValueChangeAllowed =>
+            Scope.IsFlagSet(Options.PersistTo.Global) ||
+            (Scope.IsFlagSet(Options.PersistTo.Savegame) && Options.IsGameLoaded(false));
 
         public void DefaultOnValueChanged(TVal newVal) {
-            Options.IsGameLoaded(!GlobalOption);
+            Options.IsGameLoaded(!IsValueChangeAllowed);
             Log._Debug($"{Label} changed to {newVal}");
             Value = newVal;
         }
