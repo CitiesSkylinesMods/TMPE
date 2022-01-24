@@ -36,7 +36,7 @@ namespace TrafficManager.UI.Helpers {
             set => ValueField.SetValue(null, value);
         }
 
-        /// <summary>Custom translation delegate.</summary>
+        /// <summary>Translate a locale key in to a localised string.</summary>
         /// <param name="key">The locale key to translate.</param>
         /// <returns>Returns the translation for <paramref name="key"/>.</returns>
         public delegate string TranslatorDelegate(string key);
@@ -70,12 +70,9 @@ namespace TrafficManager.UI.Helpers {
             Value = newVal;
         }
 
-        /// <summary>
-        /// Translate a locale key via <see cref="Translation.Options"/>
-        /// or, if defined, via custom <see cref="Translator"/>.
-        /// </summary>
+        /// <summary>Terse shortcut for <c>Translator(key)</c>.</summary>
         /// <param name="key">The locale key to translate.</param>
-        /// <returns>Returns the translation for <paramref name="key"/>.</returns>
+        /// <returns>Returns localised string for <paramref name="key"/>.</returns>
         protected string T(string key) => Translator(key);
 
     }
