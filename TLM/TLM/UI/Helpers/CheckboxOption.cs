@@ -48,8 +48,8 @@ namespace TrafficManager.UI.Helpers {
                 Options.Indent(_ui);
             }
             Options.AllowTextWrap(_ui, Indent);
-            if (!IsValueChangeAllowed) {
-                ReadOnly = true;
+            if (!IsInScope) {
+                ReadOnlyUI = true;
                 _ui.tooltip = "This setting can only be changed in-game.";
             } else if (Tooltip != null) {
                 _ui.tooltip = T(Tooltip);

@@ -55,14 +55,15 @@ namespace TrafficManager.UI.Helpers {
         public virtual bool ReadOnlyUI { get; set; }
 
         /// <summary>
-        /// Returns <c>true</c> if user is allowed to change the value in current context.
+        /// Returns <c>true</c> if user can change the setting in the current scope.
+        ///
+        /// When not in scope, the UI component should be made read-only.
         /// </summary>
-        protected bool IsValueChangeAllowed =>
+        protected bool IsInScope =>
             Scope.IsFlagSet(Options.PersistTo.Global) ||
             (Scope.IsFlagSet(Options.PersistTo.Savegame) && Options.IsGameLoaded(false));
 
         public void DefaultOnValueChanged(TVal newVal) {
-            Options.IsGameLoaded(!IsValueChangeAllowed);
             Log._Debug($"{Label} changed to {newVal}");
             Value = newVal;
         }
