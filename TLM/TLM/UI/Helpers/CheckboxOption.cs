@@ -25,13 +25,13 @@ namespace TrafficManager.UI.Helpers {
             }
         }
 
-        public override bool Enabled {
-            get => base.Enabled;
+        public override bool ReadOnly {
+            get => base.ReadOnly;
             set {
-                base.Enabled = value;
+                base.ReadOnly = value;
                 if (_ui != null) {
-                    _ui.readOnly = !value;
-                    _ui.opacity = value ? 1f : 0.3f;
+                    _ui.readOnly = value;
+                    _ui.opacity = value ? 0.3f : 1f;
                 }
             }
         }
@@ -49,12 +49,12 @@ namespace TrafficManager.UI.Helpers {
             }
             Options.AllowTextWrap(_ui, Indent);
             if (!IsValueChangeAllowed) {
-                Enabled = false;
+                ReadOnly = true;
                 _ui.tooltip = "This setting can only be changed in-game.";
             } else if (Tooltip != null) {
                 _ui.tooltip = T(Tooltip);
-                if (!base.Enabled) {
-                    Enabled = false;
+                if (base.ReadOnly) {
+                    ReadOnly = true;
                 }
             }
         }
