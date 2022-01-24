@@ -52,7 +52,7 @@ namespace TrafficManager.UI.Helpers {
         protected TUI _ui;
         public abstract void AddUI(UIHelperBase container);
 
-        public virtual bool ReadOnly { get; set; }
+        public virtual bool ReadOnlyUI { get; set; }
 
         /// <summary>
         /// Returns <c>true</c> if user is allowed to change the value in current context.

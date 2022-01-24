@@ -25,10 +25,10 @@ namespace TrafficManager.UI.Helpers {
             }
         }
 
-        public override bool ReadOnly {
-            get => base.ReadOnly;
+        public override bool ReadOnlyUI {
+            get => base.ReadOnlyUI;
             set {
-                base.ReadOnly = value;
+                base.ReadOnlyUI = value;
                 if (_ui != null) {
                     _ui.readOnly = value;
                     _ui.opacity = value ? 0.3f : 1f;
@@ -53,8 +53,8 @@ namespace TrafficManager.UI.Helpers {
                 _ui.tooltip = "This setting can only be changed in-game.";
             } else if (Tooltip != null) {
                 _ui.tooltip = T(Tooltip);
-                if (base.ReadOnly) {
-                    ReadOnly = true;
+                if (base.ReadOnlyUI) {
+                    ReadOnlyUI = true;
                 }
             }
         }
