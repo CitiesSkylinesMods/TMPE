@@ -59,11 +59,8 @@ namespace TrafficManager.UI.Helpers {
 
         public virtual bool ReadOnlyUI { get; set; }
 
-        /// <summary>
-        /// Returns <c>true</c> if user can change the setting in the current <see cref="Scope"/>.
-        ///
-        /// When not in scope, the UI component should be made read-only.
-        /// </summary>
+        /// <summary>Returns <c>true</c> if user can change the setting in the current <see cref="Scope"/>.</summary>
+        /// <remarks>When not in scope, the UI component should be made read-only (<seealso cref="ReadOnlyUI"/>).</remarks>
         protected bool IsInScope =>
             Scope.IsFlagSet(Options.PersistTo.Global) ||
             (Scope.IsFlagSet(Options.PersistTo.Savegame) && Options.IsGameLoaded(false));
