@@ -28,10 +28,10 @@ namespace TrafficManager.UI.Helpers {
         public override bool ReadOnlyUI {
             get => base.ReadOnlyUI;
             set {
-                base.ReadOnlyUI = value;
+                base.ReadOnlyUI = !IsInScope || value;
                 if (_ui != null) {
-                    _ui.readOnly = value;
-                    _ui.opacity = value ? 0.3f : 1f;
+                    _ui.readOnly = base.ReadOnlyUI;
+                    _ui.opacity = base.ReadOnlyUI ? 0.3f : 1f;
                 }
             }
         }
