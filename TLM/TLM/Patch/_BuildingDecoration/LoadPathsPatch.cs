@@ -32,11 +32,11 @@ namespace TrafficManager.Patches._BuildingDecoration {
 
             List<CodeInstruction> codes = TranspilerUtil.ToCodeList(instructions);
 
-            bool compareFn(int i) =>
+            bool predicate(int i) =>
                 codes[i].opcode == OpCodes.Blt &&
                 codes[i - 1].opcode == OpCodes.Ldfld && codes[i - 1].operand == mSize &&
                 codes[i - 2].opcode == OpCodes.Ldfld && codes[i - 2].operand == fTempSegmentBuffer;
-            int index = TranspilerUtil.SearchGeneric(codes, compareFn, index: 0, counter: 1);
+            int index = TranspilerUtil.SearchGeneric(codes, predicate, index: 0, counter: 1);
             index += 1; // index to insert instructions. (end of the loop)
 
             var newInstructions = new[] {
