@@ -25,6 +25,14 @@ namespace TrafficManager.State {
         // private static UITextField pathCostMultiplicator2Field = null;
 #endif
 
+        [Flags]
+        public enum PersistTo {
+            None = 0,
+            Global = 1,
+            Savegame = 2,
+            GlobalOrSavegame = Global | Savegame,
+        }
+
         public static bool instantEffects = true;
         public static bool individualDrivingStyle = true;
         public static int recklessDrivers = 3;
