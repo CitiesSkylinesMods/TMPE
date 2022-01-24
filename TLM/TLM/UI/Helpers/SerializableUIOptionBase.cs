@@ -28,21 +28,12 @@ namespace TrafficManager.UI.Helpers {
             _scope = scope;
         }
 
-        public TranslatorDelegate Translator {
-            get => _translator ?? Translation.Options.Get;
-            set => _translator = value;
-        }
-        private TranslatorDelegate _translator;
         /// <summary>Gets or sets the value of the field this option represents.</summary>
         public virtual TVal Value {
             get => (TVal)_fieldInfo.GetValue(null);
             set => _fieldInfo.SetValue(null, value);
         }
 
-        /// <summary>Translate a locale key in to a localised string.</summary>
-        /// <param name="key">The locale key to translate.</param>
-        /// <returns>Returns the translation for <paramref name="key"/>.</returns>
-        public delegate string TranslatorDelegate(string key);
         public string FieldName => _fieldInfo.Name;
 
         /// <summary>Returns <c>true</c> if user can change the setting in the current <see cref="_scope"/>.</summary>
@@ -54,17 +45,20 @@ namespace TrafficManager.UI.Helpers {
 
         public static implicit operator TVal(SerializableUIOptionBase<TVal, TUI> a) => a.Value;
 
-        // Legacy serialisation in `OptionsManager.cs`
+        public void DefaultOnValueChanged(TVal newVal) {
+            Log._Debug($"{typeof(Options)}.{_fieldInfo.Name} changed to {newVal}");
+            Value = newVal;
+        }
+
         public abstract void Load(byte data);
         public abstract byte Save();
 
-        // Unknown purpose.
         private Options OptionInstance => Singleton<Options>.instance;
 
         /* UI: */
+
         public bool HasUI => _ui != null;
         protected TUI _ui;
-        public abstract void AddUI(UIHelperBase container);
 
         protected string _label;
         protected string _tooltip;
@@ -72,15 +66,19 @@ namespace TrafficManager.UI.Helpers {
         protected bool _indent;
         protected bool _readOnlyUI;
 
-        public void DefaultOnValueChanged(TVal newVal) {
-            Log._Debug($"{Label} changed to {newVal}");
-            Value = newVal;
+        private TranslatorDelegate _translator;
+        public delegate string TranslatorDelegate(string key);
+
+        public TranslatorDelegate Translator {
+            get => _translator ?? Translation.Options.Get;
+            set => _translator = value;
         }
+
+        public abstract void AddUI(UIHelperBase container);
 
         /// <summary>Terse shortcut for <c>Translator(key)</c>.</summary>
         /// <param name="key">The locale key to translate.</param>
         /// <returns>Returns localised string for <paramref name="key"/>.</returns>
         protected string T(string key) => Translator(key);
-
     }
 }
