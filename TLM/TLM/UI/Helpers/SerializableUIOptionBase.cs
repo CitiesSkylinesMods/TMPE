@@ -54,20 +54,20 @@ namespace TrafficManager.UI.Helpers {
         private Options OptionInstance => Singleton<Options>.instance;
 
         /* UI: */
-        public string Label;
-        public string Tooltip;
-        public bool Indent = false;
         public bool HasUI => _ui != null;
         protected TUI _ui;
         public abstract void AddUI(UIHelperBase container);
 
-        public virtual bool ReadOnlyUI { get; set; }
+        protected string _label;
+        protected string _tooltip;
 
         /// <summary>Returns <c>true</c> if user can change the setting in the current <see cref="Scope"/>.</summary>
         /// <remarks>When not in scope, the UI component should be made read-only (<seealso cref="ReadOnlyUI"/>).</remarks>
         protected bool IsInScope =>
             Scope.IsFlagSet(Options.PersistTo.Global) ||
             (Scope.IsFlagSet(Options.PersistTo.Savegame) && Options.IsGameLoaded(false));
+        protected bool _indent;
+        protected bool _readOnlyUI;
 
         public void DefaultOnValueChanged(TVal newVal) {
             Log._Debug($"{Label} changed to {newVal}");
