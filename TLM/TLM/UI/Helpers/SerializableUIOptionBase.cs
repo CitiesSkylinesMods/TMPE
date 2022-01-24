@@ -14,14 +14,18 @@ namespace TrafficManager.UI.Helpers {
         protected const string INGAME_ONLY_SETTING = "This setting can only be changed in-game.";
 
         /* Data: */
+
+        protected Options.PersistTo _scope;
+        private FieldInfo _fieldInfo;
+
         public SerializableUIOptionBase(string fieldName, Options.PersistTo scope) {
 
-            ValueField = typeof(Options).GetField(fieldName, BindingFlags.Static | BindingFlags.Public);
-            if (ValueField == null) {
+            _fieldInfo = typeof(Options).GetField(fieldName, BindingFlags.Static | BindingFlags.Public);
+            if (_fieldInfo == null) {
                 throw new Exception($"{typeof(Options)}.{fieldName} does not exist");
             }
 
-            Scope = scope;
+            _scope = scope;
         }
 
         public TranslatorDelegate Translator {
@@ -29,14 +33,10 @@ namespace TrafficManager.UI.Helpers {
             set => _translator = value;
         }
         private TranslatorDelegate _translator;
-
-        private FieldInfo ValueField;
-        public Options.PersistTo Scope { get; private set; }
-
         /// <summary>Gets or sets the value of the field this option represents.</summary>
         public virtual TVal Value {
-            get => (TVal)ValueField.GetValue(null);
-            set => ValueField.SetValue(null, value);
+            get => (TVal)_fieldInfo.GetValue(null);
+            set => _fieldInfo.SetValue(null, value);
         }
 
         /// <summary>Translate a locale key in to a localised string.</summary>
