@@ -36,8 +36,11 @@ namespace TrafficManager.UI.Helpers {
 
         public string FieldName => _fieldInfo.Name;
 
-        /// <summary>Returns <c>true</c> if user can change the setting in the current <see cref="_scope"/>.</summary>
-        /// <remarks>When not in scope, the UI component should be made read-only (<seealso cref="ReadOnlyUI"/>).</remarks>
+        /// <summary>Returns <c>true</c> if setting can persist in current <see cref="_scope"/>.</summary>
+        /// <remarks>
+        /// When <c>false</c>, UI component should be <see cref="_readOnlyUI"/>
+        /// and <see cref="_tooltip"/> should be set to <see cref="INGAME_ONLY_SETTING"/>.
+        /// </remarks>
         protected bool IsInScope =>
             _scope.IsFlagSet(Options.PersistTo.Global) ||
             (_scope.IsFlagSet(Options.PersistTo.Savegame) && Options.IsGameLoaded(false)) ||
