@@ -44,6 +44,13 @@ namespace TrafficManager.UI.Helpers {
         /// <returns>Returns the translation for <paramref name="key"/>.</returns>
         public delegate string TranslatorDelegate(string key);
 
+        /// <summary>Returns <c>true</c> if user can change the setting in the current <see cref="_scope"/>.</summary>
+        /// <remarks>When not in scope, the UI component should be made read-only (<seealso cref="ReadOnlyUI"/>).</remarks>
+        protected bool IsInScope =>
+            _scope.IsFlagSet(Options.PersistTo.Global) ||
+            (_scope.IsFlagSet(Options.PersistTo.Savegame) && Options.IsGameLoaded(false)) ||
+            _scope == Options.PersistTo.None;
+
         public static implicit operator TVal(SerializableUIOptionBase<TVal, TUI> a) => a.Value;
 
         // Legacy serialisation in `OptionsManager.cs`
@@ -61,11 +68,6 @@ namespace TrafficManager.UI.Helpers {
         protected string _label;
         protected string _tooltip;
 
-        /// <summary>Returns <c>true</c> if user can change the setting in the current <see cref="Scope"/>.</summary>
-        /// <remarks>When not in scope, the UI component should be made read-only (<seealso cref="ReadOnlyUI"/>).</remarks>
-        protected bool IsInScope =>
-            Scope.IsFlagSet(Options.PersistTo.Global) ||
-            (Scope.IsFlagSet(Options.PersistTo.Savegame) && Options.IsGameLoaded(false));
         protected bool _indent;
         protected bool _readOnlyUI;
 
