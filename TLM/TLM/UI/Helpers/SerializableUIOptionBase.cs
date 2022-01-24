@@ -10,6 +10,9 @@ namespace TrafficManager.UI.Helpers {
     public abstract class SerializableUIOptionBase<TVal, TUI> : ILegacySerializableOption
         where TUI : UIComponent {
 
+        /// <summary>Use as tooltip for readonly UI components.</summary>
+        protected const string INGAME_ONLY_SETTING = "This setting can only be changed in-game.";
+
         /* Data: */
         public SerializableUIOptionBase(string fieldName, Options.PersistTo scope) {
 
