@@ -21,7 +21,12 @@ namespace TrafficManager.UI.Helpers {
             Scope = scope;
         }
 
-        public TranslatorDelegate Translator;
+        public TranslatorDelegate Translator {
+            get => _translator ?? Translation.Options.Get;
+            set => _translator = value;
+        }
+        private TranslatorDelegate _translator;
+
         private FieldInfo ValueField;
         public Options.PersistTo Scope { get; private set; }
 
@@ -55,7 +60,7 @@ namespace TrafficManager.UI.Helpers {
         public virtual bool ReadOnlyUI { get; set; }
 
         /// <summary>
-        /// Returns <c>true</c> if user can change the setting in the current scope.
+        /// Returns <c>true</c> if user can change the setting in the current <see cref="Scope"/>.
         ///
         /// When not in scope, the UI component should be made read-only.
         /// </summary>
@@ -74,11 +79,7 @@ namespace TrafficManager.UI.Helpers {
         /// </summary>
         /// <param name="key">The locale key to translate.</param>
         /// <returns>Returns the translation for <paramref name="key"/>.</returns>
-        protected string T(string key) {
-            return Translator == null
-                ? Translation.Options.Get(key)
-                : Translator(key);
-        }
+        protected string T(string key) => Translator(key);
 
     }
 }
