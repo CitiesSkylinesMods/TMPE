@@ -57,6 +57,7 @@ namespace TrafficManager.UI.Helpers {
         public string Label;
         public string Tooltip;
         public bool Indent = false;
+        public bool HasUI => _ui != null;
         protected TUI _ui;
         public abstract void AddUI(UIHelperBase container);
 
