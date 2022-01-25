@@ -690,7 +690,7 @@ This changelog includes all versions and major variants of the mod going all the
 #### TM:PE V11 ALPHA 11.0-alpha5, 31/07/2019
 
 - [Updated] Lots of code clean-up (#461, #349, #377, #451)
-- [Meta] Build process will now error if `in` is used without a `readonly struct` (thanks dymanoid!) (#463)
+- [Meta] Build process will now error if `in` is used without a `readonly struct` (thanks dymanoid!) (#463 #440)
 - [Meta] See `Contributing` guide in GitHub wiki if you get build errors due to #463
 - [Steam] [TM:PE v11 ALPHA](https://steamcommunity.com/sharedfiles/filedetails/?id=1806963141)
 
@@ -736,12 +736,12 @@ This changelog includes all versions and major variants of the mod going all the
 #### TM:PE LABS [10.21](https://github.com/CitiesSkylinesMods/TMPE/compare/10.20...10.21), 02/07/2019
 
 - [New] Cims have individual driving styles to determine lane changes and driving speed (#263 #334)
-- [New] Miles Per Hour option for speed limits (thanks kvakvs) (#384)
+- [New] Miles Per Hour option for speed limits (thanks kvakvs) (#13 #384 #556)
 - [New] Selectable style (US, UK, EU) of speed sign in speed limits UI (thanks kvakvs) (#384)
-- [New] Differentiate LABS, STABLE and DEBUG branches in UI (#326, #333)
+- [New] Differentiate LABS, STABLE and DEBUG branches in UI (#326, #333, #386)
 - [New] Keybinds tab in mod options - choose your own shortcuts! (thanks kvakvs) (#382)
 - [New] Show keyboard shortcuts in button tooltips where applicable (thanks kvakvs) (#382)
-- [New] Basic support of offline mode for users playing on EA's Origin service (#333, #400)
+- [New] Basic support of offline mode for users playing on EA's Origin service (#333, #340, #400)
 - [Updated]: Avoid setting loss due to duplicate TM:PE subscriptions (#333, #306, #149, #190, #211, #400)
 - [Fixed] Vehicle limit count; compatibility with More Vehicles mod (thanks Dymanoid) (#362)
 - [Fixed] Mail trucks ignoring lane arrows (thanks Subaru & eudyptula for feedback) (#307, #338)
@@ -907,14 +907,15 @@ This changelog includes all versions and major variants of the mod going all the
 
 #### TM:PE LABS 1.10.15, 10/02/2019
 
-- [New] (Experimental) Turn on red (thanks to FireController1847 for implementation and to pcfantasy for source code base)
-- [New] Notification if user is still subscribed to old original TM:PE
-- [Updated] Use Escape key to close Traffic Manager without returning to Pause Menu (thanks to aubergine10 for suggestion) (#16)
-- [Updated] New icons for cargo and passenger train restriction (thanks to aubergine10) (#17)
-- [Updated] Updated pathfinding with missing vanilla logic
-- [Updated] Tweaked values in `CargoTruckAI` path finding (thanks to pcfantasy for improvement suggestion)
-- [Updated] Tweaked speed multiplier of reckless drivers to get more realistic speed range (thanks to aubergine10 for suggestion) (#23)
-- [Updated] Simplified Chinese translation updated (thanks to Emphasia for translating)
+- [New] (Experimental) Turn on red #54 #25 (FireController1847, pcfantasy, LinuxFan)
+- [New] Notification if user is still subscribed to old original TM:PE #72
+- [Fixed] Option not loading/saving #57 (krzychu124)
+- [Updated] Use Escape key to close Traffic Manager without returning to Pause Menu #54 #16 (krzychu124, aubergine18)
+- [Updated] New icons for cargo and passenger train restriction #17 #37 (aubergine10)
+- [Updated] Updated pathfinding with missing vanilla logic #54
+- [Updated] Tweaked values in `CargoTruckAI` path finding #54 (pcfantasy, krzychu124)
+- [Updated] Tweaked speed multiplier of reckless drivers to get more realistic speed range #25 #54 (krzychu124, aubgergine10)
+- [Updated] Simplified Chinese translation updated #54 (Emphasia)
 - [Steam] [Traffic Manager: President Edition (LABS)](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
 
 #### TM:PE LABS 1.10.14, 27/01/2019
