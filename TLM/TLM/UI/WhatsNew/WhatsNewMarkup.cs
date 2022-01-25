@@ -10,6 +10,7 @@ namespace TrafficManager.UI.WhatsNew {
             { "[Stable]", MarkupKeyword.Stable },
             { "[Link]", MarkupKeyword.Link },
             { "[Released]", MarkupKeyword.Released },
+            { "[Meta]", MarkupKeyword.Meta },
             { "[New]", MarkupKeyword.New },
             { "[Mod]", MarkupKeyword.Mod },
             { "[Fixed]", MarkupKeyword.Fixed },
@@ -23,6 +24,7 @@ namespace TrafficManager.UI.WhatsNew {
             { MarkupKeyword.Stable, "[Stable]" },
             { MarkupKeyword.Link, "[Link]" },
             { MarkupKeyword.Released, "[Released]" },
+            { MarkupKeyword.Meta, "[Meta]" },
             { MarkupKeyword.New, "[New]" },
             { MarkupKeyword.Mod, "[Mod]" },
             { MarkupKeyword.Fixed, "[Fixed]" },
@@ -48,6 +50,7 @@ namespace TrafficManager.UI.WhatsNew {
                     return RemovedColor;
                 case MarkupKeyword.Updated:
                     return FixedOrUpdatedColor;
+                case MarkupKeyword.Meta:
                 case MarkupKeyword.VersionStart:
                 case MarkupKeyword.VersionEnd:
                 case MarkupKeyword.Stable:
