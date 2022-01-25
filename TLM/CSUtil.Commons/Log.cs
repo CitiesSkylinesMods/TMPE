@@ -130,19 +130,22 @@ namespace CSUtil.Commons {
         /// Get's a minified stack trace, optionally prepended by a string.
         /// </summary>
         /// <param name="prepend">Prepend the result with this string (skipped if <c>null</c> or empty)</param>
-        /// <param name="trunc">Truncate the stack trace to this many lines.</param>
-        /// <param name="chop">Chop this many lines from start of stack trace.</param>
+        /// <param name="skip">Skip this many lines from start of stack trace.</param>
+        /// <param name="trunc">Truncate remaining stack trace to this many lines.</param>
         /// <remarks>
-        /// For full stack trace, use <see cref="Log.Warning(string)"/>
-        /// or <see cref="Log.Error(string)"/> instead.
+        /// Skips first <paramref name="skip"/> stack items,
+        /// then truncates to <paramref name="trunc"/> total stack items,
+        /// then, if applicable, prepends <paramref name="s"/>.
+        /// </remarks>
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public static List<string> MiniStackTrace(string prepend, int trunc = 3, int chop = 2) {
+        public static List<string> MiniStackTrace(string prepend, int skip = 2, int trunc = 3) {
             var stack = new StackTrace(true);
+
             var list = new List<string>(
                 stack.ToString().Split(new string[] { "\r\n" },
                 StringSplitOptions.RemoveEmptyEntries));
 
-            list.RemoveRange(0, 2); // trim this method & caller
+            list.RemoveRange(0, skip);
 
             int len = list.Count;
             if (len > trunc) {
@@ -160,22 +163,20 @@ namespace CSUtil.Commons {
         /// Log a string and include a minified stack trace (3 methods).
         /// </summary>
         /// <param name="s">The text</param>
-        /// <param name="trunc">Truncate the stack trace to this many lines.</param>
-        /// <param name="chop">Chop this many lines from start of stack trace.</param>
-        /// <remarks>
-        /// For full stack trace, use <see cref="Log.Warning(string)"/>
-        /// or <see cref="Log.Error(string)"/> instead.
-        /// </remarks>
+        /// <param name="skip">Skip this many lines from start of stack trace.</param>
+        /// <param name="trunc">Truncate remaining stack trace to this many lines.</param>
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public static void Note(string s, int trunc = 3, int chop = 2) {
-            string str = MiniStackTrace(s, trunc, chop).ToString();
-            LogToFile(str, LogLevel.Note);
+        public static void Note(string s, int skip = 2, int trunc = 3) {
+            LogToFile(
+                $"{string.Join("\n", MiniStackTrace(s, skip, trunc).ToArray())}",
+                LogLevel.Note);
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static void NoteFormat(string format, params object[] args) {
-            string str = MiniStackTrace(string.Format(format, args)).ToString();
-            LogToFile(str, LogLevel.Note);
+            LogToFile(
+                $"{string.Join("\n", MiniStackTrace(string.Format(format, args)).ToArray())}",
+                LogLevel.Note);
         }
 
         /// <summary>
