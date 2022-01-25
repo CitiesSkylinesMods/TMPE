@@ -1,8 +1,15 @@
+[Version] 11.6.4.1
+[Stable]
+[Released] January ? 2022
+[Meta] TM:PE 11.6.4-hotfix-1
+[Fixed] Null reference error when saving in Asset Editor #1313 (krzychu124)
+[/Version]
+
 [Version] 11.6.4.0
 [Stable]
 [Released] January 25th 2022
-[Link] tmpe-v1164-stable-25012022
-[New] TM:PE 11.6 branch released as STABLE - huge thanks to our beta testers!
+[Link] tmpe-v11640-stable-25012022
+[Meta] TM:PE 11.6 branch released as STABLE - huge thanks to our beta testers!
 [Mod] Fixed: `Move It` traffic settings not copy/pasted in-game #1303 #1300 (krzychu124)
 [Mod] Fixed: `Node Controller Renewal` silent fail place intersection #1308 #1307 (krzychu124)
 [Mod] Fixed: `Intersection Marking Tool` silent fail place intersection #1308 #1307 (krzychu124)
@@ -16,7 +23,7 @@
 [Version] 11.6.3.0
 [Stable]
 [Released] January 19th 2022
-[Link] tmpe-v1163-test-19012022
+[Link] tmpe-v11630-test-19012022
 [New] What's New panel #118 #1284 (krzychu124, aubergine18)
 [Fixed] App mode detection #1290 #1289 #1286 (krzychu124)
 [Updated] Speed Limits manager for asset editor and mods #1277 #1285 (kianzarrin, krzychu124)
@@ -27,7 +34,7 @@
 [Version] 11.6.2.0
 [Stable]
 [Released] January 8th 2022
-[Link] tmpe-v1162-test-08012022
+[Link] tmpe-v11620-test-08012022
 [New] Speed Limits UI Overhaul #1168 #389 (kvakvs)
 [New] Road sign icon themes for multiple countries #1260 #1251 #1215 (Coreybpa, kvakvs, aubergine18)
 [New] Dynamic loading of road sign icon themes #1215 (kvakvs)

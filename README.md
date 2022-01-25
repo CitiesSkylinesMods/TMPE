@@ -39,6 +39,16 @@ Official releases:
 
 Recent updates (dd/mm/yyyy):
 
+#### TM:PE V11.6.4.1 STABLE, ?/01/2022
+
+* [Meta] TM:PE 11.6.4-hotfix-1
+* [Fixed] Null reference error when saving in Asset Editor #1313 (krzychu124)
+
+#### TM:PE V11.6.4.1 TEST, ?/01/2022
+
+* [Meta] TM:PE 11.6.4-hotfix-1
+* [Fixed] Null reference error when saving in Asset Editor #1313 (krzychu124)
+
 #### TM:PE V11.6.4.0 STABLE, 25/01/2022
 
 * [New] TM:PE 11.6 branch released as STABLE - huge thanks to our beta testers!

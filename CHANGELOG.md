@@ -29,9 +29,21 @@ This changelog includes all versions and major variants of the mod going all the
 
 </details>
 
+#### TM:PE V11.6.4.1 STABLE, ?/01/2022
+
+* [Meta] TM:PE 11.6.4-hotfix-1
+* [Fixed] Null reference error when saving in Asset Editor #1313 (krzychu124)
+- [Steam] [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
+
+#### TM:PE V11.6.4.1 TEST, ?/01/2022
+
+* [Meta] TM:PE 11.6.4-hotfix-1
+* [Fixed] Null reference error when saving in Asset Editor #1313 (krzychu124)
+- [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
+
 #### TM:PE V[11.6.4.0](https://github.com/CitiesSkylinesMods/TMPE/compare/11.6.3-test...11.6.4) STABLE, 25/01/2022
 
-* [New] TM:PE 11.6 branch released as STABLE - huge thanks to our beta testers!
+* [Meta] TM:PE 11.6 branch released as STABLE - huge thanks to our beta testers!
 * [Mod] Fixed: `Move It` traffic settings not copy/pasted in-game #1303 #1300 (krzychu124)
 * [Mod] Fixed: `Node Controller Renewal` silent fail place intersection #1308 #1307 (krzychu124)
 * [Mod] Fixed: `Intersection Marking Tool` silent fail place intersection #1308 #1307 (krzychu124)
