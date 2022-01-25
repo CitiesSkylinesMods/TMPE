@@ -126,8 +126,17 @@ namespace CSUtil.Commons {
             LogToFile(string.Format(format, args), LogLevel.Info);
         }
 
+        /// <summary>
+        /// Get's a minified stack trace, optionally prepended by a string.
+        /// </summary>
+        /// <param name="prepend">Prepend the result with this string (skipped if <c>null</c> or empty)</param>
+        /// <param name="trunc">Truncate the stack trace to this many lines.</param>
+        /// <param name="chop">Chop this many lines from start of stack trace.</param>
+        /// <remarks>
+        /// For full stack trace, use <see cref="Log.Warning(string)"/>
+        /// or <see cref="Log.Error(string)"/> instead.
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public static List<string> MiniStackTrace(string prependStr, int maxLen = 3) {
+        public static List<string> MiniStackTrace(string prepend, int trunc = 3, int chop = 2) {
             var stack = new StackTrace(true);
             var list = new List<string>(
                 stack.ToString().Split(new string[] { "\r\n" },
@@ -136,12 +145,12 @@ namespace CSUtil.Commons {
             list.RemoveRange(0, 2); // trim this method & caller
 
             int len = list.Count;
-            if (len > maxLen) {
-                list.RemoveRange(maxLen, len - maxLen);
+            if (len > trunc) {
+                list.RemoveRange(trunc, len - trunc);
             }
 
-            if (!string.IsNullOrEmpty(prependStr)) {
-                list.Insert(0, prependStr);
+            if (!string.IsNullOrEmpty(prepend)) {
+                list.Insert(0, prepend);
             }
 
             return list;
@@ -151,13 +160,15 @@ namespace CSUtil.Commons {
         /// Log a string and include a minified stack trace (3 methods).
         /// </summary>
         /// <param name="s">The text</param>
+        /// <param name="trunc">Truncate the stack trace to this many lines.</param>
+        /// <param name="chop">Chop this many lines from start of stack trace.</param>
         /// <remarks>
         /// For full stack trace, use <see cref="Log.Warning(string)"/>
         /// or <see cref="Log.Error(string)"/> instead.
         /// </remarks>
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public static void Note(string s) {
-            string str = MiniStackTrace(s).ToString();
+        public static void Note(string s, int trunc = 3, int chop = 2) {
+            string str = MiniStackTrace(s, trunc, chop).ToString();
             LogToFile(str, LogLevel.Note);
         }
 
