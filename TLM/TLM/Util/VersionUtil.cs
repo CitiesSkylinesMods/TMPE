@@ -116,12 +116,9 @@ namespace TrafficManager.Util {
             }
         }
 
-        /// <summary>
-        /// Checks to see if game version is what TMPE expects, and if not warns users.
-        ///
-        /// This will be replaced as part of #699.
-        /// </summary>
-        public static void CheckGameVersion() {
+        /// <summary>Checks to see if game version is what TMPE expects, and if not warns users.</summary>
+        /// <returns>Returns <c>false</c> if there is a game/mod version problem.</returns>
+        public static bool CheckGameVersion() {
             if (CurrentGameVersionU != EXPECTED_GAME_VERSION_U) {
                 Log.Info($"Detected game version v{BuildConfig.applicationVersion}. TMPE built for {ExpectedGameVersionString}");
                 Log._Debug($"CurrentGameVersion={CurrentGameVersion} ExpectedGameVersion={ExpectedGameVersion}");
@@ -146,8 +143,11 @@ namespace TrafficManager.Util {
                             ? "TM:PE needs updating!"
                             : "Cities: Skylines needs updating!",
                         msg);
+
+                    return false;
                 }
             }
+            return true;
         }
     }
 }

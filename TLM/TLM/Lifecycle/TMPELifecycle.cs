@@ -72,10 +72,25 @@ namespace TrafficManager.Lifecycle {
             }
         }
 
+        /// <summary>
+        /// Inhibits the "Resume" (auto-load last city on launch) feature of
+        /// the Paradox Launcher (and associated app launch option).
+        /// </summary>
+        public static void HaltLauncherAutoContinue() {
+            Log.Info("Halting game 'Resume' feature due to incompatibility issue.");
+            LauncherLoginData.instance.m_continue = false;
+        }
+
         private static void CompatibilityCheck() {
+            bool problems = false;
+
             ModsCompatibilityChecker mcc = new ModsCompatibilityChecker();
-            mcc.PerformModCheck();
-            VersionUtil.CheckGameVersion();
+            problems |= mcc.PerformModCheck();
+            problems |= VersionUtil.CheckGameVersion();
+
+            if (problems) {
+                HaltLauncherAutoContinue();
+            }
         }
 
         internal void Preload() {
