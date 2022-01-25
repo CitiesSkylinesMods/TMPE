@@ -2200,9 +2200,14 @@ namespace TrafficManager.Custom.PathFinding {
 #else
             var nextMaxSpeed = nextLaneInfo.m_speedLimit;
 #endif
-
+            float newDistance = distance;
+            if (!stablePath_ && (nextLaneInfo.m_vehicleType & VehicleInfo.VehicleType.Plane) != VehicleInfo.VehicleType.None)
+            {
+                Randomizer randomizer = new Randomizer(pathFindIndex_ ^ nextLaneId);
+                newDistance *= randomizer.Int32(10000U) * (1f / 1000f);
+            }
             nextItem.ComparisonValue = comparisonValue +
-                                       (distance /
+                                       (newDistance /
                                        ((prevMaxSpeed + nextMaxSpeed) * 0.5f * maxLength_));
             nextItem.Duration = duration + (distance / ((prevMaxSpeed + nextMaxSpeed) * 0.5f));
 
@@ -2468,11 +2473,15 @@ namespace TrafficManager.Custom.PathFinding {
             bool acuteTurningAngle = false;
             if (prevLaneType == NetInfo.LaneType.Vehicle &&
                 (prevVehicleType & VehicleInfo.VehicleType.Car) == VehicleInfo.VehicleType.None) {
-                float turningAngle = !nextSegment.m_overridePathFindDirectionLimit
-                                         ? (0.01f - Mathf.Min(
-                                                nextSegmentInfo.m_maxTurnAngleCos,
-                                                prevSegmentInfo.m_maxTurnAngleCos))
-                                         : 1f;
+                float turningAngle = 1f;
+                if (!nextSegment.m_overridePathFindDirectionLimit)
+                {
+                    turningAngle = 0.01f - Mathf.Min(nextSegmentInfo.m_maxTurnAngleCos, prevSegmentInfo.m_maxTurnAngleCos);
+                }
+                if ((nextSegment.m_flags2 & NetSegment.Flags2.ForbidTurn) != 0 && (netManager.m_nodes.m_buffer[nextNodeId].m_flags & NetNode.Flags.End) == 0)
+                {
+                    turningAngle = -0.99f;
+                }
                 if (turningAngle < 1f) {
                     Vector3 vector = nextNodeId != prevSegment.m_startNode
                                      ? prevSegment.m_endDirection
@@ -2760,6 +2769,10 @@ namespace TrafficManager.Custom.PathFinding {
 #if ADVANCEDAI && ROUTING
                         }
 #endif
+                        if (!stablePath_ && (nextLaneInfo.m_vehicleType & VehicleInfo.VehicleType.Plane) != 0)
+                        {
+                            transitionCostOverMeanMaxSpeed *= (float)new Randomizer(pathFindIndex_ ^ nextLaneId).Int32(10000u) * 0.001f;
+                        }
                         nextItem.Position.m_segment = nextSegmentId;
                         nextItem.Position.m_lane = (byte)nextLaneIndex;
                         nextItem.Position.m_offset =
@@ -2934,6 +2947,10 @@ namespace TrafficManager.Custom.PathFinding {
                             NetInfo.LaneType.None) {
                             nextItem.ComparisonValue += 0.1f;
                             blocked = true;
+                            if ((allowedVehicleTypes & VehicleInfo.VehicleType.Plane) != 0)
+                            {
+                                continue;
+                            }
                         }
 
                         nextItem.LaneId = nextLaneId;

@@ -9,7 +9,7 @@
     <a href="https://github.com/CitiesSkylinesMods/TMPE/wiki/Report-a-Bug">Report a Bug</a><br />
 </p>
 <p align="center">
-    <a href="https://store.steampowered.com/app/255710/Cities_Skylines/"><img src="https://img.shields.io/static/v1?label=cities:%20skylines&message=v1.13.3-f9&color=01ABF8&logo=unity" /></a>
+    <a href="https://store.steampowered.com/app/255710/Cities_Skylines/"><img src="https://img.shields.io/static/v1?label=cities:%20skylines&message=v1.14.0-f4&color=01ABF8&logo=unity" /></a>
     <a href="https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252"><img src="https://img.shields.io/github/v/release/CitiesSkylinesMods/TMPE?label=stable&color=7cc17b&logo=steam&logoColor=F5F5F5" /></a>
     <a href="https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785"><img src="https://img.shields.io/github/v/release/CitiesSkylinesMods/TMPE?include_prereleases&label=test&color=f7b73c&logo=steam&logoColor=F5F5F5" /></a>
     <a href="https://github.com/CitiesSkylinesMods/TMPE/releases/latest"><img src="https://img.shields.io/github/v/release/CitiesSkylinesMods/TMPE?label=origin&color=F56C2D&logo=origin&logoColor=F56C2D" /></a>
@@ -39,60 +39,28 @@ Official releases:
 
 Recent updates (dd/mm/yyyy):
 
-#### TM:PE V11.5.2-hotfix-1 STABLE, 27/05/2021
+#### TM:PE V11.6.4.0 STABLE, 25/01/2022
 
-- [Mod] Compatible: `Barges (Cargo Ferries)` #1112 (krzychu124)
-- [Mod] Compatible: `Movable Bridges` #1112 (krzychu124)
-- [Mod] Compatible: `81-Tiles` #1112 (krzychu124)
+* [New] TM:PE 11.6 branch released as STABLE - huge thanks to our beta testers!
+* [Mod] Fixed: `Move It` traffic settings not copy/pasted in-game #1303 #1300 (krzychu124)
+* [Mod] Fixed: `Node Controller Renewal` silent fail place intersection #1308 #1307 (krzychu124)
+* [Mod] Fixed: `Intersection Marking Tool` silent fail place intersection #1308 #1307 (krzychu124)
+* [Updated] Compatibility update for Airports DLC #1230 (krzychu124)
+* [Updated] Reduce logging from `AssetDataExtension` in release builds #1296 #1295 (aubergine18)
+* [Updated] Translations for multiple languages #1304 (Chamëleon, MenschLennart, John Deehe, Skazov, AlexofCA, CrankyAnt, Иван Соколов, AduitSSH, John Lok Ho, DNSE, shg166, GiorgioHerbie, footbool, krzychu124, aubergine18, Dmytro Lytovchenko, Fizzy_LaFizz, Vladimír Krajč, alvaroer, Mahmoud Al Gammal, ipd, 田七不甜, vitalii201, 許景翔, Mehmet Ömer Tüzer, vicugna-pacos, kianzarrin, Mbyron26, Headspike, lennier3, kevinlin18, Ikki_di_Phoenix)
+* [Updated] Reorganise General options tab #1306 #1262 (aubergine18)
+* [Updated] Improved compatibility checks, inhibit `Resume` if problems detected #1310 #1309 #699 #697 (aubergine18)
 
-#### TM:PE 11.6.3.0 TEST, 19/01/2022
+#### TM:PE V11.6.4.0 TEST, 25/01/2022
 
-- [New] What's New panel #118 #1284 (krzychu124, aubergine18)
-- [Mod] Incompatible: `Traffic++ V2` - ancient mod, breaks game #1287 (aubergine18)
-- [Fixed] App mode detection #1290 #1289 #1286 (krzychu124)
-- [Fixed] Versioned atlas to ensure textures load properly #1281 (kianzarrin)
-- [Updated] Speed Limits manager for asset editor and mods #1277 #1285 (kianzarrin, krzychu124)
-
-#### TM:PE 11.6.2.0 TEST, 08/01/2022
-
-- [New] Speed Limits UI Overhaul #1168 #389 (kvakvs)
-- [New] Road sign icon themes for multiple countries #1260 #1251 #1215 (Coreybpa, kvakvs, aubergine18)
-- [New] Dynamic loading of road sign icon themes #1215 (kvakvs)
-- [New] Default speeds apply to all elevations #1245 #1233 #1226 #1221 #1168 (kvakvs, kianzarrin)
-- [New] Additional API methods for modders #1209 (kianzarrin)
-- [Mod] Updated: `UnifiedUI` latest version #1182 (kianzarrin)
-- [Mod] Compatible: `More CitizenUnits` #1192 (algernon-A)
-- [Mod] Incompatible: `CSMultiplayer` #1196 (Krzychu124)
-- [Fixed] Auto TTL should set-up dedicated turning lanes properly #1242 #1241 (kianzarrin)
-- [Fixed] Position of lane arrow tool for different resolutions #1237 (kianzarrin)
-- [Fixed] Update routings after modifying dedicated turning lanes policy #1236 #1235 (kianzarrin)
-- [Fixed] Checkbox label text wrap for long captions #1232 #401 (aubergine18, krzychu124)
-- [Fixed] Update SPEED_TO_MPH constant to correct value #1224 #988 (Glenwing, aubergine18)
-- [Fixed] Junction Restrictions transparency #1217 #1216 (kianzarrin)
-- [Fixed] U-turn policy on T-junctions #1212 #900 #347 (SubaruSVX, yackimoff, kianzarrin)
-- [Fixed] Routing manager lane connection check #1210 (kianzarrin)
-- [Fixed] Recalculation after lane connection remove #1199 #1198 (kian, krzychu124)
-- [Fixed] Priority Signs tool not working #1189 (krzychu124)
-- [Fixed] Lifecycle of TMPE tool #1188 (kianzarrin)
-- [Fixed] Guard against null when disabling tool (kianzarrin)
-- [Fixed] Trains not counted as waiting at timed traffic lights at rail junctions #1184 #1173 (DarthJimbo, krzychu124)
-- [Fixed] Toolbar could be dragged through Speed Limits window #1168 #683 (aubergine18, kvakvs)
-- [Updated] Code clean-up: ResetIncomingHighwayLaneArrows #1166 #1178 (egi)
-- [Updated] Incompatible mod detector improvements #1196 (Krzychu124)
-- [Updated] Code clean-up: Netutil and Speed Limits #1273 #1275 (kianzarrin)
-- [Updated] Static texture classes now CustomManagers #1265 (kvakvs)
-- [Updated] Performance: GetNode/Segment -> ToNode/Segment #1202 (kianzarrin)
-- [Updated] Performance: Refactoring/buffer to extension methods #1203 (kianzarrin)
-- [Updated] Performance: Converted .m_segments.m_buffer[segmentId] calls to segment #1204 (egi)
-- [Updated] Performance: Refactoring IsValid #1201 #1197 #1175 (egi)
-- [Updated] Replace NetService with newer code #1185 #1183 (egi)
-- [Updated] Performance: Replace VehicleService with newer code #1176 (egi)
-- [Updated] Code clean-up: Removed indirection for simplicity #1179 #1172 #1171 (egi)
-- [Updated] Improve error logging of Traffic rules record #1200 (kianzarrin)
-- [Updated] Performance: Switched from CO.IsFlagSet to kianzarrin's IsFlagSet #1186 (egi)
-- [Updated] Performance: Removed the ProcessCitizen and the CitizenHandler #1169 #1170 (egi)
-- [Updated] Speed Limits manager now uses structures #1163 (kvakvs)
-- [Removed] Obsolete and unnecessary code #1194 #1185 #1183 #1177 #1176 #1174 (egi)
+* [Mod] Fixed: `Move It` traffic settings not copy/pasted in-game #1303 #1300 (krzychu124)
+* [Mod] Fixed: `Node Controller Renewal` silent fail place intersection #1308 #1307 (krzychu124)
+* [Mod] Fixed: `Intersection Marking Tool` silent fail place intersection #1308 #1307 (krzychu124)
+* [Updated] Compatibility update for Airports DLC #1230 (krzychu124)
+* [Updated] Reduce logging from `AssetDataExtension` in release builds #1296 #1295 (aubergine18)
+* [Updated] Translations for multiple languages #1304 (Chamëleon, MenschLennart, John Deehe, Skazov, AlexofCA, CrankyAnt, Иван Соколов, AduitSSH, John Lok Ho, DNSE, shg166, GiorgioHerbie, footbool, krzychu124, aubergine18, Dmytro Lytovchenko, Fizzy_LaFizz, Vladimír Krajč, alvaroer, Mahmoud Al Gammal, ipd, 田七不甜, vitalii201, 許景翔, Mehmet Ömer Tüzer, vicugna-pacos, kianzarrin, Mbyron26, Headspike, lennier3, kevinlin18, Ikki_di_Phoenix)
+* [Updated] Reorganise General options tab #1306 #1262 (aubergine18)
+* [Updated] Improved compatibility checks, inhibit `Resume` if problems detected #1310 #1309 #699 #697 (aubergine18)
 
 See [Full Changelog](https://github.com/CitiesSkylinesMods/TMPE/blob/master/CHANGELOG.md) for details of all releases.
 

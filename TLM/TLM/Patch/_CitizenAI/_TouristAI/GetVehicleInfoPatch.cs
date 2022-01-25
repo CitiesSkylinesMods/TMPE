@@ -92,7 +92,7 @@ namespace TrafficManager.Patch._CitizenAI._TouristAI {
                 bikeProb = 0;
                 taxiProb = 0;
             } else {
-                carProb = GetCarProbability(__instance);
+                carProb = GetCarProbability(__instance, citizenData.m_frame1.m_position);
                 bikeProb = GetBikeProbability(__instance);
                 taxiProb = GetTaxiProbability(__instance);
             }

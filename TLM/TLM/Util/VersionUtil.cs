@@ -116,11 +116,9 @@ namespace TrafficManager.Util {
             }
         }
 
-        /// <summary>Checks to see if game version is what TMPE expects, and if not warns users.</summary>
-        /// <returns>Returns <c>false</c> if there is a game/mod version problem.</returns>
         public static bool CheckGameVersion() {
+            Log.Info($"Expected C:SL v{ExpectedGameVersionString} - Actual C:SL v{BuildConfig.applicationVersion}");
             if (CurrentGameVersionU != EXPECTED_GAME_VERSION_U) {
-                Log.Info($"Detected game version v{BuildConfig.applicationVersion}. TMPE built for {ExpectedGameVersionString}");
                 Log._Debug($"CurrentGameVersion={CurrentGameVersion} ExpectedGameVersion={ExpectedGameVersion}");
                 Version current = CurrentGameVersion.Take(VERSION_COMPONENTS_COUNT);
                 Version expected = ExpectedGameVersion.Take(VERSION_COMPONENTS_COUNT);
