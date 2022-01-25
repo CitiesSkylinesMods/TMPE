@@ -190,7 +190,7 @@ namespace TrafficManager.UI {
             }
 
             if (!DEFAULT_LANGUAGE_CODE.Equals(language)) {
-                Log.Warning($"Translated file {translatedFilename} not found!");
+                Log.Note($"Translated file {translatedFilename} not found!");
             }
 
             return filename;
