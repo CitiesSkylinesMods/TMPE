@@ -1,7 +1,9 @@
 namespace CSUtil.Commons {
     using System;
+    using System.Collections.Generic;
     using System.Diagnostics;
     using System.IO;
+    using System.Runtime.CompilerServices;
     using UnityEngine;
     using Debug = UnityEngine.Debug;
 
@@ -47,6 +49,7 @@ namespace CSUtil.Commons {
             Trace,
             Debug,
             Info,
+            Note,
             Warning,
             Error,
         }
@@ -123,6 +126,47 @@ namespace CSUtil.Commons {
             LogToFile(string.Format(format, args), LogLevel.Info);
         }
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static List<string> MiniStackTrace(string prependStr, int maxLen = 3) {
+            var stack = new StackTrace(true);
+            var list = new List<string>(
+                stack.ToString().Split(new string[] { "\r\n" },
+                StringSplitOptions.RemoveEmptyEntries));
+
+            list.RemoveRange(0, 2); // trim this method & caller
+
+            int len = list.Count;
+            if (len > maxLen) {
+                list.RemoveRange(maxLen, len - maxLen);
+            }
+
+            if (!string.IsNullOrEmpty(prependStr)) {
+                list.Insert(0, prependStr);
+            }
+
+            return list;
+        }
+
+        /// <summary>
+        /// Log a string and include a minified stack trace (3 methods).
+        /// </summary>
+        /// <param name="s">The text</param>
+        /// <remarks>
+        /// For full stack trace, use <see cref="Log.Warning(string)"/>
+        /// or <see cref="Log.Error(string)"/> instead.
+        /// </remarks>
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static void Note(string s) {
+            string str = MiniStackTrace(s).ToString();
+            LogToFile(str, LogLevel.Note);
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static void NoteFormat(string format, params object[] args) {
+            string str = MiniStackTrace(string.Format(format, args)).ToString();
+            LogToFile(str, LogLevel.Note);
+        }
+
         /// <summary>
         /// Will log a warning only if debug mode
         /// </summary>
@@ -146,6 +190,11 @@ namespace CSUtil.Commons {
             }
         }
 
+        /// <summary>
+        /// Log <paramref name="s"/> as a warning with full stack trace.
+        /// </summary>
+        /// <param name="s">The text</param>
+        /// <remarks>For minified stack trace, use <see cref="Log.Note(string)"/> instead.</remarks>
         public static void Warning(string s) {
             LogToFile(s, LogLevel.Warning);
         }
@@ -212,13 +261,10 @@ namespace CSUtil.Commons {
                 using (StreamWriter w = File.AppendText(LogFilePath)) {
                     long secs = _sw.ElapsedTicks / Stopwatch.Frequency;
                     long fraction = _sw.ElapsedTicks % Stopwatch.Frequency;
-                    w.WriteLine(
-                        $"{level.ToString()} " +
-                        $"{secs:n0}.{fraction:D7}: " +
-                        $"{log}");
+                    w.WriteLine($"{level} {secs:n0}.{fraction:D7}: {log}");
 
                     if (level == LogLevel.Warning || level == LogLevel.Error) {
-                        w.WriteLine((new System.Diagnostics.StackTrace(true)).ToString());
+                        w.WriteLine((new StackTrace(true)).ToString());
                         w.WriteLine();
                     }
                 }
