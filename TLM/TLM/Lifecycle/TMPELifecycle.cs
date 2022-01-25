@@ -18,6 +18,7 @@ namespace TrafficManager.Lifecycle {
     using UnityEngine;
     using JetBrains.Annotations;
     using UI.WhatsNew;
+    using System.Diagnostics.CodeAnalysis;
 
     /// <summary>
     /// Do not use Singleton<TMPELifecycle>.instance to prevent memory leak.
@@ -31,6 +32,9 @@ namespace TrafficManager.Lifecycle {
         }
 
         public IDisposable GeometryNotifierDisposable;
+
+        /// <summary>Cached value of <see cref="LauncherLoginData.instance.m_continue"/>.</summary>
+        private static bool cache_m_continue;
 
         /// <summary>TMPE is in the middle of deserializing data.</summary>
         public bool Deserializing { get; set; }
@@ -72,24 +76,41 @@ namespace TrafficManager.Lifecycle {
             }
         }
 
-        /// <summary>
-        /// Inhibits the "Resume" (auto-load last city on launch) feature of
-        /// the Paradox Launcher (and associated app launch option).
-        /// </summary>
-        public static void HaltLauncherAutoContinue() {
-            Log.Info("Halting game 'Resume' feature due to incompatibility issue.");
-            LauncherLoginData.instance.m_continue = false;
+        /// <summary>Resumes PDX launcher auto-load of last city if necessary.</summary>
+        [SuppressMessage("Type Safety", "UNT0016:Unsafe way to get the method name", Justification = "Using same code as C:SL.")]
+        private static void AutoResumeLastCityIfNecessary() {
+            if (!cache_m_continue) {
+                return;
+            }
+
+            cache_m_continue = false;
+
+            if (InGameOrEditor()) {
+                return;
+            }
+
+            try {
+                MainMenu menu = FindObjectOfType<MainMenu>();
+                if (menu != null) {
+                    // code from global::MainMenu.Refresh() game code
+                    menu.m_BackgroundImage.zOrder = int.MaxValue;
+                    menu.Invoke("AutoContinue", 2.5f);
+                }
+            }
+            catch (Exception e) {
+                Log.ErrorFormat("Resume AutoContinue Failed:\n{0}", e.ToString());
+            }
         }
 
         private static void CompatibilityCheck() {
-            bool problems = false;
+            bool success = true;
 
             ModsCompatibilityChecker mcc = new ModsCompatibilityChecker();
-            problems |= mcc.PerformModCheck();
-            problems |= VersionUtil.CheckGameVersion();
+            success &= mcc.PerformModCheck();
+            success &= VersionUtil.CheckGameVersion();
 
-            if (problems) {
-                HaltLauncherAutoContinue();
+            if (success) {
+                AutoResumeLastCityIfNecessary();
             }
         }
 
@@ -209,6 +230,11 @@ namespace TrafficManager.Lifecycle {
 #endif
 
         internal static void StartMod() {
+            // Prevent launcher auto-resume now, because we can't do it later
+            // If `CompatibilityCheck()` passes, we'll invoke `AutoResumeLastCityIfNecessary()`
+            cache_m_continue = LauncherLoginData.instance.m_continue;
+            LauncherLoginData.instance.m_continue = false;
+
             var go = new GameObject(nameof(TMPELifecycle), typeof(TMPELifecycle));
             DontDestroyOnLoad(go); // don't destroy when scene changes.
         }
