@@ -32,9 +32,11 @@ namespace TrafficManager.Util {
         }
 
         /// <summary>
-        /// Initiates scan for incompatible mods. If any found, and the user has enabled the mod checker, it creates and initialises the modal dialog panel.
+        /// Initiates scan for incompatible mods. If any found, and the user has enabled the mod checker,
+        /// it creates and initialises the modal dialog panel.
         /// </summary>
-        public void PerformModCheck() {
+        /// <returns>Returns <c>false</c> if incompatible mods found (ie. mcc dialog shown).</returns>
+        public bool PerformModCheck() {
             try {
                 Dictionary<PluginInfo, string> detected = ScanForIncompatibleMods();
 
@@ -46,6 +48,7 @@ namespace TrafficManager.Util {
                     panel.Initialize();
                     UIView.PushModal(panel);
                     UIView.SetFocus(panel);
+                    return false;
                 }
             }
             catch (Exception e) {
@@ -53,6 +56,7 @@ namespace TrafficManager.Util {
                     "Something went wrong while checking incompatible mods - see main game log for details.");
                 Debug.LogException(e);
             }
+            return true;
         }
 
         /// <summary>
