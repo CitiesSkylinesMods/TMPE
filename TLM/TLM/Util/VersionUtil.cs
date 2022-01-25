@@ -29,10 +29,10 @@ namespace TrafficManager.Util {
         // we could alternatively use BuildConfig.APPLICATION_VERSION because const values are evaluated at compile time.
         // but I have decided not to do this because I don't want this to happen automatically with a rebuild if
         // CS updates. these values should be changed manaually so as to force us to acknowledge that they have changed.
-        public const uint EXPECTED_GAME_VERSION_U = 189262096U;
+        public const uint EXPECTED_GAME_VERSION_U = 193061904u;
 
         // see comments for EXPECTED_GAME_VERSION_U.
-        public static Version ExpectedGameVersion => new Version(1, 13, 3, 9);
+        public static Version ExpectedGameVersion => new Version(1, 14, 0, 4);
 
         public static string ExpectedGameVersionString => BuildConfig.VersionToString(EXPECTED_GAME_VERSION_U, false);
 
@@ -116,41 +116,38 @@ namespace TrafficManager.Util {
             }
         }
 
-        /// <summary>
-        /// Checks to see if game version is what TMPE expects, and if not warns users.
-        ///
-        /// This will be replaced as part of #699.
-        /// </summary>
-        public static void CheckGameVersion() {
+        /// <summary>Checks to see if game version is what TMPE expects, and if not warns users.</summary>
+        /// <returns>Returns <c>false</c> if there is a game/mod version problem.</returns>
+        public static bool CheckGameVersion() {
             if (CurrentGameVersionU != EXPECTED_GAME_VERSION_U) {
                 Log.Info($"Detected game version v{BuildConfig.applicationVersion}. TMPE built for {ExpectedGameVersionString}");
                 Log._Debug($"CurrentGameVersion={CurrentGameVersion} ExpectedGameVersion={ExpectedGameVersion}");
                 Version current = CurrentGameVersion.Take(VERSION_COMPONENTS_COUNT);
                 Version expected = ExpectedGameVersion.Take(VERSION_COMPONENTS_COUNT);
 
-                if (current < expected) {
-                    // game too old
+                if (current != expected) {
                     string msg = string.Format(
-                        "Traffic Manager: President Edition detected that you are running " +
-                        "a newer game version ({0}) than TM:PE has been built for ({1}). " +
-                        "Please be aware that TM:PE has not been updated for the newest game " +
-                        "version yet and thus it is very likely it will not work as expected.",
-                        BuildConfig.applicationVersion,
-                        ExpectedGameVersionString);
-                    Log.Error(msg);
-                    Shortcuts.ShowErrorDialog("TM:PE has not been updated yet", msg);
-                } else if (current > expected) {
-                    // TMPE too old
-                    string msg = string.Format(
-                        "Traffic Manager: President Edition has been built for game version {0}. " +
-                        "You are running game version {1}. Some features of TM:PE will not " +
-                        "work with older game versions. Please let Steam update your game.",
+                        "{0} is designed for Cities: Skylines {1}. However you are using Cities: " +
+                        "Skylines {2} - this is likely to cause severe problems or crashes." +
+                        "\n\n" +
+                        "Please ensure you're using the right version of TM:PE for this version of " +
+                        "Cities: Skylines before proceeding, or disable TM:PE until the problem is " +
+                        "resolved. If you need help, contact us via Steam Workshop page or Discord chat.",
+                        TrafficManagerMod.ModName,
                         ExpectedGameVersionString,
                         BuildConfig.applicationVersion);
                     Log.Error(msg);
-                    Shortcuts.ShowErrorDialog("Your game should be updated", msg);
+
+                    Shortcuts.ShowErrorDialog(
+                        current > expected
+                            ? "TM:PE needs updating!"
+                            : "Cities: Skylines needs updating!",
+                        msg);
+
+                    return false;
                 }
             }
+            return true;
         }
     }
 }
