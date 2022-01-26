@@ -55,12 +55,13 @@ namespace TrafficManager.UI.WhatsNew {
 
         private void AddContent() {
             var panel = AddUIComponent<UIScrollablePanel>();
+            panel.autoLayout = false;
             panel.maximumSize = GetMaxContentSize();
             panel.relativePosition = new Vector2(5, 40);
             panel.size = new Vector2(_defaultWidth - 10, _defaultHeight - _header.height - _footerPanel.height);
-            panel.autoLayout = true;
 
             var content = panel.AddUIComponent<UIScrollablePanel>();
+            content.autoLayout = false;
             content.autoLayoutDirection = LayoutDirection.Vertical;
             content.scrollWheelDirection = UIOrientation.Vertical;
             content.clipChildren = true;
@@ -78,6 +79,7 @@ namespace TrafficManager.UI.WhatsNew {
                 }
             }
 
+            panel.autoLayout = true;
             content.autoLayout = true;
         }
 
@@ -86,7 +88,6 @@ namespace TrafficManager.UI.WhatsNew {
                                                   panelPadding: new RectOffset(5, 0, 0, 6),
                                                   panelWidth: _defaultWidth - 5,
                                                   vertical: true);
-
             AddVersionRow(panel, changelog);
 
             foreach (Changelog.Item item in changelog.Items) {
