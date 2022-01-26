@@ -3,6 +3,7 @@
 [Released] January ? 2022
 [Meta] TM:PE 11.6.4-hotfix-1
 [Fixed] Null reference error when saving in Asset Editor #1313 (krzychu124)
+[Fixed] Speed limit icons not appearing on rail tracks #1318 (krzychu124)
 [/Version]
 
 [Version] 11.6.4.0
