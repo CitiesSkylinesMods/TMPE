@@ -39,16 +39,16 @@ Official releases:
 
 Recent updates (dd/mm/yyyy):
 
-#### TM:PE V11.6.4.1 STABLE, ?/01/2022
+#### TM:PE V11.6.4.1 STABLE, 26/01/2022
 
 * [Meta] TM:PE 11.6.4-hotfix-1
-* [Fixed] Null reference error when saving in Asset Editor #1313 (krzychu124)
+* [Updated] What's New panel updated to avoid recursive update issue #1319 #1314 (aubergine18)
 * [Fixed] Speed limit icons not appearing on rail tracks #1318 (krzychu124)
 
-#### TM:PE V11.6.4.1 TEST, ?/01/2022
+#### TM:PE V11.6.4.1 TEST, 26/01/2022
 
 * [Meta] TM:PE 11.6.4-hotfix-1
-* [Fixed] Null reference error when saving in Asset Editor #1313 (krzychu124)
+* [Updated] What's New panel updated to avoid recursive update issue #1319 #1314 (aubergine18)
 * [Fixed] Speed limit icons not appearing on rail tracks #1318 (krzychu124)
 
 #### TM:PE V11.6.4.0 STABLE, 25/01/2022

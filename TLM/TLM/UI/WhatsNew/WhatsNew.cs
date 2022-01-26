@@ -14,7 +14,7 @@ namespace TrafficManager.UI.WhatsNew {
         private const string RESOURCES_PREFIX = "TrafficManager.Resources.";
 
         // bump and update what's new changelogs when new features added
-        internal static readonly Version CurrentVersion = new Version(11,6,4,0);
+        internal static readonly Version CurrentVersion = new Version(11,6,4,1);
 
         internal bool Shown => CurrentVersion == GlobalConfig.Instance.Main.LastWhatsNewPanelVersion;
         public List<ChangelogEntry> Changelogs { get; private set; }
