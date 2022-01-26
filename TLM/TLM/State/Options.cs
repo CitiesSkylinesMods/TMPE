@@ -120,6 +120,9 @@ namespace TrafficManager.State {
         public static bool PriorityRoad_EnterBlockedYeild = false;
         public static bool PriorityRoad_StopAtEntry = false;
 
+        /// <summary>When <c>true</c>, default speeds will be depicted with green signs in normal speed limit override view.</summary>
+        public static bool differentiateDefaultSpeedsInNormalView = false;
+
         /// <summary>
         /// Invoked on options change to refresh the main menu and possibly update the labels for
         /// a new language. Takes a second, very slow.

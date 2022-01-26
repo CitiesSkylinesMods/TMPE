@@ -244,6 +244,8 @@ namespace TrafficManager.Manager.Impl {
 
             index = LoadBool(index, OptionsVehicleRestrictionsTab.NoDoubleCrossings);
             index = LoadBool(index, OptionsVehicleRestrictionsTab.DedicatedTurningLanes);
+
+            index = LoadBool(index, OptionsGeneralTab.DifferentiateDefaultSpeedsInNormalView);
             return true;
         }
 
@@ -311,6 +313,8 @@ namespace TrafficManager.Manager.Impl {
 
                 OptionsVehicleRestrictionsTab.NoDoubleCrossings.Save(),
                 OptionsVehicleRestrictionsTab.DedicatedTurningLanes.Save(),
+
+                OptionsGeneralTab.DifferentiateDefaultSpeedsInNormalView.Save(),
             };
         }
     }

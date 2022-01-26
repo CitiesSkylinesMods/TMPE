@@ -18,6 +18,12 @@ namespace TrafficManager.State {
     using UI.WhatsNew;
 
     public static class OptionsGeneralTab {
+        public static CheckboxOption DifferentiateDefaultSpeedsInNormalView =
+            new (nameof(Options.differentiateDefaultSpeedsInNormalView)) {
+                Label = "General.Checkbox:DifferentiateDefaultSpeedsInNormalView",
+                Handler = OnDifferentiateDefaultSpeedsInNormalViewChanged,
+            };
+
         private static UICheckBox _instantEffectsToggle;
 
         [UsedImplicitly]
@@ -201,6 +207,8 @@ namespace TrafficManager.State {
                       eventCallback: OnRoadSignsThemeChanged) as UIDropDown;
 
             _roadSignsThemeDropdown.width *= 2.0f;
+
+            DifferentiateDefaultSpeedsInNormalView.AddUI(generalGroup);
         }
 
         private static void OnLanguageChanged(int newLanguageIndex) {
@@ -422,6 +430,10 @@ namespace TrafficManager.State {
 
             mainConfig.RoadSignTheme = newTheme;
             GlobalConfig.WriteConfig();
+        }
+
+        private static void OnDifferentiateDefaultSpeedsInNormalViewChanged(bool newVal) {
+            // ?
         }
 
         private static void OnSimulationAccuracyChanged(int newAccuracy) {
