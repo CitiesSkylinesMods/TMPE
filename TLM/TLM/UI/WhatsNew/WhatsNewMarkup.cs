@@ -1,10 +1,23 @@
 namespace TrafficManager.UI.WhatsNew {
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
     using CSUtil.Commons;
     using UnityEngine;
 
+    [SuppressMessage("Usage", "RAS0002:Readonly field for a non-readonly struct", Justification = "Not performance critical.")]
     public static class WhatsNewMarkup {
-        public static readonly Dictionary<string, MarkupKeyword> MarkupKeywords = new() {
+        public static MarkupKeyword ToKeyword(this string token) {
+            if (MarkupKeywords.TryGetValue(token, out MarkupKeyword keyword)) {
+                return keyword;
+            }
+            return MarkupKeyword.Unknown;
+        }
+
+        public static Color32 ToColor(this MarkupKeyword keyword) {
+            return GetColor(keyword);
+        }
+
+        private static readonly Dictionary<string, MarkupKeyword> MarkupKeywords = new() {
             { "[Version]", MarkupKeyword.VersionStart },
             { "[/Version]", MarkupKeyword.VersionEnd },
             { "[Stable]", MarkupKeyword.Stable },
@@ -18,49 +31,33 @@ namespace TrafficManager.UI.WhatsNew {
             { "[Removed]", MarkupKeyword.Removed },
         };
 
-        public static readonly Dictionary<MarkupKeyword, string> MarkupKeywordsString = new() {
-            { MarkupKeyword.VersionStart, "[Version]" },
-            { MarkupKeyword.VersionEnd, "[/Version]" },
-            { MarkupKeyword.Stable, "[Stable]" },
-            { MarkupKeyword.Link, "[Link]" },
-            { MarkupKeyword.Released, "[Released]" },
-            { MarkupKeyword.Meta, "[Meta]" },
-            { MarkupKeyword.New, "[New]" },
-            { MarkupKeyword.Mod, "[Mod]" },
-            { MarkupKeyword.Fixed, "[Fixed]" },
-            { MarkupKeyword.Updated, "[Updated]" },
-            { MarkupKeyword.Removed, "[Removed]" },
-        };
+        private static readonly Color32 Red = new (224, 61, 76, 255);
+        private static readonly Color32 Amber = new (255, 196, 0, 255);
+        private static readonly Color32 Green = new (40, 178, 72, 255);
+        private static readonly Color32 Blue = new (3, 106, 225, 255);
+        private static readonly Color32 Purple = new (119, 69, 204, 255);
 
-        public static readonly Color32 ModColor = new Color32(255, 196, 0, 255);
-        public static readonly Color32 FixedOrUpdatedColor = new Color32(3, 106, 225, 255);
-        public static readonly Color32 NewOrAddedColor = new Color32(40, 178, 72, 255);
-        public static readonly Color32 RemovedColor = new Color32(224, 61, 76, 255);
-        public static readonly Color32 VersionColor = new Color32(119, 69, 204, 255);
-
-        public static Color32 GetColor(MarkupKeyword keyword) {
+        private static Color32 GetColor(MarkupKeyword keyword) {
             switch (keyword) {
                 case MarkupKeyword.Fixed:
-                    return FixedOrUpdatedColor;
+                    return Blue;
                 case MarkupKeyword.New:
-                    return NewOrAddedColor;
+                    return Green;
                 case MarkupKeyword.Mod:
-                    return ModColor;
+                    return Amber;
                 case MarkupKeyword.Removed:
-                    return RemovedColor;
+                    return Red;
                 case MarkupKeyword.Updated:
-                    return FixedOrUpdatedColor;
-                case MarkupKeyword.Meta:
+                    return Blue;
                 case MarkupKeyword.VersionStart:
                 case MarkupKeyword.VersionEnd:
                 case MarkupKeyword.Stable:
-                    return VersionColor;
+                case MarkupKeyword.Meta:
+                    return Purple;
                 default:
                     Log.Warning($"No custom color for markup keyword: {keyword}");
                     return Color.white;
             }
         }
-
-
     }
 }
