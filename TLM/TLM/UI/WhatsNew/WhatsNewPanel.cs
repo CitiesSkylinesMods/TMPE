@@ -185,7 +185,7 @@ namespace TrafficManager.UI.WhatsNew {
             label.textColor = Color.white;
             label.backgroundSprite = "TextFieldPanel";
             label.colorizeSprites = true;
-            label.color = WhatsNewMarkup.GetColor(keyword);
+            label.color = keyword.ToColor();
             label.minimumSize = _minKeywordLabelSize;
             label.textAlignment = UIHorizontalAlignment.Center;
             label.verticalAlignment = UIVerticalAlignment.Middle;
@@ -200,7 +200,7 @@ namespace TrafficManager.UI.WhatsNew {
                                                   panelWidth: 100,
                                                   vertical: true);
             panel.backgroundSprite = "TextFieldPanel";
-            panel.color = WhatsNewMarkup.GetColor(MarkupKeyword.VersionStart);
+            panel.color = MarkupKeyword.VersionStart.ToColor();
             panel.minimumSize = new Vector2(75, wasReleased ? 46 : 32);
             panel.padding = new RectOffset(0, 0, 6, 0);
             panel.height = wasReleased ? 45 : 36;

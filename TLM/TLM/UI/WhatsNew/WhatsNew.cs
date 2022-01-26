@@ -146,12 +146,10 @@ namespace TrafficManager.UI.WhatsNew {
                 int pos = line.IndexOf("]") + 1;
                 string tag = line.Substring(0, pos);
 
-                if (WhatsNewMarkup.MarkupKeywords.TryGetValue(tag, out keyword)) {
-                    text = line.Substring(pos).Trim();
-                    return true;
-                }
+                keyword = tag.ToKeyword();
+                text = line.Substring(pos).Trim();
 
-                Log.Warning($"whats_new.txt: Couldn't parse '{line}'");
+                return keyword != MarkupKeyword.Unknown;
             }
 
             keyword = MarkupKeyword.Unknown;
