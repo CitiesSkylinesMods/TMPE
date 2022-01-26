@@ -492,6 +492,19 @@ namespace TrafficManager.UI.SubTools.SpeedLimits.Overlay {
             return ret;
         }
 
+        /// <summary>
+        /// Determines whether to show green default speed icon or themed icon for normal speed override view.
+        /// </summary>
+        /// <param name="drawSpeed">The speed to show.</param>
+        /// <param name="defaultSpeed">The default speed limit.</param>
+        /// <returns>Returns <c>true</c> = use default signs, or <c>false</c> = use themed signs.</returns>
+        private bool UseUnthemedIcons(SpeedValue? drawSpeed, SpeedValue? defaultSpeed) {
+            return
+                !drawSpeed.HasValue
+                || (Options.differentiateDefaultSpeedsInNormalView
+                    && drawSpeed.Value.Equals(defaultSpeed));
+        }
+
         private bool DrawSpeedLimitHandles_SegmentCenter(
             ushort segmentId,
             Vector3 segCenter,
@@ -554,7 +567,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits.Overlay {
                     forward: overrideSpeedlimitForward,
                     back: overrideSpeedlimitBack);
 
-                if (!drawSpeedlimit.HasValue || drawSpeedlimit.Value.Equals(defaultSpeedLimit)) {
+                if (UseUnthemedIcons(drawSpeedlimit, defaultSpeedLimit)) {
                     // No value, no override
                     squareSignRenderer.Reset(
                         screenPos,
@@ -722,11 +735,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits.Overlay {
                 GetSpeedLimitResult overrideSpeedlimit =
                     SpeedLimitManager.Instance.CalculateCustomSpeedLimit(laneId);
 
-                if (!overrideSpeedlimit.OverrideValue.HasValue
-                    || (overrideSpeedlimit.DefaultValue.HasValue &&
-                        overrideSpeedlimit.OverrideValue.Value.Equals(
-                            overrideSpeedlimit.DefaultValue.Value)))
-                {
+                if (UseUnthemedIcons(overrideSpeedlimit.OverrideValue, overrideSpeedlimit.DefaultValue)) {
                     //-------------------------------------
                     // Draw default blue speed limit
                     //-------------------------------------
