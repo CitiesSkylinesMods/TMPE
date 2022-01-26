@@ -13,10 +13,6 @@ namespace TrafficManager.UI.WhatsNew {
         // bump and update what's new changelogs when new features added
         internal static readonly Version CurrentVersion = new Version(11,6,4,1);
 
-        internal static readonly Version PreviouslySeenVersion = GlobalConfig.Instance.Main.LastWhatsNewPanelVersion;
-
-        internal bool Shown => PreviouslySeenVersion >= CurrentVersion;
-
         private const string WHATS_NEW_FILE = "whats_new.txt";
         private const string RESOURCES_PREFIX = "TrafficManager.Resources.";
 
@@ -24,12 +20,26 @@ namespace TrafficManager.UI.WhatsNew {
             LoadChangelogs();
         }
 
+        public static Version PreviouslySeenVersion {
+            get => GlobalConfig.Instance.Main.LastWhatsNewPanelVersion;
+            set {
+                if (value > GlobalConfig.Instance.Main.LastWhatsNewPanelVersion) {
+                    Log.Info($"What's New: LastWhatsNewPanelVersion = {value}");
+                    GlobalConfig.Instance.Main.LastWhatsNewPanelVersion = value;
+                    GlobalConfig.WriteConfig();
+                }
+            }
+        }
+
+        public bool Shown => PreviouslySeenVersion >= CurrentVersion;
+
         public List<Changelog> Changelogs { get; private set; }
 
         public static void OpenModal() {
             UIView uiView = UIView.GetAView();
             if (uiView) {
                 MarkAsShown();
+
                 WhatsNewPanel panel = uiView.AddUIComponent(typeof(WhatsNewPanel)) as WhatsNewPanel;
                 if (panel) {
                     Log.Info("Opened What's New panel!");
@@ -46,8 +56,7 @@ namespace TrafficManager.UI.WhatsNew {
 
         public static void MarkAsShown() {
             Log.Info($"What's New - mark as shown. Version {CurrentVersion}");
-            GlobalConfig.Instance.Main.LastWhatsNewPanelVersion = CurrentVersion;
-            GlobalConfig.WriteConfig();
+            PreviouslySeenVersion = CurrentVersion;
         }
 
         private void LoadChangelogs() {
