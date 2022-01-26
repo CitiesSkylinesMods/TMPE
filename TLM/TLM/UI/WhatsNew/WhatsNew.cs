@@ -29,6 +29,7 @@ namespace TrafficManager.UI.WhatsNew {
         public static void OpenModal() {
             UIView uiView = UIView.GetAView();
             if (uiView) {
+                MarkAsShown();
                 WhatsNewPanel panel = uiView.AddUIComponent(typeof(WhatsNewPanel)) as WhatsNewPanel;
                 if (panel) {
                     Log.Info("Opened What's New panel!");
@@ -43,7 +44,7 @@ namespace TrafficManager.UI.WhatsNew {
             }
         }
 
-        public void MarkAsShown() {
+        public static void MarkAsShown() {
             Log.Info($"What's New - mark as shown. Version {CurrentVersion}");
             GlobalConfig.Instance.Main.LastWhatsNewPanelVersion = CurrentVersion;
             GlobalConfig.WriteConfig();

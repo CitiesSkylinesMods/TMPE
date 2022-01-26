@@ -317,8 +317,6 @@ namespace TrafficManager.UI.WhatsNew {
         private void HandleClose() {
             if (!gameObject) return;
 
-            TMPELifecycle.Instance.WhatsNew.MarkAsShown();
-
             if (UIView.GetModalComponent() == this) {
                 UIView.PopModal();
                 UIComponent modal = UIView.GetModalComponent();
