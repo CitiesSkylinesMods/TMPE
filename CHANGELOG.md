@@ -32,14 +32,14 @@ This changelog includes all versions and major variants of the mod going all the
 #### TM:PE V11.6.4.1 STABLE, 26/01/2022
 
 * [Meta] TM:PE 11.6.4-hotfix-1
-* [Updated] What's New panel updated to avoid recursive update issue #1319 #1314 (aubergine18)
+* [Updated] What's New panel updated to avoid recursive update issue #1319 #1317 #1314 (aubergine18)
 * [Fixed] Speed limit icons not appearing on rail tracks #1318 (krzychu124)
 - [Steam] [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
 
 #### TM:PE V11.6.4.1 TEST, 26/01/2022
 
 * [Meta] TM:PE 11.6.4-hotfix-1
-* [Updated] What's New panel updated to avoid recursive update issue #1319 #1314 (aubergine18)
+* [Updated] What's New panel updated to avoid recursive update issue #1319 #1317 #1314 (aubergine18)
 * [Fixed] Speed limit icons not appearing on rail tracks #1318 (krzychu124)
 - [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
 
