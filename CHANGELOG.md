@@ -29,6 +29,18 @@ This changelog includes all versions and major variants of the mod going all the
 
 </details>
 
+#### TM:PE V11.6.4.2 STABLE, 27/01/2022
+
+* [Meta] TM:PE 11.6.4-hotfix-2
+* [Fixed] Speed limit icons not appearing on metro tracks #1323 #1322 (krzychu124)
+- [Steam] [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
+
+#### TM:PE V11.6.4.2 TEST, 27/01/2022
+
+* [Meta] TM:PE 11.6.4-hotfix-2
+* [Fixed] Speed limit icons not appearing on metro tracks #1323 #1322 (krzychu124)
+- [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
+
 #### TM:PE V11.6.4.1 STABLE, 26/01/2022
 
 * [Meta] TM:PE 11.6.4-hotfix-1
