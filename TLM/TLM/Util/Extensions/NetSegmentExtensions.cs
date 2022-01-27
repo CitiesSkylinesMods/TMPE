@@ -123,14 +123,15 @@ namespace TrafficManager.Util.Extensions {
                     (vehicleTypeFilter == null || (laneInfo.m_vehicleType & vehicleTypeFilter) !=
                      VehicleInfo.VehicleType.None) &&
                     (filterDir == null ||
-                     segmentInfo.m_lanes[laneIndex].m_finalDirection == filterDir)) {
+                     laneInfo.m_finalDirection == filterDir)) {
                     laneList.Add(
                         new LanePos(
                             curLaneId,
                             laneIndex,
-                            segmentInfo.m_lanes[laneIndex].m_position,
+                            laneInfo.m_position,
                             laneInfo.m_vehicleType,
-                            laneInfo.m_laneType));
+                            laneInfo.m_laneType,
+                            laneInfo.m_finalDirection));
                 }
 
                 curLaneId = netManager.m_lanes.m_buffer[curLaneId].m_nextLane;
