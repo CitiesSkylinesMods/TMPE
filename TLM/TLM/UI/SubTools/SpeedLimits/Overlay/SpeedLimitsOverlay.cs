@@ -634,9 +634,17 @@ namespace TrafficManager.UI.SubTools.SpeedLimits.Overlay {
 
             bool onlyMonorailLanes = true;
 
+            int sortedLaneIndex = -1;
+            int directionChangeIndex = int.MaxValue;
+
             foreach (var lane in sortedLanes) {
+                ++sortedLaneIndex;
+
                 if (directions.Count < 2 && !directions.Contains(lane.finalDirection)) {
                     directions.Add(lane.finalDirection);
+                    if (directions.Count == 2) {
+                        directionChangeIndex = sortedLaneIndex;
+                    }
                 }
 
                 if (onlyMonorailLanes &&
@@ -659,10 +667,6 @@ namespace TrafficManager.UI.SubTools.SpeedLimits.Overlay {
             Vector3 drawOriginPos = segmentCenterPos -
                                     (0.5f * (((sortedLanes.Count - 1) + directions.Count) - 1) * signSize * xu);
 
-            directions.Clear();
-
-            int sortedLaneIndex = -1;
-
             // Main grid for large icons
             var grid = new Highlight.Grid(
                 gridOrigin: drawOriginPos,
@@ -676,18 +680,15 @@ namespace TrafficManager.UI.SubTools.SpeedLimits.Overlay {
             var colorController = new OverlayHandleColorController(args.IsInteractive);
 
             bool ret = false;
+            sortedLaneIndex = -1;
 
             foreach (var lane in sortedLanes) {
 
                 ++sortedLaneIndex;
                 uint laneId = lane.laneId;
 
-                if (directions.Count < 2 && !directions.Contains(lane.finalDirection)) {
-                    if (directions.Count > 0) {
-                        signColumn += 1f; // full space between opposite directions
-                    }
-
-                    directions.Add(lane.finalDirection);
+                if (sortedLaneIndex == directionChangeIndex) {
+                    signColumn += 1f; // add space between directions
                 }
 
                 Vector3 worldPos = grid.GetPositionForRowCol(signColumn, 0);
