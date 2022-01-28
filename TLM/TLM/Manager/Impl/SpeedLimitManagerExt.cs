@@ -1,6 +1,12 @@
-﻿namespace TrafficManager.Manager.Impl {
+using TrafficManager.Util.Extensions;
+
+namespace TrafficManager.Manager.Impl {
     /// <summary>Adds extra helper functions to NetSegment and NetInfo.Lane, etc.</summary>
     public static class SpeedLimitManagerExt {
+
+        private const NetSegment.Flags RequiredFlags = NetSegment.Flags.Created;
+        private const NetSegment.Flags RejectionFlags = NetSegment.Flags.Collapsed | NetSegment.Flags.Deleted;
+
         /// <summary>
         /// Extension method. Call via 'segment.MayHaveCustomSpeedLimits()`.
         /// Check whether custom speed limits may be assigned to the given segment.
@@ -8,12 +14,10 @@
         /// <param name="segment">Reference to affected segment.</param>
         /// <returns>True if this segment type can have custom speed limits set.</returns>
         public static bool MayHaveCustomSpeedLimits(this ref NetSegment segment) {
-            if ((segment.m_flags & NetSegment.Flags.Created) == NetSegment.Flags.None) {
-                return false;
-            }
 
-            // Collapsed roads cannot have speed limit, but will be restored if you upgrade in place
-            if ((segment.m_flags & NetSegment.Flags.Collapsed) != NetSegment.Flags.None) {
+            // if (!segment.IsValid())
+            if ((segment.m_flags & RequiredFlags) == NetSegment.Flags.None ||
+                (segment.m_flags & RejectionFlags) != NetSegment.Flags.None) {
                 return false;
             }
 
