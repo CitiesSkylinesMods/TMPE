@@ -37,7 +37,14 @@ Official releases:
 * [Download Binaries](https://github.com/CitiesSkylinesMods/TMPE/releases) (for non-Steam users)
 * [Installation Guide](https://github.com/CitiesSkylinesMods/TMPE/wiki/Installation) (for all users)
 
-Recent updates (dd/mm/yyyy):
+### Recent STABLE releases
+
+> Date format: dd/mm/yyyy
+
+#### TM:PE V11.6.4.2 STABLE, 27/01/2022
+
+* [Meta] TM:PE 11.6.4-hotfix-2
+* [Fixed] Speed limit icons not appearing on metro tracks #1323 #1322 (krzychu124)
 
 #### TM:PE V11.6.4.1 STABLE, 26/01/2022
 
@@ -45,34 +52,18 @@ Recent updates (dd/mm/yyyy):
 * [Updated] What's New panel updated to avoid recursive update issue #1319 #1317 #1314 (aubergine18)
 * [Fixed] Speed limit icons not appearing on rail tracks #1318 (krzychu124)
 
+### Recent TEST releases (dd/mm/yyyy)
+
+#### TM:PE V11.6.4.2 TEST, 27/01/2022
+
+* [Meta] TM:PE 11.6.4-hotfix-2
+* [Fixed] Speed limit icons not appearing on metro tracks #1323 #1322 (krzychu124)
+
 #### TM:PE V11.6.4.1 TEST, 26/01/2022
 
 * [Meta] TM:PE 11.6.4-hotfix-1
 * [Updated] What's New panel updated to avoid recursive update issue #1319 #1317 #1314 (aubergine18)
 * [Fixed] Speed limit icons not appearing on rail tracks #1318 (krzychu124)
-
-#### TM:PE V11.6.4.0 STABLE, 25/01/2022
-
-* [New] TM:PE 11.6 branch released as STABLE - huge thanks to our beta testers!
-* [Mod] Fixed: `Move It` traffic settings not copy/pasted in-game #1303 #1300 (krzychu124)
-* [Mod] Fixed: `Node Controller Renewal` silent fail place intersection #1308 #1307 (krzychu124)
-* [Mod] Fixed: `Intersection Marking Tool` silent fail place intersection #1308 #1307 (krzychu124)
-* [Updated] Compatibility update for Airports DLC #1230 (krzychu124)
-* [Updated] Reduce logging from `AssetDataExtension` in release builds #1296 #1295 (aubergine18)
-* [Updated] Translations for multiple languages #1304 (Chamëleon, MenschLennart, John Deehe, Skazov, AlexofCA, CrankyAnt, Иван Соколов, AduitSSH, John Lok Ho, DNSE, shg166, GiorgioHerbie, footbool, krzychu124, aubergine18, Dmytro Lytovchenko, Fizzy_LaFizz, Vladimír Krajč, alvaroer, Mahmoud Al Gammal, ipd, 田七不甜, vitalii201, 許景翔, Mehmet Ömer Tüzer, vicugna-pacos, kianzarrin, Mbyron26, Headspike, lennier3, kevinlin18, Ikki_di_Phoenix)
-* [Updated] Reorganise General options tab #1306 #1262 (aubergine18)
-* [Updated] Improved compatibility checks, inhibit `Resume` if problems detected #1310 #1309 #699 #697 (aubergine18)
-
-#### TM:PE V11.6.4.0 TEST, 25/01/2022
-
-* [Mod] Fixed: `Move It` traffic settings not copy/pasted in-game #1303 #1300 (krzychu124)
-* [Mod] Fixed: `Node Controller Renewal` silent fail place intersection #1308 #1307 (krzychu124)
-* [Mod] Fixed: `Intersection Marking Tool` silent fail place intersection #1308 #1307 (krzychu124)
-* [Updated] Compatibility update for Airports DLC #1230 (krzychu124)
-* [Updated] Reduce logging from `AssetDataExtension` in release builds #1296 #1295 (aubergine18)
-* [Updated] Translations for multiple languages #1304 (Chamëleon, MenschLennart, John Deehe, Skazov, AlexofCA, CrankyAnt, Иван Соколов, AduitSSH, John Lok Ho, DNSE, shg166, GiorgioHerbie, footbool, krzychu124, aubergine18, Dmytro Lytovchenko, Fizzy_LaFizz, Vladimír Krajč, alvaroer, Mahmoud Al Gammal, ipd, 田七不甜, vitalii201, 許景翔, Mehmet Ömer Tüzer, vicugna-pacos, kianzarrin, Mbyron26, Headspike, lennier3, kevinlin18, Ikki_di_Phoenix)
-* [Updated] Reorganise General options tab #1306 #1262 (aubergine18)
-* [Updated] Improved compatibility checks, inhibit `Resume` if problems detected #1310 #1309 #699 #697 (aubergine18)
 
 See [Full Changelog](https://github.com/CitiesSkylinesMods/TMPE/blob/master/CHANGELOG.md) for details of all releases.
 
