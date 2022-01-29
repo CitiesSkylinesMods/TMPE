@@ -80,12 +80,13 @@ namespace TrafficManager.Util {
         }
 
         /// <summary>
-        /// TMPE build info and what game ver it expects.
+        /// TMPE build info and the version of the game which the mod was built using
+        /// (BuildConfig.applicationVersion is resolved at compile time!)
         /// </summary>
         public static void LogBuildDetails() {
             Log.InfoFormat(
-                "TM:PE enabled. Version {0}, Build {1} {2} for game version {3}",
-                VersionString,
+                "{0} - Build {1} {2} compiled under C:SL {3}",
+                TrafficManagerMod.ModName,
                 ModVersion,
                 BRANCH,
                 BuildConfig.applicationVersion);
