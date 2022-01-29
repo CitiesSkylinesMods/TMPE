@@ -265,7 +265,7 @@ namespace TrafficManager.UI {
         /// <param name="mode">The <see cref="InfoMode"/> which just became active.</param>
         /// <param name="_">Not used.</param>
         private void OnInfoModeChanged(InfoManager.InfoMode mode, InfoManager.SubInfoMode _) {
-            Log.Info($"OnInfoModeChanged: Info manager mode changed to: {mode}");
+            Log._Debug($"OnInfoModeChanged: Info manager mode changed to: {mode}");
 
             if (mode == InfoManager.InfoMode.None || IsValidUndergroundMode(mode)) {
                 return; // TM:PE toolbar can persist in these modes
@@ -413,7 +413,7 @@ namespace TrafficManager.UI {
 
             // revert to normal mode if underground
             if (IsUndergroundMode) {
-                Log.Info("Toolbar disable: Restoring overground mode");
+                Log._Debug("Toolbar disable: Restoring overground mode");
                 InfoManager.instance.SetCurrentMode(InfoManager.InfoMode.None, InfoManager.SubInfoMode.Default);
             }
 
