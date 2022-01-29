@@ -5,10 +5,11 @@ namespace TrafficManager.Lifecycle {
     using System;
     using TrafficManager.State;
     using TrafficManager.UI;
+    using TrafficManager.UI.WhatsNew;
     using TrafficManager.Util;
 
     public class TrafficManagerMod : ILoadingExtension, IUserMod {
-        public static string ModName => $"TM:PE {VersionUtil.VersionString} {VersionUtil.BRANCH}";
+        public static string ModName => $"TM:PE {WhatsNew.CurrentVersion} {VersionUtil.BRANCH}";
 
         public string Name => ModName;
 
