@@ -36,6 +36,7 @@ This changelog includes all versions and major variants of the mod going all the
 * [Fixed] Incorrect minimal number of path-find threads #1331 (krzychu124)
 * [Updated] Code clean-up: Refactor `OptionsManager.cs` #1321 (kvakvs, aubergine18)
 * [Updated] Show full version in UI and log file #1335 (aubergine18)
+* [Removed] Temporary: Don't auto-show What's New on TM:PE menu button click #1336 #1314 (krzychu124, aubergine18)
 - [Steam] [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
 
 #### TM:PE V11.6.4.3 TEST, 29/01/2022
@@ -45,6 +46,7 @@ This changelog includes all versions and major variants of the mod going all the
 * [Fixed] Incorrect minimal number of path-find threads #1331 (krzychu124)
 * [Updated] Code clean-up: Refactor `OptionsManager.cs` #1321 (kvakvs, aubergine18)
 * [Updated] Show full version in UI and log file #1335 (aubergine18)
+* [Removed] Temporary: Don't auto-show What's New on TM:PE menu button click #1336 #1314 (krzychu124, aubergine18)
 - [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
 
 #### TM:PE V11.6.4.2 STABLE, 27/01/2022
