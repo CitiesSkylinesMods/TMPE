@@ -76,7 +76,7 @@ namespace TrafficManager.Manager.Impl {
 #endif
 
             // Must be road or track based:
-            if (netinfo.m_netAI is not RoadBaseAI or TrainTrackBaseAI or MetroTrackAI) {
+            if (!(netinfo.m_netAI is RoadBaseAI or TrainTrackBaseAI or MetroTrackBaseAI)) {
 #if DEBUG
                 if (debugSpeedLimits)
                     Log._Debug($"Skipped NetInfo '{netinfo.name}' because m_netAI is not applicable: {netinfo.m_netAI}");

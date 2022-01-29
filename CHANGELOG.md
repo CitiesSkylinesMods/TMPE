@@ -1,4 +1,4 @@
-﻿# Cities: Skylines - Traffic Manager: _President Edition_
+compatibility﻿# Cities: Skylines - Traffic Manager: _President Edition_
 
 # Changelog
 
@@ -29,16 +29,67 @@ This changelog includes all versions and major variants of the mod going all the
 
 </details>
 
+#### TM:PE V11.6.4.2 STABLE, 27/01/2022
 
-#### TM:PE 11.6.3.0 TEST, 19/01/2022
+* [Meta] TM:PE 11.6.4-hotfix-2
+* [Fixed] Speed limit icons not appearing on metro tracks #1323 #1322 (krzychu124)
+- [Steam] [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
+
+#### TM:PE V11.6.4.2 TEST, 27/01/2022
+
+* [Meta] TM:PE 11.6.4-hotfix-2
+* [Fixed] Speed limit icons not appearing on metro tracks #1323 #1322 (krzychu124)
+- [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
+
+#### TM:PE V11.6.4.1 STABLE, 26/01/2022
+
+* [Meta] TM:PE 11.6.4-hotfix-1
+* [Updated] What's New panel updated to avoid recursive update issue #1319 #1317 #1314 (aubergine18)
+* [Fixed] Speed limit icons not appearing on rail tracks #1318 (krzychu124)
+- [Steam] [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
+
+#### TM:PE V11.6.4.1 TEST, 26/01/2022
+
+* [Meta] TM:PE 11.6.4-hotfix-1
+* [Updated] What's New panel updated to avoid recursive update issue #1319 #1317 #1314 (aubergine18)
+* [Fixed] Speed limit icons not appearing on rail tracks #1318 (krzychu124)
+- [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
+
+#### TM:PE V[11.6.4.0](https://github.com/CitiesSkylinesMods/TMPE/compare/11.6.3-test...11.6.4) STABLE, 25/01/2022
+
+* [Meta] TM:PE 11.6 branch released as STABLE - huge thanks to our beta testers!
+* [Mod] Fixed: `Move It` traffic settings not copy/pasted in-game #1303 #1300 (krzychu124)
+* [Mod] Fixed: `Node Controller Renewal` silent fail place intersection #1308 #1307 (krzychu124)
+* [Mod] Fixed: `Intersection Marking Tool` silent fail place intersection #1308 #1307 (krzychu124)
+* [Updated] Compatibility update for Airports DLC #1230 (krzychu124)
+* [Updated] Reduce logging from `AssetDataExtension` in release builds #1296 #1295 (aubergine18)
+* [Updated] Translations for multiple languages #1304 (Chamëleon, MenschLennart, John Deehe, Skazov, AlexofCA, CrankyAnt, Иван Соколов, AduitSSH, John Lok Ho, DNSE, shg166, GiorgioHerbie, footbool, krzychu124, aubergine18, Dmytro Lytovchenko, Fizzy_LaFizz, Vladimír Krajč, alvaroer, Mahmoud Al Gammal, ipd, 田七不甜, vitalii201, 許景翔, Mehmet Ömer Tüzer, vicugna-pacos, kianzarrin, Mbyron26, Headspike, lennier3, kevinlin18, Ikki_di_Phoenix)
+* [Updated] Reorganise General options tab #1306 #1262 (aubergine18)
+* [Updated] Improved compatibility checks, inhibit `Resume` if problems detected #1310 #1309 #699 #697 (aubergine18)
+- [Steam] [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
+
+#### TM:PE V11.6.4.0 TEST, 25/01/2022
+
+* [Mod] Fixed: `Move It` traffic settings not copy/pasted in-game #1303 #1300 (krzychu124)
+* [Mod] Fixed: `Node Controller Renewal` silent fail place intersection #1308 #1307 (krzychu124)
+* [Mod] Fixed: `Intersection Marking Tool` silent fail place intersection #1308 #1307 (krzychu124)
+* [Updated] Compatibility update for Airports DLC #1230 (krzychu124)
+* [Updated] Reduce logging from `AssetDataExtension` in release builds #1296 #1295 (aubergine18)
+* [Updated] Translations for multiple languages #1304 (Chamëleon, MenschLennart, John Deehe, Skazov, AlexofCA, CrankyAnt, Иван Соколов, AduitSSH, John Lok Ho, DNSE, shg166, GiorgioHerbie, footbool, krzychu124, aubergine18, Dmytro Lytovchenko, Fizzy_LaFizz, Vladimír Krajč, alvaroer, Mahmoud Al Gammal, ipd, 田七不甜, vitalii201, 許景翔, Mehmet Ömer Tüzer, vicugna-pacos, kianzarrin, Mbyron26, Headspike, lennier3, kevinlin18, Ikki_di_Phoenix)
+* [Updated] Reorganise General options tab #1306 #1262 (aubergine18)
+* [Updated] Improved compatibility checks, inhibit `Resume` if problems detected #1310 #1309 #699 #697 (aubergine18)
+- [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
+
+#### TM:PE V[11.6.3.0](https://github.com/CitiesSkylinesMods/TMPE/compare/11.6.2-test...11.6.3-test) TEST, 19/01/2022
 
 - [New] What's New panel #118 #1284 (krzychu124, aubergine18)
 - [Mod] Incompatible: `Traffic++ V2` - ancient mod, breaks game #1287 (aubergine18)
 - [Fixed] App mode detection #1290 #1289 #1286 (krzychu124)
 - [Fixed] Versioned atlas to ensure textures load properly #1281 (kianzarrin)
 - [Updated] Speed Limits manager for asset editor and mods #1277 #1285 (kianzarrin, krzychu124)
+- [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
 
-#### TM:PE 11.6.2.0 TEST, 08/01/2022
+#### TM:PE V[11.6.2.0](https://github.com/CitiesSkylinesMods/TMPE/compare/11.6.1-test...11.6.2-test) TEST, 08/01/2022
 
 - [New] Speed Limits UI Overhaul #1168 #389 (kvakvs)
 - [New] Road sign icon themes for multiple countries #1260 #1251 #1215 (Coreybpa, kvakvs, aubergine18)
@@ -78,6 +129,7 @@ This changelog includes all versions and major variants of the mod going all the
 - [Updated] Performance: Removed the ProcessCitizen and the CitizenHandler #1169 #1170 (egi)
 - [Updated] Speed Limits manager now uses structures #1163 (kvakvs)
 - [Removed] Obsolete and unnecessary code #1194 #1185 #1183 #1177 #1176 #1174 (egi)
+- [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
 
 #### TM:PE V11.6.1.3 TEST, 14/10/2021
 
@@ -85,6 +137,7 @@ This changelog includes all versions and major variants of the mod going all the
 - [Fixed] Despawn off not working as expected #1167 #1148 (OliverWieland, krzychu124)
 - [Fixed] Bug in ResetIncomingHighwayLaneArrows #1165 (krzychu124, egi)
 - [Updated] Performance, memory efficiency #1161 #1162 #1164 #1165 (thanks egi)
+- [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
 
 #### TM:PE V11.6.1.2 TEST, 21/09/2021
 
@@ -99,6 +152,7 @@ This changelog includes all versions and major variants of the mod going all the
 - [Updated] Performance: Speed Limits GUI #1149 (egi)
 - [Updated] Improved performance benchmarking #1155 (egi)
 - [Removed] Obsolete and unnecessary code #1156 #1154 #1155 (egi)
+- [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
 
 #### TM:PE V11.6.1.1 TEST, 25/08/2021
 
@@ -107,14 +161,16 @@ This changelog includes all versions and major variants of the mod going all the
 - [Fixed] Refreshing dedicated turning lanes after loading a savegame #1140 #1137 (kianzarrin)
 - [Fixed] Custom path-finding initialization and patching - rewritten execution flow #1145 (krzychu124)
 - [Updated] Internal changes to Speed Limits code for Speed Limits UI #1143 (kvakvs)
+- [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
 
-#### TM:PE V11.6.1.0 TEST, 10/08/2021
+#### TM:PE V[11.6.1.0](https://github.com/CitiesSkylinesMods/TMPE/compare/11.6.0-test...11.6.1-test) TEST, 10/08/2021
 - [New] Language: Indonesian #1135 (Fizzy_LaFizz)
 - [New] First version of Notifier API for use by other mods #1127 (kianzarrin)
 - [Fixed] Speed Limits inifinite loop when using Shift modifier #1131 #1128 (krzychu124, kianzarrin)
 - [Fixed] Overlay transparency and UI opacity settings #1129 (krzychu124)
 - [Fixed] Half-segment detection when using Lane Arrows tool #1138 #1141 (kianzarrin, krzychu124)
 - [Updated] Multiple languages #1135 (mjm92150, Ikki_di_Phoenix, GiorgioHerbie, vicugna-pacos, DNSE, JJTspanishguy, krzychu124, macsergey, Lasm Gratel, 許景翔 gk50125012, kevinlin18, Warintorn Choorasri, chameleon-tbn)
+- [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
 
 #### TM:PE V11.6.0.3 TEST, 17/06/2021
 
@@ -122,6 +178,7 @@ This changelog includes all versions and major variants of the mod going all the
 - [Updated] Performance: PathFind performance improvements #1114 (krzychu124)
 - [Updated] Lifted limit of threads for 8t+ CPUs #1114 (krzychu124)
 - [Updated] Reduced simulation thread sleep multiplier for long pathfind queues #1114 (krzychu124)
+- [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
 
 #### TM:PE V11.6.0.2 TEST, 08/06/2021
 
@@ -129,18 +186,21 @@ This changelog includes all versions and major variants of the mod going all the
 - [Fixed] Reloading localised textures for Priority Signs and TTL #1121 #1099 (TianQiBuTian, krzychu124)
 - [Updated] Lane Connectors: New shape, changed interactions in over/under-ground mode #985 #282 #3 (krzychu124)
 - [Updated] Performance: Network flag detection #1118 (kianzarrin)
+- [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
 
 #### TM:PE V11.6.0.1 TEST, 28/05/2021
 
 - [Updated] Merge changes from 11.5.2.2 STABLE release #1113 (krzychu124)
+- [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
 
 #### TM:PE V11.5.2-hotfix-1 STABLE, 27/05/2021
 
 - [Mod] Compatible: `Barges (Cargo Ferries)` #1112 (krzychu124)
 - [Mod] Compatible: `Movable Bridges` #1112 (krzychu124)
 - [Mod] Compatible: `81-Tiles` #1112 (krzychu124)
+- [Steam] [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
 
-#### TM:PE V11.6.0 TEST, 16/05/2021
+#### TM:PE V[11.6.0](https://github.com/CitiesSkylinesMods/TMPE/compare/11.5.2...11.6.0-test) TEST, 16/05/2021
 
 - [New] Full migration to Harmony 2.x #1089 #1060 #1059 #947 #944 #943 #921 #895 #866 #865 #864 #783 #782 #462 (Krzychu124, kianzarrin)
 - [New] Map/Asset/Intersection Editor support, except for traffic lights #1011 #1004 #990 #989 #972 #971 #970 #969 #966 #965 #964 #963 #959 #956 #898 #600 #288 (kianzarrin, Strdate)
@@ -192,23 +252,26 @@ This changelog includes all versions and major variants of the mod going all the
 - [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
 - [GitHub] [CitiesSkylinesMods/TMPE](https://github.com/CitiesSkylinesMods/TMPE)
 
-#### TM:PE V11.5.2 STABLE, 12/05/2021
+#### TM:PE V[11.5.2](https://github.com/CitiesSkylinesMods/TMPE/compare/11.5.1...11.5.2) STABLE, 12/05/2021
 
 - [Mod] Hotfix: `Barges (Cargo Ferries)` #1103 (krzychu124)
 - [Mod] Hotfix: `81-Tiles` unified alternative path position #1105 (krzychu124)
 - [Fixed] Cargo trucks not respecting lane routing #1105 (krzychu124)
 - [Fixed] Bug in outside connection detection #1105 (krzychu124)
+- [Steam] [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
 
 #### TM:PE V11.5.2 STABLE (Reverted), 09/05/2021
 
 - [Mod] Hotfix: `Barges (Cargo Ferries)` #1103 (krzychu124)
 - [Meta] Had bugs and was reverted to 11.5.1 STABLE Hotfix-1
+- [Steam] [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
 
 #### TM:PE V11.5.1-hotfix-1 STABLE, 21/11/2020
 
 - [Fixed] Right click mouse button closing lane connection tool #1037 (krzychu124)
+- [Steam] [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
 
-#### TM:PE V11.5.1 STABLE, 19/11/2020
+#### TM:PE V[11.5.1](https://github.com/CitiesSkylinesMods/TMPE/compare/11.5.0...11.5.1) STABLE, 19/11/2020
 
 - [Meta] Includes all features from TM:PE 11.5.0 LABS
 - [New] Right-Click will exit tool and subsequently TM:PE toolbsar #1014 #1032 (HypoSim, krzychu124)
@@ -218,6 +281,7 @@ This changelog includes all versions and major variants of the mod going all the
 - [Fixed] Error thrown if segment info is null #957 (kianzarrin, thebugfixnet)
 - [Updated] Use locks and existing list in GenericObservable #909 (egi)
 - [Updated] RoadSelectionPanel icons optimized to 8bit #984 (Chamëleon)
+- [Steam] [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
 
 #### TM:PE V[11.4.0](https://github.com/CitiesSkylinesMods/TMPE/compare/11.3.2...11.4.0) STABLE, 22/05/2020
 
@@ -654,7 +718,7 @@ This changelog includes all versions and major variants of the mod going all the
 #### TM:PE V11 ALPHA 11.0-alpha5, 31/07/2019
 
 - [Updated] Lots of code clean-up (#461, #349, #377, #451)
-- [Meta] Build process will now error if `in` is used without a `readonly struct` (thanks dymanoid!) (#463)
+- [Meta] Build process will now error if `in` is used without a `readonly struct` (thanks dymanoid!) (#463 #440)
 - [Meta] See `Contributing` guide in GitHub wiki if you get build errors due to #463
 - [Steam] [TM:PE v11 ALPHA](https://steamcommunity.com/sharedfiles/filedetails/?id=1806963141)
 
@@ -700,12 +764,12 @@ This changelog includes all versions and major variants of the mod going all the
 #### TM:PE LABS [10.21](https://github.com/CitiesSkylinesMods/TMPE/compare/10.20...10.21), 02/07/2019
 
 - [New] Cims have individual driving styles to determine lane changes and driving speed (#263 #334)
-- [New] Miles Per Hour option for speed limits (thanks kvakvs) (#384)
+- [New] Miles Per Hour option for speed limits (thanks kvakvs) (#13 #384 #556)
 - [New] Selectable style (US, UK, EU) of speed sign in speed limits UI (thanks kvakvs) (#384)
-- [New] Differentiate LABS, STABLE and DEBUG branches in UI (#326, #333)
+- [New] Differentiate LABS, STABLE and DEBUG branches in UI (#326, #333, #386)
 - [New] Keybinds tab in mod options - choose your own shortcuts! (thanks kvakvs) (#382)
 - [New] Show keyboard shortcuts in button tooltips where applicable (thanks kvakvs) (#382)
-- [New] Basic support of offline mode for users playing on EA's Origin service (#333, #400)
+- [New] Basic support of offline mode for users playing on EA's Origin service (#333, #340, #400)
 - [Updated]: Avoid setting loss due to duplicate TM:PE subscriptions (#333, #306, #149, #190, #211, #400)
 - [Fixed] Vehicle limit count; compatibility with More Vehicles mod (thanks Dymanoid) (#362)
 - [Fixed] Mail trucks ignoring lane arrows (thanks Subaru & eudyptula for feedback) (#307, #338)
@@ -871,14 +935,15 @@ This changelog includes all versions and major variants of the mod going all the
 
 #### TM:PE LABS 1.10.15, 10/02/2019
 
-- [New] (Experimental) Turn on red (thanks to FireController1847 for implementation and to pcfantasy for source code base)
-- [New] Notification if user is still subscribed to old original TM:PE
-- [Updated] Use Escape key to close Traffic Manager without returning to Pause Menu (thanks to aubergine10 for suggestion) (#16)
-- [Updated] New icons for cargo and passenger train restriction (thanks to aubergine10) (#17)
-- [Updated] Updated pathfinding with missing vanilla logic
-- [Updated] Tweaked values in `CargoTruckAI` path finding (thanks to pcfantasy for improvement suggestion)
-- [Updated] Tweaked speed multiplier of reckless drivers to get more realistic speed range (thanks to aubergine10 for suggestion) (#23)
-- [Updated] Simplified Chinese translation updated (thanks to Emphasia for translating)
+- [New] (Experimental) Turn on red #54 #25 (FireController1847, pcfantasy, LinuxFan)
+- [New] Notification if user is still subscribed to old original TM:PE #72
+- [Fixed] Option not loading/saving #57 (krzychu124)
+- [Updated] Use Escape key to close Traffic Manager without returning to Pause Menu #54 #16 (krzychu124, aubergine18)
+- [Updated] New icons for cargo and passenger train restriction #17 #37 (aubergine10)
+- [Updated] Updated pathfinding with missing vanilla logic #54
+- [Updated] Tweaked values in `CargoTruckAI` path finding #54 (pcfantasy, krzychu124)
+- [Updated] Tweaked speed multiplier of reckless drivers to get more realistic speed range #25 #54 (krzychu124, aubgergine10)
+- [Updated] Simplified Chinese translation updated #54 (Emphasia)
 - [Steam] [Traffic Manager: President Edition (LABS)](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
 
 #### TM:PE LABS 1.10.14, 27/01/2019

@@ -1,6 +1,40 @@
+[Version] 11.6.4.2
+[Stable]
+[Released] January 27 2022
+[Link] tmpe-v11642-stable-27012022
+[Meta] TM:PE 11.6.4-hotfix-2
+[Meta] Press `Page Down` to set speeds on tunnels ;)
+[Fixed] Speed limit icons not appearing on metro tracks #1323 #1322 (krzychu124)
+[/Version]
+
+[Version] 11.6.4.1
+[Stable]
+[Released] January 26 2022
+[Link] tmpe-v11641-stable-26012022
+[Meta] TM:PE 11.6.4-hotfix-1
+[Updated] What's New panel updated to avoid recursive update issue #1319 #1317 #1314 (aubergine18)
+[Fixed] Speed limit icons not appearing on rail tracks #1318 (krzychu124)
+[/Version]
+
+[Version] 11.6.4.0
+[Stable]
+[Released] January 25th 2022
+[Link] tmpe-v11640-stable-25012022
+[Meta] TM:PE 11.6 branch released as STABLE - huge thanks to our beta testers!
+[Mod] Fixed: `Move It` traffic settings not copy/pasted in-game #1303 #1300 (krzychu124)
+[Mod] Fixed: `Node Controller Renewal` silent fail place intersection #1308 #1307 (krzychu124)
+[Mod] Fixed: `Intersection Marking Tool` silent fail place intersection #1308 #1307 (krzychu124)
+[Updated] Compatibility update for Airports DLC #1230 (krzychu124)
+[Updated] Reduce logging from `AssetDataExtension` in release builds #1296 #1295 (aubergine18)
+[Updated] Translations for multiple languages #1304 (Chamëleon, MenschLennart, John Deehe, Skazov, AlexofCA, CrankyAnt, Иван Соколов, AduitSSH, John Lok Ho, DNSE, shg166, GiorgioHerbie, footbool, krzychu124, aubergine18, Dmytro Lytovchenko, Fizzy_LaFizz, Vladimír Krajč, alvaroer, Mahmoud Al Gammal, ipd, 田七不甜, vitalii201, 許景翔, Mehmet Ömer Tüzer, vicugna-pacos, kianzarrin, Mbyron26, Headspike, lennier3, kevinlin18, Ikki_di_Phoenix)
+[Updated] Reoganise General options tab #1306 #1262 (aubergine18)
+[Updated] Improved compatibility checks, inhibit `Resume` if problems detected #1310 #1309 #699 #697 (aubergine18)
+[/Version]
+
 [Version] 11.6.3.0
+[Stable]
 [Released] January 19th 2022
-[Link] tmpe-v1163-test-19012022
+[Link] tmpe-v11630-test-19012022
 [New] What's New panel #118 #1284 (krzychu124, aubergine18)
 [Fixed] App mode detection #1290 #1289 #1286 (krzychu124)
 [Updated] Speed Limits manager for asset editor and mods #1277 #1285 (kianzarrin, krzychu124)
@@ -9,8 +43,9 @@
 [/Version]
 
 [Version] 11.6.2.0
+[Stable]
 [Released] January 8th 2022
-[Link] tmpe-v1162-test-08012022
+[Link] tmpe-v11620-test-08012022
 [New] Speed Limits UI Overhaul #1168 #389 (kvakvs)
 [New] Road sign icon themes for multiple countries #1260 #1251 #1215 (Coreybpa, kvakvs, aubergine18)
 [New] Dynamic loading of road sign icon themes #1215 (kvakvs)
@@ -52,8 +87,9 @@
 [/Version]
 
 [Version] 11.6.1.3
+[Stable]
 [Released] October 14th 2021
-[Link] tmpe-v1161-test-14102021
+[Link] tmpe-v11613-test-14102021
 [Fixed] Cannot setup timed traffic lights on monorail nodes #1160 PR??? (Adreos, krzychu124)
 [Fixed] Despawn off not working as expected #1167 #1148 (OliverWieland, krzychu124)
 [Fixed] Bug in ResetIncomingHighwayLaneArrows #1165 (krzychu124, egi)
@@ -61,7 +97,9 @@
 [/Version]
 
 [Version] 11.6.1.2
+[Stable]
 [Released] September 21st 2021
+[Link] tmpe-v11612-test-21092021
 [Mod] New: `UnifiedUI` integration, configurable in mod options #1153 (kianzarrin)
 [New] GUI scaling for Traffic Lights and Speed Limits #1157 #1152 #1157 #406 #299 (RenaKunisaki, aubergine18, kianzarrin)
 [New] Configurable TMPE.log path #1151 (kianzarrin)
@@ -76,7 +114,9 @@
 [/Version]
 
 [Version] 11.6.1.1
+[Stable]
 [Released] August 25th 2021
+[Link] tmpe-v11611-test-25082021
 [Fixed] Community Content Pack detection - Train Stations; Bridges & Piers #1144 (krzychu124)
 [Fixed] Vehicle Restrictions overlay position on Hydro Dam #1142 #741 (aubergine18. krzychu124)
 [Fixed] Refreshing dedicated turning lanes after loading a savegame #1140 #1137 (kianzarrin)
@@ -85,7 +125,9 @@
 [/Version]
 
 [Version] 11.6.1.0
+[Stable]
 [Released] August 10th 2021
+[Link] tmpe-v11610-test-10082021
 [New] Language: Indonesian #1135 (Fizzy_LaFizz)
 [Updated] Multiple languages #1135 (mjm92150, Ikki_di_Phoenix, GiorgioHerbie, vicugna-pacos, DNSE, JJTspanishguy, krzychu124, macsergey, Lasm Gratel, 許景翔 gk50125012, kevinlin18, Warintorn Choorasri, chameleon-tbn)
 [New] First version of Notifier API for use by other mods #1127 (kianzarrin)
@@ -95,8 +137,9 @@
 [/Version]
 
 [Version] 11.6.0.3
+[Stable]
 [Released] June 17th 2021
-[Link] tmpe-v1160-test-17062021
+[Link] tmpe-v11603-test-17062021
 [Fixed] Segment lane routing calculations broken by invalid node/segment connections #1125 #1124 (Kexik-png-jpeg-negr, krzychu124)
 [Updated] Performance: PathFind performance improvements #1114 (krzychu124)
 [Updated] Lifted limit of threads for 8t+ CPUs #1114 (krzychu124)
@@ -104,7 +147,9 @@
 [/Version]
 
 [Version] 11.6.0.2
+[Stable]
 [Released] June 8th 2021
+[Link] tmpe-v11602-test-08062021
 [Updated] Lane Connectors: New shape, changed interactions in over/under-ground mode #985 #282 #3 (krzychu124)
 [Updated] Performance: Network flag detection #1118 (kianzarrin)
 [Fixed] Vehicle/cim path invalidation after loading savegame #1117 (kianzarrin)
@@ -112,20 +157,25 @@
 [/Version]
 
 [Version] 11.6.0.1
+[Stable]
 [Released] May 28th 2021
+[Link] tmpe-v11601-test-28052021
 [Updated] Merge changes from 11.5.2.2 STABLE release #1113 (krzychu124)
 [/Version]
 
 [Version] 11.5.2.2
 [Stable]
 [Released] May 27th 2021
+[Link] tmpe-v1152-hotfix-1-stable-27052021
 [Mod] Compatible: `Barges (Cargo Ferries)` #1112 (krzychu124)
 [Mod] Compatible: `Movable Bridges` #1112 (krzychu124)
 [Mod] Compatible: `81-Tiles` #1112 (krzychu124)
 [/Version]
 
 [Version] 11.6.0.0
+[Stable]
 [Released] May 16th 2021
+[Link] tmpe-v1160-test-16052021
 [New] Full migration to Harmony 2.x #1089 #1060 #1059 #947 #944 #943 #921 #895 #866 #865 #864 #783 #782 #462 (Krzychu124, kianzarrin, LinuxFan)
 [New] Map/Asset/Intersection Editor support, except for traffic lights #1011 #1004 #990 #989 #972 #971 #970 #969 #966 #965 #964 #963 #959 #956 #898 #600 #288 (kianzarrin, Strdate)
 [Mod] New: `MoveIt` copy & paste support, except for traffic lights #1005 #981 #956 (kianzarrin)
@@ -176,6 +226,7 @@
 [Version] 11.5.2.1
 [Stable]
 [Released] May 12th 2021
+[Link] tmpe-v1152-stable-12052021
 [Mod] Hotfix: `Barges (Cargo Ferries)` #1103 (krzychu124)
 [Fixed] Cargo trucks not respecting lane routing #1105 (krzychu124)
 [Fixed] Bug in outside connection detection #1105 (krzychu124)
@@ -185,12 +236,14 @@
 [Version] 11.5.1.1
 [Stable]
 [Released] November 21st 2020
+[Link] tmpe-v1151-hotfix-1-stable-21112020
 [Fixed] Right click mouse button closing lane connection tool #1037 (krzychu124)
 [/Version]
 
 [Version] 11.5.1.0
 [Stable]
 [Released] November 19th 2020
+[Link] tmpe-v1151-stable-19112020
 [New] Right-Click will exit tool and subsequently TM:PE toolbsar #1014 #1032 (HypoSim, krzychu124)
 [New] Shift+Click speed limit on whole roundabout #920 #869 (thebugfixnet, kianzarrin)
 [Mod] Fixed: `MOM` stay-in-lane for metro tracks #919 (kianzarrin)
