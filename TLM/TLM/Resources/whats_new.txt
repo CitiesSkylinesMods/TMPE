@@ -6,6 +6,7 @@
 [Meta] This fixes rare issue on some PCs that are limited to single CPU core
 [Fixed] Incorrect minimal number of path-find threads #1331 (krzychu124)
 [Updated] Code maintenance: Refactor OptionsManager.cs #1321 (kvakvs, aubergine18)
+[Updated] Show full version in UI and log file #1335 (aubergine18)
 [/Version]
 
 [Version] 11.6.4.2
