@@ -44,8 +44,9 @@ Official releases:
 #### TM:PE V11.6.4.3 STABLE, 29/01/2022
 
 * [Meta] TM:PE 11.6.4-hotfix-3
-* [Meta] This fixes rare issue on some HP Laptops that report only 1 CPU core.
+* [Meta] This fixes rare issue on some PCs that are limited to single CPU core
 * [Fixed] Incorrect minimal number of path-find threads #1331 (krzychu124)
+* [Updated] Code clean-up: Refactor `OptionsManager.cs` #1321 (kvakvs, aubergine18)
 - [Steam] [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
 
 #### TM:PE V11.6.4.2 STABLE, 27/01/2022
@@ -64,8 +65,9 @@ Official releases:
 #### TM:PE V11.6.4.3 TEST, 29/01/2022
 
 * [Meta] TM:PE 11.6.4-hotfix-3
-* [Meta] This fixes rare issue on some HP Laptops that report only 1 CPU core.
+* [Meta] This fixes rare issue on some PCs that are limited to single CPU core
 * [Fixed] Incorrect minimal number of path-find threads #1331 (krzychu124)
+* [Updated] Code clean-up: Refactor `OptionsManager.cs` #1321 (kvakvs, aubergine18)
 - [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
 
 #### TM:PE V11.6.4.2 TEST, 27/01/2022
