@@ -113,7 +113,7 @@ namespace TrafficManager.Custom.PathFinding {
             int numOfStockPathFinds = stockPathFinds.Length;
             // utilize more threads if possible (systems with 8+) otherwise use vanilla calculation
             int numCustomPathFinds = SystemInfo.processorCount < 8
-                                         ? SystemInfo.processorCount / 2
+                                         ? Mathf.Max(SystemInfo.processorCount / 2, 1)
                                          : SystemInfo.processorCount - 4;
             simSleepMultiplier_ = CalculateBestSimSleepMultiplier(numCustomPathFinds);
 
