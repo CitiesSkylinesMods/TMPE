@@ -127,9 +127,10 @@ namespace TrafficManager.UI {
                 ShowMainMenu();
                 GetTrafficManagerTool()?.RequestOnscreenDisplayUpdate();
 
-                if (!TMPELifecycle.Instance.WhatsNew.Shown) {
-                    WhatsNew.WhatsNew.OpenModal();
-                }
+                // Temporarily disable - see: https://github.com/CitiesSkylinesMods/TMPE/issues/1314#issuecomment-1024989575
+                // if (!TMPELifecycle.Instance.WhatsNew.Shown) {
+                //     WhatsNew.WhatsNew.OpenModal();
+                // }
             }
         }
 
