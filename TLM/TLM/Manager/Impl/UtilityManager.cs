@@ -22,7 +22,7 @@ namespace TrafficManager.Manager.Impl {
 
         private readonly Queue<KeyValuePair<IRecordable, Dictionary<InstanceID, InstanceID>>> _transferRecordables = new();
 
-        public static void DespawnVehicles(ExtVehicleType? filter = null) {
+        public void DespawnVehicles(ExtVehicleType? filter = null) {
             lock (Singleton<VehicleManager>.instance) {
                 try {
                     var manager = Singleton<VehicleManager>.instance;
@@ -34,8 +34,7 @@ namespace TrafficManager.Manager.Impl {
                             continue;
                         }
 
-                        if (filter.HasValue &&
-                            (vehicle.ToExtVehicleType() & filter) == ExtVehicleType.None) {
+                        if (filter.HasValue && (vehicle.ToExtVehicleType() & filter) != 0) {
                             continue;
                         }
 
