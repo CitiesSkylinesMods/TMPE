@@ -12,7 +12,7 @@ namespace TrafficManager.State {
     public static class OptionsMaintenanceTab_DespawnGroup {
         public static CheckboxOption DespawnerAll =
             new(nameof(Options.despawnerAll)) {
-                Label = "Despawn.Checkbox:All vehicles and cims",
+                Label = "Despawn.Checkbox:All vehicles",
                 Handler = OnDespawnerAllChange,
             };
         public static CheckboxOption DespawnerRoad =

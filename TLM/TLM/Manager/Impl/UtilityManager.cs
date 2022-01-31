@@ -29,7 +29,7 @@ namespace TrafficManager.Manager.Impl {
                         ? filter == 0
                             ? "Nothing (filter == 0)"
                             : filter.ToString()
-                        : "All vehicles and cims";
+                        : "All vehicles";
 
                     Log.Info($"Utility Manager: Despawning {logStr}");
 
