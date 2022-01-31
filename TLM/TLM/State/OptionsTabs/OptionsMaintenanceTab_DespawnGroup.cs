@@ -155,7 +155,7 @@ namespace TrafficManager.State {
                 }
             }
 
-            DespawnerAll.Value = numSelected >= (Despawners.Count - 1);
+            DespawnerAll.Value = numSelected == Despawners.Count;
 
             ignoreDespawnerChange = false;
         }
