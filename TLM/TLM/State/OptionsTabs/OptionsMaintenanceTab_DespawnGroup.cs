@@ -147,18 +147,12 @@ namespace TrafficManager.State {
             if (ignoreDespawnerChange) return;
             ignoreDespawnerChange = true;
 
+            ExtVehicleType mask = ExtVehicleType.None;
             int numSelected = 0;
-
-            Log.Info($"Current despawnerMask = {despawnerMask}");
-
-            var mask = ExtVehicleType.None;
 
             foreach (var despawner in Despawners) {
                 if (despawner.Key) {
-                    Log.Info($"mask: {mask}");
-                    Log.Info($"- {despawner.Key.Label}: mask |= {despawner.Value}");
                     mask |= despawner.Value;
-                    Log.Info($"- mask now: {mask}");
                     numSelected++;
                 }
             }
@@ -166,8 +160,6 @@ namespace TrafficManager.State {
             DespawnerAll.Value = numSelected == Despawners.Count;
 
             despawnerMask = DespawnerAll ? null : mask;
-
-            Log.Info($"Despawner mask: {despawnerMask}{(DespawnerParked ? ", Parked" : string.Empty)}");
 
             ignoreDespawnerChange = false;
         }

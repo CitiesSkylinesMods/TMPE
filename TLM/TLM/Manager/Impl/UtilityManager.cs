@@ -42,7 +42,7 @@ namespace TrafficManager.Manager.Impl {
                             continue;
                         }
 
-                        if (filter.HasValue && (vehicle.ToExtVehicleType() & filter) != 0) {
+                        if (filter.HasValue && (vehicle.ToExtVehicleType() & filter) == 0) {
                             continue;
                         }
 
