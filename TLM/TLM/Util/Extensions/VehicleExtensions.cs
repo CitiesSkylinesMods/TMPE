@@ -23,6 +23,11 @@ namespace TrafficManager.Util.Extensions {
 
         /// <summary>Queues the vehicle to be despawned.</summary>
         /// <param name="vehicle">The vehicle instance to despawn.</param>
+        /// <remarks>
+        /// Don't use to despawn large numbers of vehicles as it will
+        /// spam SimulationManager with queued items; for many vehicles
+        /// use <see cref="UtilityManager.DespawnVehicles(ExtVehicleType?)"/> instead.
+        /// </remarks>
         // TODO: Would vehicle.Unspawn() be viable/better approach?
         public static void Despawn(this Vehicle vehicle) =>
             Singleton<SimulationManager>.instance.AddAction(() =>

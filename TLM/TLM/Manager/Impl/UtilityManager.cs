@@ -34,12 +34,12 @@ namespace TrafficManager.Manager.Impl {
                             continue;
                         }
 
-                        if (filter != null &&
+                        if (filter.HasValue &&
                             (vehicle.ToExtVehicleType() & filter) == ExtVehicleType.None) {
                             continue;
                         }
 
-                        vehicle.Despawn();
+                        manager.ReleaseVehicle((ushort)vehicleId);
                     }
 
                     TrafficMeasurementManager.Instance.ResetTrafficStats();
