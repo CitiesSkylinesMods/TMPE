@@ -25,6 +25,14 @@ namespace TrafficManager.Manager.Impl {
         public void DespawnVehicles(ExtVehicleType? filter = null) {
             lock (Singleton<VehicleManager>.instance) {
                 try {
+                    var logStr = filter.HasValue
+                        ? filter == 0
+                            ? "Nothing (filter == 0)"
+                            : filter.ToString()
+                        : "All vehicles and cims";
+
+                    Log.Info($"Utility Manager: Despawning {logStr}");
+
                     var manager = Singleton<VehicleManager>.instance;
 
                     for (uint vehicleId = 0; vehicleId < manager.m_vehicles.m_size; ++vehicleId) {
@@ -44,7 +52,7 @@ namespace TrafficManager.Manager.Impl {
                     TrafficMeasurementManager.Instance.ResetTrafficStats();
                 }
                 catch (Exception ex) {
-                    Log.Error($"Error occured while trying to clear traffic: {ex}");
+                    Log.Error($"Error occured while trying to despawn vehicles: {ex}");
                 }
             }
         }
@@ -54,6 +62,8 @@ namespace TrafficManager.Manager.Impl {
         public void RemoveParkedVehicles() {
             lock (Singleton<VehicleManager>.instance) {
                 try {
+                    Log.Info("UtilityManager: Despawning parked vehicles");
+
                     VehicleManager vehicleManager = Singleton<VehicleManager>.instance;
 
                     for (uint i = 0; i < vehicleManager.m_parkedVehicles.m_size; ++i) {

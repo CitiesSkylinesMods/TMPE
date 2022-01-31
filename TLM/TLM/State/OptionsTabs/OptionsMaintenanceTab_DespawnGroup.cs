@@ -1,5 +1,6 @@
 namespace TrafficManager.State {
     using ColossalFramework;
+    using CSUtil.Commons;
     using ICities;
     using System.Collections.Generic;
     using TrafficManager.API.Traffic.Enums;
@@ -87,7 +88,8 @@ namespace TrafficManager.State {
         private static bool ignoreDespawnerChange = false;
 
         // Stores the compiled list of selected despawner flags
-        private static ExtVehicleType despawnerFlags = ExtVehicleType.None;
+        // null = clear all traffic; ExtVehicleType.None = do nothing
+        private static ExtVehicleType? despawnerMask = ExtVehicleType.None;
 
         public static void AddUI(UIHelperBase tab) {
             if (!TMPELifecycle.PlayMode) return;
@@ -111,13 +113,13 @@ namespace TrafficManager.State {
         private static void OnDespawnButtonClick() {
             if (!TMPELifecycle.PlayMode) return;
 
-            if (DespawnerAll) {
+            if (!despawnerMask.HasValue) {
                 Singleton<SimulationManager>.instance.AddAction(() => {
                     UtilityManager.Instance.ClearTraffic();
                 });
-            } else if (despawnerFlags != 0) {
+            } else if (despawnerMask != ExtVehicleType.None) {
                 Singleton<SimulationManager>.instance.AddAction(() => {
-                    UtilityManager.Instance.DespawnVehicles(despawnerFlags);
+                    UtilityManager.Instance.DespawnVehicles(despawnerMask);
                 });
             }
 
@@ -128,15 +130,15 @@ namespace TrafficManager.State {
             }
         }
 
-        private static void OnDespawnerAllChange(bool seleceted) {
+        private static void OnDespawnerAllChange(bool selected) {
             if (ignoreDespawnerChange) return;
             ignoreDespawnerChange = true;
 
             foreach (var despawner in Despawners) {
-                despawner.Key.Value = seleceted;
+                despawner.Key.Value = selected;
             }
 
-            despawnerFlags = seleceted ? (ExtVehicleType)int.MaxValue : ExtVehicleType.None;
+            despawnerMask = selected ? null : ExtVehicleType.None;
 
             ignoreDespawnerChange = false;
         }
@@ -146,16 +148,26 @@ namespace TrafficManager.State {
             ignoreDespawnerChange = true;
 
             int numSelected = 0;
-            despawnerFlags = ExtVehicleType.None;
+
+            Log.Info($"Current despawnerMask = {despawnerMask}");
+
+            var mask = ExtVehicleType.None;
 
             foreach (var despawner in Despawners) {
                 if (despawner.Key) {
-                    despawnerFlags |= despawner.Value;
+                    Log.Info($"mask: {mask}");
+                    Log.Info($"- {despawner.Key.Label}: mask |= {despawner.Value}");
+                    mask |= despawner.Value;
+                    Log.Info($"- mask now: {mask}");
                     numSelected++;
                 }
             }
 
             DespawnerAll.Value = numSelected == Despawners.Count;
+
+            despawnerMask = DespawnerAll ? null : mask;
+
+            Log.Info($"Despawner mask: {despawnerMask}{(DespawnerParked ? ", Parked" : string.Empty)}");
 
             ignoreDespawnerChange = false;
         }
