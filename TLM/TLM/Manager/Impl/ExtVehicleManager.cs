@@ -1050,39 +1050,23 @@ namespace TrafficManager.Manager.Impl {
             ExtVehicleType extVehicleType = ExtVehicleType.None;
             if ((vehicleType & VehicleInfo.VehicleType.Car) != VehicleInfo.VehicleType.None) {
                 extVehicleType = ExtVehicleType.Bus;
-            }
-
-            if ((vehicleType & (VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Metro |
+            } else if ((vehicleType & (VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Metro |
                                 VehicleInfo.VehicleType.Monorail)) !=
                 VehicleInfo.VehicleType.None) {
                 extVehicleType = ExtVehicleType.PassengerTrain;
-            }
-
-            if ((vehicleType & VehicleInfo.VehicleType.Tram) != VehicleInfo.VehicleType.None) {
+            } else if ((vehicleType & VehicleInfo.VehicleType.Tram) != VehicleInfo.VehicleType.None) {
                 extVehicleType = ExtVehicleType.Tram;
-            }
-
-            if ((vehicleType & VehicleInfo.VehicleType.Ship) != VehicleInfo.VehicleType.None) {
+            } else if ((vehicleType & VehicleInfo.VehicleType.Ship) != VehicleInfo.VehicleType.None) {
                 extVehicleType = ExtVehicleType.PassengerShip;
-            }
-
-            if ((vehicleType & VehicleInfo.VehicleType.Plane) != VehicleInfo.VehicleType.None) {
+            } else if ((vehicleType & VehicleInfo.VehicleType.Plane) != VehicleInfo.VehicleType.None) {
                 extVehicleType = ExtVehicleType.PassengerPlane;
-            }
-
-            if ((vehicleType & VehicleInfo.VehicleType.Ferry) != VehicleInfo.VehicleType.None) {
+            } else if ((vehicleType & VehicleInfo.VehicleType.Ferry) != VehicleInfo.VehicleType.None) {
                 extVehicleType = ExtVehicleType.Ferry;
-            }
-
-            if ((vehicleType & VehicleInfo.VehicleType.Blimp) != VehicleInfo.VehicleType.None) {
+            } else if ((vehicleType & VehicleInfo.VehicleType.Blimp) != VehicleInfo.VehicleType.None) {
                 extVehicleType = ExtVehicleType.Blimp;
-            }
-
-            if ((vehicleType & VehicleInfo.VehicleType.CableCar) != VehicleInfo.VehicleType.None) {
+            } else if ((vehicleType & VehicleInfo.VehicleType.CableCar) != VehicleInfo.VehicleType.None) {
                 extVehicleType = ExtVehicleType.CableCar;
-            }
-
-            if ((vehicleType & VehicleInfo.VehicleType.Trolleybus) != VehicleInfo.VehicleType.None) {
+            } else if ((vehicleType & VehicleInfo.VehicleType.Trolleybus) != VehicleInfo.VehicleType.None) {
                 extVehicleType = ExtVehicleType.Trolleybus;
             }
 
