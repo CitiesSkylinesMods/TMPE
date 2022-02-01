@@ -21,18 +21,6 @@ namespace TrafficManager.Util.Extensions {
                 required: Vehicle.Flags.Created,
                 forbidden: Vehicle.Flags.Deleted);
 
-        /// <summary>Queues the vehicle to be despawned.</summary>
-        /// <param name="vehicle">The vehicle instance to despawn.</param>
-        /// <remarks>
-        /// Don't use to despawn large numbers of vehicles as it will
-        /// spam SimulationManager with queued items; for many vehicles
-        /// use <see cref="UtilityManager.DespawnVehicles(ExtVehicleType?)"/> instead.
-        /// </remarks>
-        // TODO: Would vehicle.Unspawn() be viable/better approach?
-        public static void Despawn(this Vehicle vehicle) =>
-            Singleton<SimulationManager>.instance.AddAction(() =>
-                Singleton<VehicleManager>.instance.ReleaseVehicle(vehicle.Info.m_instanceID.Vehicle));
-
         /// <summary>Determines the <see cref="ExtVehicleType"/> for a vehicle.</summary>
         /// <param name="vehicle">The vehocle to inspect.</param>
         /// <returns>The extended vehicle type.</returns>
