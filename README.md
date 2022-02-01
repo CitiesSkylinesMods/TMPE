@@ -41,12 +41,15 @@
 
 > Date format: dd/mm/yyyy
 
-#### TM:PE V11.6.4.4 STABLE, 29/01/2022
+#### TM:PE V11.6.4.4 STABLE, 02/02/2022
 
 - [Meta] TM:PE 11.6.4-hotfix-4
-- [Meta] This is a bugfix release for aircraft pathfinding
+- [Meta] Bugfix release targeting aircraft pathfinding, and info views.
+- [New] Filtered despawn tools in Maintenance options tab #1341 #270 (aubergine18)
 - [Fixed] Aircraft stuck at taxiway junction #1338 #1329 (krzychu124)
 - [Fixed] Aircraft taking off from taxiways #1338 #1327 (krzychu124)
+- [Fixed] Unable to edit underground nodes in Traffic info view #1333 #1330 (aubergine18)
+- [Updated] TM:PE toolbar closes in non-applicable info views #1333 (aubergine18)
 - [Steam] [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
 
 #### TM:PE V11.6.4.3 STABLE, 29/01/2022
@@ -63,13 +66,15 @@
 
 > Date format: dd/mm/yyyy
 
-#### TM:PE V11.6.4.4 TEST, 29/01/2022
+#### TM:PE V11.6.4.4 TEST, 02/02/2022
 
 - [Meta] TM:PE 11.6.4-hotfix-4
-- [Meta] This is a bugfix release for aircraft pathfinding
+- [Meta] Bugfix release targeting aircraft pathfinding, and info views.
+- [New] Filtered despawn tools in Maintenance options tab #1341 #270 (aubergine18)
 - [Fixed] Aircraft stuck at taxiway junction #1338 #1329 (krzychu124)
 - [Fixed] Aircraft taking off from taxiways #1338 #1327 (krzychu124)
-- [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
+- [Fixed] Unable to edit underground nodes in Traffic info view #1333 #1330 (aubergine18)
+- [Updated] TM:PE toolbar closes in non-applicable info views #1333 (aubergine18)- [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
 
 #### TM:PE V11.6.4.3 TEST, 29/01/2022
 
