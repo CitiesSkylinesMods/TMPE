@@ -7,6 +7,7 @@ namespace TrafficManager.Patch._PathManager {
     using JetBrains.Annotations;
     using System;
     using System.Reflection;
+    using Manager.Impl;
     using State.ConfigData;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.Custom.PathFinding;
@@ -59,6 +60,8 @@ namespace TrafficManager.Patch._PathManager {
 
             } else {
                 // CreatePath called for vanilla AI
+                // determine vehicle type
+                args.extVehicleType = ExtVehicleManager.ConvertToExtVehicleType(vehicleTypes);
                 args.skipQueue = skipQueue;
             }
 

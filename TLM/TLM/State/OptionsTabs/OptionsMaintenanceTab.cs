@@ -8,6 +8,7 @@ namespace TrafficManager.State {
     using TrafficManager.UI;
     using TrafficManager.Lifecycle;
     using ColossalFramework;
+    using System.Collections.Generic;
 
     public static class OptionsMaintenanceTab {
         [UsedImplicitly]
@@ -53,10 +54,6 @@ namespace TrafficManager.State {
             _resetStuckEntitiesBtn = maintenanceGroup.AddButton(
                                          T("Maintenance.Button:Reset stuck cims and vehicles"),
                                          onClickResetStuckEntities) as UIButton;
-
-            _removeParkedVehiclesBtn = maintenanceGroup.AddButton(
-                                           T("Maintenance.Button:Remove parked vehicles"),
-                                           OnClickRemoveParkedVehicles) as UIButton;
 
             _removeAllExistingTrafficLightsBtn = maintenanceGroup.AddButton(
                                            T("Maintenance.Button:Remove all existing traffic lights"),
@@ -120,6 +117,8 @@ namespace TrafficManager.State {
 
             Options.Indent(_turnOnRedEnabledToggle);
 
+            OptionsMaintenanceTab_DespawnGroup.AddUI(panelHelper);
+
             // TODO [issue ##959] remove when TTL is implemented in asset editor.
             bool inEditor = TMPELifecycle.InGameOrEditor()
                             && TMPELifecycle.AppMode != AppMode.Game;
@@ -138,16 +137,6 @@ namespace TrafficManager.State {
 
             Singleton<SimulationManager>.instance.AddAction(
                 () => { UtilityManager.Instance.ResetStuckEntities(); });
-        }
-
-        private static void OnClickRemoveParkedVehicles() {
-            if (!Options.IsGameLoaded()) {
-                return;
-            }
-
-            Singleton<SimulationManager>.instance.AddAction(() => {
-                UtilityManager.Instance.RemoveParkedVehicles();
-            });
         }
 
         private static void OnClickRemoveAllExistingTrafficLights() {

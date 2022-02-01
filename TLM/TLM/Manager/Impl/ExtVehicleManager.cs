@@ -910,7 +910,7 @@ namespace TrafficManager.Manager.Impl {
 #endif
         }
 
-        private ExtVehicleType? DetermineVehicleTypeFromAIType(
+        internal ExtVehicleType? DetermineVehicleTypeFromAIType(
             ushort vehicleId,
             VehicleAI ai,
             bool emergencyOnDuty)
@@ -1039,6 +1039,38 @@ namespace TrafficManager.Manager.Impl {
 
                 OnSpawnVehicle(vId, ref vehicle);
             }
+        }
+
+        /// <summary>
+        /// Converts game VehicleInfo.VehicleType to closest TMPE.API.Traffic.Enums.ExtVehicleType
+        /// </summary>
+        /// <param name="vehicleType"></param>
+        /// <returns></returns>
+        public static ExtVehicleType ConvertToExtVehicleType(VehicleInfo.VehicleType vehicleType) {
+            ExtVehicleType extVehicleType = ExtVehicleType.None;
+            if ((vehicleType & VehicleInfo.VehicleType.Car) != VehicleInfo.VehicleType.None) {
+                extVehicleType = ExtVehicleType.Bus;
+            } else if ((vehicleType & (VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Metro |
+                                VehicleInfo.VehicleType.Monorail)) !=
+                VehicleInfo.VehicleType.None) {
+                extVehicleType = ExtVehicleType.PassengerTrain;
+            } else if ((vehicleType & VehicleInfo.VehicleType.Tram) != VehicleInfo.VehicleType.None) {
+                extVehicleType = ExtVehicleType.Tram;
+            } else if ((vehicleType & VehicleInfo.VehicleType.Ship) != VehicleInfo.VehicleType.None) {
+                extVehicleType = ExtVehicleType.PassengerShip;
+            } else if ((vehicleType & VehicleInfo.VehicleType.Plane) != VehicleInfo.VehicleType.None) {
+                extVehicleType = ExtVehicleType.PassengerPlane;
+            } else if ((vehicleType & VehicleInfo.VehicleType.Ferry) != VehicleInfo.VehicleType.None) {
+                extVehicleType = ExtVehicleType.Ferry;
+            } else if ((vehicleType & VehicleInfo.VehicleType.Blimp) != VehicleInfo.VehicleType.None) {
+                extVehicleType = ExtVehicleType.Blimp;
+            } else if ((vehicleType & VehicleInfo.VehicleType.CableCar) != VehicleInfo.VehicleType.None) {
+                extVehicleType = ExtVehicleType.CableCar;
+            } else if ((vehicleType & VehicleInfo.VehicleType.Trolleybus) != VehicleInfo.VehicleType.None) {
+                extVehicleType = ExtVehicleType.Trolleybus;
+            }
+
+            return extVehicleType;
         }
 
         [UsedImplicitly]
