@@ -32,6 +32,7 @@ namespace TrafficManager.UI {
     using TrafficManager.UI.Textures;
     using TrafficManager.State.Keybinds;
     using TrafficManager.Util.Extensions;
+    using static InfoManager;
 
     [UsedImplicitly]
     public class TrafficManagerTool
@@ -102,7 +103,11 @@ namespace TrafficManager.UI {
 
         private static IDisposable _confDisposable;
 
-        public static bool IsUndergroundMode => InfoManager.instance.CurrentMode == InfoManager.InfoMode.Underground;
+        /// <summary>
+        /// Returns <c>true</c> if game is in an underground mode which allows
+        /// tunnels to be customised.
+        /// </summary>
+        public static bool IsUndergroundMode => IsValidUndergroundMode(InfoManager.instance.CurrentMode);
 
         internal static float OverlayAlpha => TransparencyToAlpha(GlobalConfig.Instance.Main.OverlayTransparency);
 
@@ -115,8 +120,21 @@ namespace TrafficManager.UI {
             ToolsModifierControl.toolController?.CurrentTool != null
             && ToolsModifierControl.toolController.CurrentTool is TrafficManagerTool;
 
+        /// <summary>
+        /// Determine if TM:PE can be used in specified info view <paramref name="mode"/>.
+        /// </summary>
+        /// <param name="mode">The <see cref="InfoManager.InfoMode"/> to test.</param>
+        /// <returns>Returns <c>true</c> if <paramref name="mode"/> is permitted, otherwise <c>false</c>.</returns>
+        public static bool IsValidUndergroundMode(InfoMode mode) => mode is
+            InfoManager.InfoMode.Underground or
+            InfoManager.InfoMode.Traffic or
+            InfoManager.InfoMode.TrafficRoutes;
+
         protected override void OnDestroy() {
             Log.Info("TrafficManagerTool.OnDestroy() called");
+
+            InfoManager.instance.EventInfoModeChanged -= OnInfoModeChanged;
+
             RemoveUUIButton();
 
             if (nopeCursor_) {
@@ -237,7 +255,23 @@ namespace TrafficManager.UI {
             _confDisposable = GlobalConfig.Instance.Subscribe(this);
 
             AddUUIButton();
+
+            InfoManager.instance.EventInfoModeChanged += OnInfoModeChanged;
+
             Log.Info("TrafficManagerTool: Initialization completed.");
+        }
+
+        /// <summary>When (most) info views are opened, close TM:PE toolbar.</summary>
+        /// <param name="mode">The <see cref="InfoMode"/> which just became active.</param>
+        /// <param name="_">Not used.</param>
+        private void OnInfoModeChanged(InfoManager.InfoMode mode, InfoManager.SubInfoMode _) {
+            Log._Debug($"OnInfoModeChanged: Info manager mode changed to: {mode}");
+
+            if (mode == InfoManager.InfoMode.None || IsValidUndergroundMode(mode)) {
+                return; // TM:PE toolbar can persist in these modes
+            }
+
+            ModUI.Instance.CloseMainMenu();
         }
 
         public void OnUpdate(GlobalConfig config) {
@@ -378,8 +412,10 @@ namespace TrafficManager.UI {
                 ModUI.Instance.CloseMainMenu();
 
             // revert to normal mode if underground
-            if (IsUndergroundMode)
+            if (IsUndergroundMode) {
+                Log._Debug("Toolbar disable: Restoring overground mode");
                 InfoManager.instance.SetCurrentMode(InfoManager.InfoMode.None, InfoManager.SubInfoMode.Default);
+            }
 
             MassEditOverlay.Show = RoadSelectionPanels.Root?.ShouldShowMassEditOverlay() ?? false;
             // no call to base method to disable base class behavior
