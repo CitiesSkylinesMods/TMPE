@@ -134,6 +134,7 @@
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="Constants.cs" />
+    <Compile Include="Custom\PathFinding\PathfinderUpdates.cs" />
     <Compile Include="Geometry\Impl\SegmentEndId.cs" />
     <Compile Include="Lifecycle\Patcher.cs" />
     <Compile Include="Lifecycle\TMPELifecycle.cs" />

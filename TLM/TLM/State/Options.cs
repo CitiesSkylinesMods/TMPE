@@ -120,6 +120,9 @@ namespace TrafficManager.State {
         public static bool PriorityRoad_EnterBlockedYeild = false;
         public static bool PriorityRoad_StopAtEntry = false;
 
+        // See PathfinderUpdates.cs
+        public static byte SavegamePathfinderEdition = 0;
+
         #region shims: do not perist
 
         public static bool despawnerAll;
