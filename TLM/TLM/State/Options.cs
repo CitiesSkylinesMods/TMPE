@@ -120,6 +120,23 @@ namespace TrafficManager.State {
         public static bool PriorityRoad_EnterBlockedYeild = false;
         public static bool PriorityRoad_StopAtEntry = false;
 
+        // See PathfinderUpdates.cs
+        public static byte SavegamePathfinderEdition = 0;
+
+        #region shims: do not perist
+
+        public static bool despawnerAll;
+        public static bool despawnerRoad;
+        public static bool despawnerParked;
+        public static bool despawnerServices;
+        public static bool despawnerTransport;
+        public static bool despawnerPassengerTrains;
+        public static bool despawnerCargoTrains;
+        public static bool despawnerAircraft;
+        public static bool despawnerShips;
+
+        #endregion shims: do not perist
+
         /// <summary>
         /// When <c>true</c>, default speeds use themed icons in normal view.
         /// When <c>false</c>, they'll use unthemed green icons.

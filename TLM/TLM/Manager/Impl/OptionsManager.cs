@@ -142,15 +142,15 @@ namespace TrafficManager.Manager.Impl {
 
             ToCheckbox(data, idx: 56, OptionsVehicleRestrictionsTab.NoDoubleCrossings);
             ToCheckbox(data, idx: 57, OptionsVehicleRestrictionsTab.DedicatedTurningLanes);
-          
-            ToCheckbox(data, idx: 58, OptionsGeneralTab.UseThemedIconsForDefaultSpeedsInNormalView);
+
+            Options.SavegamePathfinderEdition = LoadByte(data, idx: 58, defaultVal: 0);
+            ToCheckbox(data, idx: 59, OptionsGeneralTab.UseThemedIconsForDefaultSpeedsInNormalView);
 
             return true;
         }
 
         public byte[] SaveData(ref bool success) {
-
-            var save = new byte[59];
+            var save = new byte[60];
 
             save[0] = ConvertFromSimulationAccuracy(Options.simulationAccuracy);
             save[1] = 0; // Options.laneChangingRandomization
@@ -215,7 +215,8 @@ namespace TrafficManager.Manager.Impl {
             save[56] = OptionsVehicleRestrictionsTab.NoDoubleCrossings.Save();
             save[57] = OptionsVehicleRestrictionsTab.DedicatedTurningLanes.Save();
 
-            save[58] = OptionsGeneralTab.UseThemedIconsForDefaultSpeedsInNormalView.Save();
+            save[58] = (byte)Options.SavegamePathfinderEdition;
+            save[59] = OptionsGeneralTab.UseThemedIconsForDefaultSpeedsInNormalView.Save();
 
             return save;
         }
