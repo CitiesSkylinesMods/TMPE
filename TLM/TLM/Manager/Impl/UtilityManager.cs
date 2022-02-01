@@ -10,6 +10,8 @@ namespace TrafficManager.Manager.Impl {
     using UnityEngine;
     using TrafficManager.Lifecycle;
     using Util.Record;
+    using TrafficManager.API.Traffic.Enums;
+    using TrafficManager.Util.Extensions;
 
     public class UtilityManager : AbstractCustomManager, IUtilityManager {
         static UtilityManager() {
@@ -18,29 +20,50 @@ namespace TrafficManager.Manager.Impl {
 
         public static UtilityManager Instance { get; }
 
-        private readonly Queue<KeyValuePair<IRecordable, Dictionary<InstanceID, InstanceID>>> _transferRecordables = new ();
+        private readonly Queue<KeyValuePair<IRecordable, Dictionary<InstanceID, InstanceID>>> _transferRecordables = new();
 
-        public void ClearTraffic() {
+        public void DespawnVehicles(ExtVehicleType? filter = null) {
             lock (Singleton<VehicleManager>.instance) {
                 try {
-                    VehicleManager vehicleManager = Singleton<VehicleManager>.instance;
-                    for (uint i = 0; i < vehicleManager.m_vehicles.m_size; ++i) {
-                        if ((vehicleManager.m_vehicles.m_buffer[i].m_flags &
-                             Vehicle.Flags.Created) != 0) {
-                            vehicleManager.ReleaseVehicle((ushort)i);
+                    var logStr = filter.HasValue
+                        ? filter == 0
+                            ? "Nothing (filter == 0)"
+                            : filter.ToString()
+                        : "All vehicles";
+
+                    Log.Info($"Utility Manager: Despawning {logStr}");
+
+                    var manager = Singleton<VehicleManager>.instance;
+
+                    for (uint vehicleId = 0; vehicleId < manager.m_vehicles.m_size; ++vehicleId) {
+                        ref Vehicle vehicle = ref ((ushort)vehicleId).ToVehicle();
+
+                        if (!vehicle.IsValid()) {
+                            continue;
                         }
+
+                        if (filter.HasValue && (vehicle.ToExtVehicleType() & filter) == 0) {
+                            continue;
+                        }
+
+                        manager.ReleaseVehicle((ushort)vehicleId);
                     }
 
                     TrafficMeasurementManager.Instance.ResetTrafficStats();
-                } catch (Exception ex) {
-                    Log.Error($"Error occured while trying to clear traffic: {ex}");
+                }
+                catch (Exception ex) {
+                    Log.Error($"Error occured while trying to despawn vehicles: {ex}");
                 }
             }
         }
 
+        public void ClearTraffic() => DespawnVehicles();
+
         public void RemoveParkedVehicles() {
             lock (Singleton<VehicleManager>.instance) {
                 try {
+                    Log.Info("UtilityManager: Despawning parked vehicles");
+
                     VehicleManager vehicleManager = Singleton<VehicleManager>.instance;
 
                     for (uint i = 0; i < vehicleManager.m_parkedVehicles.m_size; ++i) {
