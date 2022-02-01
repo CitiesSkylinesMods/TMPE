@@ -2,6 +2,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits.Overlay {
     using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
     using System.Linq;
+    using static TrafficManager.UI.Textures.TextureResources;
     using JetBrains.Annotations;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.Manager.Impl;
@@ -386,7 +387,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits.Overlay {
                 var unthemed = RoadSignThemes.Instance.RoadDefaults;
                 var unthemedAR = unthemed.GetAspectRatio();
 
-                var preferThemed = !Options.differentiateDefaultSpeedsInNormalView;
+                var preferThemed = Options.useThemedIconsForDefaultSpeedsInNormalView;
 
                 // TODO: DrawEnv reset should ideally be separate from cached segments reset
                 this.env_ = new DrawEnv(
@@ -428,7 +429,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits.Overlay {
 
                 // Ignore: Underground segments only can be seen in underground mode
                 if (segment.IsBothEndsUnderground() != this.lastUndergroundMode_) {
-                    continue;
+                    // continue;
                 }
 
                 {
@@ -487,6 +488,8 @@ namespace TrafficManager.UI.SubTools.SpeedLimits.Overlay {
             this.env_.Gui_ = new OverlayHandleColorController(args.IsInteractive);
             this.env_.CheckHover_ = args.IsInteractive;
             this.env_.DefaultsMode_ = args.ToolMode == SpeedlimitsToolMode.Defaults;
+
+            //Singleton<TransportManager>.instance.TunnelsVisible = true;
 
             for (int cacheIdx = this.cachedVisibleSegmentIds_.Size - 1; cacheIdx >= 0; cacheIdx--) {
 
@@ -572,10 +575,11 @@ namespace TrafficManager.UI.SubTools.SpeedLimits.Overlay {
                 intersectsGuiWindows: args.IntersectsAnyUIRect(signRect),
                 opacityMultiplier: 1.0f); // Mathf.Sqrt(visibleScale) for fade
 
-            render.DrawLargeTexture(speedLimit, theme);
-
             if (segment.IsBothEndsUnderground()) {
-                render.DrawSmallTexture_TopLeft(RoadUI.Instance.Underground);
+                //render.DrawSmallTexture_TopLeft(RoadUI.Instance.Underground);
+                render.DrawLargeTexture(RoadUI.Instance.Underground);
+            } else {
+                render.DrawLargeTexture(speedLimit, theme);
             }
 
             this.env_.Gui_.RestoreGUIColor();
@@ -599,6 +603,8 @@ namespace TrafficManager.UI.SubTools.SpeedLimits.Overlay {
 
             return forward ?? back;
         }
+
+        private Texture2D trainIcon;
 
         /// <summary>Draw speed limit handles; one per lane.</summary>
         /// <param name="cacheIdx">The index of this segment in the segment cache.</param>
@@ -735,17 +741,10 @@ namespace TrafficManager.UI.SubTools.SpeedLimits.Overlay {
                     && !onlyMonorailLanes
                     && ((lane.vehicleType & VehicleInfo.VehicleType.Monorail) != VehicleInfo.VehicleType.None))
                 {
-                    var vehicleInfoSignTextures = RoadUI.Instance.VehicleInfoSignTextures;
-                    Texture2D tex1 = vehicleInfoSignTextures[LegacyExtVehicleType.ToNew(old: ExtVehicleType.PassengerTrain)];
-
-                    // TODO: Replace with direct call to GUI.DrawTexture as in the func above
-                    grid.DrawStaticSquareOverlayGridTexture(
-                        texture: tex1,
-                        camPos: camPos,
-                        x: signColumn,
-                        y: 1f,
-                        size: SPEED_LIMIT_SIGN_SIZE,
-                        screenRect: out Rect _);
+                    if (trainIcon == null) {
+                        trainIcon = LoadDllResource("RoadUI.passengertrain_infosign.png", new IntVector2(128), true);
+                    }
+                    render.DrawSmallTexture_BottomRight(trainIcon);
                 }
 
                 this.env_.Gui_.RestoreGUIColor();

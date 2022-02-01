@@ -143,7 +143,7 @@ namespace TrafficManager.Manager.Impl {
             ToCheckbox(data, idx: 56, OptionsVehicleRestrictionsTab.NoDoubleCrossings);
             ToCheckbox(data, idx: 57, OptionsVehicleRestrictionsTab.DedicatedTurningLanes);
           
-            ToCheckbox(data, idx: 58, OptionsGeneralTab.DifferentiateDefaultSpeedsInNormalView);
+            ToCheckbox(data, idx: 58, OptionsGeneralTab.UseThemedIconsForDefaultSpeedsInNormalView);
 
             return true;
         }
@@ -214,7 +214,8 @@ namespace TrafficManager.Manager.Impl {
 
             save[56] = OptionsVehicleRestrictionsTab.NoDoubleCrossings.Save();
             save[57] = OptionsVehicleRestrictionsTab.DedicatedTurningLanes.Save();
-            save[58] = OptionsGeneralTab.DifferentiateDefaultSpeedsInNormalView.Save();
+
+            save[58] = OptionsGeneralTab.UseThemedIconsForDefaultSpeedsInNormalView.Save();
 
             return save;
         }
