@@ -146,7 +146,7 @@ namespace TrafficManager.Manager.Impl {
         }
 
         public byte[] SaveData(ref bool success) {
-            var save = new byte[57];
+            var save = new byte[58];
 
             save[0] = ConvertFromSimulationAccuracy(Options.simulationAccuracy);
             save[1] = 0; // Options.laneChangingRandomization
