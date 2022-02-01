@@ -142,11 +142,14 @@ namespace TrafficManager.Manager.Impl {
 
             ToCheckbox(data, idx: 56, OptionsVehicleRestrictionsTab.NoDoubleCrossings);
             ToCheckbox(data, idx: 57, OptionsVehicleRestrictionsTab.DedicatedTurningLanes);
+
+            Options.SavegamePathfinderEdition = LoadByte(data, idx: 58, defaultVal: 0);
+
             return true;
         }
 
         public byte[] SaveData(ref bool success) {
-            var save = new byte[58];
+            var save = new byte[59];
 
             save[0] = ConvertFromSimulationAccuracy(Options.simulationAccuracy);
             save[1] = 0; // Options.laneChangingRandomization
@@ -210,6 +213,8 @@ namespace TrafficManager.Manager.Impl {
 
             save[56] = OptionsVehicleRestrictionsTab.NoDoubleCrossings.Save();
             save[57] = OptionsVehicleRestrictionsTab.DedicatedTurningLanes.Save();
+
+            save[58] = (byte)Options.SavegamePathfinderEdition;
 
             return save;
         }
