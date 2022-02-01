@@ -29,75 +29,97 @@ This changelog includes all versions and major variants of the mod going all the
 
 </details>
 
+#### TM:PE V11.6.4.4 STABLE, 01/02/2022
+
+- [Meta] TM:PE 11.6.4-hotfix-4
+- [Meta] Bugfix release targeting aircraft pathfinding, and info views.
+- [New] Filtered despawn tools in Maintenance options tab #1341 #270 (aubergine18)
+- [New] Ability to despawn specific vehicle categories when pathfinder is updated #1343 #485 (aubergine18)
+- [Fixed] Aircraft stuck at taxiway junction #1338 #1329 (krzychu124)
+- [Fixed] Aircraft taking off from taxiways #1338 #1327 (krzychu124)
+- [Fixed] Unable to edit underground nodes in Traffic info view #1333 #1330 (aubergine18)
+- [Updated] TM:PE toolbar closes in non-applicable info views #1333 (aubergine18)- [Steam] [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
+
+#### TM:PE V11.6.4.4 TEST, 01/02/2022
+
+- [Meta] TM:PE 11.6.4-hotfix-4
+- [Meta] Bugfix release targeting aircraft pathfinding, and info views.
+- [New] Filtered despawn tools in Maintenance options tab #1341 #270 (aubergine18)
+- [New] Ability to despawn specific vehicle categories when pathfinder is updated #1343 #485 (aubergine18)
+- [Fixed] Aircraft stuck at taxiway junction #1338 #1329 (krzychu124)
+- [Fixed] Aircraft taking off from taxiways #1338 #1327 (krzychu124)
+- [Fixed] Unable to edit underground nodes in Traffic info view #1333 #1330 (aubergine18)
+- [Updated] TM:PE toolbar closes in non-applicable info views #1333 (aubergine18)- [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
+
 #### TM:PE V11.6.4.3 STABLE, 29/01/2022
 
-* [Meta] TM:PE 11.6.4-hotfix-3
-* [Meta] This fixes rare issue on some PCs that are limited to single CPU core
-* [Fixed] Incorrect minimal number of path-find threads #1331 (krzychu124)
-* [Updated] Code clean-up: Refactor `OptionsManager.cs` #1321 (kvakvs, aubergine18)
-* [Updated] Show full version in UI and log file #1335 (aubergine18)
-* [Removed] Temporary: Don't auto-show What's New on TM:PE menu button click #1336 #1314 (krzychu124, aubergine18)
+- [Meta] TM:PE 11.6.4-hotfix-3
+- [Meta] This fixes rare issue on some PCs that are limited to single CPU core
+- [Fixed] Incorrect minimal number of path-find threads #1331 (krzychu124)
+- [Updated] Code clean-up: Refactor `OptionsManager.cs` #1321 (kvakvs, aubergine18)
+- [Updated] Show full version in UI and log file #1335 (aubergine18)
+- [Removed] Temporary: Don't auto-show What's New on TM:PE menu button click #1336 #1314 (krzychu124, aubergine18)
 - [Steam] [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
 
 #### TM:PE V11.6.4.3 TEST, 29/01/2022
 
-* [Meta] TM:PE 11.6.4-hotfix-3
-* [Meta] This fixes rare issue on some PCs that are limited to single CPU core
-* [Fixed] Incorrect minimal number of path-find threads #1331 (krzychu124)
-* [Updated] Code clean-up: Refactor `OptionsManager.cs` #1321 (kvakvs, aubergine18)
-* [Updated] Show full version in UI and log file #1335 (aubergine18)
-* [Removed] Temporary: Don't auto-show What's New on TM:PE menu button click #1336 #1314 (krzychu124, aubergine18)
+- [Meta] TM:PE 11.6.4-hotfix-3
+- [Meta] This fixes rare issue on some PCs that are limited to single CPU core
+- [Fixed] Incorrect minimal number of path-find threads #1331 (krzychu124)
+- [Updated] Code clean-up: Refactor `OptionsManager.cs` #1321 (kvakvs, aubergine18)
+- [Updated] Show full version in UI and log file #1335 (aubergine18)
+- [Removed] Temporary: Don't auto-show What's New on TM:PE menu button click #1336 #1314 (krzychu124, aubergine18)
 - [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
 
 #### TM:PE V11.6.4.2 STABLE, 27/01/2022
 
-* [Meta] TM:PE 11.6.4-hotfix-2
-* [Fixed] Speed limit icons not appearing on metro tracks #1323 #1322 (krzychu124)
+- [Meta] TM:PE 11.6.4-hotfix-2
+- [Fixed] Speed limit icons not appearing on metro tracks #1323 #1322 (krzychu124)
 - [Steam] [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
 
 #### TM:PE V11.6.4.2 TEST, 27/01/2022
 
-* [Meta] TM:PE 11.6.4-hotfix-2
-* [Fixed] Speed limit icons not appearing on metro tracks #1323 #1322 (krzychu124)
+- [Meta] TM:PE 11.6.4-hotfix-2
+- [Fixed] Speed limit icons not appearing on metro tracks #1323 #1322 (krzychu124)
 - [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
 
 #### TM:PE V11.6.4.1 STABLE, 26/01/2022
 
-* [Meta] TM:PE 11.6.4-hotfix-1
-* [Updated] What's New panel updated to avoid recursive update issue #1319 #1317 #1314 (aubergine18)
-* [Fixed] Speed limit icons not appearing on rail tracks #1318 (krzychu124)
+- [Meta] TM:PE 11.6.4-hotfix-1
+- [Updated] What's New panel updated to avoid recursive update issue #1319 #1317 #1314 (aubergine18)
+- [Fixed] Speed limit icons not appearing on rail tracks #1318 (krzychu124)
 - [Steam] [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
 
 #### TM:PE V11.6.4.1 TEST, 26/01/2022
 
-* [Meta] TM:PE 11.6.4-hotfix-1
-* [Updated] What's New panel updated to avoid recursive update issue #1319 #1317 #1314 (aubergine18)
-* [Fixed] Speed limit icons not appearing on rail tracks #1318 (krzychu124)
+- [Meta] TM:PE 11.6.4-hotfix-1
+- [Updated] What's New panel updated to avoid recursive update issue #1319 #1317 #1314 (aubergine18)
+- [Fixed] Speed limit icons not appearing on rail tracks #1318 (krzychu124)
 - [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
 
 #### TM:PE V[11.6.4.0](https://github.com/CitiesSkylinesMods/TMPE/compare/11.6.3-test...11.6.4) STABLE, 25/01/2022
 
-* [Meta] TM:PE 11.6 branch released as STABLE - huge thanks to our beta testers!
-* [Mod] Fixed: `Move It` traffic settings not copy/pasted in-game #1303 #1300 (krzychu124)
-* [Mod] Fixed: `Node Controller Renewal` silent fail place intersection #1308 #1307 (krzychu124)
-* [Mod] Fixed: `Intersection Marking Tool` silent fail place intersection #1308 #1307 (krzychu124)
-* [Updated] Compatibility update for Airports DLC #1230 (krzychu124)
-* [Updated] Reduce logging from `AssetDataExtension` in release builds #1296 #1295 (aubergine18)
-* [Updated] Translations for multiple languages #1304 (Chamëleon, MenschLennart, John Deehe, Skazov, AlexofCA, CrankyAnt, Иван Соколов, AduitSSH, John Lok Ho, DNSE, shg166, GiorgioHerbie, footbool, krzychu124, aubergine18, Dmytro Lytovchenko, Fizzy_LaFizz, Vladimír Krajč, alvaroer, Mahmoud Al Gammal, ipd, 田七不甜, vitalii201, 許景翔, Mehmet Ömer Tüzer, vicugna-pacos, kianzarrin, Mbyron26, Headspike, lennier3, kevinlin18, Ikki_di_Phoenix)
-* [Updated] Reorganise General options tab #1306 #1262 (aubergine18)
-* [Updated] Improved compatibility checks, inhibit `Resume` if problems detected #1310 #1309 #699 #697 (aubergine18)
+- [Meta] TM:PE 11.6 branch released as STABLE - huge thanks to our beta testers!
+- [Mod] Fixed: `Move It` traffic settings not copy/pasted in-game #1303 #1300 (krzychu124)
+- [Mod] Fixed: `Node Controller Renewal` silent fail place intersection #1308 #1307 (krzychu124)
+- [Mod] Fixed: `Intersection Marking Tool` silent fail place intersection #1308 #1307 (krzychu124)
+- [Updated] Compatibility update for Airports DLC #1230 (krzychu124)
+- [Updated] Reduce logging from `AssetDataExtension` in release builds #1296 #1295 (aubergine18)
+- [Updated] Translations for multiple languages #1304 (Chamëleon, MenschLennart, John Deehe, Skazov, AlexofCA, CrankyAnt, Иван Соколов, AduitSSH, John Lok Ho, DNSE, shg166, GiorgioHerbie, footbool, krzychu124, aubergine18, Dmytro Lytovchenko, Fizzy_LaFizz, Vladimír Krajč, alvaroer, Mahmoud Al Gammal, ipd, 田七不甜, vitalii201, 許景翔, Mehmet Ömer Tüzer, vicugna-pacos, kianzarrin, Mbyron26, Headspike, lennier3, kevinlin18, Ikki_di_Phoenix)
+- [Updated] Reorganise General options tab #1306 #1262 (aubergine18)
+- [Updated] Improved compatibility checks, inhibit `Resume` if problems detected #1310 #1309 #699 #697 (aubergine18)
 - [Steam] [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
 
 #### TM:PE V11.6.4.0 TEST, 25/01/2022
 
-* [Mod] Fixed: `Move It` traffic settings not copy/pasted in-game #1303 #1300 (krzychu124)
-* [Mod] Fixed: `Node Controller Renewal` silent fail place intersection #1308 #1307 (krzychu124)
-* [Mod] Fixed: `Intersection Marking Tool` silent fail place intersection #1308 #1307 (krzychu124)
-* [Updated] Compatibility update for Airports DLC #1230 (krzychu124)
-* [Updated] Reduce logging from `AssetDataExtension` in release builds #1296 #1295 (aubergine18)
-* [Updated] Translations for multiple languages #1304 (Chamëleon, MenschLennart, John Deehe, Skazov, AlexofCA, CrankyAnt, Иван Соколов, AduitSSH, John Lok Ho, DNSE, shg166, GiorgioHerbie, footbool, krzychu124, aubergine18, Dmytro Lytovchenko, Fizzy_LaFizz, Vladimír Krajč, alvaroer, Mahmoud Al Gammal, ipd, 田七不甜, vitalii201, 許景翔, Mehmet Ömer Tüzer, vicugna-pacos, kianzarrin, Mbyron26, Headspike, lennier3, kevinlin18, Ikki_di_Phoenix)
-* [Updated] Reorganise General options tab #1306 #1262 (aubergine18)
-* [Updated] Improved compatibility checks, inhibit `Resume` if problems detected #1310 #1309 #699 #697 (aubergine18)
+- [Mod] Fixed: `Move It` traffic settings not copy/pasted in-game #1303 #1300 (krzychu124)
+- [Mod] Fixed: `Node Controller Renewal` silent fail place intersection #1308 #1307 (krzychu124)
+- [Mod] Fixed: `Intersection Marking Tool` silent fail place intersection #1308 #1307 (krzychu124)
+- [Updated] Compatibility update for Airports DLC #1230 (krzychu124)
+- [Updated] Reduce logging from `AssetDataExtension` in release builds #1296 #1295 (aubergine18)
+- [Updated] Translations for multiple languages #1304 (Chamëleon, MenschLennart, John Deehe, Skazov, AlexofCA, CrankyAnt, Иван Соколов, AduitSSH, John Lok Ho, DNSE, shg166, GiorgioHerbie, footbool, krzychu124, aubergine18, Dmytro Lytovchenko, Fizzy_LaFizz, Vladimír Krajč, alvaroer, Mahmoud Al Gammal, ipd, 田七不甜, vitalii201, 許景翔, Mehmet Ömer Tüzer, vicugna-pacos, kianzarrin, Mbyron26, Headspike, lennier3, kevinlin18, Ikki_di_Phoenix)
+- [Updated] Reorganise General options tab #1306 #1262 (aubergine18)
+- [Updated] Improved compatibility checks, inhibit `Resume` if problems detected #1310 #1309 #699 #697 (aubergine18)
 - [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
 
 #### TM:PE V[11.6.3.0](https://github.com/CitiesSkylinesMods/TMPE/compare/11.6.2-test...11.6.3-test) TEST, 19/01/2022
@@ -699,8 +721,8 @@ This changelog includes all versions and major variants of the mod going all the
 
 #### C:SL 1.12.2-f3 ("Modern City Center" and "Downtown Radio"), 07/11/2019
 
-* [New] [Modern City Center](https://skylines.paradoxwikis.com/Modern_City_Center) DLC
-* [New] [Downtown Radio](https://skylines.paradoxwikis.com/Downtown_Radio) DLC
+- [New] [Modern City Center](https://skylines.paradoxwikis.com/Modern_City_Center) DLC
+- [New] [Downtown Radio](https://skylines.paradoxwikis.com/Downtown_Radio) DLC
 
 #### TM:PE V11 ALPHA 11.0-alpha8, 04/10/2019
 

@@ -30,62 +30,63 @@
 
 ## Releases
 
-Official releases:
+> See [Full Changelog](https://github.com/CitiesSkylinesMods/TMPE/blob/master/CHANGELOG.md) for details of all releases.
 
-* [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252) (fully tested releases)
-* [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785) (latest beta test releases)
-* [Download Binaries](https://github.com/CitiesSkylinesMods/TMPE/releases) (for non-Steam users)
-* [Installation Guide](https://github.com/CitiesSkylinesMods/TMPE/wiki/Installation) (for all users)
+- [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252) (fully tested releases)
+- [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785) (latest beta test releases)
+- [Download Binaries](https://github.com/CitiesSkylinesMods/TMPE/releases) (for non-Steam users)
+- [Installation Guide](https://github.com/CitiesSkylinesMods/TMPE/wiki/Installation) (for all users)
 
-### Recent STABLE releases
+### Recent STABLE releases:
 
 > Date format: dd/mm/yyyy
 
-#### TM:PE V11.6.4.3 STABLE, 29/01/2022
+#### TM:PE V11.6.4.4 STABLE, 01/02/2022
 
-* [Meta] TM:PE 11.6.4-hotfix-3
-* [Meta] This fixes rare issue on some PCs that are limited to single CPU core
-* [Fixed] Incorrect minimal number of path-find threads #1331 (krzychu124)
-* [Updated] Code clean-up: Refactor `OptionsManager.cs` #1321 (kvakvs, aubergine18)
-* [Updated] Show full version in UI and log file #1335 (aubergine18)
-* [Removed] Temporary: Don't auto-show What's New on TM:PE menu button click #1336 #1314 (krzychu124, aubergine18)
+- [Meta] TM:PE 11.6.4-hotfix-4
+- [Meta] Bugfix release targeting aircraft pathfinding, and info views.
+- [New] Filtered despawn tools in Maintenance options tab #1341 #270 (aubergine18)
+- [New] Ability to despawn specific vehicle categories when pathfinder is updated #1343 #485 (aubergine18)
+- [Fixed] Aircraft stuck at taxiway junction #1338 #1329 (krzychu124)
+- [Fixed] Aircraft taking off from taxiways #1338 #1327 (krzychu124)
+- [Fixed] Unable to edit underground nodes in Traffic info view #1333 #1330 (aubergine18)
+- [Updated] TM:PE toolbar closes in non-applicable info views #1333 (aubergine18)
 - [Steam] [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
 
-#### TM:PE V11.6.4.2 STABLE, 27/01/2022
+#### TM:PE V11.6.4.3 STABLE, 29/01/2022
 
-* [Meta] TM:PE 11.6.4-hotfix-2
-* [Fixed] Speed limit icons not appearing on metro tracks #1323 #1322 (krzychu124)
+- [Meta] TM:PE 11.6.4-hotfix-3
+- [Meta] This fixes rare issue on some PCs that are limited to single CPU core
+- [Fixed] Incorrect minimal number of path-find threads #1331 (krzychu124)
+- [Updated] Code clean-up: Refactor `OptionsManager.cs` #1321 (kvakvs, aubergine18)
+- [Updated] Show full version in UI and log file #1335 (aubergine18)
+- [Removed] Temporary: Don't auto-show What's New on TM:PE menu button click #1336 #1314 (krzychu124, aubergine18)
+- [Steam] [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
 
-#### TM:PE V11.6.4.1 STABLE, 26/01/2022
+### Recent TEST releases:
 
-* [Meta] TM:PE 11.6.4-hotfix-1
-* [Updated] What's New panel updated to avoid recursive update issue #1319 #1317 #1314 (aubergine18)
-* [Fixed] Speed limit icons not appearing on rail tracks #1318 (krzychu124)
+> Date format: dd/mm/yyyy
 
-### Recent TEST releases (dd/mm/yyyy)
+#### TM:PE V11.6.4.4 TEST, 01/02/2022
+
+- [Meta] TM:PE 11.6.4-hotfix-4
+- [Meta] Bugfix release targeting aircraft pathfinding, and info views.
+- [New] Filtered despawn tools in Maintenance options tab #1341 #270 (aubergine18)
+- [New] Ability to despawn specific vehicle categories when pathfinder is updated #1343 #485 (aubergine18)
+- [Fixed] Aircraft stuck at taxiway junction #1338 #1329 (krzychu124)
+- [Fixed] Aircraft taking off from taxiways #1338 #1327 (krzychu124)
+- [Fixed] Unable to edit underground nodes in Traffic info view #1333 #1330 (aubergine18)
+- [Updated] TM:PE toolbar closes in non-applicable info views #1333 (aubergine18)- [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
 
 #### TM:PE V11.6.4.3 TEST, 29/01/2022
 
-* [Meta] TM:PE 11.6.4-hotfix-3
-* [Meta] This fixes rare issue on some PCs that are limited to single CPU core
-* [Fixed] Incorrect minimal number of path-find threads #1331 (krzychu124)
-* [Updated] Code clean-up: Refactor `OptionsManager.cs` #1321 (kvakvs, aubergine18)
-* [Updated] Show full version in UI and log file #1335 (aubergine18)
-* [Removed] Temporary: Don't auto-show What's New on TM:PE menu button click #1336 #1314 (krzychu124, aubergine18)
+- [Meta] TM:PE 11.6.4-hotfix-3
+- [Meta] This fixes rare issue on some PCs that are limited to single CPU core
+- [Fixed] Incorrect minimal number of path-find threads #1331 (krzychu124)
+- [Updated] Code clean-up: Refactor `OptionsManager.cs` #1321 (kvakvs, aubergine18)
+- [Updated] Show full version in UI and log file #1335 (aubergine18)
+- [Removed] Temporary: Don't auto-show What's New on TM:PE menu button click #1336 #1314 (krzychu124, aubergine18)
 - [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
-
-#### TM:PE V11.6.4.2 TEST, 27/01/2022
-
-* [Meta] TM:PE 11.6.4-hotfix-2
-* [Fixed] Speed limit icons not appearing on metro tracks #1323 #1322 (krzychu124)
-
-#### TM:PE V11.6.4.1 TEST, 26/01/2022
-
-* [Meta] TM:PE 11.6.4-hotfix-1
-* [Updated] What's New panel updated to avoid recursive update issue #1319 #1317 #1314 (aubergine18)
-* [Fixed] Speed limit icons not appearing on rail tracks #1318 (krzychu124)
-
-See [Full Changelog](https://github.com/CitiesSkylinesMods/TMPE/blob/master/CHANGELOG.md) for details of all releases.
 
 ## Support Policy
 
