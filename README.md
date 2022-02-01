@@ -41,11 +41,12 @@
 
 > Date format: dd/mm/yyyy
 
-#### TM:PE V11.6.4.4 STABLE, 02/02/2022
+#### TM:PE V11.6.4.4 STABLE, 01/02/2022
 
 - [Meta] TM:PE 11.6.4-hotfix-4
 - [Meta] Bugfix release targeting aircraft pathfinding, and info views.
 - [New] Filtered despawn tools in Maintenance options tab #1341 #270 (aubergine18)
+- [New] Ability to despawn specific vehicle categories when pathfinder is updated #1343 #485 (aubergine18)
 - [Fixed] Aircraft stuck at taxiway junction #1338 #1329 (krzychu124)
 - [Fixed] Aircraft taking off from taxiways #1338 #1327 (krzychu124)
 - [Fixed] Unable to edit underground nodes in Traffic info view #1333 #1330 (aubergine18)
@@ -66,11 +67,12 @@
 
 > Date format: dd/mm/yyyy
 
-#### TM:PE V11.6.4.4 TEST, 02/02/2022
+#### TM:PE V11.6.4.4 TEST, 01/02/2022
 
 - [Meta] TM:PE 11.6.4-hotfix-4
 - [Meta] Bugfix release targeting aircraft pathfinding, and info views.
 - [New] Filtered despawn tools in Maintenance options tab #1341 #270 (aubergine18)
+- [New] Ability to despawn specific vehicle categories when pathfinder is updated #1343 #485 (aubergine18)
 - [Fixed] Aircraft stuck at taxiway junction #1338 #1329 (krzychu124)
 - [Fixed] Aircraft taking off from taxiways #1338 #1327 (krzychu124)
 - [Fixed] Unable to edit underground nodes in Traffic info view #1333 #1330 (aubergine18)
