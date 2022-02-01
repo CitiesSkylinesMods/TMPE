@@ -214,7 +214,7 @@ namespace TrafficManager.Manager.Impl {
 
             save[56] = OptionsVehicleRestrictionsTab.NoDoubleCrossings.Save();
             save[57] = OptionsVehicleRestrictionsTab.DedicatedTurningLanes.Save();
-            save[58] = OptionsGeneralTab.DifferentiateDefaultSpeedsInNormalView.Save(),
+            save[58] = OptionsGeneralTab.DifferentiateDefaultSpeedsInNormalView.Save();
 
             return save;
         }
