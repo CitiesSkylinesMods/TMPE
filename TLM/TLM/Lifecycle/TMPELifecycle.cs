@@ -19,6 +19,8 @@ namespace TrafficManager.Lifecycle {
     using JetBrains.Annotations;
     using UI.WhatsNew;
     using System.Diagnostics.CodeAnalysis;
+    using TrafficManager.UI.Helpers;
+    using TrafficManager.API.Traffic.Enums;
 
     /// <summary>
     /// Do not use Singleton<TMPELifecycle>.instance to prevent memory leak.
@@ -280,6 +282,18 @@ namespace TrafficManager.Lifecycle {
                 // after all TMPE rules are applied.
                 GeometryNotifierDisposable = GeometryManager.Instance.Subscribe(new GeometryNotifier());
                 Notifier.Instance.OnLevelLoaded();
+
+                if (PlayMode) {
+                    var despawned = PathfinderUpdates.DespawnVehiclesIfNecessary();
+
+                    if (despawned != ExtVehicleType.None) {
+                        Prompt.Warning(
+                            "TM:PE Pathfinder Update",
+                            "Some vehicles were using outdated paths and have been despawned: "
+                            + despawned.ToString());
+                    }
+                }
+
                 Log.Info("OnLevelLoaded complete.");
             } catch (Exception ex) {
                 ex.LogException(true);
