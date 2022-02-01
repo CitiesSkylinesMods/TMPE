@@ -374,7 +374,7 @@ namespace TrafficManager.Custom.PathFinding {
 
             PathCreationArgs args = new PathCreationArgs {
                 extPathType = ExtPathType.None,
-                extVehicleType = ConvertToExtVehicleType(vehicleType),
+                extVehicleType = ExtVehicleManager.ConvertToExtVehicleType(vehicleType),
                 vehicleId = 0,
                 spawned = true,
                 buildIndex = Singleton<SimulationManager>.instance.m_currentBuildIndex,
@@ -403,54 +403,6 @@ namespace TrafficManager.Custom.PathFinding {
             }
 
             return CustomCreatePath(out path, ref SimulationManager.instance.m_randomizer, args);
-        }
-
-        /// <summary>
-        /// Converts game VehicleInfo.VehicleType to closest TMPE.API.Traffic.Enums.ExtVehicleType
-        /// </summary>
-        /// <param name="vehicleType"></param>
-        /// <returns></returns>
-        private static ExtVehicleType ConvertToExtVehicleType(VehicleInfo.VehicleType vehicleType) {
-            ExtVehicleType extVehicleType = ExtVehicleType.None;
-            if ((vehicleType & VehicleInfo.VehicleType.Car) != VehicleInfo.VehicleType.None) {
-                extVehicleType = ExtVehicleType.Bus;
-            }
-
-            if ((vehicleType & (VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Metro |
-                                VehicleInfo.VehicleType.Monorail)) !=
-                VehicleInfo.VehicleType.None) {
-                extVehicleType = ExtVehicleType.PassengerTrain;
-            }
-
-            if ((vehicleType & VehicleInfo.VehicleType.Tram) != VehicleInfo.VehicleType.None) {
-                extVehicleType = ExtVehicleType.Tram;
-            }
-
-            if ((vehicleType & VehicleInfo.VehicleType.Ship) != VehicleInfo.VehicleType.None) {
-                extVehicleType = ExtVehicleType.PassengerShip;
-            }
-
-            if ((vehicleType & VehicleInfo.VehicleType.Plane) != VehicleInfo.VehicleType.None) {
-                extVehicleType = ExtVehicleType.PassengerPlane;
-            }
-
-            if ((vehicleType & VehicleInfo.VehicleType.Ferry) != VehicleInfo.VehicleType.None) {
-                extVehicleType = ExtVehicleType.Ferry;
-            }
-
-            if ((vehicleType & VehicleInfo.VehicleType.Blimp) != VehicleInfo.VehicleType.None) {
-                extVehicleType = ExtVehicleType.Blimp;
-            }
-
-            if ((vehicleType & VehicleInfo.VehicleType.CableCar) != VehicleInfo.VehicleType.None) {
-                extVehicleType = ExtVehicleType.CableCar;
-            }
-
-            if ((vehicleType & VehicleInfo.VehicleType.Trolleybus) != VehicleInfo.VehicleType.None) {
-                extVehicleType = ExtVehicleType.Trolleybus;
-            }
-
-            return extVehicleType;
         }
 
         /// <summary>

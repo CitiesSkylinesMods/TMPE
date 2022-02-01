@@ -9,6 +9,7 @@ namespace TrafficManager.UI.Localization {
     using System.Text;
     using CSUtil.Commons;
     using TrafficManager.U;
+    using TrafficManager.Util;
 
     public class LookupTable {
         public LookupTable(string lookupTableName) {
@@ -44,11 +45,16 @@ namespace TrafficManager.UI.Localization {
             }
 
             // If not found, try also get translation in the default English
-            // Untranslated keys are prefixed with ¶
+            // Untranslated keys are prefixed with ¶ in TEST & DEBUG builds;
+            // in STABLE builds prefix (upto and including `:`) is trimmed.
             return AllLanguages[Translation.DEFAULT_LANGUAGE_CODE]
                        .TryGetValue(key, out string ret2)
                        ? ret2
-                       : "¶" + key;
+                       : (VersionUtil.BRANCH != "STABLE")
+                            ? "¶" + key
+                            : key.IndexOf(":") > 0
+                                ? key.Substring(key.IndexOf(":") + 1)
+                                : key;
         }
 
         public bool HasString(string key) {

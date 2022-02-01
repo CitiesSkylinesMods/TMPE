@@ -120,6 +120,20 @@ namespace TrafficManager.State {
         public static bool PriorityRoad_EnterBlockedYeild = false;
         public static bool PriorityRoad_StopAtEntry = false;
 
+        #region shims: do not perist
+
+        public static bool despawnerAll;
+        public static bool despawnerRoad;
+        public static bool despawnerParked;
+        public static bool despawnerServices;
+        public static bool despawnerTransport;
+        public static bool despawnerPassengerTrains;
+        public static bool despawnerCargoTrains;
+        public static bool despawnerAircraft;
+        public static bool despawnerShips;
+
+        #endregion shims: do not perist
+
         /// <summary>
         /// Invoked on options change to refresh the main menu and possibly update the labels for
         /// a new language. Takes a second, very slow.
