@@ -41,6 +41,16 @@
 
 > Date format: dd/mm/yyyy
 
+#### TM:PE V11.6.4.5 STABLE, 02/02/2022
+
+- [Meta] TM:PE 11.6.4-hotfix-5
+- [Meta] Updates to error checking/logging, and refine pathfinder edition checks
+- [Updated] Catch and log errors in savegame options save/load #1345 (aubergine18)
+- [Updated] Pathfinder edition check refinements #1347 (aubergine18)
+- [Updated] Reduce severity of some normal log messages #1348 #1350 (aubergine18)
+- [Updated] Add new `.Info()` panel to `Prompt` class #1347 (krzychu124)
+- [Steam] [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
+
 #### TM:PE V11.6.4.4 STABLE, 01/02/2022
 
 - [Meta] TM:PE 11.6.4-hotfix-4
@@ -53,19 +63,19 @@
 - [Updated] TM:PE toolbar closes in non-applicable info views #1333 (aubergine18)
 - [Steam] [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
 
-#### TM:PE V11.6.4.3 STABLE, 29/01/2022
-
-- [Meta] TM:PE 11.6.4-hotfix-3
-- [Meta] This fixes rare issue on some PCs that are limited to single CPU core
-- [Fixed] Incorrect minimal number of path-find threads #1331 (krzychu124)
-- [Updated] Code clean-up: Refactor `OptionsManager.cs` #1321 (kvakvs, aubergine18)
-- [Updated] Show full version in UI and log file #1335 (aubergine18)
-- [Removed] Temporary: Don't auto-show What's New on TM:PE menu button click #1336 #1314 (krzychu124, aubergine18)
-- [Steam] [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
-
 ### Recent TEST releases:
 
 > Date format: dd/mm/yyyy
+
+#### TM:PE V11.6.4.5 TEST, 02/02/2022
+
+- [Meta] TM:PE 11.6.4-hotfix-5
+- [Meta] Updates to error logging, and refine pathfinder edition checks
+- [Updated] Catch and log errors in savegame options save/load #1345 (aubergine18)
+- [Updated] Pathfinder edition check refinements #1347 (aubergine18)
+- [Updated] Reduce severity of some normal log messages #1348 #1350 (aubergine18)
+- [Updated] Add new `.Info()` panel to `Prompt` class #1347 (krzychu124)
+- [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
 
 #### TM:PE V11.6.4.4 TEST, 01/02/2022
 
@@ -77,15 +87,6 @@
 - [Fixed] Aircraft taking off from taxiways #1338 #1327 (krzychu124)
 - [Fixed] Unable to edit underground nodes in Traffic info view #1333 #1330 (aubergine18)
 - [Updated] TM:PE toolbar closes in non-applicable info views #1333 (aubergine18)- [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
-
-#### TM:PE V11.6.4.3 TEST, 29/01/2022
-
-- [Meta] TM:PE 11.6.4-hotfix-3
-- [Meta] This fixes rare issue on some PCs that are limited to single CPU core
-- [Fixed] Incorrect minimal number of path-find threads #1331 (krzychu124)
-- [Updated] Code clean-up: Refactor `OptionsManager.cs` #1321 (kvakvs, aubergine18)
-- [Updated] Show full version in UI and log file #1335 (aubergine18)
-- [Removed] Temporary: Don't auto-show What's New on TM:PE menu button click #1336 #1314 (krzychu124, aubergine18)
 - [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
 
 ## Support Policy

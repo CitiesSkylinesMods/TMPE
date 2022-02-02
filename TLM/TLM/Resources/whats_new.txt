@@ -1,3 +1,15 @@
+[Version] 11.6.4.5
+[Stable]
+[Released] February 2nd 2022
+[Link] tmpe-v11645-stable-02022022
+[Meta] TM:PE 11.6.4-hotfix-5
+[Meta] Updates to error checking/logging, and refine pathfinder edition checks
+[Updated] Catch and log errors in savegame options save/load #1345 (aubergine18)
+[Updated] Pathfinder edition check refinements #1347 (aubergine18)
+[Updated] Reduce severity of some normal log messages #1348 #1350 (aubergine18)
+[Updated] Add new `.Info()` panel to `Prompt` class #1347 (krzychu124)
+[/Version]
+
 [Version] 11.6.4.4
 [Stable]
 [Released] February 1st 2022
