@@ -7,6 +7,7 @@
 [Updated] Catch and log errors in savegame options save/load #1345 (aubergine18)
 [Updated] Pathfinder edition check refinements #1347 (aubergine18)
 [Updated] Reduce severity of some normal log messages #1348 #1350 (aubergine18)
+[Updated] Add new `.Info()` panel to `Prompt` class #1347 (krzychu124)
 [/Version]
 
 [Version] 11.6.4.4

@@ -36,6 +36,7 @@ This changelog includes all versions and major variants of the mod going all the
 - [Updated] Catch and log errors in savegame options save/load #1345 (aubergine18)
 - [Updated] Pathfinder edition check refinements #1347 (aubergine18)
 - [Updated] Reduce severity of some normal log messages #1348 #1350 (aubergine18)
+- [Updated] Add new `.Info()` panel to `Prompt` class #1347 (krzychu124)
 - [Steam] [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
 
 #### TM:PE V11.6.4.5 TEST, 02/02/2022
@@ -45,6 +46,7 @@ This changelog includes all versions and major variants of the mod going all the
 - [Updated] Catch and log errors in savegame options save/load #1345 (aubergine18)
 - [Updated] Pathfinder edition check refinements #1347 (aubergine18)
 - [Updated] Reduce severity of some normal log messages #1348 #1350 (aubergine18)
+- [Updated] Add new `.Info()` panel to `Prompt` class #1347 (krzychu124)
 - [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
 
 #### TM:PE V11.6.4.4 STABLE, 01/02/2022
