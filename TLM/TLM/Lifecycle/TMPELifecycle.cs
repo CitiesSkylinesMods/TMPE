@@ -283,9 +283,7 @@ namespace TrafficManager.Lifecycle {
                 GeometryNotifierDisposable = GeometryManager.Instance.Subscribe(new GeometryNotifier());
                 Notifier.Instance.OnLevelLoaded();
 
-                if (PlayMode &&
-                    Mode != LoadMode.NewGame &&
-                    Mode != LoadMode.NewGameFromScenario) {
+                if (PlayMode && (Mode is not LoadMode.NewGame or LoadMode.NewGameFromScenario)) {
 
                     var despawned = PathfinderUpdates.DespawnVehiclesIfNecessary();
 
