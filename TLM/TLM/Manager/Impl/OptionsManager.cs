@@ -7,6 +7,7 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.UI.Helpers;
     using TrafficManager.Lifecycle;
     using JetBrains.Annotations;
+    using TrafficManager.Util;
 
     public class OptionsManager
         : AbstractCustomManager,
@@ -86,7 +87,7 @@ namespace TrafficManager.Manager.Impl {
                 OptionsVehicleRestrictionsTab.SetAllowUTurns(LoadBool(data, idx: 13));
                 OptionsVehicleRestrictionsTab.SetAllowLaneChangesWhileGoingStraight(LoadBool(data, idx: 14));
                 OptionsGameplayTab.SetDisableDespawning(!LoadBool(data, idx: 15)); // inverted
-                                                                                   // skip Options.setDynamicPathRecalculation(data[16] == (byte)1);
+                // skip Options.setDynamicPathRecalculation(data[16] == (byte)1);
                 OptionsOverlaysTab.SetConnectedLanesOverlay(LoadBool(data, idx: 17));
                 OptionsVehicleRestrictionsTab.SetPrioritySignsEnabled(LoadBool(data, idx: 18));
                 OptionsVehicleRestrictionsTab.SetTimedLightsEnabled(LoadBool(data, idx: 19));
@@ -148,7 +149,7 @@ namespace TrafficManager.Manager.Impl {
                 return true;
             }
             catch (Exception ex) {
-                Log.Error(ex.ToString());
+                ex.LogException();
                 return false;
             }
         }
@@ -227,7 +228,7 @@ namespace TrafficManager.Manager.Impl {
                 return save;
             }
             catch (Exception ex) {
-                Log.Error(ex.ToString());
+                ex.LogException();
                 return save; // try and salvage some of the settings
             }
         }
