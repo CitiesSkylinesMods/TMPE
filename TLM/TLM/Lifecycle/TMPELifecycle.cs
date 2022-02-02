@@ -284,7 +284,17 @@ namespace TrafficManager.Lifecycle {
                 Notifier.Instance.OnLevelLoaded();
 
                 if (PlayMode) {
-                    PathfinderUpdates.DespawnVehiclesIfNecessary();
+                    var despawned = PathfinderUpdates.DespawnVehiclesIfNecessary();
+
+                    if (despawned != ExtVehicleType.None) {
+                        Prompt.Warning(
+                            "TM:PE Pathfinder Updated",
+                            $"Some vehicles ({despawned}) had broken paths due to a bug "
+                            + "in an earlier version of the pathfinder. We've despawned "
+                            + "then to prevent further issues. New vehicles will "
+                            + "automatically spawn to replace them.");
+                    }
+
                 }
 
                 Log.Info("OnLevelLoaded complete.");
