@@ -283,7 +283,10 @@ namespace TrafficManager.Lifecycle {
                 GeometryNotifierDisposable = GeometryManager.Instance.Subscribe(new GeometryNotifier());
                 Notifier.Instance.OnLevelLoaded();
 
-                if (PlayMode) {
+                if (PlayMode &&
+                    Mode != LoadMode.NewGame &&
+                    Mode != LoadMode.NewGameFromScenario) {
+
                     var despawned = PathfinderUpdates.DespawnVehiclesIfNecessary();
 
                     if (despawned != ExtVehicleType.None) {
@@ -294,7 +297,6 @@ namespace TrafficManager.Lifecycle {
                             + "then to prevent further issues. New vehicles will "
                             + "automatically spawn to replace them.");
                     }
-
                 }
 
                 Log.Info("OnLevelLoaded complete.");
