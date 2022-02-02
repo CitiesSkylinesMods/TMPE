@@ -49,7 +49,7 @@ namespace TrafficManager.Patch._VehicleAI {
 
             if (counter == 0) {
                 // if another mod has already made such replacement then we would know :)
-                Log.Warning("Warning: redundant transpiler (counter == 0) - Another mod must have changed these values already (probably 81-tiles).");
+                Log.Info("ReplaceMaxPosTranspiler: Another mod has already changed the values (probably 81-tiles).");
             }
             Log._Debug($"StartPathFindCommons.ReplaceMaxPosTranspiler() successfully " +
                 $"replaced {counter} instances of ldc.r4 {vanilaMaxPos} with {newMaxPos}");
