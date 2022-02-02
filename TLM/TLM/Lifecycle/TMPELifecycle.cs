@@ -292,7 +292,7 @@ namespace TrafficManager.Lifecycle {
                             "TM:PE Pathfinder Updated",
                             $"Some vehicles ({despawned}) had broken paths due to a bug "
                             + "in an earlier version of the pathfinder. We've despawned "
-                            + "then to prevent further issues. New vehicles will "
+                            + "them to prevent further issues. New vehicles will "
                             + "automatically spawn to replace them.");
                     }
                 }
