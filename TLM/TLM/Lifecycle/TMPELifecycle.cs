@@ -288,7 +288,7 @@ namespace TrafficManager.Lifecycle {
                     var despawned = PathfinderUpdates.DespawnVehiclesIfNecessary();
 
                     if (despawned != ExtVehicleType.None) {
-                        Prompt.Warning(
+                        Prompt.Info(
                             "TM:PE Pathfinder Updated",
                             $"Some vehicles ({despawned}) had broken paths due to a bug "
                             + "in an earlier version of the pathfinder. We've despawned "
