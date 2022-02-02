@@ -121,7 +121,7 @@ namespace TrafficManager.State {
         public static bool PriorityRoad_StopAtEntry = false;
 
         // See PathfinderUpdates.cs
-        public static byte SavegamePathfinderEdition = 0;
+        public static byte SavegamePathfinderEdition;
 
         #region shims: do not perist
 
@@ -161,6 +161,7 @@ namespace TrafficManager.State {
         }
 
         public static void MakeSettings(UIHelper helper) {
+            Log.Info("Adding UI to mod options tabs");
             try {
                 ExtUITabstrip tabStrip = ExtUITabstrip.Create(helper);
                 OptionsGeneralTab.MakeSettings_General(tabStrip);
