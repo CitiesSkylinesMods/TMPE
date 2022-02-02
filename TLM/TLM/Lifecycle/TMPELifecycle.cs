@@ -283,14 +283,17 @@ namespace TrafficManager.Lifecycle {
                 GeometryNotifierDisposable = GeometryManager.Instance.Subscribe(new GeometryNotifier());
                 Notifier.Instance.OnLevelLoaded();
 
-                if (PlayMode) {
+                if (PlayMode && (Mode is not LoadMode.NewGame or LoadMode.NewGameFromScenario)) {
+
                     var despawned = PathfinderUpdates.DespawnVehiclesIfNecessary();
 
                     if (despawned != ExtVehicleType.None) {
-                        Prompt.Warning(
-                            "TM:PE Pathfinder Update",
-                            "Some vehicles were using outdated paths and have been despawned: "
-                            + despawned.ToString());
+                        Prompt.Info(
+                            "TM:PE Pathfinder Updated",
+                            $"Some vehicles ({despawned}) had broken paths due to a bug "
+                            + "in an earlier version of the pathfinder. We've despawned "
+                            + "them to prevent further issues. New vehicles will "
+                            + "automatically spawn to replace them.");
                     }
                 }
 
