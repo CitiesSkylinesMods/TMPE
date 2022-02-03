@@ -18,6 +18,16 @@ namespace TrafficManager.UI.Helpers {
     public class Prompt {
 
         /// <summary>
+        /// Display an info prompt in the centre of the screen.
+        /// </summary>
+        ///
+        /// <param name="title">Dialog title.</param>
+        /// <param name="message">Dialog body text.</param>
+        public static void Info(string title, string message) {
+            MessageBoxPanel(title, message);
+        }
+
+        /// <summary>
         /// Display a warning prompt in the centre of the screen.
         /// </summary>
         /// 
@@ -71,6 +81,37 @@ namespace TrafficManager.UI.Helpers {
                 UIView.library
                     .ShowModal<ExceptionPanel>("ExceptionPanel")
                     .SetMessage(title, message, isError);
+            };
+
+            try {
+                if (SceneManager.GetActiveScene().name == "Game") {
+                    Singleton<SimulationManager>.instance.m_ThreadingWrapper.QueueMainThread(prompt);
+                } else {
+                    prompt();
+                }
+            } catch (Exception e) {
+                Log.ErrorFormat(
+                    "Error displaying a Prompt:\n{0}",
+                    e.ToString());
+            }
+        }
+
+        /// <summary>
+        /// Display an info message dialog in the center of the screen
+        /// </summary>
+        ///
+        /// <param name="title">Dialog title.</param>
+        /// <param name="message">Dialog body text.</param>
+        private static void MessageBoxPanel(string title, string message) {
+            Action prompt = () => {
+                MessageBoxPanel messageBoxPanel = UIView.library
+                                                        .ShowModal<MessageBoxPanel>("MessageBoxPanel");
+                messageBoxPanel.Find<UILabel>("Message").text = message;
+                messageBoxPanel.Find<UILabel>("Caption").text = title;
+                UIButton uiButton = messageBoxPanel.Find<UIButton>("Close");
+                if (!uiButton)
+                    return;
+                uiButton.isVisible = false;
             };
 
             try {

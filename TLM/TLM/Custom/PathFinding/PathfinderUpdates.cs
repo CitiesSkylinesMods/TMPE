@@ -48,10 +48,16 @@ namespace TrafficManager.Custom.PathFinding {
                 filter |= ExtVehicleType.Plane; // #1338
             }
 
-            // this will also log what gets despawned
-            Singleton<SimulationManager>.instance.AddAction(() => {
-                UtilityManager.Instance.DespawnVehicles(filter);
-            });
+            var countMatching = UtilityManager.Instance.CountVehiclesMatchingFilter(filter);
+
+            if (countMatching > 0) {
+                // this will also log what gets despawned
+                Singleton<SimulationManager>.instance.AddAction(() => {
+                    UtilityManager.Instance.DespawnVehicles(filter);
+                });
+            } else {
+                filter = ExtVehicleType.None;
+            }
 
             // this will be stored in savegame
             Options.SavegamePathfinderEdition = LatestPathfinderEdition;

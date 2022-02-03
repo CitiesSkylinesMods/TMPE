@@ -22,6 +22,26 @@ namespace TrafficManager.Manager.Impl {
 
         private readonly Queue<KeyValuePair<IRecordable, Dictionary<InstanceID, InstanceID>>> _transferRecordables = new();
 
+        public int CountVehiclesMatchingFilter(ExtVehicleType filter) {
+            int count = 0;
+            var manager = Singleton<VehicleManager>.instance;
+
+            for (uint vehicleId = 0; vehicleId < manager.m_vehicles.m_size; ++vehicleId) {
+                ref Vehicle vehicle = ref ((ushort)vehicleId).ToVehicle();
+
+                if (!vehicle.IsValid()) {
+                    continue;
+                }
+
+                if ((vehicle.ToExtVehicleType() & filter) == 0) {
+                    continue;
+                }
+
+                count++;
+            }
+            return count;
+        }
+
         public void DespawnVehicles(ExtVehicleType? filter = null) {
             lock (Singleton<VehicleManager>.instance) {
                 try {
