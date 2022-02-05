@@ -1,62 +1,66 @@
+
 namespace TrafficManager.State {
     using ColossalFramework;
-    using CSUtil.Commons;
     using ICities;
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.Lifecycle;
     using TrafficManager.Manager.Impl;
     using TrafficManager.UI;
     using TrafficManager.UI.Helpers;
 
+    /// <summary>Filterable despawn tool which only appears in-game (not from main menu or editors).</summary>
+    [SuppressMessage("StyleCop.CSharp.LayoutRules", "SA1516:Elements should be separated by blank line", Justification = "Brevity.")]
+    [SuppressMessage("StyleCop.CSharp.LayoutRules", "SA1500:Braces for multi-line statements should not share line", Justification = "Brevity.")]
     public static class OptionsMaintenanceTab_DespawnGroup {
         public static CheckboxOption DespawnerAll =
-            new(nameof(Options.despawnerAll)) {
+            new (nameof(Options.despawnerAll), Options.PersistTo.None) {
                 Label = "Despawn.Checkbox:All vehicles",
                 Handler = OnDespawnerAllChange,
             };
         public static CheckboxOption DespawnerRoad =
-            new(nameof(Options.despawnerRoad)) {
+            new (nameof(Options.despawnerRoad), Options.PersistTo.None) {
                 Label = "Despawn.Checkbox:Road vehicles",
                 Handler = OnDespawnerChange,
             };
         public static CheckboxOption DespawnerParked =
-            new(nameof(Options.despawnerParked)) {
+            new (nameof(Options.despawnerParked), Options.PersistTo.None) {
                 Label = "Despawn.Checkbox:Parked vehicles",
                 Handler = OnDespawnerChange,
             };
         public static CheckboxOption DespawnerServices =
-            new(nameof(Options.despawnerServices)) {
+            new (nameof(Options.despawnerServices), Options.PersistTo.None) {
                 Label = "Despawn.Checkbox:Service vehicles",
                 Handler = OnDespawnerChange,
             };
         public static CheckboxOption DespawnerTransport =
-            new(nameof(Options.despawnerTransport)) {
+            new (nameof(Options.despawnerTransport), Options.PersistTo.None) {
                 Label = "Despawn.Checkbox:Public Transport vehicles",
                 Handler = OnDespawnerChange,
             };
         public static CheckboxOption DespawnerPassengerTrains =
-            new(nameof(Options.despawnerPassengerTrains)) {
+            new (nameof(Options.despawnerPassengerTrains), Options.PersistTo.None) {
                 Label = "Despawn.Checkbox:Passenger Trains",
                 Handler = OnDespawnerChange,
             };
         public static CheckboxOption DespawnerCargoTrains =
-            new(nameof(Options.despawnerCargoTrains)) {
+            new (nameof(Options.despawnerCargoTrains), Options.PersistTo.None) {
                 Label = "Despawn.Checkbox:Cargo Trains",
                 Handler = OnDespawnerChange,
             };
         public static CheckboxOption DespawnerAircraft =
-            new(nameof(Options.despawnerAircraft)) {
+            new (nameof(Options.despawnerAircraft), Options.PersistTo.None) {
                 Label = "Despawn.Checkbox:Aircraft",
                 Handler = OnDespawnerChange,
             };
         public static CheckboxOption DespawnerShips =
-            new(nameof(Options.despawnerShips)) {
+            new (nameof(Options.despawnerShips), Options.PersistTo.None) {
                 Label = "Despawn.Checkbox:Ships",
                 Handler = OnDespawnerChange,
             };
 
-        private static readonly Dictionary<CheckboxOption, ExtVehicleType> Despawners = new()
+        private static readonly Dictionary<CheckboxOption, ExtVehicleType> Despawners = new ()
         {
             { DespawnerRoad,
                 ExtVehicleType.RoadVehicle },
