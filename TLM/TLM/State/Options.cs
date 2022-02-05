@@ -174,7 +174,7 @@ namespace TrafficManager.State {
         }
 
         public static void MakeSettings(UIHelper helper) {
-            Log.Info("Adding UI to mod options tabs");
+            Log.Info("Options.MakeSettings: Adding UI to mod options tabs");
             try {
                 ExtUITabstrip tabStrip = ExtUITabstrip.Create(helper);
                 OptionsGeneralTab.MakeSettings_General(tabStrip);
