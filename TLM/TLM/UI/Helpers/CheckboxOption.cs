@@ -2,44 +2,142 @@ namespace TrafficManager.UI.Helpers {
     using ICities;
     using ColossalFramework.UI;
     using State;
+    using CSUtil.Commons;
+    using System.Collections.Generic;
+    using JetBrains.Annotations;
 
     public class CheckboxOption : SerializableUIOptionBase<bool, UICheckBox> {
-        public CheckboxOption(string fieldName) : base(fieldName) {
+        [CanBeNull]
+        private List<CheckboxOption> _propagatesTrueTo;
+
+        public CheckboxOption(string fieldName, Options.PersistTo scope = Options.PersistTo.Savegame)
+        : base(fieldName, scope) {
             OnValueChanged = DefaultOnValueChanged;
         }
 
-        public event ICities.OnCheckChanged OnValueChanged;
+        /* Data */
+
+        public event OnCheckChanged OnValueChanged;
 
         public OnCheckChanged Handler {
             set => OnValueChanged += value;
         }
 
+        /// <summary>
+        /// Optional: If specified, when <c>Value</c> is set <c>true</c> it will propagate that to listed checkboxes.
+        /// </summary>
+        [CanBeNull]
+        public List<CheckboxOption> PropagatesTrueTo {
+            get => _propagatesTrueTo;
+            set {
+                _propagatesTrueTo = value;
+                Log.Info($"CheckboxOption.PropagatesTrueTo: {nameof(Options)}.{FieldName} will proagate to:");
+
+                foreach (var requirement in _propagatesTrueTo) {
+                    Log.Info($"- {nameof(Options)}.{requirement.FieldName}");
+
+                    if (requirement.PropagatesFalseTo == null) {
+                        requirement.PropagatesFalseTo = new ();
+                    }
+
+                    requirement.PropagatesFalseTo.Add(this);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Optional: If specified, when <c>Value</c> is set <c>false</c> it will propagate that to listed checkboxes.
+        /// </summary>
+        /// <remarks>Don't need to set directly; it's automatically managed by <see cref="PropagatesTrueTo"/> property.</remarks>
+        [CanBeNull]
+        public List<CheckboxOption> PropagatesFalseTo { get; set; }
+
+        public override void Load(byte data) {
+            Log.Info($"CheckboxOption.Load: {data} -> {data != 0} -> {nameof(Options)}.{FieldName}");
+            Value = data != 0;
+        }
+
+        public override byte Save() {
+            Log.Info($"CheckboxOption.Save: {nameof(Options)}.{FieldName} -> {Value} -> {(Value ? (byte)1 : (byte)0)}");
+            return Value ? (byte)1 : (byte)0;
+        }
+
+        /* UI */
+
+        public string Label {
+            get => _label ?? FieldName;
+            set {
+                _label = value;
+                if (HasUI) {
+                    _ui.label.text = string.IsNullOrEmpty(value)
+                        ? string.Empty // avoid invalidating UI if already no label
+                        : T(value);
+                }
+            }
+        }
+
+        public string Tooltip {
+            get => _tooltip;
+            set {
+                _tooltip = value;
+                if (HasUI) {
+                    _ui.tooltip = IsInScope
+                        ? string.IsNullOrEmpty(value)
+                            ? string.Empty // avoid invalidating UI if already no tooltip
+                            : T(value)
+                        : T(INGAME_ONLY_SETTING);
+                }
+            }
+        }
+
         public override bool Value {
             get => base.Value;
             set {
+                Log.Info($"CheckboxOption.Value: {nameof(Options)}.{FieldName} changed to {value}");
+
+                // auto-enable requirements if applicable
+                if (value && _propagatesTrueTo != null) {
+                    foreach (var requirement in _propagatesTrueTo) {
+                        requirement.Value = true;
+                    }
+                }
+
+                // auto-disable dependents if applicable
+                if (!value && PropagatesFalseTo != null) {
+                    foreach (var dependent in PropagatesFalseTo) {
+                        dependent.Value = false;
+                    }
+                }
+
                 base.Value = value;
-                if (_ui != null) {
+                if (HasUI) {
                     _ui.isChecked = value;
                 }
             }
         }
 
-        public override void Load(byte data) => Value = (data != 0);
-        public override byte Save() => Value ? (byte)1 : (byte)0;
+        public bool ReadOnlyUI {
+            get => _readOnlyUI;
+            set {
+                // _readOnlyUI = !IsInScope || value;
+                if (HasUI) {
+                    _ui.readOnly = _readOnlyUI;
+                    _ui.opacity = _readOnlyUI ? 0.3f : 1f;
+                }
+            }
+        }
+
+        public bool Indent { get; set; }
 
         public override void AddUI(UIHelperBase container) {
-            string T(string key) => Translation.Options.Get(key);
-            _ui = container.AddCheckbox(
-                T(Label),
-                Value,
-                this.OnValueChanged) as UICheckBox;
-            if (Tooltip != null) {
-                _ui.tooltip = T(Tooltip);
-            }
-            if (Indent) {
-                State.Options.Indent(_ui);
+            _ui = container.AddCheckbox(T(Label), Value, OnValueChanged) as UICheckBox;
+            if (HasUI && Indent) {
+                Options.Indent(_ui);
             }
             Options.AllowTextWrap(_ui, Indent);
+            Tooltip = _tooltip;
+            ReadOnlyUI = _readOnlyUI;
         }
+
     }
 }
