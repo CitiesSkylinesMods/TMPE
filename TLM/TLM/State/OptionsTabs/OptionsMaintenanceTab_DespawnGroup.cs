@@ -1,4 +1,3 @@
-
 namespace TrafficManager.State {
     using ColossalFramework;
     using ICities;
