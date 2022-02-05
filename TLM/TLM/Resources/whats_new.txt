@@ -270,33 +270,3 @@
 [Removed] Obsolete Code Profiler and related benchmark code #914 (egi)
 [Removed] Legacy detour code from Loading Extension #731 (kianzarrin)
 [/Version]
-
-[Version] 11.5.2.1
-[Stable]
-[Released] May 12th 2021
-[Link] tmpe-v1152-stable-12052021
-[Mod] Hotfix: `Barges (Cargo Ferries)` #1103 (krzychu124)
-[Fixed] Cargo trucks not respecting lane routing #1105 (krzychu124)
-[Fixed] Bug in outside connection detection #1105 (krzychu124)
-[Mod] Hotfix: `81-Tiles` unified alternative path position #1105 (krzychu124)
-[/Version]
-
-[Version] 11.5.1.1
-[Stable]
-[Released] November 21st 2020
-[Link] tmpe-v1151-hotfix-1-stable-21112020
-[Fixed] Right click mouse button closing lane connection tool #1037 (krzychu124)
-[/Version]
-
-[Version] 11.5.1.0
-[Stable]
-[Released] November 19th 2020
-[Link] tmpe-v1151-stable-19112020
-[New] Right-Click will exit tool and subsequently TM:PE toolbsar #1014 #1032 (HypoSim, krzychu124)
-[New] Shift+Click speed limit on whole roundabout #920 #869 (thebugfixnet, kianzarrin)
-[Mod] Fixed: `MOM` stay-in-lane for metro tracks #919 (kianzarrin)
-[Fixed] Floating vehicles when Parking AI disabled #993 #846 (krzychu124)
-[Fixed] Error thrown if segment info is null #957 (kianzarrin, thebugfixnet)
-[Updated] Use locks and existing list in GenericObservable #909 (egi)
-[Updated] RoadSelectionPanel icons optimized to 8bit #984 (Chamëleon)
-[/Version]
