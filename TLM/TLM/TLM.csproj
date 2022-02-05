@@ -147,6 +147,10 @@
     <Compile Include="Manager\Impl\ExtSegmentEndManager.cs" />
     <Compile Include="Manager\Impl\ExtSegmentManager.cs" />
     <Compile Include="Manager\Impl\GeometryNotifier.cs" />
+    <Compile Include="Patch\_VehicleAI\_RTramBaseAI\CalculateSegmentPositionPatch.cs" />
+    <Compile Include="Patch\_VehicleAI\_RTramBaseAI\CalculateSegmentPositionPatch2.cs" />
+    <Compile Include="Patch\_VehicleAI\_RTramBaseAI\SimulationStepPatch.cs" />
+    <Compile Include="Patch\_VehicleAI\_RTramBaseAI\StartPathFindPatch.cs" />
     <Compile Include="State\OptionsTabs\OptionsMaintenanceTab_DespawnGroup.cs" />
     <Compile Include="State\VersionInfo.cs" />
     <Compile Include="UI\WhatsNew\MarkupKeyword.cs" />

@@ -10,6 +10,7 @@ namespace TrafficManager.Lifecycle {
     using Patch;
     using Patch._PathFind;
     using Patch._PathManager;
+    using ColossalFramework.Plugins;
 
     public static class Patcher {
         internal const string HARMONY_ID = "de.viathinksoft.tmpe";
@@ -44,6 +45,7 @@ namespace TrafficManager.Lifecycle {
 #endif
             AssertCitiesHarmonyInstalled();
             fail = !PatchAll(HARMONY_ID, forbidden: typeof(CustomPathFindPatchAttribute));
+            fail = fail || !PatchManual(HARMONY_ID);
 
             if (fail) {
                 Log.Info("patcher failed");
@@ -108,6 +110,49 @@ namespace TrafficManager.Lifecycle {
                 ex.LogException();
                 return false;
             }
+        }
+
+        /// <summary>
+        /// manually applying harmony patches if target mods are enabled
+        /// </summary>
+        /// <returns>false if patching failed, true otherwise</returns>
+        private static bool PatchManual(string harmonyId) {
+            try {
+                var harmony = new Harmony(harmonyId);
+
+                // Patching RTramBaseAI from Reversible Tram AI mod
+                if (IsAssemblyEnabled("ReversibleTramAI")) {
+                    Type rTramBaseAIType = Type.GetType("ReversibleTramAI.RTramBaseAI, ReversibleTramAI", false);
+                    if (rTramBaseAIType != null) {
+                        if (!TrafficManager.Patch._VehicleAI._RTramBaseAI.SimulationStepPatch.ApplyPatch(harmony, rTramBaseAIType)) return false;
+                        if (!TrafficManager.Patch._VehicleAI._RTramBaseAI.StartPathFindPatch.ApplyPatch(harmony, rTramBaseAIType)) return false;
+                        if (!TrafficManager.Patch._VehicleAI._RTramBaseAI.CalculateSegmentPositionPatch.ApplyPatch(harmony, rTramBaseAIType)) return false;
+                        if (!TrafficManager.Patch._VehicleAI._RTramBaseAI.CalculateSegmentPositionPatch2.ApplyPatch(harmony, rTramBaseAIType)) return false;
+                    }
+                    else {
+                        return false;
+                    }
+                }
+                return true;
+            }
+            catch (Exception ex) {
+                ex.LogException();
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Check if a mod is enabled
+        /// </summary>
+        private static bool IsAssemblyEnabled(string assemblyName) {
+            foreach (PluginManager.PluginInfo plugin in PluginManager.instance.GetPluginsInfo()) {
+                foreach (Assembly assembly in plugin.GetAssemblies()) {
+                    if (assembly.GetName().Name == assemblyName) {
+                        return plugin.isEnabled;
+                    }
+                }
+            }
+            return false;
         }
 
         public static void Uninstall(string harmonyId) {
