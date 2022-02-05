@@ -82,8 +82,8 @@ namespace TrafficManager.State {
         public static byte altLaneSelectionRatio;
         public static bool highwayRules;
         public static bool automaticallyAddTrafficLightsIfApplicable = true;
-        public static bool NoDoubleCrossings = false;
-        public static bool DedicatedTurningLanes = false;
+        public static bool NoDoubleCrossings;
+        public static bool DedicatedTurningLanes;
 #if DEBUG
         public static bool showLanes = true;
 #else
@@ -113,20 +113,20 @@ namespace TrafficManager.State {
         public static VehicleRestrictionsAggression vehicleRestrictionsAggression =
             VehicleRestrictionsAggression.Medium;
 
-        public static bool RoundAboutQuickFix_DedicatedExitLanes = true;
-        public static bool RoundAboutQuickFix_StayInLaneMainR = true;
-        public static bool RoundAboutQuickFix_StayInLaneNearRabout = true;
-        public static bool RoundAboutQuickFix_NoCrossMainR = true;
-        public static bool RoundAboutQuickFix_NoCrossYieldR = false;
-        public static bool RoundAboutQuickFix_PrioritySigns = true;
-        public static bool RoundAboutQuickFix_KeepClearYieldR = true;
-        public static bool RoundAboutQuickFix_RealisticSpeedLimits = false;
-        public static bool RoundAboutQuickFix_ParkingBanMainR = true;
-        public static bool RoundAboutQuickFix_ParkingBanYieldR = false;
-        public static bool PriorityRoad_CrossMainR = false;
-        public static bool PriorityRoad_AllowLeftTurns = false;
-        public static bool PriorityRoad_EnterBlockedYeild = false;
-        public static bool PriorityRoad_StopAtEntry = false;
+        public static bool RoundAboutQuickFix_DedicatedExitLanes;
+        public static bool RoundAboutQuickFix_StayInLaneMainR;
+        public static bool RoundAboutQuickFix_StayInLaneNearRabout;
+        public static bool RoundAboutQuickFix_NoCrossMainR;
+        public static bool RoundAboutQuickFix_NoCrossYieldR;
+        public static bool RoundAboutQuickFix_PrioritySigns;
+        public static bool RoundAboutQuickFix_KeepClearYieldR;
+        public static bool RoundAboutQuickFix_RealisticSpeedLimits;
+        public static bool RoundAboutQuickFix_ParkingBanMainR;
+        public static bool RoundAboutQuickFix_ParkingBanYieldR;
+        public static bool PriorityRoad_CrossMainR;
+        public static bool PriorityRoad_AllowLeftTurns;
+        public static bool PriorityRoad_EnterBlockedYeild;
+        public static bool PriorityRoad_StopAtEntry;
 
         // See PathfinderUpdates.cs
         public static byte SavegamePathfinderEdition;
