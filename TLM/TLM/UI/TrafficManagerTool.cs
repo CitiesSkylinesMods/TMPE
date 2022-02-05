@@ -279,6 +279,7 @@ namespace TrafficManager.UI {
         }
 
         internal void InitializeSubTools() {
+            Log.Info("TrafficManagerTool.InitializeSubTools()");
             foreach (KeyValuePair<ToolMode, LegacySubTool> e in legacySubTools_) {
                 e.Value.Initialize();
             }

@@ -63,14 +63,19 @@ namespace TrafficManager.Manager.Impl {
         }
 
         /// <summary>Load LegacySerializableOption bool.</summary>
-        private static void ToCheckbox([NotNull] byte[] data, uint idx, ILegacySerializableOption opt) {
+        private static void ToCheckbox([NotNull] byte[] data, uint idx, ILegacySerializableOption opt, bool defaultVal = false) {
             if (data.Length > idx) {
                 opt.Load(data[idx]);
+                return;
             }
+
+            opt.Load(defaultVal ? (byte)1 : (byte)0);
         }
 
         public bool LoadData(byte[] data) {
             try {
+                Log.Info($"OptionsManager.LoadData: {data.Length} bytes");
+
                 OptionsGeneralTab.SetSimulationAccuracy(ConvertToSimulationAccuracy(LoadByte(data, idx: 0)));
                 // skip Options.setLaneChangingRandomization(options[1]);
                 OptionsGameplayTab.SetRecklessDrivers(LoadByte(data, idx: 2));
@@ -125,21 +130,21 @@ namespace TrafficManager.Manager.Impl {
                 OptionsVehicleRestrictionsTab.SetAllowFarTurnOnRed(LoadBool(data, idx: 40));
                 OptionsVehicleRestrictionsTab.SetAddTrafficLightsIfApplicable(LoadBool(data, idx: 41));
 
-                ToCheckbox(data, idx: 42, OptionsMassEditTab.RoundAboutQuickFix_StayInLaneMainR);
-                ToCheckbox(data, idx: 43, OptionsMassEditTab.RoundAboutQuickFix_StayInLaneNearRabout);
-                ToCheckbox(data, idx: 44, OptionsMassEditTab.RoundAboutQuickFix_DedicatedExitLanes);
-                ToCheckbox(data, idx: 45, OptionsMassEditTab.RoundAboutQuickFix_NoCrossMainR);
+                ToCheckbox(data, idx: 42, OptionsMassEditTab.RoundAboutQuickFix_StayInLaneMainR, true);
+                ToCheckbox(data, idx: 43, OptionsMassEditTab.RoundAboutQuickFix_StayInLaneNearRabout, true);
+                ToCheckbox(data, idx: 44, OptionsMassEditTab.RoundAboutQuickFix_DedicatedExitLanes, true);
+                ToCheckbox(data, idx: 45, OptionsMassEditTab.RoundAboutQuickFix_NoCrossMainR, true);
                 ToCheckbox(data, idx: 46, OptionsMassEditTab.RoundAboutQuickFix_NoCrossYieldR);
-                ToCheckbox(data, idx: 47, OptionsMassEditTab.RoundAboutQuickFix_PrioritySigns);
+                ToCheckbox(data, idx: 47, OptionsMassEditTab.RoundAboutQuickFix_PrioritySigns, true);
 
                 ToCheckbox(data, idx: 48, OptionsMassEditTab.PriorityRoad_CrossMainR);
                 ToCheckbox(data, idx: 49, OptionsMassEditTab.PriorityRoad_AllowLeftTurns);
                 ToCheckbox(data, idx: 50, OptionsMassEditTab.PriorityRoad_EnterBlockedYeild);
                 ToCheckbox(data, idx: 51, OptionsMassEditTab.PriorityRoad_StopAtEntry);
 
-                ToCheckbox(data, idx: 52, OptionsMassEditTab.RoundAboutQuickFix_KeepClearYieldR);
-                ToCheckbox(data, idx: 53, OptionsMassEditTab.RoundAboutQuickFix_RealisticSpeedLimits);
-                ToCheckbox(data, idx: 54, OptionsMassEditTab.RoundAboutQuickFix_ParkingBanMainR);
+                ToCheckbox(data, idx: 52, OptionsMassEditTab.RoundAboutQuickFix_KeepClearYieldR, true);
+                ToCheckbox(data, idx: 53, OptionsMassEditTab.RoundAboutQuickFix_RealisticSpeedLimits, false);
+                ToCheckbox(data, idx: 54, OptionsMassEditTab.RoundAboutQuickFix_ParkingBanMainR, true);
                 ToCheckbox(data, idx: 55, OptionsMassEditTab.RoundAboutQuickFix_ParkingBanYieldR);
 
                 ToCheckbox(data, idx: 56, OptionsVehicleRestrictionsTab.NoDoubleCrossings);
