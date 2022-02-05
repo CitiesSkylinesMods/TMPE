@@ -8,7 +8,7 @@ namespace TrafficManager.UI.Helpers {
 
     public class CheckboxOption : SerializableUIOptionBase<bool, UICheckBox> {
         [CanBeNull]
-        private List<CheckboxOption> _requires;
+        private List<CheckboxOption> _propagatesTrueTo;
 
         public CheckboxOption(string fieldName, Options.PersistTo scope = Options.PersistTo.Savegame)
         : base(fieldName, scope) {
@@ -18,40 +18,45 @@ namespace TrafficManager.UI.Helpers {
         /* Data */
 
         public event OnCheckChanged OnValueChanged;
+
         public OnCheckChanged Handler {
             set => OnValueChanged += value;
         }
 
-        /// <summary>Optional list of checkboxes wich must be checked for this option to work.</summary>
-        /// <remarks>If specified, setting this option <c>true</c> will also set those other checkboxes <c>true</c>.</remarks>
+        /// <summary>
+        /// Optional: If specified, when <c>Value</c> is set <c>true</c> it will propagate that to listed checkboxes.
+        /// </summary>
         [CanBeNull]
-        public List<CheckboxOption> Requires {
-            get => _requires;
+        public List<CheckboxOption> PropagatesTrueTo {
+            get => _propagatesTrueTo;
             set {
-                _requires = value;
-                Log.Info($"CheckboxOption.Requires: {nameof(Options)}.{FieldName} marked as requiring:");
+                _propagatesTrueTo = value;
+                Log.Info($"CheckboxOption.PropagatesTrueTo: {nameof(Options)}.{FieldName} will proagate to:");
 
-                foreach (var requirement in _requires) {
+                foreach (var requirement in _propagatesTrueTo) {
                     Log.Info($"- {nameof(Options)}.{requirement.FieldName}");
 
-                    if (requirement.Dependents == null) {
-                        requirement.Dependents = new();
+                    if (requirement.PropagatesFalseTo == null) {
+                        requirement.PropagatesFalseTo = new ();
                     }
 
-                    requirement.Dependents.Add(this);
+                    requirement.PropagatesFalseTo.Add(this);
                 }
             }
         }
 
-        /// <summary>Opional list of options that are depending on this option.</summary>
-        /// <remarks>Don't set directly; it's automatically managed by <see cref="Requires"/> property.</remarks>
+        /// <summary>
+        /// Optional: If specified, when <c>Value</c> is set <c>false</c> it will propagate that to listed checkboxes.
+        /// </summary>
+        /// <remarks>Don't need to set directly; it's automatically managed by <see cref="PropagatesTrueTo"/> property.</remarks>
         [CanBeNull]
-        public List<CheckboxOption> Dependents { get; set; }
+        public List<CheckboxOption> PropagatesFalseTo { get; set; }
 
         public override void Load(byte data) {
             Log.Info($"CheckboxOption.Load: {data} -> {data != 0} -> {nameof(Options)}.{FieldName}");
             Value = data != 0;
         }
+
         public override byte Save() {
             Log.Info($"CheckboxOption.Save: {nameof(Options)}.{FieldName} -> {Value} -> {(Value ? (byte)1 : (byte)0)}");
             return Value ? (byte)1 : (byte)0;
@@ -91,15 +96,15 @@ namespace TrafficManager.UI.Helpers {
                 Log.Info($"CheckboxOption.Value: {nameof(Options)}.{FieldName} changed to {value}");
 
                 // auto-enable requirements if applicable
-                if (value && _requires != null) {
-                    foreach (var requirement in _requires) {
+                if (value && _propagatesTrueTo != null) {
+                    foreach (var requirement in _propagatesTrueTo) {
                         requirement.Value = true;
                     }
                 }
 
                 // auto-disable dependents if applicable
-                if (!value && Dependents != null) {
-                    foreach (var dependent in Dependents) {
+                if (!value && PropagatesFalseTo != null) {
+                    foreach (var dependent in PropagatesFalseTo) {
                         dependent.Value = false;
                     }
                 }

@@ -23,7 +23,7 @@ namespace TrafficManager.State {
 
         static OptionsGeneralTab_DebugCheckbox() {
             try {
-                DebugCheckboxA.Requires = new () {
+                DebugCheckboxA.PropagatesTrueTo = new () {
                     { DebugCheckboxB },
                 };
             }
