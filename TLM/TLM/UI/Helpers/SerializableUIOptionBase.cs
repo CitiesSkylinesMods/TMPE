@@ -22,7 +22,7 @@ namespace TrafficManager.UI.Helpers {
 
             _fieldInfo = typeof(Options).GetField(fieldName, BindingFlags.Static | BindingFlags.Public);
             if (_fieldInfo == null) {
-                throw new Exception($"{typeof(Options)}.{fieldName} does not exist");
+                throw new Exception($"SerializableUIOptionBase.ctor: {typeof(Options)}.{fieldName} does not exist");
             }
 
             _scope = scope;
@@ -49,7 +49,10 @@ namespace TrafficManager.UI.Helpers {
         public static implicit operator TVal(SerializableUIOptionBase<TVal, TUI> a) => a.Value;
 
         public void DefaultOnValueChanged(TVal newVal) {
-            Log._Debug($"{typeof(Options)}.{_fieldInfo.Name} changed to {newVal}");
+            if (Value.Equals(newVal)) {
+                return;
+            }
+            Log.Info($"SerializableUIOptionBase.DefaultOnValueChanged: {nameof(Options)}.{FieldName} changed to {newVal}");
             Value = newVal;
         }
 
@@ -66,7 +69,6 @@ namespace TrafficManager.UI.Helpers {
         protected string _label;
         protected string _tooltip;
 
-        protected bool _indent;
         protected bool _readOnlyUI;
 
         private TranslatorDelegate _translator;
