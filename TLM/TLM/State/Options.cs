@@ -133,6 +133,11 @@ namespace TrafficManager.State {
 
         #region shims: do not perist
 
+        // Debug checkbox (General tab)
+        public static bool debugCheckboxA;
+        public static bool debugCheckboxB;
+
+        // Despawner filters (Maintenance tab)
         public static bool despawnerAll;
         public static bool despawnerRoad;
         public static bool despawnerParked;

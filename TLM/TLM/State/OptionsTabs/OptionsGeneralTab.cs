@@ -55,6 +55,10 @@ namespace TrafficManager.State {
             UIHelper tab = tabStrip.AddTabPage(T("Tab:General"));
             UIHelperBase group;
 
+#if DEBUG
+            OptionsGeneralTab_DebugCheckbox.AddUI(tab);
+#endif
+
             tab.AddSpace(5);
             tab.AddButton("What's New?", WhatsNew.OpenModal);
             tab.AddSpace(5);
