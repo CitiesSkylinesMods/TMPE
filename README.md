@@ -45,6 +45,7 @@
 
 - [Meta] TM:PE 11.6.4-hotfix-6
 - [Meta] Fixes some issues relating to CSUR and similar networks
+- [Mod] Incompatible: All versions of Cities Skylines Multiplayer (CSM) #1360 #1359 (aubergine18)
 - [Fixed] Missing lane connectors on CSUR and similar networks #1355 #1357 (krzychu124)
 - [Steam] [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
 
@@ -66,6 +67,7 @@
 
 - [Meta] TM:PE 11.6.4-hotfix-6
 - [Meta] Fixes some issues relating to CSUR and similar networks
+- [Mod] Incompatible: All versions of Cities Skylines Multiplayer (CSM) #1360 #1359 (aubergine18)
 - [Fixed] Missing lane connectors on CSUR and similar networks #1355 #1357 (krzychu124)
 - [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
 
