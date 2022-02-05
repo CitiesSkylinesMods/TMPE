@@ -74,6 +74,8 @@ namespace TrafficManager.Manager.Impl {
 
         public bool LoadData(byte[] data) {
             try {
+                Log.Info($"OptionsManager.LoadData: {data.Length} bytes");
+
                 OptionsGeneralTab.SetSimulationAccuracy(ConvertToSimulationAccuracy(LoadByte(data, idx: 0)));
                 // skip Options.setLaneChangingRandomization(options[1]);
                 OptionsGameplayTab.SetRecklessDrivers(LoadByte(data, idx: 2));

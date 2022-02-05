@@ -151,7 +151,7 @@ namespace TrafficManager.State {
         /// </summary>
         internal static void RebuildMenu() {
             if (ModUI.Instance != null) {
-                Log._Debug("Rebuilding the TM:PE menu...");
+                Log.Info("Rebuilding the TM:PE menu...");
                 ModUI.Instance.RebuildMenu();
 
                 // TM:PE main button also needs to be uidated
