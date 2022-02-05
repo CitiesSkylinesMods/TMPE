@@ -131,25 +131,6 @@ namespace TrafficManager.State {
         // See PathfinderUpdates.cs
         public static byte SavegamePathfinderEdition;
 
-        #region shims: do not perist
-
-        // Debug checkbox (General tab)
-        public static bool debugCheckboxA;
-        public static bool debugCheckboxB;
-
-        // Despawner filters (Maintenance tab)
-        public static bool despawnerAll;
-        public static bool despawnerRoad;
-        public static bool despawnerParked;
-        public static bool despawnerServices;
-        public static bool despawnerTransport;
-        public static bool despawnerPassengerTrains;
-        public static bool despawnerCargoTrains;
-        public static bool despawnerAircraft;
-        public static bool despawnerShips;
-
-        #endregion shims: do not perist
-
         /// <summary>
         /// Invoked on options change to refresh the main menu and possibly update the labels for
         /// a new language. Takes a second, very slow.

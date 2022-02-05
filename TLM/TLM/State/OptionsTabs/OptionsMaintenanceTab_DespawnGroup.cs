@@ -14,47 +14,47 @@ namespace TrafficManager.State {
     [SuppressMessage("StyleCop.CSharp.LayoutRules", "SA1500:Braces for multi-line statements should not share line", Justification = "Brevity.")]
     public static class OptionsMaintenanceTab_DespawnGroup {
         public static CheckboxOption DespawnerAll =
-            new (nameof(Options.despawnerAll), Options.PersistTo.None) {
+            new ("DespawnerAll", Options.PersistTo.None) {
                 Label = "Despawn.Checkbox:All vehicles",
                 Handler = OnDespawnerAllChange,
             };
         public static CheckboxOption DespawnerRoad =
-            new (nameof(Options.despawnerRoad), Options.PersistTo.None) {
+            new ("DespawnerRoad", Options.PersistTo.None) {
                 Label = "Despawn.Checkbox:Road vehicles",
                 Handler = OnDespawnerChange,
             };
         public static CheckboxOption DespawnerParked =
-            new (nameof(Options.despawnerParked), Options.PersistTo.None) {
+            new ("DespawnerParked", Options.PersistTo.None) {
                 Label = "Despawn.Checkbox:Parked vehicles",
                 Handler = OnDespawnerChange,
             };
         public static CheckboxOption DespawnerServices =
-            new (nameof(Options.despawnerServices), Options.PersistTo.None) {
+            new ("DespawnerServices", Options.PersistTo.None) {
                 Label = "Despawn.Checkbox:Service vehicles",
                 Handler = OnDespawnerChange,
             };
         public static CheckboxOption DespawnerTransport =
-            new (nameof(Options.despawnerTransport), Options.PersistTo.None) {
+            new ("DespawnerTransport", Options.PersistTo.None) {
                 Label = "Despawn.Checkbox:Public Transport vehicles",
                 Handler = OnDespawnerChange,
             };
         public static CheckboxOption DespawnerPassengerTrains =
-            new (nameof(Options.despawnerPassengerTrains), Options.PersistTo.None) {
+            new ("DespawnerPassengerTrains", Options.PersistTo.None) {
                 Label = "Despawn.Checkbox:Passenger Trains",
                 Handler = OnDespawnerChange,
             };
         public static CheckboxOption DespawnerCargoTrains =
-            new (nameof(Options.despawnerCargoTrains), Options.PersistTo.None) {
+            new ("DespawnerCargoTrains", Options.PersistTo.None) {
                 Label = "Despawn.Checkbox:Cargo Trains",
                 Handler = OnDespawnerChange,
             };
         public static CheckboxOption DespawnerAircraft =
-            new (nameof(Options.despawnerAircraft), Options.PersistTo.None) {
+            new ("DespawnerAircraft", Options.PersistTo.None) {
                 Label = "Despawn.Checkbox:Aircraft",
                 Handler = OnDespawnerChange,
             };
         public static CheckboxOption DespawnerShips =
-            new (nameof(Options.despawnerShips), Options.PersistTo.None) {
+            new ("DespawnerShips", Options.PersistTo.None) {
                 Label = "Despawn.Checkbox:Ships",
                 Handler = OnDespawnerChange,
             };

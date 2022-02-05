@@ -1,23 +1,21 @@
 #if DEBUG
-using ICities;
-using System;
-using System.Diagnostics.CodeAnalysis;
-using TrafficManager.Lifecycle;
-using TrafficManager.UI.Helpers;
-using TrafficManager.Util;
-
 namespace TrafficManager.State {
+    using ICities;
+    using System;
+    using System.Diagnostics.CodeAnalysis;
+    using TrafficManager.Lifecycle;
+    using TrafficManager.UI.Helpers;
+    using TrafficManager.Util;
 
     /// <summary>DEBUG-only group for testing checkbox options.</summary>
     [SuppressMessage("StyleCop.CSharp.LayoutRules", "SA1516:Elements should be separated by blank line", Justification = "Brevity.")]
-    [SuppressMessage("StyleCop.CSharp.LayoutRules", "SA1500:Braces for multi-line statements should not share line", Justification = "Brevity.")]
     public static class OptionsGeneralTab_DebugCheckbox {
         public static CheckboxOption DebugCheckboxA =
-            new (nameof(Options.debugCheckboxA), Options.PersistTo.None) {
+            new ("DebugCheckboxA", Options.PersistTo.None) {
                 Label = "Checkbox A: requires Checkbox B",
             };
         public static CheckboxOption DebugCheckboxB =
-            new (nameof(Options.debugCheckboxB), Options.PersistTo.None) {
+            new ("DebugCheckboxB", Options.PersistTo.None) {
                 Label = "Checkbox B: is required by Checkbox A",
             };
 

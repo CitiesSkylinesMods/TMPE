@@ -6,6 +6,7 @@ namespace TrafficManager.UI.Helpers {
     using System.Reflection;
     using System;
     using TrafficManager.State;
+    using JetBrains.Annotations;
 
     public abstract class SerializableUIOptionBase<TVal, TUI> : ILegacySerializableOption
         where TUI : UIComponent {
@@ -16,25 +17,42 @@ namespace TrafficManager.UI.Helpers {
         /* Data: */
 
         protected Options.PersistTo _scope;
+
+        [CanBeNull]
         private FieldInfo _fieldInfo;
+
+        private string _fieldName;
+
+        // used as internal store of value if _fieldInfo is null
+        private TVal _value = default;
 
         public SerializableUIOptionBase(string fieldName, Options.PersistTo scope) {
 
-            _fieldInfo = typeof(Options).GetField(fieldName, BindingFlags.Static | BindingFlags.Public);
-            if (_fieldInfo == null) {
-                throw new Exception($"SerializableUIOptionBase.ctor: {typeof(Options)}.{fieldName} does not exist");
-            }
-
+            _fieldName = fieldName;
             _scope = scope;
+
+            if (scope.IsFlagSet(Options.PersistTo.Savegame)) {
+                _fieldInfo = typeof(Options).GetField(fieldName, BindingFlags.Static | BindingFlags.Public);
+
+                if (_fieldInfo == null) {
+                    throw new Exception($"SerializableUIOptionBase.ctor: {typeof(Options)}.{fieldName} does not exist");
+                }
+            }
         }
 
         /// <summary>Gets or sets the value of the field this option represents.</summary>
         public virtual TVal Value {
-            get => (TVal)_fieldInfo.GetValue(null);
-            set => _fieldInfo.SetValue(null, value);
+            get => _fieldInfo != null ? (TVal)_fieldInfo.GetValue(null) : _value;
+            set {
+                if (_fieldInfo != null) {
+                    _fieldInfo.SetValue(null, value);
+                } else {
+                    _value = value;
+                }
+            }
         }
 
-        public string FieldName => _fieldInfo.Name;
+        public string FieldName => _fieldInfo?.Name ?? _fieldName;
 
         /// <summary>Returns <c>true</c> if setting can persist in current <see cref="_scope"/>.</summary>
         /// <remarks>
@@ -59,7 +77,7 @@ namespace TrafficManager.UI.Helpers {
         public abstract void Load(byte data);
         public abstract byte Save();
 
-        private Options OptionInstance => Singleton<Options>.instance;
+        //private Options OptionInstance => Singleton<Options>.instance;
 
         /* UI: */
 
