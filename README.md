@@ -41,6 +41,15 @@
 
 > Date format: dd/mm/yyyy
 
+#### TM:PE V11.6.4.6 STABLE, 05/02/2022
+
+- [Meta] TM:PE 11.6.4-hotfix-6
+- [Meta] Fixes some issues relating to CSUR and similar networks
+- [Mod] Incompatible: All versions of Cities Skylines Multiplayer (CSM) #1360 #1359 (aubergine18)
+- [Fixed] Missing lane connectors on CSUR and similar networks #1355 #1357 (krzychu124)
+- [Updated] Internal changes to `CheckboxOption` code #1301 #1299 #1279 (aubergine18)
+- [Steam] [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
+
 #### TM:PE V11.6.4.5 STABLE, 02/02/2022
 
 - [Meta] TM:PE 11.6.4-hotfix-5
@@ -51,21 +60,18 @@
 - [Updated] Add new `.Info()` panel to `Prompt` class #1347 (krzychu124)
 - [Steam] [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
 
-#### TM:PE V11.6.4.4 STABLE, 01/02/2022
-
-- [Meta] TM:PE 11.6.4-hotfix-4
-- [Meta] Bugfix release targeting aircraft pathfinding, and info views.
-- [New] Filtered despawn tools in Maintenance options tab #1341 #270 (aubergine18)
-- [New] Ability to despawn specific vehicle categories when pathfinder is updated #1343 #485 (aubergine18)
-- [Fixed] Aircraft stuck at taxiway junction #1338 #1329 (krzychu124)
-- [Fixed] Aircraft taking off from taxiways #1338 #1327 (krzychu124)
-- [Fixed] Unable to edit underground nodes in Traffic info view #1333 #1330 (aubergine18)
-- [Updated] TM:PE toolbar closes in non-applicable info views #1333 (aubergine18)
-- [Steam] [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
-
 ### Recent TEST releases:
 
 > Date format: dd/mm/yyyy
+
+#### TM:PE V11.6.4.6 TEST, 05/02/2022
+
+- [Meta] TM:PE 11.6.4-hotfix-6
+- [Meta] Fixes some issues relating to CSUR and similar networks
+- [Mod] Incompatible: All versions of Cities Skylines Multiplayer (CSM) #1360 #1359 (aubergine18)
+- [Fixed] Missing lane connectors on CSUR and similar networks #1355 #1357 (krzychu124)
+- [Updated] Internal changes to `CheckboxOption` code #1301 #1299 #1279 (aubergine18)
+- [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
 
 #### TM:PE V11.6.4.5 TEST, 02/02/2022
 
@@ -75,18 +81,6 @@
 - [Updated] Pathfinder edition check refinements #1347 (aubergine18)
 - [Updated] Reduce severity of some normal log messages #1348 #1350 (aubergine18)
 - [Updated] Add new `.Info()` panel to `Prompt` class #1347 (krzychu124)
-- [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
-
-#### TM:PE V11.6.4.4 TEST, 01/02/2022
-
-- [Meta] TM:PE 11.6.4-hotfix-4
-- [Meta] Bugfix release targeting aircraft pathfinding, and info views.
-- [New] Filtered despawn tools in Maintenance options tab #1341 #270 (aubergine18)
-- [New] Ability to despawn specific vehicle categories when pathfinder is updated #1343 #485 (aubergine18)
-- [Fixed] Aircraft stuck at taxiway junction #1338 #1329 (krzychu124)
-- [Fixed] Aircraft taking off from taxiways #1338 #1327 (krzychu124)
-- [Fixed] Unable to edit underground nodes in Traffic info view #1333 #1330 (aubergine18)
-- [Updated] TM:PE toolbar closes in non-applicable info views #1333 (aubergine18)- [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
 - [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
 
 ## Support Policy
