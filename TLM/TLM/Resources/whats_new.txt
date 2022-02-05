@@ -1,3 +1,12 @@
+[Version] 11.6.4.6
+[Stable]
+[Released] February 5th 2022
+[Link] tmpe-v11646-stable-05022022
+[Meta] TM:PE 11.6.4-hotfix-6
+[Meta] Fixes some issues relating to CSUR and similar networks
+[Fixed] Missing lane connectors on CSUR and similar networks #1355 #1357 (krzychu124)
+[/Version]
+
 [Version] 11.6.4.5
 [Stable]
 [Released] February 2nd 2022
