@@ -283,9 +283,9 @@ namespace TrafficManager.Manager.Impl {
         }
 
         /// <summary>
-        /// Determines the game default speed limit of the given NetInfo.
+        /// Scans lanes which may have customisaable speed limit and returns the fastest <c>m_speedLimit</c> encountered.
         /// </summary>
-        /// <param name="info">the NetInfo of which the game default speed limit should be determined</param>
+        /// <param name="info">The <see cref="NetInfo"/> to inspect.</param>
         /// <returns>The vanilla speed limit, in game units.</returns>
         private float FindFastestCustomisableVanillaLaneSpeedLimit(NetInfo info) {
             if (info == null) {
@@ -298,18 +298,22 @@ namespace TrafficManager.Manager.Impl {
                 return 0f;
             }
 
-            float? maxSpeedLimit = null;
+            if (info.m_lanes == null) {
+                return 0f;
+            }
 
-            if (info.m_lanes != null) {
-                foreach (var laneInfo in info.m_lanes) {
+            float maxSpeedLimit = 0f;
+
+            foreach (var laneInfo in info.m_lanes) {
+                if (laneInfo.MayHaveCustomSpeedLimits()) {
                     float speedLimit = laneInfo.m_speedLimit;
-                    if (maxSpeedLimit == null || speedLimit > maxSpeedLimit) {
+                    if (speedLimit > maxSpeedLimit) {
                         maxSpeedLimit = speedLimit;
                     }
                 }
             }
 
-            return maxSpeedLimit ?? 0f;
+            return maxSpeedLimit;
         }
 
         /// <summary>
