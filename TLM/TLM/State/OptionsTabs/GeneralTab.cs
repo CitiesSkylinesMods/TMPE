@@ -17,7 +17,7 @@ namespace TrafficManager.State {
     using TrafficManager.UI.Textures;
     using UI.WhatsNew;
 
-    public static class OptionsGeneralTab {
+    public static class GeneralTab {
         private static UICheckBox _instantEffectsToggle;
 
         [UsedImplicitly]
@@ -56,7 +56,7 @@ namespace TrafficManager.State {
             UIHelperBase group;
 
 #if DEBUG
-            OptionsGeneralTab_DebugCheckbox.AddUI(tab);
+            GeneralTab_DebugGroup.AddUI(tab);
 #endif
 
             tab.AddSpace(5);
