@@ -1,29 +1,13 @@
 namespace TrafficManager {
-    using JetBrains.Annotations;
     using TrafficManager.API.Manager;
-    using UnityEngine;
     using TrafficManager.API.Notifier;
     using TrafficManager.U;
-    using System;
 
     public static class Constants {
         /// <summary>
         /// Used where a 0..1f value has to be scaled to byte or a byte to 0..1f
         /// </summary>
         public const float BYTE_TO_FLOAT_SCALE = 1f / 255f;
-
-        /// <summary>
-        /// Conversion rate from km/h to game speed (also exists in TrafficManager.API.Constants)
-        /// </summary>
-        [Obsolete("Use the value from TrafficManager.API.Traffic.ApiConstants.SPEED_TO_KMPH instead")]
-        public const float SPEED_TO_KMPH = 50.0f; // 1.0f equals 50 km/h
-
-        /// <summary>
-        /// Conversion rate from MPH to game speed (also exists in TrafficManager.API.Constants)
-        /// </summary>
-        [UsedImplicitly]
-        [Obsolete("Use the value from TrafficManager.API.Traffic.ApiConstants.SPEED_TO_MPH instead")]
-        public const float SPEED_TO_MPH = 31.06f; // 50 km/h converted to mph
 
         /// <summary>
         /// Screen pixel size for overlay signs, such as one-per-segment speed limits.
