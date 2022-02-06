@@ -287,7 +287,7 @@ namespace TrafficManager.Manager.Impl {
         /// </summary>
         /// <param name="info">the NetInfo of which the game default speed limit should be determined</param>
         /// <returns>The vanilla speed limit, in game units.</returns>
-        private float GetVanillaNetInfoSpeedLimit(NetInfo info) {
+        private float FindFastestCustomisableVanillaLaneSpeedLimit(NetInfo info) {
             if (info == null) {
                 Log._DebugOnlyWarning("SpeedLimitManager.GetVanillaNetInfoSpeedLimit: info is null!");
                 return 0f;
@@ -324,7 +324,7 @@ namespace TrafficManager.Manager.Impl {
             }
 
             return !customNetinfoSpeedLimits_.TryGetValue(info, out float speedLimit)
-                       ? GetVanillaNetInfoSpeedLimit(info)
+                       ? FindFastestCustomisableVanillaLaneSpeedLimit(info)
                        : speedLimit;
         }
 
@@ -444,7 +444,7 @@ namespace TrafficManager.Manager.Impl {
                 return;
             }
 
-            var vanillaSpeedLimit = GetVanillaNetInfoSpeedLimit(netinfo);
+            var vanillaSpeedLimit = FindFastestCustomisableVanillaLaneSpeedLimit(netinfo);
 
             foreach (var relatedNetinfo in GetCustomisableRelatives(netinfo)) {
                 if (this.customNetinfoSpeedLimits_.ContainsKey(relatedNetinfo)) {
