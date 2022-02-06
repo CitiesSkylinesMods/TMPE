@@ -1,3 +1,14 @@
+[Version] 11.6.4.7
+[Stable]
+[Released] February 6th 2022
+[Link] tmpe-v11646-stable-06022022
+[Meta] TM:PE 11.6.4-hotfix-7
+[Meta] Bugfix for default speeds which affects speed limits tool, overlays, and roundabout curvature speed
+[Fixed] Default netinfo speed should only inspect customisable lanes #1362 #1346 (aubergine18)
+[Fixed] Fix `SPEED_TO_MPH` value in `ApiConstants.cs` #1364 #1363 #988 (aubergine18)
+[Removed] Obsolete: `SPEED_TO_MPH` and `SPEED_TO_KMPH` in `Constants.cs` #1367 #1364 #1363 (aubergine18)
+[/Version]
+
 [Version] 11.6.4.6
 [Stable]
 [Released] February 5th 2022
