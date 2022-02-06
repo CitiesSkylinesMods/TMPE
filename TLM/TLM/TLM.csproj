@@ -304,7 +304,7 @@
     <Compile Include="State\OptionsTabs\OptionsMaintenanceTab.cs" />
     <Compile Include="State\OptionsTabs\OptionsMassEditTab.cs" />
     <Compile Include="State\OptionsTabs\OptionsOverlaysTab.cs" />
-    <Compile Include="State\OptionsTabs\OptionsVehicleRestrictionsTab.cs" />
+    <Compile Include="State\OptionsTabs\PoliciesTab.cs" />
     <Compile Include="TrafficLight\Impl\CustomSegmentLights.cs" />
     <Compile Include="Manager\Impl\LaneConnectionManager.cs" />
     <Compile Include="Manager\Impl\ExtVehicleManager.cs" />

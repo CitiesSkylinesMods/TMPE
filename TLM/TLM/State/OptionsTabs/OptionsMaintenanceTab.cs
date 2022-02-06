@@ -195,7 +195,7 @@ namespace TrafficManager.State {
 
             if (!val) {
                 OptionsOverlaysTab.SetPrioritySignsOverlay(false);
-                OptionsVehicleRestrictionsTab.SetTrafficLightPriorityRules(false);
+                PoliciesTab.SetTrafficLightPriorityRules(false);
             }
         }
 
@@ -209,7 +209,7 @@ namespace TrafficManager.State {
 
             if (!val) {
                 OptionsOverlaysTab.SetTimedLightsOverlay(false);
-                OptionsVehicleRestrictionsTab.SetTrafficLightPriorityRules(false);
+                PoliciesTab.SetTrafficLightPriorityRules(false);
             }
         }
 
@@ -261,9 +261,9 @@ namespace TrafficManager.State {
             Options.RebuildMenu();
 
             if (!val) {
-                OptionsVehicleRestrictionsTab.SetAllowUTurns(false);
-                OptionsVehicleRestrictionsTab.SetAllowEnterBlockedJunctions(false);
-                OptionsVehicleRestrictionsTab.SetAllowLaneChangesWhileGoingStraight(false);
+                PoliciesTab.SetAllowUTurns(false);
+                PoliciesTab.SetAllowEnterBlockedJunctions(false);
+                PoliciesTab.SetAllowLaneChangesWhileGoingStraight(false);
                 SetTurnOnRedEnabled(false);
                 OptionsOverlaysTab.SetJunctionRestrictionsOverlay(false);
             }
@@ -358,8 +358,8 @@ namespace TrafficManager.State {
             }
 
             if (!newValue) {
-                OptionsVehicleRestrictionsTab.SetAllowNearTurnOnRed(false);
-                OptionsVehicleRestrictionsTab.SetAllowFarTurnOnRed(false);
+                PoliciesTab.SetAllowNearTurnOnRed(false);
+                PoliciesTab.SetAllowFarTurnOnRed(false);
             }
         }
 
