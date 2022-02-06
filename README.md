@@ -47,7 +47,7 @@
 - [Meta] Bugfix for default speeds which affects speed limits tool, overlays, and roundabout curvature speed
 - [Fixed] Default netinfo speed should only inspect customisable lanes #1362 #1346 (aubergine18)
 - [Fixed] Fix `SPEED_TO_MPH` value in `ApiConstants.cs` #1364 #1363 #988 (aubergine18)
-- [Removed] Obsolete: `SPEED_TO_MPH` and `SPEED_TO_KMPH` in `Constants.cs` #1364 #1363 (aubergine18)
+- [Removed] Obsolete: `SPEED_TO_MPH` and `SPEED_TO_KMPH` in `Constants.cs` #1367 #1364 #1363 (aubergine18)
 - [Steam] [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
 
 
