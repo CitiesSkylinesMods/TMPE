@@ -8,7 +8,7 @@ namespace TrafficManager.API.Traffic {
         /// <summary>
         /// Conversion rate from MPH to game speed (also exists in TrafficManager.Constants)
         /// </summary>
-        public const float SPEED_TO_MPH = 32.06f; // 50 km/h converted to mph
+        public const float SPEED_TO_MPH = 31.06f; // 50 km/h converted to mph
 
         /// <summary>
         /// Multiplier used to convert between game speedlimits and velocities (directed speeds)

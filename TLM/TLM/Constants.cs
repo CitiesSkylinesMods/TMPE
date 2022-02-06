@@ -4,6 +4,7 @@ namespace TrafficManager {
     using UnityEngine;
     using TrafficManager.API.Notifier;
     using TrafficManager.U;
+    using System;
 
     public static class Constants {
         /// <summary>
@@ -14,12 +15,14 @@ namespace TrafficManager {
         /// <summary>
         /// Conversion rate from km/h to game speed (also exists in TrafficManager.API.Constants)
         /// </summary>
+        [Obsolete("Use the value from TrafficManager.API.Traffic.ApiConstants.SPEED_TO_KMPH instead")]
         public const float SPEED_TO_KMPH = 50.0f; // 1.0f equals 50 km/h
 
         /// <summary>
         /// Conversion rate from MPH to game speed (also exists in TrafficManager.API.Constants)
         /// </summary>
         [UsedImplicitly]
+        [Obsolete("Use the value from TrafficManager.API.Traffic.ApiConstants.SPEED_TO_MPH instead")]
         public const float SPEED_TO_MPH = 31.06f; // 50 km/h converted to mph
 
         /// <summary>
