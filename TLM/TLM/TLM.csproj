@@ -300,7 +300,7 @@
     <Compile Include="State\Keybinds\KeybindUI.cs" />
     <Compile Include="State\OptionsTabs\OptionsGameplayTab.cs" />
     <Compile Include="State\OptionsTabs\OptionsGeneralTab.cs" />
-    <Compile Include="State\OptionsTabs\OptionsKeybindsTab.cs" />
+    <Compile Include="State\OptionsTabs\KeybindsTab.cs" />
     <Compile Include="State\OptionsTabs\OptionsMaintenanceTab.cs" />
     <Compile Include="State\OptionsTabs\OptionsMassEditTab.cs" />
     <Compile Include="State\OptionsTabs\OptionsOverlaysTab.cs" />
