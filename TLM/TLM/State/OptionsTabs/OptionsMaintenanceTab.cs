@@ -194,7 +194,7 @@ namespace TrafficManager.State {
             Options.RebuildMenu();
 
             if (!val) {
-                OptionsOverlaysTab.SetPrioritySignsOverlay(false);
+                OverlaysTab.SetPrioritySignsOverlay(false);
                 OptionsVehicleRestrictionsTab.SetTrafficLightPriorityRules(false);
             }
         }
@@ -208,7 +208,7 @@ namespace TrafficManager.State {
             Options.RebuildMenu();
 
             if (!val) {
-                OptionsOverlaysTab.SetTimedLightsOverlay(false);
+                OverlaysTab.SetTimedLightsOverlay(false);
                 OptionsVehicleRestrictionsTab.SetTrafficLightPriorityRules(false);
             }
         }
@@ -222,7 +222,7 @@ namespace TrafficManager.State {
             Options.RebuildMenu();
 
             if (!val) {
-                OptionsOverlaysTab.SetSpeedLimitsOverlay(false);
+                OverlaysTab.SetSpeedLimitsOverlay(false);
             }
         }
 
@@ -235,7 +235,7 @@ namespace TrafficManager.State {
             Options.RebuildMenu();
 
             if (!val) {
-                OptionsOverlaysTab.SetVehicleRestrictionsOverlay(false);
+                OverlaysTab.SetVehicleRestrictionsOverlay(false);
             }
         }
 
@@ -248,7 +248,7 @@ namespace TrafficManager.State {
             Options.RebuildMenu();
 
             if (!val) {
-                OptionsOverlaysTab.SetParkingRestrictionsOverlay(false);
+                OverlaysTab.SetParkingRestrictionsOverlay(false);
             }
         }
 
@@ -265,7 +265,7 @@ namespace TrafficManager.State {
                 OptionsVehicleRestrictionsTab.SetAllowEnterBlockedJunctions(false);
                 OptionsVehicleRestrictionsTab.SetAllowLaneChangesWhileGoingStraight(false);
                 SetTurnOnRedEnabled(false);
-                OptionsOverlaysTab.SetJunctionRestrictionsOverlay(false);
+                OverlaysTab.SetJunctionRestrictionsOverlay(false);
             }
         }
 
@@ -294,7 +294,7 @@ namespace TrafficManager.State {
             RoutingManager.Instance.RequestFullRecalculation();
 
             if (!val) {
-                OptionsOverlaysTab.SetConnectedLanesOverlay(false);
+                OverlaysTab.SetConnectedLanesOverlay(false);
             }
         }
 
@@ -307,7 +307,7 @@ namespace TrafficManager.State {
             }
 
             if (!newValue) {
-                OptionsOverlaysTab.SetSpeedLimitsOverlay(false);
+                OverlaysTab.SetSpeedLimitsOverlay(false);
             }
         }
 
@@ -320,7 +320,7 @@ namespace TrafficManager.State {
             }
 
             if (!newValue) {
-                OptionsOverlaysTab.SetVehicleRestrictionsOverlay(false);
+                OverlaysTab.SetVehicleRestrictionsOverlay(false);
             }
         }
 
@@ -333,7 +333,7 @@ namespace TrafficManager.State {
             }
 
             if (!newValue) {
-                OptionsOverlaysTab.SetParkingRestrictionsOverlay(false);
+                OverlaysTab.SetParkingRestrictionsOverlay(false);
             }
         }
 
@@ -346,7 +346,7 @@ namespace TrafficManager.State {
             }
 
             if (!newValue) {
-                OptionsOverlaysTab.SetJunctionRestrictionsOverlay(false);
+                OverlaysTab.SetJunctionRestrictionsOverlay(false);
             }
         }
 
@@ -372,7 +372,7 @@ namespace TrafficManager.State {
             }
 
             if (!newValue) {
-                OptionsOverlaysTab.SetConnectedLanesOverlay(false);
+                OverlaysTab.SetConnectedLanesOverlay(false);
             }
         }
 

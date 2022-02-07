@@ -161,7 +161,7 @@ namespace TrafficManager.State {
                 OptionsGeneralTab.MakeSettings_General(tabStrip);
                 OptionsGameplayTab.MakeSettings_Gameplay(tabStrip);
                 OptionsVehicleRestrictionsTab.MakeSettings_VehicleRestrictions(tabStrip);
-                OptionsOverlaysTab.MakeSettings_Overlays(tabStrip);
+                OverlaysTab.MakeSettings_Overlays(tabStrip);
                 OptionsMaintenanceTab.MakeSettings_Maintenance(tabStrip);
                 OptionsKeybindsTab.MakeSettings_Keybinds(tabStrip);
                 tabStrip.Invalidate();

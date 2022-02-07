@@ -360,7 +360,7 @@ namespace TrafficManager.State {
             }
 
             if (!newValue) {
-                OptionsOverlaysTab.SetPrioritySignsOverlay(false);
+                OverlaysTab.SetPrioritySignsOverlay(false);
             }
         }
 
@@ -373,7 +373,7 @@ namespace TrafficManager.State {
             }
 
             if (!newValue) {
-                OptionsOverlaysTab.SetTimedLightsOverlay(false);
+                OverlaysTab.SetTimedLightsOverlay(false);
             }
         }
 
