@@ -8,6 +8,7 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.Lifecycle;
     using JetBrains.Annotations;
     using TrafficManager.Util;
+    using System.Reflection;
 
     public class OptionsManager
         : AbstractCustomManager,
@@ -27,6 +28,33 @@ namespace TrafficManager.Manager.Impl {
         /// <returns>SimulationAccuracy value</returns>
         private static SimulationAccuracy ConvertToSimulationAccuracy(byte value) {
             return SimulationAccuracy.MaxValue - value;
+        }
+
+        /// <summary>
+        /// Determine if TM:PE mod options in <see cref="Options"/> are safe to query.
+        /// </summary>
+        /// <returns>Returns <c>true</c> if safe to query, otherwise <c>false</c>.</returns>
+        /// <remarks>Options are only safe to query in editor/game, except while loading/saving.</remarks>
+        public bool OptionsAreSafeToQuery() => Options.Available;
+
+        /// <summary>
+        /// API method for external mods to get option values by name.
+        /// </summary>
+        /// <typeparam name="TVal">Option type, eg. <c>bool</c>.</typeparam>
+        /// <param name="optionName">Name of the option in <see cref="Options"/>.</param>
+        /// <param name="value">The option value, if found, otherwise <c>default</c> for <typeparamref name="TVal"/>.</param>
+        /// <returns>Returns <c>true</c> if successful, or <c>false</c> if there was a problem (eg. option not found, wrong TVal, etc).</returns>
+        /// <remarks>Check <see cref="OptionsAreSafeToQuery"/> first before trying to get an option value.</remarks>
+        public bool TryGetOptionByName<TVal>(string optionName, out TVal value) {
+            var field = typeof(Options).GetField(optionName, BindingFlags.Static | BindingFlags.Public);
+
+            if (field == null || field.FieldType is not TVal) {
+                value = default;
+                return false;
+            }
+
+            value = (TVal)field.GetValue(null);
+            return true;
         }
 
         /// <summary>
@@ -74,6 +102,8 @@ namespace TrafficManager.Manager.Impl {
 
         public bool LoadData(byte[] data) {
             try {
+                Options.Available = false;
+
                 Log.Info($"OptionsManager.LoadData: {data.Length} bytes");
 
                 OptionsGeneralTab.SetSimulationAccuracy(ConvertToSimulationAccuracy(LoadByte(data, idx: 0)));
@@ -151,15 +181,24 @@ namespace TrafficManager.Manager.Impl {
                 ToCheckbox(data, idx: 57, OptionsVehicleRestrictionsTab.DedicatedTurningLanes);
 
                 Options.SavegamePathfinderEdition = LoadByte(data, idx: 58, defaultVal: 0);
+
+                Options.Available = true;
+
                 return true;
             }
             catch (Exception ex) {
                 ex.LogException();
+
+                // even though there was error, the options are now available for querying
+                Options.Available = true;
+
                 return false;
             }
         }
 
         public byte[] SaveData(ref bool success) {
+
+            Options.Available = false;
 
             // Remember to update this when adding new options (lastIdx + 1)
             var save = new byte[59];
@@ -230,10 +269,15 @@ namespace TrafficManager.Manager.Impl {
 
                 save[58] = (byte)Options.SavegamePathfinderEdition;
 
+                Options.Available = true;
+
                 return save;
             }
             catch (Exception ex) {
                 ex.LogException();
+
+                Options.Available = true;
+
                 return save; // try and salvage some of the settings
             }
         }
