@@ -4005,6 +4005,11 @@ namespace TrafficManager.Custom.PathFinding {
                 return true;
             }
 
+            if (startLaneA_ == laneId || startLaneB_ == laneId ||
+                endLaneA_ == laneId || endLaneB_ == laneId) {
+                return true;
+            }
+
             ExtVehicleType allowedTypes = vehicleRestrictionsManager.GetAllowedVehicleTypes(
                 segmentId,
                 segmentInfo,
@@ -4012,9 +4017,7 @@ namespace TrafficManager.Custom.PathFinding {
                 laneInfo,
                 VehicleRestrictionsMode.Configured);
 
-            return (allowedTypes & queueItem_.vehicleType) != ExtVehicleType.None ||
-                   startLaneA_ == laneId || startLaneB_ == laneId ||
-                   endLaneA_ == laneId || endLaneB_ == laneId;
+            return (allowedTypes & queueItem_.vehicleType) != ExtVehicleType.None;
         }
 #endif
 
