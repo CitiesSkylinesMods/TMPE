@@ -29,6 +29,20 @@ This changelog includes all versions and major variants of the mod going all the
 
 </details>
 
+#### TM:PE V11.6.4.8 STABLE, 09/02/2022
+
+- [Meta] TM:PE 11.6.4-hotfix-8
+- [Meta] Bugfix for vehicle spawning/delivery on restricted lanes
+- [Fixed] Allow vehicles to use restricted lanes when spawning/delivering #1381 #1380 #494 #85 (krzychu124)
+- [Steam] [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
+
+#### TM:PE V11.6.4.8 TEST, 09/02/2022
+
+- [Meta] TM:PE 11.6.4-hotfix-8
+- [Meta] Bugfix for vehicle spawning/delivery on restricted lanes
+- [Fixed] Allow vehicles to use restricted lanes when spawning/delivering #1381 #1380 #494 #85 (krzychu124)
+- [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
+
 #### TM:PE V11.6.4.7 STABLE, 06/02/2022
 
 - [Meta] TM:PE 11.6.4-hotfix-7
@@ -964,11 +978,11 @@ This changelog includes all versions and major variants of the mod going all the
 - [Updated] Turn-on-red can now be toggled for unpreferred (far-side) turns between one-ways
 - [Updated] Train behaviour at shunts: Trains now prefer to stay on their track (#230)
 - [Updated] Parking AI: Improved public transport (PT) usage patterns, mixed car/PT paths are now possible (#218)
-- [Fixed] and optimized lane selection for U-turns and at dead ends (#101)
+- [Fixed] and optimized lane selection for U-turns and at dead ends (#233 #101 #85)
 - [Fixed] Parking AI: Tourist cars despawn because they assume they are at an outside connection (#218)
 - [Fixed] Parking AI: Return path calculation did not accept beautification segments (#218)
 - [Fixed] Parking AI: Cars/Citizens waiting for a path might jump around (#218)
-- [Fixed] Vanilla lane randomization does not work as intended at highway transitions (#112)
+- [Fixed] Vanilla lane randomization does not work as intended at highway transitions (#233 #112)
 - [Fixed] Vehicles change lanes at tollbooths (#225)
 - [Fixed] Path-finding: Array index is out of range due to a race condition (#221)
 - [Fixed] Citizen not found errors when using walking tours (#219)
@@ -982,11 +996,11 @@ This changelog includes all versions and major variants of the mod going all the
 - [New] Turn-on-red can now be toggled for unpreferred (far-side) turns between one-ways (#121)
 - [Updated] Train behaviour at shunts: Trains now prefer to stay on their track (#230)
 - [Updated] Parking AI - Improved public transport (PT) usage patterns, mixed car/PT paths are now possible  (#218)
-- [Fixed] Lane selection for U-turns and at dead ends (also optimised) (#101)
+- [Fixed] Lane selection for U-turns and at dead ends (also optimised) (#233 #101 #85)
 - [Fixed] Parking AI - Tourist cars despawn because they assume they are at an outside connection (#218)
 - [Fixed] Parking AI - Return path calculation did not accept beautification segments (#218)
 - [Fixed] Parking AI - Cars/Citizens waiting for a path might jump around (#218)
-- [Fixed] Vanilla lane randomization does not work as intended at highway transitions (#112)
+- [Fixed] Vanilla lane randomization does not work as intended at highway transitions (#233 #112)
 - [Fixed] Vehicles change lanes at tollbooths (#225)
 - [Fixed] Path-finding: Array index is out of range due to a race condition (#221)
 - [Fixed] Citizen not found errors when using walking tours (#219)
