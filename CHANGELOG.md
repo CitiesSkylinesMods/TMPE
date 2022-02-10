@@ -33,6 +33,7 @@ This changelog includes all versions and major variants of the mod going all the
 
 - [Meta] TM:PE 11.6.4-hotfix-8
 - [Meta] Bugfix for vehicle spawning/delivery on restricted lanes
+- [Mod] Malware: We are treating all mods by Chaos/Holy Water (same person) as targeted malware #1389 #1388 (aubergine18)
 - [Fixed] Allow vehicles to use restricted lanes when spawning/delivering #1381 #1380 #494 #85 (krzychu124)
 - [Steam] [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
 
@@ -40,6 +41,7 @@ This changelog includes all versions and major variants of the mod going all the
 
 - [Meta] TM:PE 11.6.4-hotfix-8
 - [Meta] Bugfix for vehicle spawning/delivery on restricted lanes
+- [Mod] Malware: We are treating all mods by Chaos/Holy Water (same person) as targeted malware #1389 #1388 (aubergine18)
 - [Fixed] Allow vehicles to use restricted lanes when spawning/delivering #1381 #1380 #494 #85 (krzychu124)
 - [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
 
