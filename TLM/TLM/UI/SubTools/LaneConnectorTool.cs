@@ -1099,7 +1099,9 @@ namespace TrafficManager.UI.SubTools {
                 bool startNode = netSegment.m_startNode == nodeId;
                 NetInfo.Lane[] lanes = netSegment.Info.m_lanes;
                 uint laneId = netSegment.m_lanes;
-                float offsetT = offset / netSegment.m_averageLength;
+                // CSUR transition segments (2->3, 3->2 etc.) have "0" m_averageLength,
+                // set 10% of lane length as a connector marker offset
+                float offsetT = FloatUtil.IsZero(netSegment.m_averageLength) ? 0.1f : offset / netSegment.m_averageLength;
 
                 for (byte laneIndex = 0; (laneIndex < lanes.Length) && (laneId != 0); laneIndex++) {
                     NetInfo.Lane laneInfo = lanes[laneIndex];

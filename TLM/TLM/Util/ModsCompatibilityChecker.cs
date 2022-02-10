@@ -28,7 +28,12 @@ namespace TrafficManager.Util {
 
         public ModsCompatibilityChecker() {
             knownIncompatibleMods = LoadListOfIncompatibleMods();
-            gameBreaking = new HashSet<string>(new[] { "Cities: Skylines Multiplayer" });
+            gameBreaking = new HashSet<string>(new[] {
+                "Cities: Skylines Multiplayer",
+                "CSM",
+                "Cities Skylines Multiplayer (CSM)",
+                "Cities: Skylines Multiplayer (CSM) [Beta]",
+            });
         }
 
         /// <summary>

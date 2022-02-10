@@ -29,6 +29,42 @@ This changelog includes all versions and major variants of the mod going all the
 
 </details>
 
+#### TM:PE V11.6.4.7 STABLE, 06/02/2022
+
+- [Meta] TM:PE 11.6.4-hotfix-7
+- [Meta] Bugfix for default speeds which affects speed limits tool, overlays, and roundabout curvature speed
+- [Fixed] Default netinfo speed should only inspect customisable lanes #1362 #1346 (aubergine18)
+- [Fixed] Fix `SPEED_TO_MPH` value in `ApiConstants.cs` #1364 #1363 #988 (aubergine18)
+- [Removed] Obsolete: `SPEED_TO_MPH` and `SPEED_TO_KMPH` in `Constants.cs` #1367 #1364 #1363 (aubergine18)
+- [Steam] [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
+
+#### TM:PE V11.6.4.7 TEST, 06/02/2022
+
+- [Meta] TM:PE 11.6.4-hotfix-7
+- [Meta] Bugfix for default speeds which affects speed limits tool, overlays, and roundabout curvature speed
+- [Fixed] Default netinfo speed should only inspect customisable lanes #1362 #1346 (aubergine18)
+- [Fixed] Fix `SPEED_TO_MPH` value in `ApiConstants.cs` #1364 #1363 #988 (aubergine18)
+- [Removed] Obsolete: `SPEED_TO_MPH` and `SPEED_TO_KMPH` in `Constants.cs` #1367 #1364 #1363 (aubergine18)
+- [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
+
+#### TM:PE V11.6.4.6 STABLE, 05/02/2022
+
+- [Meta] TM:PE 11.6.4-hotfix-6
+- [Meta] Fixes some issues relating to CSUR and similar networks
+- [Mod] Incompatible: All versions of Cities Skylines Multiplayer (CSM) #1360 #1359 (aubergine18)
+- [Fixed] Missing lane connectors on CSUR and similar networks #1355 #1357 (krzychu124)
+- [Updated] Internal changes to `CheckboxOption` code #1301 #1299 #1279 (aubergine18)
+- [Steam] [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
+
+#### TM:PE V11.6.4.6 TEST, 05/02/2022
+
+- [Meta] TM:PE 11.6.4-hotfix-6
+- [Meta] Fixes some issues relating to CSUR and similar networks
+- [Mod] Incompatible: All versions of Cities Skylines Multiplayer (CSM) #1360 #1359 (aubergine18)
+- [Fixed] Missing lane connectors on CSUR and similar networks #1355 #1357 (krzychu124)
+- [Updated] Internal changes to `CheckboxOption` code #1301 #1299 #1279 (aubergine18)
+- [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
+
 #### TM:PE V11.6.4.5 STABLE, 02/02/2022
 
 - [Meta] TM:PE 11.6.4-hotfix-5
