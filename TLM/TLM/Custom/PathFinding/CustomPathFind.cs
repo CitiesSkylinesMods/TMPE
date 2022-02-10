@@ -3541,7 +3541,7 @@ namespace TrafficManager.Custom.PathFinding {
              * Check vehicle restrictions, especially bans
              * =====================================================================================
              */
-            bool canUseLane = CanUseLane(prevSegmentId, prevSegmentInfo, prevLaneIndex, prevLaneInfo);
+            bool canUseLane = CanUseLane(prevSegmentId, prevSegmentInfo, prevLaneIndex, prevLaneInfo, item.LaneId);
             if (!canUseLane && Options.vehicleRestrictionsAggression ==
                 VehicleRestrictionsAggression.Strict) {
                 // vehicle is strictly prohibited to use this lane
@@ -3979,10 +3979,22 @@ namespace TrafficManager.Custom.PathFinding {
         }
 
 #if VEHICLERESTRICTIONS
+        /// <summary>
+        /// Check if lane can be used by vehicle requesting path
+        /// </summary>
+        /// <param name="segmentId">segment ID</param>
+        /// <param name="segmentInfo">">segment NetInfo</param>
+        /// <param name="laneIndex">lane index</param>
+        /// <param name="laneInfo">lane LaneInfo</param>
+        /// <param name="laneId">lane ID</param>
+        /// <returns>true if vehicle restrictions is disabled,
+        /// lane vehicle restriction allow vehicle type or lane is start/end of the path
+        /// otherwise false</returns>
         private bool CanUseLane(ushort segmentId,
                                 NetInfo segmentInfo,
                                 int laneIndex,
-                                NetInfo.Lane laneInfo) {
+                                NetInfo.Lane laneInfo,
+                                uint laneId) {
             if (!Options.vehicleRestrictionsEnabled ||
                 queueItem_.vehicleType == ExtVehicleType.None ||
                 queueItem_.vehicleType == ExtVehicleType.Tram ||
@@ -3990,6 +4002,11 @@ namespace TrafficManager.Custom.PathFinding {
                 (laneInfo.m_vehicleType &
                  (VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train)) ==
                 VehicleInfo.VehicleType.None) {
+                return true;
+            }
+
+            if (startLaneA_ == laneId || startLaneB_ == laneId ||
+                endLaneA_ == laneId || endLaneB_ == laneId) {
                 return true;
             }
 
