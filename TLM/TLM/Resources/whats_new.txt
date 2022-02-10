@@ -1,7 +1,7 @@
 [Version] 11.6.4.8
 [Stable]
-[Released] February 9th 2022
-[Link] tmpe-v11648-stable-09022022
+[Released] February 10th 2022
+[Link] tmpe-v11648-stable-10022022
 [Meta] TM:PE 11.6.4-hotfix-8
 [Meta] Bugfix for vehicle spawning/delivery on restricted lanes
 [Fixed] Allow vehicles to use restricted lanes when spawning/delivering #1381 #1380 #494 #85 (krzychu124)

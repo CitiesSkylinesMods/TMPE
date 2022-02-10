@@ -41,7 +41,7 @@
 
 > Date format: dd/mm/yyyy
 
-#### TM:PE V11.6.4.8 STABLE, 09/02/2022
+#### TM:PE V11.6.4.8 STABLE, 10/02/2022
 
 - [Meta] TM:PE 11.6.4-hotfix-8
 - [Meta] Bugfix for vehicle spawning/delivery on restricted lanes
