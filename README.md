@@ -68,6 +68,7 @@ Our team is happy to support you if:
 We will _not_ provide support if:
 - You are using a pirated or old version of Cities: Skylines
 - You are using an older version of the mod
+- You are using any mod by Holy Water ([due to malware targeted at our team](https://steamcommunity.com/workshop/filedetails/discussion/1637663252/4731597528356140067/))
 
 TM:PE is only tested on and updated for the latest version of Cities: Skylines.
 
