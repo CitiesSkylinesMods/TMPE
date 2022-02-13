@@ -4,6 +4,7 @@ namespace TrafficManager.Patch._VehicleAI._PassengerCarAI {
     using HarmonyLib;
     using JetBrains.Annotations;
     using Manager.Impl;
+    using Util.Extensions;
 
     [UsedImplicitly]
     [HarmonyPatch(typeof(PassengerCarAI), "ParkVehicle")]
@@ -28,9 +29,9 @@ namespace TrafficManager.Patch._VehicleAI._PassengerCarAI {
             int numIterations = 0;
 
             while (curCitizenUnitId != 0u && driverCitizenId == 0u) {
-                uint nextUnit = citizenManager.m_units.m_buffer[curCitizenUnitId].m_nextUnit;
+                ref CitizenUnit currentCitizenUnit = ref curCitizenUnitId.ToCitizenUnit();
                 for (int i = 0; i < 5; i++) {
-                    uint citizenId = citizenManager.m_units.m_buffer[curCitizenUnitId].GetCitizen(i);
+                    uint citizenId = currentCitizenUnit.GetCitizen(i);
                     if (citizenId == 0u) {
                         continue;
                     }
@@ -49,7 +50,7 @@ namespace TrafficManager.Patch._VehicleAI._PassengerCarAI {
                     break;
                 }
 
-                curCitizenUnitId = nextUnit;
+                curCitizenUnitId = currentCitizenUnit.m_nextUnit;
                 if (++numIterations > maxUnitCount) {
                     CODebugBase<LogChannel>.Error(LogChannel.Core,
                                                   $"Invalid list detected!\n{Environment.StackTrace}");

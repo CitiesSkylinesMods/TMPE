@@ -1,82 +1,84 @@
-1957033250;Traffic Manager: President Edition (Industries Compatible)
-1546870472;Traffic Manager: President Edition (Industries Compatible)
-1581695572;Traffic Manager: President Edition
-1348361731;Traffic Manager: President Edition ALPHA/DEBUG
-498363759;Traffic Manager + Improved AI
-563720449;Traffic Manager + Improved AI (Japanese Ver.)
-492391912;Improved AI (Traffic++)
-409184143;Traffic++
-626024868;Traffic++ V2
-568443446;Traffic Manager Plus 1.2.0
-481786333;Traffic Manager Plus
-427585724;Traffic Manager
 407335588;No Despawn Mod
-600733054;No On-Street Parking
-1628112268;RightTurnNoStop
-411833858;Toggle Traffic Lights
-512341354;Central Services Dispatcher (WtM)
-844180955;City Drive
-529979180;CSL Service Reserve
-433249875;[ARIS] Enhanced Hearse AI
-583556014;Enhanced Hearse AI [Fixed for v1.4+]
-813835241;Enhanced Hearse AI [1.6]
-439582006;[ARIS] Enhanced Garbage Truck AI
-583552152;Enhanced Garbage Truck AI [Fixed for v1.4+]
-813835391;Enhanced Garbage Truck AI [1.6]
-413847191;SOM - Services Optimisation Module
-418556522;Road Anarchy
-954034590;Road Anarchy V2
-726005715;Roads United Core+
-680748394;Roads United: North America
-532863263;Multi-track Station Enabler
-442957897;Multi-track Station Enabler
-553184329;Sharp Junction Angles
-478820060;Network Extensions Project (v1)
-658653260;Network Nodes Editor [Experimental]
-929114228;New Roads for Network Extensions
-436253779;Road Protractor
-651610627;Road Color Changer Continued
-422554572;81 Tiles Updated
-414702884;Zoneable Pedestrian Paths
-631694768;Extended Road Upgrade
 408209297;Extended Road Upgrade
-649522495;District Service Limit
-428094792;[ARIS] Remove Stuck Vehicles
-587530437;Remove Stuck Vehicles [Fixed for v1.4+]
-813834836;Remove Stuck Vehicles [1.6]
-421028969;[ARIS] Skylines Overwatch
-583538182;Skylines Overwatch [Fixed for v1.3+]
-813833476;Skylines Overwatch [1.6]
+409184143;Traffic++
+411833858;Toggle Traffic Lights
+413847191;SOM - Services Optimisation Module
+414702884;Zoneable Pedestrian Paths
 417926819;Road Assistant
+418556522;Road Anarchy
+421028969;[ARIS] Skylines Overwatch
+422554572;81 Tiles Updated
+427585724;Traffic Manager
+428094792;[ARIS] Remove Stuck Vehicles
+433249875;[ARIS] Enhanced Hearse AI
+436253779;Road Protractor
+439582006;[ARIS] Enhanced Garbage Truck AI
+442957897;Multi-track Station Enabler
+478820060;Network Extensions Project (v1)
+481786333;Traffic Manager Plus
+492391912;Improved AI (Traffic++)
+498363759;Traffic Manager + Improved AI
+512341354;Central Services Dispatcher (WtM)
+529979180;CSL Service Reserve
+532863263;Multi-track Station Enabler
+553184329;Sharp Junction Angles
+563720449;Traffic Manager + Improved AI (Japanese Ver.)
+568443446;Traffic Manager Plus 1.2.0
+583538182;Skylines Overwatch [Fixed for v1.3+]
+583552152;Enhanced Garbage Truck AI [Fixed for v1.4+]
+583556014;Enhanced Hearse AI [Fixed for v1.4+]
+587530437;Remove Stuck Vehicles [Fixed for v1.4+]
+600733054;No On-Street Parking
+626024868;Traffic++ V2
+631694768;Extended Road Upgrade
 631930385;Realistic Vehicle Speeds
+649522495;District Service Limit
+651610627;Road Color Changer Continued
+658653260;Network Nodes Editor [Experimental]
+680748394;Roads United: North America
+726005715;Roads United Core+
+813833476;Skylines Overwatch [1.6]
+813834836;Remove Stuck Vehicles [1.6]
+813835241;Enhanced Hearse AI [1.6]
+813835391;Enhanced Garbage Truck AI [1.6]
+844180955;City Drive
+929114228;New Roads for Network Extensions
+954034590;Road Anarchy V2
 1072157697;Cargo Info
-2719881998;Traffic++ V2
-2719881745;Traffic++ V2
-2733711176;CSM FIX
-2721843224;Cities: Skylines Multiplayer mod
-2709131417;CSM
-2707583168;CSM
+1348361731;Traffic Manager: President Edition ALPHA/DEBUG
+1546870472;Traffic Manager: President Edition (Industries Compatible)
+1556669944;CSM
+1558438291;Cities Multiplayer Mod (CSM) [Beta]
+1581695572;Traffic Manager: President Edition
+1604291910;498363759 Traffic Manager + Improved AI
+1628112268;RightTurnNoStop
+1731754018;CSM
+1806963141;TM:PE LABS
+1841616225;CSM
+1957033250;Traffic Manager: President Edition (Industries Compatible)
+2021598295;1558438291 [Beta] CSM - Cities_ Skylines Multiplayer
+2027716634;CitiesSkylinesMultiplayer_2002.2.0
+2030131871;CSM
+2080356971;CSM
+2261025679;Greg's CSM
+2263694803;TMPE:TrafficManager全部汉化
+2326186273;CSM
+2330696251;CSM
+2330742524;CSM
+2345340418;CSM
+2394524110;CSM
+2399343344;Harmony (redesigned) - potentially malicious
+2497082534;CSM
+2513702805;CSM
+2542516762;CSM
+2571962851;Cities Skylines Multiplayer (CSM)
 2643245070;CSM
 2643961628;CSM
-2571962851;Cities Skylines Multiplayer (CSM)
-2542516762;CSM
-2513702805;CSM
-2497082534;CSM
-2394524110;CSM
-2345340418;CSM
-2330742524;CSM
-2330696251;CSM
-2326186273;CSM
-2261025679;Greg's CSM
-2080356971;CSM
-2030131871;CSM
-2027716634;CitiesSkylinesMultiplayer_2002.2.0
-2021598295;1558438291 [Beta] CSM - Cities_ Skylines Multiplayer
-1841616225;CSM
-1731754018;CSM
-1558438291;Cities Multiplayer Mod (CSM) [Beta]
-1556669944;CSM
-2730687809;Network Extensions 3 - contains malware targeting TM:PE devs
-2399343344;Harmony (redesigned) - by same author of the malware, and potentially much more dangerous
-2389228470;Transfer Broker BETA - by same author of the malware
-2325122732;Supply Chain Coloring - by same author of the malware
+2707583168;CSM
+2709131417;CSM
+2719881745;Traffic++ V2
+2719881998;Traffic++ V2
+2721843224;Cities: Skylines Multiplayer mod
+2730687809;Network Extensions 3 - malware: https://github.com/CitiesSkylinesMods/TMPE/pull/1389 
+2733711176;CSM FIX
+2749420751;Uninspected TM:PE clone

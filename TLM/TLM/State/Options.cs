@@ -158,12 +158,12 @@ namespace TrafficManager.State {
             Log.Info("Options.MakeSettings: Adding UI to mod options tabs");
             try {
                 ExtUITabstrip tabStrip = ExtUITabstrip.Create(helper);
-                OptionsGeneralTab.MakeSettings_General(tabStrip);
-                OptionsGameplayTab.MakeSettings_Gameplay(tabStrip);
-                OptionsVehicleRestrictionsTab.MakeSettings_VehicleRestrictions(tabStrip);
+                GeneralTab.MakeSettings_General(tabStrip);
+                GameplayTab.MakeSettings_Gameplay(tabStrip);
+                PoliciesTab.MakeSettings_VehicleRestrictions(tabStrip);
                 OverlaysTab.MakeSettings_Overlays(tabStrip);
                 OptionsMaintenanceTab.MakeSettings_Maintenance(tabStrip);
-                OptionsKeybindsTab.MakeSettings_Keybinds(tabStrip);
+                KeybindsTab.MakeSettings_Keybinds(tabStrip);
                 tabStrip.Invalidate();
             } catch (Exception ex) {
                 ex.LogException();

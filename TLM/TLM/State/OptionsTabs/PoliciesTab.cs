@@ -8,7 +8,7 @@ namespace TrafficManager.State {
     using TrafficManager.UI;
     using static TrafficManager.Util.Shortcuts;
 
-    public static class OptionsVehicleRestrictionsTab {
+    public static class PoliciesTab {
         private static UICheckBox _relaxedBussesToggle;
         private static UICheckBox _allRelaxedToggle;
         private static UICheckBox _allowEnterBlockedJunctionsToggle;

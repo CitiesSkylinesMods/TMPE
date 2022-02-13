@@ -14,7 +14,7 @@ namespace TrafficManager.Patch._RoadBaseAI {
         /// </summary>
         [UsedImplicitly]
         static void Postfix(ushort segmentID) {
-            if (OptionsVehicleRestrictionsTab.DedicatedTurningLanes) {
+            if (PoliciesTab.DedicatedTurningLanes) {
                 BuiltIn(segmentID);
             }
 

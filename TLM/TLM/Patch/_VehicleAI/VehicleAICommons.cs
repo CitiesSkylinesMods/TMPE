@@ -9,7 +9,6 @@ namespace TrafficManager.Patch._VehicleAI {
     public class VehicleAICommons {
 
         private static CalculateTargetSpeedDelegate CalculateTargetSpeed = GameConnectionManager.Instance.VehicleAIConnection.CalculateTargetSpeed;
-        private static NetManager _netManager = NetManager.instance;
         public static void CustomCalculateSegmentPosition(VehicleAI instance,
                                                    ushort vehicleId,
                                                    ref Vehicle vehicleData,
@@ -19,7 +18,7 @@ namespace TrafficManager.Patch._VehicleAI {
                                                    out Vector3 pos,
                                                    out Vector3 dir,
                                                    out float maxSpeed) {
-            _netManager.m_lanes.m_buffer[laneId].CalculatePositionAndDirection(Constants.ByteToFloat(offset), out pos, out dir);
+            laneId.ToLane().CalculatePositionAndDirection(Constants.ByteToFloat(offset), out pos, out dir);
             CustomCalculateTargetSpeed(
                 instance,
                 vehicleId,
@@ -50,7 +49,7 @@ namespace TrafficManager.Patch._VehicleAI {
                     vehicleId,
                     ref vehicleData,
                     laneSpeedLimit,
-                    _netManager.m_lanes.m_buffer[laneId].m_curve);
+                    laneId.ToLane().m_curve);
             } else {
                 maxSpeed = CalculateTargetSpeed(instance, vehicleId, ref vehicleData, 1f, 0f);
             }
