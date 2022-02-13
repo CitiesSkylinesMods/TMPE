@@ -62,8 +62,7 @@ namespace TrafficManager.Patch._VehicleAI._TrainAI{
                 if (reserveSpace && i >= 1 && i <= 2) {
                     uint laneId = PathManager.GetLaneID(position);
                     if (laneId != 0u) {
-                        reserveSpace = netMan.m_lanes.m_buffer[laneId]
-                                             .ReserveSpace(__instance.m_info.m_generatedInfo.m_size.z, vehicleID);
+                        reserveSpace = laneId.ToLane().ReserveSpace(__instance.m_info.m_generatedInfo.m_size.z, vehicleID);
                     }
                 }
 

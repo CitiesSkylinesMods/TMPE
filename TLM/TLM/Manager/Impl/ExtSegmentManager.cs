@@ -150,7 +150,7 @@ namespace TrafficManager.Manager.Impl {
                     }
                 }
 
-                laneId = instance.m_lanes.m_buffer[laneId].m_nextLane;
+                laneId = laneId.ToLane().m_nextLane;
                 laneIndex++;
             }
 
