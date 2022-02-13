@@ -411,10 +411,10 @@ namespace TrafficManager.Manager.Impl {
                     int numIter = 0;
 
                     while (curUnitId != 0u) {
-                        uint nextUnit = citizenManager.m_units.m_buffer[curUnitId].m_nextUnit;
+                        ref CitizenUnit currentCitizenUnit = ref curUnitId.ToCitizenUnit();
 
                         for (int i = 0; i < 5; i++) {
-                            uint curCitizenId = citizenManager.m_units.m_buffer[curUnitId].GetCitizen(i);
+                            uint curCitizenId = currentCitizenUnit.GetCitizen(i);
 
                             if (curCitizenId != 0u) {
                                 ushort citizenInstanceId = citizenManager
@@ -459,7 +459,7 @@ namespace TrafficManager.Manager.Impl {
                             }
                         }
 
-                        curUnitId = nextUnit;
+                        curUnitId = currentCitizenUnit.m_nextUnit;
 
                         if (++numIter > maxUnitCount) {
                             CODebugBase<LogChannel>.Error(
@@ -485,10 +485,10 @@ namespace TrafficManager.Manager.Impl {
                 int numIter = 0;
 
                 while (curCitizenUnitId != 0u) {
-                    uint nextUnit = citizenManager.m_units.m_buffer[curCitizenUnitId].m_nextUnit;
+                    ref CitizenUnit currentCitizenUnit = ref curCitizenUnitId.ToCitizenUnit();
 
                     for (int j = 0; j < 5; j++) {
-                        uint citId = citizenManager.m_units.m_buffer[curCitizenUnitId].GetCitizen(j);
+                        uint citId = currentCitizenUnit.GetCitizen(j);
                         if (citId == 0u) {
                             continue;
                         }
@@ -534,7 +534,7 @@ namespace TrafficManager.Manager.Impl {
                         }
                     }
 
-                    curCitizenUnitId = nextUnit;
+                    curCitizenUnitId = currentCitizenUnit.m_nextUnit;
 
                     if (++numIter > maxUnitCount) {
                         CODebugBase<LogChannel>.Error(
