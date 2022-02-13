@@ -300,11 +300,11 @@
     <Compile Include="State\Keybinds\KeybindUI.cs" />
     <Compile Include="State\OptionsTabs\GameplayTab.cs" />
     <Compile Include="State\OptionsTabs\OptionsGeneralTab.cs" />
-    <Compile Include="State\OptionsTabs\OptionsKeybindsTab.cs" />
+    <Compile Include="State\OptionsTabs\KeybindsTab.cs" />
     <Compile Include="State\OptionsTabs\OptionsMaintenanceTab.cs" />
     <Compile Include="State\OptionsTabs\OptionsMassEditTab.cs" />
     <Compile Include="State\OptionsTabs\OptionsOverlaysTab.cs" />
-    <Compile Include="State\OptionsTabs\OptionsVehicleRestrictionsTab.cs" />
+    <Compile Include="State\OptionsTabs\PoliciesTab.cs" />
     <Compile Include="TrafficLight\Impl\CustomSegmentLights.cs" />
     <Compile Include="Manager\Impl\LaneConnectionManager.cs" />
     <Compile Include="Manager\Impl\ExtVehicleManager.cs" />

@@ -661,7 +661,7 @@ namespace TrafficManager.Manager.Impl {
                 return true;
             }
 
-            if (OptionsVehicleRestrictionsTab.NoDoubleCrossings &&
+            if (PoliciesTab.NoDoubleCrossings &&
                 node.m_flags.IsFlagSet(NetNode.Flags.Junction) &&
                 !node.m_flags.IsFlagSet(NetNode.Flags.Untouchable) &&
                 node.CountSegments() == 2) {
