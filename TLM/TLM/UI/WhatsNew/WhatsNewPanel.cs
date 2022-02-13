@@ -90,7 +90,7 @@ namespace TrafficManager.UI.WhatsNew {
                                                   panelPadding: new RectOffset(5, 0, 0, 6),
                                                   panelWidth: _defaultWidth - 5,
                                                   vertical: true);
-            panel.minimumSize = new Vector4(_defaultWidth - 10, true ? 46 : 36);
+            panel.minimumSize = new Vector4(_defaultWidth - 10, 36);
             panel.name = "Changelog Content";
             AddVersionRow(panel, changelog);
 
