@@ -1,9 +1,9 @@
 namespace TrafficManager.UI.SubTools.LaneArrows {
-    using ColossalFramework;
     using ColossalFramework.UI;
     using CSUtil.Commons;
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.Manager.Impl;
+    using TrafficManager.Util.Extensions;
 
     /// <summary>
     /// Button in Lane Arrows editor, containing a direction arrow.
@@ -44,8 +44,8 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                 Log.Error("LaneArrowButton: LaneId is 0, too bad");
                 return false;
             }
-            NetLane[] lanesBuffer = Singleton<NetManager>.instance.m_lanes.m_buffer;
-            NetLane.Flags flags = (NetLane.Flags)lanesBuffer[LaneId].m_flags;
+
+            NetLane.Flags flags = (NetLane.Flags)LaneId.ToLane().m_flags;
             return (flags & NetlaneFlagsMask) == NetlaneFlagsMask;
         }
 

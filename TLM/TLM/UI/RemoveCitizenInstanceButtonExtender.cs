@@ -5,6 +5,7 @@ namespace TrafficManager.UI {
     using System.Collections.Generic;
     using TrafficManager.U;
     using TrafficManager.Util;
+    using TrafficManager.Util.Extensions;
     using UnityEngine;
 
     public class RemoveCitizenInstanceButtonExtender : MonoBehaviour {
@@ -78,7 +79,7 @@ namespace TrafficManager.UI {
                 Log._Debug($"Current citizen: {instance.Citizen}");
 
                 if (instance.Citizen != 0) {
-                    ushort citizenInstanceId = Singleton<CitizenManager>.instance.m_citizens.m_buffer[instance.Citizen].m_instance;
+                    ushort citizenInstanceId = instance.Citizen.ToCitizen().m_instance;
 
                     Log._Debug(
                         $"Current citizen: {instance.Citizen} Instance: {citizenInstanceId}");

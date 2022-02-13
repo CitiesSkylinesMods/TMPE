@@ -93,11 +93,10 @@ namespace TrafficManager.UI.SubTools {
 
             ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
             foreach (LaneIdAndIndex laneIdAndIndex in extSegmentManager.GetSegmentLaneIdsAndLaneIndexes(renderInfo_.SegmentId)) {
-                NetLane netLane = NetManager.instance.m_lanes.m_buffer[laneIdAndIndex.laneId];
                 NetInfo.Lane laneInfo = netInfo.m_lanes[laneIdAndIndex.laneIndex];
                 bool isParking = laneInfo.m_laneType.IsFlagSet(NetInfo.LaneType.Parking);
                 if (isParking && laneInfo.m_finalDirection == renderInfo_.FinalDirection) {
-                    bezier = netLane.m_bezier;
+                    bezier = laneIdAndIndex.laneId.ToLane().m_bezier;
                     laneMarker_ = new SegmentLaneMarker(bezier);
                     laneMarker_.RenderOverlay(cameraInfo, color, enlarge: pressed);
                 }
@@ -105,7 +104,6 @@ namespace TrafficManager.UI.SubTools {
         }
 
         private void RenderRoadParkings(RenderManager.CameraInfo cameraInfo) {
-            NetLane[] laneBuffer = NetManager.instance.m_lanes.m_buffer;
             bool LaneVisitor(SegmentLaneVisitData data) {
                 ushort segmentId = data.SegVisitData.CurSeg.segmentId;
                 int laneIndex = data.CurLanePos.laneIndex;
@@ -130,7 +128,7 @@ namespace TrafficManager.UI.SubTools {
                     bool pressed = Input.GetMouseButton(0);
                     Color color = MainTool.GetToolColor(pressed, false);
                     uint otherLaneId = data.CurLanePos.laneId;
-                    var laneMarker = new SegmentLaneMarker(laneBuffer[otherLaneId].m_bezier);
+                    var laneMarker = new SegmentLaneMarker(otherLaneId.ToLane().m_bezier);
                     laneMarker.RenderOverlay(cameraInfo, color, enlarge: pressed);
                 }
 
