@@ -13,6 +13,7 @@ namespace TrafficManager.Patch._CitizenAI._HumanAI {
     using State.ConfigData;
     using UnityEngine;
     using Util;
+    using Util.Extensions;
 
     [UsedImplicitly]
     [HarmonyPatch]
@@ -312,9 +313,7 @@ namespace TrafficManager.Patch._CitizenAI._HumanAI {
                 // check if the citizen has reached a parked car or target
                 case ExtPathMode.WalkingToParkedCar:
                 case ExtPathMode.ApproachingParkedCar: {
-                    Citizen[] citizensBuffer =
-                        Singleton<CitizenManager>.instance.m_citizens.m_buffer;
-                    ushort parkedVehicleId = citizensBuffer[data.m_citizen].m_parkedVehicle;
+                    ushort parkedVehicleId = data.m_citizen.ToCitizen().m_parkedVehicle;
 
                     if (parkedVehicleId == 0) {
                         // citizen is reaching their parked car but does not own a parked car

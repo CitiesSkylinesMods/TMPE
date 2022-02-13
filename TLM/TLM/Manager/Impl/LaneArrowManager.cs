@@ -188,8 +188,7 @@ namespace TrafficManager.Manager.Impl {
         }
 
         private static void RecalculateFlags(uint laneId) {
-            NetLane[] laneBuffer = NetManager.instance.m_lanes.m_buffer;
-            ushort segmentId = laneBuffer[laneId].m_segment;
+            ushort segmentId = laneId.ToLane().m_segment;
             ref NetSegment segment = ref segmentId.ToSegment();
             NetAI ai = segment.Info.m_netAI;
 #if DEBUGFLAGS
@@ -269,9 +268,7 @@ namespace TrafficManager.Manager.Impl {
 
                     uint laneArrowFlags = flags & Flags.lfr;
 #if DEBUGLOAD
-                    uint origFlags =
-                        (Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags &
-                         Flags.lfr);
+                    uint origFlags = (laneId.ToLane().m_flags & Flags.lfr);
 
                     Log._Debug("Setting flags for lane " + laneId + " to " + flags + " (" +
                         ((Flags.LaneArrows)(laneArrowFlags)).ToString() + ")");
