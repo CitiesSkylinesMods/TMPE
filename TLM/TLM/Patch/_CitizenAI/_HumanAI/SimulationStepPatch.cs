@@ -77,7 +77,6 @@ namespace TrafficManager.Patch._CitizenAI._HumanAI {
                 return false;
             }
 
-            Citizen[] citizensBuffer = citizenManager.m_citizens.m_buffer;
             if ((data.m_flags & CitizenInstance.Flags.WaitingPath) != CitizenInstance.Flags.None) {
                 PathManager pathManager = Singleton<PathManager>.instance;
                 byte pathFindFlags = pathManager.m_pathUnits.m_buffer[data.m_path].m_pathFindFlags;
@@ -108,8 +107,7 @@ namespace TrafficManager.Patch._CitizenAI._HumanAI {
                         ref ExtCitizenManager
                             .Instance.ExtCitizens[
                                 citizenId],
-                        ref citizensBuffer[
-                            data.m_citizen],
+                        ref data.m_citizen.ToCitizen(),
                         mainPathState);
                     if (logParkingAi) {
                         Log._Debug(

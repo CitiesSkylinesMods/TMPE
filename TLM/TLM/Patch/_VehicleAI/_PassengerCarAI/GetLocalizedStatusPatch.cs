@@ -39,8 +39,7 @@ namespace TrafficManager.Patch._VehicleAI._PassengerCarAI {
             if (driverInstanceId != 0) {
                 if ((data.m_flags & Vehicle.Flags.Parking) != 0) {
                     uint citizen = citizenManager.m_instances.m_buffer[driverInstanceId].m_citizen;
-                    if (citizen != 0u
-                        && citizenManager.m_citizens.m_buffer[citizen].m_parkedVehicle != 0) {
+                    if (citizen != 0u && citizen.ToCitizen().m_parkedVehicle != 0) {
                         target = InstanceID.Empty;
                         __result = Locale.Get("VEHICLE_STATUS_PARKING");
                         return false;

@@ -417,10 +417,7 @@ namespace TrafficManager.Manager.Impl {
                             uint curCitizenId = currentCitizenUnit.GetCitizen(i);
 
                             if (curCitizenId != 0u) {
-                                ushort citizenInstanceId = citizenManager
-                                                           .m_citizens.m_buffer[curCitizenId]
-                                                           .m_instance;
-
+                                ushort citizenInstanceId = curCitizenId.ToCitizen().m_instance;
                                 if (citizenInstanceId == 0) {
                                     continue;
                                 }
@@ -493,8 +490,7 @@ namespace TrafficManager.Manager.Impl {
                             continue;
                         }
 
-                        ushort citizenInstanceId = citizenManager.m_citizens.m_buffer[citId].m_instance;
-
+                        ushort citizenInstanceId = citId.ToCitizen().m_instance;
                         if (citizenInstanceId == 0) {
                             continue;
                         }
