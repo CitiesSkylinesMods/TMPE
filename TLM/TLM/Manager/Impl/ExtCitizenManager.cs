@@ -1,11 +1,11 @@
 namespace TrafficManager.Manager.Impl {
-    using ColossalFramework;
     using CSUtil.Commons;
     using System.Collections.Generic;
     using System;
     using TrafficManager.API.Manager;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.API.Traffic.Enums;
+    using TrafficManager.Util.Extensions;
 
 #if DEBUG
     using State.ConfigData;
@@ -36,9 +36,10 @@ namespace TrafficManager.Manager.Impl {
             base.InternalPrintDebugInfo();
             Log._Debug($"Extended citizen data:");
 
-            Citizen[] citizenBuffer = Singleton<CitizenManager>.instance.m_citizens.m_buffer;
-            for (var i = 0; i < ExtCitizens.Length; ++i) {
-                if ((citizenBuffer[(uint)i].m_flags & Citizen.Flags.Created) == 0) {
+            for (uint i = 0; i < ExtCitizens.Length; ++i)
+            {
+                ref Citizen citizen = ref (i).ToCitizen();
+                if ((citizen.m_flags & Citizen.Flags.Created) == 0) {
                     continue;
                 }
 
@@ -77,7 +78,7 @@ namespace TrafficManager.Manager.Impl {
 
             ushort targetBuildingId = instanceData.m_targetBuilding;
 
-            Singleton<CitizenManager>.instance.m_citizens.m_buffer[citizenId].SetLocationByBuilding(citizenId, targetBuildingId);
+            citizenId.ToCitizen().SetLocationByBuilding(citizenId, targetBuildingId);
 
             if (citizenData.CurrentLocation != Citizen.Location.Moving) {
                 ExtCitizens[citizenId].lastLocation = citizenData.CurrentLocation;
@@ -100,7 +101,7 @@ namespace TrafficManager.Manager.Impl {
         }
 
         private void ResetLastLocation(ref ExtCitizen extCitizen) {
-            extCitizen.lastLocation = Singleton<CitizenManager>.instance.m_citizens.m_buffer[extCitizen.citizenId].CurrentLocation;
+            extCitizen.lastLocation = extCitizen.citizenId.ToCitizen().CurrentLocation;
         }
 
         // stock code
@@ -164,8 +165,7 @@ namespace TrafficManager.Manager.Impl {
             List<Configuration.ExtCitizenData> ret = new List<Configuration.ExtCitizenData>();
             for (uint citizenId = 0; citizenId < CitizenManager.MAX_CITIZEN_COUNT; ++citizenId) {
                 try {
-                    if ((Singleton<CitizenManager>.instance.m_citizens.m_buffer[citizenId].m_flags &
-                         Citizen.Flags.Created) == Citizen.Flags.None) {
+                    if ((citizenId.ToCitizen().m_flags & Citizen.Flags.Created) == Citizen.Flags.None) {
                         continue;
                     }
 

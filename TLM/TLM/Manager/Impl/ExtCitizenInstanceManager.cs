@@ -91,7 +91,7 @@ namespace TrafficManager.Manager.Impl {
             bool targetIsNode = (data.m_flags & CitizenInstance.Flags.TargetIsNode) != 0;
 
             if (citizenId != 0u) {
-                Citizen citizen = Singleton<CitizenManager>.instance.m_citizens.m_buffer[citizenId];
+                ref Citizen citizen = ref citizenId.ToCitizen();
                 vehicleId = citizen.m_vehicle;
             }
 
@@ -196,7 +196,6 @@ namespace TrafficManager.Manager.Impl {
             }
 
             uint citizenId = data.m_citizen;
-            Citizen citizen;
             var isStudent = false;
             ushort homeId = 0;
             ushort workId = 0;
@@ -206,7 +205,7 @@ namespace TrafficManager.Manager.Impl {
             bool targetIsNode = (data.m_flags & CitizenInstance.Flags.TargetIsNode) != 0;
 
             if (citizenId != 0u) {
-                citizen = Singleton<CitizenManager>.instance.m_citizens.m_buffer[citizenId];
+                ref Citizen citizen = ref citizenId.ToCitizen();
                 homeId = citizen.m_homeBuilding;
                 workId = citizen.m_workBuilding;
                 vehicleId = citizen.m_vehicle;
@@ -425,9 +424,9 @@ namespace TrafficManager.Manager.Impl {
             }
 
             // NON-STOCK CODE START
-            Citizen[] citizensBuffer = Singleton<CitizenManager>.instance.m_citizens.m_buffer;
-            ushort parkedVehicleId = citizensBuffer[instanceData.m_citizen].m_parkedVehicle;
-            ushort homeId = citizensBuffer[instanceData.m_citizen].m_homeBuilding;
+            ref Citizen citizen = ref instanceData.m_citizen.ToCitizen();
+            ushort parkedVehicleId = citizen.m_parkedVehicle;
+            ushort homeId = citizen.m_homeBuilding;
             CarUsagePolicy carUsageMode = CarUsagePolicy.Allowed;
             var startsAtOutsideConnection = false;
             ParkingAI parkingAiConf = GlobalConfig.Instance.ParkingAI;
@@ -982,8 +981,7 @@ namespace TrafficManager.Manager.Impl {
 
                         uint citizenId = instanceData.m_citizen;
                         if (citizenId != 0u &&
-                            (citizensBuffer[citizenId].m_flags & Citizen.Flags.Evacuating) !=
-                            Citizen.Flags.None) {
+                            (citizenId.ToCitizen().m_flags & Citizen.Flags.Evacuating) != Citizen.Flags.None) {
                             laneTypes |= NetInfo.LaneType.EvacuationTransport;
                         }
                     } else if (Options.parkingAI) { // TODO check for incoming connection

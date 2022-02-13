@@ -4,6 +4,7 @@ namespace TrafficManager.Patch._VehicleAI._PassengerCarAI {
     using JetBrains.Annotations;
     using Manager.Impl;
     using State;
+    using Util.Extensions;
 
     [UsedImplicitly]
     [HarmonyPatch(typeof(PassengerCarAI), "UpdateParkedVehicle")]
@@ -14,11 +15,11 @@ namespace TrafficManager.Patch._VehicleAI._PassengerCarAI {
             uint ownerCitizenId = parkedData.m_ownerCitizen;
             ushort homeId = 0;
 
+            // NON-STOCK CODE START
             if (ownerCitizenId != 0u) {
-                homeId = Singleton<CitizenManager>.instance.m_citizens.m_buffer[ownerCitizenId].m_homeBuilding;
+                homeId = ownerCitizenId.ToCitizen().m_homeBuilding;
             }
 
-            // NON-STOCK CODE START
             if (!AdvancedParkingManager.Instance.TryMoveParkedVehicle(
                     parkedID,
                     ref parkedData,

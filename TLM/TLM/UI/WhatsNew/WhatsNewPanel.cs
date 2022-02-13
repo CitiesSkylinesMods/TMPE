@@ -1,4 +1,5 @@
 namespace TrafficManager.UI.WhatsNew {
+    using System;
     using System.Collections.Generic;
     using ColossalFramework;
     using ColossalFramework.UI;
@@ -11,6 +12,7 @@ namespace TrafficManager.UI.WhatsNew {
         private UIPanel _footerPanel;
         private const int _defaultWidth = 750;
         private const int _defaultHeight = 500;
+        private const int _footerPanelHeight = 40;
 
         private readonly RectOffset _paddingZero = new RectOffset(0, 0, 0, 0);
         private readonly RectOffset _pillTextPadding = new RectOffset(4, 4, 5, 0);
@@ -22,7 +24,7 @@ namespace TrafficManager.UI.WhatsNew {
         private readonly Color _linkTextColor = new Color(0f, 0.52f, 1f);
 
         // Used in AddKeywordLabel()
-        private readonly Vector2 _minKeywordLabelSize = new(85, 20);
+        private readonly Vector2 _minKeywordLabelSize = new(90, 20);
 
         public override void Awake() {
             base.Awake();
@@ -36,8 +38,8 @@ namespace TrafficManager.UI.WhatsNew {
             color = _panelBgColor;
 
             AddHeader();
-            AddFooter();
             AddContent();
+            AddFooter();
         }
 
         private void AddFooter() {
@@ -58,7 +60,7 @@ namespace TrafficManager.UI.WhatsNew {
             panel.autoLayout = false;
             panel.maximumSize = GetMaxContentSize();
             panel.relativePosition = new Vector2(5, 40);
-            panel.size = new Vector2(_defaultWidth - 10, _defaultHeight - _header.height - _footerPanel.height);
+            panel.size = new Vector2(_defaultWidth - 10, _defaultHeight - _header.height - _footerPanelHeight);
 
             var content = panel.AddUIComponent<UIScrollablePanel>();
             content.autoLayout = false;
@@ -67,7 +69,7 @@ namespace TrafficManager.UI.WhatsNew {
             content.clipChildren = true;
             content.autoLayoutPadding = new RectOffset(0, 0, 10, 5);
             content.autoReset = true;
-            content.size = new Vector2(_defaultWidth - 20, _defaultHeight - _header.height - _footerPanel.height);
+            content.size = new Vector2(_defaultWidth - 20, _defaultHeight - _header.height - _footerPanelHeight);
             AddScrollbar(panel, content);
 
             var stableRelease = Util.VersionUtil.IsStableRelease;
@@ -79,8 +81,8 @@ namespace TrafficManager.UI.WhatsNew {
                 }
             }
 
-            panel.autoLayout = true;
             content.autoLayout = true;
+            panel.autoLayout = true;
         }
 
         private void AddChangelogContent(Changelog changelog, UIScrollablePanel uiScrollablePanel) {
@@ -88,6 +90,8 @@ namespace TrafficManager.UI.WhatsNew {
                                                   panelPadding: new RectOffset(5, 0, 0, 6),
                                                   panelWidth: _defaultWidth - 5,
                                                   vertical: true);
+            panel.minimumSize = new Vector4(_defaultWidth - 10, 36);
+            panel.name = "Changelog Content";
             AddVersionRow(panel, changelog);
 
             foreach (Changelog.Item item in changelog.Items) {
@@ -111,13 +115,13 @@ namespace TrafficManager.UI.WhatsNew {
             bool wasReleased = !string.IsNullOrEmpty(buildString);
 
             // row: [version number] released xyz
-            UIPanel versionRow = AddRowAutoLayoutPanel(parentPanel: parentPanel,
-                                                       panelPadding: _paddingZero,
-                                                       panelWidth: _defaultWidth - 10);
-            versionRow.maximumSize = new Vector2(_defaultWidth - 10, wasReleased? 46 : 36);
+            UIPanel versionRow = parentPanel.AddUIComponent<UIPanel>();
+            versionRow.name = "Version Row";
+            versionRow.autoSize = false;
+            versionRow.width = _defaultWidth - 10;
+            versionRow.height = wasReleased? 46 : 36;
 
             // part: [version number]
-            // UILabel versionLabel = AddKeywordLabel(versionRow, versionStr, MarkupKeyword.VersionStart);
             UIPanel versionLabel = AddVersionLabel(versionRow, changelog, buildString, wasReleased);
             versionLabel.name = "Version";
             // part released xyz
@@ -127,14 +131,13 @@ namespace TrafficManager.UI.WhatsNew {
             title.suffix = isCurrentVersion ? " - current version" : string.Empty;
             title.textScale = 1.3f;
             title.textColor = _textColor;
-            title.minimumSize = new Vector2(0, 36);
+            title.minimumSize = new Vector2(200, 36);
             title.padding = new RectOffset(16, 0, 0, 0);
             title.verticalAlignment = UIVerticalAlignment.Middle;
+            title.relativePosition = new Vector3(versionLabel.width, 0, 0);
             if (!string.IsNullOrEmpty(changelog.Link)) {
                 SetupLink(title, changelog);
             }
-
-            versionRow.autoLayout = true;
         }
 
         private string StableOrTest(Changelog changelog) =>
@@ -204,6 +207,7 @@ namespace TrafficManager.UI.WhatsNew {
             panel.minimumSize = new Vector2(75, wasReleased ? 46 : 32);
             panel.padding = new RectOffset(0, 0, 6, 0);
             panel.height = wasReleased ? 45 : 36;
+            panel.relativePosition = Vector3.zero;
 
             UILabel version = panel.AddUIComponent<UILabel>();
             version.name = "ChangelogVersionNumber";
@@ -275,7 +279,7 @@ namespace TrafficManager.UI.WhatsNew {
             scrollbar.incrementAmount = 25;
             scrollbar.autoHide = true;
             scrollbar.width = 4;
-            scrollbar.height = _defaultHeight - _header.height - _footerPanel.height;
+            scrollbar.height = _defaultHeight - _header.height - _footerPanelHeight;
             scrollbar.scrollEasingType = EasingType.BackEaseOut;
 
             var trackSprite = scrollbar.AddUIComponent<UISlicedSprite>();

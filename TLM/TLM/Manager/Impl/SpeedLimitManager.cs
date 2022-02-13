@@ -157,7 +157,7 @@ namespace TrafficManager.Manager.Impl {
                 ++validLanes;
 
                 nextIter:
-                curLaneId = Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_nextLane;
+                curLaneId = curLaneId.ToLane().m_nextLane;
                 laneIndex++;
             }
 
@@ -182,8 +182,8 @@ namespace TrafficManager.Manager.Impl {
             //----------------------------
             // check default speed limit
             //----------------------------
-            NetLane[] laneBuffer = Singleton<NetManager>.instance.m_lanes.m_buffer;
-            ushort segmentId = laneBuffer[laneId].m_segment;
+            ref NetLane netLane = ref laneId.ToLane();
+            ushort segmentId = netLane.m_segment;
             ref NetSegment netSegment = ref segmentId.ToSegment();
 
             if (!netSegment.MayHaveCustomSpeedLimits()) {
@@ -216,7 +216,7 @@ namespace TrafficManager.Manager.Impl {
                 }
 
                 laneIndex++;
-                curLaneId = laneBuffer[curLaneId].m_nextLane;
+                curLaneId = curLaneId.ToLane().m_nextLane;
             }
 
             Log.Warning($"Speed limit for lane {laneId} could not be determined.");
@@ -716,7 +716,7 @@ namespace TrafficManager.Manager.Impl {
                 return;
             }
 
-            ushort segmentId = Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_segment;
+            ushort segmentId = laneId.ToLane().m_segment;
             ref NetSegment netSegment = ref segmentId.ToSegment();
             NetInfo segmentInfo = netSegment.Info;
             uint curLaneId = netSegment.m_lanes;
@@ -729,7 +729,7 @@ namespace TrafficManager.Manager.Impl {
                 }
 
                 laneIndex++;
-                curLaneId = Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_nextLane;
+                curLaneId = curLaneId.ToLane().m_nextLane;
             }
         }
 
@@ -753,9 +753,7 @@ namespace TrafficManager.Manager.Impl {
                 return;
             }
 
-            NetLane[] lanesBuffer = Singleton<NetManager>.instance.m_lanes.m_buffer;
-
-            if (((NetLane.Flags)lanesBuffer[laneId].m_flags &
+            if (((NetLane.Flags)laneId.ToLane().m_flags &
                  (NetLane.Flags.Created | NetLane.Flags.Deleted)) != NetLane.Flags.Created) {
                 return;
             }

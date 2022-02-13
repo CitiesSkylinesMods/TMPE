@@ -327,8 +327,6 @@ namespace TrafficManager.Manager.Impl {
                                                ushort nodeId,
                                                out bool incoming,
                                                out bool outgoing) {
-            NetManager instance = Singleton<NetManager>.instance;
-
             ref NetSegment netSegment = ref segmentId.ToSegment();
             NetInfo info = netSegment.Info;
 
@@ -375,7 +373,7 @@ namespace TrafficManager.Manager.Impl {
                     }
                 }
 
-                laneId = instance.m_lanes.m_buffer[laneId].m_nextLane;
+                laneId = laneId.ToLane().m_nextLane;
                 laneIndex++;
             }
 

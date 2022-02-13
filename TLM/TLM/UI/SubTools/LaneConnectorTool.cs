@@ -1180,7 +1180,7 @@ namespace TrafficManager.UI.SubTools {
                         }
                     }
 
-                    laneId = NetManager.instance.m_lanes.m_buffer[laneId].m_nextLane;
+                    laneId = laneId.ToLane().m_nextLane;
                 }
             }
 
@@ -1390,11 +1390,11 @@ namespace TrafficManager.UI.SubTools {
             bezier3.d = targetLaneEnd.NodeMarker.Position;
 
             Vector3 sourceLaneDirection =
-                (NetManager.instance.m_lanes.m_buffer[sourceLaneEnd.LaneId].m_bezier
+                (sourceLaneEnd.LaneId.ToLane().m_bezier
                            .Tangent(sourceLaneEnd.StartNode ? 0f : 1f) *
                  (sourceLaneEnd.StartNode ? -1 : 1)).normalized;
             Vector3 targetLaneDirection =
-                (NetManager.instance.m_lanes.m_buffer[targetLaneEnd.LaneId].m_bezier
+                (targetLaneEnd.LaneId.ToLane().m_bezier
                            .Tangent(targetLaneEnd.StartNode ? 0f : 1f) *
                  (targetLaneEnd.StartNode ? -1 : 1)).normalized;
             NetSegment.CalculateMiddlePoints(
