@@ -44,7 +44,6 @@ namespace TrafficManager.Patch._VehicleAI._TramBaseAI {
                                   out Vector3 pos,
                                   out Vector3 dir,
                                   out float maxSpeed) {
-            NetManager netManager = Singleton<NetManager>.instance;
             ushort prevSourceNodeId;
             ushort prevTargetNodeId;
             ref NetSegment currentPositionSegment = ref position.m_segment.ToSegment();
@@ -64,11 +63,11 @@ namespace TrafficManager.Patch._VehicleAI._TramBaseAI {
             Vehicle.Frame lastFrameData = vehicleData.GetLastFrameData();
             float sqrVelocity = lastFrameData.m_velocity.sqrMagnitude;
 
-            netManager.m_lanes.m_buffer[laneID].CalculatePositionAndDirection(
+            laneID.ToLane().CalculatePositionAndDirection(
                 Constants.ByteToFloat(offset),
                 out pos,
                 out dir);
-            Vector3 b = netManager.m_lanes.m_buffer[prevLaneID].CalculatePosition(
+            Vector3 b = prevLaneID.ToLane().CalculatePosition(
                 Constants.ByteToFloat(prevOffset));
             Vector3 a = lastFrameData.m_position;
             Vector3 a2 = lastFrameData.m_position;

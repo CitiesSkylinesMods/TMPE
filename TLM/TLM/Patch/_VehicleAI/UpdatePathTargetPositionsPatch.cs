@@ -183,12 +183,8 @@ namespace TrafficManager.Patch._VehicleAI {
                                     pathOffsetDelta = 4;
                                 } else {
                                     pathOffsetDelta = 4 + Mathf.Max(
-                                                          0,
-                                                          Mathf.CeilToInt(
-                                                              distDiff * 256f /
-                                                              (netManager
-                                                               .m_lanes.m_buffer[curLaneId]
-                                                               .m_length + 1f)));
+                                        0,
+                                        Mathf.CeilToInt(distDiff * 256f / (curLaneId.ToLane().m_length + 1f)));
                                 }
 
                                 Log._DebugIf(
