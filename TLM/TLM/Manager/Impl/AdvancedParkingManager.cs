@@ -1597,12 +1597,12 @@ namespace TrafficManager.Manager.Impl {
             // relocate parked car if abandoned
             if (extInstance.pathMode == ExtPathMode.CalculatingWalkingPathToParkedCar) {
                 // parked car is unreachable
-                Citizen[] citizensBuffer = Singleton<CitizenManager>.instance.m_citizens.m_buffer;
-                ushort parkedVehicleId = citizensBuffer[instanceData.m_citizen].m_parkedVehicle;
+                ref Citizen citizen = ref instanceData.m_citizen.ToCitizen();
+                ushort parkedVehicleId = citizen.m_parkedVehicle;
 
                 if (parkedVehicleId != 0) {
                     // parked car is present
-                    ushort homeId = citizensBuffer[extCitizen.citizenId].m_homeBuilding;
+                    ushort homeId = citizen.m_homeBuilding;
 
                     // calculate distance between citizen and parked car
                     var movedCar = false;
@@ -1879,8 +1879,7 @@ namespace TrafficManager.Manager.Impl {
                 uint citizenId = extCitInstMan.GetCitizenId(extDriverInstance.instanceId);
 
                 if (citizenId == 0 ||
-                    (Singleton<CitizenManager>.instance.m_citizens.m_buffer[citizenId].m_flags &
-                     Citizen.Flags.Tourist) != Citizen.Flags.None) {
+                    (citizenId.ToCitizen().m_flags & Citizen.Flags.Tourist) != Citizen.Flags.None) {
                     return false;
                 }
             }
@@ -2103,8 +2102,7 @@ namespace TrafficManager.Manager.Impl {
                     parkRot,
                     citizenId))
                 {
-                    Singleton<CitizenManager>.instance.m_citizens.m_buffer[citizenId]
-                        .SetParkedVehicle(citizenId, parkedVehicleId);
+                    citizenId.ToCitizen().SetParkedVehicle(citizenId, parkedVehicleId);
 
                     Singleton<VehicleManager>.instance.m_parkedVehicles.m_buffer[parkedVehicleId].m_flags
                         &= (ushort)(VehicleParked.Flags.All & ~VehicleParked.Flags.Parking);
@@ -2173,8 +2171,7 @@ namespace TrafficManager.Manager.Impl {
                     parkRot,
                     citizenId))
                 {
-                    Singleton<CitizenManager>.instance.m_citizens.m_buffer[citizenId]
-                        .SetParkedVehicle(citizenId, parkedVehicleId);
+                    citizenId.ToCitizen().SetParkedVehicle(citizenId, parkedVehicleId);
 
                     Singleton<VehicleManager>.instance.m_parkedVehicles.m_buffer[parkedVehicleId].m_flags
                         &= (ushort)(VehicleParked.Flags.All & ~VehicleParked.Flags.Parking);

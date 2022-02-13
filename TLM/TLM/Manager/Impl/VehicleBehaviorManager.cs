@@ -629,7 +629,6 @@ namespace TrafficManager.Manager.Impl {
             bool foundStartingPos = false;
             bool skipQueue = (vehicleData.m_flags & Vehicle.Flags.Spawned) != 0;
             ExtPathType extPathType = ExtPathType.None;
-            Citizen[] citizensBuffer = Singleton<CitizenManager>.instance.m_citizens.m_buffer;
             ref Building targetBuilding = ref targetBuildingId.ToBuilding();
 
             if (Options.parkingAI) {
@@ -761,7 +760,7 @@ namespace TrafficManager.Manager.Impl {
                         }
                     }
 
-                    ushort homeId = citizensBuffer[driverCitizenId].m_homeBuilding;
+                    ushort homeId = driverCitizenId.ToCitizen().m_homeBuilding;
                     Vector3 returnPos =
                         searchAtCurrentPos ? (Vector3)vehicleData.m_targetPos3 : endPos;
 
@@ -854,8 +853,7 @@ namespace TrafficManager.Manager.Impl {
 
                     uint citizenId = driverInstance.m_citizen;
                     if (citizenId != 0u
-                        && (citizensBuffer[citizenId].m_flags & Citizen.Flags.Evacuating)
-                        != Citizen.Flags.None)
+                        && (citizenId.ToCitizen().m_flags & Citizen.Flags.Evacuating) != Citizen.Flags.None)
                     {
                         laneTypes |= NetInfo.LaneType.EvacuationTransport;
                     }

@@ -1,8 +1,8 @@
 ﻿namespace TrafficManager.Patch._CitizenAI._HumanAI {
-    using ColossalFramework;
     using HarmonyLib;
     using JetBrains.Annotations;
     using TrafficManager.State;
+    using TrafficManager.Util.Extensions;
 
     [HarmonyPatch(typeof(HumanAI), "ArriveAtDestination")]
     public class ArriveAtDestinationPatch {
@@ -24,7 +24,7 @@
             {
                 Constants.ManagerFactory.ExtCitizenManager.OnArriveAtDestination(
                     citizenData.m_citizen,
-                    ref Singleton<CitizenManager>.instance.m_citizens.m_buffer[citizenData.m_citizen],
+                    ref citizenData.m_citizen.ToCitizen(),
                     ref citizenData);
             }
         }
