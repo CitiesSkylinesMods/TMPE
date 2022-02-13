@@ -130,7 +130,7 @@ namespace TrafficManager.Manager.Impl {
                       $"position for citizen instance {instanceId}: seg. {vehLanePathPos.m_segment}, " +
                       $"lane {vehLanePathPos.m_lane}, off {vehLanePathPos.m_offset} (lane id {vehLaneId})");
 
-            netManager.m_lanes.m_buffer[vehLaneId].GetClosestPosition(
+            vehLaneId.ToLane().GetClosestPosition(
                 parkedVehPos,
                 out Vector3 vehLanePos,
                 out float vehLaneOff);
