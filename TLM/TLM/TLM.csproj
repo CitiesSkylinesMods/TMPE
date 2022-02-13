@@ -298,7 +298,7 @@
     <Compile Include="State\Keybinds\KeybindSettingsBase.cs" />
     <Compile Include="State\Keybinds\KeybindSettingsPage.cs" />
     <Compile Include="State\Keybinds\KeybindUI.cs" />
-    <Compile Include="State\OptionsTabs\OptionsGameplayTab.cs" />
+    <Compile Include="State\OptionsTabs\GameplayTab.cs" />
     <Compile Include="State\OptionsTabs\OptionsGeneralTab.cs" />
     <Compile Include="State\OptionsTabs\KeybindsTab.cs" />
     <Compile Include="State\OptionsTabs\OptionsMaintenanceTab.cs" />

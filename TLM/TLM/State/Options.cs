@@ -159,7 +159,7 @@ namespace TrafficManager.State {
             try {
                 ExtUITabstrip tabStrip = ExtUITabstrip.Create(helper);
                 OptionsGeneralTab.MakeSettings_General(tabStrip);
-                OptionsGameplayTab.MakeSettings_Gameplay(tabStrip);
+                GameplayTab.MakeSettings_Gameplay(tabStrip);
                 PoliciesTab.MakeSettings_VehicleRestrictions(tabStrip);
                 OptionsOverlaysTab.MakeSettings_Overlays(tabStrip);
                 OptionsMaintenanceTab.MakeSettings_Maintenance(tabStrip);
