@@ -9,7 +9,7 @@ namespace TrafficManager.State {
 
     /// <summary>DEBUG-only group for testing checkbox options.</summary>
     [SuppressMessage("StyleCop.CSharp.LayoutRules", "SA1516:Elements should be separated by blank line", Justification = "Brevity.")]
-    public static class OptionsGeneralTab_DebugCheckbox {
+    public static class GeneralTab_DebugGroup {
         public static CheckboxOption DebugCheckboxA =
             new ("DebugCheckboxA", Options.PersistTo.None) {
                 Label = "Checkbox A: requires Checkbox B",
@@ -19,7 +19,7 @@ namespace TrafficManager.State {
                 Label = "Checkbox B: is required by Checkbox A",
             };
 
-        static OptionsGeneralTab_DebugCheckbox() {
+        static GeneralTab_DebugGroup() {
             try {
                 DebugCheckboxA.PropagatesTrueTo = new () {
                     { DebugCheckboxB },
@@ -30,7 +30,7 @@ namespace TrafficManager.State {
             }
         }
 
-        public static void AddUI(UIHelperBase tab) {
+        internal static void AddUI(UIHelperBase tab) {
             if (TMPELifecycle.InGameOrEditor()) return;
 
             var group = tab.AddGroup("Debug CheckboxOption");

@@ -9,7 +9,7 @@
 
             public override void HandleClick(UIMouseEventParameter p) {
                 bool mph = !GlobalConfig.Instance.Main.DisplaySpeedLimitsMph;
-                OptionsGeneralTab.SetDisplayInMph(mph);
+                GeneralTab.SetDisplayInMph(mph);
             }
 
             /// <summary>Always clickable.</summary>
