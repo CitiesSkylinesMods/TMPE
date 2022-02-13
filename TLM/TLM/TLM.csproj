@@ -147,7 +147,7 @@
     <Compile Include="Manager\Impl\ExtSegmentEndManager.cs" />
     <Compile Include="Manager\Impl\ExtSegmentManager.cs" />
     <Compile Include="Manager\Impl\GeometryNotifier.cs" />
-    <Compile Include="State\OptionsTabs\OptionsGeneralTab_DebugCheckbox.cs" />
+    <Compile Include="State\OptionsTabs\GeneralTab_DebugGroup.cs" />
     <Compile Include="State\OptionsTabs\OptionsMaintenanceTab_DespawnGroup.cs" />
     <Compile Include="State\VersionInfo.cs" />
     <Compile Include="UI\WhatsNew\MarkupKeyword.cs" />
@@ -298,13 +298,13 @@
     <Compile Include="State\Keybinds\KeybindSettingsBase.cs" />
     <Compile Include="State\Keybinds\KeybindSettingsPage.cs" />
     <Compile Include="State\Keybinds\KeybindUI.cs" />
-    <Compile Include="State\OptionsTabs\OptionsGameplayTab.cs" />
-    <Compile Include="State\OptionsTabs\OptionsGeneralTab.cs" />
-    <Compile Include="State\OptionsTabs\OptionsKeybindsTab.cs" />
+    <Compile Include="State\OptionsTabs\GameplayTab.cs" />
+    <Compile Include="State\OptionsTabs\GeneralTab.cs" />
+    <Compile Include="State\OptionsTabs\KeybindsTab.cs" />
     <Compile Include="State\OptionsTabs\OptionsMaintenanceTab.cs" />
     <Compile Include="State\OptionsTabs\OptionsMassEditTab.cs" />
     <Compile Include="State\OptionsTabs\OptionsOverlaysTab.cs" />
-    <Compile Include="State\OptionsTabs\OptionsVehicleRestrictionsTab.cs" />
+    <Compile Include="State\OptionsTabs\PoliciesTab.cs" />
     <Compile Include="TrafficLight\Impl\CustomSegmentLights.cs" />
     <Compile Include="Manager\Impl\LaneConnectionManager.cs" />
     <Compile Include="Manager\Impl\ExtVehicleManager.cs" />

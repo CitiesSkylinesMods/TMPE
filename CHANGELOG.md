@@ -29,7 +29,23 @@ This changelog includes all versions and major variants of the mod going all the
 
 </details>
 
-#### TM:PE V11.6.4.7 STABLE, 06/02/2022
+#### TM:PE V[11.6.4.8](https://github.com/CitiesSkylinesMods/TMPE/compare/11.6.4.7...11.6.4.8) STABLE, 10/02/2022
+
+- [Meta] TM:PE 11.6.4-hotfix-8
+- [Meta] Bugfix for vehicle spawning/delivery on restricted lanes
+- [Mod] Malware: We are treating all mods by Chaos/Holy Water (same person) as targeted malware #1389 #1388 (aubergine18)
+- [Fixed] Allow vehicles to use restricted lanes when spawning/delivering #1381 #1380 #494 #85 (krzychu124)
+- [Steam] [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
+
+#### TM:PE V11.6.4.8 TEST, 10/02/2022
+
+- [Meta] TM:PE 11.6.4-hotfix-8
+- [Meta] Bugfix for vehicle spawning/delivery on restricted lanes
+- [Mod] Malware: We are treating all mods by Chaos/Holy Water (same person) as targeted malware #1389 #1388 (aubergine18)
+- [Fixed] Allow vehicles to use restricted lanes when spawning/delivering #1381 #1380 #494 #85 (krzychu124)
+- [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
+
+#### TM:PE V[11.6.4.7](https://github.com/CitiesSkylinesMods/TMPE/compare/11.6.4.6...11.6.4.7) STABLE, 06/02/2022
 
 - [Meta] TM:PE 11.6.4-hotfix-7
 - [Meta] Bugfix for default speeds which affects speed limits tool, overlays, and roundabout curvature speed
@@ -47,7 +63,7 @@ This changelog includes all versions and major variants of the mod going all the
 - [Removed] Obsolete: `SPEED_TO_MPH` and `SPEED_TO_KMPH` in `Constants.cs` #1367 #1364 #1363 (aubergine18)
 - [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
 
-#### TM:PE V11.6.4.6 STABLE, 05/02/2022
+#### TM:PE V[11.6.4.6](https://github.com/CitiesSkylinesMods/TMPE/compare/11.6.4.5...11.6.4.6) STABLE, 05/02/2022
 
 - [Meta] TM:PE 11.6.4-hotfix-6
 - [Meta] Fixes some issues relating to CSUR and similar networks
@@ -65,7 +81,7 @@ This changelog includes all versions and major variants of the mod going all the
 - [Updated] Internal changes to `CheckboxOption` code #1301 #1299 #1279 (aubergine18)
 - [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
 
-#### TM:PE V11.6.4.5 STABLE, 02/02/2022
+#### TM:PE V[11.6.4.5](https://github.com/CitiesSkylinesMods/TMPE/compare/11.6.4.4...11.6.4.5) STABLE, 02/02/2022
 
 - [Meta] TM:PE 11.6.4-hotfix-5
 - [Meta] Updates to error checking/logging, and refine pathfinder edition checks
@@ -85,7 +101,7 @@ This changelog includes all versions and major variants of the mod going all the
 - [Updated] Add new `.Info()` panel to `Prompt` class #1347 (krzychu124)
 - [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
 
-#### TM:PE V11.6.4.4 STABLE, 01/02/2022
+#### TM:PE V[11.6.4.4](https://github.com/CitiesSkylinesMods/TMPE/compare/11.6.4.3...11.6.4.4) STABLE, 01/02/2022
 
 - [Meta] TM:PE 11.6.4-hotfix-4
 - [Meta] Bugfix release targeting aircraft pathfinding, and info views.
@@ -109,7 +125,7 @@ This changelog includes all versions and major variants of the mod going all the
 - [Updated] TM:PE toolbar closes in non-applicable info views #1333 (aubergine18)
 - [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
 
-#### TM:PE V11.6.4.3 STABLE, 29/01/2022
+#### TM:PE V[11.6.4.3](https://github.com/CitiesSkylinesMods/TMPE/compare/11.6.4.2...11.6.4.3) STABLE, 29/01/2022
 
 - [Meta] TM:PE 11.6.4-hotfix-3
 - [Meta] This fixes rare issue on some PCs that are limited to single CPU core
@@ -129,7 +145,7 @@ This changelog includes all versions and major variants of the mod going all the
 - [Removed] Temporary: Don't auto-show What's New on TM:PE menu button click #1336 #1314 (krzychu124, aubergine18)
 - [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
 
-#### TM:PE V11.6.4.2 STABLE, 27/01/2022
+#### TM:PE V[11.6.4.2](https://github.com/CitiesSkylinesMods/TMPE/compare/11.6.4.1...11.6.4.2) STABLE, 27/01/2022
 
 - [Meta] TM:PE 11.6.4-hotfix-2
 - [Fixed] Speed limit icons not appearing on metro tracks #1323 #1322 (krzychu124)
@@ -141,7 +157,7 @@ This changelog includes all versions and major variants of the mod going all the
 - [Fixed] Speed limit icons not appearing on metro tracks #1323 #1322 (krzychu124)
 - [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
 
-#### TM:PE V11.6.4.1 STABLE, 26/01/2022
+#### TM:PE V[11.6.4.1](https://github.com/CitiesSkylinesMods/TMPE/compare/11.6.4...11.6.4.1) STABLE, 26/01/2022
 
 - [Meta] TM:PE 11.6.4-hotfix-1
 - [Updated] What's New panel updated to avoid recursive update issue #1319 #1317 #1314 (aubergine18)
@@ -964,11 +980,11 @@ This changelog includes all versions and major variants of the mod going all the
 - [Updated] Turn-on-red can now be toggled for unpreferred (far-side) turns between one-ways
 - [Updated] Train behaviour at shunts: Trains now prefer to stay on their track (#230)
 - [Updated] Parking AI: Improved public transport (PT) usage patterns, mixed car/PT paths are now possible (#218)
-- [Fixed] and optimized lane selection for U-turns and at dead ends (#101)
+- [Fixed] and optimized lane selection for U-turns and at dead ends (#233 #101 #85)
 - [Fixed] Parking AI: Tourist cars despawn because they assume they are at an outside connection (#218)
 - [Fixed] Parking AI: Return path calculation did not accept beautification segments (#218)
 - [Fixed] Parking AI: Cars/Citizens waiting for a path might jump around (#218)
-- [Fixed] Vanilla lane randomization does not work as intended at highway transitions (#112)
+- [Fixed] Vanilla lane randomization does not work as intended at highway transitions (#233 #112)
 - [Fixed] Vehicles change lanes at tollbooths (#225)
 - [Fixed] Path-finding: Array index is out of range due to a race condition (#221)
 - [Fixed] Citizen not found errors when using walking tours (#219)
@@ -982,11 +998,11 @@ This changelog includes all versions and major variants of the mod going all the
 - [New] Turn-on-red can now be toggled for unpreferred (far-side) turns between one-ways (#121)
 - [Updated] Train behaviour at shunts: Trains now prefer to stay on their track (#230)
 - [Updated] Parking AI - Improved public transport (PT) usage patterns, mixed car/PT paths are now possible  (#218)
-- [Fixed] Lane selection for U-turns and at dead ends (also optimised) (#101)
+- [Fixed] Lane selection for U-turns and at dead ends (also optimised) (#233 #101 #85)
 - [Fixed] Parking AI - Tourist cars despawn because they assume they are at an outside connection (#218)
 - [Fixed] Parking AI - Return path calculation did not accept beautification segments (#218)
 - [Fixed] Parking AI - Cars/Citizens waiting for a path might jump around (#218)
-- [Fixed] Vanilla lane randomization does not work as intended at highway transitions (#112)
+- [Fixed] Vanilla lane randomization does not work as intended at highway transitions (#233 #112)
 - [Fixed] Vehicles change lanes at tollbooths (#225)
 - [Fixed] Path-finding: Array index is out of range due to a race condition (#221)
 - [Fixed] Citizen not found errors when using walking tours (#219)

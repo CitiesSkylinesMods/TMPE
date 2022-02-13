@@ -328,13 +328,14 @@ namespace TrafficManager.Lifecycle {
 
                 GlobalConfig.OnLevelUnloading();
 
-                // destroy immidately to prevent duplicates after hot-reload.
-                var uiviewGO = UIView.GetAView().gameObject;
-                DestroyImmediate(uiviewGO.GetComponent<RoadSelectionPanels>());
-                DestroyImmediate(uiviewGO.GetComponent<RemoveVehicleButtonExtender>());
-                DestroyImmediate(uiviewGO.GetComponent<RemoveCitizenInstanceButtonExtender>());
-                DestroyImmediate(uiviewGO.GetComponent<RemoveCitizenInstanceButtonExtender>());
-                DestroyImmediate(uiviewGO.GetComponent<UITransportDemand>());
+                if (PlayMode) {
+                    // destroy immidately to prevent duplicates after hot-reload.
+                    var uiviewGO = UIView.GetAView().gameObject;
+                    DestroyImmediate(uiviewGO.GetComponent<RoadSelectionPanels>());
+                    DestroyImmediate(uiviewGO.GetComponent<RemoveVehicleButtonExtender>());
+                    DestroyImmediate(uiviewGO.GetComponent<RemoveCitizenInstanceButtonExtender>());
+                    DestroyImmediate(uiviewGO.GetComponent<UITransportDemand>());
+                }
 
                 Log.Info("Removing Controls from UI.");
                 if (ModUI.Instance) {
