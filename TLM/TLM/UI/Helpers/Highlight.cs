@@ -270,26 +270,21 @@ namespace TrafficManager.UI.Helpers {
                 return;
             }
 
-            ref NetSegment segment =
-                ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
-            float width = segment.Info.m_halfWidth;
-
-            NetNode[] nodeBuffer = Singleton<NetManager>.instance.m_nodes.m_buffer;
-
-            bool IsMiddle(ushort nodeId) =>
-                (nodeBuffer[nodeId].m_flags & NetNode.Flags.Middle) != 0;
+            ref NetSegment segment = ref segmentId.ToSegment();
+            ref NetNode startNode = ref segment.m_startNode.ToNode();
+            ref NetNode endNode = ref segment.m_endNode.ToNode();
 
             Bezier3 bezier;
-            bezier.a = segment.m_startNode.ToNode().GetPositionOnTerrain();
-            bezier.d = segment.m_endNode.ToNode().GetPositionOnTerrain();
+            bezier.a = startNode.GetPositionOnTerrain();
+            bezier.d = endNode.GetPositionOnTerrain();
 
             NetSegment.CalculateMiddlePoints(
                 startPos: bezier.a,
                 startDir: segment.m_startDirection,
                 endPos: bezier.d,
                 endDir: segment.m_endDirection,
-                smoothStart: IsMiddle(segment.m_startNode),
-                smoothEnd: IsMiddle(segment.m_endNode),
+                smoothStart: startNode.IsMiddle(),
+                smoothEnd: endNode.IsMiddle(),
                 middlePos1: out bezier.b,
                 middlePos2: out bezier.c);
 
@@ -298,7 +293,7 @@ namespace TrafficManager.UI.Helpers {
                 cameraInfo,
                 color,
                 bezier,
-                size: width * 2f,
+                size: segment.Info.m_halfWidth * 2f,
                 cutStart: 0,
                 cutEnd: 0,
                 minY: -1f,
