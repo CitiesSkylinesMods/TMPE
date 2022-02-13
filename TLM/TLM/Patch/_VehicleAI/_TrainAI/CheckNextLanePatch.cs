@@ -122,7 +122,7 @@ namespace TrafficManager.Patch._VehicleAI._TrainAI {
                 }
 #endif
 
-                if (!netManager.m_lanes.m_buffer[laneID].CheckSpace(1000f, vehicleID)) {
+                if (!laneID.ToLane().CheckSpace(1000f, vehicleID)) {
 #if DEBUG
                     if (logLogic) {
                         Log._Debug($"CustomTrainAI.CustomCheckNextLane({vehicleID}): " +
