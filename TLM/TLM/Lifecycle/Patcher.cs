@@ -45,7 +45,7 @@ namespace TrafficManager.Lifecycle {
 #endif
             AssertCitiesHarmonyInstalled();
             fail = !PatchAll(HARMONY_ID, forbidden: typeof(CustomPathFindPatchAttribute));
-            fail = fail || !PatchManual(HARMONY_ID);
+            fail |= !PatchManual(HARMONY_ID);
 
             if (fail) {
                 Log.Info("patcher failed");
