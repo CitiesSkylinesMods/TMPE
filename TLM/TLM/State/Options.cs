@@ -163,7 +163,7 @@ namespace TrafficManager.State {
                 OptionsVehicleRestrictionsTab.MakeSettings_VehicleRestrictions(tabStrip);
                 OptionsOverlaysTab.MakeSettings_Overlays(tabStrip);
                 OptionsMaintenanceTab.MakeSettings_Maintenance(tabStrip);
-                OptionsKeybindsTab.MakeSettings_Keybinds(tabStrip);
+                KeybindsTab.MakeSettings_Keybinds(tabStrip);
                 tabStrip.Invalidate();
             } catch (Exception ex) {
                 ex.LogException();
