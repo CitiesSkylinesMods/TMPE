@@ -8,7 +8,7 @@ namespace TrafficManager.State {
     using UnityEngine;
     using TrafficManager.Lifecycle;
 
-    public static class OptionsGameplayTab {
+    public static class GameplayTab {
         private static UICheckBox _individualDrivingStyleToggle;
         private static UIDropDown _recklessDriversDropdown;
         private static UICheckBox _disableDespawningToggle;
