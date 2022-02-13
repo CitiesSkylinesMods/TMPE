@@ -5,6 +5,7 @@ namespace TrafficManager.Util.Extensions {
 
         internal static ref NetNode ToNode(this ushort nodeId) => ref _nodeBuffer[nodeId];
         internal static bool IsJunction(this ref NetNode netNode) => netNode.m_flags.IsFlagSet(NetNode.Flags.Junction);
+        internal static bool IsMiddle(this ref NetNode netNode) => netNode.m_flags.IsFlagSet(NetNode.Flags.Middle);
 
         /// <summary>
         /// Checks if the netNode is Created, but neither Collapsed nor Deleted.
