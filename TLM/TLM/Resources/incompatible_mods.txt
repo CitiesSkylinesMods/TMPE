@@ -79,6 +79,6 @@
 2719881745;Traffic++ V2
 2719881998;Traffic++ V2
 2721843224;Cities: Skylines Multiplayer mod
-2730687809;Network Extensions 3 - contains malware targeting TM:PE devs
+2730687809;Network Extensions 3 - malware: https://github.com/CitiesSkylinesMods/TMPE/pull/1389 
 2733711176;CSM FIX
 2749420751;Uninspected TM:PE clone
