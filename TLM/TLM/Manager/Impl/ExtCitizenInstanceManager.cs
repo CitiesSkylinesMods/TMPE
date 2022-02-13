@@ -1176,7 +1176,7 @@ namespace TrafficManager.Manager.Impl {
         }
 
         public uint GetCitizenId(ushort instanceId) {
-            return Singleton<CitizenManager>.instance.m_instances.m_buffer[instanceId].m_citizen;
+            return instanceId.ToCitizenInstance().m_citizen;
         }
 
         /// <summary>
@@ -1388,10 +1388,11 @@ namespace TrafficManager.Manager.Impl {
             var ret = new List<Configuration.ExtCitizenInstanceData>();
 
             for (uint instanceId = 0; instanceId < CitizenManager.MAX_INSTANCE_COUNT; ++instanceId) {
-                try {
-                    if ((Singleton<CitizenManager>
-                         .instance.m_instances.m_buffer[instanceId].m_flags &
-                         CitizenInstance.Flags.Created) == CitizenInstance.Flags.None) {
+                try
+                {
+                    ref CitizenInstance citizenInstance = ref ((ushort)instanceId).ToCitizenInstance();
+                    
+                    if (!citizenInstance.IsCreated()) {
                         continue;
                     }
 
@@ -1438,18 +1439,17 @@ namespace TrafficManager.Manager.Impl {
                                           Vector3 startPos)
         {
 #if DEBUG
-            CitizenInstance[] citizensBuffer = Singleton<CitizenManager>.instance.m_instances.m_buffer;
+            ref CitizenInstance citizenInstance = ref extInstance.instanceId.ToCitizenInstance();
+            
             bool citizenDebug =
                 (DebugSettings.CitizenId == 0
                  || DebugSettings.CitizenId == GetCitizenId(instanceId))
                 && (DebugSettings.CitizenInstanceId == 0
                     || DebugSettings.CitizenInstanceId == instanceId)
                 && (DebugSettings.SourceBuildingId == 0
-                    || DebugSettings.SourceBuildingId ==
-                    citizensBuffer[extInstance.instanceId].m_sourceBuilding) &&
+                    || DebugSettings.SourceBuildingId == citizenInstance.m_sourceBuilding) &&
                 (DebugSettings.TargetBuildingId == 0
-                 || DebugSettings.TargetBuildingId ==
-                 citizensBuffer[extInstance.instanceId].m_targetBuilding);
+                 || DebugSettings.TargetBuildingId == citizenInstance.m_targetBuilding);
 
             bool logParkingAi = DebugSwitch.BasicParkingAILog.Get() && citizenDebug;
             // bool fineDebug = DebugSwitch.ExtendedParkingAILog.Get() && citizenDebug;

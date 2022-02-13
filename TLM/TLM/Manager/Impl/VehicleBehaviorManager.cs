@@ -425,6 +425,8 @@ namespace TrafficManager.Manager.Impl {
                                     continue;
                                 }
 
+                                ref CitizenInstance citizenInstance = ref ((ushort)citizenInstanceId).ToCitizenInstance();
+
                                 if (logParkingAi) {
                                     Log._DebugFormat(
                                         "CustomPassengerCarAI.ExtParkVehicle({0}): Releasing path " +
@@ -432,7 +434,7 @@ namespace TrafficManager.Manager.Impl {
                                         vehicleID,
                                         citizenInstanceId,
                                         vehicleID,
-                                        citizenManager.m_instances.m_buffer[citizenInstanceId].m_path);
+                                        citizenInstance.m_path);
                                 }
 
                                 if (citizenInstanceId != driverCitizenInstanceId) {
@@ -450,11 +452,11 @@ namespace TrafficManager.Manager.Impl {
                                     extCitizenInstanceManager.Reset(ref extCitizenInstanceManager.ExtInstances[citizenInstanceId]);
                                 }
 
-                                if (citizenManager.m_instances.m_buffer[citizenInstanceId].m_path != 0) {
+                                if (citizenInstance.m_path != 0) {
                                     Singleton<PathManager>.instance.ReleasePath(
-                                        citizenManager.m_instances.m_buffer[citizenInstanceId].m_path);
+                                        citizenInstance.m_path);
 
-                                    citizenManager.m_instances.m_buffer[citizenInstanceId].m_path = 0u;
+                                    citizenInstance.m_path = 0u;
                                 }
                             }
                         }
@@ -498,6 +500,8 @@ namespace TrafficManager.Manager.Impl {
                         if (citizenInstanceId == 0) {
                             continue;
                         }
+                        
+                        ref CitizenInstance citizenInstance = ref ((ushort)citizenInstanceId).ToCitizenInstance();
 
                         // NON-STOCK CODE START
                         if (prohibitPocketCars) {
@@ -506,7 +510,7 @@ namespace TrafficManager.Manager.Impl {
                                     Log._Debug(
                                         $"CustomPassengerCarAI.ExtParkVehicle({vehicleID}): Parking succeeded: " +
                                         $"Doing nothing for citizen instance {citizenInstanceId}! " +
-                                        $"path: {citizenManager.m_instances.m_buffer[citizenInstanceId].m_path}");
+                                        $"path: {citizenInstance.m_path}");
                                 }
 
                                 extCitizenInstanceManager.ExtInstances[citizenInstanceId].pathMode = ExtPathMode.RequiresWalkingPathToTarget;
@@ -519,13 +523,13 @@ namespace TrafficManager.Manager.Impl {
                             continue;
                         }
 
-                        if (citizenManager.m_instances.m_buffer[citizenInstanceId].m_path != 0u) {
-                            pathManager.ReleasePath(citizenManager.m_instances.m_buffer[citizenInstanceId].m_path);
+                        if (citizenInstance.m_path != 0u) {
+                            pathManager.ReleasePath(citizenInstance.m_path);
                         }
 
-                        citizenManager.m_instances.m_buffer[citizenInstanceId].m_path = nextPath;
-                        citizenManager.m_instances.m_buffer[citizenInstanceId].m_pathPositionIndex = (byte)nextPositionIndex;
-                        citizenManager.m_instances.m_buffer[citizenInstanceId].m_lastPathOffset = segmentOffset;
+                        citizenInstance.m_path = nextPath;
+                        citizenInstance.m_pathPositionIndex = (byte)nextPositionIndex;
+                        citizenInstance.m_lastPathOffset = segmentOffset;
 
                         if (logParkingAi) {
                             Log._Debug(

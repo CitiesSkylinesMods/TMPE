@@ -1411,22 +1411,23 @@ namespace TrafficManager.UI {
             VehicleParked[] parkedVehiclesBuffer = Singleton<VehicleManager>.instance.m_parkedVehicles.m_buffer;
             Vehicle[] vehiclesBuffer = Singleton<VehicleManager>.instance.m_vehicles.m_buffer;
 
-            for (int i = 1; i < CitizenManager.MAX_INSTANCE_COUNT; ++i) {
-                if ((citManager.m_instances.m_buffer[i].m_flags &
-                     CitizenInstance.Flags.Character) == CitizenInstance.Flags.None) {
+            for (uint citizenInstanceId = 1; citizenInstanceId < CitizenManager.MAX_INSTANCE_COUNT; ++citizenInstanceId) {
+                ref CitizenInstance citizenInstance = ref ((ushort)citizenInstanceId).ToCitizenInstance();
+                
+                if (!citizenInstance.IsCreated()) {
                     continue;
                 }
 #if DEBUG
                 if (DebugSwitch.NoValidPathCitizensOverlay.Get()) {
 #endif
-                    if (citManager.m_instances.m_buffer[i].m_path != 0) {
+                    if (citizenInstance.m_path != 0) {
                         continue;
                     }
 #if DEBUG
                 }
 #endif
 
-                Vector3 pos = citManager.m_instances.m_buffer[i].GetSmoothPosition((ushort)i);
+                Vector3 pos = citizenInstance.GetSmoothPosition((ushort)citizenInstanceId);
                 bool visible = GeometryUtil.WorldToScreenPoint(pos, out Vector3 screenPos);
 
                 if (!visible) {
@@ -1448,7 +1449,7 @@ namespace TrafficManager.UI {
 
 #if DEBUG
                 if (GlobalConfig.Instance.Debug.ExtPathMode != ExtPathMode.None &&
-                    ExtCitizenInstanceManager.Instance.ExtInstances[i].pathMode !=
+                    ExtCitizenInstanceManager.Instance.ExtInstances[citizenInstanceId].pathMode !=
                     GlobalConfig.Instance.Debug.ExtPathMode) {
                     continue;
                 }
@@ -1456,17 +1457,18 @@ namespace TrafficManager.UI {
 
                 var labelSb = new StringBuilder();
                 ExtCitizen[] extCitizensBuf = ExtCitizenManager.Instance.ExtCitizens;
+                uint citizenId = citizenInstance.m_citizen;
                 labelSb.AppendFormat(
                     "Inst. {0}, Cit. {1},\nm: {2}, tm: {3}, ltm: {4}, ll: {5}",
-                    i,
-                    citManager.m_instances.m_buffer[i].m_citizen,
-                    ExtCitizenInstanceManager.Instance.ExtInstances[i].pathMode,
-                    extCitizensBuf[citManager.m_instances.m_buffer[i].m_citizen].transportMode,
-                    extCitizensBuf[citManager.m_instances.m_buffer[i].m_citizen].lastTransportMode,
-                    extCitizensBuf[citManager.m_instances.m_buffer[i].m_citizen].lastLocation);
+                    citizenInstanceId,
+                    citizenId,
+                    ExtCitizenInstanceManager.Instance.ExtInstances[citizenInstanceId].pathMode,
+                    extCitizensBuf[citizenId].transportMode,
+                    extCitizensBuf[citizenId].lastTransportMode,
+                    extCitizensBuf[citizenId].lastLocation);
 
-                if (citManager.m_instances.m_buffer[i].m_citizen != 0) {
-                    ref Citizen citizen = ref citManager.m_instances.m_buffer[i].m_citizen.ToCitizen();
+                if (citizenId != 0) {
+                    ref Citizen citizen = ref citizenId.ToCitizen();
                     if (citizen.m_parkedVehicle != 0) {
                         labelSb.AppendFormat(
                             "\nparked: {0} dist: {1}",
