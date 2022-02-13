@@ -985,12 +985,13 @@ namespace TrafficManager.UI {
 
             uint curLaneId = segment.m_lanes;
             var labelSb = new StringBuilder();
-            NetLane[] lanesBuffer = Singleton<NetManager>.instance.m_lanes.m_buffer;
 
             for (int i = 0; i < segmentInfo.m_lanes.Length; ++i) {
                 if (curLaneId == 0) {
                     break;
                 }
+
+                ref NetLane netLane = ref curLaneId.ToLane();
 
                 bool laneTrafficDataLoaded =
                     TrafficMeasurementManager.Instance.GetLaneTrafficData(
@@ -1020,7 +1021,7 @@ namespace TrafficManager.UI {
                     "pos: {7:0.##}, sim: {8} for {9}/{10}",
                     RoutingManager.Instance.CalcInnerSimilarLaneIndex(segmentId, i),
                     RoutingManager.Instance.CalcOuterSimilarLaneIndex(segmentId, i),
-                    (NetLane.Flags)lanesBuffer[curLaneId].m_flags,
+                    (NetLane.Flags)curLaneId.ToLane().m_flags,
                     SpeedLimitManager.Instance.CalculateCustomSpeedLimit(curLaneId).ToString(),
                     VehicleRestrictionsManager.Instance.GetAllowedVehicleTypes(
                         segmentId,
@@ -1079,7 +1080,7 @@ namespace TrafficManager.UI {
 #endif
                 }
 
-                labelSb.AppendFormat(", nd: {0}", lanesBuffer[curLaneId].m_nodes);
+                labelSb.AppendFormat(", nd: {0}", netLane.m_nodes);
 #if DEBUG
                 //    labelSb.AppendFormat(
                 //        " ({0}/{1}/{2})",
@@ -1108,7 +1109,7 @@ namespace TrafficManager.UI {
                 //            : "?");
                 labelSb.Append("\n");
 
-                curLaneId = lanesBuffer[curLaneId].m_nextLane;
+                curLaneId = netLane.m_nextLane;
             }
 
             var labelStr = labelSb.ToString();
