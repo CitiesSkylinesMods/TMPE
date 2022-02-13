@@ -64,6 +64,7 @@ namespace TrafficManager.Patch._CitizenAI._HumanAI {
 #endif
             CitizenManager citizenManager = Singleton<CitizenManager>.instance;
             uint citizenId = data.m_citizen;
+            ref Citizen citizen = ref data.m_citizen.ToCitizen();
 
             if ((data.m_flags & (CitizenInstance.Flags.Blown
                                          | CitizenInstance.Flags.Floating)) != CitizenInstance.Flags.None
@@ -128,8 +129,7 @@ namespace TrafficManager.Patch._CitizenAI._HumanAI {
                                 "-- calling HumanAI.PathfindSuccess");
                         }
 
-                        if (citizenId == 0
-                            || citizensBuffer[data.m_citizen].m_vehicle == 0) {
+                        if (citizenId == 0 || citizen.m_vehicle == 0) {
                             SpawnCitizenAI(__instance, instanceID, ref data);
                         }
 
@@ -144,8 +144,7 @@ namespace TrafficManager.Patch._CitizenAI._HumanAI {
                         const Citizen.Flags CTZ_MASK = Citizen.Flags.Tourist
                                                        | Citizen.Flags.MovingIn
                                                        | Citizen.Flags.DummyTraffic;
-                        if (citizenId != 0
-                            && (citizensBuffer[citizenId].m_flags & CTZ_MASK) == Citizen.Flags.MovingIn)
+                        if (citizenId != 0 && (citizen.m_flags & CTZ_MASK) == Citizen.Flags.MovingIn)
                         {
                             StatisticBase statisticBase = Singleton<StatisticsManager>
                                                 .instance.Acquire<StatisticInt32>(StatisticType.MoveRate);
@@ -242,7 +241,7 @@ namespace TrafficManager.Patch._CitizenAI._HumanAI {
             VehicleManager vehicleManager = Singleton<VehicleManager>.instance;
             ushort vehicleId = 0;
             if (data.m_citizen != 0u) {
-                vehicleId = citizensBuffer[data.m_citizen].m_vehicle;
+                vehicleId = data.m_citizen.ToCitizen().m_vehicle;
             }
 
             if (vehicleId != 0) {
