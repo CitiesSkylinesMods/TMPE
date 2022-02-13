@@ -33,6 +33,7 @@ namespace TrafficManager.Util {
                 "CSM",
                 "Cities Skylines Multiplayer (CSM)",
                 "Cities: Skylines Multiplayer (CSM) [Beta]",
+                "Harmony (redesigned)",
             });
         }
 

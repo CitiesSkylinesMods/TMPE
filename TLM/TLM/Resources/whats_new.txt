@@ -1,7 +1,17 @@
+[Version] 11.6.4.8
+[Stable]
+[Released] February 10th 2022
+[Link] tmpe-v11648-stable-10022022
+[Meta] TM:PE 11.6.4-hotfix-8
+[Meta] Bugfix for vehicle spawning/delivery on restricted lanes
+[Fixed] Allow vehicles to use restricted lanes when spawning/delivering #1381 #1380 #494 #85 (krzychu124)
+[Mod] Malware: We are treating all mods by Chaos/Holy Water (same person) as targeted malware #1389 #1388 (aubergine18)
+[/Version]
+
 [Version] 11.6.4.7
 [Stable]
 [Released] February 6th 2022
-[Link] tmpe-v11646-stable-06022022
+[Link] tmpe-v11647-stable-06022022
 [Meta] TM:PE 11.6.4-hotfix-7
 [Meta] Bugfix for default speeds which affects speed limits tool, overlays, and roundabout curvature speed
 [Fixed] Default netinfo speed should only inspect customisable lanes #1362 #1346 (aubergine18)
