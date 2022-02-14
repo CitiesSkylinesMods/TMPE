@@ -10,7 +10,7 @@ namespace TrafficManager.State {
     using ColossalFramework;
     using System.Collections.Generic;
 
-    public static class OptionsMaintenanceTab {
+    public static class MaintenanceTab {
         [UsedImplicitly]
         private static UIButton _resetStuckEntitiesBtn;
 
