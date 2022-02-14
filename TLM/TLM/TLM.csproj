@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -147,6 +147,7 @@
     <Compile Include="Manager\Impl\ExtSegmentEndManager.cs" />
     <Compile Include="Manager\Impl\ExtSegmentManager.cs" />
     <Compile Include="Manager\Impl\GeometryNotifier.cs" />
+    <Compile Include="Patch\_External\RTramAIModPatch.cs" />
     <Compile Include="State\OptionsTabs\GeneralTab_DebugGroup.cs" />
     <Compile Include="State\OptionsTabs\OptionsMaintenanceTab_DespawnGroup.cs" />
     <Compile Include="State\VersionInfo.cs" />
@@ -304,7 +305,7 @@
     <Compile Include="State\OptionsTabs\KeybindsTab.cs" />
     <Compile Include="State\OptionsTabs\OptionsMaintenanceTab.cs" />
     <Compile Include="State\OptionsTabs\OptionsMassEditTab.cs" />
-    <Compile Include="State\OptionsTabs\OptionsOverlaysTab.cs" />
+    <Compile Include="State\OptionsTabs\OverlaysTab.cs" />
     <Compile Include="State\OptionsTabs\PoliciesTab.cs" />
     <Compile Include="TrafficLight\Impl\CustomSegmentLights.cs" />
     <Compile Include="Manager\Impl\LaneConnectionManager.cs" />
