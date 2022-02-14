@@ -562,7 +562,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits.Overlay {
                     speedlimit: isDefaultSpeed ? defaultSpeedLimit : drawSpeedlimit,
                     theme: drawEnv.largeSignsTextures_);
 
-                if (isDefaultSpeed) {
+                if (args.IsInteractive && Options.showDefaultSpeedSubIcon && !isDefaultSpeed) {
                     squareSignRenderer.Reset(
                         screenPos,
                         size: 3f * RoadSignThemes.DefaultSpeedlimitsAspectRatio());
