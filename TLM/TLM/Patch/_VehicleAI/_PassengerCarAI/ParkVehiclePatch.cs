@@ -36,7 +36,7 @@ namespace TrafficManager.Patch._VehicleAI._PassengerCarAI {
                         continue;
                     }
 
-                    driverCitizenInstanceId = citizenManager.m_citizens.m_buffer[citizenId].m_instance;
+                    driverCitizenInstanceId = citizenId.ToCitizen().m_instance;
                     if (driverCitizenInstanceId == 0) {
                         continue;
                     }
@@ -63,7 +63,7 @@ namespace TrafficManager.Patch._VehicleAI._PassengerCarAI {
                 ref vehicleData,
                 vehicleData.Info,
                 driverCitizenId,
-                ref citizenManager.m_citizens.m_buffer[driverCitizenId],
+                ref driverCitizenId.ToCitizen(),
                 driverCitizenInstanceId,
                 ref citizenManager.m_instances.m_buffer[driverCitizenInstanceId],
                 ref ExtCitizenInstanceManager.Instance.ExtInstances[driverCitizenInstanceId],
