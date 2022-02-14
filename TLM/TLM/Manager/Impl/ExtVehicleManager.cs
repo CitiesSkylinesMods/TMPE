@@ -65,18 +65,23 @@ namespace TrafficManager.Manager.Impl {
             }
         }
 
+        /// <summary>
+        /// Gets the driver from a vehicle.
+        /// See PassengerCarAI.GetDriverInstance - almost stock code.
+        /// </summary>
+        /// <param name="vehicleId">Id of the vehicle.</param>
+        /// <param name="data">Vehicle data of the vehicle.</param>
+        /// <returns>CitizenInstanceId of the driver.</returns>
         public ushort GetDriverInstanceId(ushort vehicleId, ref Vehicle data) {
-            // (stock code from PassengerCarAI.GetDriverInstance)
             CitizenManager citizenManager = Singleton<CitizenManager>.instance;
             uint citizenUnitId = data.m_citizenUnits;
             uint maxUnitCount = citizenManager.m_units.m_size;
             int numIter = 0;
 
             while (citizenUnitId != 0) {
-                uint nextCitizenUnitId = citizenManager.m_units.m_buffer[citizenUnitId].m_nextUnit;
-
+                ref CitizenUnit citizenUnit = ref citizenUnitId.ToCitizenUnit();
                 for (int i = 0; i < 5; i++) {
-                    uint citizenId = citizenManager.m_units.m_buffer[citizenUnitId].GetCitizen(i);
+                    uint citizenId = citizenUnit.GetCitizen(i);
 
                     if (citizenId != 0) {
                         ushort citizenInstanceId =
@@ -87,7 +92,7 @@ namespace TrafficManager.Manager.Impl {
                     }
                 }
 
-                citizenUnitId = nextCitizenUnitId;
+                citizenUnitId = citizenUnit.m_nextUnit;
                 if (++numIter > maxUnitCount) {
                     CODebugBase<LogChannel>.Error(
                         LogChannel.Core,
