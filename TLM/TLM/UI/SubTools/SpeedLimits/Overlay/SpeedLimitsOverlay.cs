@@ -554,20 +554,24 @@ namespace TrafficManager.UI.SubTools.SpeedLimits.Overlay {
                     forward: overrideSpeedlimitForward,
                     back: overrideSpeedlimitBack);
 
-                if (!drawSpeedlimit.HasValue || drawSpeedlimit.Value.Equals(defaultSpeedLimit)) {
-                    // No value, no override
+                bool isDefaultSpeed =
+                    !drawSpeedlimit.HasValue ||
+                    drawSpeedlimit.Value.Equals(defaultSpeedLimit);
+
+                signRenderer.DrawLargeTexture(
+                    speedlimit: isDefaultSpeed ? defaultSpeedLimit : drawSpeedlimit,
+                    theme: drawEnv.largeSignsTextures_);
+
+                if (isDefaultSpeed) {
                     squareSignRenderer.Reset(
                         screenPos,
-                        size: size * RoadSignThemes.DefaultSpeedlimitsAspectRatio());
+                        size: 3f * RoadSignThemes.DefaultSpeedlimitsAspectRatio());
+
                     Texture2D chosenTexture = SignRenderer.ChooseTexture(
                         speedlimit: defaultSpeedLimit,
                         theme: RoadSignThemes.Instance.RoadDefaults);
-                    squareSignRenderer.DrawLargeTexture(chosenTexture);
-                    // squareSignRenderer.DrawSmallTexture_BottomRight(chosenTexture);
-                } else {
-                    signRenderer.DrawLargeTexture(
-                        speedlimit: drawSpeedlimit,
-                        theme: drawEnv.largeSignsTextures_);
+
+                    signRenderer.DrawSmallTexture_BottomRight(chosenTexture);
                 }
             }
 
