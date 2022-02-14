@@ -1,7 +1,5 @@
-﻿namespace TrafficManager.UI.SubTools.SpeedLimits.Overlay {
-    using System.Collections.Generic;
+namespace TrafficManager.UI.SubTools.SpeedLimits.Overlay {
     using TrafficManager.API.Traffic.Data;
-    using TrafficManager.Lifecycle;
     using TrafficManager.UI.Textures;
     using UnityEngine;
 
@@ -76,6 +74,29 @@
                 y: this.screenPos_.y,
                 width: this.screenRect_.width * 0.5f,
                 height: this.screenRect_.height * 0.5f);
+
+            GUI.DrawTexture(
+                position: smallRect,
+                image: tex);
+        }
+
+        /// <summary>
+        /// Used to draw default speed sign subicon overlapping bottom right corner.
+        /// </summary>
+        /// <param name="speed">The default speed value.</param>
+        public void DrawDefaultSpeedSubIcon(SpeedValue speed) {
+            Texture2D tex = SignRenderer.ChooseTexture(
+                speedlimit: speed,
+                theme: RoadSignThemes.Instance.RoadDefaults);
+
+            float size = this.screenRect_.height * 0.4f;
+            float half = size / 2;
+
+            Rect smallRect = new Rect(
+                x: this.screenPos_.x + half,
+                y: this.screenPos_.y + half,
+                width: size,
+                height: size);
 
             GUI.DrawTexture(
                 position: smallRect,
