@@ -505,12 +505,9 @@ namespace TrafficManager.UI.SubTools.SpeedLimits.Overlay {
                                      ? RoadSignThemes.DefaultSpeedlimitsAspectRatio()
                                      : drawEnv.signsThemeAspectRatio_;
 
-            float signSize = args.IsInteractive
-                     ? Constants.OVERLAY_INTERACTIVE_SIGN_SIZE
-                     : Constants.OVERLAY_READONLY_SIGN_SIZE;
-
+            // TODO: Replace formula in visibleScale and size to use Constants.OVERLAY_INTERACTIVE_SIGN_SIZE and OVERLAY_READONLY_SIGN_SIZE
             float visibleScale = drawEnv.baseScreenSizeForSign_ / (segCenter - camPos).magnitude;
-            float size = signSize * SPEED_LIMIT_SIGN_SIZE * visibleScale;
+            float size = (args.IsInteractive ? 1f : 0.8f) * SPEED_LIMIT_SIGN_SIZE * visibleScale;
 
             SignRenderer signRenderer = default;
             SignRenderer squareSignRenderer = default;
@@ -618,7 +615,6 @@ namespace TrafficManager.UI.SubTools.SpeedLimits.Overlay {
             [NotNull] DrawEnv drawEnv,
             [NotNull] DrawArgs args)
         {
-            var vehicleInfoSignTextures = RoadUI.Instance.VehicleInfoSignTextures;
             bool ret = false;
             ref NetSegment segment = ref segmentId.ToSegment();
 
@@ -712,8 +708,9 @@ namespace TrafficManager.UI.SubTools.SpeedLimits.Overlay {
                     continue;
                 }
 
-                float visibleScale = 100.0f / (worldPos - camPos).magnitude;
+                float visibleScale = drawEnv.baseScreenSizeForSign_ / (worldPos - camPos).magnitude;
                 float size = (args.IsInteractive ? 1f : 0.8f) * SPEED_LIMIT_SIGN_SIZE * visibleScale;
+
                 Rect signScreenRect = signRenderer.Reset(screenPos, size: largeRatio * size);
 
                 // Set render transparency based on mouse hover
@@ -754,6 +751,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits.Overlay {
                     && !onlyMonorailLanes
                     && ((laneInfo.m_vehicleType & VehicleInfo.VehicleType.Monorail) != VehicleInfo.VehicleType.None))
                 {
+                    var vehicleInfoSignTextures = RoadUI.Instance.VehicleInfoSignTextures;
                     Texture2D tex1 = vehicleInfoSignTextures[LegacyExtVehicleType.ToNew(old: ExtVehicleType.PassengerTrain)];
 
                     // TODO: Replace with direct call to GUI.DrawTexture as in the func above
