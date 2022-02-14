@@ -199,10 +199,10 @@ namespace TrafficManager.Manager.Impl {
 
                 // set vehicle id for citizen instance
                 instanceData.m_path = 0u;
-                citManager.m_citizens.m_buffer[instanceData.m_citizen]
-                          .SetParkedVehicle(instanceData.m_citizen, 0);
-                citManager.m_citizens.m_buffer[instanceData.m_citizen]
-                          .SetVehicle(instanceData.m_citizen, vehicleId, 0u);
+                ref Citizen citizen = ref instanceData.m_citizen.ToCitizen();
+                
+                citizen.SetParkedVehicle(instanceData.m_citizen, 0);
+                citizen.SetVehicle(instanceData.m_citizen, vehicleId, 0u);
 
                 // update citizen instance flags
                 instanceData.m_flags &= ~CitizenInstance.Flags.WaitingPath;
@@ -1355,9 +1355,8 @@ namespace TrafficManager.Manager.Impl {
                     "section. Ensuring that citizen is allowed to use their car.");
 
                 ushort sourceBuildingId = instanceData.m_sourceBuilding;
-                ushort homeId = Singleton<CitizenManager>
-                             .instance.m_citizens.m_buffer[instanceData.m_citizen]
-                             .m_homeBuilding;
+                ref Citizen citizen = ref instanceData.m_citizen.ToCitizen();
+                ushort homeId = citizen.m_homeBuilding;
 
                 if (parkedVehicleId == 0) {
                     if (logParkingAi) {
@@ -1395,9 +1394,7 @@ namespace TrafficManager.Manager.Impl {
 
                         // determine current position vector
                         Vector3 currentPos;
-                        ushort currentBuildingId = Singleton<CitizenManager>
-                                                .instance.m_citizens.m_buffer[instanceData.m_citizen]
-                                                .GetBuildingByLocation();
+                        ushort currentBuildingId = citizen.GetBuildingByLocation();
                         if (currentBuildingId != 0) {
                             currentPos = currentBuildingId.ToBuilding().m_position;
                             if (logParkingAi) {
@@ -1429,9 +1426,7 @@ namespace TrafficManager.Manager.Impl {
                             vehicleInfo,
                             out Vector3 parkPos,
                             out ParkingError parkReason)) {
-                            parkedVehicleId = Singleton<CitizenManager>
-                                              .instance.m_citizens.m_buffer[instanceData.m_citizen]
-                                              .m_parkedVehicle;
+                            parkedVehicleId = citizen.m_parkedVehicle;
                             Log._DebugIf(
                                 logParkingAi,
                                 () => $"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): " +
