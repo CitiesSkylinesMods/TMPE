@@ -117,7 +117,7 @@ namespace TrafficManager.State {
 
             Options.Indent(_turnOnRedEnabledToggle);
 
-            OptionsMaintenanceTab_DespawnGroup.AddUI(panelHelper);
+            MaintenanceTab_DespawnGroup.AddUI(panelHelper);
 
             // TODO [issue ##959] remove when TTL is implemented in asset editor.
             bool inEditor = TMPELifecycle.InGameOrEditor()
