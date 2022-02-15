@@ -99,13 +99,6 @@ namespace TrafficManager.API.Manager {
                                    Vector3 startPos);
 
         /// <summary>
-        /// Determines the citizen id for the given citizen instance id
-        /// </summary>
-        /// <param name="instanceId">citizen instance id</param>
-        /// <returns>citizen id</returns>
-        uint GetCitizenId(ushort instanceId);
-
-        /// <summary>
         /// Releases the return path (if present) for the given citizen instance.
         /// </summary>
         /// <param name="extInstance">ext. citizen instance</param>
