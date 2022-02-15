@@ -37,13 +37,13 @@ namespace TrafficManager.Manager.Impl {
             base.InternalPrintDebugInfo();
             Log._Debug("Extended citizen instance data:");
 
-            for (var i = 0; i < ExtInstances.Length; ++i) {
-                ref CitizenInstance citizenInstance = ref ((ushort)i).ToCitizenInstance();
+            for (uint citizenInstanceId = 0; citizenInstanceId < ExtInstances.Length; ++citizenInstanceId) {
+                ref CitizenInstance citizenInstance = ref citizenInstanceId.ToCitizenInstance();
                 if (!citizenInstance.IsValid()) {
                     continue;
                 }
 
-                Log._Debug($"Citizen instance {i}: {ExtInstances[i]}");
+                Log._Debug($"Citizen instance {citizenInstanceId}: {ExtInstances[citizenInstanceId]}");
             }
         }
 
@@ -1175,17 +1175,13 @@ namespace TrafficManager.Manager.Impl {
             return position.m_segment != 0;
         }
 
-        public uint GetCitizenId(ushort instanceId) {
-            return Singleton<CitizenManager>.instance.m_instances.m_buffer[instanceId].m_citizen;
-        }
-
         /// <summary>
         /// Releases the return path
         /// </summary>
         public void ReleaseReturnPath(ref ExtCitizenInstance extInstance) {
 #if DEBUG
-            bool citizenDebug = DebugSettings.CitizenId == 0
-                                || DebugSettings.CitizenId == GetCitizenId(extInstance.instanceId);
+            bool citizenDebug = DebugSettings.CitizenId == 0 
+                                || DebugSettings.CitizenId == extInstance.instanceId.ToCitizenInstance().m_citizen;
 
             bool logParkingAi = DebugSwitch.BasicParkingAILog.Get() && citizenDebug;
             // bool extendedLogParkingAi = DebugSwitch.ExtendedParkingAILog.Get() && citizenDebug;
@@ -1210,7 +1206,7 @@ namespace TrafficManager.Manager.Impl {
         public void UpdateReturnPathState(ref ExtCitizenInstance extInstance) {
 #if DEBUG
             bool citizenDebug = DebugSettings.CitizenId == 0
-                                || DebugSettings.CitizenId == GetCitizenId(extInstance.instanceId);
+                                || DebugSettings.CitizenId == extInstance.instanceId.ToCitizenInstance().m_citizen;
 
             bool logParkingAi = DebugSwitch.BasicParkingAILog.Get() && citizenDebug;
             bool extendedLogParkingAi = DebugSwitch.ExtendedParkingAILog.Get() && citizenDebug;
@@ -1258,7 +1254,7 @@ namespace TrafficManager.Manager.Impl {
                                         Vector3 targetPos) {
 #if DEBUG
             bool citizenDebug = DebugSettings.CitizenId == 0
-                                || DebugSettings.CitizenId == GetCitizenId(extInstance.instanceId);
+                                || DebugSettings.CitizenId == extInstance.instanceId.ToCitizenInstance().m_citizen;
             bool logParkingAi = DebugSwitch.BasicParkingAILog.Get() && citizenDebug;
             // bool extendedLogParkingAi = DebugSwitch.ExtendedParkingAILog.Get() && citizenDebug;
 #else
@@ -1388,10 +1384,11 @@ namespace TrafficManager.Manager.Impl {
             var ret = new List<Configuration.ExtCitizenInstanceData>();
 
             for (uint instanceId = 0; instanceId < CitizenManager.MAX_INSTANCE_COUNT; ++instanceId) {
-                try {
-                    if ((Singleton<CitizenManager>
-                         .instance.m_instances.m_buffer[instanceId].m_flags &
-                         CitizenInstance.Flags.Created) == CitizenInstance.Flags.None) {
+                try
+                {
+                    ref CitizenInstance citizenInstance = ref instanceId.ToCitizenInstance();
+                    
+                    if (!citizenInstance.IsCreated()) {
                         continue;
                     }
 
@@ -1438,18 +1435,13 @@ namespace TrafficManager.Manager.Impl {
                                           Vector3 startPos)
         {
 #if DEBUG
-            CitizenInstance[] citizensBuffer = Singleton<CitizenManager>.instance.m_instances.m_buffer;
+            ref CitizenInstance citizenInstance = ref extInstance.instanceId.ToCitizenInstance();
+            
             bool citizenDebug =
-                (DebugSettings.CitizenId == 0
-                 || DebugSettings.CitizenId == GetCitizenId(instanceId))
-                && (DebugSettings.CitizenInstanceId == 0
-                    || DebugSettings.CitizenInstanceId == instanceId)
-                && (DebugSettings.SourceBuildingId == 0
-                    || DebugSettings.SourceBuildingId ==
-                    citizensBuffer[extInstance.instanceId].m_sourceBuilding) &&
-                (DebugSettings.TargetBuildingId == 0
-                 || DebugSettings.TargetBuildingId ==
-                 citizensBuffer[extInstance.instanceId].m_targetBuilding);
+                (DebugSettings.CitizenId == 0 || DebugSettings.CitizenId == citizenInstance.m_citizen)
+                && (DebugSettings.CitizenInstanceId == 0 || DebugSettings.CitizenInstanceId == instanceId)
+                && (DebugSettings.SourceBuildingId == 0 || DebugSettings.SourceBuildingId == citizenInstance.m_sourceBuilding)
+                && (DebugSettings.TargetBuildingId == 0 || DebugSettings.TargetBuildingId == citizenInstance.m_targetBuilding);
 
             bool logParkingAi = DebugSwitch.BasicParkingAILog.Get() && citizenDebug;
             // bool fineDebug = DebugSwitch.ExtendedParkingAILog.Get() && citizenDebug;
