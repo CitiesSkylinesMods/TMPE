@@ -1799,10 +1799,9 @@ namespace TrafficManager.Manager.Impl {
                                                ref PathUnit.Position endPathPos,
                                                out bool calculateEndPos) {
             IExtCitizenInstanceManager extCitInstMan = Constants.ManagerFactory.ExtCitizenInstanceManager;
-
-#if DEBUG
             ref CitizenInstance citizenInstance = ref extDriverInstance.instanceId.ToCitizenInstance();
 
+#if DEBUG
             bool citizenDebug =
                 (DebugSettings.VehicleId == 0 || DebugSettings.VehicleId == vehicleId)
                 && (DebugSettings.CitizenInstanceId == 0 || DebugSettings.CitizenInstanceId == extDriverInstance.instanceId)
