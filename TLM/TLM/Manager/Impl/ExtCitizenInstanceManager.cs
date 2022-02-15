@@ -392,8 +392,6 @@ namespace TrafficManager.Manager.Impl {
             bool enableTransport,
             bool ignoreCost,
             bool adhocDebugLog = false) {
-
-            VehicleParked[] parkedVehiclesBuffer = Singleton<VehicleManager>.instance.m_parkedVehicles.m_buffer;
 #if DEBUG
             bool citizenDebug
                 = (DebugSettings.CitizenInstanceId == 0
@@ -514,8 +512,7 @@ namespace TrafficManager.Manager.Impl {
 
                                 extInstance.pathMode = ExtPathMode.RequiresCarPath;
                                 carUsageMode = CarUsagePolicy.ForcedParked;
-                                startPos = parkedVehiclesBuffer[parkedVehicleId]
-                                    .m_position; // force to start from the parked car
+                                startPos = parkedVehicleId.ToParkedVehicle().m_position; // force to start from the parked car
                             }
 
                             break;
@@ -619,7 +616,8 @@ namespace TrafficManager.Manager.Impl {
                 if ((carUsageMode == CarUsagePolicy.Allowed ||
                      carUsageMode == CarUsagePolicy.ForcedParked) && parkedVehicleId != 0) {
                     // Reuse parked vehicle info
-                    vehicleInfo = parkedVehiclesBuffer[parkedVehicleId].Info;
+                    ref VehicleParked parkedVehicle = ref parkedVehicleId.ToParkedVehicle();
+                    vehicleInfo = parkedVehicle.Info;
 
                     // Check if the citizen should return their car back home
                     if (extInstance.pathMode == ExtPathMode.None && // initiating a new path
@@ -645,8 +643,7 @@ namespace TrafficManager.Manager.Impl {
                             // citizen travelled by other means of transport
                             // -> check distance between home and parked car. if too far away:
                             // force to take the car back home
-                            float distHomeToParked =
-                                (parkedVehiclesBuffer[parkedVehicleId].m_position - homeId.ToBuilding().m_position).magnitude;
+                            float distHomeToParked = (parkedVehicle.m_position - homeId.ToBuilding().m_position).magnitude;
 
                             if (distHomeToParked > parkingAiConf.MaxParkedCarDistanceToHome) {
                                 // force to take car back home
@@ -685,7 +682,7 @@ namespace TrafficManager.Manager.Impl {
                     if (extInstance.pathMode == ExtPathMode.CalculatingWalkingPathToParkedCar) {
                         // walk to parked car
                         // -> end position is parked car
-                        endPos = parkedVehiclesBuffer[parkedVehicleId].m_position;
+                        endPos = parkedVehicleId.ToParkedVehicle().m_position;
                         if (extendedLogParkingAi) {
                             Log.Info(
                                 $"CustomCitizenAI.ExtStartPathFind({instanceID}): Citizen shall " +
@@ -892,7 +889,7 @@ namespace TrafficManager.Manager.Impl {
             PathUnit.Position parkedVehiclePathPos = default;
 
             if (parkedVehicleId != 0 && extVehicleType == ExtVehicleType.PassengerCar) {
-                Vector3 position = parkedVehiclesBuffer[parkedVehicleId].m_position;
+                Vector3 position = parkedVehicleId.ToParkedVehicle().m_position;
                 Constants.ManagerFactory.ExtPathManager.FindPathPositionWithSpiralLoop(
                     position,
                     ItemClass.Service.Road,
