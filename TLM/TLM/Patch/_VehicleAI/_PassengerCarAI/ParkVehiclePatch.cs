@@ -4,6 +4,7 @@ namespace TrafficManager.Patch._VehicleAI._PassengerCarAI {
     using HarmonyLib;
     using JetBrains.Annotations;
     using Manager.Impl;
+    using Util.Extensions;
 
     [UsedImplicitly]
     [HarmonyPatch(typeof(PassengerCarAI), "ParkVehicle")]
@@ -28,28 +29,28 @@ namespace TrafficManager.Patch._VehicleAI._PassengerCarAI {
             int numIterations = 0;
 
             while (curCitizenUnitId != 0u && driverCitizenId == 0u) {
-                uint nextUnit = citizenManager.m_units.m_buffer[curCitizenUnitId].m_nextUnit;
+                ref CitizenUnit currentCitizenUnit = ref curCitizenUnitId.ToCitizenUnit();
                 for (int i = 0; i < 5; i++) {
-                    uint citizenId = citizenManager.m_units.m_buffer[curCitizenUnitId].GetCitizen(i);
+                    uint citizenId = currentCitizenUnit.GetCitizen(i);
                     if (citizenId == 0u) {
                         continue;
                     }
 
-                    driverCitizenInstanceId = citizenManager.m_citizens.m_buffer[citizenId].m_instance;
+                    driverCitizenInstanceId = citizenId.ToCitizen().m_instance;
                     if (driverCitizenInstanceId == 0) {
                         continue;
                     }
 
-                    driverCitizenId = citizenManager.m_instances.m_buffer[driverCitizenInstanceId].m_citizen;
-
                     // NON-STOCK CODE START
-                    targetBuildingId = citizenManager.m_instances.m_buffer[driverCitizenInstanceId].m_targetBuilding;
+                    ref CitizenInstance driverCitizenInstance = ref driverCitizenInstanceId.ToCitizenInstance();
+                    driverCitizenId = driverCitizenInstance.m_citizen;
+                    targetBuildingId = driverCitizenInstance.m_targetBuilding;
                     // NON-STOCK CODE END
 
                     break;
                 }
 
-                curCitizenUnitId = nextUnit;
+                curCitizenUnitId = currentCitizenUnit.m_nextUnit;
                 if (++numIterations > maxUnitCount) {
                     CODebugBase<LogChannel>.Error(LogChannel.Core,
                                                   $"Invalid list detected!\n{Environment.StackTrace}");
@@ -62,9 +63,9 @@ namespace TrafficManager.Patch._VehicleAI._PassengerCarAI {
                 ref vehicleData,
                 vehicleData.Info,
                 driverCitizenId,
-                ref citizenManager.m_citizens.m_buffer[driverCitizenId],
+                ref driverCitizenId.ToCitizen(),
                 driverCitizenInstanceId,
-                ref citizenManager.m_instances.m_buffer[driverCitizenInstanceId],
+                ref driverCitizenInstanceId.ToCitizenInstance(),
                 ref ExtCitizenInstanceManager.Instance.ExtInstances[driverCitizenInstanceId],
                 targetBuildingId,
                 pathPos,

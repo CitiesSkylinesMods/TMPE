@@ -10,7 +10,7 @@ namespace TrafficManager.State {
     using ColossalFramework;
     using System.Collections.Generic;
 
-    public static class OptionsMaintenanceTab {
+    public static class MaintenanceTab {
         [UsedImplicitly]
         private static UIButton _resetStuckEntitiesBtn;
 
@@ -117,7 +117,7 @@ namespace TrafficManager.State {
 
             Options.Indent(_turnOnRedEnabledToggle);
 
-            OptionsMaintenanceTab_DespawnGroup.AddUI(panelHelper);
+            MaintenanceTab_DespawnGroup.AddUI(panelHelper);
 
             // TODO [issue ##959] remove when TTL is implemented in asset editor.
             bool inEditor = TMPELifecycle.InGameOrEditor()
@@ -194,7 +194,7 @@ namespace TrafficManager.State {
             Options.RebuildMenu();
 
             if (!val) {
-                OptionsOverlaysTab.SetPrioritySignsOverlay(false);
+                OverlaysTab.SetPrioritySignsOverlay(false);
                 PoliciesTab.SetTrafficLightPriorityRules(false);
             }
         }
@@ -208,7 +208,7 @@ namespace TrafficManager.State {
             Options.RebuildMenu();
 
             if (!val) {
-                OptionsOverlaysTab.SetTimedLightsOverlay(false);
+                OverlaysTab.SetTimedLightsOverlay(false);
                 PoliciesTab.SetTrafficLightPriorityRules(false);
             }
         }
@@ -222,7 +222,7 @@ namespace TrafficManager.State {
             Options.RebuildMenu();
 
             if (!val) {
-                OptionsOverlaysTab.SetSpeedLimitsOverlay(false);
+                OverlaysTab.SetSpeedLimitsOverlay(false);
             }
         }
 
@@ -235,7 +235,7 @@ namespace TrafficManager.State {
             Options.RebuildMenu();
 
             if (!val) {
-                OptionsOverlaysTab.SetVehicleRestrictionsOverlay(false);
+                OverlaysTab.SetVehicleRestrictionsOverlay(false);
             }
         }
 
@@ -248,7 +248,7 @@ namespace TrafficManager.State {
             Options.RebuildMenu();
 
             if (!val) {
-                OptionsOverlaysTab.SetParkingRestrictionsOverlay(false);
+                OverlaysTab.SetParkingRestrictionsOverlay(false);
             }
         }
 
@@ -265,7 +265,7 @@ namespace TrafficManager.State {
                 PoliciesTab.SetAllowEnterBlockedJunctions(false);
                 PoliciesTab.SetAllowLaneChangesWhileGoingStraight(false);
                 SetTurnOnRedEnabled(false);
-                OptionsOverlaysTab.SetJunctionRestrictionsOverlay(false);
+                OverlaysTab.SetJunctionRestrictionsOverlay(false);
             }
         }
 
@@ -294,7 +294,7 @@ namespace TrafficManager.State {
             RoutingManager.Instance.RequestFullRecalculation();
 
             if (!val) {
-                OptionsOverlaysTab.SetConnectedLanesOverlay(false);
+                OverlaysTab.SetConnectedLanesOverlay(false);
             }
         }
 
@@ -307,7 +307,7 @@ namespace TrafficManager.State {
             }
 
             if (!newValue) {
-                OptionsOverlaysTab.SetSpeedLimitsOverlay(false);
+                OverlaysTab.SetSpeedLimitsOverlay(false);
             }
         }
 
@@ -320,7 +320,7 @@ namespace TrafficManager.State {
             }
 
             if (!newValue) {
-                OptionsOverlaysTab.SetVehicleRestrictionsOverlay(false);
+                OverlaysTab.SetVehicleRestrictionsOverlay(false);
             }
         }
 
@@ -333,7 +333,7 @@ namespace TrafficManager.State {
             }
 
             if (!newValue) {
-                OptionsOverlaysTab.SetParkingRestrictionsOverlay(false);
+                OverlaysTab.SetParkingRestrictionsOverlay(false);
             }
         }
 
@@ -346,7 +346,7 @@ namespace TrafficManager.State {
             }
 
             if (!newValue) {
-                OptionsOverlaysTab.SetJunctionRestrictionsOverlay(false);
+                OverlaysTab.SetJunctionRestrictionsOverlay(false);
             }
         }
 
@@ -372,7 +372,7 @@ namespace TrafficManager.State {
             }
 
             if (!newValue) {
-                OptionsOverlaysTab.SetConnectedLanesOverlay(false);
+                OverlaysTab.SetConnectedLanesOverlay(false);
             }
         }
 

@@ -411,19 +411,18 @@ namespace TrafficManager.Manager.Impl {
                     int numIter = 0;
 
                     while (curUnitId != 0u) {
-                        uint nextUnit = citizenManager.m_units.m_buffer[curUnitId].m_nextUnit;
+                        ref CitizenUnit currentCitizenUnit = ref curUnitId.ToCitizenUnit();
 
                         for (int i = 0; i < 5; i++) {
-                            uint curCitizenId = citizenManager.m_units.m_buffer[curUnitId].GetCitizen(i);
+                            uint curCitizenId = currentCitizenUnit.GetCitizen(i);
 
                             if (curCitizenId != 0u) {
-                                ushort citizenInstanceId = citizenManager
-                                                           .m_citizens.m_buffer[curCitizenId]
-                                                           .m_instance;
-
+                                ushort citizenInstanceId = curCitizenId.ToCitizen().m_instance;
                                 if (citizenInstanceId == 0) {
                                     continue;
                                 }
+
+                                ref CitizenInstance citizenInstance = ref citizenInstanceId.ToCitizenInstance();
 
                                 if (logParkingAi) {
                                     Log._DebugFormat(
@@ -432,7 +431,7 @@ namespace TrafficManager.Manager.Impl {
                                         vehicleID,
                                         citizenInstanceId,
                                         vehicleID,
-                                        citizenManager.m_instances.m_buffer[citizenInstanceId].m_path);
+                                        citizenInstance.m_path);
                                 }
 
                                 if (citizenInstanceId != driverCitizenInstanceId) {
@@ -450,16 +449,16 @@ namespace TrafficManager.Manager.Impl {
                                     extCitizenInstanceManager.Reset(ref extCitizenInstanceManager.ExtInstances[citizenInstanceId]);
                                 }
 
-                                if (citizenManager.m_instances.m_buffer[citizenInstanceId].m_path != 0) {
+                                if (citizenInstance.m_path != 0) {
                                     Singleton<PathManager>.instance.ReleasePath(
-                                        citizenManager.m_instances.m_buffer[citizenInstanceId].m_path);
+                                        citizenInstance.m_path);
 
-                                    citizenManager.m_instances.m_buffer[citizenInstanceId].m_path = 0u;
+                                    citizenInstance.m_path = 0u;
                                 }
                             }
                         }
 
-                        curUnitId = nextUnit;
+                        curUnitId = currentCitizenUnit.m_nextUnit;
 
                         if (++numIter > maxUnitCount) {
                             CODebugBase<LogChannel>.Error(
@@ -485,19 +484,20 @@ namespace TrafficManager.Manager.Impl {
                 int numIter = 0;
 
                 while (curCitizenUnitId != 0u) {
-                    uint nextUnit = citizenManager.m_units.m_buffer[curCitizenUnitId].m_nextUnit;
+                    ref CitizenUnit currentCitizenUnit = ref curCitizenUnitId.ToCitizenUnit();
 
                     for (int j = 0; j < 5; j++) {
-                        uint citId = citizenManager.m_units.m_buffer[curCitizenUnitId].GetCitizen(j);
+                        uint citId = currentCitizenUnit.GetCitizen(j);
                         if (citId == 0u) {
                             continue;
                         }
 
-                        ushort citizenInstanceId = citizenManager.m_citizens.m_buffer[citId].m_instance;
-
+                        ushort citizenInstanceId = citId.ToCitizen().m_instance;
                         if (citizenInstanceId == 0) {
                             continue;
                         }
+                        
+                        ref CitizenInstance citizenInstance = ref citizenInstanceId.ToCitizenInstance();
 
                         // NON-STOCK CODE START
                         if (prohibitPocketCars) {
@@ -506,7 +506,7 @@ namespace TrafficManager.Manager.Impl {
                                     Log._Debug(
                                         $"CustomPassengerCarAI.ExtParkVehicle({vehicleID}): Parking succeeded: " +
                                         $"Doing nothing for citizen instance {citizenInstanceId}! " +
-                                        $"path: {citizenManager.m_instances.m_buffer[citizenInstanceId].m_path}");
+                                        $"path: {citizenInstance.m_path}");
                                 }
 
                                 extCitizenInstanceManager.ExtInstances[citizenInstanceId].pathMode = ExtPathMode.RequiresWalkingPathToTarget;
@@ -519,13 +519,13 @@ namespace TrafficManager.Manager.Impl {
                             continue;
                         }
 
-                        if (citizenManager.m_instances.m_buffer[citizenInstanceId].m_path != 0u) {
-                            pathManager.ReleasePath(citizenManager.m_instances.m_buffer[citizenInstanceId].m_path);
+                        if (citizenInstance.m_path != 0u) {
+                            pathManager.ReleasePath(citizenInstance.m_path);
                         }
 
-                        citizenManager.m_instances.m_buffer[citizenInstanceId].m_path = nextPath;
-                        citizenManager.m_instances.m_buffer[citizenInstanceId].m_pathPositionIndex = (byte)nextPositionIndex;
-                        citizenManager.m_instances.m_buffer[citizenInstanceId].m_lastPathOffset = segmentOffset;
+                        citizenInstance.m_path = nextPath;
+                        citizenInstance.m_pathPositionIndex = (byte)nextPositionIndex;
+                        citizenInstance.m_lastPathOffset = segmentOffset;
 
                         if (logParkingAi) {
                             Log._Debug(
@@ -534,7 +534,7 @@ namespace TrafficManager.Manager.Impl {
                         }
                     }
 
-                    curCitizenUnitId = nextUnit;
+                    curCitizenUnitId = currentCitizenUnit.m_nextUnit;
 
                     if (++numIter > maxUnitCount) {
                         CODebugBase<LogChannel>.Error(

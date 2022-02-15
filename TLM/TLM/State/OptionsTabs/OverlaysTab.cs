@@ -5,7 +5,7 @@ namespace TrafficManager.State {
     using TrafficManager.UI.Helpers;
     using TrafficManager.UI;
 
-    public static class OptionsOverlaysTab {
+    public static class OverlaysTab {
         private static UICheckBox _prioritySignsOverlayToggle;
         private static UICheckBox _timedLightsOverlayToggle;
         private static UICheckBox _speedLimitsOverlayToggle;
