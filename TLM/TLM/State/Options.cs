@@ -36,12 +36,9 @@ namespace TrafficManager.State {
 
         /// <summary>
         /// When <c>true</c>, options are safe to query.
-        ///
-        /// When <c>false</c>, options are being loaded/saved/unloaded and should not be queried.
         /// </summary>
         /// <remarks>
         /// Is set <c>true</c> after options are loaded via <see cref="Manager.Impl.OptionsManager"/>.
-        /// 
         /// Is set <c>false</c> while options are being saved, and also when level unloads.
         /// </remarks>
         public static bool Available = false;
