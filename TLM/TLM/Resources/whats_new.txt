@@ -8,7 +8,7 @@
 [Mod] Incompatible: `TMPE:TrafficManager全部汉化` - unsupported clone #1390 (aubergine18)
 [Fixed] `StackOverflowException` due to `What's New` panel autolayout #1393 #1314 (krzychu124)
 [Updated] Extend Harmony patch manager to allow manual patches #1386 #1361 (sway2020)
-[Updated] Various code clean-up and micro optimisations #1401 #1400 #1399 #1398 #1397 #1396 (egi)
+[Updated] Various code clean-up and micro optimisations #1406 #1401 #1400 #1399 #1398 #1397 #1396 (egi)
 [Updated] Remove duplicate button clean-up code in lifecycle #1375 (aubergine18)
 [Updated] Internal restructuring of mod options code #1369 #1370 #1371 #1373 #1374 (aubergine18)
 [/Version]
