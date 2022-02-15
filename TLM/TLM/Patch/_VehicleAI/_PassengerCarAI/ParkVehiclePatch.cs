@@ -41,10 +41,10 @@ namespace TrafficManager.Patch._VehicleAI._PassengerCarAI {
                         continue;
                     }
 
-                    driverCitizenId = citizenManager.m_instances.m_buffer[driverCitizenInstanceId].m_citizen;
-
                     // NON-STOCK CODE START
-                    targetBuildingId = citizenManager.m_instances.m_buffer[driverCitizenInstanceId].m_targetBuilding;
+                    ref CitizenInstance driverCitizenInstance = ref driverCitizenInstanceId.ToCitizenInstance();
+                    driverCitizenId = driverCitizenInstance.m_citizen;
+                    targetBuildingId = driverCitizenInstance.m_targetBuilding;
                     // NON-STOCK CODE END
 
                     break;
@@ -65,7 +65,7 @@ namespace TrafficManager.Patch._VehicleAI._PassengerCarAI {
                 driverCitizenId,
                 ref driverCitizenId.ToCitizen(),
                 driverCitizenInstanceId,
-                ref citizenManager.m_instances.m_buffer[driverCitizenInstanceId],
+                ref driverCitizenInstanceId.ToCitizenInstance(),
                 ref ExtCitizenInstanceManager.Instance.ExtInstances[driverCitizenInstanceId],
                 targetBuildingId,
                 pathPos,

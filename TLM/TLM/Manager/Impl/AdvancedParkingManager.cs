@@ -39,11 +39,8 @@ namespace TrafficManager.Manager.Impl {
         }
 
         protected override void OnDisableFeatureInternal() {
-            for (var citizenInstanceId = 0;
-                 citizenInstanceId < ExtCitizenInstanceManager.Instance.ExtInstances.Length;
-                 ++citizenInstanceId) {
-                ExtPathMode pathMode = ExtCitizenInstanceManager
-                               .Instance.ExtInstances[citizenInstanceId].pathMode;
+            for (uint citizenInstanceId = 0; citizenInstanceId < ExtCitizenInstanceManager.Instance.ExtInstances.Length; ++citizenInstanceId) {
+                ExtPathMode pathMode = ExtCitizenInstanceManager.Instance.ExtInstances[citizenInstanceId].pathMode;
                 switch (pathMode) {
                     case ExtPathMode.RequiresWalkingPathToParkedCar:
                     case ExtPathMode.CalculatingWalkingPathToParkedCar:
@@ -63,7 +60,8 @@ namespace TrafficManager.Manager.Impl {
                     case ExtPathMode.DrivingToTarget: {
                         // citizen instance requires a car but is walking: release instance to
                         // prevent it from floating
-                        if ((Singleton<CitizenManager>.instance.m_instances.m_buffer[(ushort)citizenInstanceId].m_flags & CitizenInstance.Flags.Character) != 0) {
+                        ref CitizenInstance citizenInstance = ref citizenInstanceId.ToCitizenInstance();
+                        if (citizenInstance.IsCharacter()) {
                             Singleton<CitizenManager>.instance.ReleaseCitizenInstance((ushort)citizenInstanceId);
                         }
 
@@ -1843,9 +1841,7 @@ namespace TrafficManager.Manager.Impl {
             IExtCitizenInstanceManager extCitInstMan = Constants.ManagerFactory.ExtCitizenInstanceManager;
 
 #if DEBUG
-            CitizenInstance[] citizensBuffer = Singleton<CitizenManager> .instance.m_instances.m_buffer;
-            ushort ctzTargetBuilding = citizensBuffer[extDriverInstance.instanceId] .m_targetBuilding;
-            ushort ctzSourceBuilding = citizensBuffer[extDriverInstance.instanceId] .m_sourceBuilding;
+            ref CitizenInstance citizenInstance = ref extDriverInstance.instanceId.ToCitizenInstance();
 
             bool citizenDebug
                     = (DebugSettings.VehicleId == 0
@@ -1855,9 +1851,9 @@ namespace TrafficManager.Manager.Impl {
                       && (DebugSettings.CitizenId == 0
                           || DebugSettings.CitizenId == extCitInstMan.GetCitizenId(extDriverInstance.instanceId))
                       && (DebugSettings.SourceBuildingId == 0
-                          || DebugSettings.SourceBuildingId == ctzSourceBuilding)
+                          || DebugSettings.SourceBuildingId == citizenInstance.m_sourceBuilding)
                       && (DebugSettings.TargetBuildingId == 0
-                          || DebugSettings.TargetBuildingId == ctzTargetBuilding);
+                          || DebugSettings.TargetBuildingId == citizenInstance.m_targetBuilding);
 
             bool logParkingAi = DebugSwitch.BasicParkingAILog.Get() && citizenDebug;
             bool extendedLogParkingAi = DebugSwitch.ExtendedParkingAILog.Get() && citizenDebug;
