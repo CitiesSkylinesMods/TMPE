@@ -10,13 +10,6 @@ namespace TrafficManager.API.Manager {
         bool MayPublishSegmentChanges();
 
         /// <summary>
-        /// Determine if TM:PE mod options in <see cref="Options"/> are safe to query.
-        /// </summary>
-        /// <returns>Returns <c>true</c> if safe to query, otherwise <c>false</c>.</returns>
-        /// <remarks>Options are only safe to query in editor/game, except while loading/saving.</remarks>
-        public bool OptionsAreSafeToQuery();
-
-        /// <summary>
         /// Get current value of TMPE mod option from <see cref="Options"/>.
         /// </summary>
         /// <typeparam name="TVal">Option type, eg. <c>bool</c>.</typeparam>

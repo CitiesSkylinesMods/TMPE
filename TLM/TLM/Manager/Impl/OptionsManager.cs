@@ -31,13 +31,6 @@ namespace TrafficManager.Manager.Impl {
         }
 
         /// <summary>
-        /// Determine if TM:PE mod options in <see cref="Options"/> are safe to query.
-        /// </summary>
-        /// <returns>Returns <c>true</c> if safe to query, otherwise <c>false</c>.</returns>
-        /// <remarks>Options are only safe to query in editor/game, except while loading/saving.</remarks>
-        public bool OptionsAreSafeToQuery() => Options.Available;
-
-        /// <summary>
         /// API method for external mods to get option values by name.
         /// </summary>
         /// <typeparam name="TVal">Option type, eg. <c>bool</c>.</typeparam>
@@ -46,6 +39,11 @@ namespace TrafficManager.Manager.Impl {
         /// <returns>Returns <c>true</c> if successful, or <c>false</c> if there was a problem (eg. option not found, wrong TVal, etc).</returns>
         /// <remarks>Check <see cref="OptionsAreSafeToQuery"/> first before trying to get an option value.</remarks>
         public bool TryGetOptionByName<TVal>(string optionName, out TVal value) {
+            if (!Options.Available) {
+                value = default;
+                return false;
+            }
+
             var field = typeof(Options).GetField(optionName, BindingFlags.Static | BindingFlags.Public);
 
             if (field == null || field.FieldType is not TVal) {
@@ -198,8 +196,6 @@ namespace TrafficManager.Manager.Impl {
 
         public byte[] SaveData(ref bool success) {
 
-            Options.Available = false;
-
             // Remember to update this when adding new options (lastIdx + 1)
             var save = new byte[59];
 
@@ -269,15 +265,10 @@ namespace TrafficManager.Manager.Impl {
 
                 save[58] = (byte)Options.SavegamePathfinderEdition;
 
-                Options.Available = true;
-
                 return save;
             }
             catch (Exception ex) {
                 ex.LogException();
-
-                Options.Available = true;
-
                 return save; // try and salvage some of the settings
             }
         }
