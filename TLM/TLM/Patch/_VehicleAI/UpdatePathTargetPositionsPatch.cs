@@ -423,7 +423,8 @@ namespace TrafficManager.Patch._VehicleAI {
 
                 // find next lane (emergency vehicles / dynamic lane selection)
                 int bestLaneIndex = nextPosition.m_lane;
-                if ((vehicleData.m_flags & Vehicle.Flags.Emergency2) != 0) {
+                if ((vehicleData.m_flags & Vehicle.Flags.Emergency2) != 0 &&
+                    (vehicleData.Info.m_vehicleType & VehicleInfo.VehicleType.Car) != 0) {
                     Log._DebugIf(
                         logLogic,
                         () => $"CustomVehicle.CustomUpdatePathTargetPositions({vehicleID}): " +
@@ -450,94 +451,78 @@ namespace TrafficManager.Patch._VehicleAI {
                         () => $"CustomVehicle.CustomUpdatePathTargetPositions({vehicleID}): " +
                         "Found best lane for emergency vehicles. " +
                         $"After: bestLaneIndex={bestLaneIndex}");
-                } else if (VehicleBehaviorManager.Instance.MayFindBestLane(
-                    vehicleID,
-                    ref vehicleData,
-                    ref ExtVehicleManager.Instance.ExtVehicles[vehicleID]))
-                {
+                } else if (firstIter &&
+                           __instance.m_info.m_vehicleType == VehicleInfo.VehicleType.Car &&
+                           VehicleBehaviorManager.Instance.MayFindBestLane(
+                               vehicleID,
+                               ref vehicleData,
+                               ref ExtVehicleManager.Instance.ExtVehicles[vehicleID])) {
                     // NON-STOCK CODE START
-                    if (firstIter
-                        && __instance.m_info.m_vehicleType == VehicleInfo.VehicleType.Car) {
-                        Log._DebugIf(
-                            logLogic,
-                            () => $"CustomVehicle.CustomUpdatePathTargetPositions({vehicleID}): " +
-                            "Finding best lane for regular vehicles. Before: " +
-                            $"bestLaneIndex={bestLaneIndex}");
+                    Log._DebugIf(
+                        logLogic,
+                        () => $"CustomVehicle.CustomUpdatePathTargetPositions({vehicleID}): " +
+                              "Finding best lane for regular vehicles. Before: " +
+                              $"bestLaneIndex={bestLaneIndex}. Using DLS.");
 
-                        if (!__instance.m_info.m_isLargeVehicle) {
-                            if (VehicleBehaviorManager.Instance.MayFindBestLane(
-                                vehicleID,
-                                ref vehicleData,
-                                ref ExtVehicleManager.Instance.ExtVehicles[vehicleID])) {
-                                Log._DebugIf(
-                                    logLogic,
-                                    () => $"CustomVehicle.CustomUpdatePathTargetPositions({vehicleID}): " +
-                                    "Using DLS.");
+                    uint next2PathId = nextPathId;
+                    int next2PathPosIndex = nextCoarsePathPosIndex;
+                    NetInfo next2SegmentInfo = null;
+                    PathUnit.Position next3PathPos;
+                    NetInfo next3SegmentInfo = null;
+                    PathUnit.Position next4PathPos;
 
-                                uint next2PathId = nextPathId;
-                                int next2PathPosIndex = nextCoarsePathPosIndex;
-                                NetInfo next2SegmentInfo = null;
-                                PathUnit.Position next3PathPos;
-                                NetInfo next3SegmentInfo = null;
-                                PathUnit.Position next4PathPos;
+                    if (PathUnit.GetNextPosition(
+                        ref next2PathId,
+                        ref next2PathPosIndex,
+                        out PathUnit.Position next2PathPos,
+                        out _)) {
+                        next2SegmentInfo = next2PathPos.m_segment.ToSegment().Info;
 
-                                if (PathUnit.GetNextPosition(
-                                    ref next2PathId,
-                                    ref next2PathPosIndex,
-                                    out PathUnit.Position next2PathPos,
-                                    out _))
-                                {
-                                    next2SegmentInfo = next2PathPos.m_segment.ToSegment().Info;
+                        uint next3PathId = next2PathId;
+                        int next3PathPosIndex = next2PathPosIndex;
 
-                                    uint next3PathId = next2PathId;
-                                    int next3PathPosIndex = next2PathPosIndex;
+                        if (PathUnit.GetNextPosition(
+                            ref next3PathId,
+                            ref next3PathPosIndex,
+                            out next3PathPos,
+                            out _)) {
+                            next3SegmentInfo = next3PathPos.m_segment.ToSegment().Info;
 
-                                    if (PathUnit.GetNextPosition(
-                                        ref next3PathId,
-                                        ref next3PathPosIndex,
-                                        out next3PathPos,
-                                        out _))
-                                    {
-                                        next3SegmentInfo = next3PathPos.m_segment.ToSegment().Info;
-
-                                        uint next4PathId = next3PathId;
-                                        int next4PathPosIndex = next3PathPosIndex;
-                                        if (!PathUnit.GetNextPosition(
-                                                ref next4PathId,
-                                                ref next4PathPosIndex,
-                                                out next4PathPos,
-                                                out _)) {
-                                            next4PathPos = default;
-                                        }
-                                    } else {
-                                        next3PathPos = default;
-                                        next4PathPos = default;
-                                    }
-                                } else {
-                                    next2PathPos = default;
-                                    next3PathPos = default;
-                                    next4PathPos = default;
-                                }
-
-                                bestLaneIndex = VehicleBehaviorManager.Instance.FindBestLane(
-                                    vehicleID,
-                                    ref vehicleData,
-                                    ref ExtVehicleManager.Instance.ExtVehicles[vehicleID],
-                                    curLaneId,
-                                    currentPosition,
-                                    curSegmentInfo,
-                                    nextPosition,
-                                    nextSegmentInfo,
-                                    next2PathPos,
-                                    next2SegmentInfo,
-                                    next3PathPos,
-                                    next3SegmentInfo,
-                                    next4PathPos);
+                            uint next4PathId = next3PathId;
+                            int next4PathPosIndex = next3PathPosIndex;
+                            if (!PathUnit.GetNextPosition(
+                                    ref next4PathId,
+                                    ref next4PathPosIndex,
+                                    out next4PathPos,
+                                    out _)) {
+                                next4PathPos = default;
                             }
+                        } else {
+                            next3PathPos = default;
+                            next4PathPos = default;
                         }
-
-                        // NON-STOCK CODE END
+                    } else {
+                        next2PathPos = default;
+                        next3PathPos = default;
+                        next4PathPos = default;
                     }
+
+                    bestLaneIndex = VehicleBehaviorManager.Instance.FindBestLane(
+                        vehicleID,
+                        ref vehicleData,
+                        ref ExtVehicleManager.Instance.ExtVehicles[vehicleID],
+                        curLaneId,
+                        currentPosition,
+                        curSegmentInfo,
+                        nextPosition,
+                        nextSegmentInfo,
+                        next2PathPos,
+                        next2SegmentInfo,
+                        next3PathPos,
+                        next3SegmentInfo,
+                        next4PathPos);
+
+                    // NON-STOCK CODE END
                 }
 
                 Log._DebugIf(
@@ -825,7 +810,7 @@ namespace TrafficManager.Patch._VehicleAI {
                     }
 
                     if (curMaxSpeed < 0.01f
-                        || (nextPositionSegment.m_flags 
+                        || (nextPositionSegment.m_flags
                             & (NetSegment.Flags.Collapsed
                                | NetSegment.Flags.Flooded)) != NetSegment.Flags.None)
                     {
