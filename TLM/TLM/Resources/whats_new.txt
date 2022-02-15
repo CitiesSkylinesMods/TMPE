@@ -1,5 +1,6 @@
 [Version] 11.6.5.0
 [Meta] Due to targeted malware, we are unable to provide support if you have mods by `Chaos`/`Holy Water`/`drok`, even if those mods are currently malware-free #1391 (TM:PE Team)
+[New] Overlays mod option to show default speed when overriding segment/lane speeds #1404 (aubergine18)
 [Mod] Compatible: `Reversible Tram AI` full compatibility #1386 #1353 (sway2020)
 [Mod] Compatible: `Supply Chain Coloring` workshop version only #1390 (aubergine18)
 [Mod] Compatible: `Transfer Broker BETA` workshop version only #1390 (aubergine18)
@@ -7,12 +8,12 @@
 [Mod] Incompatible: `Traffic Manager (Curated)` - unsupported clone #1390 (aubergine18)
 [Mod] Incompatible: `TMPE:TrafficManager全部汉化` - unsupported clone #1390 (aubergine18)
 [Fixed] `StackOverflowException` due to `What's New` panel autolayout #1393 #1314 (krzychu124)
+[Updated] Speed Limits: Always use themed icons in segment/lane modes #1404 (aubergine18)
 [Updated] Extend Harmony patch manager to allow manual patches #1386 #1361 (sway2020)
 [Updated] Various code clean-up and micro optimisations #1406 #1401 #1400 #1399 #1398 #1397 #1396 (egi)
 [Updated] Remove duplicate button clean-up code in lifecycle #1375 (aubergine18)
 [Updated] Internal restructuring of mod options code #1403 #1369 #1370 #1371 #1373 #1374 (aubergine18)
 [/Version]
-
 
 [Version] 11.6.4.8
 [Stable]
