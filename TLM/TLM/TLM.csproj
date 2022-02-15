@@ -148,6 +148,7 @@
     <Compile Include="Manager\Impl\ExtSegmentManager.cs" />
     <Compile Include="Manager\Impl\GeometryNotifier.cs" />
     <Compile Include="Patch\_External\RTramAIModPatch.cs" />
+    <Compile Include="State\OptionsTabs\GeneralTab_LocalisationGroup.cs" />
     <Compile Include="State\OptionsTabs\GeneralTab_DebugGroup.cs" />
     <Compile Include="State\OptionsTabs\MaintenanceTab_DespawnGroup.cs" />
     <Compile Include="State\VersionInfo.cs" />

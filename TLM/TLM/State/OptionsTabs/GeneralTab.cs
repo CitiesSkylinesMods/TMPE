@@ -1,27 +1,20 @@
 namespace TrafficManager.State {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
     using TrafficManager.API.Traffic.Enums;
     using ColossalFramework.UI;
     using CSUtil.Commons;
     using ICities;
     using JetBrains.Annotations;
     using TrafficManager.U;
-    using TrafficManager.UI.Helpers;
-    using TrafficManager.UI.SubTools.SpeedLimits;
     using TrafficManager.UI;
+    using TrafficManager.UI.Helpers;
+    using TrafficManager.UI.WhatsNew;
     using UnityEngine;
     using TrafficManager.Lifecycle;
-    using TrafficManager.State.ConfigData;
-    using TrafficManager.UI.Textures;
-    using UI.WhatsNew;
 
     public static class GeneralTab {
         private static UICheckBox _instantEffectsToggle;
 
         [UsedImplicitly]
-        private static UIDropDown _languageDropdown;
         private static UIDropDown _simulationAccuracyDropdown;
 
         [UsedImplicitly]
@@ -43,10 +36,6 @@ namespace TrafficManager.State {
         private static UICheckBox _scanForKnownIncompatibleModsToggle;
         private static UICheckBox _ignoreDisabledModsToggle;
 
-        private static UICheckBox _displayMphToggle;
-
-        private static UIDropDown _roadSignsThemeDropdown;
-
         private static UICheckBox _useUUI;
 
         private static string T(string key) => Translation.Options.Get(key);
@@ -63,36 +52,8 @@ namespace TrafficManager.State {
             tab.AddButton("What's New?", WhatsNew.OpenModal);
             tab.AddSpace(5);
 
-            group = tab.AddGroup(T("General.Group:Localisation"));
+            GeneralTab_LocalisationGroup.AddUI(tab);
 
-            string[] languageLabels = new string[Translation.AvailableLanguageCodes.Count + 1];
-            languageLabels[0] = T("General.Dropdown.Option:Game language");
-
-            for (int i = 0; i < Translation.AvailableLanguageCodes.Count; ++i) {
-                languageLabels[i + 1] = Translation.Options.Get(
-                    lang: Translation.AvailableLanguageCodes[i],
-                    key: "General.Dropdown.Option:Language Name");
-            }
-
-            int languageIndex = 0;
-            string curLangCode = GlobalConfig.Instance.LanguageCode;
-
-            if (curLangCode != null) {
-                languageIndex = Translation.AvailableLanguageCodes.IndexOf(curLangCode);
-                if (languageIndex < 0) {
-                    languageIndex = 0;
-                } else {
-                    ++languageIndex;
-                }
-            }
-
-            _languageDropdown = group.AddDropdown(
-                                    text: T("General.Dropdown:Select language") + ":",
-                                    options: languageLabels,
-                                    defaultSelection: languageIndex,
-                                    eventCallback: OnLanguageChanged) as UIDropDown;
-
-            SetupSpeedLimitsPanel(group);
 
             group = tab.AddGroup(T("General.Group:Interface"));
 
@@ -178,60 +139,6 @@ namespace TrafficManager.State {
                       T("General.Checkbox:Notify me about TM:PE startup conflicts"),
                       GlobalConfig.Instance.Main.ShowCompatibilityCheckErrorMessage,
                       OnShowCompatibilityCheckErrorChanged) as UICheckBox;
-        }
-
-        private static void SetupSpeedLimitsPanel(UIHelperBase generalGroup) {
-            Main mainConfig = GlobalConfig.Instance.Main;
-
-            _displayMphToggle = generalGroup.AddCheckbox(
-                                    text: Translation.SpeedLimits.Get("Checkbox:Display speed limits mph"),
-                                    defaultValue: mainConfig.DisplaySpeedLimitsMph,
-                                    eventCallback: OnDisplayMphChanged) as UICheckBox;
-
-            string FormatThemeName(string themeName) {
-                return Translation.SpeedLimits.Get($"RoadSignTheme:{themeName}");
-            }
-
-            List<string> themeNames = RoadSignThemes.Instance.ThemeNames;
-            var themeOptions = themeNames.Select(FormatThemeName).ToArray();
-            int selectedThemeIndex = themeNames.FindIndex(x => x == mainConfig.RoadSignTheme);
-            int defaultSignsThemeIndex = RoadSignThemes.Instance.FindDefaultThemeIndex(GlobalConfig.Instance.Main.DisplaySpeedLimitsMph);
-
-            _roadSignsThemeDropdown
-                = generalGroup.AddDropdown(
-                      text: Translation.SpeedLimits.Get("General.Dropdown:Road signs theme") + ":",
-                      options: themeOptions,
-                      defaultSelection: selectedThemeIndex >= 0 ? selectedThemeIndex : defaultSignsThemeIndex,
-                      eventCallback: OnRoadSignsThemeChanged) as UIDropDown;
-
-            _roadSignsThemeDropdown.width *= 2.0f;
-        }
-
-        private static void OnLanguageChanged(int newLanguageIndex) {
-            if (newLanguageIndex <= 0) {
-                GlobalConfig.Instance.LanguageCode = null;
-                GlobalConfig.WriteConfig();
-
-                // TODO: Move this to the owner class and implement IObserver<ModUI.EventPublishers.LanguageChangeNotification>
-                Translation.SetCurrentLanguageToGameLanguage();
-                Options.RebuildMenu();
-            } else if (newLanguageIndex - 1 < Translation.AvailableLanguageCodes.Count) {
-                string newLang = Translation.AvailableLanguageCodes[newLanguageIndex - 1];
-                GlobalConfig.Instance.LanguageCode = newLang;
-                GlobalConfig.WriteConfig();
-                // TODO: Move this to the owner class and implement IObserver<ModUI.EventPublishers.LanguageChangeNotification>
-                Translation.SetCurrentLanguageToTMPELanguage();
-                Options.RebuildMenu();
-            } else {
-                Log.Warning($"Options.onLanguageChanged: Invalid language index: {newLanguageIndex}");
-                return;
-            }
-
-            if (Options.IsGameLoaded(false)) {
-                // Events will be null when mod is not fully loaded and language changed in main menu
-                ModUI.Instance.Events.LanguageChanged();
-            }
-            Options.RebuildOptions();
         }
 
         private static void OnLockButtonChanged(bool newValue) {
@@ -352,79 +259,6 @@ namespace TrafficManager.State {
         private static void OnIgnoreDisabledModsChanged(bool newValue) {
             Log._Debug($"Ignore disabled mods changed to {newValue}");
             GlobalConfig.Instance.Main.IgnoreDisabledMods = newValue;
-            GlobalConfig.WriteConfig();
-        }
-
-        private static void OnDisplayMphChanged(bool newMphValue) {
-            bool supportedByTheme = newMphValue
-                                        ? RoadSignThemes.ActiveTheme.SupportsMph
-                                        : RoadSignThemes.ActiveTheme.SupportsKmph;
-            Main mainConfig = GlobalConfig.Instance.Main;
-
-            if (!supportedByTheme) {
-                // Reset to German road signs theme
-                _roadSignsThemeDropdown.selectedIndex = RoadSignThemes.Instance.FindDefaultThemeIndex(newMphValue);
-                mainConfig.RoadSignTheme = RoadSignThemes.Instance.GetDefaultThemeName(newMphValue);
-                Log.Info(
-                    $"Display MPH changed to {newMphValue}, but was not supported by current theme, "
-                    + "so theme was also reset to German_Kmph");
-            } else {
-                Log.Info($"Display MPH changed to {newMphValue}");
-            }
-
-            mainConfig.DisplaySpeedLimitsMph = newMphValue;
-
-            GlobalConfig.WriteConfig();
-
-            if (Options.IsGameLoaded(false)) {
-                ModUI.Instance.Events.DisplayMphChanged(newMphValue);
-            }
-        }
-
-        public static void SetDisplayInMph(bool value) {
-            if (_displayMphToggle != null) {
-                _displayMphToggle.isChecked = value;
-            }
-        }
-
-        private static void OnRoadSignsThemeChanged(int newThemeIndex) {
-            if (!Options.IsGameLoaded()) {
-                return;
-            }
-
-            var newTheme = RoadSignThemes.Instance.ThemeNames[newThemeIndex];
-
-            Main mainConfig = GlobalConfig.Instance.Main;
-            switch (RoadSignThemes.Instance.ChangeTheme(
-                        newTheme: newTheme,
-                        mphEnabled: mainConfig.DisplaySpeedLimitsMph)) {
-                case RoadSignThemes.ChangeThemeResult.Success:
-                    Log.Info($"Road Sign theme changed to {newTheme}");
-                    mainConfig.RoadSignTheme = newTheme;
-                    break;
-                case RoadSignThemes.ChangeThemeResult.ForceKmph:
-                    mainConfig.DisplaySpeedLimitsMph = false;
-                    _displayMphToggle.isChecked = false;
-
-                    Log.Info($"Road Sign theme was changed to {newTheme} AND display switched to km/h");
-
-                    if (Options.IsGameLoaded(false)) {
-                        ModUI.Instance.Events.DisplayMphChanged(false);
-                    }
-                    break;
-                case RoadSignThemes.ChangeThemeResult.ForceMph:
-                    mainConfig.DisplaySpeedLimitsMph = true;
-                    _displayMphToggle.isChecked = true;
-
-                    Log.Info($"Road Sign theme was changed to {newTheme} AND display switched to MPH");
-
-                    if (Options.IsGameLoaded(false)) {
-                        ModUI.Instance.Events.DisplayMphChanged(true);
-                    }
-                    break;
-            }
-
-            mainConfig.RoadSignTheme = newTheme;
             GlobalConfig.WriteConfig();
         }
 
