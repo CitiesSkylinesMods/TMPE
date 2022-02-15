@@ -96,20 +96,20 @@ namespace TrafficManager.Manager.Impl {
                 OverlaysTab.SetConnectedLanesOverlay(LoadBool(data, idx: 17));
                 PoliciesTab.SetPrioritySignsEnabled(LoadBool(data, idx: 18));
                 PoliciesTab.SetTimedLightsEnabled(LoadBool(data, idx: 19));
-                OptionsMaintenanceTab.SetCustomSpeedLimitsEnabled(LoadBool(data, idx: 20));
-                OptionsMaintenanceTab.SetVehicleRestrictionsEnabled(LoadBool(data, idx: 21));
-                OptionsMaintenanceTab.SetLaneConnectorEnabled(LoadBool(data, idx: 22));
+                MaintenanceTab.SetCustomSpeedLimitsEnabled(LoadBool(data, idx: 20));
+                MaintenanceTab.SetVehicleRestrictionsEnabled(LoadBool(data, idx: 21));
+                MaintenanceTab.SetLaneConnectorEnabled(LoadBool(data, idx: 22));
                 OverlaysTab.SetJunctionRestrictionsOverlay(LoadBool(data, idx: 23));
-                OptionsMaintenanceTab.SetJunctionRestrictionsEnabled(LoadBool(data, idx: 24));
+                MaintenanceTab.SetJunctionRestrictionsEnabled(LoadBool(data, idx: 24));
                 GameplayTab.SetProhibitPocketCars(LoadBool(data, idx: 25));
                 PoliciesTab.SetPreferOuterLane(LoadBool(data, idx: 26));
                 GameplayTab.SetIndividualDrivingStyle(LoadBool(data, idx: 27));
                 PoliciesTab.SetEvacBussesMayIgnoreRules(LoadBool(data, idx: 28));
                 GeneralTab.SetInstantEffects(LoadBool(data, idx: 29));
-                OptionsMaintenanceTab.SetParkingRestrictionsEnabled(LoadBool(data, idx: 30));
+                MaintenanceTab.SetParkingRestrictionsEnabled(LoadBool(data, idx: 30));
                 OverlaysTab.SetParkingRestrictionsOverlay(LoadBool(data, idx: 31));
                 PoliciesTab.SetBanRegularTrafficOnBusLanes(LoadBool(data, idx: 32));
-                OptionsMaintenanceTab.SetShowPathFindStats(LoadBool(data, idx: 33));
+                MaintenanceTab.SetShowPathFindStats(LoadBool(data, idx: 33));
                 GameplayTab.SetDLSPercentage(LoadByte(data, idx: 34));
 
                 if (data.Length > 35) {
@@ -125,7 +125,7 @@ namespace TrafficManager.Manager.Impl {
 
                 PoliciesTab.SetTrafficLightPriorityRules(LoadBool(data, idx: 36));
                 GameplayTab.SetRealisticPublicTransport(LoadBool(data, idx: 37));
-                OptionsMaintenanceTab.SetTurnOnRedEnabled(LoadBool(data, idx: 38));
+                MaintenanceTab.SetTurnOnRedEnabled(LoadBool(data, idx: 38));
                 PoliciesTab.SetAllowNearTurnOnRed(LoadBool(data, idx: 39));
                 PoliciesTab.SetAllowFarTurnOnRed(LoadBool(data, idx: 40));
                 PoliciesTab.SetAddTrafficLightsIfApplicable(LoadBool(data, idx: 41));
