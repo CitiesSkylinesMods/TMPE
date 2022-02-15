@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -149,7 +149,7 @@
     <Compile Include="Manager\Impl\GeometryNotifier.cs" />
     <Compile Include="Patch\_External\RTramAIModPatch.cs" />
     <Compile Include="State\OptionsTabs\GeneralTab_DebugGroup.cs" />
-    <Compile Include="State\OptionsTabs\OptionsMaintenanceTab_DespawnGroup.cs" />
+    <Compile Include="State\OptionsTabs\MaintenanceTab_DespawnGroup.cs" />
     <Compile Include="State\VersionInfo.cs" />
     <Compile Include="UI\WhatsNew\MarkupKeyword.cs" />
     <Compile Include="UI\WhatsNew\WhatsNewMarkup.cs" />
@@ -303,7 +303,7 @@
     <Compile Include="State\OptionsTabs\GameplayTab.cs" />
     <Compile Include="State\OptionsTabs\GeneralTab.cs" />
     <Compile Include="State\OptionsTabs\KeybindsTab.cs" />
-    <Compile Include="State\OptionsTabs\OptionsMaintenanceTab.cs" />
+    <Compile Include="State\OptionsTabs\MaintenanceTab.cs" />
     <Compile Include="State\OptionsTabs\OptionsMassEditTab.cs" />
     <Compile Include="State\OptionsTabs\OverlaysTab.cs" />
     <Compile Include="State\OptionsTabs\PoliciesTab.cs" />

@@ -131,6 +131,8 @@ namespace TrafficManager.State {
         // See PathfinderUpdates.cs
         public static byte SavegamePathfinderEdition;
 
+        public static bool showDefaultSpeedSubIcon;
+
         /// <summary>
         /// Invoked on options change to refresh the main menu and possibly update the labels for
         /// a new language. Takes a second, very slow.
@@ -162,7 +164,7 @@ namespace TrafficManager.State {
                 GameplayTab.MakeSettings_Gameplay(tabStrip);
                 PoliciesTab.MakeSettings_VehicleRestrictions(tabStrip);
                 OverlaysTab.MakeSettings_Overlays(tabStrip);
-                OptionsMaintenanceTab.MakeSettings_Maintenance(tabStrip);
+                MaintenanceTab.MakeSettings_Maintenance(tabStrip);
                 KeybindsTab.MakeSettings_Keybinds(tabStrip);
                 tabStrip.Invalidate();
             } catch (Exception ex) {

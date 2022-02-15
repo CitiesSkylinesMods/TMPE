@@ -2,7 +2,6 @@ namespace TrafficManager.State {
     using ColossalFramework;
     using ICities;
     using System.Collections.Generic;
-    using System.Diagnostics.CodeAnalysis;
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.Lifecycle;
     using TrafficManager.Manager.Impl;
@@ -10,49 +9,56 @@ namespace TrafficManager.State {
     using TrafficManager.UI.Helpers;
 
     /// <summary>Filterable despawn tool which only appears in-game (not from main menu or editors).</summary>
-    [SuppressMessage("StyleCop.CSharp.LayoutRules", "SA1516:Elements should be separated by blank line", Justification = "Brevity.")]
-    [SuppressMessage("StyleCop.CSharp.LayoutRules", "SA1500:Braces for multi-line statements should not share line", Justification = "Brevity.")]
-    public static class OptionsMaintenanceTab_DespawnGroup {
+    public static class MaintenanceTab_DespawnGroup {
+
         public static CheckboxOption DespawnerAll =
             new ("DespawnerAll", Options.PersistTo.None) {
                 Label = "Despawn.Checkbox:All vehicles",
                 Handler = OnDespawnerAllChange,
             };
+
         public static CheckboxOption DespawnerRoad =
             new ("DespawnerRoad", Options.PersistTo.None) {
                 Label = "Despawn.Checkbox:Road vehicles",
                 Handler = OnDespawnerChange,
             };
+
         public static CheckboxOption DespawnerParked =
             new ("DespawnerParked", Options.PersistTo.None) {
                 Label = "Despawn.Checkbox:Parked vehicles",
                 Handler = OnDespawnerChange,
             };
+
         public static CheckboxOption DespawnerServices =
             new ("DespawnerServices", Options.PersistTo.None) {
                 Label = "Despawn.Checkbox:Service vehicles",
                 Handler = OnDespawnerChange,
             };
+
         public static CheckboxOption DespawnerTransport =
             new ("DespawnerTransport", Options.PersistTo.None) {
                 Label = "Despawn.Checkbox:Public Transport vehicles",
                 Handler = OnDespawnerChange,
             };
+
         public static CheckboxOption DespawnerPassengerTrains =
             new ("DespawnerPassengerTrains", Options.PersistTo.None) {
                 Label = "Despawn.Checkbox:Passenger Trains",
                 Handler = OnDespawnerChange,
             };
+
         public static CheckboxOption DespawnerCargoTrains =
             new ("DespawnerCargoTrains", Options.PersistTo.None) {
                 Label = "Despawn.Checkbox:Cargo Trains",
                 Handler = OnDespawnerChange,
             };
+
         public static CheckboxOption DespawnerAircraft =
             new ("DespawnerAircraft", Options.PersistTo.None) {
                 Label = "Despawn.Checkbox:Aircraft",
                 Handler = OnDespawnerChange,
             };
+
         public static CheckboxOption DespawnerShips =
             new ("DespawnerShips", Options.PersistTo.None) {
                 Label = "Despawn.Checkbox:Ships",
@@ -94,6 +100,10 @@ namespace TrafficManager.State {
         // null = clear all traffic; ExtVehicleType.None = do nothing
         private static ExtVehicleType? despawnerMask = ExtVehicleType.None;
 
+        /// <summary>
+        /// Adds "Despawn" group to the specified <paramref name="tab"/>.
+        /// </summary>
+        /// <param name="tab">The parent UI panel.</param>
         public static void AddUI(UIHelperBase tab) {
             if (!TMPELifecycle.PlayMode) return;
 
