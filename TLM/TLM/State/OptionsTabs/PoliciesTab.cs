@@ -355,8 +355,8 @@ namespace TrafficManager.State {
             Options.RebuildMenu();
             Options.prioritySignsEnabled = newValue;
 
-            if (OptionsMaintenanceTab.EnablePrioritySignsToggle != null) {
-                OptionsMaintenanceTab.EnablePrioritySignsToggle.isChecked = newValue;
+            if (MaintenanceTab.EnablePrioritySignsToggle != null) {
+                MaintenanceTab.EnablePrioritySignsToggle.isChecked = newValue;
             }
 
             if (!newValue) {
@@ -368,8 +368,8 @@ namespace TrafficManager.State {
             Options.RebuildMenu();
             Options.timedLightsEnabled = newValue;
 
-            if (OptionsMaintenanceTab.EnableTimedLightsToggle != null) {
-                OptionsMaintenanceTab.EnableTimedLightsToggle.isChecked = newValue;
+            if (MaintenanceTab.EnableTimedLightsToggle != null) {
+                MaintenanceTab.EnableTimedLightsToggle.isChecked = newValue;
             }
 
             if (!newValue) {
