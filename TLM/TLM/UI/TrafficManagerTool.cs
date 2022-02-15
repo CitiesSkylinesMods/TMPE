@@ -1412,7 +1412,7 @@ namespace TrafficManager.UI {
             Vehicle[] vehiclesBuffer = Singleton<VehicleManager>.instance.m_vehicles.m_buffer;
 
             for (uint citizenInstanceId = 1; citizenInstanceId < CitizenManager.MAX_INSTANCE_COUNT; ++citizenInstanceId) {
-                ref CitizenInstance citizenInstance = ref ((ushort)citizenInstanceId).ToCitizenInstance();
+                ref CitizenInstance citizenInstance = ref citizenInstanceId.ToCitizenInstance();
                 
                 if (!citizenInstance.IsCreated()) {
                     continue;

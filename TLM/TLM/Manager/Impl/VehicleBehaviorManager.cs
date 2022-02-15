@@ -422,7 +422,7 @@ namespace TrafficManager.Manager.Impl {
                                     continue;
                                 }
 
-                                ref CitizenInstance citizenInstance = ref ((ushort)citizenInstanceId).ToCitizenInstance();
+                                ref CitizenInstance citizenInstance = ref citizenInstanceId.ToCitizenInstance();
 
                                 if (logParkingAi) {
                                     Log._DebugFormat(
@@ -497,7 +497,7 @@ namespace TrafficManager.Manager.Impl {
                             continue;
                         }
                         
-                        ref CitizenInstance citizenInstance = ref ((ushort)citizenInstanceId).ToCitizenInstance();
+                        ref CitizenInstance citizenInstance = ref citizenInstanceId.ToCitizenInstance();
 
                         // NON-STOCK CODE START
                         if (prohibitPocketCars) {

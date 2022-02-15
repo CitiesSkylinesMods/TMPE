@@ -39,11 +39,8 @@ namespace TrafficManager.Manager.Impl {
         }
 
         protected override void OnDisableFeatureInternal() {
-            for (var citizenInstanceId = 0;
-                 citizenInstanceId < ExtCitizenInstanceManager.Instance.ExtInstances.Length;
-                 ++citizenInstanceId) {
-                ExtPathMode pathMode = ExtCitizenInstanceManager
-                               .Instance.ExtInstances[citizenInstanceId].pathMode;
+            for (uint citizenInstanceId = 0; citizenInstanceId < ExtCitizenInstanceManager.Instance.ExtInstances.Length; ++citizenInstanceId) {
+                ExtPathMode pathMode = ExtCitizenInstanceManager.Instance.ExtInstances[citizenInstanceId].pathMode;
                 switch (pathMode) {
                     case ExtPathMode.RequiresWalkingPathToParkedCar:
                     case ExtPathMode.CalculatingWalkingPathToParkedCar:
@@ -63,7 +60,7 @@ namespace TrafficManager.Manager.Impl {
                     case ExtPathMode.DrivingToTarget: {
                         // citizen instance requires a car but is walking: release instance to
                         // prevent it from floating
-                        ref CitizenInstance citizenInstance = ref ((ushort)citizenInstanceId).ToCitizenInstance();
+                        ref CitizenInstance citizenInstance = ref citizenInstanceId.ToCitizenInstance();
                         if (citizenInstance.IsCharacter()) {
                             Singleton<CitizenManager>.instance.ReleaseCitizenInstance((ushort)citizenInstanceId);
                         }

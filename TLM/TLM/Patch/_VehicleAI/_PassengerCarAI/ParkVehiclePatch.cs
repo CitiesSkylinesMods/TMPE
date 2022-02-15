@@ -42,7 +42,7 @@ namespace TrafficManager.Patch._VehicleAI._PassengerCarAI {
                     }
 
                     // NON-STOCK CODE START
-                    ref CitizenInstance driverCitizenInstance = ref ((ushort)driverCitizenInstanceId).ToCitizenInstance();
+                    ref CitizenInstance driverCitizenInstance = ref driverCitizenInstanceId.ToCitizenInstance();
                     driverCitizenId = driverCitizenInstance.m_citizen;
                     targetBuildingId = driverCitizenInstance.m_targetBuilding;
                     // NON-STOCK CODE END

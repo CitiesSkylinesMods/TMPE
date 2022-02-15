@@ -37,13 +37,13 @@ namespace TrafficManager.Manager.Impl {
             base.InternalPrintDebugInfo();
             Log._Debug("Extended citizen instance data:");
 
-            for (var i = 0; i < ExtInstances.Length; ++i) {
-                ref CitizenInstance citizenInstance = ref ((ushort)i).ToCitizenInstance();
+            for (uint citizenInstanceId = 0; citizenInstanceId < ExtInstances.Length; ++citizenInstanceId) {
+                ref CitizenInstance citizenInstance = ref citizenInstanceId.ToCitizenInstance();
                 if (!citizenInstance.IsValid()) {
                     continue;
                 }
 
-                Log._Debug($"Citizen instance {i}: {ExtInstances[i]}");
+                Log._Debug($"Citizen instance {citizenInstanceId}: {ExtInstances[citizenInstanceId]}");
             }
         }
 
@@ -1390,7 +1390,7 @@ namespace TrafficManager.Manager.Impl {
             for (uint instanceId = 0; instanceId < CitizenManager.MAX_INSTANCE_COUNT; ++instanceId) {
                 try
                 {
-                    ref CitizenInstance citizenInstance = ref ((ushort)instanceId).ToCitizenInstance();
+                    ref CitizenInstance citizenInstance = ref instanceId.ToCitizenInstance();
                     
                     if (!citizenInstance.IsCreated()) {
                         continue;

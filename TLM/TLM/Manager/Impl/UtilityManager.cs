@@ -139,11 +139,10 @@ namespace TrafficManager.Manager.Impl {
             Singleton<PathManager>.instance.WaitForAllPaths();
 
             Log.Info("UtilityManager.RemoveStuckEntities(): Resetting citizen instances that are waiting for a path.");
-            CitizenManager citizenManager = Singleton<CitizenManager>.instance;
             PathManager pathManager = Singleton<PathManager>.instance;
 
             for (uint citizenInstanceId = 1; citizenInstanceId < CitizenManager.MAX_INSTANCE_COUNT; ++citizenInstanceId) {
-                ref CitizenInstance citizenInstance = ref ((ushort)citizenInstanceId).ToCitizenInstance();
+                ref CitizenInstance citizenInstance = ref citizenInstanceId.ToCitizenInstance();
                 
                 // Log._Debug($"UtilityManager.RemoveStuckEntities(): Processing instance {citizenInstanceId}.");
                 if (citizenInstance.IsWaitingPath())

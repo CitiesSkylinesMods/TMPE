@@ -5,6 +5,8 @@ namespace TrafficManager.Util.Extensions {
 
         internal static ref CitizenInstance ToCitizenInstance(this ushort citizenInstance) => ref _citizenInstanceBuffer[citizenInstance];
 
+        internal static ref CitizenInstance ToCitizenInstance(this uint citizenInstance) => ref _citizenInstanceBuffer[citizenInstance];
+
         public static bool IsCharacter(this ref CitizenInstance citizenInstance) =>
             citizenInstance.m_flags.IsFlagSet(CitizenInstance.Flags.Character);
 
