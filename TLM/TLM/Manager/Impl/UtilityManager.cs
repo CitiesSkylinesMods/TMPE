@@ -214,7 +214,7 @@ namespace TrafficManager.Manager.Impl {
                         (ushort)vehicleId, ref vehicleManager.m_vehicles.m_buffer[vehicleId]);
                     uint citizenId = citizenManager.m_instances.m_buffer[driverInstanceId].m_citizen;
 
-                    if (citizenId != 0u && citizenManager.m_citizens.m_buffer[citizenId].m_parkedVehicle == 0)
+                    if (citizenId != 0u && citizenId.ToCitizen().m_parkedVehicle == 0)
                     {
                         Log.Info($"Resetting vehicle {vehicleId} (parking without parked vehicle)");
                         vehicleManager.m_vehicles.m_buffer[vehicleId].m_flags &= ~Vehicle.Flags.Parking;
