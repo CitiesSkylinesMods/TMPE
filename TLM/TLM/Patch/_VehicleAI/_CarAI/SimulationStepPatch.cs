@@ -13,6 +13,7 @@ namespace TrafficManager.Patch._VehicleAI._CarAI {
     using State.ConfigData;
     using UnityEngine;
     using Util;
+    using Util.Extensions;
 
     [UsedImplicitly]
     [HarmonyPatch]
@@ -65,7 +66,7 @@ namespace TrafficManager.Patch._VehicleAI._CarAI {
                     finalPathState = AdvancedParkingManager.Instance.UpdateCarPathState(
                         vehicleID,
                         ref data,
-                        ref Singleton<CitizenManager>.instance.m_instances.m_buffer[driverInstanceId],
+                        ref driverInstanceId.ToCitizenInstance(),
                         ref ExtCitizenInstanceManager.Instance.ExtInstances[driverInstanceId],
                         mainPathState);
 

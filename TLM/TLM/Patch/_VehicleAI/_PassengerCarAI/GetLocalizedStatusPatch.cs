@@ -37,20 +37,19 @@ namespace TrafficManager.Patch._VehicleAI._PassengerCarAI {
             bool targetIsNode = false;
 
             if (driverInstanceId != 0) {
+                ref CitizenInstance driverCitizenInstance = ref driverInstanceId.ToCitizenInstance();
+                
                 if ((data.m_flags & Vehicle.Flags.Parking) != 0) {
-                    uint citizen = citizenManager.m_instances.m_buffer[driverInstanceId].m_citizen;
-                    if (citizen != 0u
-                        && citizenManager.m_citizens.m_buffer[citizen].m_parkedVehicle != 0) {
+                    uint citizen = driverCitizenInstance.m_citizen;
+                    if (citizen != 0u && citizen.ToCitizen().m_parkedVehicle != 0) {
                         target = InstanceID.Empty;
                         __result = Locale.Get("VEHICLE_STATUS_PARKING");
                         return false;
                     }
                 }
 
-                targetBuildingId = citizenManager.m_instances.m_buffer[driverInstanceId]
-                                                 .m_targetBuilding;
-                targetIsNode = (citizenManager.m_instances.m_buffer[driverInstanceId].m_flags
-                                & CitizenInstance.Flags.TargetIsNode) != CitizenInstance.Flags.None;
+                targetBuildingId = driverCitizenInstance.m_targetBuilding;
+                targetIsNode = driverCitizenInstance.TargetIsNode();
             }
 
             if (targetBuildingId == 0) {

@@ -432,9 +432,8 @@ namespace TrafficManager.UI.MainMenu {
         private void ClickGoToCitizenInstance(UIComponent component,
                                               UIMouseEventParameter eventParam) {
             ushort citizenInstanceId = Convert.ToUInt16(_goToField.text);
-            CitizenInstance citizenInstance =
-                Singleton<CitizenManager>.instance.m_instances.m_buffer[citizenInstanceId];
-            if ((citizenInstance.m_flags & CitizenInstance.Flags.Created) != 0) {
+            ref CitizenInstance citizenInstance = ref citizenInstanceId.ToCitizenInstance();
+            if (citizenInstance.IsCreated()) {
                 CSUtil.CameraControl.CameraController.Instance.GoToCitizenInstance(
                     citizenInstanceId);
             }

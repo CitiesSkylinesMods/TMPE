@@ -139,44 +139,37 @@ namespace TrafficManager.Manager.Impl {
             Singleton<PathManager>.instance.WaitForAllPaths();
 
             Log.Info("UtilityManager.RemoveStuckEntities(): Resetting citizen instances that are waiting for a path.");
-            CitizenManager citizenManager = Singleton<CitizenManager>.instance;
             PathManager pathManager = Singleton<PathManager>.instance;
 
             for (uint citizenInstanceId = 1; citizenInstanceId < CitizenManager.MAX_INSTANCE_COUNT; ++citizenInstanceId) {
+                ref CitizenInstance citizenInstance = ref citizenInstanceId.ToCitizenInstance();
+                
                 // Log._Debug($"UtilityManager.RemoveStuckEntities(): Processing instance {citizenInstanceId}.");
-                if ((citizenManager.m_instances.m_buffer[citizenInstanceId].m_flags &
-                     CitizenInstance.Flags.WaitingPath) != CitizenInstance.Flags.None)
+                if (citizenInstance.IsWaitingPath())
                 {
-                    // CitizenAI ai = citizenManager.m_instances.m_buffer[citizenInstanceId].Info.m_citizenAI;
-                    if (citizenManager.m_instances.m_buffer[citizenInstanceId].m_path != 0u) {
+                    if (citizenInstance.m_path != 0u) {
                         Log.Info(
                             $"Resetting stuck citizen instance {citizenInstanceId} (waiting for path)");
 
-                        pathManager.ReleasePath(citizenManager.m_instances.m_buffer[citizenInstanceId].m_path);
-                        citizenManager.m_instances.m_buffer[citizenInstanceId].m_path = 0u;
+                        pathManager.ReleasePath(citizenInstance.m_path);
+                        citizenInstance.m_path = 0u;
                     }
 
-                    citizenManager.m_instances.m_buffer[citizenInstanceId].m_flags &=
+                    citizenInstance.m_flags &=
                         ~(CitizenInstance.Flags.WaitingTransport |
                           CitizenInstance.Flags.EnteringVehicle |
                           CitizenInstance.Flags.BoredOfWaiting | CitizenInstance.Flags.WaitingTaxi |
                           CitizenInstance.Flags.WaitingPath);
                 } else {
 #if DEBUG
-                    if (citizenManager.m_instances.m_buffer[citizenInstanceId].m_path == 0 &&
-                        (citizenManager.m_instances.m_buffer[citizenInstanceId].m_flags &
-                         CitizenInstance.Flags.Character) != CitizenInstance.Flags.None)
-                    {
-                        float magnitude =
-                            (citizenManager.m_instances.m_buffer[citizenInstanceId].GetLastFramePosition() -
-                             (Vector3)citizenManager.m_instances.m_buffer[citizenInstanceId].m_targetPos
-                             ).magnitude;
+                    if (citizenInstance.m_path == 0 && citizenInstance.IsCharacter()) {
+                        float magnitude = (citizenInstance.GetLastFramePosition() - (Vector3)citizenInstance.m_targetPos).magnitude;
                         Log._DebugFormat(
                             "Found potential floating citizen instance: {0} Source building: {1} " +
                             "Target building: {2} Distance to target position: {3}",
                             citizenInstanceId,
-                            citizenManager.m_instances.m_buffer[citizenInstanceId].m_sourceBuilding,
-                            citizenManager.m_instances.m_buffer[citizenInstanceId].m_targetBuilding,
+                            citizenInstance.m_sourceBuilding,
+                            citizenInstance.m_targetBuilding,
                             magnitude);
                     }
 #endif
@@ -212,9 +205,9 @@ namespace TrafficManager.Manager.Impl {
                 {
                     ushort driverInstanceId = Constants.ManagerFactory.ExtVehicleManager.GetDriverInstanceId(
                         (ushort)vehicleId, ref vehicleManager.m_vehicles.m_buffer[vehicleId]);
-                    uint citizenId = citizenManager.m_instances.m_buffer[driverInstanceId].m_citizen;
+                    uint citizenId = driverInstanceId.ToCitizenInstance().m_citizen;
 
-                    if (citizenId != 0u && citizenManager.m_citizens.m_buffer[citizenId].m_parkedVehicle == 0)
+                    if (citizenId != 0u && citizenId.ToCitizen().m_parkedVehicle == 0)
                     {
                         Log.Info($"Resetting vehicle {vehicleId} (parking without parked vehicle)");
                         vehicleManager.m_vehicles.m_buffer[vehicleId].m_flags &= ~Vehicle.Flags.Parking;
