@@ -80,16 +80,16 @@ namespace TrafficManager.Manager.Impl {
         public void ClearTraffic() => DespawnVehicles();
 
         public void RemoveParkedVehicles() {
-            lock (Singleton<VehicleManager>.instance) {
+            var vehicleManager = Singleton<VehicleManager>.instance; 
+
+            lock (vehicleManager) {
                 try {
                     Log.Info("UtilityManager: Despawning parked vehicles");
 
-                    VehicleManager vehicleManager = Singleton<VehicleManager>.instance;
-
-                    for (uint i = 0; i < vehicleManager.m_parkedVehicles.m_size; ++i) {
-                        if ((vehicleManager.m_parkedVehicles.m_buffer[i].m_flags &
-                             (ushort)VehicleParked.Flags.Created) != 0) {
-                            vehicleManager.ReleaseParkedVehicle((ushort)i);
+                    for (uint parkedVehicleId = 0; parkedVehicleId < vehicleManager.m_parkedVehicles.m_size; ++parkedVehicleId) {
+                        if (parkedVehicleId.ToParkedVehicle().IsCreated())
+                        {
+                            vehicleManager.ReleaseParkedVehicle((ushort)parkedVehicleId);
                         }
                     }
                 } catch (Exception ex) {

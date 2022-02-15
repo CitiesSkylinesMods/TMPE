@@ -134,7 +134,7 @@ namespace TrafficManager.Patch._CitizenAI._ResidentAI {
                         () => $"CustomResidentAI.CustomGetVehicleInfo({instanceID}): " +
                         $"Citizen instance {instanceID} owns a parked vehicle {parkedVehicleId}. " +
                         $"Reusing vehicle info.");
-                    carInfo = Singleton<VehicleManager>.instance.m_parkedVehicles.m_buffer[parkedVehicleId].Info;
+                    carInfo = parkedVehicleId.ToParkedVehicle().Info;
                 }
             }
 
