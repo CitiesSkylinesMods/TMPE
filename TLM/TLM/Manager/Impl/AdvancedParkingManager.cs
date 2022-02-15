@@ -102,11 +102,9 @@ namespace TrafficManager.Manager.Impl {
             NetManager netManager = Singleton<NetManager>.instance;
             CitizenManager citManager = Singleton<CitizenManager>.instance;
 
-            Vector3 parkedVehPos = vehManager.m_parkedVehicles.m_buffer[parkedVehicleId].m_position;
-            Quaternion parkedVehRot =
-                vehManager.m_parkedVehicles.m_buffer[parkedVehicleId].m_rotation;
-            VehicleInfo vehicleInfo = vehManager.m_parkedVehicles.m_buffer[parkedVehicleId].Info;
-
+            ref VehicleParked parkedVehicle = ref parkedVehicleId.ToParkedVehicle();
+            VehicleInfo parkedVehicleInfo = parkedVehicle.Info;
+            
             if (!CustomPathManager._instance.m_pathUnits.m_buffer[instanceData.m_path]
                                   .GetPosition(0, out PathUnit.Position vehLanePathPos)) {
                 Log._DebugIf(
@@ -125,7 +123,7 @@ namespace TrafficManager.Manager.Impl {
                       $"lane {vehLanePathPos.m_lane}, off {vehLanePathPos.m_offset} (lane id {vehLaneId})");
 
             vehLaneId.ToLane().GetClosestPosition(
-                parkedVehPos,
+                parkedVehicle.m_position,
                 out Vector3 vehLanePos,
                 out float vehLaneOff);
 
@@ -138,20 +136,20 @@ namespace TrafficManager.Manager.Impl {
             if (vehManager.CreateVehicle(
                 out vehicleId,
                 ref Singleton<SimulationManager>.instance.m_randomizer,
-                vehicleInfo,
-                parkedVehPos,
+                parkedVehicleInfo,
+                parkedVehicle.m_position,
                 TransferManager.TransferReason.None,
                 false,
                 false)) {
                 // update frame data
                 Vehicle.Frame frame = vehManager.m_vehicles.m_buffer[vehicleId].m_frame0;
-                frame.m_rotation = parkedVehRot;
+                frame.m_rotation = parkedVehicle.m_rotation;
 
                 vehManager.m_vehicles.m_buffer[vehicleId].m_frame0 = frame;
                 vehManager.m_vehicles.m_buffer[vehicleId].m_frame1 = frame;
                 vehManager.m_vehicles.m_buffer[vehicleId].m_frame2 = frame;
                 vehManager.m_vehicles.m_buffer[vehicleId].m_frame3 = frame;
-                vehicleInfo.m_vehicleAI.FrameDataUpdated(
+                parkedVehicleInfo.m_vehicleAI.FrameDataUpdated(
                     vehicleId,
                     ref vehManager.m_vehicles.m_buffer[vehicleId],
                     ref frame);
@@ -173,13 +171,11 @@ namespace TrafficManager.Manager.Impl {
                 vehManager.m_vehicles.m_buffer[vehicleId].m_transferSize =
                     (ushort)(instanceData.m_citizen & 65535u);
 
-                if (!vehicleInfo.m_vehicleAI.TrySpawn(
-                        vehicleId,
-                        ref vehManager.m_vehicles.m_buffer[vehicleId])) {
+                if (!parkedVehicleInfo.m_vehicleAI.TrySpawn(vehicleId, ref vehManager.m_vehicles.m_buffer[vehicleId])) {
                     Log._DebugIf(
                         logParkingAi,
                         () => $"CustomHumanAI.EnterParkedCar({instanceId}): Could not " +
-                              $"spawn a {vehicleInfo.m_vehicleType} for citizen instance {instanceId}!");
+                              $"spawn a {parkedVehicleInfo.m_vehicleType} for citizen instance {instanceId}!");
                     return false;
                 }
 
@@ -945,8 +941,7 @@ namespace TrafficManager.Manager.Impl {
                 var sqrDistToParkedVehicle = 0f;
                 if (parkedVehicleId != 0) {
                     // calculate distance to parked vehicle
-                    VehicleManager vehicleManager = Singleton<VehicleManager>.instance;
-                    VehicleParked parkedVehicle = vehicleManager.m_parkedVehicles.m_buffer[parkedVehicleId];
+                    ref VehicleParked parkedVehicle = ref parkedVehicleId.ToParkedVehicle();
                     Vector3 doorPosition = parkedVehicle.GetClosestDoorPosition(
                         parkedVehicle.m_position,
                         VehicleInfo.DoorType.Enter);
@@ -1572,7 +1567,7 @@ namespace TrafficManager.Manager.Impl {
                     var movedCar = false;
                     Vector3 citizenPos = instanceData.GetLastFramePosition();
 
-                    ref VehicleParked parkedVehicle = ref Singleton<VehicleManager>.instance.m_parkedVehicles.m_buffer[parkedVehicleId];
+                    ref VehicleParked parkedVehicle = ref parkedVehicleId.ToParkedVehicle();
 
                     Vector3 oldParkedVehiclePos = parkedVehicle.m_position;
                     var parkedToCitizen = (parkedVehicle.m_position - citizenPos).magnitude;
@@ -1591,9 +1586,8 @@ namespace TrafficManager.Manager.Impl {
                         // successfully moved the parked car to a closer location
                         // -> retry path-finding
                         extInstance.pathMode = ExtPathMode.RequiresWalkingPathToParkedCar;
-                        Vector3 parkedPos = Singleton<VehicleManager>.instance.m_parkedVehicles
-                                                                 .m_buffer[parkedVehicleId]
-                                                                 .m_position;
+                        Vector3 parkedPos = parkedVehicleId.ToParkedVehicle().m_position;
+
                         if (extendedLogParkingAi) {
                             Log._Debug(
                                 $"AdvancedParkingManager.OnCitizenPathFindFailure({instanceId}): " +
@@ -2056,8 +2050,7 @@ namespace TrafficManager.Manager.Impl {
                 {
                     citizenId.ToCitizen().SetParkedVehicle(citizenId, parkedVehicleId);
 
-                    Singleton<VehicleManager>.instance.m_parkedVehicles.m_buffer[parkedVehicleId].m_flags
-                        &= (ushort)(VehicleParked.Flags.All & ~VehicleParked.Flags.Parking);
+                    parkedVehicleId.ToParkedVehicle().m_flags &= (ushort)(VehicleParked.Flags.All & ~VehicleParked.Flags.Parking);
 
                     if (logParkingAi) {
                         Log._Debug(
@@ -2125,8 +2118,7 @@ namespace TrafficManager.Manager.Impl {
                 {
                     citizenId.ToCitizen().SetParkedVehicle(citizenId, parkedVehicleId);
 
-                    Singleton<VehicleManager>.instance.m_parkedVehicles.m_buffer[parkedVehicleId].m_flags
-                        &= (ushort)(VehicleParked.Flags.All & ~VehicleParked.Flags.Parking);
+                    parkedVehicleId.ToParkedVehicle().m_flags &= (ushort)(VehicleParked.Flags.All & ~VehicleParked.Flags.Parking);
 
                     if (extendedLogParkingAi && homeId != 0) {
                         Log._Debug(
