@@ -1381,7 +1381,7 @@ namespace TrafficManager.UI {
                     vState.nextLaneIndex,
                     vState.waitTime,
                     driverInst.instanceId,
-                    ExtCitizenInstanceManager.Instance.GetCitizenId(driverInst.instanceId),
+                    driverInst.instanceId.ToCitizenInstance().m_citizen,
                     driverInst.pathMode,
                     driverInst.failedParkingAttempts,
                     driverInst.parkingSpaceLocation,

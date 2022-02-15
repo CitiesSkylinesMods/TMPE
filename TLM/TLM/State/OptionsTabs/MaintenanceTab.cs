@@ -10,7 +10,7 @@ namespace TrafficManager.State {
     using ColossalFramework;
     using System.Collections.Generic;
 
-    public static class OptionsMaintenanceTab {
+    public static class MaintenanceTab {
         [UsedImplicitly]
         private static UIButton _resetStuckEntitiesBtn;
 
@@ -117,7 +117,7 @@ namespace TrafficManager.State {
 
             Options.Indent(_turnOnRedEnabledToggle);
 
-            OptionsMaintenanceTab_DespawnGroup.AddUI(panelHelper);
+            MaintenanceTab_DespawnGroup.AddUI(panelHelper);
 
             // TODO [issue ##959] remove when TTL is implemented in asset editor.
             bool inEditor = TMPELifecycle.InGameOrEditor()
