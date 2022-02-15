@@ -136,7 +136,7 @@ namespace TrafficManager.State {
                 mainConfig.RoadSignTheme = RoadSignThemes.Instance.GetDefaultThemeName(newMphValue);
                 Log.Info(
                     $"Display MPH changed to {newMphValue}, but was not supported by current theme, "
-                    + "so theme was also reset to German_Kmph");
+                    + $"so theme was also reset to {mainConfig.RoadSignTheme}");
             } else {
                 Log.Info($"Display MPH changed to {newMphValue}");
             }
