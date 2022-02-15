@@ -180,6 +180,8 @@ namespace TrafficManager.Manager.Impl {
 
                 Options.SavegamePathfinderEdition = LoadByte(data, idx: 58, defaultVal: 0);
 
+                ToCheckbox(data, idx: 59, OverlaysTab.ShowDefaultSpeedSubIcon, false);
+
                 Options.Available = true;
 
                 return true;
@@ -197,7 +199,7 @@ namespace TrafficManager.Manager.Impl {
         public byte[] SaveData(ref bool success) {
 
             // Remember to update this when adding new options (lastIdx + 1)
-            var save = new byte[59];
+            var save = new byte[60];
 
             try {
                 save[0] = ConvertFromSimulationAccuracy(Options.simulationAccuracy);
@@ -264,6 +266,8 @@ namespace TrafficManager.Manager.Impl {
                 save[57] = PoliciesTab.DedicatedTurningLanes.Save();
 
                 save[58] = (byte)Options.SavegamePathfinderEdition;
+
+                save[59] = OverlaysTab.ShowDefaultSpeedSubIcon.Save();
 
                 return save;
             }
