@@ -51,13 +51,10 @@ namespace TrafficManager.State {
 
         // Road conditions option requires Snowfall DLC
         private static bool SnowfallDlcValidator(bool desiredVal, out bool resultVal) {
-            if (SteamHelper.IsDLCOwned(SteamHelper.DLC.SnowFallDLC)) {
-                resultVal = desiredVal;
-                return true;
-            }
+            var dlcOwned = SteamHelper.IsDLCOwned(SteamHelper.DLC.SnowFallDLC);
 
-            resultVal = false;
-            return false;
+            resultVal = dlcOwned && desiredVal;
+            return dlcOwned;
         }
 
         private static void AddRecklessDriversDropDown(UIHelperBase group) {
