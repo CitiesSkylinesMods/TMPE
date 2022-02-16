@@ -32,7 +32,7 @@ This changelog includes all versions and major variants of the mod going all the
 #### TM:PE V11.6.5.0 TEST, 16/02/2022
 
 - [Meta] Due to targeted malware, we are unable to provide support if you have mods by `Chaos`/`Holy Water`/`drok`, even if those mods are currently malware-free #1391 (TM:PE Team)
-- [Meta] Compatible with Cities: Skylines v1.14.0-f8 #1387 (krzychu124)
+- [Meta] Compatible with Cities: Skylines v1.14.0-f9 #1387 (krzychu124)
 - [New] Overlays mod option to show default speed when overriding segment/lane speeds #1404 (aubergine18)
 - [New] Added API for external mods to query TM:PE mod options #1378 #1376 (aubergine18)
 - [Mod] Compatible: `Reversible Tram AI` full compatibility #1386 #1353 (sway2020)

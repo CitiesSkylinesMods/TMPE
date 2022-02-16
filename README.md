@@ -9,7 +9,7 @@
     <a href="https://github.com/CitiesSkylinesMods/TMPE/wiki/Report-a-Bug">Report a Bug</a><br />
 </p>
 <p align="center">
-    <a href="https://store.steampowered.com/app/255710/Cities_Skylines/"><img src="https://img.shields.io/static/v1?label=cities:%20skylines&message=v1.14.0-f8&color=01ABF8&logo=unity" /></a>
+    <a href="https://store.steampowered.com/app/255710/Cities_Skylines/"><img src="https://img.shields.io/static/v1?label=cities:%20skylines&message=v1.14.0-f9&color=01ABF8&logo=unity" /></a>
     <a href="https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252"><img src="https://img.shields.io/github/v/release/CitiesSkylinesMods/TMPE?label=stable&color=7cc17b&logo=steam&logoColor=F5F5F5" /></a>
     <a href="https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785"><img src="https://img.shields.io/github/v/release/CitiesSkylinesMods/TMPE?include_prereleases&label=test&color=f7b73c&logo=steam&logoColor=F5F5F5" /></a>
     <a href="https://github.com/CitiesSkylinesMods/TMPE/releases/latest"><img src="https://img.shields.io/github/v/release/CitiesSkylinesMods/TMPE?label=origin&color=F56C2D&logo=origin&logoColor=F56C2D" /></a>
@@ -44,7 +44,7 @@
 #### TM:PE V11.6.5.0 TEST, 16/02/2022
 
 - [Meta] Due to targeted malware, we are unable to provide support if you have mods by `Chaos`/`Holy Water`/`drok`, even if those mods are currently malware-free #1391 (TM:PE Team)
-- [Meta] Compatible with Cities: Skylines v1.14.0-f8 #1387 (krzychu124)
+- [Meta] Compatible with Cities: Skylines v1.14.0-f9 #1387 (krzychu124)
 - [New] Overlays mod option to show default speed when overriding segment/lane speeds #1404 (aubergine18)
 - [New] Added API for external mods to query TM:PE mod options #1378 #1376 (aubergine18)
 - [Mod] Compatible: `Reversible Tram AI` full compatibility #1386 #1353 (sway2020)
