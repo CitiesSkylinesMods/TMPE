@@ -392,13 +392,9 @@ namespace TrafficManager.UI.MainMenu {
             }
         }
 
-        private void ClickGoToParkedVehicle(UIComponent component,
-                                            UIMouseEventParameter eventParam) {
+        private void ClickGoToParkedVehicle(UIComponent component, UIMouseEventParameter eventParam) {
             ushort parkedVehicleId = Convert.ToUInt16(_goToField.text);
-            VehicleParked parkedVehicle =
-                Singleton<VehicleManager>.instance.m_parkedVehicles.m_buffer[parkedVehicleId];
-
-            if ((parkedVehicle.m_flags & (ushort)VehicleParked.Flags.Created) != 0) {
+            if (parkedVehicleId.ToParkedVehicle().IsCreated()) {
                 CSUtil.CameraControl.CameraController.Instance.GoToParkedVehicle(parkedVehicleId);
             }
         }
