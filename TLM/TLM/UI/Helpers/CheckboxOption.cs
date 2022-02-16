@@ -17,7 +17,7 @@ namespace TrafficManager.UI.Helpers {
 
         /* Data */
 
-        public delegate bool ValidatorDelegate(bool desiredVal, out bool resultVal);
+        public delegate bool ValidatorDelegate(bool desired, out bool result);
 
         public event OnCheckChanged OnValueChanged;
 
