@@ -5,8 +5,8 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyCopyright("Copyright © 2022")]
+[assembly: AssemblyCompany("CitiesSkylinesMods/TMPE")]
+[assembly: AssemblyCopyright("Copyright © 2022, CitiesSkylinesMods/TMPE")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
