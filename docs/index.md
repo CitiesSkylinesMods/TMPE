@@ -38,7 +38,7 @@
 Official releases:
 
 * [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252) (fully tested releases)
-* [TM:PE v11 LABS](https://steamcommunity.com/sharedfiles/filedetails/?id=1806963141) (latest beta test releases)
+* [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785) (latest beta test releases)
 * [Download Binaries](https://github.com/CitiesSkylinesMods/TMPE/releases) (for non-Steam users)
 * [Installation Guide](https://github.com/CitiesSkylinesMods/TMPE/wiki/Installation) (for all users)
 * [Changelog](https://github.com/CitiesSkylinesMods/TMPE/blob/master/CHANGELOG.md) (lists changes made for each release)
@@ -46,7 +46,7 @@ Official releases:
 ## Support Policy
 
 Our team is happy to support you if:
-- You are using the latest version of **TM:PE v11 STABLE** or **TM:PE v11 LABS**
+- You are using the latest version of **TM:PE v11 STABLE** or **TM:PE v11 TEST**
 - You are using a properly purchased and latest version of Cities: Skylines
 - You provide useful information when [reporting a bug](https://github.com/CitiesSkylinesMods/TMPE/wiki/Report-a-Bug)
 
