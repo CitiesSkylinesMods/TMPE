@@ -181,16 +181,16 @@ namespace TrafficManager.Manager.Impl {
             var maxVehicleCount = vehicleManager.m_vehicles.m_buffer.Length;
 
             for (uint vehicleId = 1; vehicleId < maxVehicleCount; ++vehicleId) {
-                // Log._Debug($"UtilityManager.RemoveStuckEntities(): Processing vehicle {vehicleId}.");
-                if ((vehicleManager.m_vehicles.m_buffer[vehicleId].m_flags & Vehicle.Flags.WaitingPath) != 0) {
-                    if (vehicleManager.m_vehicles.m_buffer[vehicleId].m_path != 0u) {
+                ref Vehicle vehicle = ref vehicleId.ToVehicle();
+                if (vehicle.IsWaitingPath()) {
+                    if (vehicle.m_path != 0u) {
                         Log.Info($"Resetting stuck vehicle {vehicleId} (waiting for path)");
 
-                        pathManager.ReleasePath(vehicleManager.m_vehicles.m_buffer[vehicleId].m_path);
-                        vehicleManager.m_vehicles.m_buffer[vehicleId].m_path = 0u;
+                        pathManager.ReleasePath(vehicle.m_path);
+                        vehicle.m_path = 0u;
                     }
 
-                    vehicleManager.m_vehicles.m_buffer[vehicleId].m_flags &= ~Vehicle.Flags.WaitingPath;
+                    vehicle.m_flags &= ~Vehicle.Flags.WaitingPath;
                 }
             }
 
@@ -199,18 +199,17 @@ namespace TrafficManager.Manager.Impl {
                 "where no parked vehicle is assigned to the driver.");
 
             for (uint vehicleId = 1; vehicleId < maxVehicleCount; ++vehicleId) {
-                // Log._Debug($"UtilityManager.RemoveStuckEntities(): Processing vehicle {vehicleId}.");
-                if ((vehicleManager.m_vehicles.m_buffer[vehicleId].m_flags
-                     & Vehicle.Flags.Parking) != 0)
+                ref Vehicle vehicle = ref vehicleId.ToVehicle();
+                if (vehicle.IsParking())
                 {
                     ushort driverInstanceId = Constants.ManagerFactory.ExtVehicleManager.GetDriverInstanceId(
-                        (ushort)vehicleId, ref vehicleManager.m_vehicles.m_buffer[vehicleId]);
+                        (ushort)vehicleId, ref vehicle);
                     uint citizenId = driverInstanceId.ToCitizenInstance().m_citizen;
 
                     if (citizenId != 0u && citizenId.ToCitizen().m_parkedVehicle == 0)
                     {
                         Log.Info($"Resetting vehicle {vehicleId} (parking without parked vehicle)");
-                        vehicleManager.m_vehicles.m_buffer[vehicleId].m_flags &= ~Vehicle.Flags.Parking;
+                        vehicle.m_flags &= ~Vehicle.Flags.Parking;
                     }
                 }
             }
