@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 // associated with an assembly.
 [assembly: AssemblyTitle("TLM")]
 [assembly: AssemblyProduct("TLM")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("A mod for Cities: Skylines that gives you more control over road and rail traffic in your city.")]
 [assembly: AssemblyConfiguration("")]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
