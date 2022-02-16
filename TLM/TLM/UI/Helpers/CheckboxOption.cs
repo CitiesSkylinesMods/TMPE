@@ -119,7 +119,7 @@ namespace TrafficManager.UI.Helpers {
         public bool ReadOnlyUI {
             get => _readOnlyUI;
             set {
-                // _readOnlyUI = !IsInScope || value;
+                _readOnlyUI = !IsInScope || value;
                 if (HasUI) {
                     _ui.readOnly = _readOnlyUI;
                     _ui.opacity = _readOnlyUI ? 0.3f : 1f;
