@@ -133,8 +133,7 @@ namespace TrafficManager.Patch._CitizenAI._TouristAI {
                         () => $"CustomTouristAI.CustomGetVehicleInfo({instanceID}): " +
                               $"Citizen instance {instanceID} owns a parked vehicle {parkedVehicleId}. " +
                               $"Reusing vehicle info.");
-                    carInfo = VehicleManager
-                              .instance.m_parkedVehicles.m_buffer[parkedVehicleId].Info;
+                    carInfo = parkedVehicleId.ToParkedVehicle().Info;
                 }
             }
 

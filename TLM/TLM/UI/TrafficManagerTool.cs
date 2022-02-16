@@ -1408,7 +1408,6 @@ namespace TrafficManager.UI {
         private void DebugGuiDisplayCitizens() {
             GUIStyle counterStyle = new GUIStyle();
             CitizenManager citManager = Singleton<CitizenManager>.instance;
-            VehicleParked[] parkedVehiclesBuffer = Singleton<VehicleManager>.instance.m_parkedVehicles.m_buffer;
             Vehicle[] vehiclesBuffer = Singleton<VehicleManager>.instance.m_vehicles.m_buffer;
 
             for (uint citizenInstanceId = 1; citizenInstanceId < CitizenManager.MAX_INSTANCE_COUNT; ++citizenInstanceId) {
@@ -1473,7 +1472,7 @@ namespace TrafficManager.UI {
                         labelSb.AppendFormat(
                             "\nparked: {0} dist: {1}",
                             citizen.m_parkedVehicle,
-                            (parkedVehiclesBuffer[citizen.m_parkedVehicle].m_position - pos).magnitude);
+                            (citizen.m_parkedVehicle.ToParkedVehicle().m_position - pos).magnitude);
                     }
 
                     if (citizen.m_vehicle != 0) {

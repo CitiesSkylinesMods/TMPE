@@ -25,6 +25,7 @@ namespace TrafficManager.State {
         // private static UITextField pathCostMultiplicator2Field = null;
 #endif
 
+        // Likely to change or be removed in future
         [Flags]
         public enum PersistTo {
             None = 0,
@@ -32,6 +33,15 @@ namespace TrafficManager.State {
             Savegame = 2,
             GlobalOrSavegame = Global | Savegame,
         }
+
+        /// <summary>
+        /// When <c>true</c>, options are safe to query.
+        /// </summary>
+        /// <remarks>
+        /// Is set <c>true</c> after options are loaded via <see cref="Manager.Impl.OptionsManager"/>.
+        /// Is set <c>false</c> while options are being saved, and also when level unloads.
+        /// </remarks>
+        public static bool Available = false;
 
         public static bool instantEffects = true;
         public static bool individualDrivingStyle = true;
@@ -130,6 +140,8 @@ namespace TrafficManager.State {
 
         // See PathfinderUpdates.cs
         public static byte SavegamePathfinderEdition;
+
+        public static bool showDefaultSpeedSubIcon;
 
         /// <summary>
         /// Invoked on options change to refresh the main menu and possibly update the labels for
