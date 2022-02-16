@@ -50,10 +50,10 @@ namespace TrafficManager.State {
         private static string T(string key) => Translation.Options.Get(key);
 
         // Road conditions option requires Snowfall DLC
-        private static bool SnowfallDlcValidator(bool desiredVal, out bool resultVal) {
+        private static bool SnowfallDlcValidator(bool desired, out bool result) {
             var dlcOwned = SteamHelper.IsDLCOwned(SteamHelper.DLC.SnowFallDLC);
 
-            resultVal = dlcOwned && desiredVal;
+            result = dlcOwned && desired;
             return dlcOwned;
         }
 
