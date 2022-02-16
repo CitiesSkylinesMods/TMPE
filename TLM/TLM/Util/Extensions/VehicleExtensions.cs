@@ -4,12 +4,23 @@ using TrafficManager.Manager.Impl;
 
 namespace TrafficManager.Util.Extensions {
     public static class VehicleExtensions {
-        private static Vehicle[] _vehBuffer = Singleton<VehicleManager>.instance.m_vehicles.m_buffer;
+        private static Vehicle[] _vehicleBuffer = Singleton<VehicleManager>.instance.m_vehicles.m_buffer;
 
         /// <summary>Returns a reference to the vehicle instance.</summary>
         /// <param name="vehicleId">The ID of the vehicle instance to obtain.</param>
         /// <returns>The vehicle instance.</returns>
-        public static ref Vehicle ToVehicle(this ushort vehicleId) => ref _vehBuffer[vehicleId];
+        public static ref Vehicle ToVehicle(this ushort vehicleId) => ref _vehicleBuffer[vehicleId];
+
+        /// <summary>Returns a reference to the vehicle instance.</summary>
+        /// <param name="vehicleId">The ID of the vehicle instance to obtain.</param>
+        /// <returns>The vehicle instance.</returns>
+        public static ref Vehicle ToVehicle(this uint vehicleId) => ref _vehicleBuffer[vehicleId];
+
+        public static bool IsCreated(this ref Vehicle vehicle) =>
+            vehicle.m_flags.IsFlagSet(Vehicle.Flags.Created);
+
+        public static bool IsParking(this ref Vehicle vehicle) =>
+            vehicle.m_flags.IsFlagSet(Vehicle.Flags.Parking);
 
         /// <summary>
         /// Checks if the vehicle is Created, but not Deleted.
@@ -20,6 +31,9 @@ namespace TrafficManager.Util.Extensions {
             vehicle.m_flags.CheckFlags(
                 required: Vehicle.Flags.Created,
                 forbidden: Vehicle.Flags.Deleted);
+
+        public static bool IsWaitingPath(this ref Vehicle vehicle) =>
+            vehicle.m_flags.IsFlagSet(Vehicle.Flags.WaitingPath);
 
         /// <summary>Determines the <see cref="ExtVehicleType"/> for a vehicle.</summary>
         /// <param name="vehicle">The vehocle to inspect.</param>

@@ -386,8 +386,8 @@ namespace TrafficManager.UI.MainMenu {
 
         private void ClickGoToVehicle(UIComponent component, UIMouseEventParameter eventParam) {
             ushort vehicleId = Convert.ToUInt16(_goToField.text);
-            Vehicle vehicle = Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId];
-            if ((vehicle.m_flags & Vehicle.Flags.Created) != 0) {
+            ref Vehicle vehicle = ref vehicleId.ToVehicle();
+            if (vehicle.IsCreated()) {
                 CSUtil.CameraControl.CameraController.Instance.GoToVehicle(vehicleId);
             }
         }
