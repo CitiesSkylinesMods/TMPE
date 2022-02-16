@@ -305,6 +305,8 @@ namespace TrafficManager.Lifecycle {
 
         internal void Unload() {
             try {
+                Options.Available = false;
+
                 GeometryNotifierDisposable?.Dispose();
                 GeometryNotifierDisposable = null;
 

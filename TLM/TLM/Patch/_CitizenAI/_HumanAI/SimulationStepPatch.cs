@@ -331,15 +331,13 @@ namespace TrafficManager.Patch._CitizenAI._HumanAI {
                         return true;
                     }
 
-                    VehicleParked[] parkedVehicles =
-                        Singleton<VehicleManager>.instance.m_parkedVehicles.m_buffer;
                     ParkedCarApproachState approachState =
                         AdvancedParkingManager.Instance.CitizenApproachingParkedCarSimulationStep(
                             instanceID,
                             ref data,
                             ref extInstance,
                             physicsLodRefPos,
-                            ref parkedVehicles[parkedVehicleId]);
+                            ref parkedVehicleId.ToParkedVehicle());
 
                     switch (approachState) {
                         case ParkedCarApproachState.None:
