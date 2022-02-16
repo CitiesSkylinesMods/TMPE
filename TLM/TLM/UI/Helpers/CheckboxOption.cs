@@ -1,7 +1,7 @@
 namespace TrafficManager.UI.Helpers {
     using ICities;
     using ColossalFramework.UI;
-    using State;
+    using TrafficManager.State;
     using CSUtil.Commons;
     using System.Collections.Generic;
     using JetBrains.Annotations;
@@ -17,11 +17,18 @@ namespace TrafficManager.UI.Helpers {
 
         /* Data */
 
+        public delegate bool ValidatorDelegate(bool desiredVal, out bool resultVal);
+
         public event OnCheckChanged OnValueChanged;
 
         public OnCheckChanged Handler {
             set => OnValueChanged += value;
         }
+
+        /// <summary>
+        /// Optional custom validator which intercepts value changes and can inhibit event propagation.
+        /// </summary>
+        public ValidatorDelegate Validator { get; set; }
 
         /// <summary>
         /// Optional: If specified, when <c>Value</c> is set <c>true</c> it will propagate that to listed checkboxes.
@@ -93,16 +100,23 @@ namespace TrafficManager.UI.Helpers {
         public override bool Value {
             get => base.Value;
             set {
+                if (Validator != null) {
+                    if (Validator(value, out bool result)) {
+                        value = result;
+                    } else {
+                        Log.Info($"CheckboxOption.Value: {nameof(Options)}.{FieldName} validator rejected value: {value}");
+                        return;
+                    }
+                }
+
                 Log.Info($"CheckboxOption.Value: {nameof(Options)}.{FieldName} changed to {value}");
 
-                // auto-enable requirements if applicable
                 if (value && _propagatesTrueTo != null) {
                     foreach (var requirement in _propagatesTrueTo) {
                         requirement.Value = true;
                     }
                 }
 
-                // auto-disable dependents if applicable
                 if (!value && PropagatesFalseTo != null) {
                     foreach (var dependent in PropagatesFalseTo) {
                         dependent.Value = false;
