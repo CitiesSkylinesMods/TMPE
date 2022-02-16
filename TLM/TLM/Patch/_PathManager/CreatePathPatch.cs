@@ -46,8 +46,7 @@ namespace TrafficManager.Patch._PathManager {
             VehicleInfo info = null;
             if (VehicleID != 0) {
                 // CreatePath called for customized AI
-                Vehicle[] vehicleBuffer = VehicleManager.instance.m_vehicles.m_buffer;
-                ref Vehicle vehicleData = ref vehicleBuffer[VehicleID];
+                ref Vehicle vehicleData = ref VehicleID.ToVehicle();
 
                 args.vehicleId = VehicleID;
                 args.extPathType = ExtPathType;

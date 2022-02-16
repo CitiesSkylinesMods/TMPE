@@ -96,8 +96,7 @@ namespace TrafficManager.Manager.Impl {
             }
 
             if (vehicleId != 0) {
-
-                Vehicle vehicle = Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId];
+                ref Vehicle vehicle = ref vehicleId.ToVehicle();
                 VehicleInfo info = vehicle.Info;
 
                 switch (info.m_class.m_service) {
@@ -213,8 +212,7 @@ namespace TrafficManager.Manager.Impl {
             }
 
             if (vehicleId != 0) {
-
-                Vehicle vehicle = Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId];
+                ref Vehicle vehicle = ref vehicleId.ToVehicle();
                 VehicleInfo info = vehicle.Info;
 
                 switch (info.m_class.m_service) {
