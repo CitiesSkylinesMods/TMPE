@@ -188,21 +188,19 @@ namespace TrafficManager.Patch._VehicleAI._CarAI {
 
             __instance.SimulationStep(vehicleID, ref data, vehicleID, ref data, lodPhysics);
             if (data.m_leadingVehicle == 0 && data.m_trailingVehicle != 0) {
-                VehicleManager vehManager = Singleton<VehicleManager>.instance;
                 ushort trailerId = data.m_trailingVehicle;
                 int numIters = 0;
                 while (trailerId != 0) {
-                    ushort trailingVehicle = vehManager.m_vehicles.m_buffer[trailerId].m_trailingVehicle;
-                    VehicleInfo info = vehManager.m_vehicles.m_buffer[trailerId].Info;
+                    ref Vehicle trailer = ref trailerId.ToVehicle();
 
-                    info.m_vehicleAI.SimulationStep(
+                    trailer.Info.m_vehicleAI.SimulationStep(
                         trailerId,
-                        ref vehManager.m_vehicles.m_buffer[trailerId],
+                        ref trailer,
                         vehicleID,
                         ref data,
                         lodPhysics);
 
-                    trailerId = trailingVehicle;
+                    trailerId = trailer.m_trailingVehicle;
                     if (++numIters > 16384) {
                         CODebugBase<LogChannel>.Error(
                             LogChannel.Core,

@@ -1309,23 +1309,26 @@ namespace TrafficManager.UI {
             GUIStyle _counterStyle = new GUIStyle();
             SimulationManager simManager = Singleton<SimulationManager>.instance;
             ExtVehicleManager vehStateManager = ExtVehicleManager.Instance;
-            VehicleManager vehicleManager = Singleton<VehicleManager>.instance;
-            Vehicle[] vehicleBuffer = vehicleManager.m_vehicles.m_buffer;
 
             int startVehicleId = 1;
-            int endVehicleId = vehicleBuffer.Length - 1;
+            int endVehicleId = Singleton<VehicleManager>.instance.m_vehicles.m_buffer.Length - 1;
 #if DEBUG
-            if (DebugSettings.VehicleId != 0) {
-                startVehicleId = endVehicleId = DebugSettings.VehicleId;
+            if (DebugSettings.VehicleId != 0)
+            {
+                startVehicleId = DebugSettings.VehicleId;
+                endVehicleId = DebugSettings.VehicleId;
             }
 #endif
             for (int i = startVehicleId; i <= endVehicleId; ++i) {
-                if (vehicleBuffer[i].m_flags == 0) {
+                ushort vehicleId = (ushort)i;
+                ref Vehicle vehicle = ref vehicleId.ToVehicle();
+
+                if (vehicle.m_flags == 0) {
                     // node is unused
                     continue;
                 }
 
-                Vector3 vehPos = vehicleBuffer[i].GetSmoothPosition((ushort)i);
+                Vector3 vehPos = vehicle.GetSmoothPosition(vehicleId);
                 bool visible = GeometryUtil.WorldToScreenPoint(vehPos, out Vector3 screenPos);
 
                 if (!visible) {
@@ -1350,12 +1353,12 @@ namespace TrafficManager.UI {
                         Constants.ManagerFactory.ExtVehicleManager
                                  .GetDriverInstanceId(
                                      (ushort)i,
-                                     ref vehicleBuffer[i])];
+                                     ref vehicle)];
                 // bool startNode = vState.currentStartNode;
                 // ushort segmentId = vState.currentSegmentId;
 
                 // Converting magnitudes into game speed float, and then into km/h
-                SpeedValue vehSpeed = SpeedValue.FromVelocity(vehicleBuffer[i].GetLastFrameVelocity().magnitude);
+                SpeedValue vehSpeed = SpeedValue.FromVelocity(vehicle.GetLastFrameVelocity().magnitude);
 #if DEBUG
                 if (GlobalConfig.Instance.Debug.ExtPathMode != ExtPathMode.None &&
                     driverInst.pathMode != GlobalConfig.Instance.Debug.ExtPathMode) {
@@ -1407,8 +1410,6 @@ namespace TrafficManager.UI {
         // TODO: Extract into a Debug Tool GUI class
         private void DebugGuiDisplayCitizens() {
             GUIStyle counterStyle = new GUIStyle();
-            CitizenManager citManager = Singleton<CitizenManager>.instance;
-            Vehicle[] vehiclesBuffer = Singleton<VehicleManager>.instance.m_vehicles.m_buffer;
 
             for (uint citizenInstanceId = 1; citizenInstanceId < CitizenManager.MAX_INSTANCE_COUNT; ++citizenInstanceId) {
                 ref CitizenInstance citizenInstance = ref citizenInstanceId.ToCitizenInstance();
@@ -1479,7 +1480,7 @@ namespace TrafficManager.UI {
                         labelSb.AppendFormat(
                             "\nveh: {0} dist: {1}",
                             citizen.m_vehicle,
-                            (vehiclesBuffer[citizen.m_vehicle].GetLastFramePosition() - pos).magnitude);
+                            (citizen.m_vehicle.ToVehicle().GetLastFramePosition() - pos).magnitude);
                     }
                 }
 

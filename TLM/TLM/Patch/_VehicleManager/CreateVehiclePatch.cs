@@ -1,6 +1,7 @@
 namespace TrafficManager.Patch._VehicleManager {
     using HarmonyLib;
     using JetBrains.Annotations;
+    using TrafficManager.Util.Extensions;
 
     [HarmonyPatch(typeof(VehicleManager), "CreateVehicle")]
     [UsedImplicitly]
@@ -36,7 +37,7 @@ namespace TrafficManager.Patch._VehicleManager {
             if (__result) {
                 Constants.ManagerFactory.ExtVehicleManager.OnCreateVehicle(
                     vehicle,
-                    ref __instance.m_vehicles.m_buffer[vehicle]); // NON-STOCK CODE
+                    ref vehicle.ToVehicle()); // NON-STOCK CODE
             }
         }
     }

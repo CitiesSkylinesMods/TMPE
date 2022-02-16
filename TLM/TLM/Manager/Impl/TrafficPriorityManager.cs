@@ -557,8 +557,7 @@ namespace TrafficManager.Manager.Impl {
                         ref curEnd,
                         targetToDir,
                         incomingVehicleId,
-                        ref Singleton<VehicleManager>.instance.m_vehicles
-                                                     .m_buffer[incomingVehicleId],
+                        ref incomingVehicleId.ToVehicle(),
                         ref vehStateManager.ExtVehicles[incomingVehicleId],
                         incomingOnMain,
                         ref extSegEndMan.ExtSegmentEnds[otherEndIndex],

@@ -142,36 +142,38 @@ namespace TrafficManager.Manager.Impl {
                 false,
                 false)) {
                 // update frame data
-                Vehicle.Frame frame = vehManager.m_vehicles.m_buffer[vehicleId].m_frame0;
+                ref Vehicle vehicle = ref vehicleId.ToVehicle();
+                
+                Vehicle.Frame frame = vehicle.m_frame0;
                 frame.m_rotation = parkedVehicle.m_rotation;
 
-                vehManager.m_vehicles.m_buffer[vehicleId].m_frame0 = frame;
-                vehManager.m_vehicles.m_buffer[vehicleId].m_frame1 = frame;
-                vehManager.m_vehicles.m_buffer[vehicleId].m_frame2 = frame;
-                vehManager.m_vehicles.m_buffer[vehicleId].m_frame3 = frame;
+                vehicle.m_frame0 = frame;
+                vehicle.m_frame1 = frame;
+                vehicle.m_frame2 = frame;
+                vehicle.m_frame3 = frame;
                 parkedVehicleInfo.m_vehicleAI.FrameDataUpdated(
                     vehicleId,
-                    ref vehManager.m_vehicles.m_buffer[vehicleId],
+                    ref vehicle,
                     ref frame);
 
                 // update vehicle target position
-                vehManager.m_vehicles.m_buffer[vehicleId].m_targetPos0 = new Vector4(
+                vehicle.m_targetPos0 = new Vector4(
                     vehLanePos.x,
                     vehLanePos.y,
                     vehLanePos.z,
                     2f);
 
                 // update other fields
-                vehManager.m_vehicles.m_buffer[vehicleId].m_flags =
-                    vehManager.m_vehicles.m_buffer[vehicleId].m_flags | Vehicle.Flags.Stopped;
+                vehicle.m_flags =
+                    vehicle.m_flags | Vehicle.Flags.Stopped;
 
-                vehManager.m_vehicles.m_buffer[vehicleId].m_path = instanceData.m_path;
-                vehManager.m_vehicles.m_buffer[vehicleId].m_pathPositionIndex = 0;
-                vehManager.m_vehicles.m_buffer[vehicleId].m_lastPathOffset = vehLaneOffset;
-                vehManager.m_vehicles.m_buffer[vehicleId].m_transferSize =
+                vehicle.m_path = instanceData.m_path;
+                vehicle.m_pathPositionIndex = 0;
+                vehicle.m_lastPathOffset = vehLaneOffset;
+                vehicle.m_transferSize =
                     (ushort)(instanceData.m_citizen & 65535u);
 
-                if (!parkedVehicleInfo.m_vehicleAI.TrySpawn(vehicleId, ref vehManager.m_vehicles.m_buffer[vehicleId])) {
+                if (!parkedVehicleInfo.m_vehicleAI.TrySpawn(vehicleId, ref vehicle)) {
                     Log._DebugIf(
                         logParkingAi,
                         () => $"CustomHumanAI.EnterParkedCar({instanceId}): Could not " +

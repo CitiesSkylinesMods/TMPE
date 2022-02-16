@@ -93,9 +93,9 @@ namespace TrafficManager.Patch._VehicleAI._TrainAI {
             float motionFactor = 0.5f;
 
             if (frontVehicleId != 0) {
-                VehicleManager vehMan = VehicleManager.instance;
-                Vehicle.Frame frontVehLastFrameData = vehMan.m_vehicles.m_buffer[frontVehicleId].GetLastFrameData();
-                VehicleInfo frontVehInfo = vehMan.m_vehicles.m_buffer[frontVehicleId].Info;
+                ref Vehicle frontVehicle = ref frontVehicleId.ToVehicle();
+                Vehicle.Frame frontVehLastFrameData = frontVehicle.GetLastFrameData();
+                VehicleInfo frontVehInfo = frontVehicle.Info;
                 float attachOffset;
 
                 if ((vehicleData.m_flags & Vehicle.Flags.Inverted) != 0 != reversed) {
@@ -106,7 +106,7 @@ namespace TrafficManager.Patch._VehicleAI._TrainAI {
 
                 float frontAttachOffset;
 
-                if ((vehMan.m_vehicles.m_buffer[frontVehicleId].m_flags & Vehicle.Flags.Inverted) != 0 != reversed) {
+                if ((frontVehicle.m_flags & Vehicle.Flags.Inverted) != 0 != reversed) {
                     frontAttachOffset = frontVehInfo.m_attachOffsetFront -
                                         (frontVehInfo.m_generatedInfo.m_size.z * 0.5f);
                 } else {

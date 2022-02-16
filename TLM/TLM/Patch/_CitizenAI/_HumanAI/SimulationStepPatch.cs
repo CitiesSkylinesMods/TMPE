@@ -245,15 +245,15 @@ namespace TrafficManager.Patch._CitizenAI._HumanAI {
             }
 
             if (vehicleId != 0) {
-                Vehicle[] vehiclesBuffer = vehicleManager.m_vehicles.m_buffer;
-                VehicleInfo vehicleInfo = vehiclesBuffer[vehicleId].Info;
+                ref Vehicle vehicle = ref vehicleId.ToVehicle();
+                VehicleInfo vehicleInfo = vehicle.Info;
 
                 if (vehicleInfo.m_vehicleType == VehicleInfo.VehicleType.Bicycle) {
                     vehicleInfo.m_vehicleAI.SimulationStep(
                         vehicleId,
-                        ref vehiclesBuffer[vehicleId],
+                        ref vehicle,
                         vehicleId,
-                        ref vehiclesBuffer[vehicleId],
+                        ref vehicle,
                         0);
                     vehicleId = 0;
                 }

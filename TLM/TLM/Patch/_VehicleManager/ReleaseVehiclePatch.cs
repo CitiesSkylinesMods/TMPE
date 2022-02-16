@@ -1,6 +1,7 @@
 ﻿namespace TrafficManager.Patch._VehicleManager {
     using HarmonyLib;
     using JetBrains.Annotations;
+    using TrafficManager.Util.Extensions;
 
     [HarmonyPatch(typeof(VehicleManager), "ReleaseVehicle")]
     [UsedImplicitly]
@@ -13,7 +14,7 @@
         public static void Prefix(VehicleManager __instance, ushort vehicle) {
             Constants.ManagerFactory.ExtVehicleManager.OnReleaseVehicle(
                 vehicle,
-                ref __instance.m_vehicles.m_buffer[vehicle]);
+                ref vehicle.ToVehicle());
         }
     }
 }
