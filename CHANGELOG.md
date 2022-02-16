@@ -45,7 +45,7 @@ This changelog includes all versions and major variants of the mod going all the
 - [Fixed] Skip searching for best emergency lane for non-car vehicles #1408 (krzychu124)
 - [Updated] Speed Limits: Always use themed icons in segment/lane modes #1404 (aubergine18)
 - [Updated] Extend Harmony patch manager to allow manual patches #1386 #1361 (sway2020)
-- [Updated] Various code clean-up and micro optimisations #1407 #1406 #1401 #1400 #1399 #1398 #1397 #1396 (egi)
+- [Updated] Various code clean-up and micro optimisations #1413 #1407 #1406 #1401 #1400 #1399 #1398 #1397 #1396 (egi)
 - [Updated] Remove duplicate button clean-up code in lifecycle #1375 (aubergine18)
 - [Updated] Internal restructuring of mod options code #1403 #1369 #1370 #1371 #1373 #1374 (aubergine18)
 - [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
