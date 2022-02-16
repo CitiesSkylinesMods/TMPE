@@ -35,7 +35,7 @@ namespace TrafficManager.UI.MainMenu {
             ModUI.GetTrafficManagerTool()?.SetToolMode(ToolMode.None);
 
             // Toggle the despawning value
-            GameplayTab.SetDisableDespawning(!Options.disableDespawning);
+            GameplayTab_VehicleBehaviourGroup.DisableDespawning.Value = !Options.disableDespawning;
 
             // Update currently visible tooltip
             this.UpdateTooltip(refreshTooltip: true);
