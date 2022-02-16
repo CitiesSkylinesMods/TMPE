@@ -84,7 +84,7 @@
 ## Support Policy
 
 Our team is happy to support you if:
-- You are using the latest version of **TM:PE v11 STABLE** or **TM:PE v11 LABS**
+- You are using the latest version of **TM:PE v11 STABLE** or **TM:PE v11 TEST**
 - You are using a properly purchased and latest version of Cities: Skylines
 - You provide useful information when [reporting a bug](https://github.com/CitiesSkylinesMods/TMPE/wiki/Report-a-Bug)
 
