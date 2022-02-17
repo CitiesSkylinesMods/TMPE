@@ -38,17 +38,31 @@ namespace TrafficManager.UI.Helpers {
             get => _propagatesTrueTo;
             set {
                 _propagatesTrueTo = value;
-                Log.Info($"CheckboxOption.PropagatesTrueTo: {nameof(Options)}.{FieldName} will proagate to:");
+                Log.Info($"CheckboxOption.PropagatesTrueTo: `{FieldName}` will proagate to:");
 
-                foreach (var requirement in _propagatesTrueTo) {
-                    Log.Info($"- {nameof(Options)}.{requirement.FieldName}");
+                foreach (var target in _propagatesTrueTo) {
+                    Log.Info($"- `{target.FieldName}`");
 
-                    if (requirement.PropagatesFalseTo == null) {
-                        requirement.PropagatesFalseTo = new ();
+                    if (target.PropagatesFalseTo == null) {
+                        target.PropagatesFalseTo = new ();
                     }
 
-                    requirement.PropagatesFalseTo.Add(this);
+                    target.PropagatesFalseTo.Add(this);
                 }
+            }
+        }
+
+        /// <summary>
+        /// An alternate way to add targets to the <see cref="_propagatesTrueTo"/> list.
+        /// Useful for keeping code concise when there's only single target (most common use case).
+        /// </summary>
+        /// <param name="target">The checkox to propagate <c>true</c> value to.</param>
+        public void PropagateTrueTo([NotNull] CheckboxOption target) {
+            Log.Info($"CheckboxOption.PropagateTrueTo: `{FieldName}` will proagate to `{target.FieldName}`");
+            if (_propagatesTrueTo != null) {
+                _propagatesTrueTo.Add(target);
+            } else {
+                _propagatesTrueTo = new() { { target } };
             }
         }
 
@@ -60,12 +74,12 @@ namespace TrafficManager.UI.Helpers {
         public List<CheckboxOption> PropagatesFalseTo { get; set; }
 
         public override void Load(byte data) {
-            Log.Info($"CheckboxOption.Load: {data} -> {data != 0} -> {nameof(Options)}.{FieldName}");
+            Log.Info($"CheckboxOption.Load({data}): `{FieldName}` = {data != 0}");
             Value = data != 0;
         }
 
         public override byte Save() {
-            Log.Info($"CheckboxOption.Save: {nameof(Options)}.{FieldName} -> {Value} -> {(Value ? (byte)1 : (byte)0)}");
+            Log.Info($"CheckboxOption.Save(): `{FieldName}` is {Value} -> {(Value ? (byte)1 : (byte)0)}");
             return Value ? (byte)1 : (byte)0;
         }
 
@@ -104,22 +118,22 @@ namespace TrafficManager.UI.Helpers {
                     if (Validator(value, out bool result)) {
                         value = result;
                     } else {
-                        Log.Info($"CheckboxOption.Value: {nameof(Options)}.{FieldName} validator rejected value: {value}");
+                        Log.Info($"CheckboxOption.Value: `{FieldName}` validator rejected value: {value}");
                         return;
                     }
                 }
 
-                Log.Info($"CheckboxOption.Value: {nameof(Options)}.{FieldName} changed to {value}");
+                Log.Info($"CheckboxOption.Value: `{FieldName}` changed to {value}");
 
                 if (value && _propagatesTrueTo != null) {
-                    foreach (var requirement in _propagatesTrueTo) {
-                        requirement.Value = true;
+                    foreach (var target in _propagatesTrueTo) {
+                        target.Value = true;
                     }
                 }
 
                 if (!value && PropagatesFalseTo != null) {
-                    foreach (var dependent in PropagatesFalseTo) {
-                        dependent.Value = false;
+                    foreach (var target in PropagatesFalseTo) {
+                        target.Value = false;
                     }
                 }
 
