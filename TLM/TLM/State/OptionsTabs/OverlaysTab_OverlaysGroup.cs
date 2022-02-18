@@ -71,6 +71,12 @@ namespace TrafficManager.State {
                 Label = "Overlay.Checkbox:Buildings",
                 Validator = DebugOnlyValidator,
             };
+        public static CheckboxOption ShowPathFindStats =
+            new(nameof(Options.showPathFindStats), Options.PersistTo.Savegame) {
+                Label = "Maintenance.Checkbox:Show path - find stats",
+                Validator = QueuedStatsOnlyValidator,
+                Handler = OnShowPathFindStatsChanged,
+            };
 
         static OverlaysTab_OverlaysGroup() {
             try {
@@ -114,6 +120,9 @@ namespace TrafficManager.State {
             CitizenOverlay.AddUI(group);
             BuildingOverlay.AddUI(group);
 #endif
+#if QUEUEDSTATS
+            ShowPathFindStats.AddUI(group);
+#endif
         }
 
         private static string T(string key) => Translation.Options.Get(key);
@@ -123,7 +132,19 @@ namespace TrafficManager.State {
             return true;
         }
 
+        private static bool QueuedStatsOnlyValidator(bool desired, out bool result) {
+#if QUEUEDSTATS
+            result = desired;
+#else
+            result = false;
+#endif
+            return true;
+        }
+
         private static void OnOverlayChanged(bool _)
             => OptionsManager.ReinitialiseSubTools();
+
+        private static void OnShowPathFindStatsChanged(bool _)
+            => OptionsManager.RebuildMenu();
     }
 }

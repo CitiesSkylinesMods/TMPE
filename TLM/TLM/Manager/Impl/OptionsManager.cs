@@ -176,7 +176,7 @@ namespace TrafficManager.Manager.Impl {
                 ToCheckbox(data, idx: 30, MaintenanceTab_FeaturesGroup.ParkingRestrictionsEnabled, true);
                 ToCheckbox(data, idx: 31, OverlaysTab_OverlaysGroup.ParkingRestrictionsOverlay, false);
                 PoliciesTab.SetBanRegularTrafficOnBusLanes(LoadBool(data, idx: 32));
-                MaintenanceTab.SetShowPathFindStats(LoadBool(data, idx: 33));
+                ToCheckbox(data, idx: 33, OverlaysTab_OverlaysGroup.ShowPathFindStats, VersionUtil.IS_DEBUG);
                 GameplayTab.SetDLSPercentage(LoadByte(data, idx: 34));
 
                 if (data.Length > 35) {
