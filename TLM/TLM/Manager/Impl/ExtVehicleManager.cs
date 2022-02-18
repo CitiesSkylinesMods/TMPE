@@ -189,9 +189,7 @@ namespace TrafficManager.Manager.Impl {
 
             ushort connectedVehicleId = vehicleId;
             while (true) {
-                connectedVehicleId = Singleton<VehicleManager>
-                                     .instance.m_vehicles.m_buffer[connectedVehicleId]
-                                     .m_trailingVehicle;
+                connectedVehicleId = connectedVehicleId.ToVehicle().m_trailingVehicle;
 
                 if (connectedVehicleId == 0) {
                     break;
@@ -206,7 +204,7 @@ namespace TrafficManager.Manager.Impl {
 
                 OnStartPathFind(
                     ref ExtVehicles[connectedVehicleId],
-                    ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[connectedVehicleId],
+                    ref connectedVehicleId.ToVehicle(),
                     vehicleType);
             }
 
@@ -243,14 +241,15 @@ namespace TrafficManager.Manager.Impl {
             }
 
             ushort connectedVehicleId = vehicleId;
-            Vehicle[] vehiclesBuffer = Singleton<VehicleManager>.instance.m_vehicles.m_buffer;
 
             while (connectedVehicleId != 0) {
+                ref Vehicle connectedVehicle = ref connectedVehicleId.ToVehicle();
+                
                 OnSpawn(
                     ref ExtVehicles[connectedVehicleId],
-                    ref vehiclesBuffer[connectedVehicleId]);
+                    ref connectedVehicleId.ToVehicle());
 
-                connectedVehicleId = vehiclesBuffer[connectedVehicleId].m_trailingVehicle;
+                connectedVehicleId = connectedVehicle.m_trailingVehicle;
             }
         }
 
@@ -258,11 +257,9 @@ namespace TrafficManager.Manager.Impl {
             ushort connectedVehicleId = vehicleId;
             while (connectedVehicleId != 0) {
                 UpdateVehiclePosition(
-                    ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[connectedVehicleId],
+                    ref connectedVehicleId.ToVehicle(),
                     ref ExtVehicles[connectedVehicleId]);
-                connectedVehicleId = Singleton<VehicleManager>
-                                     .instance.m_vehicles.m_buffer[connectedVehicleId]
-                                     .m_trailingVehicle;
+                connectedVehicleId = connectedVehicleId.ToVehicle().m_trailingVehicle;
             }
         }
 
@@ -329,9 +326,7 @@ namespace TrafficManager.Manager.Impl {
 
                 OnDespawn(ref ExtVehicles[connectedVehicleId]);
 
-                connectedVehicleId = Singleton<VehicleManager>
-                                     .instance.m_vehicles.m_buffer[connectedVehicleId]
-                                     .m_trailingVehicle;
+                connectedVehicleId = connectedVehicleId.ToVehicle().m_trailingVehicle;
             }
         }
 
@@ -698,7 +693,7 @@ namespace TrafficManager.Manager.Impl {
             Constants.ManagerFactory.ExtCitizenInstanceManager.ResetInstance(
                 GetDriverInstanceId(
                     extVehicle.vehicleId,
-                    ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[extVehicle.vehicleId]));
+                    ref extVehicle.vehicleId.ToVehicle()));
 
             Unlink(ref extVehicle);
 
@@ -1025,9 +1020,9 @@ namespace TrafficManager.Manager.Impl {
                  ++vehicleId) {
 
                 ushort vId = (ushort)vehicleId;
-                ref Vehicle vehicle = ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vId];
+                ref Vehicle vehicle = ref vId.ToVehicle();
 
-                if ((vehicle.m_flags & Vehicle.Flags.Created) == 0) {
+                if (!vehicle.IsCreated()) {
                     continue;
                 }
 
@@ -1089,8 +1084,8 @@ namespace TrafficManager.Manager.Impl {
             base.OnLevelUnloading();
 
             for (int i = 0; i < ExtVehicles.Length; ++i) {
-                ushort vId = (ushort)i;
-                ref Vehicle vehicle = ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vId];
+                ushort vehicleId = (ushort)i;
+                ref Vehicle vehicle = ref vehicleId.ToVehicle();
                 OnRelease(ref ExtVehicles[i], ref vehicle);
             }
         }

@@ -108,7 +108,7 @@ namespace TrafficManager.Traffic.Impl {
             var maxVehicleCount = VehicleManager.instance.m_vehicles.m_buffer.Length;
 
             while (vehicleId != 0) {
-                ref Vehicle vehicle = ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId];
+                ref Vehicle vehicle = ref vehicleId.ToVehicle();
 
                 MeasureOutgoingVehicle(
                             logDebug,

@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 // associated with an assembly.
 [assembly: AssemblyTitle("TMPE.API")]
 [assembly: AssemblyProduct("TMPE.API")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("API assembly to help integration of other Cities: Skylines modifications with TMPE")]
 [assembly: AssemblyConfiguration("")]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
