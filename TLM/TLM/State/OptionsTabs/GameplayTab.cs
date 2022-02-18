@@ -88,7 +88,7 @@ namespace TrafficManager.State {
                       Translation.Options.Get("Gameplay.Checkbox:No excessive transfers"),
                       Options.realisticPublicTransport,
                       OnRealisticPublicTransportChanged) as UICheckBox;
-            Options.AllowTextWrap(_realisticPublicTransportToggle);
+            CheckboxOption.AllowTextWrap(_realisticPublicTransportToggle);
         }
 
         private static void OnRecklessDriversChanged(int newRecklessDrivers) {

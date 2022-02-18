@@ -16,6 +16,7 @@ namespace TrafficManager.State {
     using TrafficManager.State.ConfigData;
     using TrafficManager.UI.Textures;
     using UI.WhatsNew;
+    using TrafficManager.Manager.Impl;
 
     public static class GeneralTab {
         private static UICheckBox _instantEffectsToggle;
@@ -172,7 +173,7 @@ namespace TrafficManager.State {
                                             text: Translation.ModConflicts.Get("Checkbox:Ignore disabled mods"),
                                             defaultValue: GlobalConfig.Instance.Main.IgnoreDisabledMods,
                                             eventCallback: OnIgnoreDisabledModsChanged) as UICheckBox;
-            Options.Indent(_ignoreDisabledModsToggle);
+            CheckboxOption.IndentUI(_ignoreDisabledModsToggle);
             _showCompatibilityCheckErrorToggle
                 = group.AddCheckbox(
                       T("General.Checkbox:Notify me about TM:PE startup conflicts"),
@@ -214,14 +215,14 @@ namespace TrafficManager.State {
 
                 // TODO: Move this to the owner class and implement IObserver<ModUI.EventPublishers.LanguageChangeNotification>
                 Translation.SetCurrentLanguageToGameLanguage();
-                Options.RebuildMenu();
+                OptionsManager.RebuildMenu();
             } else if (newLanguageIndex - 1 < Translation.AvailableLanguageCodes.Count) {
                 string newLang = Translation.AvailableLanguageCodes[newLanguageIndex - 1];
                 GlobalConfig.Instance.LanguageCode = newLang;
                 GlobalConfig.WriteConfig();
                 // TODO: Move this to the owner class and implement IObserver<ModUI.EventPublishers.LanguageChangeNotification>
                 Translation.SetCurrentLanguageToTMPELanguage();
-                Options.RebuildMenu();
+                OptionsManager.RebuildMenu();
             } else {
                 Log.Warning($"Options.onLanguageChanged: Invalid language index: {newLanguageIndex}");
                 return;

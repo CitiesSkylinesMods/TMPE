@@ -9,26 +9,20 @@ namespace TrafficManager.Manager.Impl {
     using JetBrains.Annotations;
     using TrafficManager.Util;
     using System.Reflection;
+    using TrafficManager.UI;
+    using TrafficManager.UI.Textures;
 
     public class OptionsManager
         : AbstractCustomManager,
           IOptionsManager {
+
         // TODO I contain ugly code
         public static OptionsManager Instance = new OptionsManager();
 
-        protected override void InternalPrintDebugInfo() {
-            base.InternalPrintDebugInfo();
-            Log.NotImpl("InternalPrintDebugInfo for OptionsManager");
-        }
-
-        /// <summary>
-        /// Converts value to SimulationAccuracy
-        /// </summary>
-        /// <param name="value">Old value</param>
-        /// <returns>SimulationAccuracy value</returns>
-        private static SimulationAccuracy ConvertToSimulationAccuracy(byte value) {
-            return SimulationAccuracy.MaxValue - value;
-        }
+        // See: OnAfterLoadData() and related methods
+        private static bool _needUpdateRoutingManager = false;
+        private static bool _needUpdateDedicatedTurningLanes = false;
+        private static bool _needUpdateJunctionRestrictionsManager = false;
 
         /// <summary>
         /// API method for external mods to get option values by name.
@@ -55,6 +49,50 @@ namespace TrafficManager.Manager.Impl {
             return true;
         }
 
+        public bool MayPublishSegmentChanges() =>
+            Options.instantEffects &&
+            TMPELifecycle.InGameOrEditor() &&
+            !TMPELifecycle.Instance.Deserializing;
+
+        /// <summary>
+        /// Loading options may trigger multiple calls to certain methods. To de-spam
+        /// invocations, the methods are skipped during loading and a bool is set
+        /// so that we can invoke those methods just once after loading has completed.
+        /// </summary>
+        public override void OnAfterLoadData() {
+            base.OnAfterLoadData();
+            Log.Info("OptionsManger.OnAfterLoadData() checking for queued method calls");
+
+            if (_needUpdateRoutingManager) {
+                _needUpdateRoutingManager = false;
+                UpdateRoutingManager();
+            }
+
+            if (_needUpdateDedicatedTurningLanes) {
+                _needUpdateDedicatedTurningLanes = false;
+                UpdateDedicatedTurningLanes();
+            }
+
+            if (_needUpdateJunctionRestrictionsManager) {
+                _needUpdateJunctionRestrictionsManager = false;
+                UpdateJunctionRestrictionsManager();
+            }
+        }
+
+        protected override void InternalPrintDebugInfo() {
+            base.InternalPrintDebugInfo();
+            Log.NotImpl("InternalPrintDebugInfo for OptionsManager");
+        }
+
+        /// <summary>
+        /// Converts value to SimulationAccuracy
+        /// </summary>
+        /// <param name="value">Old value</param>
+        /// <returns>SimulationAccuracy value</returns>
+        private static SimulationAccuracy ConvertToSimulationAccuracy(byte value) {
+            return SimulationAccuracy.MaxValue - value;
+        }
+
         /// <summary>
         /// Converts SimulationAccuracy to SimulationAccuracy
         /// </summary>
@@ -62,11 +100,6 @@ namespace TrafficManager.Manager.Impl {
         /// <returns>byte representation of value (backward compatible)</returns>
         private static byte ConvertFromSimulationAccuracy(SimulationAccuracy value) {
             return (byte)(SimulationAccuracy.MaxValue - value);
-        }
-
-        public bool MayPublishSegmentChanges() {
-            return Options.instantEffects && TMPELifecycle.InGameOrEditor() &&
-                !TMPELifecycle.Instance.Deserializing;
         }
 
         // Takes a bool from data and sets it in `out result`
@@ -98,6 +131,12 @@ namespace TrafficManager.Manager.Impl {
             opt.Load(defaultVal ? (byte)1 : (byte)0);
         }
 
+        /// <summary>
+        /// Restores the mod options based on supplied <paramref name="data"/>.
+        /// </summary>
+        /// <param name="data">Byte array obtained from the savegame.</param>
+        /// <returns>Returns <c>true</c> if successful, otherwise <c>false</c>.</returns>
+        /// <remarks>Applies default values if the data for an option does not exist.</remarks>
         public bool LoadData(byte[] data) {
             try {
                 Options.Available = false;
@@ -107,35 +146,35 @@ namespace TrafficManager.Manager.Impl {
                 GeneralTab.SetSimulationAccuracy(ConvertToSimulationAccuracy(LoadByte(data, idx: 0)));
                 // skip Options.setLaneChangingRandomization(options[1]);
                 GameplayTab.SetRecklessDrivers(LoadByte(data, idx: 2));
-                PoliciesTab.SetRelaxedBusses(LoadBool(data, idx: 3));
-                OverlaysTab.SetNodesOverlay(LoadBool(data, idx: 4));
-                PoliciesTab.SetMayEnterBlockedJunctions(LoadBool(data, idx: 5));
+                ToCheckbox(data, idx: 3, PoliciesTab_AtJunctionsGroup.RelaxedBusses, true);
+                ToCheckbox(data, idx: 4, OverlaysTab_OverlaysGroup.NodesOverlay, false);
+                ToCheckbox(data, idx: 5, PoliciesTab_AtJunctionsGroup.AllowEnterBlockedJunctions, false);
                 GameplayTab.SetAdvancedAi(LoadBool(data, idx: 6));
                 PoliciesTab.SetHighwayRules(LoadBool(data, idx: 7));
-                OverlaysTab.SetPrioritySignsOverlay(LoadBool(data, idx: 8));
-                OverlaysTab.SetTimedLightsOverlay(LoadBool(data, idx: 9));
-                OverlaysTab.SetSpeedLimitsOverlay(LoadBool(data, idx: 10));
-                OverlaysTab.SetVehicleRestrictionsOverlay(LoadBool(data, idx: 11));
+                ToCheckbox(data, idx: 8, OverlaysTab_OverlaysGroup.PrioritySignsOverlay, false);
+                ToCheckbox(data, idx: 9, OverlaysTab_OverlaysGroup.TimedLightsOverlay, false);
+                ToCheckbox(data, idx: 10, OverlaysTab_OverlaysGroup.SpeedLimitsOverlay, false);
+                ToCheckbox(data, idx: 11, OverlaysTab_OverlaysGroup.VehicleRestrictionsOverlay, false);
                 GameplayTab.SetStrongerRoadConditionEffects(LoadBool(data, idx: 12));
-                PoliciesTab.SetAllowUTurns(LoadBool(data, idx: 13));
-                PoliciesTab.SetAllowLaneChangesWhileGoingStraight(LoadBool(data, idx: 14));
+                ToCheckbox(data, idx: 13, PoliciesTab_AtJunctionsGroup.AllowUTurns, false);
+                ToCheckbox(data, idx: 14, PoliciesTab_AtJunctionsGroup.AllowLaneChangesWhileGoingStraight, true);
                 GameplayTab.SetDisableDespawning(!LoadBool(data, idx: 15)); // inverted
                 // skip Options.setDynamicPathRecalculation(data[16] == (byte)1);
-                OverlaysTab.SetConnectedLanesOverlay(LoadBool(data, idx: 17));
-                PoliciesTab.SetPrioritySignsEnabled(LoadBool(data, idx: 18));
-                PoliciesTab.SetTimedLightsEnabled(LoadBool(data, idx: 19));
-                MaintenanceTab.SetCustomSpeedLimitsEnabled(LoadBool(data, idx: 20));
-                MaintenanceTab.SetVehicleRestrictionsEnabled(LoadBool(data, idx: 21));
-                MaintenanceTab.SetLaneConnectorEnabled(LoadBool(data, idx: 22));
-                OverlaysTab.SetJunctionRestrictionsOverlay(LoadBool(data, idx: 23));
-                MaintenanceTab.SetJunctionRestrictionsEnabled(LoadBool(data, idx: 24));
+                ToCheckbox(data, idx: 17, OverlaysTab_OverlaysGroup.ConnectedLanesOverlay, false);
+                ToCheckbox(data, idx: 18, MaintenanceTab_FeaturesGroup.PrioritySignsEnabled, true);
+                ToCheckbox(data, idx: 19, MaintenanceTab_FeaturesGroup.TimedLightsEnabled, true);
+                ToCheckbox(data, idx: 20, MaintenanceTab_FeaturesGroup.CustomSpeedLimitsEnabled, true);
+                ToCheckbox(data, idx: 21, MaintenanceTab_FeaturesGroup.VehicleRestrictionsEnabled, true);
+                ToCheckbox(data, idx: 22, MaintenanceTab_FeaturesGroup.LaneConnectorEnabled, true);
+                ToCheckbox(data, idx: 23, OverlaysTab_OverlaysGroup.JunctionRestrictionsOverlay, false);
+                ToCheckbox(data, idx: 24, MaintenanceTab_FeaturesGroup.JunctionRestrictionsEnabled, true);
                 GameplayTab.SetProhibitPocketCars(LoadBool(data, idx: 25));
                 PoliciesTab.SetPreferOuterLane(LoadBool(data, idx: 26));
                 GameplayTab.SetIndividualDrivingStyle(LoadBool(data, idx: 27));
                 PoliciesTab.SetEvacBussesMayIgnoreRules(LoadBool(data, idx: 28));
                 GeneralTab.SetInstantEffects(LoadBool(data, idx: 29));
-                MaintenanceTab.SetParkingRestrictionsEnabled(LoadBool(data, idx: 30));
-                OverlaysTab.SetParkingRestrictionsOverlay(LoadBool(data, idx: 31));
+                ToCheckbox(data, idx: 30, MaintenanceTab_FeaturesGroup.ParkingRestrictionsEnabled, true);
+                ToCheckbox(data, idx: 31, OverlaysTab_OverlaysGroup.ParkingRestrictionsOverlay, false);
                 PoliciesTab.SetBanRegularTrafficOnBusLanes(LoadBool(data, idx: 32));
                 MaintenanceTab.SetShowPathFindStats(LoadBool(data, idx: 33));
                 GameplayTab.SetDLSPercentage(LoadByte(data, idx: 34));
@@ -151,12 +190,12 @@ namespace TrafficManager.Manager.Impl {
                     }
                 }
 
-                PoliciesTab.SetTrafficLightPriorityRules(LoadBool(data, idx: 36));
+                ToCheckbox(data, idx: 36, PoliciesTab_AtJunctionsGroup.TrafficLightPriorityRules, false);
                 GameplayTab.SetRealisticPublicTransport(LoadBool(data, idx: 37));
-                MaintenanceTab.SetTurnOnRedEnabled(LoadBool(data, idx: 38));
-                PoliciesTab.SetAllowNearTurnOnRed(LoadBool(data, idx: 39));
-                PoliciesTab.SetAllowFarTurnOnRed(LoadBool(data, idx: 40));
-                PoliciesTab.SetAddTrafficLightsIfApplicable(LoadBool(data, idx: 41));
+                ToCheckbox(data, idx: 38, MaintenanceTab_FeaturesGroup.TurnOnRedEnabled, true);
+                ToCheckbox(data, idx: 39, PoliciesTab_AtJunctionsGroup.AllowNearTurnOnRed, false);
+                ToCheckbox(data, idx: 40, PoliciesTab_AtJunctionsGroup.AllowFarTurnOnRed, false);
+                ToCheckbox(data, idx: 41, PoliciesTab_AtJunctionsGroup.AutomaticallyAddTrafficLightsIfApplicable, true);
 
                 ToCheckbox(data, idx: 42, OptionsMassEditTab.RoundAboutQuickFix_StayInLaneMainR, true);
                 ToCheckbox(data, idx: 43, OptionsMassEditTab.RoundAboutQuickFix_StayInLaneNearRabout, true);
@@ -176,26 +215,28 @@ namespace TrafficManager.Manager.Impl {
                 ToCheckbox(data, idx: 55, OptionsMassEditTab.RoundAboutQuickFix_ParkingBanYieldR);
 
                 ToCheckbox(data, idx: 56, PoliciesTab.NoDoubleCrossings);
-                ToCheckbox(data, idx: 57, PoliciesTab.DedicatedTurningLanes);
+                ToCheckbox(data, idx: 57, PoliciesTab_AtJunctionsGroup.DedicatedTurningLanes);
 
                 Options.SavegamePathfinderEdition = LoadByte(data, idx: 58, defaultVal: 0);
 
-                ToCheckbox(data, idx: 59, OverlaysTab.ShowDefaultSpeedSubIcon, false);
+                ToCheckbox(data, idx: 59, OverlaysTab_OverlaysGroup.ShowDefaultSpeedSubIcon, false);
 
                 Options.Available = true;
-
                 return true;
             }
             catch (Exception ex) {
                 ex.LogException();
 
-                // even though there was error, the options are now available for querying
                 Options.Available = true;
-
                 return false;
             }
         }
 
+        /// <summary>
+        /// Compiles mod options in to a byte array for storage in savegame.
+        /// </summary>
+        /// <param name="success">Current success state of SaveData operation.</param>
+        /// <returns>Returns <c>true</c> if successful, otherwise <c>false</c>.</returns>
         public byte[] SaveData(ref bool success) {
 
             // Remember to update this when adding new options (lastIdx + 1)
@@ -217,7 +258,7 @@ namespace TrafficManager.Manager.Impl {
                 save[12] = (byte)(Options.strongerRoadConditionEffects ? 1 : 0);
                 save[13] = (byte)(Options.allowUTurns ? 1 : 0);
                 save[14] = (byte)(Options.allowLaneChangesWhileGoingStraight ? 1 : 0);
-                save[15] = (byte)(Options.disableDespawning ? 0 : 1);
+                save[15] = (byte)(!Options.disableDespawning ? 1 : 0); // inverted
                 save[16] = 0; // Options.IsDynamicPathRecalculationActive
                 save[17] = (byte)(Options.connectedLanesOverlay ? 1 : 0);
                 save[18] = (byte)(Options.prioritySignsEnabled ? 1 : 0);
@@ -263,17 +304,106 @@ namespace TrafficManager.Manager.Impl {
                 save[55] = OptionsMassEditTab.RoundAboutQuickFix_ParkingBanYieldR.Save();
 
                 save[56] = PoliciesTab.NoDoubleCrossings.Save();
-                save[57] = PoliciesTab.DedicatedTurningLanes.Save();
+                save[57] = PoliciesTab_AtJunctionsGroup.DedicatedTurningLanes.Save();
 
-                save[58] = (byte)Options.SavegamePathfinderEdition;
+                save[58] = Options.SavegamePathfinderEdition;
 
-                save[59] = OverlaysTab.ShowDefaultSpeedSubIcon.Save();
+                save[59] = OverlaysTab_OverlaysGroup.ShowDefaultSpeedSubIcon.Save();
 
                 return save;
             }
             catch (Exception ex) {
                 ex.LogException();
                 return save; // try and salvage some of the settings
+            }
+        }
+
+        /// <summary>
+        /// Triggers a rebuild of the main menu (toolbar), adding/removing buttons
+        /// where applicable, and refreshing all translated text. Very slow.
+        /// </summary>
+        internal static void RebuildMenu() {
+            if (TMPELifecycle.Instance.Deserializing || ModUI.Instance == null) {
+                Log._Debug("OptionsManager.RebuildMenu() - Ignoring; Deserialising or ModUI is null");
+                return;
+            }
+
+            Log.Info("OptionsManager.RebuildMenu()");
+            ModUI.Instance.RebuildMenu();
+
+            // TM:PE main button also needs to be updated
+            if (ModUI.Instance.MainMenuButton != null) {
+                ModUI.Instance.MainMenuButton.UpdateButtonSkinAndTooltip();
+            }
+
+            RoadUI.Instance.ReloadTexturesWithTranslation();
+            TrafficLightTextures.Instance.ReloadTexturesWithTranslation();
+            TMPELifecycle.Instance.TranslationDatabase.ReloadTutorialTranslations();
+            TMPELifecycle.Instance.TranslationDatabase.ReloadGuideTranslations();
+        }
+
+        /// <summary>
+        /// When options which affect subtools or overlays are toggled,
+        /// all subtools are reinitialised to ensure they reflect the change.
+        /// </summary>
+        internal static void ReinitialiseSubTools() {
+            if (TMPELifecycle.Instance.Deserializing || ModUI.Instance == null) {
+                Log._Debug("OptionsManager.ReinitialiseSubTools() - Ignoring; Deserialising or ModUI is null");
+                return;
+            }
+
+            Log.Info("OptionsManager.ReinitialiseSubTools()");
+            ModUI.GetTrafficManagerTool()?.InitializeSubTools();
+        }
+
+        /// <summary>
+        /// When junction restriction policies are toggled, all junctions
+        /// need to reflect the new default settings.
+        /// </summary>
+        internal static void UpdateJunctionRestrictionsManager() {
+            if (TMPELifecycle.Instance.Deserializing) {
+                Log._Debug("Options.UpdateJunctionRestrictionsManager() - Waiting for deserialisation");
+                _needUpdateJunctionRestrictionsManager = true;
+                return;
+            }
+
+            if (TMPELifecycle.InGameOrEditor()) {
+                Log.Info("OptionsManager.UpdateJunctionRestrictionsManager()");
+                JunctionRestrictionsManager.Instance.UpdateAllDefaults();
+            }
+        }
+
+        /// <summary>
+        /// When dedicated turning lane policy is toggled, all junctions
+        /// need to be checked and updated if necessary.
+        /// </summary>
+        internal static void UpdateDedicatedTurningLanes() {
+            if (TMPELifecycle.Instance.Deserializing) {
+                Log._Debug("Options.UpdateDedicatedTurningLanes() - Waiting for deserialisation");
+                _needUpdateDedicatedTurningLanes = true;
+                return;
+            }
+
+            if (TMPELifecycle.InGameOrEditor()) {
+                Log.Info("OptionsManager.UpdateDedicatedTurningLanes()");
+                LaneArrowManager.Instance.UpdateDedicatedTurningLanePolicy(true);
+            }
+        }
+
+        /// <summary>
+        /// When lane routing feature activation is toggled, all junctions
+        /// need to be updated to reflect the change.
+        /// </summary>
+        internal static void UpdateRoutingManager() {
+            if (TMPELifecycle.Instance.Deserializing) {
+                Log._Debug("OptionsManager.UpdateRoutingManager() - Waiting for deserialisation");
+                _needUpdateRoutingManager = true;
+                return;
+            }
+
+            if (TMPELifecycle.InGameOrEditor()) {
+                Log.Info("OptionsManager.UpdateRoutingManager()");
+                RoutingManager.Instance.RequestFullRecalculation();
             }
         }
     }

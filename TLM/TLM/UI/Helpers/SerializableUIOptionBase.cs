@@ -7,6 +7,7 @@ namespace TrafficManager.UI.Helpers {
     using System;
     using TrafficManager.State;
     using JetBrains.Annotations;
+    using TrafficManager.Lifecycle;
 
     public abstract class SerializableUIOptionBase<TVal, TUI> : ILegacySerializableOption
         where TUI : UIComponent {
@@ -56,12 +57,12 @@ namespace TrafficManager.UI.Helpers {
 
         /// <summary>Returns <c>true</c> if setting can persist in current <see cref="_scope"/>.</summary>
         /// <remarks>
-        /// When <c>false</c>, UI component should be <see cref="_readOnlyUI"/>
+        /// When <c>false</c>, UI component should be <see cref="_readOnly"/>
         /// and <see cref="_tooltip"/> should be set to <see cref="INGAME_ONLY_SETTING"/>.
         /// </remarks>
         protected bool IsInScope =>
             _scope.IsFlagSet(Options.PersistTo.Global) ||
-            (_scope.IsFlagSet(Options.PersistTo.Savegame) && Options.IsGameLoaded(false)) ||
+            (_scope.IsFlagSet(Options.PersistTo.Savegame) && TMPELifecycle.AppMode != null) ||
             _scope == Options.PersistTo.None;
 
         public static implicit operator TVal(SerializableUIOptionBase<TVal, TUI> a) => a.Value;
@@ -87,7 +88,7 @@ namespace TrafficManager.UI.Helpers {
         protected string _label;
         protected string _tooltip;
 
-        protected bool _readOnlyUI;
+        protected bool _readOnly;
 
         private TranslatorDelegate _translator;
         public delegate string TranslatorDelegate(string key);
