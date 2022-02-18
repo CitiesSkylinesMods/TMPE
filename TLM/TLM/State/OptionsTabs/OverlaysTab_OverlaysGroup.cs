@@ -119,12 +119,8 @@ namespace TrafficManager.State {
         private static string T(string key) => Translation.Options.Get(key);
 
         private static bool DebugOnlyValidator(bool desired, out bool result) {
-#if DEBUG
-            result = desired;
+            result = VersionUtil.IS_DEBUG && desired;
             return true;
-#else
-            return result = false;
-#endif
         }
 
         private static void OnOverlayChanged(bool _)

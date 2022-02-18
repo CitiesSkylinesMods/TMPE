@@ -88,12 +88,8 @@ namespace TrafficManager.State {
 
         // TODO [issue #959] remove when TTL is implemented in asset editor.
         private static bool NotInEditorValidator(bool desired, out bool result) {
-            if (!IsInEditor()) {
-                result = desired;
-                return true;
-            }
-
-            return result = false;
+            result = !IsInEditor() && desired;
+            return true;
         }
 
         private static void OnFeatureAvailabilityChanged(bool _)
