@@ -437,8 +437,10 @@ namespace TrafficManager.Lifecycle {
                 }
 
                 try {
-                    // save options
-                    SerializableData.SaveData("TMPE_Options", OptionsManager.Instance.SaveData(ref success));
+                    // if in-game, save options
+                    if (TMPELifecycle.PlayMode) {
+                        SerializableData.SaveData("TMPE_Options", OptionsManager.Instance.SaveData(ref success));
+                    }
                 } catch (Exception ex) {
                     Log.Error("Unexpected error while saving options: " + ex.Message);
                     success = false;
