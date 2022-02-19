@@ -53,7 +53,9 @@ namespace TrafficManager.UI.Helpers {
         protected virtual void UpdateTooltip() {
             if (!HasUI) return;
 
-            _ui.tooltip = T(_tooltip);
+            _ui.tooltip = string.IsNullOrEmpty(_tooltip)
+                ? string.Empty
+                : T(_tooltip);
         }
 
         protected virtual void UpdateReadOnly() {
