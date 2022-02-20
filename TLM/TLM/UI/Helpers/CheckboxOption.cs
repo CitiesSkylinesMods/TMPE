@@ -26,7 +26,10 @@ namespace TrafficManager.UI.Helpers {
         public event OnCheckChanged OnValueChanged;
 
         public OnCheckChanged Handler {
-            set => OnValueChanged += value;
+            set {
+                OnValueChanged -= value;
+                OnValueChanged += value;
+            }
         }
 
         /// <summary>
@@ -150,9 +153,9 @@ namespace TrafficManager.UI.Helpers {
         private void UpdateReadOnly() {
             if (!HasUI) return;
 
-            Log.Info($"CheckboxOption.Value: `{FieldName}` is readonly");
-
             var readOnly = !IsInScope || _readOnly;
+
+            Log._Debug($"CheckboxOption.UpdateReadOnly() - `{FieldName}` is {(readOnly ? "read-only" : "writeable")}");
 
             _ui.readOnly = readOnly;
             _ui.opacity = readOnly ? 0.3f : 1f;

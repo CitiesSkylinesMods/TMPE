@@ -21,7 +21,8 @@ namespace TrafficManager.State {
 
         static GeneralTab_DebugGroup() {
             try {
-                DebugCheckboxA.PropagateTrueTo(DebugCheckboxB);
+                DebugCheckboxA
+                    .PropagateTrueTo(DebugCheckboxB);
             }
             catch (Exception ex) {
                 ex.LogException();
