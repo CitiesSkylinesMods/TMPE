@@ -9,7 +9,7 @@ namespace TrafficManager.UI.Helpers {
 
         protected UIButton _ui;
 
-        protected event OnButtonClicked OnClicked;
+        public event OnButtonClicked OnClicked;
 
         public bool HasUI => _ui != null;
 

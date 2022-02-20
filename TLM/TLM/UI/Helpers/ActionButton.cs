@@ -4,7 +4,10 @@ namespace TrafficManager.UI.Helpers {
     public class ActionButton : OptionButtonBase {
 
         public OnButtonClicked Handler {
-            set => OnClicked += value;
+            set {
+                OnClicked -= value;
+                OnClicked += value;
+            }
         }
     }
 }
