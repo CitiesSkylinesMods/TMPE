@@ -109,7 +109,7 @@ namespace TrafficManager.State.ConfigData {
         /// If <c>true</c>, <see cref="UI.Helpers.UrlButton"/> links will open in
         /// Steam Overlay if it is available.
         /// </summary>
-        public bool OpenUrlsInSteamOverlay = false;
+        public bool OpenUrlsInSteamOverlay = true;
 
         /// <summary>
         /// Storing version of What's New panel opened last time

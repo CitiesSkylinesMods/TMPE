@@ -8,6 +8,7 @@ namespace TrafficManager.UI.Helpers {
         private string _url;
 
         public UrlButton() {
+            OnClicked -= OpenURL;
             OnClicked += OpenURL;
         }
 
