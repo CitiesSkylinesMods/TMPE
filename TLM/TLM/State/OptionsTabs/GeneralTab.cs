@@ -12,6 +12,19 @@ namespace TrafficManager.State {
     using TrafficManager.Lifecycle;
 
     public static class GeneralTab {
+        public static ActionButton WhatsNewButton = new() {
+            Label = "What's New?",
+            Handler = WhatsNew.OpenModal,
+        };
+
+        public static CheckboxOption OpenUrlsInSteamOverlay =
+            new (nameof(GlobalConfig.Instance.Main.OpenUrlsInSteamOverlay), Options.PersistTo.Global) {
+                Label = "Checkbox:Use Steam Overlay to show TM:PE website links",
+                Tooltip = "Checkbox.Tooltip:When disabled, website links will open in your default web browser",
+                Handler = OnOpenUrlsInSteamOverlayChanged,
+                Value = GlobalConfig.Instance.Main.OpenUrlsInSteamOverlay,
+            };
+
         private static UICheckBox _instantEffectsToggle;
 
         [UsedImplicitly]
@@ -49,7 +62,7 @@ namespace TrafficManager.State {
 #endif
 
             tab.AddSpace(5);
-            tab.AddButton("What's New?", WhatsNew.OpenModal);
+            WhatsNewButton.AddUI(tab);
             tab.AddSpace(5);
 
             GeneralTab_LocalisationGroup.AddUI(tab);
@@ -101,6 +114,8 @@ namespace TrafficManager.State {
                                         T("General.Checkbox:Enable tutorials"),
                                         GlobalConfig.Instance.Main.EnableTutorial,
                                         OnEnableTutorialsChanged) as UICheckBox;
+
+            OpenUrlsInSteamOverlay.AddUI(group);
 
             group = tab.AddGroup(T("General.Group:Simulation"));
 
@@ -259,6 +274,14 @@ namespace TrafficManager.State {
         private static void OnIgnoreDisabledModsChanged(bool newValue) {
             Log._Debug($"Ignore disabled mods changed to {newValue}");
             GlobalConfig.Instance.Main.IgnoreDisabledMods = newValue;
+            GlobalConfig.WriteConfig();
+        }
+
+        private static void OnOpenUrlsInSteamOverlayChanged(bool val) {
+            var current = GlobalConfig.Instance.Main.OpenUrlsInSteamOverlay;
+            if (current == val) return;
+
+            GlobalConfig.Instance.Main.OpenUrlsInSteamOverlay = val;
             GlobalConfig.WriteConfig();
         }
 

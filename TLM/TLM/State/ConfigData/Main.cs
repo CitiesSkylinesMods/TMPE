@@ -106,6 +106,12 @@ namespace TrafficManager.State.ConfigData {
         public string RoadSignTheme = string.Empty;
 
         /// <summary>
+        /// If <c>true</c>, <see cref="UI.Helpers.UrlButton"/> links will open in
+        /// Steam Overlay if it is available.
+        /// </summary>
+        public bool OpenUrlsInSteamOverlay = true;
+
+        /// <summary>
         /// Storing version of What's New panel opened last time
         /// </summary>
         [XmlIgnore]
