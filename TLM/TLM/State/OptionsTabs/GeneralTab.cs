@@ -1,5 +1,4 @@
 namespace TrafficManager.State {
-    using System;
     using System.Collections.Generic;
     using System.Linq;
     using TrafficManager.API.Traffic.Enums;
@@ -9,7 +8,6 @@ namespace TrafficManager.State {
     using JetBrains.Annotations;
     using TrafficManager.U;
     using TrafficManager.UI.Helpers;
-    using TrafficManager.UI.SubTools.SpeedLimits;
     using TrafficManager.UI;
     using UnityEngine;
     using TrafficManager.Lifecycle;
@@ -18,6 +16,19 @@ namespace TrafficManager.State {
     using UI.WhatsNew;
 
     public static class GeneralTab {
+        public static ActionButton WhatsNewButton = new() {
+            Label = "What's New?",
+            Handler = WhatsNew.OpenModal,
+        };
+
+        public static CheckboxOption OpenUrlsInSteamOverlay =
+            new (nameof(GlobalConfig.Instance.Main.OpenUrlsInSteamOverlay), Options.PersistTo.Global) {
+                Label = "Checkbox:Use Steam Overlay to show TM:PE website links",
+                Tooltip = "Checkbox.Tooltip:When disabled, website links will open in your default web browser",
+                Handler = OnOpenUrlsInSteamOverlayChanged,
+                Value = GlobalConfig.Instance.Main.OpenUrlsInSteamOverlay,
+            };
+
         private static UICheckBox _instantEffectsToggle;
 
         [UsedImplicitly]
@@ -60,7 +71,7 @@ namespace TrafficManager.State {
 #endif
 
             tab.AddSpace(5);
-            tab.AddButton("What's New?", WhatsNew.OpenModal);
+            WhatsNewButton.AddUI(tab);
             tab.AddSpace(5);
 
             group = tab.AddGroup(T("General.Group:Localisation"));
@@ -140,6 +151,8 @@ namespace TrafficManager.State {
                                         T("General.Checkbox:Enable tutorials"),
                                         GlobalConfig.Instance.Main.EnableTutorial,
                                         OnEnableTutorialsChanged) as UICheckBox;
+
+            OpenUrlsInSteamOverlay.AddUI(group);
 
             group = tab.AddGroup(T("General.Group:Simulation"));
 
@@ -425,6 +438,14 @@ namespace TrafficManager.State {
             }
 
             mainConfig.RoadSignTheme = newTheme;
+            GlobalConfig.WriteConfig();
+        }
+
+        private static void OnOpenUrlsInSteamOverlayChanged(bool val) {
+            var current = GlobalConfig.Instance.Main.OpenUrlsInSteamOverlay;
+            if (current == val) return;
+
+            GlobalConfig.Instance.Main.OpenUrlsInSteamOverlay = val;
             GlobalConfig.WriteConfig();
         }
 
