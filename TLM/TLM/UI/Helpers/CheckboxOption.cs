@@ -26,7 +26,10 @@ namespace TrafficManager.UI.Helpers {
         public event OnCheckChanged OnValueChanged;
 
         public OnCheckChanged Handler {
-            set => OnValueChanged += value;
+            set {
+                OnValueChanged -= value;
+                OnValueChanged += value;
+            }
         }
 
         /// <summary>
