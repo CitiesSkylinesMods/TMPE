@@ -12,6 +12,7 @@ namespace TrafficManager.State {
                 Label = T("Gameplay.Checkbox:Individual driving styles"),
             };
 
+        // Requires Snowfall DLC
         public static CheckboxOption StrongerRoadConditionEffects =
             new(nameof(Options.strongerRoadConditionEffects), Options.PersistTo.Savegame) {
                 Label = T("Gameplay.Checkbox:Increase road condition impact"),
@@ -40,21 +41,20 @@ namespace TrafficManager.State {
 
             IndividualDrivingStyle.AddUI(group);
 
-            if (SteamHelper.IsDLCOwned(SteamHelper.DLC.SnowFallDLC)) {
+            if (HasSnowfallDLC)
                 StrongerRoadConditionEffects.AddUI(group);
-            }
 
             DisableDespawning.AddUI(group);
         }
 
         private static string T(string key) => Translation.Options.Get(key);
 
-        // Road conditions option requires Snowfall DLC
-        private static bool SnowfallDlcValidator(bool desired, out bool result) {
-            var dlcOwned = SteamHelper.IsDLCOwned(SteamHelper.DLC.SnowFallDLC);
+        private static bool HasSnowfallDLC
+            => SteamHelper.IsDLCOwned(SteamHelper.DLC.SnowFallDLC);
 
-            result = dlcOwned && desired;
-            return dlcOwned;
+        private static bool SnowfallDlcValidator(bool desired, out bool result) {
+            result = HasSnowfallDLC && desired;
+            return true;
         }
 
         private static void AddRecklessDriversDropDown(UIHelperBase group) {
