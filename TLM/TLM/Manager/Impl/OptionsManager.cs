@@ -106,7 +106,7 @@ namespace TrafficManager.Manager.Impl {
 
                 GeneralTab.SetSimulationAccuracy(ConvertToSimulationAccuracy(LoadByte(data, idx: 0)));
                 // skip Options.setLaneChangingRandomization(options[1]);
-                GameplayTab.SetRecklessDrivers(LoadByte(data, idx: 2));
+                GameplayTab_VehicleBehaviourGroup.SetRecklessDrivers(LoadByte(data, idx: 2));
                 PoliciesTab.SetRelaxedBusses(LoadBool(data, idx: 3));
                 OverlaysTab.SetNodesOverlay(LoadBool(data, idx: 4));
                 PoliciesTab.SetMayEnterBlockedJunctions(LoadBool(data, idx: 5));
@@ -116,10 +116,10 @@ namespace TrafficManager.Manager.Impl {
                 OverlaysTab.SetTimedLightsOverlay(LoadBool(data, idx: 9));
                 OverlaysTab.SetSpeedLimitsOverlay(LoadBool(data, idx: 10));
                 OverlaysTab.SetVehicleRestrictionsOverlay(LoadBool(data, idx: 11));
-                GameplayTab.SetStrongerRoadConditionEffects(LoadBool(data, idx: 12));
+                ToCheckbox(data, idx: 12, GameplayTab_VehicleBehaviourGroup.StrongerRoadConditionEffects, false);
                 PoliciesTab.SetAllowUTurns(LoadBool(data, idx: 13));
                 PoliciesTab.SetAllowLaneChangesWhileGoingStraight(LoadBool(data, idx: 14));
-                GameplayTab.SetDisableDespawning(!LoadBool(data, idx: 15)); // inverted
+                GameplayTab_VehicleBehaviourGroup.DisableDespawning.Value = !LoadBool(data, idx: 15, true); // inverted
                 // skip Options.setDynamicPathRecalculation(data[16] == (byte)1);
                 OverlaysTab.SetConnectedLanesOverlay(LoadBool(data, idx: 17));
                 PoliciesTab.SetPrioritySignsEnabled(LoadBool(data, idx: 18));
@@ -131,7 +131,7 @@ namespace TrafficManager.Manager.Impl {
                 MaintenanceTab.SetJunctionRestrictionsEnabled(LoadBool(data, idx: 24));
                 GameplayTab.SetProhibitPocketCars(LoadBool(data, idx: 25));
                 PoliciesTab.SetPreferOuterLane(LoadBool(data, idx: 26));
-                GameplayTab.SetIndividualDrivingStyle(LoadBool(data, idx: 27));
+                ToCheckbox(data, idx: 27, GameplayTab_VehicleBehaviourGroup.IndividualDrivingStyle, false);
                 PoliciesTab.SetEvacBussesMayIgnoreRules(LoadBool(data, idx: 28));
                 GeneralTab.SetInstantEffects(LoadBool(data, idx: 29));
                 MaintenanceTab.SetParkingRestrictionsEnabled(LoadBool(data, idx: 30));
@@ -214,10 +214,10 @@ namespace TrafficManager.Manager.Impl {
                 save[9] = (byte)(Options.timedLightsOverlay ? 1 : 0);
                 save[10] = (byte)(Options.speedLimitsOverlay ? 1 : 0);
                 save[11] = (byte)(Options.vehicleRestrictionsOverlay ? 1 : 0);
-                save[12] = (byte)(Options.strongerRoadConditionEffects ? 1 : 0);
+                save[12] = GameplayTab_VehicleBehaviourGroup.StrongerRoadConditionEffects.Save();
                 save[13] = (byte)(Options.allowUTurns ? 1 : 0);
                 save[14] = (byte)(Options.allowLaneChangesWhileGoingStraight ? 1 : 0);
-                save[15] = (byte)(Options.disableDespawning ? 0 : 1);
+                save[15] = (byte)(Options.disableDespawning ? 0 : 1); // inverted
                 save[16] = 0; // Options.IsDynamicPathRecalculationActive
                 save[17] = (byte)(Options.connectedLanesOverlay ? 1 : 0);
                 save[18] = (byte)(Options.prioritySignsEnabled ? 1 : 0);
@@ -229,7 +229,7 @@ namespace TrafficManager.Manager.Impl {
                 save[24] = (byte)(Options.junctionRestrictionsEnabled ? 1 : 0);
                 save[25] = (byte)(Options.parkingAI ? 1 : 0);
                 save[26] = (byte)(Options.preferOuterLane ? 1 : 0);
-                save[27] = (byte)(Options.individualDrivingStyle ? 1 : 0);
+                save[27] = GameplayTab_VehicleBehaviourGroup.IndividualDrivingStyle.Save();
                 save[28] = (byte)(Options.evacBussesMayIgnoreRules ? 1 : 0);
                 save[29] = (byte)(Options.instantEffects ? 1 : 0);
                 save[30] = (byte)(Options.parkingRestrictionsEnabled ? 1 : 0);
@@ -265,7 +265,7 @@ namespace TrafficManager.Manager.Impl {
                 save[56] = PoliciesTab.NoDoubleCrossings.Save();
                 save[57] = PoliciesTab.DedicatedTurningLanes.Save();
 
-                save[58] = (byte)Options.SavegamePathfinderEdition;
+                save[58] = Options.SavegamePathfinderEdition;
 
                 save[59] = OverlaysTab.ShowDefaultSpeedSubIcon.Save();
 
