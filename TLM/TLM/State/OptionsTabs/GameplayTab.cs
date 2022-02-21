@@ -9,11 +9,6 @@ namespace TrafficManager.State {
     using TrafficManager.Lifecycle;
 
     public static class GameplayTab {
-        private static UICheckBox _individualDrivingStyleToggle;
-        private static UIDropDown _recklessDriversDropdown;
-        private static UICheckBox _disableDespawningToggle;
-
-        private static UICheckBox _strongerRoadConditionEffectsToggle;
         private static UICheckBox _prohibitPocketCarsToggle;
         private static UICheckBox _advancedAIToggle;
         private static UICheckBox _realisticPublicTransportToggle;
@@ -22,40 +17,7 @@ namespace TrafficManager.State {
         internal static void MakeSettings_Gameplay(ExtUITabstrip tabStrip) {
             UIHelper panelHelper = tabStrip.AddTabPage(Translation.Options.Get("Tab:Gameplay"));
 
-            UIHelperBase vehBehaviorGroup = panelHelper.AddGroup(
-                Translation.Options.Get("Gameplay.Group:Vehicle behavior"));
-
-            _recklessDriversDropdown
-                = vehBehaviorGroup.AddDropdown(
-                      Translation.Options.Get("Gameplay.Dropdown:Reckless drivers%") + ":",
-                      new[] {
-                                Translation.Options.Get("Gameplay.Dropdown.Option:Path Of Evil (10%)"),
-                                Translation.Options.Get("Gameplay.Dropdown.Option:Rush Hour (5%)"),
-                                Translation.Options.Get("Gameplay.Dropdown.Option:Minor Complaints (2%)"),
-                                Translation.Options.Get("Gameplay.Dropdown.Option:Holy City (0%)"),
-                      },
-                      Options.recklessDrivers,
-                      OnRecklessDriversChanged) as UIDropDown;
-            _recklessDriversDropdown.width = 350;
-            _individualDrivingStyleToggle
-                = vehBehaviorGroup.AddCheckbox(
-                      Translation.Options.Get("Gameplay.Checkbox:Individual driving styles"),
-                      Options.individualDrivingStyle,
-                      onIndividualDrivingStyleChanged) as UICheckBox;
-
-            if (SteamHelper.IsDLCOwned(SteamHelper.DLC.SnowFallDLC)) {
-                _strongerRoadConditionEffectsToggle
-                    = vehBehaviorGroup.AddCheckbox(
-                          Translation.Options.Get("Gameplay.Checkbox:Increase road condition impact"),
-                          Options.strongerRoadConditionEffects,
-                          OnStrongerRoadConditionEffectsChanged) as UICheckBox;
-            }
-
-            // TODO: Duplicates main menu button function
-            _disableDespawningToggle = vehBehaviorGroup.AddCheckbox(
-                                          Translation.Options.Get("Maintenance.Checkbox:Disable despawning"),
-                                          Options.disableDespawning,
-                                          onDisableDespawningChanged) as UICheckBox;
+            GameplayTab_VehicleBehaviourGroup.AddUI(panelHelper);
 
             UIHelperBase vehAiGroup = panelHelper.AddGroup(
                 Translation.Options.Get("Gameplay.Group:Advanced vehicle AI"));
@@ -88,7 +50,7 @@ namespace TrafficManager.State {
                       Translation.Options.Get("Gameplay.Checkbox:No excessive transfers"),
                       Options.realisticPublicTransport,
                       OnRealisticPublicTransportChanged) as UICheckBox;
-            CheckboxOption.AllowTextWrap(_realisticPublicTransportToggle);
+            CheckboxOption.ApplyTextWrap(_realisticPublicTransportToggle);
         }
 
         private static void OnRecklessDriversChanged(int newRecklessDrivers) {
@@ -107,15 +69,6 @@ namespace TrafficManager.State {
 
             Log._Debug($"advancedAI changed to {newAdvancedAi}");
             SetAdvancedAi(newAdvancedAi);
-        }
-
-        private static void OnStrongerRoadConditionEffectsChanged(bool newStrongerRoadConditionEffects) {
-            if (!Options.IsGameLoaded()) {
-                return;
-            }
-
-            Log._Debug($"strongerRoadConditionEffects changed to {newStrongerRoadConditionEffects}");
-            Options.strongerRoadConditionEffects = newStrongerRoadConditionEffects;
         }
 
         private static void OnProhibitPocketCarsChanged(bool newValue) {
@@ -140,24 +93,6 @@ namespace TrafficManager.State {
 
             Log._Debug($"realisticPublicTransport changed to {newValue}");
             Options.realisticPublicTransport = newValue;
-        }
-
-        private static void onIndividualDrivingStyleChanged(bool value) {
-            if (!Options.IsGameLoaded()) {
-                return;
-            }
-
-            Log._Debug($"individualDrivingStyle changed to {value}");
-            SetIndividualDrivingStyle(value);
-        }
-
-        private static void onDisableDespawningChanged(bool value) {
-            if (!Options.IsGameLoaded()) {
-                return;
-            }
-
-            Log._Debug($"disableDespawning changed to {value}");
-            Options.disableDespawning = value;
         }
 
         private static void OnAltLaneSelectionRatioChanged(float newVal) {
@@ -204,24 +139,6 @@ namespace TrafficManager.State {
             }
         }
 
-        public static void SetRecklessDrivers(int newRecklessDrivers) {
-            Options.recklessDrivers = newRecklessDrivers;
-            if (_recklessDriversDropdown != null)
-                _recklessDriversDropdown.selectedIndex = newRecklessDrivers;
-        }
-
-        public static void SetStrongerRoadConditionEffects(bool newStrongerRoadConditionEffects) {
-            if (!SteamHelper.IsDLCOwned(SteamHelper.DLC.SnowFallDLC)) {
-                newStrongerRoadConditionEffects = false;
-            }
-
-            Options.strongerRoadConditionEffects = newStrongerRoadConditionEffects;
-
-            if (_strongerRoadConditionEffectsToggle != null) {
-                _strongerRoadConditionEffectsToggle.isChecked = newStrongerRoadConditionEffects;
-            }
-        }
-
         public static void SetProhibitPocketCars(bool newValue) {
             // bool valueChanged = newValue != Options.parkingAI;
             Options.parkingAI = newValue;
@@ -237,22 +154,6 @@ namespace TrafficManager.State {
 
             if (_realisticPublicTransportToggle != null) {
                 _realisticPublicTransportToggle.isChecked = newValue;
-            }
-        }
-
-        public static void SetIndividualDrivingStyle(bool newValue) {
-            Options.individualDrivingStyle = newValue;
-
-            if (_individualDrivingStyleToggle != null) {
-                _individualDrivingStyleToggle.isChecked = newValue;
-            }
-        }
-
-        public static void SetDisableDespawning(bool value) {
-            Options.disableDespawning = value;
-
-            if (_disableDespawningToggle != null) {
-                _disableDespawningToggle.isChecked = value;
             }
         }
     } // end class

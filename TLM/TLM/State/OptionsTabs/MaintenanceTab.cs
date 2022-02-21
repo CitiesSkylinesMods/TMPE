@@ -6,7 +6,7 @@ namespace TrafficManager.State {
 
         internal static void MakeSettings_Maintenance(ExtUITabstrip tabStrip) {
 
-            var tab = tabStrip.AddTabPage(T("Tab:Maintenance"));
+          var tab = tabStrip.AddTabPage(T("Tab:Maintenance"));
 
             MaintenanceTab_ToolsGroup.AddUI(tab);
 
