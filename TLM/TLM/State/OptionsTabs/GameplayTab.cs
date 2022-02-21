@@ -50,7 +50,7 @@ namespace TrafficManager.State {
                       Translation.Options.Get("Gameplay.Checkbox:No excessive transfers"),
                       Options.realisticPublicTransport,
                       OnRealisticPublicTransportChanged) as UICheckBox;
-            Options.AllowTextWrap(_realisticPublicTransportToggle);
+            CheckboxOption.ApplyTextWrap(_realisticPublicTransportToggle);
         }
 
         private static void OnAdvancedAiChanged(bool newAdvancedAi) {

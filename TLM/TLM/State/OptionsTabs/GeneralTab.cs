@@ -185,7 +185,7 @@ namespace TrafficManager.State {
                                             text: Translation.ModConflicts.Get("Checkbox:Ignore disabled mods"),
                                             defaultValue: GlobalConfig.Instance.Main.IgnoreDisabledMods,
                                             eventCallback: OnIgnoreDisabledModsChanged) as UICheckBox;
-            Options.Indent(_ignoreDisabledModsToggle);
+            CheckboxOption.ApplyIndent(_ignoreDisabledModsToggle);
             _showCompatibilityCheckErrorToggle
                 = group.AddCheckbox(
                       T("General.Checkbox:Notify me about TM:PE startup conflicts"),

@@ -48,11 +48,17 @@ namespace TrafficManager.UI.Helpers {
         public CheckboxOption PropagateTrueTo([NotNull] CheckboxOption target) {
             Log.Info($"CheckboxOption.PropagateTrueTo: `{FieldName}` will proagate to `{target.FieldName}`");
 
-            if (_propagatesTrueTo == null) _propagatesTrueTo = new();
-            _propagatesTrueTo.Add(target);
+            if (_propagatesTrueTo == null)
+                _propagatesTrueTo = new();
 
-            if (target._propagatesFalseTo == null) target._propagatesFalseTo = new();
-            target._propagatesFalseTo.Add(this);
+            if (!_propagatesTrueTo.Contains(target))
+                _propagatesTrueTo.Add(target);
+
+            if (target._propagatesFalseTo == null)
+                target._propagatesFalseTo = new();
+
+            if (!target._propagatesFalseTo.Contains(this))
+                target._propagatesFalseTo.Add(this);
 
             return this;
         }
@@ -121,9 +127,9 @@ namespace TrafficManager.UI.Helpers {
         public override void AddUI(UIHelperBase container) {
             _ui = container.AddCheckbox(T(Label), Value, OnValueChanged) as UICheckBox;
 
-            if (Indent) IndentUI(_ui);
+            if (Indent) ApplyIndent(_ui);
 
-            AllowTextWrap(_ui, Indent);
+            ApplyTextWrap(_ui, Indent);
 
             UpdateTooltip();
             UpdateReadOnly();
@@ -163,7 +169,7 @@ namespace TrafficManager.UI.Helpers {
 
         /* UI helper methods */
 
-        internal static void IndentUI(UIComponent component) {
+        internal static void ApplyIndent(UIComponent component) {
             UILabel label = component.Find<UILabel>("Label");
 
             if (label != null) {
@@ -177,7 +183,7 @@ namespace TrafficManager.UI.Helpers {
             }
         }
 
-        internal static void AllowTextWrap(UICheckBox checkBox, bool indented = false) {
+        internal static void ApplyTextWrap(UICheckBox checkBox, bool indented = false) {
             UILabel label = checkBox.label;
             bool requireTextWrap;
             int maxWidth = indented ? CHECKBOX_LABEL_MAX_WIDTH_INDENTED : CHECKBOX_LABEL_MAX_WIDTH;
