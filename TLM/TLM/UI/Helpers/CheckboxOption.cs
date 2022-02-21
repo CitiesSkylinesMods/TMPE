@@ -127,7 +127,7 @@ namespace TrafficManager.UI.Helpers {
         public override void AddUI(UIHelperBase container) {
             _ui = container.AddCheckbox(T(Label), Value, OnValueChanged) as UICheckBox;
 
-            if (Indent) IndentUI(_ui);
+            if (Indent) ApplyIndent(_ui);
 
             AllowTextWrap(_ui, Indent);
 
@@ -169,7 +169,7 @@ namespace TrafficManager.UI.Helpers {
 
         /* UI helper methods */
 
-        internal static void IndentUI(UIComponent component) {
+        internal static void ApplyIndent(UIComponent component) {
             UILabel label = component.Find<UILabel>("Label");
 
             if (label != null) {

@@ -78,7 +78,7 @@ namespace TrafficManager.State {
                       Translation.Options.Get("VR.Checkbox:Also apply to left/right turns between one-way streets"),
                       Options.allowFarTurnOnRed,
                       OnAllowFarTurnOnRedChanged) as UICheckBox;
-            CheckboxOption.IndentUI(_allowFarTurnOnRedToggle);
+            CheckboxOption.ApplyIndent(_allowFarTurnOnRedToggle);
             CheckboxOption.AllowTextWrap(_allowFarTurnOnRedToggle, indented: true);
             _allowLaneChangesWhileGoingStraightToggle
                 = atJunctionsGroup.AddCheckbox(
