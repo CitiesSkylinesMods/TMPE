@@ -129,7 +129,7 @@ namespace TrafficManager.UI.Helpers {
 
             if (Indent) ApplyIndent(_ui);
 
-            AllowTextWrap(_ui, Indent);
+            ApplyTextWrap(_ui, Indent);
 
             UpdateTooltip();
             UpdateReadOnly();
@@ -183,7 +183,7 @@ namespace TrafficManager.UI.Helpers {
             }
         }
 
-        internal static void AllowTextWrap(UICheckBox checkBox, bool indented = false) {
+        internal static void ApplyTextWrap(UICheckBox checkBox, bool indented = false) {
             UILabel label = checkBox.label;
             bool requireTextWrap;
             int maxWidth = indented ? CHECKBOX_LABEL_MAX_WIDTH_INDENTED : CHECKBOX_LABEL_MAX_WIDTH;
