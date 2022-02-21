@@ -78,8 +78,8 @@ namespace TrafficManager.State {
                       Translation.Options.Get("VR.Checkbox:Also apply to left/right turns between one-way streets"),
                       Options.allowFarTurnOnRed,
                       OnAllowFarTurnOnRedChanged) as UICheckBox;
-            Options.Indent(_allowFarTurnOnRedToggle);
-            Options.AllowTextWrap(_allowFarTurnOnRedToggle, indented: true);
+            CheckboxOption.IndentUI(_allowFarTurnOnRedToggle);
+            CheckboxOption.AllowTextWrap(_allowFarTurnOnRedToggle, indented: true);
             _allowLaneChangesWhileGoingStraightToggle
                 = atJunctionsGroup.AddCheckbox(
                       Translation.Options.Get("VR.Checkbox:Vehicles going straight may change lanes at junctions"),
@@ -90,7 +90,7 @@ namespace TrafficManager.State {
                       Translation.Options.Get("VR.Checkbox:Vehicles follow priority rules at junctions with timedTL"),
                       Options.trafficLightPriorityRules,
                       OnTrafficLightPriorityRulesChanged) as UICheckBox;
-            Options.AllowTextWrap(_trafficLightPriorityRulesToggle);
+            CheckboxOption.AllowTextWrap(_trafficLightPriorityRulesToggle);
             _automaticallyAddTrafficLightsIfApplicableToggle
                 = atJunctionsGroup.AddCheckbox(
                       Translation.Options.Get("VR.Checkbox:Automatically add traffic lights if applicable"),

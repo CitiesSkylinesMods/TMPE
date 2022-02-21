@@ -115,7 +115,7 @@ namespace TrafficManager.State {
                                              Options.laneConnectorEnabled,
                                              OnLaneConnectorEnabledChanged) as UICheckBox;
 
-            Options.Indent(_turnOnRedEnabledToggle);
+            CheckboxOption.IndentUI(_turnOnRedEnabledToggle);
 
             MaintenanceTab_DespawnGroup.AddUI(panelHelper);
 
