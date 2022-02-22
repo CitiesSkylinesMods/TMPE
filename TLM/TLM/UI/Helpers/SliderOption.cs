@@ -64,7 +64,7 @@ namespace TrafficManager.UI.Helpers {
 
         public override void Load(byte data) => Value = data;
 
-        public override byte Save() => (byte)Mathf.Clamp(Value, 0, 255);
+        public override byte Save() => (byte)Mathf.RoundToInt(Value);
 
         /* UI */
 
@@ -87,6 +87,8 @@ namespace TrafficManager.UI.Helpers {
         public override float Value {
             get => base.Value;
             set {
+                value = Mathf.Clamp(value, Min, Max);
+
                 if (Validator != null) {
                     if (Validator(value, out float result)) {
                         value = result;
