@@ -104,7 +104,10 @@ namespace TrafficManager.UI.Helpers {
 
                 Log.Info($"SliderOption.Value: `{FieldName}` changed to {value}");
 
-                if (HasUI) _ui.value = value;
+                if (HasUI) {
+                    _ui.value = value;
+                    UpdateTooltip();
+                }
             }
         }
 
@@ -144,9 +147,7 @@ namespace TrafficManager.UI.Helpers {
             if (!HasUI) return;
 
             _ui.tooltip = IsInScope
-                ? string.IsNullOrEmpty(_tooltip)
-                    ? string.Empty // avoid invalidating UI if already no tooltip
-                    : T(_tooltip)
+                ? $"{Value}{_tooltip}"
                 : T(INGAME_ONLY_SETTING);
 
             _ui.RefreshTooltip();
