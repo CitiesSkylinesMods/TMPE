@@ -4,22 +4,27 @@ namespace TrafficManager.UI.Helpers {
     using TrafficManager.State;
     using CSUtil.Commons;
     using UnityEngine;
+    using System;
 
     public class SliderOption : SerializableUIOptionBase<float, UISlider, SliderOption> {
 
-        private float _min = 0;
-        private float _max = 255;
-        private float _step = 5;
+        private const int SLIDER_LABEL_MAX_WIDTH = 695;
+
+        private byte _min = 0;
+        private byte _max = 255;
+        private byte _step = 5;
         private UILabel _sliderLabel;
 
         public SliderOption(string fieldName, Options.PersistTo scope = Options.PersistTo.Savegame)
         : base(fieldName, scope) {
             OnValueChanged = DefaultOnValueChanged;
+
+            _min = 0;
+            _max = 255;
+            _step = 5;
         }
 
         /* Data */
-
-        public delegate bool SliderValidatorDelegate(float desired, out float result);
 
         public event OnValueChanged OnValueChanged;
 
@@ -30,15 +35,9 @@ namespace TrafficManager.UI.Helpers {
             }
         }
 
-        /// <summary>
-        /// Optional custom validator which intercepts value changes and can inhibit event propagation.
-        /// </summary>
-        public SliderValidatorDelegate Validator { get; set; }
-
-        public float Min {
+        public byte Min {
             get => _min;
             set {
-                value = ClampToByte(value);
                 if (_min == value) return;
 
                 _min = value;
@@ -46,10 +45,9 @@ namespace TrafficManager.UI.Helpers {
             }
         }
 
-        public float Max {
+        public byte Max {
             get => _max;
             set {
-                value = ClampToByte(value);
                 if (_max == value) return;
 
                 _max = value;
@@ -57,7 +55,7 @@ namespace TrafficManager.UI.Helpers {
             }
         }
 
-        public float Step {
+        public byte Step {
             get => _step;
             set {
                 if (_step == value) return;
@@ -67,11 +65,12 @@ namespace TrafficManager.UI.Helpers {
             }
         }
 
-        public float ClampToByte(float val) => Mathf.Clamp(val, 0, 255);
+        public byte FloatToByte(float val)
+            => (byte)Mathf.RoundToInt(Mathf.Clamp(val, Min, Max).Quantize(Step));
 
         public override void Load(byte data) => Value = data;
 
-        public override byte Save() => (byte)Mathf.RoundToInt(Value);
+        public override byte Save() => FloatToByte(Value);
 
         /* UI */
 
@@ -94,18 +93,9 @@ namespace TrafficManager.UI.Helpers {
         public override float Value {
             get => base.Value;
             set {
-                value = Mathf.Clamp(value, Min, Max);
+                value = FloatToByte(value);
 
-                if (Validator != null) {
-                    if (Validator(value, out float result)) {
-                        value = result;
-                    } else {
-                        Log.Info($"SliderOption.Value: `{FieldName}` validator rejected value: {value}");
-                        return;
-                    }
-                }
-
-                if (value == base.Value) return;
+                if (Mathf.Approximately(value, base.Value)) return;
 
                 base.Value = value;
 
@@ -132,11 +122,11 @@ namespace TrafficManager.UI.Helpers {
                 min: Min,
                 max: Max,
                 step: Step,
-                defaultValue: Mathf.Clamp(Value, Min, Max),
+                defaultValue: Value,
                 eventCallback: OnValueChanged) as UISlider;
 
             _sliderLabel = _ui.parent.Find<UILabel>("Label");
-            _sliderLabel.width = 500;
+            _sliderLabel.width = SLIDER_LABEL_MAX_WIDTH;
 
             UpdateTooltip();
             UpdateReadOnly();
@@ -157,7 +147,10 @@ namespace TrafficManager.UI.Helpers {
                 ? $"{Value}{_tooltip}"
                 : T(INGAME_ONLY_SETTING);
 
-            _ui.RefreshTooltip();
+            if (_ui.thumbObject.hasFocus) {
+                try { _ui.RefreshTooltip(); }
+                catch (Exception _) { }
+            }
         }
 
         private void UpdateReadOnly() {
@@ -167,8 +160,8 @@ namespace TrafficManager.UI.Helpers {
 
             Log._Debug($"SliderOption.UpdateReadOnly() - `{FieldName}` is {(readOnly ? "read-only" : "writeable")}");
 
-            _ui.isInteractive = !readOnly;
-            _ui.opacity = readOnly ? 0.3f : 1f;
+            _ui.thumbObject.isInteractive = !readOnly;
+            _ui.thumbObject.opacity = readOnly ? 0.3f : 1f;
         }
     }
 }

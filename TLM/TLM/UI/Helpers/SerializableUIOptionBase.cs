@@ -36,7 +36,7 @@ namespace TrafficManager.UI.Helpers {
                 _fieldInfo = typeof(Options).GetField(fieldName, BindingFlags.Static | BindingFlags.Public);
 
                 if (_fieldInfo == null) {
-                    throw new Exception($"SerializableUIOptionBase.ctor: {typeof(Options)}.{fieldName} does not exist");
+                    throw new Exception($"SerializableUIOptionBase.ctor: `{fieldName}` does not exist");
                 }
             }
         }
@@ -71,7 +71,7 @@ namespace TrafficManager.UI.Helpers {
             if (Value.Equals(newVal)) {
                 return;
             }
-            Log.Info($"SerializableUIOptionBase.DefaultOnValueChanged: {nameof(Options)}.{FieldName} changed to {newVal}");
+            Log._Debug($"SerializableUIOptionBase.DefaultOnValueChanged: `{FieldName}` changed to {newVal}");
             Value = newVal;
         }
 
