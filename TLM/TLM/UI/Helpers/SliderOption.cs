@@ -38,7 +38,7 @@ namespace TrafficManager.UI.Helpers {
         public float Min {
             get => _min;
             set {
-                value = Mathf.Clamp(value, 0, 255);
+                value = ClampToByte(value);
                 if (_min == value) return;
 
                 _min = value;
@@ -49,7 +49,7 @@ namespace TrafficManager.UI.Helpers {
         public float Max {
             get => _max;
             set {
-                value = Mathf.Clamp(value, 0, 255);
+                value = ClampToByte(value);
                 if (_max == value) return;
 
                 _max = value;
@@ -66,6 +66,8 @@ namespace TrafficManager.UI.Helpers {
                 if (HasUI) _ui.stepSize = value;
             }
         }
+
+        public float ClampToByte(float val) => Mathf.Clamp(val, 0, 255);
 
         public override void Load(byte data) => Value = data;
 
