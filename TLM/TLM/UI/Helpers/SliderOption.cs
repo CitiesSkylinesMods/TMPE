@@ -18,10 +18,6 @@ namespace TrafficManager.UI.Helpers {
         public SliderOption(string fieldName, Options.PersistTo scope = Options.PersistTo.Savegame)
         : base(fieldName, scope) {
             OnValueChanged = DefaultOnValueChanged;
-
-            _min = 0;
-            _max = 255;
-            _step = 5;
         }
 
         /* Data */
