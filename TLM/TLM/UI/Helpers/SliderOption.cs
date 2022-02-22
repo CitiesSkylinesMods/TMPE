@@ -7,8 +7,8 @@ namespace TrafficManager.UI.Helpers {
 
     public class SliderOption : SerializableUIOptionBase<float, UISlider, SliderOption> {
 
-        private float _min = 10;
-        private float _max = 100;
+        private float _min = 0;
+        private float _max = 255;
         private float _step = 5;
         private UILabel _sliderLabel;
 
@@ -146,6 +146,8 @@ namespace TrafficManager.UI.Helpers {
                     ? string.Empty // avoid invalidating UI if already no tooltip
                     : T(_tooltip)
                 : T(INGAME_ONLY_SETTING);
+
+            _ui.RefreshTooltip();
         }
 
         private void UpdateReadOnly() {
