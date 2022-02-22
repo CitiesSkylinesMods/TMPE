@@ -38,8 +38,10 @@ namespace TrafficManager.UI.Helpers {
         public float Min {
             get => _min;
             set {
+                value = Mathf.Clamp(value, 0, 255);
                 if (_min == value) return;
-                _min = Mathf.Clamp(value, 0, 255);
+
+                _min = value;
                 if (HasUI) _ui.minValue = _min;
             }
         }
@@ -47,8 +49,10 @@ namespace TrafficManager.UI.Helpers {
         public float Max {
             get => _max;
             set {
+                value = Mathf.Clamp(value, 0, 255);
                 if (_max == value) return;
-                _max = Mathf.Clamp(value, 0, 255);
+
+                _max = value;
                 if (HasUI) _ui.maxValue = _max;
             }
         }
@@ -57,6 +61,7 @@ namespace TrafficManager.UI.Helpers {
             get => _step;
             set {
                 if (_step == value) return;
+
                 _step = value;
                 if (HasUI) _ui.stepSize = value;
             }
