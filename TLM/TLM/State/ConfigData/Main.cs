@@ -1,12 +1,14 @@
 namespace TrafficManager.State.ConfigData {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
     using System.Linq;
     using System.Xml.Serialization;
     using JetBrains.Annotations;
     using TrafficManager.UI.MainMenu;
     using TrafficManager.UI.SubTools.SpeedLimits;
 
+    [SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:Fields should be private", Justification = "Reviewed.")]
     public class Main {
         /// <summary>Whether floating keybinds panel is visible.</summary>
         public bool KeybindsPanelVisible = true;
