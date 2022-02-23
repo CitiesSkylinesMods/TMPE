@@ -90,53 +90,53 @@ namespace TrafficManager.State {
 
         private static string T(string key) => Translation.Options.Get(key);
 
-        private static void OnMainMenuButtonPosLockedChanged(bool val) {
-            if (Main.MainMenuButtonPosLocked == val) return;
+        private static void OnMainMenuButtonPosLockedChanged(bool value) {
+            if (Main.MainMenuButtonPosLocked == value) return;
 
-            Main.MainMenuButtonPosLocked = val;
+            Main.MainMenuButtonPosLocked = value;
             GlobalConfig.WriteConfig();
 
             if (TMPELifecycle.InGameOrEditor()) {
-                ModUI.Instance.MainMenuButton.SetPosLock(val);
+                ModUI.Instance.MainMenuButton.SetPosLock(value);
             }
         }
 
-        private static void OnMainMenuPosLockedChanged(bool val) {
-            if (Main.MainMenuPosLocked == val) return;
+        private static void OnMainMenuPosLockedChanged(bool value) {
+            if (Main.MainMenuPosLocked == value) return;
 
-            Main.MainMenuPosLocked = val;
+            Main.MainMenuPosLocked = value;
             GlobalConfig.WriteConfig();
 
             if (TMPELifecycle.InGameOrEditor()) {
-                ModUI.Instance.MainMenu.SetPosLock(val);
+                ModUI.Instance.MainMenu.SetPosLock(value);
             }
         }
 
-        private static void OnUseUUIChanged(bool val) {
-            if (Main.UseUUI == val) return;
+        private static void OnUseUUIChanged(bool value) {
+            if (Main.UseUUI == value) return;
 
-            Main.UseUUI = val;
+            Main.UseUUI = value;
             GlobalConfig.WriteConfig();
 
             if (TMPELifecycle.InGameOrEditor()) {
                 var button = ModUI.GetTrafficManagerTool()?.UUIButton;
-                if (button) button.isVisible = val;
+                if (button) button.isVisible = value;
                 ModUI.Instance?.MainMenuButton?.UpdateButtonSkinAndTooltip();
             }
         }
 
-        private static void OnGuiScaleChanged(float val) {
-            if (Main.GuiScale == val) return;
+        private static void OnGuiScaleChanged(float value) {
+            if (Main.GuiScale == value) return;
 
-            Main.GuiScale = val;
+            Main.GuiScale = value;
             GlobalConfig.WriteConfig();
 
             if (TMPELifecycle.InGameOrEditor())
                 ModUI.Instance?.Events.UiScaleChanged();
         }
 
-        private static void OnGuiOpacityChanged(float val) {
-            if (Main.GuiOpacity == val) return;
+        private static void OnGuiOpacityChanged(float value) {
+            if (Main.GuiOpacity == value) return;
 
             Main.GuiOpacity = GuiOpacity.Save();
             GlobalConfig.WriteConfig();
@@ -147,24 +147,25 @@ namespace TrafficManager.State {
             }
         }
 
-        private static void OnOverlayOpacityChanged(float val) {
-            if (Main.OverlayOpacity == val) return;
+        private static void OnOverlayOpacityChanged(float value) {
+            if (Main.OverlayOpacity == value) return;
 
             Main.OverlayOpacity = OverlayOpacity.Save();
             GlobalConfig.WriteConfig();
         }
 
-        private static void OnEnableTutorialChanged(bool val) {
-            if (Main.EnableTutorial == val) return;
+        private static void OnEnableTutorialChanged(bool value) {
+            if (Main.EnableTutorial == value) return;
 
-            Main.EnableTutorial = val;
+            Main.EnableTutorial = value;
             GlobalConfig.WriteConfig();
         }
 
-        private static void OnOpenUrlsInSteamOverlayChanged(bool val) {
-            if (Main.OpenUrlsInSteamOverlay == val) return;
-
-            Main.OpenUrlsInSteamOverlay = val;
+        private static void OnOpenUrlsInSteamOverlayChanged(bool value)
+        {
+            if (Main.OpenUrlsInSteamOverlay == value)
+                return;
+            Main.OpenUrlsInSteamOverlay = value;
             GlobalConfig.WriteConfig();
         }
     }

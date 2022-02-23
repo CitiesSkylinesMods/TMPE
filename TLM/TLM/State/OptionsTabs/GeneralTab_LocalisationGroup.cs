@@ -123,8 +123,8 @@ namespace TrafficManager.State {
             Options.RebuildOptions();
         }
 
-        private static void OnDisplaySpeedLimitsMphChanged(bool newMphValue) {
-            bool supportedByTheme = newMphValue
+        private static void OnDisplaySpeedLimitsMphChanged(bool value) {
+            bool supportedByTheme = value
                                         ? RoadSignThemes.ActiveTheme.SupportsMph
                                         : RoadSignThemes.ActiveTheme.SupportsKmph;
 
@@ -132,20 +132,20 @@ namespace TrafficManager.State {
 
             if (!supportedByTheme) {
                 // Reset to German road signs theme
-                _roadSignsThemeDropdown.selectedIndex = RoadSignThemes.Instance.FindDefaultThemeIndex(newMphValue);
-                mainConfig.RoadSignTheme = RoadSignThemes.Instance.GetDefaultThemeName(newMphValue);
+                _roadSignsThemeDropdown.selectedIndex = RoadSignThemes.Instance.FindDefaultThemeIndex(value);
+                mainConfig.RoadSignTheme = RoadSignThemes.Instance.GetDefaultThemeName(value);
                 Log.Info(
-                    $"Display MPH changed to {newMphValue}, but was not supported by current theme, "
+                    $"Display MPH changed to {value}, but was not supported by current theme, "
                     + $"so theme was also reset to {mainConfig.RoadSignTheme}");
             } else {
-                Log.Info($"Display MPH changed to {newMphValue}");
+                Log.Info($"Display MPH changed to {value}");
             }
 
-            mainConfig.DisplaySpeedLimitsMph = newMphValue;
+            mainConfig.DisplaySpeedLimitsMph = value;
             GlobalConfig.WriteConfig();
 
             if (Options.IsGameLoaded(false)) {
-                ModUI.Instance.Events.DisplayMphChanged(newMphValue);
+                ModUI.Instance.Events.DisplayMphChanged(value);
             }
         }
 
