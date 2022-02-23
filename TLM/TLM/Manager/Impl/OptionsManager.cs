@@ -104,7 +104,7 @@ namespace TrafficManager.Manager.Impl {
 
                 Log.Info($"OptionsManager.LoadData: {data.Length} bytes");
 
-                GeneralTab.SetSimulationAccuracy(ConvertToSimulationAccuracy(LoadByte(data, idx: 0)));
+                GeneralTab_SimulationGroup.SetSimulationAccuracy(ConvertToSimulationAccuracy(LoadByte(data, idx: 0)));
                 // skip Options.setLaneChangingRandomization(options[1]);
                 GameplayTab_VehicleBehaviourGroup.SetRecklessDrivers(LoadByte(data, idx: 2));
                 PoliciesTab.SetRelaxedBusses(LoadBool(data, idx: 3));
@@ -133,7 +133,7 @@ namespace TrafficManager.Manager.Impl {
                 PoliciesTab.SetPreferOuterLane(LoadBool(data, idx: 26));
                 ToCheckbox(data, idx: 27, GameplayTab_VehicleBehaviourGroup.IndividualDrivingStyle, false);
                 PoliciesTab.SetEvacBussesMayIgnoreRules(LoadBool(data, idx: 28));
-                GeneralTab.SetInstantEffects(LoadBool(data, idx: 29));
+                ToCheckbox(data, idx: 29, GeneralTab_SimulationGroup.InstantEffects, true);
                 MaintenanceTab.SetParkingRestrictionsEnabled(LoadBool(data, idx: 30));
                 OverlaysTab.SetParkingRestrictionsOverlay(LoadBool(data, idx: 31));
                 PoliciesTab.SetBanRegularTrafficOnBusLanes(LoadBool(data, idx: 32));
