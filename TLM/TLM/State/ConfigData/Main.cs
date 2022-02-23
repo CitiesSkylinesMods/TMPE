@@ -45,14 +45,14 @@ namespace TrafficManager.State.ConfigData {
         public bool EnableTutorial = true;
 
         /// <summary>Determines if the main menu shall be displayed in a tiny format.</summary>
-        [Obsolete("Do not use. TM:PE now has UI scale slider")]
+        [Obsolete("Use GuiScale instead")]
         public bool TinyMainMenu = true;
 
-        /// <summary>User interface transparency, unit: percents, range: 0..100.</summary>
-        [Obsolete("Value is not used anymore, use GuiOpacity instead")]
+        /// <summary>User interface transparency, unit: percents, range: 0..90.</summary>
+        [Obsolete("Use GuiOpacity instead")]
         public byte GuiTransparency = 75;
 
-        /// <summary>User interface opacity, unit: percents, range: 0..100.</summary>
+        /// <summary>User interface opacity, unit: percents, range: 10..100.</summary>
         public byte GuiOpacity = 75;
 
         /// <summary>User interface scale for TM:PE. Unit: percents, range: 30..200f.</summary>
@@ -60,14 +60,16 @@ namespace TrafficManager.State.ConfigData {
 
         /// <summary>
         /// if checked, size remains constant but pixel count changes when resolution changes. Quality drops with lower resolutions.
-        /// if unchecked checked, size changes constant but pixel count remains the same. Maintains same image quality for all resolution.
+        /// if unchecked, size changes constant but pixel count remains the same. Maintains same image quality for all resolution.
         /// </summary>
         public bool GuiScaleToResolution = true;
 
-        /// <summary>
-        /// Overlay transparency
-        /// </summary>
+        /// <summary>Overlay transparency, unit: percents, range: 0..90</summary>
+        [Obsolete("Use OverlayOpacity instead")]
         public byte OverlayTransparency = 40;
+
+        /// <summary>Overlay icons opacity, unit: percent, range: 10..100.</summary>
+        public byte OverlayOpacity = 60;
 
         /// <summary>
         /// Extended mod compatibility check

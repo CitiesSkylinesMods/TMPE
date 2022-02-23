@@ -21,14 +21,6 @@ namespace TrafficManager.State {
             Handler = WhatsNew.OpenModal,
         };
 
-        public static CheckboxOption OpenUrlsInSteamOverlay =
-            new (nameof(GlobalConfig.Instance.Main.OpenUrlsInSteamOverlay), Options.PersistTo.Global) {
-                Label = "Checkbox:Use Steam Overlay to show TM:PE website links",
-                Tooltip = "Checkbox.Tooltip:When disabled, website links will open in your default web browser",
-                Handler = OnOpenUrlsInSteamOverlayChanged,
-                Value = GlobalConfig.Instance.Main.OpenUrlsInSteamOverlay,
-            };
-
         private static UICheckBox _instantEffectsToggle;
 
         [UsedImplicitly]
@@ -105,55 +97,6 @@ namespace TrafficManager.State {
 
             SetupSpeedLimitsPanel(group);
 
-            group = tab.AddGroup(T("General.Group:Interface"));
-
-            _lockButtonToggle = group.AddCheckbox(
-                                    text: T("General.Checkbox:Lock main menu button position"),
-                                    defaultValue: GlobalConfig.Instance.Main.MainMenuButtonPosLocked,
-                                    eventCallback: OnLockButtonChanged) as UICheckBox;
-            _lockMenuToggle = group.AddCheckbox(
-                                  text: T("General.Checkbox:Lock main menu window position"),
-                                  defaultValue: GlobalConfig.Instance.Main.MainMenuPosLocked,
-                                  eventCallback: OnLockMenuChanged) as UICheckBox;
-
-            _useUUI = group.AddCheckbox(
-                text: T("General.Checkbox:Use UnifiedUI"),
-                defaultValue: GlobalConfig.Instance.Main.UseUUI,
-                eventCallback: OnUseUUIChanged) as UICheckBox;
-
-            _guiScaleSlider = group.AddSlider(
-                                  text: T("General.Slider:GUI scale") + ":",
-                                  min: 50,
-                                  max: 200,
-                                  step: 5,
-                                  defaultValue: GlobalConfig.Instance.Main.GuiScale,
-                                  eventCallback: OnGuiScaleChanged) as UISlider;
-            _guiScaleSlider.parent.Find<UILabel>("Label").width = 500;
-
-            _guiOpacitySlider = group.AddSlider(
-                                        text: T("General.Slider:Window transparency") + ":",
-                                        min: 0,
-                                        max: 100,
-                                        step: 5,
-                                        defaultValue: GlobalConfig.Instance.Main.GuiOpacity,
-                                        eventCallback: OnGuiOpacityChanged) as UISlider;
-            _guiOpacitySlider.parent.Find<UILabel>("Label").width = 500;
-
-            _overlayTransparencySlider = group.AddSlider(
-                                             text: T("General.Slider:Overlay transparency") + ":",
-                                             min: 0,
-                                             max: 100,
-                                             step: 5,
-                                             defaultValue: GlobalConfig.Instance.Main.OverlayTransparency,
-                                             eventCallback: OnOverlayTransparencyChanged) as UISlider;
-            _overlayTransparencySlider.parent.Find<UILabel>("Label").width = 500;
-            _enableTutorialToggle = group.AddCheckbox(
-                                        T("General.Checkbox:Enable tutorials"),
-                                        GlobalConfig.Instance.Main.EnableTutorial,
-                                        OnEnableTutorialsChanged) as UICheckBox;
-
-            OpenUrlsInSteamOverlay.AddUI(group);
-
             group = tab.AddGroup(T("General.Group:Simulation"));
 
             string[] simPrecisionOptions = new[] {
@@ -173,6 +116,8 @@ namespace TrafficManager.State {
                                        text: T("General.Checkbox:Apply AI changes right away"),
                                        defaultValue: Options.instantEffects,
                                        eventCallback: OnInstantEffectsChanged) as UICheckBox;
+
+            GeneralTab_InterfaceGroup.AddUI(tab);
 
             group = tab.AddGroup(T("General.Group:Compatibility"));
 
@@ -247,43 +192,6 @@ namespace TrafficManager.State {
             Options.RebuildOptions();
         }
 
-        private static void OnLockButtonChanged(bool newValue) {
-            Log._Debug($"Button lock changed to {newValue}");
-            if (Options.IsGameLoaded(false)) {
-                ModUI.Instance.MainMenuButton.SetPosLock(newValue);
-            }
-
-            GlobalConfig.Instance.Main.MainMenuButtonPosLocked = newValue;
-            GlobalConfig.WriteConfig();
-        }
-
-        private static void OnLockMenuChanged(bool newValue) {
-            Log._Debug($"Menu lock changed to {newValue}");
-            if (Options.IsGameLoaded(false)) {
-                ModUI.Instance.MainMenu.SetPosLock(newValue);
-            }
-
-            GlobalConfig.Instance.Main.MainMenuPosLocked = newValue;
-            GlobalConfig.WriteConfig();
-        }
-
-        private static void OnUseUUIChanged(bool newValue) {
-            Log._Debug($"Use UUI set to {newValue}");
-            GlobalConfig.Instance.Main.UseUUI = newValue;
-            GlobalConfig.WriteConfig();
-            var button = ModUI.GetTrafficManagerTool()?.UUIButton;
-            if (button) {
-                button.isVisible = newValue;
-            }
-            ModUI.Instance?.MainMenuButton?.UpdateButtonSkinAndTooltip();
-        }
-
-        private static void OnEnableTutorialsChanged(bool newValue) {
-            Log._Debug($"Enable tutorial messages changed to {newValue}");
-            GlobalConfig.Instance.Main.EnableTutorial = newValue;
-            GlobalConfig.WriteConfig();
-        }
-
         private static void OnShowCompatibilityCheckErrorChanged(bool newValue) {
             Log._Debug($"Show mod compatibility error changed to {newValue}");
             GlobalConfig.Instance.Main.ShowCompatibilityCheckErrorMessage = newValue;
@@ -299,67 +207,6 @@ namespace TrafficManager.State {
                 SetIgnoreDisabledMods(false);
                 OnIgnoreDisabledModsChanged(false);
             }
-        }
-
-        private static void OnGuiOpacityChanged(float newVal) {
-            if (!Options.IsGameLoaded()) {
-                return;
-            }
-
-            SetGuiTransparency((byte)Mathf.RoundToInt(newVal));
-            _guiOpacitySlider.tooltip
-                = string.Format(
-                    T("General.Tooltip.Format:Window transparency: {0}%"),
-                    GlobalConfig.Instance.Main.GuiOpacity);
-            if (TMPELifecycle.Instance.IsGameLoaded) {
-                _guiOpacitySlider.RefreshTooltip();
-            }
-
-            GlobalConfig.WriteConfig();
-            Log._Debug($"GuiTransparency changed to {GlobalConfig.Instance.Main.GuiOpacity}");
-        }
-
-        private static void OnGuiScaleChanged(float newVal) {
-            ModUI.Instance.Events.UiScaleChanged();
-            SetGuiScale(newVal);
-            _guiScaleSlider.tooltip
-                = string.Format(
-                    T("General.Tooltip.Format:GUI scale: {0}%"),
-                    GlobalConfig.Instance.Main.GuiScale);
-            if (TMPELifecycle.Instance.IsGameLoaded) {
-                _guiScaleSlider.RefreshTooltip();
-            }
-
-            GlobalConfig.WriteConfig();
-            Log._Debug($"GuiScale changed to {GlobalConfig.Instance.Main.GuiScale}");
-        }
-
-        /// <summary>User clicked [scale GUI to screen resolution] checkbox.</summary>
-        private static void OnGuiScaleToResChanged(float newVal) {
-            SetGuiScale(newVal);
-            if (TMPELifecycle.Instance.IsGameLoaded) {
-                _guiScaleSlider.RefreshTooltip();
-            }
-
-            GlobalConfig.WriteConfig();
-            Log._Debug($"GuiScale changed to {GlobalConfig.Instance.Main.GuiScale}");
-        }
-
-        private static void OnOverlayTransparencyChanged(float newVal) {
-            if (!Options.IsGameLoaded()) {
-                return;
-            }
-
-            SetOverlayTransparency((byte)Mathf.RoundToInt(newVal));
-            _overlayTransparencySlider.tooltip = string.Format(
-                T("General.Tooltip.Format:Overlay transparency: {0}%"),
-                GlobalConfig.Instance.Main.OverlayTransparency);
-            GlobalConfig.WriteConfig();
-            if (TMPELifecycle.Instance.IsGameLoaded) {
-                _overlayTransparencySlider.RefreshTooltip();
-            }
-
-            Log._Debug($"Overlay transparency changed to {GlobalConfig.Instance.Main.OverlayTransparency}");
         }
 
         private static void OnIgnoreDisabledModsChanged(bool newValue) {
@@ -441,14 +288,6 @@ namespace TrafficManager.State {
             GlobalConfig.WriteConfig();
         }
 
-        private static void OnOpenUrlsInSteamOverlayChanged(bool val) {
-            var current = GlobalConfig.Instance.Main.OpenUrlsInSteamOverlay;
-            if (current == val) return;
-
-            GlobalConfig.Instance.Main.OpenUrlsInSteamOverlay = val;
-            GlobalConfig.WriteConfig();
-        }
-
         private static void OnSimulationAccuracyChanged(int newAccuracy) {
             if (!Options.IsGameLoaded()) {
                 return;
@@ -471,37 +310,6 @@ namespace TrafficManager.State {
             Options.ignoreDisabledModsEnabled = value;
             if (_ignoreDisabledModsToggle != null) {
                 _ignoreDisabledModsToggle.isChecked = value;
-            }
-        }
-
-        public static void SetGuiTransparency(byte val) {
-            bool isChanged = val != GlobalConfig.Instance.Main.GuiOpacity;
-            GlobalConfig.Instance.Main.GuiOpacity = val;
-
-            if (isChanged && _guiOpacitySlider != null) {
-                _guiOpacitySlider.value = val;
-
-                U.UOpacityValue opacity = UOpacityValue.FromOpacity(0.01f * val);
-                ModUI.Instance.Events.OpacityChanged(opacity);
-            }
-        }
-
-        public static void SetGuiScale(float val) {
-            bool changed = (int)val != (int)GlobalConfig.Instance.Main.GuiScale;
-            GlobalConfig.Instance.Main.GuiScale = val;
-
-            if (changed && _guiScaleSlider != null) {
-                _guiScaleSlider.value = val;
-                ModUI.Instance.Events.UiScaleChanged();
-            }
-        }
-
-        public static void SetOverlayTransparency(byte val) {
-            bool changed = val != GlobalConfig.Instance.Main.OverlayTransparency;
-            GlobalConfig.Instance.Main.OverlayTransparency = val;
-
-            if (changed && _overlayTransparencySlider != null) {
-                _overlayTransparencySlider.value = val;
             }
         }
 

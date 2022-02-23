@@ -149,6 +149,7 @@
     <Compile Include="Manager\Impl\GeometryNotifier.cs" />
     <Compile Include="Patch\_External\RTramAIModPatch.cs" />
     <Compile Include="State\OptionsTabs\GameplayTab_VehicleBehaviourGroup.cs" />
+    <Compile Include="State\OptionsTabs\GeneralTab_InterfaceGroup.cs" />
     <Compile Include="State\OptionsTabs\GeneralTab_DebugGroup.cs" />
     <Compile Include="State\OptionsTabs\MaintenanceTab_DespawnGroup.cs" />
     <Compile Include="State\VersionInfo.cs" />
