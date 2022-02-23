@@ -114,12 +114,6 @@ namespace TrafficManager.State {
         public static bool turnOnRedEnabled = true;
         public static bool laneConnectorEnabled = true;
 
-        [UsedImplicitly]
-        public static bool scanForKnownIncompatibleModsEnabled = true;
-
-        [UsedImplicitly]
-        public static bool ignoreDisabledModsEnabled;
-
         public static VehicleRestrictionsAggression vehicleRestrictionsAggression =
             VehicleRestrictionsAggression.Medium;
 
