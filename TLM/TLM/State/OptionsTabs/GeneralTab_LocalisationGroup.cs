@@ -17,7 +17,7 @@ namespace TrafficManager.State {
 
         // TODO: Implement global config updates direct from CheckboxOption
         public static CheckboxOption DisplaySpeedLimitsMph =
-            new ("DebugCheckboxA", Options.PersistTo.None) {
+            new (nameof(GlobalConfig.Instance.Main.DisplaySpeedLimitsMph), Options.PersistTo.Global) {
                 Label = "Checkbox:Display speed limits mph",
                 Translator = TSpeedLimits,
                 Handler = OnDisplaySpeedLimitsMphChanged,
@@ -31,8 +31,8 @@ namespace TrafficManager.State {
 
             AddLanguageDropDown(group);
 
-            DisplaySpeedLimitsMph.Value = GlobalConfig.Instance.Main.DisplaySpeedLimitsMph;
-            DisplaySpeedLimitsMph.AddUI(group);
+            DisplaySpeedLimitsMph.AddUI(group)
+                .Value = GlobalConfig.Instance.Main.DisplaySpeedLimitsMph;
 
             AddRoadSignThemeDropDown(group);
         }
