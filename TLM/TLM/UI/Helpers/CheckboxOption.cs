@@ -7,7 +7,7 @@ namespace TrafficManager.UI.Helpers {
     using JetBrains.Annotations;
     using UnityEngine;
 
-    public class CheckboxOption : SerializableUIOptionBase<bool, UICheckBox> {
+    public class CheckboxOption : SerializableUIOptionBase<bool, UICheckBox, CheckboxOption> {
         private const int CHECKBOX_LABEL_MAX_WIDTH = 695;
         private const int CHECKBOX_LABEL_MAX_WIDTH_INDENTED = 680;
 
@@ -124,7 +124,7 @@ namespace TrafficManager.UI.Helpers {
             }
         }
 
-        public override void AddUI(UIHelperBase container) {
+        public override CheckboxOption AddUI(UIHelperBase container) {
             _ui = container.AddCheckbox(T(Label), Value, OnValueChanged) as UICheckBox;
 
             if (Indent) ApplyIndent(_ui);
@@ -133,6 +133,8 @@ namespace TrafficManager.UI.Helpers {
 
             UpdateTooltip();
             UpdateReadOnly();
+
+            return this;
         }
 
         private void PropagateTo(IList<CheckboxOption> targets, bool value) {
