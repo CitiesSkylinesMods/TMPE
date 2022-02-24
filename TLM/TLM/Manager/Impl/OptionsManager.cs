@@ -64,36 +64,20 @@ namespace TrafficManager.Manager.Impl {
             return (byte)(SimulationAccuracy.MaxValue - value);
         }
 
-        public bool MayPublishSegmentChanges() {
-            return Options.instantEffects && TMPELifecycle.InGameOrEditor() &&
-                !TMPELifecycle.Instance.Deserializing;
-        }
+        public bool MayPublishSegmentChanges() =>
+            Options.instantEffects &&
+            TMPELifecycle.InGameOrEditor() &&
+            !TMPELifecycle.Instance.Deserializing;
 
-        // Takes a bool from data and sets it in `out result`
-        private static bool LoadBool([NotNull] byte[] data, uint idx, bool defaultVal = false) {
-            if (data.Length > idx) {
-                var result = data[idx] == 1;
-                return result;
-            }
+        private static bool LoadBool([NotNull] byte[] data, uint idx, bool defaultVal = false)
+            => (data.Length > idx) ? data[idx] == 1 : defaultVal;
 
-            return defaultVal;
-        }
-
-        private static byte LoadByte([NotNull] byte[] data, uint idx, byte defaultVal = 0) {
-            if (data.Length > idx) {
-                var result = data[idx];
-                return result;
-            }
-
-            return defaultVal;
-        }
+        private static byte LoadByte([NotNull] byte[] data, uint idx, byte defaultVal = 0)
+            => (data.Length > idx) ? data[idx] : defaultVal;
 
         /// <summary>Load LegacySerializableOption bool.</summary>
-        private static void ToCheckbox([NotNull] byte[] data, uint idx, ILegacySerializableOption opt, bool defaultVal = false) {
-            if (data.Length > idx) {
-                opt.Load(data[idx]);
-                return;
-            }
+        private static void ToCheckbox(byte[] data, uint idx, ILegacySerializableOption opt, bool defaultVal = false)
+            => opt.Load((byte)(LoadBool(data, idx, defaultVal) ? 1 : 0));
 
         /// <summary>Load LegacySerializableOption byte.</summary>
         private static void ToSlider(byte[] data, uint idx, ILegacySerializableOption opt, byte defaultVal = 0)
