@@ -95,8 +95,9 @@ namespace TrafficManager.Manager.Impl {
                 return;
             }
 
-            opt.Load(defaultVal ? (byte)1 : (byte)0);
-        }
+        /// <summary>Load LegacySerializableOption byte.</summary>
+        private static void ToSlider(byte[] data, uint idx, ILegacySerializableOption opt, byte defaultVal = 0)
+            => opt.Load(LoadByte(data, idx, defaultVal));
 
         public bool LoadData(byte[] data) {
             try {
