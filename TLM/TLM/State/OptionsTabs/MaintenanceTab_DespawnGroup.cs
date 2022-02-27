@@ -104,7 +104,7 @@ namespace TrafficManager.State {
         /// Adds "Despawn" group to the specified <paramref name="tab"/>.
         /// </summary>
         /// <param name="tab">The parent UI panel.</param>
-        public static void AddUI(UIHelperBase tab) {
+        internal static void AddUI(UIHelperBase tab) {
             if (!TMPELifecycle.PlayMode) return;
 
             var group = tab.AddGroup(T("Maintenance.Group:Despawn"));

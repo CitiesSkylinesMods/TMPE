@@ -7,8 +7,9 @@ namespace TrafficManager.UI.Helpers {
     using System;
     using TrafficManager.State;
     using JetBrains.Annotations;
+    using TrafficManager.Lifecycle;
 
-    public abstract class SerializableUIOptionBase<TVal, TUI> : ILegacySerializableOption
+    public abstract class SerializableUIOptionBase<TVal, TUI, TComponent> : ILegacySerializableOption
         where TUI : UIComponent {
 
         /// <summary>Use as tooltip for readonly UI components.</summary>
@@ -35,7 +36,7 @@ namespace TrafficManager.UI.Helpers {
                 _fieldInfo = typeof(Options).GetField(fieldName, BindingFlags.Static | BindingFlags.Public);
 
                 if (_fieldInfo == null) {
-                    throw new Exception($"SerializableUIOptionBase.ctor: {typeof(Options)}.{fieldName} does not exist");
+                    throw new Exception($"SerializableUIOptionBase.ctor: `{fieldName}` does not exist");
                 }
             }
         }
@@ -56,21 +57,21 @@ namespace TrafficManager.UI.Helpers {
 
         /// <summary>Returns <c>true</c> if setting can persist in current <see cref="_scope"/>.</summary>
         /// <remarks>
-        /// When <c>false</c>, UI component should be <see cref="_readOnlyUI"/>
+        /// When <c>false</c>, UI component should be <see cref="_readOnly"/>
         /// and <see cref="_tooltip"/> should be set to <see cref="INGAME_ONLY_SETTING"/>.
         /// </remarks>
         protected bool IsInScope =>
             _scope.IsFlagSet(Options.PersistTo.Global) ||
-            (_scope.IsFlagSet(Options.PersistTo.Savegame) && Options.IsGameLoaded(false)) ||
+            (_scope.IsFlagSet(Options.PersistTo.Savegame) && TMPELifecycle.AppMode != null) ||
             _scope == Options.PersistTo.None;
 
-        public static implicit operator TVal(SerializableUIOptionBase<TVal, TUI> a) => a.Value;
+        public static implicit operator TVal(SerializableUIOptionBase<TVal, TUI, TComponent> a) => a.Value;
 
         public void DefaultOnValueChanged(TVal newVal) {
             if (Value.Equals(newVal)) {
                 return;
             }
-            Log.Info($"SerializableUIOptionBase.DefaultOnValueChanged: {nameof(Options)}.{FieldName} changed to {newVal}");
+            Log._Debug($"SerializableUIOptionBase.DefaultOnValueChanged: `{FieldName}` changed to {newVal}");
             Value = newVal;
         }
 
@@ -87,7 +88,7 @@ namespace TrafficManager.UI.Helpers {
         protected string _label;
         protected string _tooltip;
 
-        protected bool _readOnlyUI;
+        protected bool _readOnly;
 
         private TranslatorDelegate _translator;
         public delegate string TranslatorDelegate(string key);
@@ -97,7 +98,7 @@ namespace TrafficManager.UI.Helpers {
             set => _translator = value;
         }
 
-        public abstract void AddUI(UIHelperBase container);
+        public abstract TComponent AddUI(UIHelperBase container);
 
         /// <summary>Terse shortcut for <c>Translator(key)</c>.</summary>
         /// <param name="key">The locale key to translate.</param>
