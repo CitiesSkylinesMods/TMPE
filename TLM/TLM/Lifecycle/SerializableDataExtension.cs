@@ -71,11 +71,14 @@ namespace TrafficManager.Lifecycle {
                 loadingSucceeded = false;
             }
 
-            // load options
+            // load options (empty byte array causes default options to be applied)
             try {
-                byte[] options = SerializableData.LoadData("TMPE_Options");
-                if (options != null) {
-                    if (!OptionsManager.Instance.LoadData(options)) {
+                if (TMPELifecycle.InGameOrEditor()) {
+                    byte[] options = OptionsManager.Instance.ForceResetToDefaults
+                        ? null
+                        : SerializableData.LoadData("TMPE_Options");
+
+                    if (!OptionsManager.Instance.LoadData(options ?? new byte[0])) {
                         loadingSucceeded = false;
                     }
                 }
@@ -437,7 +440,6 @@ namespace TrafficManager.Lifecycle {
                 }
 
                 try {
-                    // if in-game, save options
                     if (TMPELifecycle.PlayMode) {
                         SerializableData.SaveData("TMPE_Options", OptionsManager.Instance.SaveData(ref success));
                     }
