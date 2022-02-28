@@ -323,7 +323,7 @@ namespace TrafficManager.Manager.Impl {
         /// </summary>
         internal static void RebuildMenu() {
             if (TMPELifecycle.Instance.Deserializing || ModUI.Instance == null) {
-                Log._Debug("OptionsManager.RebuildMenu() - Ignoring; Deserialising or ModUI is null");
+                Log._Debug("OptionsManager.RebuildMenu() - Ignoring; Deserialising or ModUI.Instance is null");
                 return;
             }
 
