@@ -1,7 +1,9 @@
 [Version] 11.6.5.1
 [Meta] This update focuses on major refactoring of mod options code
 [Updated] Add/update UI helpers for use in mod options #1431 #1430 #1424 #1419 (aubergine18)
-[Updated] Refactoring mod options #1411 #1416 #1356 (aubergine18)
+[Updated] Refactoring mod options #1432 #1411 #1416 #1356 #1279 (aubergine18)
+[Updated] Replaced `Overlay Transparency` with `Overlay Opacity` #1432 #1268 (aubergine18)
+[Updated] Minimum GUI/Overlay opacity limited to 10% #1432 #1409 (aubergine18)
 [Removed] Obsolete gamebridge stuff from build script #1436 (aubergine18)
 [/Version]
 
