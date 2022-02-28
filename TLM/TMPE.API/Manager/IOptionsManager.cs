@@ -1,4 +1,6 @@
 namespace TrafficManager.API.Manager {
+    using System;
+
     /// <summary>
     /// Manages mod options
     /// </summary>
@@ -7,6 +9,7 @@ namespace TrafficManager.API.Manager {
         /// Determines if modifications to segments may be published in the current state.
         /// </summary>
         /// <returns>true if changes may be published, false otherwise</returns>
+        [Obsolete("Use TMPELifecycle method of same name instead")]
         bool MayPublishSegmentChanges();
 
         /// <summary>

@@ -14,6 +14,7 @@ namespace TrafficManager.Manager.Impl {
     using static TrafficManager.Util.Shortcuts;
     using TrafficManager.Util;
     using TrafficManager.Util.Extensions;
+    using TrafficManager.Lifecycle;
 
     public class LaneConnectionManager
         : AbstractGeometryObservingManager,
@@ -247,7 +248,7 @@ namespace TrafficManager.Manager.Impl {
             ref NetNode commonNode = ref commonNodeId.ToNode();
             RoutingManager.Instance.RequestNodeRecalculation(ref commonNode);
 
-            if (OptionsManager.Instance.MayPublishSegmentChanges()) {
+            if (TMPELifecycle.Instance.MayPublishSegmentChanges()) {
                 ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
                 extSegmentManager.PublishSegmentChanges(segmentId1);
                 extSegmentManager.PublishSegmentChanges(segmentId2);
@@ -310,7 +311,7 @@ namespace TrafficManager.Manager.Impl {
             if (recalcAndPublish) {
                 RoutingManager.Instance.RequestRecalculation(segmentId);
 
-                if (OptionsManager.Instance.MayPublishSegmentChanges()) {
+                if (TMPELifecycle.Instance.MayPublishSegmentChanges()) {
                     ExtSegmentManager.Instance.PublishSegmentChanges(segmentId);
                 }
             }
@@ -364,7 +365,7 @@ namespace TrafficManager.Manager.Impl {
                 ushort segment = laneId.ToLane().m_segment;
                 RoutingManager.Instance.RequestRecalculation(segment);
 
-                if (OptionsManager.Instance.MayPublishSegmentChanges()) {
+                if (TMPELifecycle.Instance.MayPublishSegmentChanges()) {
                     ExtSegmentManager.Instance.PublishSegmentChanges(segment);
                 }
             }
@@ -426,7 +427,7 @@ namespace TrafficManager.Manager.Impl {
             RoutingManager.Instance.RequestRecalculation(sourceSegmentId, false);
             RoutingManager.Instance.RequestRecalculation(targetSegmentId, false);
 
-            if (OptionsManager.Instance.MayPublishSegmentChanges()) {
+            if (TMPELifecycle.Instance.MayPublishSegmentChanges()) {
                 ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
                 extSegmentManager.PublishSegmentChanges(sourceSegmentId);
                 extSegmentManager.PublishSegmentChanges(targetSegmentId);

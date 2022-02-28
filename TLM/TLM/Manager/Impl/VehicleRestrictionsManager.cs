@@ -12,6 +12,7 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.Traffic;
     using TrafficManager.Util;
     using TrafficManager.Util.Extensions;
+    using TrafficManager.Lifecycle;
 
     public class VehicleRestrictionsManager
         : AbstractGeometryObservingManager,
@@ -447,7 +448,7 @@ namespace TrafficManager.Manager.Impl {
 
             NotifyStartEndNode(segmentId);
 
-            if (OptionsManager.Instance.MayPublishSegmentChanges()) {
+            if (TMPELifecycle.Instance.MayPublishSegmentChanges()) {
                 ExtSegmentManager.Instance.PublishSegmentChanges(segmentId);
             }
 
@@ -494,7 +495,7 @@ namespace TrafficManager.Manager.Impl {
             Flags.SetLaneAllowedVehicleTypes(segmentId, laneIndex, laneId, allowedTypes);
             NotifyStartEndNode(segmentId);
 
-            if (OptionsManager.Instance.MayPublishSegmentChanges()) {
+            if (TMPELifecycle.Instance.MayPublishSegmentChanges()) {
                 ExtSegmentManager.Instance.PublishSegmentChanges(segmentId);
             }
         }
@@ -539,7 +540,7 @@ namespace TrafficManager.Manager.Impl {
             Flags.SetLaneAllowedVehicleTypes(segmentId, laneIndex, laneId, allowedTypes);
             NotifyStartEndNode(segmentId);
 
-            if (OptionsManager.Instance.MayPublishSegmentChanges()) {
+            if (TMPELifecycle.Instance.MayPublishSegmentChanges()) {
                 ExtSegmentManager.Instance.PublishSegmentChanges(segmentId);
             }
         }
