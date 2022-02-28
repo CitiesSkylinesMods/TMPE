@@ -1,7 +1,6 @@
 namespace TrafficManager.State {
     using TrafficManager.UI.Helpers;
     using TrafficManager.UI;
-    using TrafficManager.Lifecycle;
 
     public static class GameplayTab {
 
@@ -11,13 +10,6 @@ namespace TrafficManager.State {
             GameplayTab_VehicleBehaviourGroup.AddUI(tab);
 
             GameplayTab_AIGroups.AddUI(tab);
-        }
-
-        private static void OnAltLaneSelectionRatioChanged(float newVal) {
-            // Only call this if the game is running, not during the loading time
-            if (TMPELifecycle.Instance.IsGameLoaded) {
-                //_altLaneSelectionRatioSlider.RefreshTooltip();
-            }
         }
     }
 }
