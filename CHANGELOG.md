@@ -253,7 +253,7 @@ This changelog includes all versions and major variants of the mod going all the
 - [Fixed] Trains not counted as waiting at timed traffic lights at rail junctions #1184 #1173 (DarthJimbo, krzychu124)
 - [Fixed] Toolbar could be dragged through Speed Limits window #1168 #683 (aubergine18, kvakvs)
 - [Updated] Code clean-up: ResetIncomingHighwayLaneArrows #1166 #1178 (egi)
-- [Updated] Incompatible mod detector improvements #1196 (Krzychu124)
+- [Updated] Incompatible mod detector improvements #1196 #439 (Krzychu124)
 - [Updated] Code clean-up: Netutil and Speed Limits #1273 #1275 (kianzarrin)
 - [Updated] Static texture classes now CustomManagers #1265 (kvakvs)
 - [Updated] Performance: GetNode/Segment -> ToNode/Segment #1202 (kianzarrin)
