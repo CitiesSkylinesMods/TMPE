@@ -23,7 +23,8 @@ namespace TrafficManager.Manager.Impl {
         /// <remarks>See: https://github.com/CitiesSkylinesMods/TMPE/pull/1425 for details</remarks>
         public bool ForceResetToDefaults =>
             !TMPELifecycle.PlayMode ||
-            (TMPELifecycle.Mode == LoadMode.NewGame && TMPELifecycle.Mode == LoadMode.NewGameFromScenario);
+            TMPELifecycle.Mode == LoadMode.NewGame ||
+            TMPELifecycle.Mode == LoadMode.NewGameFromScenario;
 
         protected override void InternalPrintDebugInfo() {
             base.InternalPrintDebugInfo();
