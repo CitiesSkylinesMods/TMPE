@@ -56,12 +56,28 @@ namespace TrafficManager.UI {
 
         private CursorInfo nopeCursor_;
 
+        public const float DEBUG_CLOSE_LOD = 300f;
+
+        /// <summary>Square of the distance, where overlays are not rendered.</summary>
+        public const float MAX_OVERLAY_DISTANCE_SQR = 600f * 600f;
+
+        internal const float MAX_ZOOM = 0.05f;
+
         /// <summary>Maximum error of HitPos field.</summary>
         internal const float MAX_HIT_ERROR = 2.5f;
 
         /// <summary>Maximum detection radius of segment raycast hit position.</summary>
         internal const float NODE_DETECTION_RADIUS = 75f;
         internal const float PRECISE_NODE_DETECTION_RADIUS = 15f;
+
+        /// <summary>Convert 0..100 opacity value to 0..1f alpha value.</summary>
+        internal const float TO_ALPHA = 0.01f;
+
+        /// <summary>Minimum opacity value. Also affects sliders in mod options.</summary>
+        internal const byte MINIMUM_OPACITY = 10;
+
+        /// <summary>Maximum opacity value. Also affects sliders in mod options.</summary>
+        internal const byte MAXIMUM_OPACITY = 100;
 
         internal static ushort HoveredNodeId;
 
@@ -73,11 +89,6 @@ namespace TrafficManager.UI {
         internal Vector3 MousePosition => m_mousePosition; //expose protected member.
 
         private static bool _mouseClickProcessed;
-
-        public const float DEBUG_CLOSE_LOD = 300f;
-
-        /// <summary>Square of the distance, where overlays are not rendered.</summary>
-        public const float MAX_OVERLAY_DISTANCE_SQR = 600f * 600f;
 
         private IDictionary<ToolMode, LegacySubTool> legacySubTools_;
 
@@ -109,7 +120,11 @@ namespace TrafficManager.UI {
         /// </summary>
         public static bool IsUndergroundMode => IsValidUndergroundMode(InfoManager.instance.CurrentMode);
 
-        internal static float OverlayAlpha => TransparencyToAlpha(GlobalConfig.Instance.Main.OverlayTransparency);
+        internal static float OverlayAlpha
+            => TO_ALPHA * Mathf.Clamp(
+                GlobalConfig.Instance.Main.OverlayOpacity,
+                MINIMUM_OPACITY,
+                MAXIMUM_OPACITY);
 
         static TrafficManagerTool() { }
 
@@ -194,21 +209,20 @@ namespace TrafficManager.UI {
             return Screen.height / 1200f;
         }
 
-        internal const float MAX_ZOOM = 0.05f;
+        internal static float GetWindowAlpha()
+            => TO_ALPHA * Mathf.Clamp(
+                GlobalConfig.Instance.Main.GuiOpacity,
+                MINIMUM_OPACITY,
+                MAXIMUM_OPACITY);
 
-        internal static float GetWindowAlpha() {
-            return Mathf.Clamp(GlobalConfig.Instance.Main.GuiOpacity, 0f, 100f) / 100f;
-        }
-
-        internal static float GetHandleAlpha(bool hovered) {
-            byte transparency = GlobalConfig.Instance.Main.OverlayTransparency;
-            if (hovered) {
-                // reduce transparency when handle is hovered
-                transparency = (byte)Math.Min(20, transparency >> 2);
-            }
-
-            return TransparencyToAlpha(transparency);
-        }
+        /// <summary>
+        /// Get alpha value for an overlay icon, taking in to account hovered state.
+        /// </summary>
+        /// <param name="hovered">Set <c>true</c> if mouse is over handle.</param>
+        /// <returns>Returns alpha value in range 0.1..1f.</returns>
+        internal static float GetHandleAlpha(bool hovered) => hovered
+            ? TO_ALPHA * MAXIMUM_OPACITY
+            : OverlayAlpha;
 
         /// <summary>Gives convenient access to NetTool from the original game.</summary>
         private NetTool NetTool {
@@ -220,10 +234,6 @@ namespace TrafficManager.UI {
 
                 return netTool_;
             }
-        }
-
-        private static float TransparencyToAlpha(byte transparency) {
-            return Mathf.Clamp(100 - transparency, 0f, 100f) / 100f;
         }
 
         internal void Initialize() {
