@@ -12,6 +12,7 @@ namespace TrafficManager.Manager.Impl {
     using UnityEngine;
     using static TrafficManager.Util.Shortcuts;
     using TrafficManager.Util.Extensions;
+    using TrafficManager.Lifecycle;
 
     public class LaneArrowManager
         : AbstractGeometryObservingManager,
@@ -200,7 +201,7 @@ namespace TrafficManager.Manager.Impl {
         private void OnLaneChange(uint laneId) {
             ushort segment = laneId.ToLane().m_segment;
             RoutingManager.Instance.RequestRecalculation(segment);
-            if (OptionsManager.Instance.MayPublishSegmentChanges()) {
+            if (TMPELifecycle.Instance.MayPublishSegmentChanges()) {
                 ExtSegmentManager.Instance.PublishSegmentChanges(segment);
             }
         }

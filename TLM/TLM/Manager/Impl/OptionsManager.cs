@@ -49,11 +49,6 @@ namespace TrafficManager.Manager.Impl {
             return true;
         }
 
-        public bool MayPublishSegmentChanges() =>
-            Options.instantEffects &&
-            TMPELifecycle.InGameOrEditor() &&
-            !TMPELifecycle.Instance.Deserializing;
-
         /// <summary>
         /// Loading options may trigger multiple calls to certain methods. To de-spam
         /// invocations, the methods are skipped during loading and a bool is set
@@ -83,6 +78,10 @@ namespace TrafficManager.Manager.Impl {
             base.InternalPrintDebugInfo();
             Log.NotImpl("InternalPrintDebugInfo for OptionsManager");
         }
+
+        [Obsolete("Use TMPELifecycle method of same name instead")]
+        public bool MayPublishSegmentChanges()
+            => TMPELifecycle.Instance.MayPublishSegmentChanges();
 
         /// <summary>
         /// Converts value to SimulationAccuracy
@@ -143,7 +142,7 @@ namespace TrafficManager.Manager.Impl {
 
                 Log.Info($"OptionsManager.LoadData: {data.Length} bytes");
 
-                GeneralTab.SetSimulationAccuracy(ConvertToSimulationAccuracy(LoadByte(data, idx: 0)));
+                GeneralTab_SimulationGroup.SetSimulationAccuracy(ConvertToSimulationAccuracy(LoadByte(data, idx: 0)));
                 // skip Options.setLaneChangingRandomization(options[1]);
                 GameplayTab_VehicleBehaviourGroup.SetRecklessDrivers(LoadByte(data, idx: 2));
                 ToCheckbox(data, idx: 3, PoliciesTab_AtJunctionsGroup.RelaxedBusses, true);
@@ -172,7 +171,7 @@ namespace TrafficManager.Manager.Impl {
                 PoliciesTab.SetPreferOuterLane(LoadBool(data, idx: 26));
                 ToCheckbox(data, idx: 27, GameplayTab_VehicleBehaviourGroup.IndividualDrivingStyle, false);
                 PoliciesTab.SetEvacBussesMayIgnoreRules(LoadBool(data, idx: 28));
-                GeneralTab.SetInstantEffects(LoadBool(data, idx: 29));
+                // skip ToCheckbox(data, idx: 29, GeneralTab_SimulationGroup.InstantEffects, true);
                 ToCheckbox(data, idx: 30, MaintenanceTab_FeaturesGroup.ParkingRestrictionsEnabled, true);
                 ToCheckbox(data, idx: 31, OverlaysTab_OverlaysGroup.ParkingRestrictionsOverlay, false);
                 PoliciesTab.SetBanRegularTrafficOnBusLanes(LoadBool(data, idx: 32));
@@ -272,7 +271,7 @@ namespace TrafficManager.Manager.Impl {
                 save[26] = (byte)(Options.preferOuterLane ? 1 : 0);
                 save[27] = GameplayTab_VehicleBehaviourGroup.IndividualDrivingStyle.Save();
                 save[28] = (byte)(Options.evacBussesMayIgnoreRules ? 1 : 0);
-                save[29] = (byte)(Options.instantEffects ? 1 : 0);
+                save[29] = 0; // (byte)(Options.instantEffects ? 1 : 0);
                 save[30] = (byte)(Options.parkingRestrictionsEnabled ? 1 : 0);
                 save[31] = (byte)(Options.parkingRestrictionsOverlay ? 1 : 0);
                 save[32] = (byte)(Options.banRegularTrafficOnBusLanes ? 1 : 0);

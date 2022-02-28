@@ -148,16 +148,20 @@
     <Compile Include="Manager\Impl\ExtSegmentManager.cs" />
     <Compile Include="Manager\Impl\GeometryNotifier.cs" />
     <Compile Include="Patch\_External\RTramAIModPatch.cs" />
-    <Compile Include="State\OptionsTabs\MaintenanceTab_ConfigGroup.cs" />
-    <Compile Include="State\OptionsTabs\MaintenanceTab_ToolsGroup.cs" />
+    <Compile Include="State\OptionsTabs\GeneralTab_CompatibilityGroup.cs" />
+    <Compile Include="State\OptionsTabs\GeneralTab_LocalisationGroup.cs" />
+    <Compile Include="State\OptionsTabs\GeneralTab_InterfaceGroup.cs" />
+    <Compile Include="State\OptionsTabs\GeneralTab_SimulationGroup.cs" />
+    <Compile Include="State\OptionsTabs\GameplayTab_VehicleBehaviourGroup.cs" />
     <Compile Include="State\OptionsTabs\PoliciesTab_AtJunctionsGroup.cs" />
     <Compile Include="State\OptionsTabs\OverlaysTab_OverlaysGroup.cs" />
     <Compile Include="State\OptionsTabs\MaintenanceTab_FeaturesGroup.cs" />
-    <Compile Include="State\OptionsTabs\GameplayTab_VehicleBehaviourGroup.cs" />
-    <Compile Include="State\OptionsTabs\GeneralTab_DebugGroup.cs" />
+    <Compile Include="State\OptionsTabs\MaintenanceTab_ConfigGroup.cs" />
     <Compile Include="State\OptionsTabs\MaintenanceTab_DespawnGroup.cs" />
+    <Compile Include="State\OptionsTabs\MaintenanceTab_ToolsGroup.cs" />
     <Compile Include="State\VersionInfo.cs" />
     <Compile Include="UI\Helpers\ActionButton.cs" />
+    <Compile Include="UI\Helpers\SliderOption.cs" />
     <Compile Include="UI\Helpers\OptionButtonBase.cs" />
     <Compile Include="UI\Helpers\UrlButton.cs" />
     <Compile Include="UI\WhatsNew\MarkupKeyword.cs" />
@@ -1148,8 +1152,6 @@ echo MONODIR is "%25MONODIR%25"
 
 set "DEPLOYDIR=$(LOCALAPPDATA)\Colossal Order\Cities_Skylines\Addons\Mods\$(TargetName)\"
 xcopy /y /v "$(TargetPath).mdb" "%25DEPLOYDIR%25"
-xcopy /y "$(TargetDir)TMPE.CitiesGameBridge.dll" "%25DEPLOYDIR%25"
-xcopy /y "$(TargetDir)TMPE.GenericGameBridge.dll" "%25DEPLOYDIR%25"
 xcopy /y "$(TargetDir)TMPE.API.dll" "%25DEPLOYDIR%25"
 xcopy /y "$(TargetDir)CSUtil.CameraControl.dll" "%25DEPLOYDIR%25"
 xcopy /y "$(TargetDir)CSUtil.Commons.dll" "%25DEPLOYDIR%25"

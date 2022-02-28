@@ -17,7 +17,7 @@ namespace TrafficManager.Lifecycle {
     using UnityEngine.SceneManagement;
     using UnityEngine;
     using JetBrains.Annotations;
-    using UI.WhatsNew;
+    using TrafficManager.UI.WhatsNew;
     using System.Diagnostics.CodeAnalysis;
     using TrafficManager.UI.Helpers;
     using TrafficManager.API.Traffic.Enums;
@@ -61,6 +61,13 @@ namespace TrafficManager.Lifecycle {
             SceneManager.GetActiveScene().name != "IntroScreen" &&
             SceneManager.GetActiveScene().name != "MainMenu" &&
             SceneManager.GetActiveScene().name != "Startup";
+
+        /// <summary>
+        /// Determines if modifications to segments may be published in the current state.
+        /// </summary>
+        /// <returns>Returns <c>true</c> if changes may be published, otherwise <c>false</c>.</returns>
+        public bool MayPublishSegmentChanges()
+            => InGameOrEditor() && !Instance.Deserializing;
 
         public static AppMode? AppMode => SimulationManager.instance.m_ManagersWrapper.loading?.currentMode;
 
