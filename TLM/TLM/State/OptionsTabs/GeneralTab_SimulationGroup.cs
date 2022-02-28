@@ -10,11 +10,6 @@ namespace TrafficManager.State {
 
         private static UIDropDown _simulationAccuracyDropdown;
 
-        public static CheckboxOption InstantEffects =
-            new (nameof(Options.instantEffects), Options.PersistTo.Savegame) {
-                Label = "General.Checkbox:Apply AI changes right away",
-            };
-
         public static void SetSimulationAccuracy(SimulationAccuracy value) {
             Options.simulationAccuracy = value;
             if (_simulationAccuracyDropdown != null) {
@@ -27,7 +22,6 @@ namespace TrafficManager.State {
             var group = tab.AddGroup(T("General.Group:Simulation"));
 
             AddSimulationAccuracyDropDown(group);
-            InstantEffects.AddUI(group);
         }
 
         private static string T(string key) => Translation.Options.Get(key);

@@ -43,7 +43,6 @@ namespace TrafficManager.State {
         /// </remarks>
         public static bool Available = false;
 
-        public static bool instantEffects;
         public static bool individualDrivingStyle = true;
         public static int recklessDrivers = 3;
 
