@@ -173,7 +173,7 @@
 [Mod] Compatible: `More CitizenUnits` #1192 (algernon-A)
 [Mod] Incompatible: `CSMultiplayer` #1196 (Krzychu124)
 [Updated] Code clean-up: ResetIncomingHighwayLaneArrows #1166 #1178 (egi)
-[Updated] Incompatible mod detector improvements #1196 (Krzychu124)
+[Updated] Incompatible mod detector improvements #1196 #439 (Krzychu124)
 [Updated] Code clean-up: Netutil and Speed Limits #1273 #1275 (kianzarrin)
 [Updated] Static texture classes now CustomManagers #1265 (kvakvs)
 [Updated] Performance: GetNode/Segment -> ToNode/Segment #1202 (kianzarrin)
