@@ -28,6 +28,7 @@ namespace TrafficManager.Patch {
                     found = true;
                     yield return instruction; // return found instruction
                     yield return new CodeInstruction(OpCodes.Ldsfld, _vehicleBehaviourManagerInstanceField); // loadInstFiled
+                    yield return new CodeInstruction(OpCodes.Ldarg_1); // vehicleID
                     yield return new CodeInstruction(OpCodes.Ldarg_2); // loadVehicleData
                     yield return new CodeInstruction(OpCodes.Callvirt, _mayDespawnMethod); // callMayDespawn
                     yield return instruction.Clone(); //brfalse_s || brfalse - clone including label!
@@ -49,6 +50,7 @@ namespace TrafficManager.Patch {
 
              // NON-STOCK CODE START
              IL_000e: ldsfld       class TrafficManager.Manager.Impl.VehicleBehaviorManager TrafficManager.Manager.Impl.VehicleBehaviorManager::Instance
+             IL_0013: ldarg.1     // vehicleID
              IL_0013: ldarg.2      // vehicleData
              IL_0014: callvirt     instance bool TrafficManager.Manager.Impl.VehicleBehaviorManager::MayDespawn(valuetype ['Assembly-CSharp']Vehicle&)
              IL_0019: brfalse.s    IL_0027
@@ -168,6 +170,7 @@ namespace TrafficManager.Patch {
 
             return new List<CodeInstruction> {
                 new CodeInstruction(OpCodes.Ldsfld, instance),
+                new CodeInstruction(OpCodes.Ldarg_1),
                 new CodeInstruction(OpCodes.Ldarg_2),
                 new CodeInstruction(OpCodes.Callvirt, mayDespawn),
                 new CodeInstruction(OpCodes.Brfalse_S, retLabel)
@@ -180,6 +183,7 @@ namespace TrafficManager.Patch {
              ------------------------------
 
               ldsfld       class TrafficManager.Manager.Impl.VehicleBehaviorManager TrafficManager.Manager.Impl.VehicleBehaviorManager::Instance
+              ldarg.1      // vehicleID
               ldarg.2      // vehicleData
               callvirt     instance bool TrafficManager.Manager.Impl.VehicleBehaviorManager::MayDespawn(valuetype ['Assembly-CSharp']Vehicle&)
               brfalse.s    IL_0248

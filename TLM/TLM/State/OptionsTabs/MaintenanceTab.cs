@@ -118,6 +118,7 @@ namespace TrafficManager.State {
             CheckboxOption.ApplyIndent(_turnOnRedEnabledToggle);
 
             MaintenanceTab_DespawnGroup.AddUI(panelHelper);
+            MaintenanceTab_AllowDespawnGroup.AddUI(panelHelper);
 
             // TODO [issue ##959] remove when TTL is implemented in asset editor.
             bool inEditor = TMPELifecycle.InGameOrEditor()

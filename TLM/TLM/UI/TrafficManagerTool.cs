@@ -1413,7 +1413,7 @@ namespace TrafficManager.UI {
 
             for (uint citizenInstanceId = 1; citizenInstanceId < CitizenManager.MAX_INSTANCE_COUNT; ++citizenInstanceId) {
                 ref CitizenInstance citizenInstance = ref citizenInstanceId.ToCitizenInstance();
-                
+
                 if (!citizenInstance.IsCreated()) {
                     continue;
                 }

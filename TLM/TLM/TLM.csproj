@@ -151,9 +151,11 @@
     <Compile Include="State\OptionsTabs\GeneralTab_LocalisationGroup.cs" />
     <Compile Include="State\OptionsTabs\GameplayTab_VehicleBehaviourGroup.cs" />
     <Compile Include="State\OptionsTabs\GeneralTab_DebugGroup.cs" />
+    <Compile Include="State\OptionsTabs\MaintenanceTab_AllowDespawnGroup.cs" />
     <Compile Include="State\OptionsTabs\MaintenanceTab_DespawnGroup.cs" />
     <Compile Include="State\VersionInfo.cs" />
     <Compile Include="UI\Helpers\ActionButton.cs" />
+    <Compile Include="UI\Helpers\GlobalConfigObserver.cs" />
     <Compile Include="UI\Helpers\SliderOption.cs" />
     <Compile Include="UI\Helpers\OptionButtonBase.cs" />
     <Compile Include="UI\Helpers\UrlButton.cs" />
