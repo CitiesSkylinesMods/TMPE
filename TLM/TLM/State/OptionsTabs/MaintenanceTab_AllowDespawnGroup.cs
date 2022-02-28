@@ -50,7 +50,7 @@ namespace TrafficManager.State {
                 Value = GlobalConfig.Instance.Gameplay.AllowedDespawnVehicleTypes.IsFlagSet(ExtVehicleType.Trolleybus)
             };
 
-        /* TODO #1367 - not supported yet
+        /* TODO #1368 - not supported yet
         public static CheckboxOption AllowDespawnPassengerPlanes =
             new ("AllowDespawnPassengerPlane", Options.PersistTo.Global) {
                 Label = "AllowDespawn.Checkbox:Passenger Planes",
@@ -66,7 +66,7 @@ namespace TrafficManager.State {
                 Value = GlobalConfig.Instance.Gameplay.AllowedDespawnVehicleTypes.IsFlagSet(ExtVehicleType.PassengerTrain)
             };
 
-        /* TODO #1367 - not supported yet
+        /* TODO #1368 - not supported yet
          public static CheckboxOption AllowDespawnCargoPlanes =
             new ("AllowDespawnCargoPlane", Options.PersistTo.Global) {
                 Label = "AllowDespawn.Checkbox:Cargo Planes",
@@ -101,11 +101,11 @@ namespace TrafficManager.State {
             { AllowDespawnTaxis, ExtVehicleType.Taxi },
             { AllowDespawnTrams, ExtVehicleType.Tram },
             { AllowDespawnTrolleybuses, ExtVehicleType.Trolleybus },
-            /*TODO 1367 - not supported yet
+            /*TODO #1368 - not supported yet
             { AllowDespawnPassengerPlanes, ExtVehicleType.PassengerPlane },
             */
             { AllowDespawnPassengerTrains, ExtVehicleType.PassengerTrain },
-            /*TODO 1367 - not supported yet
+            /*TODO #1368 - not supported yet
              { AllowDespawnCargoPlanes, ExtVehicleType.CargoPlane },
              */
             { AllowDespawnCargoTrains, ExtVehicleType.CargoTrain },
