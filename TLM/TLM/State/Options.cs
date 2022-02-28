@@ -43,7 +43,6 @@ namespace TrafficManager.State {
         /// </remarks>
         public static bool Available = false;
 
-        public static bool instantEffects = true;
         public static bool individualDrivingStyle = true;
         public static int recklessDrivers = 3;
 
@@ -113,12 +112,6 @@ namespace TrafficManager.State {
         public static bool junctionRestrictionsEnabled = true;
         public static bool turnOnRedEnabled = true;
         public static bool laneConnectorEnabled = true;
-
-        [UsedImplicitly]
-        public static bool scanForKnownIncompatibleModsEnabled = true;
-
-        [UsedImplicitly]
-        public static bool ignoreDisabledModsEnabled;
 
         public static VehicleRestrictionsAggression vehicleRestrictionsAggression =
             VehicleRestrictionsAggression.Medium;
