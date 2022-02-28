@@ -20,7 +20,6 @@ namespace TrafficManager.Manager.Impl {
         public static OptionsManager Instance = new OptionsManager();
 
         // See: OnAfterLoadData() and related methods
-        private static bool _needUpdateRoutingManager = false;
         private static bool _needUpdateDedicatedTurningLanes = false;
         private static bool _needUpdateJunctionRestrictionsManager = false;
 
@@ -57,11 +56,6 @@ namespace TrafficManager.Manager.Impl {
         public override void OnAfterLoadData() {
             base.OnAfterLoadData();
             Log.Info("OptionsManger.OnAfterLoadData() checking for queued method calls");
-
-            if (_needUpdateRoutingManager) {
-                _needUpdateRoutingManager = false;
-                UpdateRoutingManager();
-            }
 
             if (_needUpdateDedicatedTurningLanes) {
                 _needUpdateDedicatedTurningLanes = false;
@@ -395,8 +389,7 @@ namespace TrafficManager.Manager.Impl {
         /// </summary>
         internal static void UpdateRoutingManager() {
             if (TMPELifecycle.Instance.Deserializing) {
-                Log._Debug("OptionsManager.UpdateRoutingManager() - Waiting for deserialisation");
-                _needUpdateRoutingManager = true;
+                Log._Debug("OptionsManager.UpdateRoutingManager() - Ignoring; Deserialising");
                 return;
             }
 
