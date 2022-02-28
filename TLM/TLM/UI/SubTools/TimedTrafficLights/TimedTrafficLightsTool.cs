@@ -333,6 +333,10 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
                     break;
                 }
             }
+
+            if (_cursorInSecondaryPanel) {
+                UIInput.MouseUsed();
+            }
         }
 
         public override void RenderOverlay(RenderManager.CameraInfo cameraInfo) {
@@ -2550,6 +2554,8 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
             if (!hoveredSegment) {
                 _hoveredButton[0] = 0;
                 _hoveredButton[1] = 0;
+            } else {
+                UIInput.MouseUsed();
             }
         }
 
