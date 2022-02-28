@@ -16,6 +16,7 @@ namespace TrafficManager.Manager.Impl {
     using static CSUtil.Commons.TernaryBoolUtil;
     using TrafficManager.Util;
     using TrafficManager.Util.Extensions;
+    using TrafficManager.Lifecycle;
 
     public class JunctionRestrictionsManager
         : AbstractGeometryObservingManager,
@@ -1018,7 +1019,7 @@ namespace TrafficManager.Manager.Impl {
 
             if (requireRecalc) {
                 RoutingManager.Instance.RequestRecalculation(segmentId);
-                if (OptionsManager.Instance.MayPublishSegmentChanges()) {
+                if (TMPELifecycle.Instance.MayPublishSegmentChanges()) {
                     ExtSegmentManager.Instance.PublishSegmentChanges(segmentId);
                 }
             }
