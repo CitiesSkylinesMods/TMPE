@@ -1,4 +1,5 @@
 namespace TrafficManager.State {
+    using System;
     using ColossalFramework;
     using ICities;
     using System.Collections.Generic;
@@ -19,35 +20,35 @@ namespace TrafficManager.State {
             new ("AllowDespawnPassengerCar", Options.PersistTo.Global) {
                 Label = "AllowDespawn.Checkbox:Passenger Car",
                 Handler = (bool newValue) => OnChange(ExtVehicleType.PassengerCar, newValue),
-                Value = GlobalConfig.Instance.Gameplay.AllowedDespawnVehicleTypes.IsFlagSet(ExtVehicleType.PassengerCar)
+                Value = IsDespawnAllowed(ExtVehicleType.PassengerCar)
             };
 
         public static CheckboxOption AllowDespawnBuses =
             new ("AllowDespawnBus", Options.PersistTo.Global) {
                 Label = "AllowDespawn.Checkbox:Buses",
                 Handler = (bool newValue) => OnChange(ExtVehicleType.Bus, newValue),
-                Value = GlobalConfig.Instance.Gameplay.AllowedDespawnVehicleTypes.IsFlagSet(ExtVehicleType.Bus)
+                Value = IsDespawnAllowed(ExtVehicleType.Bus)
             };
 
         public static CheckboxOption AllowDespawnTaxis =
             new ("AllowDespawnTaxi", Options.PersistTo.Global) {
                 Label = "AllowDespawn.Checkbox:Taxis",
                 Handler = (bool newValue) => OnChange(ExtVehicleType.Taxi, newValue),
-                Value = GlobalConfig.Instance.Gameplay.AllowedDespawnVehicleTypes.IsFlagSet(ExtVehicleType.Taxi)
+                Value = IsDespawnAllowed(ExtVehicleType.Taxi)
             };
 
         public static CheckboxOption AllowDespawnTrams =
             new ("AllowDespawnTram", Options.PersistTo.Global) {
                 Label = "AllowDespawn.Checkbox:Trams",
                 Handler = (bool newValue) => OnChange(ExtVehicleType.Tram, newValue),
-                Value = GlobalConfig.Instance.Gameplay.AllowedDespawnVehicleTypes.IsFlagSet(ExtVehicleType.Tram)
+                Value = IsDespawnAllowed(ExtVehicleType.Tram)
             };
 
         public static CheckboxOption AllowDespawnTrolleybuses =
             new ("AllowDespawnTrolleybus", Options.PersistTo.Global) {
                 Label = "AllowDespawn.Checkbox:Trolleybuses",
                 Handler = (bool newValue) => OnChange(ExtVehicleType.Trolleybus, newValue),
-                Value = GlobalConfig.Instance.Gameplay.AllowedDespawnVehicleTypes.IsFlagSet(ExtVehicleType.Trolleybus)
+                Value = IsDespawnAllowed(ExtVehicleType.Trolleybus)
             };
 
         /* TODO #1368 - not supported yet
@@ -55,7 +56,7 @@ namespace TrafficManager.State {
             new ("AllowDespawnPassengerPlane", Options.PersistTo.Global) {
                 Label = "AllowDespawn.Checkbox:Passenger Planes",
                 Handler = (bool newValue) => OnChange(ExtVehicleType.PassengerPlane, newValue),
-                Value = GlobalConfig.Instance.Gameplay.AllowedDespawnVehicleTypes.IsFlagSet(ExtVehicleType.PassengerPlane)
+                Value = IsDespawnAllowed(ExtVehicleType.PassengerPlane)
             };
         */
 
@@ -63,7 +64,7 @@ namespace TrafficManager.State {
             new ("AllowDespawnPassengerTrain", Options.PersistTo.Global) {
                 Label = "AllowDespawn.Checkbox:Passenger Trains",
                 Handler = (bool newValue) => OnChange(ExtVehicleType.PassengerTrain, newValue),
-                Value = GlobalConfig.Instance.Gameplay.AllowedDespawnVehicleTypes.IsFlagSet(ExtVehicleType.PassengerTrain)
+                Value = IsDespawnAllowed(ExtVehicleType.PassengerTrain)
             };
 
         /* TODO #1368 - not supported yet
@@ -71,7 +72,7 @@ namespace TrafficManager.State {
             new ("AllowDespawnCargoPlane", Options.PersistTo.Global) {
                 Label = "AllowDespawn.Checkbox:Cargo Planes",
                 Handler = (bool newValue) => OnChange(ExtVehicleType.CargoPlane, newValue),
-                Value = GlobalConfig.Instance.Gameplay.AllowedDespawnVehicleTypes.IsFlagSet(ExtVehicleType.CargoPlane)
+                Value = IsDespawnAllowed(ExtVehicleType.CargoPlane)
             };
         */
 
@@ -79,19 +80,19 @@ namespace TrafficManager.State {
             new ("AllowDespawnCargoTrain", Options.PersistTo.Global) {
                 Label = "AllowDespawn.Checkbox:Cargo Trains",
                 Handler = (bool newValue) => OnChange(ExtVehicleType.CargoTrain, newValue),
-                Value = GlobalConfig.Instance.Gameplay.AllowedDespawnVehicleTypes.IsFlagSet(ExtVehicleType.CargoTrain)
+                Value = IsDespawnAllowed(ExtVehicleType.CargoTrain)
             };
         public static CheckboxOption AllowDespawnCargoTrucks =
             new ("AllowDespawnPassengerTruck", Options.PersistTo.Global) {
                 Label = "AllowDespawn.Checkbox:Cargo Trucks",
                 Handler = (bool newValue) => OnChange(ExtVehicleType.CargoTruck, newValue),
-                Value = GlobalConfig.Instance.Gameplay.AllowedDespawnVehicleTypes.IsFlagSet(ExtVehicleType.CargoTruck)
+                Value = IsDespawnAllowed(ExtVehicleType.CargoTruck)
             };
         public static CheckboxOption AllowDespawnService =
             new ("AllowDespawnService", Options.PersistTo.Global) {
                 Label = "AllowDespawn.Checkbox:Service vehicles",
                 Handler = (bool newValue) => OnChange(ExtVehicleType.Service, newValue),
-                Value = GlobalConfig.Instance.Gameplay.AllowedDespawnVehicleTypes.IsFlagSet(ExtVehicleType.Service)
+                Value = IsDespawnAllowed(ExtVehicleType.Service)
             };
 
         private static readonly Dictionary<CheckboxOption, ExtVehicleType> AllowDespawns = new ()
@@ -114,10 +115,18 @@ namespace TrafficManager.State {
         };
 
         static MaintenanceTab_AllowDespawnGroup() {
-            // attach observer, update checkboxes with new values
-            GlobalConfigObserver configObserver = TMPELifecycle.Instance.gameObject.AddComponent<GlobalConfigObserver>();
-            configObserver.OnUpdateObservers += (config) => OnUpdateCheckboxes(config);
+            try {
+                // attach observer, update checkboxes with new values
+                GlobalConfigObserver configObserver =
+                    TMPELifecycle.Instance.gameObject.AddComponent<GlobalConfigObserver>();
+                configObserver.OnUpdateObservers += (config) => OnUpdateCheckboxes(config);
+            } catch (Exception e) {
+                Log.Error($"Error initializing GlobalConfigObserver {e}");
+            }
         }
+
+        private static bool IsDespawnAllowed(ExtVehicleType evt) =>
+            GlobalConfig.Instance.Gameplay.AllowedDespawnVehicleTypes.IsFlagSet(evt);
 
         /// <summary>
         /// Handles update of GlobalConfig in case of reload or reset
@@ -125,8 +134,8 @@ namespace TrafficManager.State {
         /// <param name="config">New config instance after reload</param>
         private static void OnUpdateCheckboxes(GlobalConfig config) {
             Log._Debug("Updating Allow Despawn checkboxes with updated global config value");
-            foreach (KeyValuePair<CheckboxOption,ExtVehicleType> keyValuePair in AllowDespawns) {
-                keyValuePair.Key.Value = config.Gameplay.AllowedDespawnVehicleTypes.IsFlagSet(keyValuePair.Value);
+            foreach (KeyValuePair<CheckboxOption,ExtVehicleType> entry in AllowDespawns) {
+                entry.Key.Value = IsDespawnAllowed(entry.Value);
             }
         }
 
