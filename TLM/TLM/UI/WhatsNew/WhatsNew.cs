@@ -31,7 +31,7 @@ namespace TrafficManager.UI.WhatsNew {
             }
         }
 
-        public bool Shown => PreviouslySeenVersion >= CurrentVersion;
+        public bool Shown => CurrentVersion <= PreviouslySeenVersion;
 
         public List<Changelog> Changelogs { get; private set; }
 
