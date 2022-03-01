@@ -1,8 +1,8 @@
-using ColossalFramework;
-using TrafficManager.API.Traffic.Enums;
-using TrafficManager.Manager.Impl;
-
 namespace TrafficManager.Util.Extensions {
+    using ColossalFramework;
+    using TrafficManager.API.Traffic.Enums;
+    using TrafficManager.Manager.Impl;
+
     public static class VehicleExtensions {
         private static Vehicle[] _vehicleBuffer = Singleton<VehicleManager>.instance.m_vehicles.m_buffer;
 
@@ -36,20 +36,23 @@ namespace TrafficManager.Util.Extensions {
             vehicle.m_flags.IsFlagSet(Vehicle.Flags.WaitingPath);
 
         /// <summary>Determines the <see cref="ExtVehicleType"/> for a vehicle.</summary>
-        /// <param name="vehicle">The vehocle to inspect.</param>
+        /// <param name="vehicle">The vehicle to inspect.</param>
         /// <returns>The extended vehicle type.</returns>
-        public static ExtVehicleType ToExtVehicleType(this ref Vehicle vehicle) {
-            var vehicleId = vehicle.Info.m_instanceID.Vehicle;
-            var vehicleAI = vehicle.Info.m_vehicleAI;
-            var emergency = vehicle.m_flags.IsFlagSet(Vehicle.Flags.Emergency2);
+        public static ExtVehicleType ToExtVehicleType(this ref Vehicle vehicle)
+            => vehicle.IsValid()
+                ? vehicle.Info.m_instanceID.Vehicle.ToExtVehicleType()
+                : ExtVehicleType.None;
 
-            var ret = ExtVehicleManager.Instance.DetermineVehicleTypeFromAIType(
-                vehicleId,
-                vehicleAI,
-                emergency);
+        /// <summary>Determines the <see cref="ExtVehicleType"/> for a vehicle.</summary>
+        /// <param name="vehicleId">The id of the vehicle to inspect.</param>
+        /// <returns>The extended vehicle type.</returns>
+        public static ExtVehicleType ToExtVehicleType(this ushort vehicleId)
+            => ExtVehicleManager.Instance.ExtVehicles[vehicleId].vehicleType;
 
-            return ret ?? ExtVehicleType.None;
-        }
-
+        /// <summary>Determines the <see cref="ExtVehicleType"/> for a vehicle.</summary>
+        /// <param name="vehicleId">The id of the vehicle to inspect.</param>
+        /// <returns>The extended vehicle type.</returns>
+        public static ExtVehicleType ToExtVehicleType(this uint vehicleId)
+            => ExtVehicleManager.Instance.ExtVehicles[vehicleId].vehicleType;
     }
 }

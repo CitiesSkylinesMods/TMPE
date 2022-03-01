@@ -1,17 +1,16 @@
 namespace TrafficManager.Manager.Impl {
     using ColossalFramework;
     using CSUtil.Commons;
-    using System.Threading;
+    using JetBrains.Annotations;
     using System;
     using System.Collections.Generic;
-    using JetBrains.Annotations;
     using TrafficManager.API.Manager;
-    using TrafficManager.State;
-    using UnityEngine;
-    using TrafficManager.Lifecycle;
-    using Util.Record;
     using TrafficManager.API.Traffic.Enums;
+    using TrafficManager.Lifecycle;
+    using TrafficManager.State;
     using TrafficManager.Util.Extensions;
+    using TrafficManager.Util.Record;
+    using UnityEngine;
 
     public class UtilityManager : AbstractCustomManager, IUtilityManager {
         static UtilityManager() {
@@ -27,15 +26,12 @@ namespace TrafficManager.Manager.Impl {
             var manager = Singleton<VehicleManager>.instance;
 
             for (uint vehicleId = 0; vehicleId < manager.m_vehicles.m_size; ++vehicleId) {
-                ref Vehicle vehicle = ref ((ushort)vehicleId).ToVehicle();
 
-                if (!vehicle.IsValid()) {
+                if (!vehicleId.ToVehicle().IsValid())
                     continue;
-                }
 
-                if ((vehicle.ToExtVehicleType() & filter) == 0) {
+                if ((vehicleId.ToVehicle().ToExtVehicleType() & filter) == 0)
                     continue;
-                }
 
                 count++;
             }
@@ -43,7 +39,9 @@ namespace TrafficManager.Manager.Impl {
         }
 
         public void DespawnVehicles(ExtVehicleType? filter = null) {
-            lock (Singleton<VehicleManager>.instance) {
+            var vehicleManager = Singleton<VehicleManager>.instance;
+
+            lock (vehicleManager) {
                 try {
                     var logStr = filter.HasValue
                         ? filter == 0
@@ -53,20 +51,15 @@ namespace TrafficManager.Manager.Impl {
 
                     Log.Info($"Utility Manager: Despawning {logStr}");
 
-                    var manager = Singleton<VehicleManager>.instance;
+                    for (uint vehicleId = 0; vehicleId < vehicleManager.m_vehicles.m_size; ++vehicleId) {
 
-                    for (uint vehicleId = 0; vehicleId < manager.m_vehicles.m_size; ++vehicleId) {
-                        ref Vehicle vehicle = ref ((ushort)vehicleId).ToVehicle();
-
-                        if (!vehicle.IsValid()) {
+                        if (!vehicleId.ToVehicle().IsValid())
                             continue;
-                        }
 
-                        if (filter.HasValue && (vehicle.ToExtVehicleType() & filter) == 0) {
+                        if (filter.HasValue && (vehicleId.ToExtVehicleType() & filter) == 0)
                             continue;
-                        }
 
-                        manager.ReleaseVehicle((ushort)vehicleId);
+                        vehicleManager.ReleaseVehicle((ushort)vehicleId);
                     }
 
                     TrafficMeasurementManager.Instance.ResetTrafficStats();
