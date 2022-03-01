@@ -909,7 +909,7 @@ namespace TrafficManager.Manager.Impl {
 #endif
         }
 
-        internal ExtVehicleType? DetermineVehicleTypeFromAIType(
+        private ExtVehicleType? DetermineVehicleTypeFromAIType(
             ushort vehicleId,
             VehicleAI ai,
             bool emergencyOnDuty)
