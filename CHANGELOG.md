@@ -360,7 +360,7 @@ This changelog includes all versions and major variants of the mod going all the
 - [Fixed] Industries, etc., outside central 25 tile area not spawning vehicles #1097 (klyte45, krzychu124)
 - [Fixed] Cargo trucks ignoring lane routing #1105 (krzychu124)
 - [Fixed] Citizen Not Found error #1091 #1067 (meda22, krzychu124)
-- [Fixed] TMPE state changes after using free camera mode #938 (Biffa, kianzarrin)
+- [Fixed] TMPE state changes after using free camera mode #938 #958 (Biffa, kianzarrin)
 - [Fixed] Typo in priority roads tooltip locale code #904 (TianQiBuTian)
 - [Fixed] Asset data extension lifecycle for hotloading #1096 #1095 (kianzarrin)
 - [Fixed] Lane connector duplicate render bug #1094 (egi)
