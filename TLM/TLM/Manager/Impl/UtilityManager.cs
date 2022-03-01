@@ -8,6 +8,7 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.Lifecycle;
     using TrafficManager.State;
+    using TrafficManager.Util;
     using TrafficManager.Util.Extensions;
     using TrafficManager.Util.Record;
     using UnityEngine;
@@ -41,32 +42,30 @@ namespace TrafficManager.Manager.Impl {
         public void DespawnVehicles(ExtVehicleType? filter = null) {
             var vehicleManager = Singleton<VehicleManager>.instance;
 
-            lock (vehicleManager) {
-                try {
-                    var logStr = filter.HasValue
-                        ? filter == 0
-                            ? "Nothing (filter == 0)"
-                            : filter.ToString()
-                        : "All vehicles";
+            try {
+                var logStr = filter.HasValue
+                    ? filter == 0
+                        ? "Nothing (filter == 0)"
+                        : filter.ToString()
+                    : "All vehicles";
 
-                    Log.Info($"Utility Manager: Despawning {logStr}");
+                Log.Info($"Utility Manager: Despawning {logStr}");
 
-                    for (uint vehicleId = 0; vehicleId < vehicleManager.m_vehicles.m_size; ++vehicleId) {
+                for (uint vehicleId = 0; vehicleId < vehicleManager.m_vehicles.m_size; ++vehicleId) {
 
-                        if (!vehicleId.ToVehicle().IsValid())
-                            continue;
+                    if (!vehicleId.ToVehicle().IsValid())
+                        continue;
 
-                        if (filter.HasValue && (vehicleId.ToExtVehicleType() & filter) == 0)
-                            continue;
+                    if (filter.HasValue && (vehicleId.ToExtVehicleType() & filter) == 0)
+                        continue;
 
-                        vehicleManager.ReleaseVehicle((ushort)vehicleId);
-                    }
-
-                    TrafficMeasurementManager.Instance.ResetTrafficStats();
+                    vehicleManager.ReleaseVehicle((ushort)vehicleId);
                 }
-                catch (Exception ex) {
-                    Log.Error($"Error occured while trying to despawn vehicles: {ex}");
-                }
+
+                TrafficMeasurementManager.Instance.ResetTrafficStats();
+            }
+            catch (Exception ex) {
+                ex.LogException();
             }
         }
 
