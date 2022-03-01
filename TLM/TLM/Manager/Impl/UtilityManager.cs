@@ -28,10 +28,12 @@ namespace TrafficManager.Manager.Impl {
 
             for (uint vehicleId = 0; vehicleId < manager.m_vehicles.m_size; ++vehicleId) {
 
-                if (!vehicleId.ToVehicle().IsValid())
+                ref Vehicle vehicle = ref vehicleId.ToVehicle();
+
+                if (!vehicle.IsValid())
                     continue;
 
-                if ((vehicleId.ToVehicle().ToExtVehicleType() & filter) == 0)
+                if ((vehicle.ToExtVehicleType() & filter) == 0)
                     continue;
 
                 count++;
@@ -53,10 +55,12 @@ namespace TrafficManager.Manager.Impl {
 
                 for (uint vehicleId = 0; vehicleId < vehicleManager.m_vehicles.m_size; ++vehicleId) {
 
-                    if (!vehicleId.ToVehicle().IsValid())
+                    ref Vehicle vehicle = ref vehicleId.ToVehicle();
+
+                    if (!vehicle.IsValid())
                         continue;
 
-                    if (filter.HasValue && (vehicleId.ToExtVehicleType() & filter) == 0)
+                    if (filter.HasValue && (vehicle.ToExtVehicleType() & filter) == 0)
                         continue;
 
                     vehicleManager.ReleaseVehicle((ushort)vehicleId);
