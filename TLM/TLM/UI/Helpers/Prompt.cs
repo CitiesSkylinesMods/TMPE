@@ -3,6 +3,7 @@ namespace TrafficManager.UI.Helpers {
     using ColossalFramework.UI;
     using CSUtil.Commons;
     using System;
+    using TrafficManager.Lifecycle;
     using UnityEngine.SceneManagement;
 
     /// <summary>
@@ -84,7 +85,7 @@ namespace TrafficManager.UI.Helpers {
             };
 
             try {
-                if (SceneManager.GetActiveScene().name == "Game") {
+                if (TMPELifecycle.InGameOrEditor()) {
                     Singleton<SimulationManager>.instance.m_ThreadingWrapper.QueueMainThread(prompt);
                 } else {
                     prompt();
@@ -115,7 +116,7 @@ namespace TrafficManager.UI.Helpers {
             };
 
             try {
-                if (SceneManager.GetActiveScene().name == "Game") {
+                if (TMPELifecycle.InGameOrEditor()) {
                     Singleton<SimulationManager>.instance.m_ThreadingWrapper.QueueMainThread(prompt);
                 } else {
                     prompt();
