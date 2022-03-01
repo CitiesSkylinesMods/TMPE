@@ -386,19 +386,15 @@ namespace TrafficManager.UI.MainMenu {
 
         private void ClickGoToVehicle(UIComponent component, UIMouseEventParameter eventParam) {
             ushort vehicleId = Convert.ToUInt16(_goToField.text);
-            Vehicle vehicle = Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId];
-            if ((vehicle.m_flags & Vehicle.Flags.Created) != 0) {
+            ref Vehicle vehicle = ref vehicleId.ToVehicle();
+            if (vehicle.IsCreated()) {
                 CSUtil.CameraControl.CameraController.Instance.GoToVehicle(vehicleId);
             }
         }
 
-        private void ClickGoToParkedVehicle(UIComponent component,
-                                            UIMouseEventParameter eventParam) {
+        private void ClickGoToParkedVehicle(UIComponent component, UIMouseEventParameter eventParam) {
             ushort parkedVehicleId = Convert.ToUInt16(_goToField.text);
-            VehicleParked parkedVehicle =
-                Singleton<VehicleManager>.instance.m_parkedVehicles.m_buffer[parkedVehicleId];
-
-            if ((parkedVehicle.m_flags & (ushort)VehicleParked.Flags.Created) != 0) {
+            if (parkedVehicleId.ToParkedVehicle().IsCreated()) {
                 CSUtil.CameraControl.CameraController.Instance.GoToParkedVehicle(parkedVehicleId);
             }
         }
@@ -432,9 +428,8 @@ namespace TrafficManager.UI.MainMenu {
         private void ClickGoToCitizenInstance(UIComponent component,
                                               UIMouseEventParameter eventParam) {
             ushort citizenInstanceId = Convert.ToUInt16(_goToField.text);
-            CitizenInstance citizenInstance =
-                Singleton<CitizenManager>.instance.m_instances.m_buffer[citizenInstanceId];
-            if ((citizenInstance.m_flags & CitizenInstance.Flags.Created) != 0) {
+            ref CitizenInstance citizenInstance = ref citizenInstanceId.ToCitizenInstance();
+            if (citizenInstance.IsCreated()) {
                 CSUtil.CameraControl.CameraController.Instance.GoToCitizenInstance(
                     citizenInstanceId);
             }

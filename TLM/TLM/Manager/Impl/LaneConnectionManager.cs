@@ -14,6 +14,7 @@ namespace TrafficManager.Manager.Impl {
     using static TrafficManager.Util.Shortcuts;
     using TrafficManager.Util;
     using TrafficManager.Util.Extensions;
+    using TrafficManager.Lifecycle;
 
     public class LaneConnectionManager
         : AbstractGeometryObservingManager,
@@ -65,8 +66,7 @@ namespace TrafficManager.Manager.Impl {
         /// </summary>
         /// <returns>true if heading toward and start node.</returns>
         private bool IsHeadingTowardsStartNode(uint sourceLaneId) {
-            NetLane[] laneBuffer = NetManager.instance.m_lanes.m_buffer;
-            ushort segmentId = laneBuffer[sourceLaneId].m_segment;
+            ushort segmentId = sourceLaneId.ToLane().m_segment;
             ref NetSegment segment = ref segmentId.ToSegment();
             uint laneId = segment.m_lanes;
             bool inverted = (segment.m_flags & NetSegment.Flags.Invert) != 0;
@@ -75,7 +75,7 @@ namespace TrafficManager.Manager.Impl {
                 if (laneId == sourceLaneId) {
                     return (laneInfo.m_finalDirection == NetInfo.Direction.Forward) ^ !inverted;
                 }
-                laneId = laneBuffer[laneId].m_nextLane;
+                laneId = laneId.ToLane().m_nextLane;
             }
             throw new Exception($"Unreachable code. sourceLaneId:{sourceLaneId}, segmentId:{segmentId} ");
         }
@@ -153,13 +153,13 @@ namespace TrafficManager.Manager.Impl {
 
                 if (targetLaneIds != null) {
                     foreach (uint targetLaneId in targetLaneIds) {
-                        if (netManager.m_lanes.m_buffer[targetLaneId].m_segment == segmentId) {
+                        if (targetLaneId.ToLane().m_segment == segmentId) {
                             return true;
                         }
                     }
                 }
 
-                sourceLaneId = netManager.m_lanes.m_buffer[sourceLaneId].m_nextLane;
+                sourceLaneId = sourceLaneId.ToLane().m_nextLane;
             }
 
             return false;
@@ -232,8 +232,8 @@ namespace TrafficManager.Manager.Impl {
             }
 
             NetManager netManager = Singleton<NetManager>.instance;
-            ushort segmentId1 = netManager.m_lanes.m_buffer[laneId1].m_segment;
-            ushort segmentId2 = netManager.m_lanes.m_buffer[laneId2].m_segment;
+            ushort segmentId1 = laneId1.ToLane().m_segment;
+            ushort segmentId2 = laneId2.ToLane().m_segment;
 
             GetCommonNodeId(
                 laneId1,
@@ -248,7 +248,7 @@ namespace TrafficManager.Manager.Impl {
             ref NetNode commonNode = ref commonNodeId.ToNode();
             RoutingManager.Instance.RequestNodeRecalculation(ref commonNode);
 
-            if (OptionsManager.Instance.MayPublishSegmentChanges()) {
+            if (TMPELifecycle.Instance.MayPublishSegmentChanges()) {
                 ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
                 extSegmentManager.PublishSegmentChanges(segmentId1);
                 extSegmentManager.PublishSegmentChanges(segmentId2);
@@ -311,7 +311,7 @@ namespace TrafficManager.Manager.Impl {
             if (recalcAndPublish) {
                 RoutingManager.Instance.RequestRecalculation(segmentId);
 
-                if (OptionsManager.Instance.MayPublishSegmentChanges()) {
+                if (TMPELifecycle.Instance.MayPublishSegmentChanges()) {
                     ExtSegmentManager.Instance.PublishSegmentChanges(segmentId);
                 }
             }
@@ -353,7 +353,7 @@ namespace TrafficManager.Manager.Impl {
                             if ((Flags.laneConnections[otherLaneId][0] != null && Flags.laneConnections[otherLaneId][0].Length == 1 && Flags.laneConnections[otherLaneId][0][0] == laneId && Flags.laneConnections[otherLaneId][1] == null) ||
                                     Flags.laneConnections[otherLaneId][1] != null && Flags.laneConnections[otherLaneId][1].Length == 1 && Flags.laneConnections[otherLaneId][1][0] == laneId && Flags.laneConnections[otherLaneId][0] == null) {
 
-                                    ushort otherSegmentId = netManager.m_lanes.m_buffer[otherLaneId].m_segment;
+                                    ushort otherSegmentId = otherLaneId.ToLane().m_segment;
                                     UnsubscribeFromSegmentGeometry(otherSegmentId);
                             }
                     }
@@ -365,7 +365,7 @@ namespace TrafficManager.Manager.Impl {
                 ushort segment = laneId.ToLane().m_segment;
                 RoutingManager.Instance.RequestRecalculation(segment);
 
-                if (OptionsManager.Instance.MayPublishSegmentChanges()) {
+                if (TMPELifecycle.Instance.MayPublishSegmentChanges()) {
                     ExtSegmentManager.Instance.PublishSegmentChanges(segment);
                 }
             }
@@ -414,8 +414,8 @@ namespace TrafficManager.Manager.Impl {
 
             NetManager netManager = Singleton<NetManager>.instance;
 
-            ushort sourceSegmentId = netManager.m_lanes.m_buffer[sourceLaneId].m_segment;
-            ushort targetSegmentId = netManager.m_lanes.m_buffer[targetLaneId].m_segment;
+            ushort sourceSegmentId = sourceLaneId.ToLane().m_segment;
+            ushort targetSegmentId = targetLaneId.ToLane().m_segment;
 
             if (sourceSegmentId == targetSegmentId) {
                 JunctionRestrictionsManager.Instance.SetUturnAllowed(
@@ -427,7 +427,7 @@ namespace TrafficManager.Manager.Impl {
             RoutingManager.Instance.RequestRecalculation(sourceSegmentId, false);
             RoutingManager.Instance.RequestRecalculation(targetSegmentId, false);
 
-            if (OptionsManager.Instance.MayPublishSegmentChanges()) {
+            if (TMPELifecycle.Instance.MayPublishSegmentChanges()) {
                 ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
                 extSegmentManager.PublishSegmentChanges(sourceSegmentId);
                 extSegmentManager.PublishSegmentChanges(targetSegmentId);
@@ -464,9 +464,8 @@ namespace TrafficManager.Manager.Impl {
                                       bool startNode1,
                                       out ushort commonNodeId,
                                       out bool startNode2) {
-            NetManager netManager = Singleton<NetManager>.instance;
-            ref NetSegment netSegment1 = ref netManager.m_lanes.m_buffer[laneId1].m_segment.ToSegment();
-            ref NetSegment netSegment2 = ref netManager.m_lanes.m_buffer[laneId2].m_segment.ToSegment();
+            ref NetSegment netSegment1 = ref laneId1.ToLane().m_segment.ToSegment();
+            ref NetSegment netSegment2 = ref laneId2.ToLane().m_segment.ToSegment();
 
             ushort nodeId2Start = netSegment2.m_startNode;
             ushort nodeId2End = netSegment2.m_endNode;
@@ -491,7 +490,6 @@ namespace TrafficManager.Manager.Impl {
                                       out bool outgoing,
                                       out bool incoming,
                                       out Vector3? pos) {
-            NetManager netManager = Singleton<NetManager>.instance;
             ref NetSegment netSegment = ref segmentId.ToSegment();
 
             pos = null;
@@ -509,7 +507,9 @@ namespace TrafficManager.Manager.Impl {
                 }
             }
 
-            if ((netManager.m_lanes.m_buffer[(uint)laneId].m_flags &
+            ref NetLane netLane = ref ((uint)laneId).ToLane();
+
+            if ((netLane.m_flags &
                  ((ushort)NetLane.Flags.Created | (ushort)NetLane.Flags.Deleted)) !=
                 (ushort)NetLane.Flags.Created) {
                 return false;
@@ -536,7 +536,7 @@ namespace TrafficManager.Manager.Impl {
                     incoming = true;
                 }
 
-                pos = NetManager.instance.m_lanes.m_buffer[(uint)laneId].m_bezier.a;
+                pos = netLane.m_bezier.a;
             } else {
                 if ((laneDir & NetInfo.Direction.Forward) != NetInfo.Direction.None) {
                     outgoing = true;
@@ -546,7 +546,7 @@ namespace TrafficManager.Manager.Impl {
                     incoming = true;
                 }
 
-                pos = NetManager.instance.m_lanes.m_buffer[(uint)laneId].m_bezier.d;
+                pos = netLane.m_bezier.d;
             }
 
             return true;
@@ -563,7 +563,7 @@ namespace TrafficManager.Manager.Impl {
                     return laneId;
                 }
 
-                laneId = NetManager.instance.m_lanes.m_buffer[laneId].m_nextLane;
+                laneId = laneId.ToLane().m_nextLane;
             }
 
             return null;
@@ -616,8 +616,7 @@ namespace TrafficManager.Manager.Impl {
             }
 
             var arrows = LaneArrows.None;
-            NetManager netManager = Singleton<NetManager>.instance;
-            ushort segmentId = netManager.m_lanes.m_buffer[laneId].m_segment;
+            ushort segmentId = laneId.ToLane().m_segment;
 
             if (segmentId == 0) {
                 if (logLaneConnections) {
@@ -732,7 +731,7 @@ namespace TrafficManager.Manager.Impl {
                             break;
                         }
 
-                        curLaneId = netManager.m_lanes.m_buffer[curLaneId].m_nextLane;
+                        curLaneId = curLaneId.ToLane().m_nextLane;
                     }
 
                     if (logLaneConnections) {

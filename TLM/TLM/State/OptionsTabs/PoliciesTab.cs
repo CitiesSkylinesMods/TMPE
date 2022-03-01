@@ -8,7 +8,7 @@ namespace TrafficManager.State {
     using TrafficManager.UI;
     using static TrafficManager.Util.Shortcuts;
 
-    public static class OptionsVehicleRestrictionsTab {
+    public static class PoliciesTab {
         private static UICheckBox _relaxedBussesToggle;
         private static UICheckBox _allRelaxedToggle;
         private static UICheckBox _allowEnterBlockedJunctionsToggle;
@@ -78,8 +78,8 @@ namespace TrafficManager.State {
                       Translation.Options.Get("VR.Checkbox:Also apply to left/right turns between one-way streets"),
                       Options.allowFarTurnOnRed,
                       OnAllowFarTurnOnRedChanged) as UICheckBox;
-            Options.Indent(_allowFarTurnOnRedToggle);
-            Options.AllowTextWrap(_allowFarTurnOnRedToggle, indented: true);
+            CheckboxOption.ApplyIndent(_allowFarTurnOnRedToggle);
+            CheckboxOption.ApplyTextWrap(_allowFarTurnOnRedToggle, indented: true);
             _allowLaneChangesWhileGoingStraightToggle
                 = atJunctionsGroup.AddCheckbox(
                       Translation.Options.Get("VR.Checkbox:Vehicles going straight may change lanes at junctions"),
@@ -90,7 +90,7 @@ namespace TrafficManager.State {
                       Translation.Options.Get("VR.Checkbox:Vehicles follow priority rules at junctions with timedTL"),
                       Options.trafficLightPriorityRules,
                       OnTrafficLightPriorityRulesChanged) as UICheckBox;
-            Options.AllowTextWrap(_trafficLightPriorityRulesToggle);
+            CheckboxOption.ApplyTextWrap(_trafficLightPriorityRulesToggle);
             _automaticallyAddTrafficLightsIfApplicableToggle
                 = atJunctionsGroup.AddCheckbox(
                       Translation.Options.Get("VR.Checkbox:Automatically add traffic lights if applicable"),
@@ -355,12 +355,12 @@ namespace TrafficManager.State {
             Options.RebuildMenu();
             Options.prioritySignsEnabled = newValue;
 
-            if (OptionsMaintenanceTab.EnablePrioritySignsToggle != null) {
-                OptionsMaintenanceTab.EnablePrioritySignsToggle.isChecked = newValue;
+            if (MaintenanceTab.EnablePrioritySignsToggle != null) {
+                MaintenanceTab.EnablePrioritySignsToggle.isChecked = newValue;
             }
 
             if (!newValue) {
-                OptionsOverlaysTab.SetPrioritySignsOverlay(false);
+                OverlaysTab.SetPrioritySignsOverlay(false);
             }
         }
 
@@ -368,12 +368,12 @@ namespace TrafficManager.State {
             Options.RebuildMenu();
             Options.timedLightsEnabled = newValue;
 
-            if (OptionsMaintenanceTab.EnableTimedLightsToggle != null) {
-                OptionsMaintenanceTab.EnableTimedLightsToggle.isChecked = newValue;
+            if (MaintenanceTab.EnableTimedLightsToggle != null) {
+                MaintenanceTab.EnableTimedLightsToggle.isChecked = newValue;
             }
 
             if (!newValue) {
-                OptionsOverlaysTab.SetTimedLightsOverlay(false);
+                OverlaysTab.SetTimedLightsOverlay(false);
             }
         }
 

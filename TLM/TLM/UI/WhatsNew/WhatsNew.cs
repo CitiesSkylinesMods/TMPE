@@ -10,22 +10,36 @@ namespace TrafficManager.UI.WhatsNew {
     using State;
 
     public class WhatsNew {
+        // bump and update what's new changelogs when new features added
+        public static readonly Version CurrentVersion = new Version(11,6,5,0);
+
         private const string WHATS_NEW_FILE = "whats_new.txt";
         private const string RESOURCES_PREFIX = "TrafficManager.Resources.";
 
-        // bump and update what's new changelogs when new features added
-        internal static readonly Version CurrentVersion = new Version(11,6,4,0);
-
-        internal bool Shown => CurrentVersion == GlobalConfig.Instance.Main.LastWhatsNewPanelVersion;
-        public List<ChangelogEntry> Changelogs { get; private set; }
-
         public WhatsNew() {
-            LoadChangelog();
+            LoadChangelogs();
         }
+
+        public static Version PreviouslySeenVersion {
+            get => GlobalConfig.Instance.Main.LastWhatsNewPanelVersion;
+            set {
+                if (value > GlobalConfig.Instance.Main.LastWhatsNewPanelVersion) {
+                    Log.Info($"What's New: LastWhatsNewPanelVersion = {value}");
+                    GlobalConfig.Instance.Main.LastWhatsNewPanelVersion = value;
+                    GlobalConfig.WriteConfig();
+                }
+            }
+        }
+
+        public bool Shown => PreviouslySeenVersion >= CurrentVersion;
+
+        public List<Changelog> Changelogs { get; private set; }
 
         public static void OpenModal() {
             UIView uiView = UIView.GetAView();
             if (uiView) {
+                MarkAsShown();
+
                 WhatsNewPanel panel = uiView.AddUIComponent(typeof(WhatsNewPanel)) as WhatsNewPanel;
                 if (panel) {
                     Log.Info("Opened What's New panel!");
@@ -40,14 +54,12 @@ namespace TrafficManager.UI.WhatsNew {
             }
         }
 
-        public void MarkAsShown() {
+        public static void MarkAsShown() {
             Log.Info($"What's New - mark as shown. Version {CurrentVersion}");
-            GlobalConfig.Instance.Main.LastWhatsNewPanelVersion = CurrentVersion;
-            GlobalConfig.WriteConfig();
+            PreviouslySeenVersion = CurrentVersion;
         }
 
-
-        private void LoadChangelog() {
+        private void LoadChangelogs() {
             Log.Info("Loading What's New changelogs...");
             string[] lines;
             using (Stream st = Assembly.GetExecutingAssembly()
@@ -57,42 +69,47 @@ namespace TrafficManager.UI.WhatsNew {
                     lines = sr.ReadToEnd().Split(new[] { "\n", "\r\n" }, StringSplitOptions.None);
                 }
 
-                Changelogs = ChangelogEntry.ParseChangelogs(lines);
+                Changelogs = ParseChangelogs(lines);
             }
             Log.Info($"Loaded {Changelogs.Count} What's New changelogs");
         }
-    }
 
-    public class ChangelogEntry {
-        public Version Version { get; private set; }
-        public bool Stable { get; private set; }
-        [CanBeNull]
-        public string Link { get; private set; }
-        [CanBeNull]
-        public string Released { get; private set; }
-        public ChangeEntry[] ChangeEntries { get; private set; }
-
-        public static List<ChangelogEntry> ParseChangelogs(string[] lines) {
-            List<ChangelogEntry> entries = new List<ChangelogEntry>();
+        /// <summary>
+        /// Parses the changelogs in <c>whats_new.txt</c>.
+        /// </summary>
+        /// <param name="lines">The contents of <c>whats_new.txt</c>.</param>
+        /// <returns>A list of <see cref="Changelog"/>.</returns>
+        /// <exception cref="FormatException">
+        /// Version blocks must contain only one <c>[Version]</c> tag
+        /// and must end with a <c>[/Version]</c> tag.
+        /// </exception>
+        /// <exception cref="IndexOutOfRangeException">
+        /// Ensure each version block ends with <c>[/Version]</c>.
+        /// </exception>
+        /// <remarks><seealso cref="https://github.com/CitiesSkylinesMods/TMPE/wiki/Changelogs#whats-new-panel"/> .</remarks>
+        private static List<Changelog> ParseChangelogs(string[] lines) {
+            var changelogs = new List<Changelog>();
             int i = 0;
-            var keywordStrings = WhatsNewMarkup.MarkupKeywordsString;
+
             while (i < lines.Length) {
                 string line = lines[i];
 
-                if (TryParseKeyword(line, out MarkupKeyword lineKeyword) && lineKeyword == MarkupKeyword.VersionStart) {
-                    ChangelogEntry changelog = new ChangelogEntry();
-                    // read version
-                    changelog.Version = new Version(lines[i++].Substring(keywordStrings[MarkupKeyword.VersionStart].Length).Trim());
+                if (TryParseKeyword(line, out MarkupKeyword lineKeyword, out string text)
+                    && lineKeyword == MarkupKeyword.VersionStart) {
 
-                    //get next line keyword
-                    TryParseKeyword(lines[i], out lineKeyword);
-                    // parse to the end of version section
-                    List<ChangeEntry> changeEntries = new List<ChangeEntry>();
+                    var changelog = new Changelog() {
+                        Version = new Version(text),
+                    };
+                    var items = new List<Changelog.Item>();
+
+                    // Parse contents of [Version]..[/Version] block
+                    TryParseKeyword(lines[++i], out lineKeyword, out text);
                     while (lineKeyword != MarkupKeyword.VersionEnd) {
-                        string text = lines[i].Substring(keywordStrings[lineKeyword].Length).Trim();
-                        Log._Debug($"Keyword {lineKeyword}, text: {text}");
+
+                        // Log._Debug($"Keyword {lineKeyword}, Text: {text}");
                         switch (lineKeyword) {
-                            // TODO: Should we also check for VersionStart keyword and throw an error if encountered? (a changelog block missing the [/Version])
+                            case MarkupKeyword.VersionStart:
+                                throw new FormatException($"whats_new.txt line {i}: Unexpected '[Version]' tag.");
                             case MarkupKeyword.Stable:
                                 changelog.Stable = true;
                                 break;
@@ -103,58 +120,77 @@ namespace TrafficManager.UI.WhatsNew {
                                 changelog.Released = text;
                                 break;
                             case MarkupKeyword.Unknown:
-                                //skip unknown entries
+                                // skip unknown entries
+                                Log.Warning($"whats_new.txt line {i}: Unrecognised entry '{line}'");
                                 break;
                             default:
-                                changeEntries.Add(
-                                    new ChangeEntry() {
+                                items.Add(
+                                    new Changelog.Item() {
                                         Keyword = lineKeyword,
-                                        Text = text
+                                        Text = text,
                                     });
                                 break;
                         }
 
-                        i++;
-                        TryParseKeyword(lines[i], out lineKeyword);
+                        TryParseKeyword(lines[++i], out lineKeyword, out text);
                     }
 
-                    changelog.ChangeEntries = changeEntries.ToArray();
-                    Array.Sort(changelog.ChangeEntries, ChangeEntry.KeywordComparer);
-                    entries.Add(changelog);
+                    changelog.Items = items.ToArray();
+                    Array.Sort(changelog.Items, Changelog.Item.KeywordComparer);
+                    changelogs.Add(changelog);
+
+                    // If user already seen this version, don't bother parsing remainder of file
+                    if (changelog.Version <= PreviouslySeenVersion) {
+                        break;
+                    }
                 }
 
                 i++;
             }
 
-            return entries;
+            return changelogs;
         }
 
-        private static bool TryParseKeyword(string line, out MarkupKeyword keyword) {
-            if (!string.IsNullOrEmpty(line)) {
-                if(line.StartsWith("[") &&
-                    WhatsNewMarkup.MarkupKeywords.TryGetValue(
-                        line.Substring(0, line.IndexOf("]") + 1),
-                        out keyword)) {
-                    return true;
-                }
-                Log.Warning($"Couldn't parse line \"{line}\"");
+        private static bool TryParseKeyword(string line, out MarkupKeyword keyword, out string text) {
+            if ((!string.IsNullOrEmpty(line)) && line.StartsWith("[")) {
+                int pos = line.IndexOf("]") + 1;
+                string tag = line.Substring(0, pos);
+
+                keyword = tag.ToKeyword();
+                text = line.Substring(pos).Trim();
+
+                return keyword != MarkupKeyword.Unknown;
             }
 
             keyword = MarkupKeyword.Unknown;
+            text = line;
             return false;
         }
+    }
 
-        public struct ChangeEntry {
+    /// <summary>
+    /// Represents the changelog for a release (ie. <c>[Version]..[/Version]</c> block).
+    /// </summary>
+    public class Changelog {
+        public Version Version { get; set; }
+        public bool Stable { get; set; }
+        [CanBeNull]
+        public string Link { get; set; }
+        [CanBeNull]
+        public string Released { get; set; }
+        public Item[] Items { get; set; }
+
+        public struct Item {
             public MarkupKeyword Keyword;
             public string Text;
 
-            private sealed class KeywordRelationalComparer : IComparer<ChangeEntry> {
-                public int Compare(ChangeEntry x, ChangeEntry y) {
+            public static IComparer<Item> KeywordComparer { get; } = new KeywordRelationalComparer();
+
+            private sealed class KeywordRelationalComparer : IComparer<Item> {
+                public int Compare(Item x, Item y) {
                     return x.Keyword.CompareTo(y.Keyword);
                 }
             }
-
-            public static IComparer<ChangeEntry> KeywordComparer { get; } = new KeywordRelationalComparer();
         }
     }
 }

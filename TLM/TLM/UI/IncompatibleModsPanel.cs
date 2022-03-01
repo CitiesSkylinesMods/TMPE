@@ -181,8 +181,7 @@ namespace TrafficManager.UI {
         ///
         /// <param name="value">The new value of the checkbox; <c>true</c> if checked, otherwise <c>false</c>.</param>
         private void RunModsCheckerOnStartup_eventCheckChanged(bool value) {
-            Log._Debug("Incompatible mods checker run on game launch changed to " + value);
-            OptionsGeneralTab.SetScanForKnownIncompatibleMods(value);
+            GeneralTab_CompatibilityGroup.ScanForKnownIncompatibleModsAtStartup.Value = value;            
         }
 
         /// <summary>

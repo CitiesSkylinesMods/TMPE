@@ -29,29 +29,194 @@ This changelog includes all versions and major variants of the mod going all the
 
 </details>
 
+#### TM:PE V11.6.5.0 TEST, 16/02/2022
+
+- [Meta] Due to targeted malware, we are unable to provide support if you have mods by `Chaos`/`Holy Water`/`drok`, even if those mods are currently malware-free #1391 (TM:PE Team)
+- [Meta] Compatible with Cities: Skylines v1.14.0-f9 #1387 (krzychu124)
+- [New] Overlays mod option to show default speed when overriding segment/lane speeds #1404 (aubergine18)
+- [New] Added API for external mods to query TM:PE mod options #1378 #1376 (aubergine18)
+- [Mod] Compatible: `Reversible Tram AI` full compatibility #1386 #1353 (sway2020)
+- [Mod] Compatible: `Supply Chain Coloring` workshop version only #1390 (aubergine18)
+- [Mod] Compatible: `Transfer Broker BETA` workshop version only #1390 (aubergine18)
+- [Mod] Incompatible: `TM:PE LABS` - discontinued (replaced by TM:PE TEST) #1390 (aubergine18)
+- [Mod] Incompatible: `Traffic Manager (Curated)` - unsupported clone #1390 (aubergine18)
+- [Mod] Incompatible: `TMPE:TrafficManager全部汉化` - unsupported clone #1390 (aubergine18)
+- [Fixed] `StackOverflowException` due to `What's New` panel autolayout #1393 #1314 (krzychu124)
+- [Fixed] Skip searching for best emergency lane for non-car vehicles #1408 (krzychu124)
+- [Updated] Speed Limits: Always use themed icons in segment/lane modes #1404 (aubergine18)
+- [Updated] Extend Harmony patch manager to allow manual patches #1386 #1361 (sway2020)
+- [Updated] Various code clean-up and micro optimisations #1413 #1407 #1406 #1401 #1400 #1399 #1398 #1397 #1396 (egi)
+- [Updated] Remove duplicate button clean-up code in lifecycle #1375 (aubergine18)
+- [Updated] Internal restructuring of mod options code #1403 #1369 #1370 #1371 #1373 #1374 (aubergine18)
+- [Updated] Translations for mod options, speed limits, traffic lights #1415 (krzychu124, freddy0419, Natchanok Kulphiwet, MamylaPuce, ipd, 田七不甜 TianQiBuTian, TwotoolusFLY_LSh.st, Never2333, 문주원 sky162178, MenschLennart, Chamëleon, John Deehe, Skazov, AlexofCA, CrankyAnt, Иван Соколов)
+- [Updated] Update assembly info metadata #1417 (krzychu124)
+- [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
+
+#### TM:PE V[11.6.4.8](https://github.com/CitiesSkylinesMods/TMPE/compare/11.6.4.7...11.6.4.8) STABLE, 10/02/2022
+
+- [Meta] TM:PE 11.6.4-hotfix-8
+- [Meta] Bugfix for vehicle spawning/delivery on restricted lanes
+- [Mod] Malware: We are treating all mods by Chaos/Holy Water (same person) as targeted malware #1389 #1388 (aubergine18)
+- [Fixed] Allow vehicles to use restricted lanes when spawning/delivering #1381 #1380 #494 #85 (krzychu124)
+- [Steam] [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
+
+#### TM:PE V11.6.4.8 TEST, 10/02/2022
+
+- [Meta] TM:PE 11.6.4-hotfix-8
+- [Meta] Bugfix for vehicle spawning/delivery on restricted lanes
+- [Mod] Malware: We are treating all mods by Chaos/Holy Water (same person) as targeted malware #1389 #1388 (aubergine18)
+- [Fixed] Allow vehicles to use restricted lanes when spawning/delivering #1381 #1380 #494 #85 (krzychu124)
+- [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
+
+#### TM:PE V[11.6.4.7](https://github.com/CitiesSkylinesMods/TMPE/compare/11.6.4.6...11.6.4.7) STABLE, 06/02/2022
+
+- [Meta] TM:PE 11.6.4-hotfix-7
+- [Meta] Bugfix for default speeds which affects speed limits tool, overlays, and roundabout curvature speed
+- [Fixed] Default netinfo speed should only inspect customisable lanes #1362 #1346 (aubergine18)
+- [Fixed] Fix `SPEED_TO_MPH` value in `ApiConstants.cs` #1364 #1363 #988 (aubergine18)
+- [Removed] Obsolete: `SPEED_TO_MPH` and `SPEED_TO_KMPH` in `Constants.cs` #1367 #1364 #1363 (aubergine18)
+- [Steam] [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
+
+#### TM:PE V11.6.4.7 TEST, 06/02/2022
+
+- [Meta] TM:PE 11.6.4-hotfix-7
+- [Meta] Bugfix for default speeds which affects speed limits tool, overlays, and roundabout curvature speed
+- [Fixed] Default netinfo speed should only inspect customisable lanes #1362 #1346 (aubergine18)
+- [Fixed] Fix `SPEED_TO_MPH` value in `ApiConstants.cs` #1364 #1363 #988 (aubergine18)
+- [Removed] Obsolete: `SPEED_TO_MPH` and `SPEED_TO_KMPH` in `Constants.cs` #1367 #1364 #1363 (aubergine18)
+- [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
+
+#### TM:PE V[11.6.4.6](https://github.com/CitiesSkylinesMods/TMPE/compare/11.6.4.5...11.6.4.6) STABLE, 05/02/2022
+
+- [Meta] TM:PE 11.6.4-hotfix-6
+- [Meta] Fixes some issues relating to CSUR and similar networks
+- [Mod] Incompatible: All versions of Cities Skylines Multiplayer (CSM) #1360 #1359 (aubergine18)
+- [Fixed] Missing lane connectors on CSUR and similar networks #1355 #1357 (krzychu124)
+- [Updated] Internal changes to `CheckboxOption` code #1301 #1299 #1279 (aubergine18)
+- [Steam] [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
+
+#### TM:PE V11.6.4.6 TEST, 05/02/2022
+
+- [Meta] TM:PE 11.6.4-hotfix-6
+- [Meta] Fixes some issues relating to CSUR and similar networks
+- [Mod] Incompatible: All versions of Cities Skylines Multiplayer (CSM) #1360 #1359 (aubergine18)
+- [Fixed] Missing lane connectors on CSUR and similar networks #1355 #1357 (krzychu124)
+- [Updated] Internal changes to `CheckboxOption` code #1301 #1299 #1279 (aubergine18)
+- [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
+
+#### TM:PE V[11.6.4.5](https://github.com/CitiesSkylinesMods/TMPE/compare/11.6.4.4...11.6.4.5) STABLE, 02/02/2022
+
+- [Meta] TM:PE 11.6.4-hotfix-5
+- [Meta] Updates to error checking/logging, and refine pathfinder edition checks
+- [Updated] Catch and log errors in savegame options save/load #1345 (aubergine18)
+- [Updated] Pathfinder edition check refinements #1347 (aubergine18)
+- [Updated] Reduce severity of some normal log messages #1348 #1350 (aubergine18)
+- [Updated] Add new `.Info()` panel to `Prompt` class #1347 (krzychu124)
+- [Steam] [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
+
+#### TM:PE V11.6.4.5 TEST, 02/02/2022
+
+- [Meta] TM:PE 11.6.4-hotfix-5
+- [Meta] Updates to error logging, and refine pathfinder edition checks
+- [Updated] Catch and log errors in savegame options save/load #1345 (aubergine18)
+- [Updated] Pathfinder edition check refinements #1347 (aubergine18)
+- [Updated] Reduce severity of some normal log messages #1348 #1350 (aubergine18)
+- [Updated] Add new `.Info()` panel to `Prompt` class #1347 (krzychu124)
+- [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
+
+#### TM:PE V[11.6.4.4](https://github.com/CitiesSkylinesMods/TMPE/compare/11.6.4.3...11.6.4.4) STABLE, 01/02/2022
+
+- [Meta] TM:PE 11.6.4-hotfix-4
+- [Meta] Bugfix release targeting aircraft pathfinding, and info views.
+- [New] Filtered despawn tools in Maintenance options tab #1341 #270 (aubergine18)
+- [New] Ability to despawn specific vehicle categories when pathfinder is updated #1343 #485 (aubergine18)
+- [Fixed] Aircraft stuck at taxiway junction #1338 #1329 (krzychu124)
+- [Fixed] Aircraft taking off from taxiways #1338 #1327 (krzychu124)
+- [Fixed] Unable to edit underground nodes in Traffic info view #1333 #1330 (aubergine18)
+- [Updated] TM:PE toolbar closes in non-applicable info views #1333 (aubergine18)
+- [Steam] [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
+
+#### TM:PE V11.6.4.4 TEST, 01/02/2022
+
+- [Meta] TM:PE 11.6.4-hotfix-4
+- [Meta] Bugfix release targeting aircraft pathfinding, and info views.
+- [New] Filtered despawn tools in Maintenance options tab #1341 #270 (aubergine18)
+- [New] Ability to despawn specific vehicle categories when pathfinder is updated #1343 #485 (aubergine18)
+- [Fixed] Aircraft stuck at taxiway junction #1338 #1329 (krzychu124)
+- [Fixed] Aircraft taking off from taxiways #1338 #1327 (krzychu124)
+- [Fixed] Unable to edit underground nodes in Traffic info view #1333 #1330 (aubergine18)
+- [Updated] TM:PE toolbar closes in non-applicable info views #1333 (aubergine18)
+- [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
+
+#### TM:PE V[11.6.4.3](https://github.com/CitiesSkylinesMods/TMPE/compare/11.6.4.2...11.6.4.3) STABLE, 29/01/2022
+
+- [Meta] TM:PE 11.6.4-hotfix-3
+- [Meta] This fixes rare issue on some PCs that are limited to single CPU core
+- [Fixed] Incorrect minimal number of path-find threads #1331 (krzychu124)
+- [Updated] Code clean-up: Refactor `OptionsManager.cs` #1321 (kvakvs, aubergine18)
+- [Updated] Show full version in UI and log file #1335 (aubergine18)
+- [Removed] Temporary: Don't auto-show What's New on TM:PE menu button click #1336 #1314 (krzychu124, aubergine18)
+- [Steam] [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
+
+#### TM:PE V11.6.4.3 TEST, 29/01/2022
+
+- [Meta] TM:PE 11.6.4-hotfix-3
+- [Meta] This fixes rare issue on some PCs that are limited to single CPU core
+- [Fixed] Incorrect minimal number of path-find threads #1331 (krzychu124)
+- [Updated] Code clean-up: Refactor `OptionsManager.cs` #1321 (kvakvs, aubergine18)
+- [Updated] Show full version in UI and log file #1335 (aubergine18)
+- [Removed] Temporary: Don't auto-show What's New on TM:PE menu button click #1336 #1314 (krzychu124, aubergine18)
+- [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
+
+#### TM:PE V[11.6.4.2](https://github.com/CitiesSkylinesMods/TMPE/compare/11.6.4.1...11.6.4.2) STABLE, 27/01/2022
+
+- [Meta] TM:PE 11.6.4-hotfix-2
+- [Fixed] Speed limit icons not appearing on metro tracks #1323 #1322 (krzychu124)
+- [Steam] [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
+
+#### TM:PE V11.6.4.2 TEST, 27/01/2022
+
+- [Meta] TM:PE 11.6.4-hotfix-2
+- [Fixed] Speed limit icons not appearing on metro tracks #1323 #1322 (krzychu124)
+- [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
+
+#### TM:PE V[11.6.4.1](https://github.com/CitiesSkylinesMods/TMPE/compare/11.6.4...11.6.4.1) STABLE, 26/01/2022
+
+- [Meta] TM:PE 11.6.4-hotfix-1
+- [Updated] What's New panel updated to avoid recursive update issue #1319 #1317 #1314 (aubergine18)
+- [Fixed] Speed limit icons not appearing on rail tracks #1318 (krzychu124)
+- [Steam] [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
+
+#### TM:PE V11.6.4.1 TEST, 26/01/2022
+
+- [Meta] TM:PE 11.6.4-hotfix-1
+- [Updated] What's New panel updated to avoid recursive update issue #1319 #1317 #1314 (aubergine18)
+- [Fixed] Speed limit icons not appearing on rail tracks #1318 (krzychu124)
+- [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
+
 #### TM:PE V[11.6.4.0](https://github.com/CitiesSkylinesMods/TMPE/compare/11.6.3-test...11.6.4) STABLE, 25/01/2022
 
-* [New] TM:PE 11.6 branch released as STABLE - huge thanks to our beta testers!
-* [Mod] Fixed: `Move It` traffic settings not copy/pasted in-game #1303 #1300 (krzychu124)
-* [Mod] Fixed: `Node Controller Renewal` silent fail place intersection #1308 #1307 (krzychu124)
-* [Mod] Fixed: `Intersection Marking Tool` silent fail place intersection #1308 #1307 (krzychu124)
-* [Updated] Compatibility update for Airports DLC #1230 (krzychu124)
-* [Updated] Reduce logging from `AssetDataExtension` in release builds #1296 #1295 (aubergine18)
-* [Updated] Translations for multiple languages #1304 (Chamëleon, MenschLennart, John Deehe, Skazov, AlexofCA, CrankyAnt, Иван Соколов, AduitSSH, John Lok Ho, DNSE, shg166, GiorgioHerbie, footbool, krzychu124, aubergine18, Dmytro Lytovchenko, Fizzy_LaFizz, Vladimír Krajč, alvaroer, Mahmoud Al Gammal, ipd, 田七不甜, vitalii201, 許景翔, Mehmet Ömer Tüzer, vicugna-pacos, kianzarrin, Mbyron26, Headspike, lennier3, kevinlin18, Ikki_di_Phoenix)
-* [Updated] Reorganise General options tab #1306 #1262 (aubergine18)
-* [Updated] Improved compatibility checks, inhibit `Resume` if problems detected #1310 #1309 #699 #697 (aubergine18)
+- [Meta] TM:PE 11.6 branch released as STABLE - huge thanks to our beta testers!
+- [Mod] Fixed: `Move It` traffic settings not copy/pasted in-game #1303 #1300 (krzychu124)
+- [Mod] Fixed: `Node Controller Renewal` silent fail place intersection #1308 #1307 (krzychu124)
+- [Mod] Fixed: `Intersection Marking Tool` silent fail place intersection #1308 #1307 (krzychu124)
+- [Updated] Compatibility update for Airports DLC #1230 (krzychu124)
+- [Updated] Reduce logging from `AssetDataExtension` in release builds #1296 #1295 (aubergine18)
+- [Updated] Translations for multiple languages #1304 (Chamëleon, MenschLennart, John Deehe, Skazov, AlexofCA, CrankyAnt, Иван Соколов, AduitSSH, John Lok Ho, DNSE, shg166, GiorgioHerbie, footbool, krzychu124, aubergine18, Dmytro Lytovchenko, Fizzy_LaFizz, Vladimír Krajč, alvaroer, Mahmoud Al Gammal, ipd, 田七不甜, vitalii201, 許景翔, Mehmet Ömer Tüzer, vicugna-pacos, kianzarrin, Mbyron26, Headspike, lennier3, kevinlin18, Ikki_di_Phoenix)
+- [Updated] Reorganise General options tab #1306 #1262 (aubergine18)
+- [Updated] Improved compatibility checks, inhibit `Resume` if problems detected #1310 #1309 #699 #697 (aubergine18)
 - [Steam] [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
 
 #### TM:PE V11.6.4.0 TEST, 25/01/2022
 
-* [Mod] Fixed: `Move It` traffic settings not copy/pasted in-game #1303 #1300 (krzychu124)
-* [Mod] Fixed: `Node Controller Renewal` silent fail place intersection #1308 #1307 (krzychu124)
-* [Mod] Fixed: `Intersection Marking Tool` silent fail place intersection #1308 #1307 (krzychu124)
-* [Updated] Compatibility update for Airports DLC #1230 (krzychu124)
-* [Updated] Reduce logging from `AssetDataExtension` in release builds #1296 #1295 (aubergine18)
-* [Updated] Translations for multiple languages #1304 (Chamëleon, MenschLennart, John Deehe, Skazov, AlexofCA, CrankyAnt, Иван Соколов, AduitSSH, John Lok Ho, DNSE, shg166, GiorgioHerbie, footbool, krzychu124, aubergine18, Dmytro Lytovchenko, Fizzy_LaFizz, Vladimír Krajč, alvaroer, Mahmoud Al Gammal, ipd, 田七不甜, vitalii201, 許景翔, Mehmet Ömer Tüzer, vicugna-pacos, kianzarrin, Mbyron26, Headspike, lennier3, kevinlin18, Ikki_di_Phoenix)
-* [Updated] Reorganise General options tab #1306 #1262 (aubergine18)
-* [Updated] Improved compatibility checks, inhibit `Resume` if problems detected #1310 #1309 #699 #697 (aubergine18)
+- [Mod] Fixed: `Move It` traffic settings not copy/pasted in-game #1303 #1300 (krzychu124)
+- [Mod] Fixed: `Node Controller Renewal` silent fail place intersection #1308 #1307 (krzychu124)
+- [Mod] Fixed: `Intersection Marking Tool` silent fail place intersection #1308 #1307 (krzychu124)
+- [Updated] Compatibility update for Airports DLC #1230 (krzychu124)
+- [Updated] Reduce logging from `AssetDataExtension` in release builds #1296 #1295 (aubergine18)
+- [Updated] Translations for multiple languages #1304 (Chamëleon, MenschLennart, John Deehe, Skazov, AlexofCA, CrankyAnt, Иван Соколов, AduitSSH, John Lok Ho, DNSE, shg166, GiorgioHerbie, footbool, krzychu124, aubergine18, Dmytro Lytovchenko, Fizzy_LaFizz, Vladimír Krajč, alvaroer, Mahmoud Al Gammal, ipd, 田七不甜, vitalii201, 許景翔, Mehmet Ömer Tüzer, vicugna-pacos, kianzarrin, Mbyron26, Headspike, lennier3, kevinlin18, Ikki_di_Phoenix)
+- [Updated] Reorganise General options tab #1306 #1262 (aubergine18)
+- [Updated] Improved compatibility checks, inhibit `Resume` if problems detected #1310 #1309 #699 #697 (aubergine18)
 - [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
 
 #### TM:PE V[11.6.3.0](https://github.com/CitiesSkylinesMods/TMPE/compare/11.6.2-test...11.6.3-test) TEST, 19/01/2022
@@ -653,8 +818,8 @@ This changelog includes all versions and major variants of the mod going all the
 
 #### C:SL 1.12.2-f3 ("Modern City Center" and "Downtown Radio"), 07/11/2019
 
-* [New] [Modern City Center](https://skylines.paradoxwikis.com/Modern_City_Center) DLC
-* [New] [Downtown Radio](https://skylines.paradoxwikis.com/Downtown_Radio) DLC
+- [New] [Modern City Center](https://skylines.paradoxwikis.com/Modern_City_Center) DLC
+- [New] [Downtown Radio](https://skylines.paradoxwikis.com/Downtown_Radio) DLC
 
 #### TM:PE V11 ALPHA 11.0-alpha8, 04/10/2019
 
@@ -838,11 +1003,11 @@ This changelog includes all versions and major variants of the mod going all the
 - [Updated] Turn-on-red can now be toggled for unpreferred (far-side) turns between one-ways
 - [Updated] Train behaviour at shunts: Trains now prefer to stay on their track (#230)
 - [Updated] Parking AI: Improved public transport (PT) usage patterns, mixed car/PT paths are now possible (#218)
-- [Fixed] and optimized lane selection for U-turns and at dead ends (#101)
+- [Fixed] and optimized lane selection for U-turns and at dead ends (#233 #101 #85)
 - [Fixed] Parking AI: Tourist cars despawn because they assume they are at an outside connection (#218)
 - [Fixed] Parking AI: Return path calculation did not accept beautification segments (#218)
 - [Fixed] Parking AI: Cars/Citizens waiting for a path might jump around (#218)
-- [Fixed] Vanilla lane randomization does not work as intended at highway transitions (#112)
+- [Fixed] Vanilla lane randomization does not work as intended at highway transitions (#233 #112)
 - [Fixed] Vehicles change lanes at tollbooths (#225)
 - [Fixed] Path-finding: Array index is out of range due to a race condition (#221)
 - [Fixed] Citizen not found errors when using walking tours (#219)
@@ -856,11 +1021,11 @@ This changelog includes all versions and major variants of the mod going all the
 - [New] Turn-on-red can now be toggled for unpreferred (far-side) turns between one-ways (#121)
 - [Updated] Train behaviour at shunts: Trains now prefer to stay on their track (#230)
 - [Updated] Parking AI - Improved public transport (PT) usage patterns, mixed car/PT paths are now possible  (#218)
-- [Fixed] Lane selection for U-turns and at dead ends (also optimised) (#101)
+- [Fixed] Lane selection for U-turns and at dead ends (also optimised) (#233 #101 #85)
 - [Fixed] Parking AI - Tourist cars despawn because they assume they are at an outside connection (#218)
 - [Fixed] Parking AI - Return path calculation did not accept beautification segments (#218)
 - [Fixed] Parking AI - Cars/Citizens waiting for a path might jump around (#218)
-- [Fixed] Vanilla lane randomization does not work as intended at highway transitions (#112)
+- [Fixed] Vanilla lane randomization does not work as intended at highway transitions (#233 #112)
 - [Fixed] Vehicles change lanes at tollbooths (#225)
 - [Fixed] Path-finding: Array index is out of range due to a race condition (#221)
 - [Fixed] Citizen not found errors when using walking tours (#219)

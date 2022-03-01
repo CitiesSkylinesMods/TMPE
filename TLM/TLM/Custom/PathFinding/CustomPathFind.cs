@@ -558,6 +558,7 @@ namespace TrafficManager.Custom.PathFinding {
                     }
 
                     ref NetSegment candidateItemPositionSegment = ref candidateItem.Position.m_segment.ToSegment();
+                    ref NetLane candidateItemNetLane = ref candidateItem.LaneId.ToLane();
 
                     ushort startNodeId = candidateItemPositionSegment.m_startNode;
                     ref NetNode startNode = ref startNodeId.ToNode();
@@ -588,7 +589,7 @@ namespace TrafficManager.Custom.PathFinding {
 #endif
                             candidateItem,
                             ref candidateItemPositionSegment,
-                            ref netManager.m_lanes.m_buffer[candidateItem.LaneId],
+                            ref candidateItemNetLane,
                             endNodeId,
                             ref endNode,
                             255,
@@ -596,7 +597,7 @@ namespace TrafficManager.Custom.PathFinding {
                     }
 
                     int numIter = 0;
-                    ushort specialNodeId = netManager.m_lanes.m_buffer[candidateItem.LaneId].m_nodes;
+                    ushort specialNodeId = candidateItemNetLane.m_nodes;
 
                     if (specialNodeId == 0) {
                         continue;
@@ -639,7 +640,7 @@ namespace TrafficManager.Custom.PathFinding {
 #endif
                                 candidateItem,
                                 ref candidateItemPositionSegment,
-                                ref netManager.m_lanes.m_buffer[candidateItem.LaneId],
+                                ref candidateItemNetLane,
                                 specialNodeId,
                                 ref specialNode,
                                 laneOffset,
@@ -1167,7 +1168,7 @@ namespace TrafficManager.Custom.PathFinding {
                                 ref nextNode,
                                 leftLaneIndex,
                                 leftLaneId,
-                                ref netManager.m_lanes.m_buffer[leftLaneId],
+                                ref leftLaneId.ToLane(),
                                 connectOffset,
                                 connectOffset);
                         }
@@ -1204,7 +1205,7 @@ namespace TrafficManager.Custom.PathFinding {
                                 ref nextNode,
                                 rightLaneIndex,
                                 rightLaneId,
-                                ref netManager.m_lanes.m_buffer[rightLaneId],
+                                ref rightLaneId.ToLane(),
                                 connectOffset,
                                 connectOffset);
                         }
@@ -1246,7 +1247,7 @@ namespace TrafficManager.Custom.PathFinding {
                                 ref nextNode,
                                 nextLaneIndex,
                                 nextLaneId,
-                                ref netManager.m_lanes.m_buffer[nextLaneId],
+                                ref nextLaneId.ToLane(),
                                 connectOffset,
                                 connectOffset);
                         }
@@ -1417,7 +1418,7 @@ namespace TrafficManager.Custom.PathFinding {
                             ref nextNode,
                             sameSegLaneIndex,
                             sameSegLaneId,
-                            ref netManager.m_lanes.m_buffer[sameSegLaneId],
+                            ref sameSegLaneId.ToLane(),
                             sameSegConnectOffset,
                             128);
                     }
@@ -1948,7 +1949,7 @@ namespace TrafficManager.Custom.PathFinding {
                             ref nextNode,
                             nextLaneIndex,
                             nextLaneId,
-                            ref netManager.m_lanes.m_buffer[nextLaneId],
+                            ref nextLaneId.ToLane(),
                             switchConnectOffset,
                             switchConnectOffset);
                     }
@@ -1962,7 +1963,7 @@ namespace TrafficManager.Custom.PathFinding {
             bool targetDisabled =
                 (nextNode.m_flags & (NetNode.Flags.Disabled | NetNode.Flags.DisableOnlyMiddle)) ==
                 NetNode.Flags.Disabled;
-            ushort nextSegmentId2 = netManager.m_lanes.m_buffer[nextNode.m_lane].m_segment;
+            ushort nextSegmentId2 = nextNode.m_lane.ToLane().m_segment;
 
             if (nextSegmentId2 == 0 || nextSegmentId2 == prevSegmentId) {
                 return;
@@ -2109,7 +2110,7 @@ namespace TrafficManager.Custom.PathFinding {
             while (true) {
                 if (nextLaneIndex < nextNumLanes && curLaneId != 0) {
                     if (nextLaneId != curLaneId) {
-                        curLaneId = netManager.m_lanes.m_buffer[curLaneId].m_nextLane;
+                        curLaneId = curLaneId.ToLane().m_nextLane;
                         nextLaneIndex++;
                         continue;
                     }
@@ -2156,8 +2157,7 @@ namespace TrafficManager.Custom.PathFinding {
                     $"\tnextLaneInfo.m_laneType={nextLaneInfo.m_laneType}");
             }
 
-            Vector3 a = netManager.m_lanes.m_buffer[nextLaneId]
-                              .CalculatePosition(offset * BYTE_TO_FLOAT_OFFSET_CONVERSION_FACTOR);
+            Vector3 a = nextLaneId.ToLane().CalculatePosition(offset * BYTE_TO_FLOAT_OFFSET_CONVERSION_FACTOR);
             float distance = Vector3.Distance(a, b);
             BufferItem nextItem = default(BufferItem);
 
@@ -2721,16 +2721,17 @@ namespace TrafficManager.Custom.PathFinding {
                         }
 
                         BufferItem nextItem = default(BufferItem);
+                        ref NetLane nextLane = ref nextLaneId.ToLane();
 
                         Vector3 a = (nextDir & NetInfo.Direction.Forward) == NetInfo.Direction.None
-                                    ? netManager.m_lanes.m_buffer[nextLaneId].m_bezier.a
-                                    : netManager.m_lanes.m_buffer[nextLaneId].m_bezier.d;
+                                    ? nextLane.m_bezier.a
+                                    : nextLane.m_bezier.d;
                         float transitionCost = Vector3.Distance(a, b);
                         if (isTransition) {
                             transitionCost *= 2f;
                         }
 
-                        if (ticketCost != 0 && netManager.m_lanes.m_buffer[nextLaneId].m_ticketCost != 0) {
+                        if (ticketCost != 0 && nextLane.m_ticketCost != 0) {
                             transitionCost *= 10f;
                         }
 
@@ -2752,14 +2753,10 @@ namespace TrafficManager.Custom.PathFinding {
 #if ADVANCEDAI && ROUTING
                         if (!enableAdvancedAI) {
 #endif
-                            if (!stablePath_ &&
-                                (netManager.m_lanes.m_buffer[nextLaneId].m_flags &
-                                 (ushort)NetLane.Flags.Merge) != 0)
+                            if (!stablePath_ && (nextLane.m_flags & (ushort)NetLane.Flags.Merge) != 0)
                             {
-                                int firstTarget =
-                                    netManager.m_lanes.m_buffer[nextLaneId].m_firstTarget;
-                                int lastTarget =
-                                    netManager.m_lanes.m_buffer[nextLaneId].m_lastTarget;
+                                int firstTarget = nextLane.m_firstTarget;
+                                int lastTarget = nextLane.m_lastTarget;
 
                                 transitionCostOverMeanMaxSpeed *=
                                     new Randomizer(pathFindIndex_ ^ nextLaneId).Int32(
@@ -2789,7 +2786,7 @@ namespace TrafficManager.Custom.PathFinding {
                             !(nextItem.MethodDistance <
                               globalConf_.PathFinding.MaxWalkingDistance) && !stablePath_) {
                             // NON-STOCK CODE (custom walking distance)
-                            nextLaneId = netManager.m_lanes.m_buffer[nextLaneId].m_nextLane;
+                            nextLaneId = nextLane.m_nextLane;
                             continue;
                         }
 
@@ -2878,7 +2875,7 @@ namespace TrafficManager.Custom.PathFinding {
                                         $"\tm_startOffsetA={startOffsetA_}");
                                 }
 
-                                nextLaneId = netManager.m_lanes.m_buffer[nextLaneId].m_nextLane;
+                                nextLaneId = nextLane.m_nextLane;
                                 continue;
                             }
 
@@ -2919,7 +2916,7 @@ namespace TrafficManager.Custom.PathFinding {
                                         $"\tm_startOffsetB={startOffsetB_}");
                                 }
 
-                                nextLaneId = netManager.m_lanes.m_buffer[nextLaneId].m_nextLane;
+                                nextLaneId = nextLane.m_nextLane;
                                 continue;
                             }
 
@@ -3025,8 +3022,8 @@ namespace TrafficManager.Custom.PathFinding {
 #if ADVANCEDAI && ROUTING
                             if (!enableAdvancedAI) {
 #endif
-                                int firstTarget = netManager.m_lanes.m_buffer[nextLaneId].m_firstTarget;
-                                int lastTarget = netManager.m_lanes.m_buffer[nextLaneId].m_lastTarget;
+                                int firstTarget = nextLane.m_firstTarget;
+                                int lastTarget = nextLane.m_lastTarget;
                                 if (laneIndexFromInner < firstTarget ||
                                     laneIndexFromInner >= lastTarget) {
                                     nextItem.ComparisonValue +=
@@ -3541,7 +3538,7 @@ namespace TrafficManager.Custom.PathFinding {
              * Check vehicle restrictions, especially bans
              * =====================================================================================
              */
-            bool canUseLane = CanUseLane(prevSegmentId, prevSegmentInfo, prevLaneIndex, prevLaneInfo);
+            bool canUseLane = CanUseLane(prevSegmentId, prevSegmentInfo, prevLaneIndex, prevLaneInfo, item.LaneId);
             if (!canUseLane && Options.vehicleRestrictionsAggression ==
                 VehicleRestrictionsAggression.Strict) {
                 // vehicle is strictly prohibited to use this lane
@@ -3979,10 +3976,22 @@ namespace TrafficManager.Custom.PathFinding {
         }
 
 #if VEHICLERESTRICTIONS
+        /// <summary>
+        /// Check if lane can be used by vehicle requesting path
+        /// </summary>
+        /// <param name="segmentId">segment ID</param>
+        /// <param name="segmentInfo">">segment NetInfo</param>
+        /// <param name="laneIndex">lane index</param>
+        /// <param name="laneInfo">lane LaneInfo</param>
+        /// <param name="laneId">lane ID</param>
+        /// <returns>true if vehicle restrictions is disabled,
+        /// lane vehicle restriction allow vehicle type or lane is start/end of the path
+        /// otherwise false</returns>
         private bool CanUseLane(ushort segmentId,
                                 NetInfo segmentInfo,
                                 int laneIndex,
-                                NetInfo.Lane laneInfo) {
+                                NetInfo.Lane laneInfo,
+                                uint laneId) {
             if (!Options.vehicleRestrictionsEnabled ||
                 queueItem_.vehicleType == ExtVehicleType.None ||
                 queueItem_.vehicleType == ExtVehicleType.Tram ||
@@ -3990,6 +3999,11 @@ namespace TrafficManager.Custom.PathFinding {
                 (laneInfo.m_vehicleType &
                  (VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train)) ==
                 VehicleInfo.VehicleType.None) {
+                return true;
+            }
+
+            if (startLaneA_ == laneId || startLaneB_ == laneId ||
+                endLaneA_ == laneId || endLaneB_ == laneId) {
                 return true;
             }
 

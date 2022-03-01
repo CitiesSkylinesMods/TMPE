@@ -16,6 +16,7 @@ namespace TrafficManager.Manager.Impl {
     using static CSUtil.Commons.TernaryBoolUtil;
     using TrafficManager.Util;
     using TrafficManager.Util.Extensions;
+    using TrafficManager.Lifecycle;
 
     public class JunctionRestrictionsManager
         : AbstractGeometryObservingManager,
@@ -661,7 +662,7 @@ namespace TrafficManager.Manager.Impl {
                 return true;
             }
 
-            if (OptionsVehicleRestrictionsTab.NoDoubleCrossings &&
+            if (PoliciesTab.NoDoubleCrossings &&
                 node.m_flags.IsFlagSet(NetNode.Flags.Junction) &&
                 !node.m_flags.IsFlagSet(NetNode.Flags.Untouchable) &&
                 node.CountSegments() == 2) {
@@ -1018,7 +1019,7 @@ namespace TrafficManager.Manager.Impl {
 
             if (requireRecalc) {
                 RoutingManager.Instance.RequestRecalculation(segmentId);
-                if (OptionsManager.Instance.MayPublishSegmentChanges()) {
+                if (TMPELifecycle.Instance.MayPublishSegmentChanges()) {
                     ExtSegmentManager.Instance.PublishSegmentChanges(segmentId);
                 }
             }

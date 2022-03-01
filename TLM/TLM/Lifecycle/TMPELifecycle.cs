@@ -17,8 +17,10 @@ namespace TrafficManager.Lifecycle {
     using UnityEngine.SceneManagement;
     using UnityEngine;
     using JetBrains.Annotations;
-    using UI.WhatsNew;
+    using TrafficManager.UI.WhatsNew;
     using System.Diagnostics.CodeAnalysis;
+    using TrafficManager.UI.Helpers;
+    using TrafficManager.API.Traffic.Enums;
 
     /// <summary>
     /// Do not use Singleton<TMPELifecycle>.instance to prevent memory leak.
@@ -59,6 +61,13 @@ namespace TrafficManager.Lifecycle {
             SceneManager.GetActiveScene().name != "IntroScreen" &&
             SceneManager.GetActiveScene().name != "MainMenu" &&
             SceneManager.GetActiveScene().name != "Startup";
+
+        /// <summary>
+        /// Determines if modifications to segments may be published in the current state.
+        /// </summary>
+        /// <returns>Returns <c>true</c> if changes may be published, otherwise <c>false</c>.</returns>
+        public bool MayPublishSegmentChanges()
+            => InGameOrEditor() && !Instance.Deserializing;
 
         public static AppMode? AppMode => SimulationManager.instance.m_ManagersWrapper.loading?.currentMode;
 
@@ -280,6 +289,21 @@ namespace TrafficManager.Lifecycle {
                 // after all TMPE rules are applied.
                 GeometryNotifierDisposable = GeometryManager.Instance.Subscribe(new GeometryNotifier());
                 Notifier.Instance.OnLevelLoaded();
+
+                if (PlayMode && (Mode is not LoadMode.NewGame or LoadMode.NewGameFromScenario)) {
+
+                    var despawned = PathfinderUpdates.DespawnVehiclesIfNecessary();
+
+                    if (despawned != ExtVehicleType.None) {
+                        Prompt.Info(
+                            "TM:PE Pathfinder Updated",
+                            $"Some vehicles ({despawned}) had broken paths due to a bug "
+                            + "in an earlier version of the pathfinder. We've despawned "
+                            + "them to prevent further issues. New vehicles will "
+                            + "automatically spawn to replace them.");
+                    }
+                }
+
                 Log.Info("OnLevelLoaded complete.");
             } catch (Exception ex) {
                 ex.LogException(true);
@@ -288,6 +312,8 @@ namespace TrafficManager.Lifecycle {
 
         internal void Unload() {
             try {
+                Options.Available = false;
+
                 GeometryNotifierDisposable?.Dispose();
                 GeometryNotifierDisposable = null;
 
@@ -309,13 +335,14 @@ namespace TrafficManager.Lifecycle {
 
                 GlobalConfig.OnLevelUnloading();
 
-                // destroy immidately to prevent duplicates after hot-reload.
-                var uiviewGO = UIView.GetAView().gameObject;
-                DestroyImmediate(uiviewGO.GetComponent<RoadSelectionPanels>());
-                DestroyImmediate(uiviewGO.GetComponent<RemoveVehicleButtonExtender>());
-                DestroyImmediate(uiviewGO.GetComponent<RemoveCitizenInstanceButtonExtender>());
-                DestroyImmediate(uiviewGO.GetComponent<RemoveCitizenInstanceButtonExtender>());
-                DestroyImmediate(uiviewGO.GetComponent<UITransportDemand>());
+                if (PlayMode) {
+                    // destroy immidately to prevent duplicates after hot-reload.
+                    var uiviewGO = UIView.GetAView().gameObject;
+                    DestroyImmediate(uiviewGO.GetComponent<RoadSelectionPanels>());
+                    DestroyImmediate(uiviewGO.GetComponent<RemoveVehicleButtonExtender>());
+                    DestroyImmediate(uiviewGO.GetComponent<RemoveCitizenInstanceButtonExtender>());
+                    DestroyImmediate(uiviewGO.GetComponent<UITransportDemand>());
+                }
 
                 Log.Info("Removing Controls from UI.");
                 if (ModUI.Instance) {

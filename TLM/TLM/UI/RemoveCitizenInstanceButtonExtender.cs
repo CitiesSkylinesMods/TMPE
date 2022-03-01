@@ -5,6 +5,7 @@ namespace TrafficManager.UI {
     using System.Collections.Generic;
     using TrafficManager.U;
     using TrafficManager.Util;
+    using TrafficManager.Util.Extensions;
     using UnityEngine;
 
     public class RemoveCitizenInstanceButtonExtender : MonoBehaviour {
@@ -74,16 +75,16 @@ namespace TrafficManager.UI {
             }
 
             public override void HandleClick(UIMouseEventParameter p) {
-                InstanceID instance = WorldInfoPanel.GetCurrentInstanceID();
-                Log._Debug($"Current citizen: {instance.Citizen}");
+                InstanceID worldInfoPanelInstanceId = WorldInfoPanel.GetCurrentInstanceID();
+                Log._Debug($"Current citizen: {worldInfoPanelInstanceId.Citizen}");
 
-                if (instance.Citizen != 0) {
-                    ushort citizenInstanceId = Singleton<CitizenManager>.instance.m_citizens.m_buffer[instance.Citizen].m_instance;
+                if (worldInfoPanelInstanceId.Citizen != 0) {
+                    ushort citizenInstanceId = worldInfoPanelInstanceId.Citizen.ToCitizen().m_instance;
 
                     Log._Debug(
-                        $"Current citizen: {instance.Citizen} Instance: {citizenInstanceId}");
+                        $"Current citizen: {worldInfoPanelInstanceId.Citizen} Instance: {citizenInstanceId}");
                     if (citizenInstanceId != 0) {
-                        bool isTourist = CitizenManager.instance.m_instances.m_buffer[citizenInstanceId].Info.m_citizenAI is TouristAI;
+                        bool isTourist = citizenInstanceId.ToCitizenInstance().Info.m_citizenAI is TouristAI;
                         Singleton<SimulationManager>.instance.AddAction(
                             () => Singleton<CitizenManager>.instance.ReleaseCitizenInstance(citizenInstanceId));
                         // InfoPanel needs to be closed manually because method responsible for hiding it testing against type Citizen instead of CitizenInstance

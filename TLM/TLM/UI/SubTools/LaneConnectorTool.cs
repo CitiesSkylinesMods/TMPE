@@ -1099,7 +1099,9 @@ namespace TrafficManager.UI.SubTools {
                 bool startNode = netSegment.m_startNode == nodeId;
                 NetInfo.Lane[] lanes = netSegment.Info.m_lanes;
                 uint laneId = netSegment.m_lanes;
-                float offsetT = offset / netSegment.m_averageLength;
+                // CSUR transition segments (2->3, 3->2 etc.) have "0" m_averageLength,
+                // set 10% of lane length as a connector marker offset
+                float offsetT = FloatUtil.IsZero(netSegment.m_averageLength) ? 0.1f : offset / netSegment.m_averageLength;
 
                 for (byte laneIndex = 0; (laneIndex < lanes.Length) && (laneId != 0); laneIndex++) {
                     NetInfo.Lane laneInfo = lanes[laneIndex];
@@ -1178,7 +1180,7 @@ namespace TrafficManager.UI.SubTools {
                         }
                     }
 
-                    laneId = NetManager.instance.m_lanes.m_buffer[laneId].m_nextLane;
+                    laneId = laneId.ToLane().m_nextLane;
                 }
             }
 
@@ -1388,11 +1390,11 @@ namespace TrafficManager.UI.SubTools {
             bezier3.d = targetLaneEnd.NodeMarker.Position;
 
             Vector3 sourceLaneDirection =
-                (NetManager.instance.m_lanes.m_buffer[sourceLaneEnd.LaneId].m_bezier
+                (sourceLaneEnd.LaneId.ToLane().m_bezier
                            .Tangent(sourceLaneEnd.StartNode ? 0f : 1f) *
                  (sourceLaneEnd.StartNode ? -1 : 1)).normalized;
             Vector3 targetLaneDirection =
-                (NetManager.instance.m_lanes.m_buffer[targetLaneEnd.LaneId].m_bezier
+                (targetLaneEnd.LaneId.ToLane().m_bezier
                            .Tangent(targetLaneEnd.StartNode ? 0f : 1f) *
                  (targetLaneEnd.StartNode ? -1 : 1)).normalized;
             NetSegment.CalculateMiddlePoints(

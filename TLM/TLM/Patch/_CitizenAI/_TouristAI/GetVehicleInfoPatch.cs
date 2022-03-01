@@ -10,6 +10,7 @@ namespace TrafficManager.Patch._CitizenAI._TouristAI {
     using State;
     using State.ConfigData;
     using Util;
+    using Util.Extensions;
 
     [UsedImplicitly]
     [HarmonyPatch]
@@ -74,8 +75,7 @@ namespace TrafficManager.Patch._CitizenAI._TouristAI {
             }
 
             // NON-STOCK CODE END
-            Citizen.Wealth wealthLevel = CitizenManager.instance.m_citizens
-                                                       .m_buffer[citizenData.m_citizen].WealthLevel;
+            Citizen.Wealth wealthLevel = citizenData.m_citizen.ToCitizen().WealthLevel;
             int carProb;
             int bikeProb;
             int taxiProb;
@@ -126,17 +126,14 @@ namespace TrafficManager.Patch._CitizenAI._TouristAI {
             // NON-STOCK CODE START
             VehicleInfo carInfo = null;
             if (Options.parkingAI && useCar && !useTaxi) {
-                ushort parkedVehicleId = CitizenManager
-                                         .instance.m_citizens.m_buffer[citizenData.m_citizen]
-                                         .m_parkedVehicle;
+                ushort parkedVehicleId = citizenData.m_citizen.ToCitizen().m_parkedVehicle;
                 if (parkedVehicleId != 0) {
                     Log._DebugIf(
                         logParkingAi,
                         () => $"CustomTouristAI.CustomGetVehicleInfo({instanceID}): " +
                               $"Citizen instance {instanceID} owns a parked vehicle {parkedVehicleId}. " +
                               $"Reusing vehicle info.");
-                    carInfo = VehicleManager
-                              .instance.m_parkedVehicles.m_buffer[parkedVehicleId].Info;
+                    carInfo = parkedVehicleId.ToParkedVehicle().Info;
                 }
             }
 

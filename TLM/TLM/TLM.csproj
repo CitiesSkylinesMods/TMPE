@@ -134,6 +134,7 @@
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="Constants.cs" />
+    <Compile Include="Custom\PathFinding\PathfinderUpdates.cs" />
     <Compile Include="Geometry\Impl\SegmentEndId.cs" />
     <Compile Include="Lifecycle\Patcher.cs" />
     <Compile Include="Lifecycle\TMPELifecycle.cs" />
@@ -146,9 +147,22 @@
     <Compile Include="Manager\Impl\ExtSegmentEndManager.cs" />
     <Compile Include="Manager\Impl\ExtSegmentManager.cs" />
     <Compile Include="Manager\Impl\GeometryNotifier.cs" />
+    <Compile Include="Patch\_External\RTramAIModPatch.cs" />
+    <Compile Include="State\OptionsTabs\GeneralTab_CompatibilityGroup.cs" />
+    <Compile Include="State\OptionsTabs\GeneralTab_LocalisationGroup.cs" />
+    <Compile Include="State\OptionsTabs\GameplayTab_VehicleBehaviourGroup.cs" />
+    <Compile Include="State\OptionsTabs\GeneralTab_InterfaceGroup.cs" />
+    <Compile Include="State\OptionsTabs\GeneralTab_SimulationGroup.cs" />
+    <Compile Include="State\OptionsTabs\MaintenanceTab_DespawnGroup.cs" />
     <Compile Include="State\VersionInfo.cs" />
+    <Compile Include="UI\Helpers\ActionButton.cs" />
+    <Compile Include="UI\Helpers\SliderOption.cs" />
+    <Compile Include="UI\Helpers\OptionButtonBase.cs" />
+    <Compile Include="UI\Helpers\UrlButton.cs" />
     <Compile Include="UI\WhatsNew\MarkupKeyword.cs" />
     <Compile Include="UI\WhatsNew\WhatsNewMarkup.cs" />
+    <Compile Include="Util\Extensions\CitizenUnitExtensions.cs" />
+    <Compile Include="Util\Extensions\ParkedVehicleExtensions.cs" />
     <Compile Include="Util\Extensions\VersionExtension.cs" />
     <Compile Include="Util\Iterators\GetNodeSegmentIdsEnumerable.cs" />
     <Compile Include="Util\Iterators\GetNodeSegmentIdsEnumerator.cs" />
@@ -295,13 +309,13 @@
     <Compile Include="State\Keybinds\KeybindSettingsBase.cs" />
     <Compile Include="State\Keybinds\KeybindSettingsPage.cs" />
     <Compile Include="State\Keybinds\KeybindUI.cs" />
-    <Compile Include="State\OptionsTabs\OptionsGameplayTab.cs" />
-    <Compile Include="State\OptionsTabs\OptionsGeneralTab.cs" />
-    <Compile Include="State\OptionsTabs\OptionsKeybindsTab.cs" />
-    <Compile Include="State\OptionsTabs\OptionsMaintenanceTab.cs" />
+    <Compile Include="State\OptionsTabs\GameplayTab.cs" />
+    <Compile Include="State\OptionsTabs\GeneralTab.cs" />
+    <Compile Include="State\OptionsTabs\KeybindsTab.cs" />
+    <Compile Include="State\OptionsTabs\MaintenanceTab.cs" />
     <Compile Include="State\OptionsTabs\OptionsMassEditTab.cs" />
-    <Compile Include="State\OptionsTabs\OptionsOverlaysTab.cs" />
-    <Compile Include="State\OptionsTabs\OptionsVehicleRestrictionsTab.cs" />
+    <Compile Include="State\OptionsTabs\OverlaysTab.cs" />
+    <Compile Include="State\OptionsTabs\PoliciesTab.cs" />
     <Compile Include="TrafficLight\Impl\CustomSegmentLights.cs" />
     <Compile Include="Manager\Impl\LaneConnectionManager.cs" />
     <Compile Include="Manager\Impl\ExtVehicleManager.cs" />
@@ -1133,8 +1147,6 @@ echo MONODIR is "%25MONODIR%25"
 
 set "DEPLOYDIR=$(LOCALAPPDATA)\Colossal Order\Cities_Skylines\Addons\Mods\$(TargetName)\"
 xcopy /y /v "$(TargetPath).mdb" "%25DEPLOYDIR%25"
-xcopy /y "$(TargetDir)TMPE.CitiesGameBridge.dll" "%25DEPLOYDIR%25"
-xcopy /y "$(TargetDir)TMPE.GenericGameBridge.dll" "%25DEPLOYDIR%25"
 xcopy /y "$(TargetDir)TMPE.API.dll" "%25DEPLOYDIR%25"
 xcopy /y "$(TargetDir)CSUtil.CameraControl.dll" "%25DEPLOYDIR%25"
 xcopy /y "$(TargetDir)CSUtil.Commons.dll" "%25DEPLOYDIR%25"

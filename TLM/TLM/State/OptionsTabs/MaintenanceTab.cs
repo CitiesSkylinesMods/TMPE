@@ -8,8 +8,9 @@ namespace TrafficManager.State {
     using TrafficManager.UI;
     using TrafficManager.Lifecycle;
     using ColossalFramework;
+    using System.Collections.Generic;
 
-    public static class OptionsMaintenanceTab {
+    public static class MaintenanceTab {
         [UsedImplicitly]
         private static UIButton _resetStuckEntitiesBtn;
 
@@ -53,10 +54,6 @@ namespace TrafficManager.State {
             _resetStuckEntitiesBtn = maintenanceGroup.AddButton(
                                          T("Maintenance.Button:Reset stuck cims and vehicles"),
                                          onClickResetStuckEntities) as UIButton;
-
-            _removeParkedVehiclesBtn = maintenanceGroup.AddButton(
-                                           T("Maintenance.Button:Remove parked vehicles"),
-                                           OnClickRemoveParkedVehicles) as UIButton;
 
             _removeAllExistingTrafficLightsBtn = maintenanceGroup.AddButton(
                                            T("Maintenance.Button:Remove all existing traffic lights"),
@@ -118,7 +115,9 @@ namespace TrafficManager.State {
                                              Options.laneConnectorEnabled,
                                              OnLaneConnectorEnabledChanged) as UICheckBox;
 
-            Options.Indent(_turnOnRedEnabledToggle);
+            CheckboxOption.ApplyIndent(_turnOnRedEnabledToggle);
+
+            MaintenanceTab_DespawnGroup.AddUI(panelHelper);
 
             // TODO [issue ##959] remove when TTL is implemented in asset editor.
             bool inEditor = TMPELifecycle.InGameOrEditor()
@@ -138,16 +137,6 @@ namespace TrafficManager.State {
 
             Singleton<SimulationManager>.instance.AddAction(
                 () => { UtilityManager.Instance.ResetStuckEntities(); });
-        }
-
-        private static void OnClickRemoveParkedVehicles() {
-            if (!Options.IsGameLoaded()) {
-                return;
-            }
-
-            Singleton<SimulationManager>.instance.AddAction(() => {
-                UtilityManager.Instance.RemoveParkedVehicles();
-            });
         }
 
         private static void OnClickRemoveAllExistingTrafficLights() {
@@ -205,8 +194,8 @@ namespace TrafficManager.State {
             Options.RebuildMenu();
 
             if (!val) {
-                OptionsOverlaysTab.SetPrioritySignsOverlay(false);
-                OptionsVehicleRestrictionsTab.SetTrafficLightPriorityRules(false);
+                OverlaysTab.SetPrioritySignsOverlay(false);
+                PoliciesTab.SetTrafficLightPriorityRules(false);
             }
         }
 
@@ -219,8 +208,8 @@ namespace TrafficManager.State {
             Options.RebuildMenu();
 
             if (!val) {
-                OptionsOverlaysTab.SetTimedLightsOverlay(false);
-                OptionsVehicleRestrictionsTab.SetTrafficLightPriorityRules(false);
+                OverlaysTab.SetTimedLightsOverlay(false);
+                PoliciesTab.SetTrafficLightPriorityRules(false);
             }
         }
 
@@ -233,7 +222,7 @@ namespace TrafficManager.State {
             Options.RebuildMenu();
 
             if (!val) {
-                OptionsOverlaysTab.SetSpeedLimitsOverlay(false);
+                OverlaysTab.SetSpeedLimitsOverlay(false);
             }
         }
 
@@ -246,7 +235,7 @@ namespace TrafficManager.State {
             Options.RebuildMenu();
 
             if (!val) {
-                OptionsOverlaysTab.SetVehicleRestrictionsOverlay(false);
+                OverlaysTab.SetVehicleRestrictionsOverlay(false);
             }
         }
 
@@ -259,7 +248,7 @@ namespace TrafficManager.State {
             Options.RebuildMenu();
 
             if (!val) {
-                OptionsOverlaysTab.SetParkingRestrictionsOverlay(false);
+                OverlaysTab.SetParkingRestrictionsOverlay(false);
             }
         }
 
@@ -272,11 +261,11 @@ namespace TrafficManager.State {
             Options.RebuildMenu();
 
             if (!val) {
-                OptionsVehicleRestrictionsTab.SetAllowUTurns(false);
-                OptionsVehicleRestrictionsTab.SetAllowEnterBlockedJunctions(false);
-                OptionsVehicleRestrictionsTab.SetAllowLaneChangesWhileGoingStraight(false);
+                PoliciesTab.SetAllowUTurns(false);
+                PoliciesTab.SetAllowEnterBlockedJunctions(false);
+                PoliciesTab.SetAllowLaneChangesWhileGoingStraight(false);
                 SetTurnOnRedEnabled(false);
-                OptionsOverlaysTab.SetJunctionRestrictionsOverlay(false);
+                OverlaysTab.SetJunctionRestrictionsOverlay(false);
             }
         }
 
@@ -305,7 +294,7 @@ namespace TrafficManager.State {
             RoutingManager.Instance.RequestFullRecalculation();
 
             if (!val) {
-                OptionsOverlaysTab.SetConnectedLanesOverlay(false);
+                OverlaysTab.SetConnectedLanesOverlay(false);
             }
         }
 
@@ -318,7 +307,7 @@ namespace TrafficManager.State {
             }
 
             if (!newValue) {
-                OptionsOverlaysTab.SetSpeedLimitsOverlay(false);
+                OverlaysTab.SetSpeedLimitsOverlay(false);
             }
         }
 
@@ -331,7 +320,7 @@ namespace TrafficManager.State {
             }
 
             if (!newValue) {
-                OptionsOverlaysTab.SetVehicleRestrictionsOverlay(false);
+                OverlaysTab.SetVehicleRestrictionsOverlay(false);
             }
         }
 
@@ -344,7 +333,7 @@ namespace TrafficManager.State {
             }
 
             if (!newValue) {
-                OptionsOverlaysTab.SetParkingRestrictionsOverlay(false);
+                OverlaysTab.SetParkingRestrictionsOverlay(false);
             }
         }
 
@@ -357,7 +346,7 @@ namespace TrafficManager.State {
             }
 
             if (!newValue) {
-                OptionsOverlaysTab.SetJunctionRestrictionsOverlay(false);
+                OverlaysTab.SetJunctionRestrictionsOverlay(false);
             }
         }
 
@@ -369,8 +358,8 @@ namespace TrafficManager.State {
             }
 
             if (!newValue) {
-                OptionsVehicleRestrictionsTab.SetAllowNearTurnOnRed(false);
-                OptionsVehicleRestrictionsTab.SetAllowFarTurnOnRed(false);
+                PoliciesTab.SetAllowNearTurnOnRed(false);
+                PoliciesTab.SetAllowFarTurnOnRed(false);
             }
         }
 
@@ -383,7 +372,7 @@ namespace TrafficManager.State {
             }
 
             if (!newValue) {
-                OptionsOverlaysTab.SetConnectedLanesOverlay(false);
+                OverlaysTab.SetConnectedLanesOverlay(false);
             }
         }
 

@@ -13,6 +13,7 @@ namespace TrafficManager.Patch._CitizenAI._HumanAI {
     using State.ConfigData;
     using UnityEngine;
     using Util;
+    using Util.Extensions;
 
     [UsedImplicitly]
     [HarmonyPatch]
@@ -63,6 +64,7 @@ namespace TrafficManager.Patch._CitizenAI._HumanAI {
 #endif
             CitizenManager citizenManager = Singleton<CitizenManager>.instance;
             uint citizenId = data.m_citizen;
+            ref Citizen citizen = ref data.m_citizen.ToCitizen();
 
             if ((data.m_flags & (CitizenInstance.Flags.Blown
                                          | CitizenInstance.Flags.Floating)) != CitizenInstance.Flags.None
@@ -76,7 +78,6 @@ namespace TrafficManager.Patch._CitizenAI._HumanAI {
                 return false;
             }
 
-            Citizen[] citizensBuffer = citizenManager.m_citizens.m_buffer;
             if ((data.m_flags & CitizenInstance.Flags.WaitingPath) != CitizenInstance.Flags.None) {
                 PathManager pathManager = Singleton<PathManager>.instance;
                 byte pathFindFlags = pathManager.m_pathUnits.m_buffer[data.m_path].m_pathFindFlags;
@@ -107,8 +108,7 @@ namespace TrafficManager.Patch._CitizenAI._HumanAI {
                         ref ExtCitizenManager
                             .Instance.ExtCitizens[
                                 citizenId],
-                        ref citizensBuffer[
-                            data.m_citizen],
+                        ref data.m_citizen.ToCitizen(),
                         mainPathState);
                     if (logParkingAi) {
                         Log._Debug(
@@ -129,8 +129,7 @@ namespace TrafficManager.Patch._CitizenAI._HumanAI {
                                 "-- calling HumanAI.PathfindSuccess");
                         }
 
-                        if (citizenId == 0
-                            || citizensBuffer[data.m_citizen].m_vehicle == 0) {
+                        if (citizenId == 0 || citizen.m_vehicle == 0) {
                             SpawnCitizenAI(__instance, instanceID, ref data);
                         }
 
@@ -145,8 +144,7 @@ namespace TrafficManager.Patch._CitizenAI._HumanAI {
                         const Citizen.Flags CTZ_MASK = Citizen.Flags.Tourist
                                                        | Citizen.Flags.MovingIn
                                                        | Citizen.Flags.DummyTraffic;
-                        if (citizenId != 0
-                            && (citizensBuffer[citizenId].m_flags & CTZ_MASK) == Citizen.Flags.MovingIn)
+                        if (citizenId != 0 && (citizen.m_flags & CTZ_MASK) == Citizen.Flags.MovingIn)
                         {
                             StatisticBase statisticBase = Singleton<StatisticsManager>
                                                 .instance.Acquire<StatisticInt32>(StatisticType.MoveRate);
@@ -243,19 +241,19 @@ namespace TrafficManager.Patch._CitizenAI._HumanAI {
             VehicleManager vehicleManager = Singleton<VehicleManager>.instance;
             ushort vehicleId = 0;
             if (data.m_citizen != 0u) {
-                vehicleId = citizensBuffer[data.m_citizen].m_vehicle;
+                vehicleId = data.m_citizen.ToCitizen().m_vehicle;
             }
 
             if (vehicleId != 0) {
-                Vehicle[] vehiclesBuffer = vehicleManager.m_vehicles.m_buffer;
-                VehicleInfo vehicleInfo = vehiclesBuffer[vehicleId].Info;
+                ref Vehicle vehicle = ref vehicleId.ToVehicle();
+                VehicleInfo vehicleInfo = vehicle.Info;
 
                 if (vehicleInfo.m_vehicleType == VehicleInfo.VehicleType.Bicycle) {
                     vehicleInfo.m_vehicleAI.SimulationStep(
                         vehicleId,
-                        ref vehiclesBuffer[vehicleId],
+                        ref vehicle,
                         vehicleId,
-                        ref vehiclesBuffer[vehicleId],
+                        ref vehicle,
                         0);
                     vehicleId = 0;
                 }
@@ -312,9 +310,7 @@ namespace TrafficManager.Patch._CitizenAI._HumanAI {
                 // check if the citizen has reached a parked car or target
                 case ExtPathMode.WalkingToParkedCar:
                 case ExtPathMode.ApproachingParkedCar: {
-                    Citizen[] citizensBuffer =
-                        Singleton<CitizenManager>.instance.m_citizens.m_buffer;
-                    ushort parkedVehicleId = citizensBuffer[data.m_citizen].m_parkedVehicle;
+                    ushort parkedVehicleId = data.m_citizen.ToCitizen().m_parkedVehicle;
 
                     if (parkedVehicleId == 0) {
                         // citizen is reaching their parked car but does not own a parked car
@@ -335,15 +331,13 @@ namespace TrafficManager.Patch._CitizenAI._HumanAI {
                         return true;
                     }
 
-                    VehicleParked[] parkedVehicles =
-                        Singleton<VehicleManager>.instance.m_parkedVehicles.m_buffer;
                     ParkedCarApproachState approachState =
                         AdvancedParkingManager.Instance.CitizenApproachingParkedCarSimulationStep(
                             instanceID,
                             ref data,
                             ref extInstance,
                             physicsLodRefPos,
-                            ref parkedVehicles[parkedVehicleId]);
+                            ref parkedVehicleId.ToParkedVehicle());
 
                     switch (approachState) {
                         case ParkedCarApproachState.None:

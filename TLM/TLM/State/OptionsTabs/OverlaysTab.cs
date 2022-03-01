@@ -5,7 +5,7 @@ namespace TrafficManager.State {
     using TrafficManager.UI.Helpers;
     using TrafficManager.UI;
 
-    public static class OptionsOverlaysTab {
+    public static class OverlaysTab {
         private static UICheckBox _prioritySignsOverlayToggle;
         private static UICheckBox _timedLightsOverlayToggle;
         private static UICheckBox _speedLimitsOverlayToggle;
@@ -24,6 +24,12 @@ namespace TrafficManager.State {
         private static UICheckBox _buildingOverlayToggle;
 #endif
 
+        public static CheckboxOption ShowDefaultSpeedSubIcon =
+            new(nameof(Options.showDefaultSpeedSubIcon), Options.PersistTo.Savegame) {
+                Label = "Overlays.Checkbox:Show default speed with customised speeds",
+                Indent = true,
+            };
+
         internal static void MakeSettings_Overlays(ExtUITabstrip tabStrip) {
             UIHelper panelHelper = tabStrip.AddTabPage(Translation.Options.Get("Tab:Overlays"));
 
@@ -39,6 +45,7 @@ namespace TrafficManager.State {
                                             Translation.Options.Get("Checkbox:Speed limits"),
                                             Options.speedLimitsOverlay,
                                             OnSpeedLimitsOverlayChanged) as UICheckBox;
+            ShowDefaultSpeedSubIcon.AddUI(panelHelper);
             _vehicleRestrictionsOverlayToggle
                 = panelHelper.AddCheckbox(
                       Translation.Options.Get("Checkbox:Vehicle restrictions"),

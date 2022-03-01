@@ -112,9 +112,6 @@ namespace TrafficManager.Patch._VehicleAI._TrainAI {
 #endif
 
             if (Mathf.Min(distToTargetAfterRot, distToTargetBeforeRot) >= breakingDist - 5f) {
-                /*VehicleManager vehMan = Singleton<VehicleManager>.instance;
-                ushort firstVehicleId = vehicleData.GetFirstVehicle(vehicleID);
-                if (VehicleBehaviorManager.Instance.MayDespawn(ref vehMan.m_vehicles.m_buffer[firstVehicleId]) || vehMan.m_vehicles.m_buffer[firstVehicleId].m_blockCounter < 100) {*/ // NON-STOCK CODE
 #if DEBUG
                 if (logLogic) {
                     Log._Debug($"CustomTrainAI.CustomCheckNextLane({vehicleID}): " +
@@ -122,7 +119,7 @@ namespace TrafficManager.Patch._VehicleAI._TrainAI {
                 }
 #endif
 
-                if (!netManager.m_lanes.m_buffer[laneID].CheckSpace(1000f, vehicleID)) {
+                if (!laneID.ToLane().CheckSpace(1000f, vehicleID)) {
 #if DEBUG
                     if (logLogic) {
                         Log._Debug($"CustomTrainAI.CustomCheckNextLane({vehicleID}): " +

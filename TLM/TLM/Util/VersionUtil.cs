@@ -29,10 +29,10 @@ namespace TrafficManager.Util {
         // we could alternatively use BuildConfig.APPLICATION_VERSION because const values are evaluated at compile time.
         // but I have decided not to do this because I don't want this to happen automatically with a rebuild if
         // CS updates. these values should be changed manaually so as to force us to acknowledge that they have changed.
-        public const uint EXPECTED_GAME_VERSION_U = 193061904u;
+        public const uint EXPECTED_GAME_VERSION_U = 193063184u;
 
         // see comments for EXPECTED_GAME_VERSION_U.
-        public static Version ExpectedGameVersion => new Version(1, 14, 0, 4);
+        public static Version ExpectedGameVersion => new Version(1, 14, 0, 9);
 
         public static string ExpectedGameVersionString => BuildConfig.VersionToString(EXPECTED_GAME_VERSION_U, false);
 
@@ -80,12 +80,13 @@ namespace TrafficManager.Util {
         }
 
         /// <summary>
-        /// TMPE build info and what game ver it expects.
+        /// TMPE build info and the version of the game which the mod was built using
+        /// (BuildConfig.applicationVersion is resolved at compile time!)
         /// </summary>
         public static void LogBuildDetails() {
             Log.InfoFormat(
-                "TM:PE enabled. Version {0}, Build {1} {2} for game version {3}",
-                VersionString,
+                "{0} - Build {1} {2} compiled under C:SL {3}",
+                TrafficManagerMod.ModName,
                 ModVersion,
                 BRANCH,
                 BuildConfig.applicationVersion);

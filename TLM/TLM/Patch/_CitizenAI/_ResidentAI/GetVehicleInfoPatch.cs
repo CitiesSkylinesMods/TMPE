@@ -1,3 +1,5 @@
+using TrafficManager.Util.Extensions;
+
 namespace TrafficManager.Patch._CitizenAI._ResidentAI {
     using System.Reflection;
     using API.Traffic.Enums;
@@ -124,9 +126,7 @@ namespace TrafficManager.Patch._CitizenAI._ResidentAI {
             // NON-STOCK CODE START
             VehicleInfo carInfo = null;
             if (Options.parkingAI && useCar) {
-                ushort parkedVehicleId = Singleton<CitizenManager>
-                                      .instance.m_citizens.m_buffer[citizenData.m_citizen]
-                                      .m_parkedVehicle;
+                ushort parkedVehicleId = citizenData.m_citizen.ToCitizen().m_parkedVehicle;
 
                 if (parkedVehicleId != 0) {
                     Log._DebugIf(
@@ -134,7 +134,7 @@ namespace TrafficManager.Patch._CitizenAI._ResidentAI {
                         () => $"CustomResidentAI.CustomGetVehicleInfo({instanceID}): " +
                         $"Citizen instance {instanceID} owns a parked vehicle {parkedVehicleId}. " +
                         $"Reusing vehicle info.");
-                    carInfo = Singleton<VehicleManager>.instance.m_parkedVehicles.m_buffer[parkedVehicleId].Info;
+                    carInfo = parkedVehicleId.ToParkedVehicle().Info;
                 }
             }
 

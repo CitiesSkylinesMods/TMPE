@@ -1,4 +1,5 @@
 namespace TrafficManager.UI.WhatsNew {
+    using System;
     using System.Collections.Generic;
     using ColossalFramework;
     using ColossalFramework.UI;
@@ -11,6 +12,7 @@ namespace TrafficManager.UI.WhatsNew {
         private UIPanel _footerPanel;
         private const int _defaultWidth = 750;
         private const int _defaultHeight = 500;
+        private const int _footerPanelHeight = 40;
 
         private readonly RectOffset _paddingZero = new RectOffset(0, 0, 0, 0);
         private readonly RectOffset _pillTextPadding = new RectOffset(4, 4, 5, 0);
@@ -22,7 +24,7 @@ namespace TrafficManager.UI.WhatsNew {
         private readonly Color _linkTextColor = new Color(0f, 0.52f, 1f);
 
         // Used in AddKeywordLabel()
-        private readonly Vector2 _minKeywordLabelSize = new(85, 20);
+        private readonly Vector2 _minKeywordLabelSize = new(90, 20);
 
         public override void Awake() {
             base.Awake();
@@ -36,8 +38,8 @@ namespace TrafficManager.UI.WhatsNew {
             color = _panelBgColor;
 
             AddHeader();
-            AddFooter();
             AddContent();
+            AddFooter();
         }
 
         private void AddFooter() {
@@ -55,42 +57,45 @@ namespace TrafficManager.UI.WhatsNew {
 
         private void AddContent() {
             var panel = AddUIComponent<UIScrollablePanel>();
+            panel.autoLayout = false;
             panel.maximumSize = GetMaxContentSize();
             panel.relativePosition = new Vector2(5, 40);
-            panel.size = new Vector2(_defaultWidth - 10, _defaultHeight - _header.height - _footerPanel.height);
-            panel.autoLayout = true;
+            panel.size = new Vector2(_defaultWidth - 10, _defaultHeight - _header.height - _footerPanelHeight);
 
             var content = panel.AddUIComponent<UIScrollablePanel>();
+            content.autoLayout = false;
             content.autoLayoutDirection = LayoutDirection.Vertical;
             content.scrollWheelDirection = UIOrientation.Vertical;
             content.clipChildren = true;
             content.autoLayoutPadding = new RectOffset(0, 0, 10, 5);
             content.autoReset = true;
-            content.size = new Vector2(_defaultWidth - 20, _defaultHeight - _header.height - _footerPanel.height);
+            content.size = new Vector2(_defaultWidth - 20, _defaultHeight - _header.height - _footerPanelHeight);
             AddScrollbar(panel, content);
 
             var stableRelease = Util.VersionUtil.IsStableRelease;
 
-            List<ChangelogEntry> changelogEntries = TMPELifecycle.Instance.WhatsNew.Changelogs;
-            foreach (ChangelogEntry entry in changelogEntries) {
-                if (!stableRelease || entry.Stable) {
-                    AddChangelogEntry(entry, content);
+            List<Changelog> changelogs = TMPELifecycle.Instance.WhatsNew.Changelogs;
+            foreach (Changelog changelog in changelogs) {
+                if (!stableRelease || changelog.Stable) {
+                    AddChangelogContent(changelog, content);
                 }
             }
 
             content.autoLayout = true;
+            panel.autoLayout = true;
         }
 
-        private void AddChangelogEntry(ChangelogEntry changelogEntry, UIScrollablePanel uiScrollablePanel) {
+        private void AddChangelogContent(Changelog changelog, UIScrollablePanel uiScrollablePanel) {
             UIPanel panel = AddRowAutoLayoutPanel(parentPanel: uiScrollablePanel,
                                                   panelPadding: new RectOffset(5, 0, 0, 6),
                                                   panelWidth: _defaultWidth - 5,
                                                   vertical: true);
+            panel.minimumSize = new Vector4(_defaultWidth - 10, 36);
+            panel.name = "Changelog Content";
+            AddVersionRow(panel, changelog);
 
-            AddVersionRow(panel, changelogEntry);
-
-            foreach (ChangelogEntry.ChangeEntry changeEntry in changelogEntry.ChangeEntries) {
-                AddBulletPoint(panel, changeEntry, _bulletListPadding);
+            foreach (Changelog.Item item in changelog.Items) {
+                AddBulletPoint(panel, item, _bulletListPadding);
             }
 
             AddSeparator(panel);
@@ -104,47 +109,46 @@ namespace TrafficManager.UI.WhatsNew {
             separator.height = 30;
         }
 
-        private void AddVersionRow(UIComponent parentPanel, ChangelogEntry changelogEntry) {
-            bool isCurrentVersion = WhatsNew.CurrentVersion.Equals(changelogEntry.Version);
-            string buildString = StableOrTest(changelogEntry);
+        private void AddVersionRow(UIComponent parentPanel, Changelog changelog) {
+            bool isCurrentVersion = WhatsNew.CurrentVersion.Equals(changelog.Version);
+            string buildString = StableOrTest(changelog);
             bool wasReleased = !string.IsNullOrEmpty(buildString);
 
             // row: [version number] released xyz
-            UIPanel versionRow = AddRowAutoLayoutPanel(parentPanel: parentPanel,
-                                                       panelPadding: _paddingZero,
-                                                       panelWidth: _defaultWidth - 10);
-            versionRow.maximumSize = new Vector2(_defaultWidth - 10, wasReleased? 46 : 36);
+            UIPanel versionRow = parentPanel.AddUIComponent<UIPanel>();
+            versionRow.name = "Version Row";
+            versionRow.autoSize = false;
+            versionRow.width = _defaultWidth - 10;
+            versionRow.height = wasReleased? 46 : 36;
 
             // part: [version number]
-            // UILabel versionLabel = AddKeywordLabel(versionRow, versionStr, MarkupKeyword.VersionStart);
-            UIPanel versionLabel = AddVersionLabel(versionRow, changelogEntry, buildString, wasReleased);
+            UIPanel versionLabel = AddVersionLabel(versionRow, changelog, buildString, wasReleased);
             versionLabel.name = "Version";
             // part released xyz
             UILabel title = versionRow.AddUIComponent<UILabel>();
             title.name = "Released";
-            title.text = string.IsNullOrEmpty(changelogEntry.Released) ? "Not released yet" : changelogEntry.Released.TrimStart();
+            title.text = string.IsNullOrEmpty(changelog.Released) ? "Not released yet" : changelog.Released.TrimStart();
             title.suffix = isCurrentVersion ? " - current version" : string.Empty;
             title.textScale = 1.3f;
             title.textColor = _textColor;
-            title.minimumSize = new Vector2(0, 36);
+            title.minimumSize = new Vector2(200, 36);
             title.padding = new RectOffset(16, 0, 0, 0);
             title.verticalAlignment = UIVerticalAlignment.Middle;
-            if (!string.IsNullOrEmpty(changelogEntry.Link)) {
-                SetupLink(title, changelogEntry);
+            title.relativePosition = new Vector3(versionLabel.width, 0, 0);
+            if (!string.IsNullOrEmpty(changelog.Link)) {
+                SetupLink(title, changelog);
             }
-
-            versionRow.autoLayout = true;
         }
 
-        private string StableOrTest(ChangelogEntry changelogEntry) =>
-            changelogEntry.Stable
+        private string StableOrTest(Changelog changelog) =>
+            changelog.Stable
                 ? " STABLE"
-                : changelogEntry.Released != null
+                : changelog.Released != null
                     ? " TEST"
                     : string.Empty;
 
-        private void SetupLink(UILabel title, ChangelogEntry changelogEntry) {
-            string url = $"https://github.com/CitiesSkylinesMods/TMPE/blob/master/CHANGELOG.md#{changelogEntry.Link}";
+        private void SetupLink(UILabel title, Changelog changelog) {
+            string url = $"https://github.com/CitiesSkylinesMods/TMPE/blob/master/CHANGELOG.md#{changelog.Link}";
             title.tooltip = url;
             title.textColor = _linkTextColor;
             title.eventMouseEnter += (label, _) => ((UILabel)label).textColor = _linkTextColorHover;
@@ -152,20 +156,20 @@ namespace TrafficManager.UI.WhatsNew {
             title.eventClicked += (_, _) => Application.OpenURL(url);
         }
 
-        private void AddBulletPoint(UIComponent parentPanel, ChangelogEntry.ChangeEntry changeEntry, RectOffset bulletPadding) {
+        private void AddBulletPoint(UIComponent parentPanel, Changelog.Item item, RectOffset bulletPadding) {
             // row: [keyword] text what has been changed
             UIPanel panel = AddRowAutoLayoutPanel(parentPanel: parentPanel,
                                                   panelPadding: bulletPadding,
                                                   panelWidth: _defaultWidth - 10);
-            panel.name = "ChangelogEntry";
+            panel.name = "ChangelogItem";
             panel.padding = new RectOffset(20, 0, 0, 0);
             // part: [fixed/updated/removed]
-            AddKeywordLabel(panel, changeEntry.Keyword.ToString(), changeEntry.Keyword);
+            AddKeywordLabel(panel, item.Keyword.ToString(), item.Keyword);
             // part: text
             UILabel label = panel.AddUIComponent<UILabel>();
-            label.name = "ChangelogEntryText";
+            label.name = "ChangelogItemText";
             label.wordWrap = true;
-            label.text = changeEntry.Text;
+            label.text = item.Text;
             label.textScale = 0.8f;
             label.textColor = _textColor;
             label.autoHeight = true;
@@ -178,13 +182,13 @@ namespace TrafficManager.UI.WhatsNew {
 
         private UILabel AddKeywordLabel(UIPanel panel, string text, MarkupKeyword keyword) {
             UILabel label = panel.AddUIComponent<UILabel>();
-            label.name = "ChangelogEntryKeyword";
+            label.name = "ChangelogItemKeyword";
             label.text = text.ToUpper();
             label.textScale = 0.7f;
             label.textColor = Color.white;
             label.backgroundSprite = "TextFieldPanel";
             label.colorizeSprites = true;
-            label.color = WhatsNewMarkup.GetColor(keyword);
+            label.color = keyword.ToColor();
             label.minimumSize = _minKeywordLabelSize;
             label.textAlignment = UIHorizontalAlignment.Center;
             label.verticalAlignment = UIVerticalAlignment.Middle;
@@ -193,20 +197,21 @@ namespace TrafficManager.UI.WhatsNew {
             return label;
         }
 
-        private UIPanel AddVersionLabel(UIPanel parentPanel, ChangelogEntry changelogEntry, string buildString, bool wasReleased) {
+        private UIPanel AddVersionLabel(UIPanel parentPanel, Changelog changelog, string buildString, bool wasReleased) {
             UIPanel panel = AddRowAutoLayoutPanel(parentPanel: parentPanel,
                                                   panelPadding: _paddingZero,
                                                   panelWidth: 100,
                                                   vertical: true);
             panel.backgroundSprite = "TextFieldPanel";
-            panel.color = WhatsNewMarkup.GetColor(MarkupKeyword.VersionStart);
+            panel.color = MarkupKeyword.VersionStart.ToColor();
             panel.minimumSize = new Vector2(75, wasReleased ? 46 : 32);
             panel.padding = new RectOffset(0, 0, 6, 0);
             panel.height = wasReleased ? 45 : 36;
+            panel.relativePosition = Vector3.zero;
 
             UILabel version = panel.AddUIComponent<UILabel>();
-            version.name = "ChangelogEntryVersionNumber";
-            version.text = changelogEntry.Version.ToString();
+            version.name = "ChangelogVersionNumber";
+            version.text = changelog.Version.ToString();
             version.textScale = 1.2f;
             version.textAlignment = UIHorizontalAlignment.Center;
             version.verticalAlignment = UIVerticalAlignment.Top;
@@ -216,7 +221,7 @@ namespace TrafficManager.UI.WhatsNew {
 
             if (wasReleased) {
                 UILabel build = panel.AddUIComponent<UILabel>();
-                build.name = "ChangelogEntryBuildType";
+                build.name = "ChangelogBuildType";
                 build.text = buildString;
                 build.textScale = 0.7f;
                 build.textAlignment = UIHorizontalAlignment.Center;
@@ -253,7 +258,7 @@ namespace TrafficManager.UI.WhatsNew {
             title.anchor = UIAnchorStyle.Top;
             title.textAlignment = UIHorizontalAlignment.Center;
             title.eventTextChanged += (_, _) => title.CenterToParent();
-            title.text = "What's New - " + TrafficManagerMod.ModName;
+            title.text = $"What's New - {TrafficManagerMod.ModName}";
             title.MakePixelPerfect();
 
             var cancel = _header.AddUIComponent<UIButton>();
@@ -273,25 +278,24 @@ namespace TrafficManager.UI.WhatsNew {
             scrollbar.value = 0;
             scrollbar.incrementAmount = 25;
             scrollbar.autoHide = true;
-            scrollbar.width = 10;
-            scrollbar.height = _defaultHeight - _header.height - _footerPanel.height;
+            scrollbar.width = 4;
+            scrollbar.height = _defaultHeight - _header.height - _footerPanelHeight;
             scrollbar.scrollEasingType = EasingType.BackEaseOut;
 
             var trackSprite = scrollbar.AddUIComponent<UISlicedSprite>();
             trackSprite.relativePosition = Vector2.zero;
-            trackSprite.autoSize = true;
             trackSprite.anchor = UIAnchorStyle.All;
-            trackSprite.size = trackSprite.parent.size;
+            trackSprite.size = scrollbar.size;
             trackSprite.fillDirection = UIFillDirection.Vertical;
-            trackSprite.spriteName = "ScrollbarTrack";
+            trackSprite.spriteName = string.Empty; // "ScrollbarTrack";
             scrollbar.trackObject = trackSprite;
 
             var thumbSprite = trackSprite.AddUIComponent<UISlicedSprite>();
             thumbSprite.relativePosition = Vector2.zero;
             thumbSprite.fillDirection = UIFillDirection.Vertical;
-            thumbSprite.autoSize = true;
-            thumbSprite.width = thumbSprite.parent.width;
-            thumbSprite.spriteName = "ScrollbarThumb";
+            thumbSprite.size = scrollbar.size;
+            thumbSprite.spriteName = "ScrollbarTrack"; // "ScrollbarThumb";
+            thumbSprite.color = new Color(40, 40, 40);
             scrollbar.thumbObject = thumbSprite;
 
             scrollbar.eventValueChanged += (_, value) => scrollablePanel.scrollPosition = new Vector2(0, value);
@@ -316,8 +320,6 @@ namespace TrafficManager.UI.WhatsNew {
 
         private void HandleClose() {
             if (!gameObject) return;
-
-            TMPELifecycle.Instance.WhatsNew.MarkAsShown();
 
             if (UIView.GetModalComponent() == this) {
                 UIView.PopModal();
