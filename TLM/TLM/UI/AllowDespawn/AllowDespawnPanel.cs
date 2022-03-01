@@ -1,20 +1,18 @@
-namespace TrafficManager.State {
+namespace TrafficManager.UI.AllowDespawn {
     using System;
-    using ColossalFramework;
-    using ICities;
     using System.Collections.Generic;
+    using API.Traffic.Enums;
+    using ColossalFramework;
     using ColossalFramework.UI;
-    using ConfigData;
     using CSUtil.Commons;
-    using TrafficManager.API.Traffic.Enums;
-    using TrafficManager.Lifecycle;
-    using TrafficManager.Manager.Impl;
-    using TrafficManager.UI;
-    using TrafficManager.UI.Helpers;
-    using Util;
+    using Helpers;
+    using Lifecycle;
+    using State;
+    using UnityEngine;
 
-    /// <summary>Exclusions list for "Force No Despawning" feature</summary>
-    public static class MaintenanceTab_AllowDespawnGroup {
+    public class AllowDespawningPanel : UIPanel {
+        private const int _defaultWidth = 290;
+        private const int _defaultHeight = 280;
 
         public static CheckboxOption AllowDespawnPassengerCars =
             new ("AllowDespawnPassengerCar", Options.PersistTo.Global) {
@@ -82,12 +80,14 @@ namespace TrafficManager.State {
                 Handler = (bool newValue) => OnChange(ExtVehicleType.CargoTrain, newValue),
                 Value = IsDespawnAllowed(ExtVehicleType.CargoTrain)
             };
+
         public static CheckboxOption AllowDespawnCargoTrucks =
             new ("AllowDespawnPassengerTruck", Options.PersistTo.Global) {
                 Label = "AllowDespawn.Checkbox:Cargo Trucks",
                 Handler = (bool newValue) => OnChange(ExtVehicleType.CargoTruck, newValue),
                 Value = IsDespawnAllowed(ExtVehicleType.CargoTruck)
             };
+
         public static CheckboxOption AllowDespawnService =
             new ("AllowDespawnService", Options.PersistTo.Global) {
                 Label = "AllowDespawn.Checkbox:Service vehicles",
@@ -114,11 +114,45 @@ namespace TrafficManager.State {
             { AllowDespawnService, ExtVehicleType.Service },
         };
 
-        static MaintenanceTab_AllowDespawnGroup() {
+        private readonly Color32 _panelBgColor = new Color32(55, 55, 55, 255);
+
+        private readonly RectOffset _panelPadding = new RectOffset(10, 0, 15, 0);
+        private UIDragHandle _header;
+
+        public override void Awake() {
+            base.Awake();
+            SubscribeToGlobalConfigChanges();
+
+            isVisible = true;
+            canFocus = true;
+            isInteractive = true;
+            anchor = UIAnchorStyle.Left | UIAnchorStyle.Top | UIAnchorStyle.Proportional;
+            size = new Vector2(_defaultWidth, _defaultHeight);
+            backgroundSprite = "GenericPanel";
+            color = _panelBgColor;
+
+            AddHeader();
+            AddContent();
+        }
+
+        public static void OpenModal() {
+            UIView uiView = UIView.GetAView();
+            if (uiView) {
+
+                AllowDespawningPanel panel = uiView.AddUIComponent(typeof(AllowDespawningPanel)) as AllowDespawningPanel;
+                if (panel) {
+                    Log.Info("Opened Allow Despawn panel!");
+                    UIView.PushModal(panel);
+                    panel.CenterToParent();
+                    panel.BringToFront();
+                }
+            }
+        }
+
+        private void SubscribeToGlobalConfigChanges() {
             try {
-                // attach observer, update checkboxes with new values
-                GlobalConfigObserver configObserver =
-                    TMPELifecycle.Instance.gameObject.AddComponent<GlobalConfigObserver>();
+                // attach observer and update checkboxes values callback
+                GlobalConfigObserver configObserver = gameObject.AddComponent<GlobalConfigObserver>();
                 configObserver.OnUpdateObservers += (config) => OnUpdateCheckboxes(config);
             } catch (Exception e) {
                 Log.Error($"Error initializing GlobalConfigObserver {e}");
@@ -139,22 +173,6 @@ namespace TrafficManager.State {
             }
         }
 
-        /// <summary>
-        /// Adds "Allow Despawn" group to the specified <paramref name="tab"/>.
-        /// </summary>
-        /// <param name="tab">The parent UI panel.</param>
-        internal static void AddUI(UIHelperBase tab) {
-            var group = tab.AddGroup(T("Maintenance.Group:Allow Despawn"));
-
-            foreach (var allowed in AllowDespawns) {
-                allowed.Key.AddUI(group);
-            }
-        }
-
-        private static string T(string text) {
-            return Translation.Options.Get(text);
-        }
-
         private static void OnChange(ExtVehicleType vehicleType, bool newVal) {
             if (newVal) {
                 GlobalConfig.Instance.Gameplay.AllowedDespawnVehicleTypes |= vehicleType;
@@ -163,6 +181,73 @@ namespace TrafficManager.State {
             }
             GlobalConfig.WriteConfig();
             Log._Debug($"Updated GlobalConfig AllowedDespawnVehicleTypes: {GlobalConfig.Instance.Gameplay.AllowedDespawnVehicleTypes}");
+        }
+
+        private void AddContent() {
+            var panel = AddUIComponent<UIPanel>();
+            panel.autoLayout = false;
+            panel.maximumSize = GetMaxContentSize();
+            panel.relativePosition = new Vector2(5, 40);
+            panel.size = new Vector2(_defaultWidth - 10, _defaultHeight - _header.height);
+            panel.padding = _panelPadding;
+            panel.autoLayoutDirection = LayoutDirection.Vertical;
+
+            var group = new UIHelper(panel);
+
+            foreach (var allowed in AllowDespawns) {
+                allowed.Key.AddUI(group);
+            }
+
+            panel.autoLayout = true;
+        }
+
+        private Vector2 GetMaxContentSize() {
+            var resolution = GetUIView().GetScreenResolution();
+            return new Vector2(_defaultWidth, resolution.y - 580f);
+        }
+
+        private void AddHeader() {
+            _header = AddUIComponent<UIDragHandle>();
+            _header.size = new Vector2(_defaultWidth, 42);
+            _header.relativePosition = Vector2.zero;
+
+            var title = _header.AddUIComponent<UILabel>();
+            title.textScale = 1.35f;
+            title.anchor = UIAnchorStyle.Top;
+            title.textAlignment = UIHorizontalAlignment.Center;
+            title.eventTextChanged += (_, _) => title.CenterToParent();
+            title.text = T("Maintenance.Group:Allowed to despawn");
+            title.MakePixelPerfect();
+
+            var cancel = _header.AddUIComponent<UIButton>();
+            cancel.normalBgSprite = "buttonclose";
+            cancel.hoveredBgSprite = "buttonclosehover";
+            cancel.pressedBgSprite = "buttonclosepressed";
+            cancel.size = new Vector2(32, 32);
+            cancel.relativePosition = new Vector2(_defaultWidth - 37, 4);
+            cancel.eventClick += (_, _) => HandleClose();
+        }
+
+        private static string T(string text) {
+            return Translation.Options.Get(text);
+        }
+
+        private void HandleClose() {
+            if (!gameObject) return;
+
+            if (UIView.GetModalComponent() == this) {
+                UIView.PopModal();
+                UIComponent modal = UIView.GetModalComponent();
+                if (modal) {
+                    UIView.GetAView().BringToFront(modal);
+                } else {
+                    UIView.GetAView().panelsLibraryModalEffect.Hide();
+                }
+            }
+
+            _header = null;
+            Destroy(gameObject);
+            Log.Info("Allow Despawn panel closed and destroyed.");
         }
     }
 }

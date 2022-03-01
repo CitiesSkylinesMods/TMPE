@@ -153,9 +153,9 @@
     <Compile Include="State\OptionsTabs\GameplayTab_VehicleBehaviourGroup.cs" />
     <Compile Include="State\OptionsTabs\GeneralTab_InterfaceGroup.cs" />
     <Compile Include="State\OptionsTabs\GeneralTab_SimulationGroup.cs" />
-    <Compile Include="State\OptionsTabs\MaintenanceTab_AllowDespawnGroup.cs" />
     <Compile Include="State\OptionsTabs\MaintenanceTab_DespawnGroup.cs" />
     <Compile Include="State\VersionInfo.cs" />
+    <Compile Include="UI\AllowDespawn\AllowDespawnPanel.cs" />
     <Compile Include="UI\Helpers\ActionButton.cs" />
     <Compile Include="UI\Helpers\GlobalConfigObserver.cs" />
     <Compile Include="UI\Helpers\SliderOption.cs" />
