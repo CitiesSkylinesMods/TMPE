@@ -76,7 +76,7 @@ namespace TrafficManager.UI.Helpers {
         /// <param name="title">Dialog title.</param>
         /// <param name="message">Dialog body text.</param>
         /// <param name="isError">If <c>true</c>, the dialog is styled as an error.</param>
-        internal static void ExceptionPanel(string title, string message, bool isError) {
+        private static void ExceptionPanel(string title, string message, bool isError) {
             Action prompt = () => {
                 UIView.library
                     .ShowModal<ExceptionPanel>("ExceptionPanel")
