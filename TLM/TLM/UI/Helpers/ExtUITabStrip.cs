@@ -87,6 +87,7 @@ namespace TrafficManager.UI.Helpers {
             tabButton.pressedBgSprite = "SubBarButtonBasePressed";
             tabButton.textPadding = new RectOffset(10, 10, 10, 6);
             tabButton.autoSize = true;
+            tabButton.atlas = U.TextureUtil.Ingame;
 
             selectedIndex = tabCount - 1;
             UIPanel currentPanel = tabContainer.components[selectedIndex] as UIPanel;
