@@ -1,5 +1,10 @@
 namespace TrafficManager.State {
+    using UnityEngine;
+    using TrafficManager.Lifecycle;
+    using TrafficManager.Manager.Impl;
+    using TrafficManager.State.ConfigData;
     using TrafficManager.UI;
+    using TrafficManager.UI.Textures;
     using TrafficManager.UI.Helpers;
     using TrafficManager.UI.WhatsNew;
 

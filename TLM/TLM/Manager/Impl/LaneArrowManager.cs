@@ -220,7 +220,7 @@ namespace TrafficManager.Manager.Impl {
 
         public override void OnLevelLoading() {
             base.OnLevelLoading();
-            if (PoliciesTab.DedicatedTurningLanes) {
+            if (Options.DedicatedTurningLanes) {
                 // update dedicated turning lanes after patch has been applied.
                 UpdateDedicatedTurningLanePolicy(false);
             }
