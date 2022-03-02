@@ -1,8 +1,7 @@
 namespace TrafficManager.Util {
-    using CSUtil.Commons;
     using System;
     using System.Reflection;
-    using System.Diagnostics.CodeAnalysis;
+    using CSUtil.Commons;
     using TrafficManager.Lifecycle;
     using TrafficManager.UI.Helpers;
 
