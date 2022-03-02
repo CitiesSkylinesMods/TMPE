@@ -3,22 +3,27 @@ namespace TrafficManager.Util {
     using System;
     using System.Reflection;
     using TrafficManager.Lifecycle;
-    using System.Diagnostics.CodeAnalysis;
 
     /// <summary>
     /// Much of this stuff will be replaced as part of PR #699.
     /// </summary>
-    [SuppressMessage("Performance", "HAA0101:Array allocation for params parameter", Justification = "Not performance critical")]
-    [SuppressMessage("Performance", "HAA0601:Value type to reference type conversion causing boxing allocation", Justification = "Not performance critical")]
-    [SuppressMessage("Performance", "HAA0302:Display class allocation to capture closure", Justification = "Not performance critical")]
     public static class VersionUtil {
-        public const string BRANCH =
+
 #if TEST
-            "TEST";
+        public const string BRANCH = "TEST";
+        public const bool IS_DEBUG = false;
+        public const bool IS_TEST = true;
+        public const bool IS_STABLE = false;
 #elif DEBUG
-            "DEBUG";
+        public const string BRANCH = "DEBUG";
+        public const bool IS_DEBUG = true;
+        public const bool IS_TEST = false;
+        public const bool IS_STABLE = false;
 #else
-            "STABLE";
+        public const string BRANCH = "STABLE";
+        public const bool IS_DEBUG = false;
+        public const bool IS_TEST = false;
+        public const bool IS_STABLE = true;
 #endif
 
         /// <summary>
