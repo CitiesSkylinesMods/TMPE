@@ -12,7 +12,6 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.State;
     using UnityEngine;
     using static TrafficManager.Util.Shortcuts;
-    using TrafficManager.Util;
     using TrafficManager.Util.Extensions;
     using TrafficManager.Manager.Impl.LaneConnectionManagerData;
     using TrafficManager.Lifecycle;
