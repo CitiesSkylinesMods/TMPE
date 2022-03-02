@@ -71,8 +71,12 @@ namespace TrafficManager.Lifecycle {
 
         public static AppMode? AppMode => SimulationManager.instance.m_ManagersWrapper.loading?.currentMode;
 
+        // throws null ref if used from main menu
         public static SimulationManager.UpdateMode UpdateMode => SimulationManager.instance.m_metaData.m_updateMode;
+
+        // throws null ref if used form main menu
         public static LoadMode Mode => (LoadMode)UpdateMode;
+
         public static string Scene => SceneManager.GetActiveScene().name;
 
         /// <summary>
