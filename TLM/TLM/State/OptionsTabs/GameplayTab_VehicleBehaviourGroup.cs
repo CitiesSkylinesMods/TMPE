@@ -9,19 +9,19 @@ namespace TrafficManager.State {
 
         public static CheckboxOption IndividualDrivingStyle =
             new (nameof(Options.individualDrivingStyle), Options.PersistTo.Savegame) {
-                Label = T("Gameplay.Checkbox:Individual driving styles"),
+                Label = "Gameplay.Checkbox:Individual driving styles",
             };
 
         // Requires Snowfall DLC
         public static CheckboxOption StrongerRoadConditionEffects =
             new(nameof(Options.strongerRoadConditionEffects), Options.PersistTo.Savegame) {
-                Label = T("Gameplay.Checkbox:Increase road condition impact"),
+                Label = "Gameplay.Checkbox:Increase road condition impact",
                 Validator = SnowfallDlcValidator,
             };
 
         public static CheckboxOption DisableDespawning =
             new(nameof(Options.disableDespawning), Options.PersistTo.Savegame) {
-                Label = T("Maintenance.Checkbox:Disable despawning"),
+                Label = "Maintenance.Checkbox:Disable despawning",
             };
 
         private static UIDropDown _recklessDriversDropdown;
