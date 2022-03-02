@@ -6,6 +6,7 @@
 [Updated] Refactoring mod options #1435 #1432 #1422 #1411 #1416 #1356 #1279 (aubergine18)
 [Updated] Replaced `Overlay Transparency` with `Overlay Opacity` #1432 #1268 (aubergine18)
 [Updated] Minimum GUI/Overlay opacity limited to 10% #1432 #1409 (KHY-afk, aubergine18)
+[Updated] Use `Prompt.Error` for error message display #1445 (aubergine18)
 [Removed] Obsolete gamebridge stuff from build script #1436 (aubergine18)
 [/Version]
 
