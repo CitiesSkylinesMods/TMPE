@@ -68,34 +68,19 @@ namespace TrafficManager.Manager.Impl {
             return (byte)(SimulationAccuracy.MaxValue - value);
         }
 
-        // Takes a bool from data and sets it in `out result`
-        private static bool LoadBool([NotNull] byte[] data, uint idx, bool defaultVal = false) {
-            if (data.Length > idx) {
-                var result = data[idx] == 1;
-                return result;
-            }
+        private static bool LoadBool([NotNull] byte[] data, uint idx, bool defaultVal = false)
+            => (data.Length > idx) ? data[idx] == 1 : defaultVal;
 
-            return defaultVal;
-        }
-
-        private static byte LoadByte([NotNull] byte[] data, uint idx, byte defaultVal = 0) {
-            if (data.Length > idx) {
-                var result = data[idx];
-                return result;
-            }
-
-            return defaultVal;
-        }
+        private static byte LoadByte([NotNull] byte[] data, uint idx, byte defaultVal = 0)
+            => (data.Length > idx) ? data[idx] : defaultVal;
 
         /// <summary>Load LegacySerializableOption bool.</summary>
-        private static void ToCheckbox([NotNull] byte[] data, uint idx, ILegacySerializableOption opt, bool defaultVal = false) {
-            if (data.Length > idx) {
-                opt.Load(data[idx]);
-                return;
-            }
+        private static void ToCheckbox(byte[] data, uint idx, ILegacySerializableOption opt, bool defaultVal = false)
+            => opt.Load((byte)(LoadBool(data, idx, defaultVal) ? 1 : 0));
 
-            opt.Load(defaultVal ? (byte)1 : (byte)0);
-        }
+        /// <summary>Load LegacySerializableOption byte.</summary>
+        private static void ToSlider(byte[] data, uint idx, ILegacySerializableOption opt, byte defaultVal = 0)
+            => opt.Load(LoadByte(data, idx, defaultVal));
 
         public bool LoadData(byte[] data) {
             try {
@@ -109,7 +94,7 @@ namespace TrafficManager.Manager.Impl {
                 PoliciesTab.SetRelaxedBusses(LoadBool(data, idx: 3));
                 OverlaysTab.SetNodesOverlay(LoadBool(data, idx: 4));
                 PoliciesTab.SetMayEnterBlockedJunctions(LoadBool(data, idx: 5));
-                GameplayTab.SetAdvancedAi(LoadBool(data, idx: 6));
+                ToCheckbox(data, idx: 6, GameplayTab_AIGroups.AdvancedAI, false);
                 PoliciesTab.SetHighwayRules(LoadBool(data, idx: 7));
                 OverlaysTab.SetPrioritySignsOverlay(LoadBool(data, idx: 8));
                 OverlaysTab.SetTimedLightsOverlay(LoadBool(data, idx: 9));
@@ -128,7 +113,7 @@ namespace TrafficManager.Manager.Impl {
                 MaintenanceTab.SetLaneConnectorEnabled(LoadBool(data, idx: 22));
                 OverlaysTab.SetJunctionRestrictionsOverlay(LoadBool(data, idx: 23));
                 MaintenanceTab.SetJunctionRestrictionsEnabled(LoadBool(data, idx: 24));
-                GameplayTab.SetProhibitPocketCars(LoadBool(data, idx: 25));
+                ToCheckbox(data, idx: 25, GameplayTab_AIGroups.ParkingAI, false);
                 PoliciesTab.SetPreferOuterLane(LoadBool(data, idx: 26));
                 ToCheckbox(data, idx: 27, GameplayTab_VehicleBehaviourGroup.IndividualDrivingStyle, false);
                 PoliciesTab.SetEvacBussesMayIgnoreRules(LoadBool(data, idx: 28));
@@ -137,7 +122,7 @@ namespace TrafficManager.Manager.Impl {
                 OverlaysTab.SetParkingRestrictionsOverlay(LoadBool(data, idx: 31));
                 PoliciesTab.SetBanRegularTrafficOnBusLanes(LoadBool(data, idx: 32));
                 MaintenanceTab.SetShowPathFindStats(LoadBool(data, idx: 33));
-                GameplayTab.SetDLSPercentage(LoadByte(data, idx: 34));
+                ToSlider(data, idx: 34, GameplayTab_AIGroups.AltLaneSelectionRatio, 0);
 
                 if (data.Length > 35) {
                     try {
@@ -151,7 +136,7 @@ namespace TrafficManager.Manager.Impl {
                 }
 
                 PoliciesTab.SetTrafficLightPriorityRules(LoadBool(data, idx: 36));
-                GameplayTab.SetRealisticPublicTransport(LoadBool(data, idx: 37));
+                ToCheckbox(data, idx: 37, GameplayTab_AIGroups.RealisticPublicTransport, false);
                 MaintenanceTab.SetTurnOnRedEnabled(LoadBool(data, idx: 38));
                 PoliciesTab.SetAllowNearTurnOnRed(LoadBool(data, idx: 39));
                 PoliciesTab.SetAllowFarTurnOnRed(LoadBool(data, idx: 40));
