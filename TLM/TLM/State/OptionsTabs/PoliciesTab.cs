@@ -9,15 +9,6 @@ namespace TrafficManager.State {
     using static TrafficManager.Util.Shortcuts;
 
     public static class PoliciesTab {
-        private static UICheckBox _relaxedBussesToggle;
-        private static UICheckBox _allRelaxedToggle;
-        private static UICheckBox _allowEnterBlockedJunctionsToggle;
-        private static UICheckBox _allowUTurnsToggle;
-        private static UICheckBox _allowNearTurnOnRedToggle;
-        private static UICheckBox _allowFarTurnOnRedToggle;
-        private static UICheckBox _allowLaneChangesWhileGoingStraightToggle;
-        private static UICheckBox _trafficLightPriorityRulesToggle;
-        private static UICheckBox _automaticallyAddTrafficLightsIfApplicableToggle;
         private static UIDropDown _vehicleRestrictionsAggressionDropdown;
         private static UICheckBox _banRegularTrafficOnBusLanesToggle;
         private static UICheckBox _highwayRulesToggle;
@@ -30,74 +21,13 @@ namespace TrafficManager.State {
                 Handler = JunctionRestrictionsUpdateHandler,
             };
 
-        public static CheckboxOption DedicatedTurningLanes =
-            new CheckboxOption(nameof(DedicatedTurningLanes)) {
-                Label = "VR.Option:Dedicated turning lanes",
-                Handler = UpdateDedicatedTurningLanePolicyHandler,
-        };
-
         static void JunctionRestrictionsUpdateHandler(bool value ) =>
             JunctionRestrictionsManager.Instance.UpdateAllDefaults();
 
-        static void UpdateDedicatedTurningLanePolicyHandler(bool value) =>
-            LaneArrowManager.Instance.UpdateDedicatedTurningLanePolicy(true);
-
         internal static void MakeSettings_VehicleRestrictions(ExtUITabstrip tabStrip) {
             UIHelper panelHelper = tabStrip.AddTabPage(Translation.Options.Get("Tab:Policies & Restrictions"));
-            UIHelperBase atJunctionsGroup = panelHelper.AddGroup(
-                Translation.Options.Get("VR.Group:At junctions"));
-#if DEBUG
-            _allRelaxedToggle
-                = atJunctionsGroup.AddCheckbox(
-                      Translation.Options.Get("VR.Checkbox:All vehicles may ignore lane arrows"),
-                      Options.allRelaxed,
-                      OnAllRelaxedChanged) as UICheckBox;
-#endif
-            _relaxedBussesToggle
-                = atJunctionsGroup.AddCheckbox(
-                      Translation.Options.Get("VR.Checkbox:Buses may ignore lane arrows"),
-                      Options.relaxedBusses,
-                      OnRelaxedBussesChanged) as UICheckBox;
-            _allowEnterBlockedJunctionsToggle
-                = atJunctionsGroup.AddCheckbox(
-                      Translation.Options.Get("VR.Checkbox:Vehicles may enter blocked junctions"),
-                      Options.allowEnterBlockedJunctions,
-                      OnAllowEnterBlockedJunctionsChanged) as UICheckBox;
-            _allowUTurnsToggle
-                = atJunctionsGroup.AddCheckbox(
-                      Translation.Options.Get("VR.Checkbox:Vehicles may do u-turns at junctions"),
-                      Options.allowUTurns,
-                      OnAllowUTurnsChanged) as UICheckBox;
-            _allowNearTurnOnRedToggle
-                = atJunctionsGroup.AddCheckbox(
-                      Translation.Options.Get("VR.Checkbox:Vehicles may turn on red"),
-                      Options.allowNearTurnOnRed,
-                      OnAllowNearTurnOnRedChanged) as UICheckBox;
-            _allowFarTurnOnRedToggle
-                = atJunctionsGroup.AddCheckbox(
-                      Translation.Options.Get("VR.Checkbox:Also apply to left/right turns between one-way streets"),
-                      Options.allowFarTurnOnRed,
-                      OnAllowFarTurnOnRedChanged) as UICheckBox;
-            CheckboxOption.ApplyIndent(_allowFarTurnOnRedToggle);
-            CheckboxOption.ApplyTextWrap(_allowFarTurnOnRedToggle, indented: true);
-            _allowLaneChangesWhileGoingStraightToggle
-                = atJunctionsGroup.AddCheckbox(
-                      Translation.Options.Get("VR.Checkbox:Vehicles going straight may change lanes at junctions"),
-                      Options.allowLaneChangesWhileGoingStraight,
-                      OnAllowLaneChangesWhileGoingStraightChanged) as UICheckBox;
-            _trafficLightPriorityRulesToggle
-                = atJunctionsGroup.AddCheckbox(
-                      Translation.Options.Get("VR.Checkbox:Vehicles follow priority rules at junctions with timedTL"),
-                      Options.trafficLightPriorityRules,
-                      OnTrafficLightPriorityRulesChanged) as UICheckBox;
-            CheckboxOption.ApplyTextWrap(_trafficLightPriorityRulesToggle);
-            _automaticallyAddTrafficLightsIfApplicableToggle
-                = atJunctionsGroup.AddCheckbox(
-                      Translation.Options.Get("VR.Checkbox:Automatically add traffic lights if applicable"),
-                      Options.automaticallyAddTrafficLightsIfApplicable,
-                      OnAutomaticallyAddTrafficLightsIfApplicableChanged) as UICheckBox;
-            DedicatedTurningLanes.AddUI(atJunctionsGroup);
 
+            PoliciesTab_AtJunctionsGroup.AddUI(panelHelper);
 
             UIHelperBase onRoadsGroup =
                 panelHelper.AddGroup(Translation.Options.Get("VR.Group:On roads"));
@@ -146,126 +76,6 @@ namespace TrafficManager.State {
             OptionsMassEditTab.MakePanel_MassEdit(panelHelper);
         }
 
-        private static void OnAllRelaxedChanged(bool newAllRelaxed) {
-            if (!Options.IsGameLoaded()) {
-                return;
-            }
-
-            Log._Debug($"All relaxed changed to {newAllRelaxed}");
-            Options.allRelaxed = newAllRelaxed;
-        }
-
-        private static void OnRelaxedBussesChanged(bool newRelaxedBusses) {
-            if (!Options.IsGameLoaded()) {
-                return;
-            }
-
-            Log._Debug($"Relaxed busses changed to {newRelaxedBusses}");
-            Options.relaxedBusses = newRelaxedBusses;
-        }
-
-        private static void OnAllowEnterBlockedJunctionsChanged(bool newValue) {
-            if (!Options.IsGameLoaded()) {
-                return;
-            }
-
-            if (newValue && !Options.junctionRestrictionsEnabled) {
-                SetAllowEnterBlockedJunctions(false);
-                return;
-            }
-
-            Log._Debug($"allowEnterBlockedJunctions changed to {newValue}");
-            SetAllowEnterBlockedJunctions(newValue);
-        }
-
-        private static void OnAllowUTurnsChanged(bool newValue) {
-            if (!Options.IsGameLoaded()) {
-                return;
-            }
-
-            if (newValue && !Options.junctionRestrictionsEnabled) {
-                SetAllowUTurns(false);
-                return;
-            }
-
-            Log._Debug($"allowUTurns changed to {newValue}");
-            SetAllowUTurns(newValue);
-        }
-
-        private static void OnAllowNearTurnOnRedChanged(bool newValue) {
-            if (!Options.IsGameLoaded()) {
-                return;
-            }
-
-            if (newValue && !Options.turnOnRedEnabled) {
-                SetAllowNearTurnOnRed(false);
-                SetAllowFarTurnOnRed(false);
-                return;
-            }
-
-            Log._Debug($"allowNearTurnOnRed changed to {newValue}");
-            SetAllowNearTurnOnRed(newValue);
-
-            if (!newValue) {
-                SetAllowFarTurnOnRed(false);
-            }
-        }
-
-        private static void OnAllowFarTurnOnRedChanged(bool newValue) {
-            if (!Options.IsGameLoaded()) {
-                return;
-            }
-
-            if (newValue && (!Options.turnOnRedEnabled || !Options.allowNearTurnOnRed)) {
-                SetAllowFarTurnOnRed(false);
-                return;
-            }
-
-            Log._Debug($"allowFarTurnOnRed changed to {newValue}");
-            SetAllowFarTurnOnRed(newValue);
-        }
-
-        private static void OnAllowLaneChangesWhileGoingStraightChanged(bool newValue) {
-            if (!Options.IsGameLoaded()) {
-                return;
-            }
-
-            if (newValue && !Options.junctionRestrictionsEnabled) {
-                SetAllowLaneChangesWhileGoingStraight(false);
-                return;
-            }
-
-            Log._Debug($"allowLaneChangesWhileGoingStraight changed to {newValue}");
-            SetAllowLaneChangesWhileGoingStraight(newValue);
-        }
-
-        private static void OnTrafficLightPriorityRulesChanged(bool newValue) {
-            if (!Options.IsGameLoaded()) {
-                return;
-            }
-
-            if (newValue && !Options.prioritySignsEnabled) {
-                SetTrafficLightPriorityRules(false);
-                return;
-            }
-
-            Log._Debug($"trafficLightPriorityRules changed to {newValue}");
-            Options.trafficLightPriorityRules = newValue;
-
-            if (newValue) {
-                SetPrioritySignsEnabled(true);
-                SetTimedLightsEnabled(true);
-            }
-        }
-
-        private static void OnAutomaticallyAddTrafficLightsIfApplicableChanged(bool newValue) {
-            if (!Options.IsGameLoaded()) {
-                return;
-            }
-            Log._Debug($"AutomaticallyAddTrafficLightsIfApplicableChanged changed to {newValue}");
-            Options.automaticallyAddTrafficLightsIfApplicable = newValue;
-        }
-
         private static void OnVehicleRestrictionsAggressionChanged(int newValue) {
             if (!Options.IsGameLoaded()) {
                 return;
@@ -284,14 +94,6 @@ namespace TrafficManager.State {
             }
         }
 
-        public static void SetTrafficLightPriorityRules(bool value) {
-            Options.trafficLightPriorityRules = value;
-
-            if (_trafficLightPriorityRulesToggle != null) {
-                _trafficLightPriorityRulesToggle.isChecked = value;
-            }
-        }
-
         private static void OnBanRegularTrafficOnBusLanesChanged(bool newValue) {
             if (!Options.IsGameLoaded()) {
                 return;
@@ -301,7 +103,7 @@ namespace TrafficManager.State {
             Options.banRegularTrafficOnBusLanes = newValue;
             VehicleRestrictionsManager.Instance.ClearCache();
             ModUI.GetTrafficManagerTool()?.InitializeSubTools();
-            if (DedicatedTurningLanes) {
+            if (Options.DedicatedTurningLanes) {
                 LaneArrowManager.Instance.UpdateDedicatedTurningLanePolicy(false);
             }
         }
@@ -340,100 +142,6 @@ namespace TrafficManager.State {
             Options.evacBussesMayIgnoreRules = value;
         }
 
-        public static void SetAllowEnterBlockedJunctions(bool value) {
-            Options.allowEnterBlockedJunctions = value;
-
-            if (_allowEnterBlockedJunctionsToggle != null) {
-                _allowEnterBlockedJunctionsToggle.isChecked = value;
-            }
-
-            Constants.ManagerFactory.JunctionRestrictionsManager.UpdateAllDefaults();
-            ModUI.GetTrafficManagerTool()?.InitializeSubTools();
-        }
-
-        public static void SetPrioritySignsEnabled(bool newValue) {
-            Options.RebuildMenu();
-            Options.prioritySignsEnabled = newValue;
-
-            if (MaintenanceTab.EnablePrioritySignsToggle != null) {
-                MaintenanceTab.EnablePrioritySignsToggle.isChecked = newValue;
-            }
-
-            if (!newValue) {
-                OverlaysTab.SetPrioritySignsOverlay(false);
-            }
-        }
-
-        public static void SetTimedLightsEnabled(bool newValue) {
-            Options.RebuildMenu();
-            Options.timedLightsEnabled = newValue;
-
-            if (MaintenanceTab.EnableTimedLightsToggle != null) {
-                MaintenanceTab.EnableTimedLightsToggle.isChecked = newValue;
-            }
-
-            if (!newValue) {
-                OverlaysTab.SetTimedLightsOverlay(false);
-            }
-        }
-
-        public static void SetAllowUTurns(bool value) {
-            Options.allowUTurns = value;
-
-            if (_allowUTurnsToggle != null) {
-                _allowUTurnsToggle.isChecked = value;
-            }
-
-            Constants.ManagerFactory.JunctionRestrictionsManager.UpdateAllDefaults();
-            ModUI.GetTrafficManagerTool()?.InitializeSubTools();
-        }
-
-        public static void SetAllowNearTurnOnRed(bool newValue) {
-            Options.allowNearTurnOnRed = newValue;
-
-            if (_allowNearTurnOnRedToggle != null) {
-                _allowNearTurnOnRedToggle.isChecked = newValue;
-            }
-
-            Constants.ManagerFactory.JunctionRestrictionsManager.UpdateAllDefaults();
-            ModUI.GetTrafficManagerTool()?.InitializeSubTools();
-        }
-
-        public static void SetAllowFarTurnOnRed(bool newValue) {
-            Options.allowFarTurnOnRed = newValue;
-
-            if (_allowFarTurnOnRedToggle != null) {
-                _allowFarTurnOnRedToggle.isChecked = newValue;
-            }
-
-            Constants.ManagerFactory.JunctionRestrictionsManager.UpdateAllDefaults();
-            ModUI.GetTrafficManagerTool()?.InitializeSubTools();
-        }
-
-        public static void SetAllowLaneChangesWhileGoingStraight(bool value) {
-            Options.allowLaneChangesWhileGoingStraight = value;
-            if (_allowLaneChangesWhileGoingStraightToggle != null)
-                _allowLaneChangesWhileGoingStraightToggle.isChecked = value;
-            Constants.ManagerFactory.JunctionRestrictionsManager.UpdateAllDefaults();
-            ModUI.GetTrafficManagerTool()?.InitializeSubTools();
-        }
-
-        public static void SetRelaxedBusses(bool newRelaxedBusses) {
-            Options.relaxedBusses = newRelaxedBusses;
-
-            if (_relaxedBussesToggle != null) {
-                _relaxedBussesToggle.isChecked = newRelaxedBusses;
-            }
-        }
-
-        public static void SetAllRelaxed(bool newAllRelaxed) {
-            Options.allRelaxed = newAllRelaxed;
-
-            if (_allRelaxedToggle != null) {
-                _allRelaxedToggle.isChecked = newAllRelaxed;
-            }
-        }
-
         public static void SetHighwayRules(bool newHighwayRules) {
             Options.highwayRules = newHighwayRules;
 
@@ -462,14 +170,6 @@ namespace TrafficManager.State {
             }
         }
 
-        public static void SetMayEnterBlockedJunctions(bool newMayEnterBlockedJunctions) {
-            Options.allowEnterBlockedJunctions = newMayEnterBlockedJunctions;
-
-            if (_allowEnterBlockedJunctionsToggle != null) {
-                _allowEnterBlockedJunctionsToggle.isChecked = newMayEnterBlockedJunctions;
-            }
-        }
-
         public static void SetBanRegularTrafficOnBusLanes(bool value) {
             Options.banRegularTrafficOnBusLanes = value;
 
@@ -481,12 +181,5 @@ namespace TrafficManager.State {
             ModUI.GetTrafficManagerTool()?.InitializeSubTools();
         }
 
-        public static void SetAddTrafficLightsIfApplicable(bool value) {
-            Options.automaticallyAddTrafficLightsIfApplicable = value;
-
-            if (_automaticallyAddTrafficLightsIfApplicableToggle != null) {
-                _automaticallyAddTrafficLightsIfApplicableToggle.isChecked = value;
-            }
-        }
-    } // end class
+    }
 }
