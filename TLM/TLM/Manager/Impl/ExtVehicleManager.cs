@@ -11,6 +11,7 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.State;
     using UnityEngine;
     using TrafficManager.Util;
+    using TrafficManager.Util.Extensions;
 
     public class ExtVehicleManager
         : AbstractCustomManager,
@@ -64,29 +65,33 @@ namespace TrafficManager.Manager.Impl {
             }
         }
 
+        /// <summary>
+        /// Gets the driver from a vehicle.
+        /// See PassengerCarAI.GetDriverInstance - almost stock code.
+        /// </summary>
+        /// <param name="vehicleId">Id of the vehicle.</param>
+        /// <param name="data">Vehicle data of the vehicle.</param>
+        /// <returns>CitizenInstanceId of the driver.</returns>
         public ushort GetDriverInstanceId(ushort vehicleId, ref Vehicle data) {
-            // (stock code from PassengerCarAI.GetDriverInstance)
             CitizenManager citizenManager = Singleton<CitizenManager>.instance;
             uint citizenUnitId = data.m_citizenUnits;
             uint maxUnitCount = citizenManager.m_units.m_size;
             int numIter = 0;
 
             while (citizenUnitId != 0) {
-                uint nextCitizenUnitId = citizenManager.m_units.m_buffer[citizenUnitId].m_nextUnit;
-
+                ref CitizenUnit citizenUnit = ref citizenUnitId.ToCitizenUnit();
                 for (int i = 0; i < 5; i++) {
-                    uint citizenId = citizenManager.m_units.m_buffer[citizenUnitId].GetCitizen(i);
+                    uint citizenId = citizenUnit.GetCitizen(i);
 
                     if (citizenId != 0) {
-                        ushort citizenInstanceId =
-                            citizenManager.m_citizens.m_buffer[citizenId].m_instance;
+                        ushort citizenInstanceId = citizenId.ToCitizen().m_instance;
                         if (citizenInstanceId != 0) {
                             return citizenInstanceId;
                         }
                     }
                 }
 
-                citizenUnitId = nextCitizenUnitId;
+                citizenUnitId = citizenUnit.m_nextUnit;
                 if (++numIter > maxUnitCount) {
                     CODebugBase<LogChannel>.Error(
                         LogChannel.Core,
@@ -184,9 +189,7 @@ namespace TrafficManager.Manager.Impl {
 
             ushort connectedVehicleId = vehicleId;
             while (true) {
-                connectedVehicleId = Singleton<VehicleManager>
-                                     .instance.m_vehicles.m_buffer[connectedVehicleId]
-                                     .m_trailingVehicle;
+                connectedVehicleId = connectedVehicleId.ToVehicle().m_trailingVehicle;
 
                 if (connectedVehicleId == 0) {
                     break;
@@ -201,7 +204,7 @@ namespace TrafficManager.Manager.Impl {
 
                 OnStartPathFind(
                     ref ExtVehicles[connectedVehicleId],
-                    ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[connectedVehicleId],
+                    ref connectedVehicleId.ToVehicle(),
                     vehicleType);
             }
 
@@ -238,14 +241,15 @@ namespace TrafficManager.Manager.Impl {
             }
 
             ushort connectedVehicleId = vehicleId;
-            Vehicle[] vehiclesBuffer = Singleton<VehicleManager>.instance.m_vehicles.m_buffer;
 
             while (connectedVehicleId != 0) {
+                ref Vehicle connectedVehicle = ref connectedVehicleId.ToVehicle();
+                
                 OnSpawn(
                     ref ExtVehicles[connectedVehicleId],
-                    ref vehiclesBuffer[connectedVehicleId]);
+                    ref connectedVehicleId.ToVehicle());
 
-                connectedVehicleId = vehiclesBuffer[connectedVehicleId].m_trailingVehicle;
+                connectedVehicleId = connectedVehicle.m_trailingVehicle;
             }
         }
 
@@ -253,11 +257,9 @@ namespace TrafficManager.Manager.Impl {
             ushort connectedVehicleId = vehicleId;
             while (connectedVehicleId != 0) {
                 UpdateVehiclePosition(
-                    ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[connectedVehicleId],
+                    ref connectedVehicleId.ToVehicle(),
                     ref ExtVehicles[connectedVehicleId]);
-                connectedVehicleId = Singleton<VehicleManager>
-                                     .instance.m_vehicles.m_buffer[connectedVehicleId]
-                                     .m_trailingVehicle;
+                connectedVehicleId = connectedVehicleId.ToVehicle().m_trailingVehicle;
             }
         }
 
@@ -324,9 +326,7 @@ namespace TrafficManager.Manager.Impl {
 
                 OnDespawn(ref ExtVehicles[connectedVehicleId]);
 
-                connectedVehicleId = Singleton<VehicleManager>
-                                     .instance.m_vehicles.m_buffer[connectedVehicleId]
-                                     .m_trailingVehicle;
+                connectedVehicleId = connectedVehicleId.ToVehicle().m_trailingVehicle;
             }
         }
 
@@ -693,7 +693,7 @@ namespace TrafficManager.Manager.Impl {
             Constants.ManagerFactory.ExtCitizenInstanceManager.ResetInstance(
                 GetDriverInstanceId(
                     extVehicle.vehicleId,
-                    ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[extVehicle.vehicleId]));
+                    ref extVehicle.vehicleId.ToVehicle()));
 
             Unlink(ref extVehicle);
 
@@ -909,7 +909,7 @@ namespace TrafficManager.Manager.Impl {
 #endif
         }
 
-        private ExtVehicleType? DetermineVehicleTypeFromAIType(
+        internal ExtVehicleType? DetermineVehicleTypeFromAIType(
             ushort vehicleId,
             VehicleAI ai,
             bool emergencyOnDuty)
@@ -1020,9 +1020,9 @@ namespace TrafficManager.Manager.Impl {
                  ++vehicleId) {
 
                 ushort vId = (ushort)vehicleId;
-                ref Vehicle vehicle = ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vId];
+                ref Vehicle vehicle = ref vId.ToVehicle();
 
-                if ((vehicle.m_flags & Vehicle.Flags.Created) == 0) {
+                if (!vehicle.IsCreated()) {
                     continue;
                 }
 
@@ -1040,6 +1040,38 @@ namespace TrafficManager.Manager.Impl {
             }
         }
 
+        /// <summary>
+        /// Converts game VehicleInfo.VehicleType to closest TMPE.API.Traffic.Enums.ExtVehicleType
+        /// </summary>
+        /// <param name="vehicleType"></param>
+        /// <returns></returns>
+        public static ExtVehicleType ConvertToExtVehicleType(VehicleInfo.VehicleType vehicleType) {
+            ExtVehicleType extVehicleType = ExtVehicleType.None;
+            if ((vehicleType & VehicleInfo.VehicleType.Car) != VehicleInfo.VehicleType.None) {
+                extVehicleType = ExtVehicleType.Bus;
+            } else if ((vehicleType & (VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Metro |
+                                VehicleInfo.VehicleType.Monorail)) !=
+                VehicleInfo.VehicleType.None) {
+                extVehicleType = ExtVehicleType.PassengerTrain;
+            } else if ((vehicleType & VehicleInfo.VehicleType.Tram) != VehicleInfo.VehicleType.None) {
+                extVehicleType = ExtVehicleType.Tram;
+            } else if ((vehicleType & VehicleInfo.VehicleType.Ship) != VehicleInfo.VehicleType.None) {
+                extVehicleType = ExtVehicleType.PassengerShip;
+            } else if ((vehicleType & VehicleInfo.VehicleType.Plane) != VehicleInfo.VehicleType.None) {
+                extVehicleType = ExtVehicleType.PassengerPlane;
+            } else if ((vehicleType & VehicleInfo.VehicleType.Ferry) != VehicleInfo.VehicleType.None) {
+                extVehicleType = ExtVehicleType.Ferry;
+            } else if ((vehicleType & VehicleInfo.VehicleType.Blimp) != VehicleInfo.VehicleType.None) {
+                extVehicleType = ExtVehicleType.Blimp;
+            } else if ((vehicleType & VehicleInfo.VehicleType.CableCar) != VehicleInfo.VehicleType.None) {
+                extVehicleType = ExtVehicleType.CableCar;
+            } else if ((vehicleType & VehicleInfo.VehicleType.Trolleybus) != VehicleInfo.VehicleType.None) {
+                extVehicleType = ExtVehicleType.Trolleybus;
+            }
+
+            return extVehicleType;
+        }
+
         [UsedImplicitly]
         public ushort GetFrontVehicleId(ushort vehicleId, ref Vehicle vehicleData) {
             bool reversed = (vehicleData.m_flags & Vehicle.Flags.Reversed) != 0;
@@ -1052,8 +1084,8 @@ namespace TrafficManager.Manager.Impl {
             base.OnLevelUnloading();
 
             for (int i = 0; i < ExtVehicles.Length; ++i) {
-                ushort vId = (ushort)i;
-                ref Vehicle vehicle = ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vId];
+                ushort vehicleId = (ushort)i;
+                ref Vehicle vehicle = ref vehicleId.ToVehicle();
                 OnRelease(ref ExtVehicles[i], ref vehicle);
             }
         }

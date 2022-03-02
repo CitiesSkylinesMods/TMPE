@@ -65,7 +65,7 @@ namespace TrafficManager.Patch._VehicleAI._TrolleybusAI {
 
         private static float GetCustomSpeed(PathUnit.Position position, uint laneID, NetInfo info) {
             return Options.customSpeedLimitsEnabled
-                       ? SpeedLimitManager.Instance.GetLockFreeGameSpeedLimit(
+                       ? SpeedLimitManager.Instance.GetGameSpeedLimit(
                            position.m_segment,
                            position.m_lane,
                            laneID,

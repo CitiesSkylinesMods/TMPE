@@ -6,6 +6,7 @@ namespace TrafficManager.Patch._VehicleAI._TrainAI {
     using HarmonyLib;
     using JetBrains.Annotations;
     using Manager.Impl;
+    using TrafficManager.Util.Extensions;
     using UnityEngine;
     using Util;
 
@@ -92,9 +93,9 @@ namespace TrafficManager.Patch._VehicleAI._TrainAI {
             float motionFactor = 0.5f;
 
             if (frontVehicleId != 0) {
-                VehicleManager vehMan = VehicleManager.instance;
-                Vehicle.Frame frontVehLastFrameData = vehMan.m_vehicles.m_buffer[frontVehicleId].GetLastFrameData();
-                VehicleInfo frontVehInfo = vehMan.m_vehicles.m_buffer[frontVehicleId].Info;
+                ref Vehicle frontVehicle = ref frontVehicleId.ToVehicle();
+                Vehicle.Frame frontVehLastFrameData = frontVehicle.GetLastFrameData();
+                VehicleInfo frontVehInfo = frontVehicle.Info;
                 float attachOffset;
 
                 if ((vehicleData.m_flags & Vehicle.Flags.Inverted) != 0 != reversed) {
@@ -105,7 +106,7 @@ namespace TrafficManager.Patch._VehicleAI._TrainAI {
 
                 float frontAttachOffset;
 
-                if ((vehMan.m_vehicles.m_buffer[frontVehicleId].m_flags & Vehicle.Flags.Inverted) != 0 != reversed) {
+                if ((frontVehicle.m_flags & Vehicle.Flags.Inverted) != 0 != reversed) {
                     frontAttachOffset = frontVehInfo.m_attachOffsetFront -
                                         (frontVehInfo.m_generatedInfo.m_size.z * 0.5f);
                 } else {
@@ -198,7 +199,6 @@ namespace TrafficManager.Patch._VehicleAI._TrainAI {
                 }
 
                 if (vehicleData.m_path != 0u) {
-                    NetManager netMan = NetManager.instance;
                     byte pathPosIndex = vehicleData.m_pathPositionIndex;
                     byte lastPathOffset = vehicleData.m_lastPathOffset;
                     if (pathPosIndex == 255) {
@@ -219,7 +219,7 @@ namespace TrafficManager.Patch._VehicleAI._TrainAI {
                             (leaderData.m_flags & Vehicle.Flags.WaitingPath) != 0) {
                             uint laneId = PathManager.GetLaneID(curPathPos);
                             if (laneId != 0u) {
-                                netMan.m_lanes.m_buffer[laneId].ReserveSpace(___m_info.m_generatedInfo.m_size.z);
+                                laneId.ToLane().ReserveSpace(___m_info.m_generatedInfo.m_size.z);
                             }
                         } else if (pathMan.m_pathUnits.m_buffer[vehicleData.m_path]
                                           .GetNextPosition(pathPosIndex >> 1, out PathUnit.Position nextPathPos)) {
@@ -239,7 +239,7 @@ namespace TrafficManager.Patch._VehicleAI._TrainAI {
                                 // NON-STOCK CODE END
                                 uint nextLaneId = PathManager.GetLaneID(nextPathPos);
                                 if (nextLaneId != 0u) {
-                                    netMan.m_lanes.m_buffer[nextLaneId].ReserveSpace(___m_info.m_generatedInfo.m_size.z);
+                                    nextLaneId.ToLane().ReserveSpace(___m_info.m_generatedInfo.m_size.z);
                                 }
                             } // NON-STOCK CODE
                         }
@@ -386,7 +386,7 @@ namespace TrafficManager.Patch._VehicleAI._TrainAI {
                         {
                             uint laneId = PathManager.GetLaneID(curPathPos);
                             if (laneId != 0u) {
-                                netMan.m_lanes.m_buffer[laneId].ReserveSpace(___m_info.m_generatedInfo.m_size.z, vehicleID);
+                                laneId.ToLane().ReserveSpace(___m_info.m_generatedInfo.m_size.z, vehicleID);
                             }
                         } else if (pathMan.m_pathUnits.m_buffer[vehicleData.m_path]
                                           .GetNextPosition(pathPosIndex >> 1, out PathUnit.Position nextPathPos)) {
@@ -403,7 +403,7 @@ namespace TrafficManager.Patch._VehicleAI._TrainAI {
                                 // NON-STOCK CODE END
                                 uint nextLaneId = PathManager.GetLaneID(nextPathPos);
                                 if (nextLaneId != 0u) {
-                                    netMan.m_lanes.m_buffer[nextLaneId].ReserveSpace(
+                                    nextLaneId.ToLane().ReserveSpace(
                                         ___m_info.m_generatedInfo.m_size.z, vehicleID);
                                 }
                             } // NON-STOCK CODE

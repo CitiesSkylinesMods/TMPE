@@ -1,8 +1,9 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
+namespace TrafficManager.Util.Iterators {
+    using System;
+    using System.Collections;
+    using System.Collections.Generic;
+    using TrafficManager.Manager.Impl;
 
-namespace TrafficManager.Manager.Impl {
     /// <summary>
     /// Mutable struct enumerator to be returned from the GetSegmentLaneIds method.
     /// This implementation is just for perf optimizations and should be handled with care since it is a mutable struct!

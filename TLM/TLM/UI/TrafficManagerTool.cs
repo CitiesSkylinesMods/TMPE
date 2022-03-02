@@ -31,6 +31,8 @@ namespace TrafficManager.UI {
     using static TrafficManager.Util.SegmentTraverser;
     using TrafficManager.UI.Textures;
     using TrafficManager.State.Keybinds;
+    using TrafficManager.Util.Extensions;
+    using static InfoManager;
 
     [UsedImplicitly]
     public class TrafficManagerTool
@@ -54,12 +56,28 @@ namespace TrafficManager.UI {
 
         private CursorInfo nopeCursor_;
 
+        public const float DEBUG_CLOSE_LOD = 300f;
+
+        /// <summary>Square of the distance, where overlays are not rendered.</summary>
+        public const float MAX_OVERLAY_DISTANCE_SQR = 600f * 600f;
+
+        internal const float MAX_ZOOM = 0.05f;
+
         /// <summary>Maximum error of HitPos field.</summary>
         internal const float MAX_HIT_ERROR = 2.5f;
 
         /// <summary>Maximum detection radius of segment raycast hit position.</summary>
         internal const float NODE_DETECTION_RADIUS = 75f;
         internal const float PRECISE_NODE_DETECTION_RADIUS = 15f;
+
+        /// <summary>Convert 0..100 opacity value to 0..1f alpha value.</summary>
+        internal const float TO_ALPHA = 0.01f;
+
+        /// <summary>Minimum opacity value. Also affects sliders in mod options.</summary>
+        internal const byte MINIMUM_OPACITY = 10;
+
+        /// <summary>Maximum opacity value. Also affects sliders in mod options.</summary>
+        internal const byte MAXIMUM_OPACITY = 100;
 
         internal static ushort HoveredNodeId;
 
@@ -71,11 +89,6 @@ namespace TrafficManager.UI {
         internal Vector3 MousePosition => m_mousePosition; //expose protected member.
 
         private static bool _mouseClickProcessed;
-
-        public const float DEBUG_CLOSE_LOD = 300f;
-
-        /// <summary>Square of the distance, where overlays are not rendered.</summary>
-        public const float MAX_OVERLAY_DISTANCE_SQR = 600f * 600f;
 
         private IDictionary<ToolMode, LegacySubTool> legacySubTools_;
 
@@ -101,9 +114,17 @@ namespace TrafficManager.UI {
 
         private static IDisposable _confDisposable;
 
-        public static bool IsUndergroundMode => InfoManager.instance.CurrentMode == InfoManager.InfoMode.Underground;
+        /// <summary>
+        /// Returns <c>true</c> if game is in an underground mode which allows
+        /// tunnels to be customised.
+        /// </summary>
+        public static bool IsUndergroundMode => IsValidUndergroundMode(InfoManager.instance.CurrentMode);
 
-        internal static float OverlayAlpha => TransparencyToAlpha(GlobalConfig.Instance.Main.OverlayTransparency);
+        internal static float OverlayAlpha
+            => TO_ALPHA * Mathf.Clamp(
+                GlobalConfig.Instance.Main.OverlayOpacity,
+                MINIMUM_OPACITY,
+                MAXIMUM_OPACITY);
 
         static TrafficManagerTool() { }
 
@@ -114,8 +135,21 @@ namespace TrafficManager.UI {
             ToolsModifierControl.toolController?.CurrentTool != null
             && ToolsModifierControl.toolController.CurrentTool is TrafficManagerTool;
 
+        /// <summary>
+        /// Determine if TM:PE can be used in specified info view <paramref name="mode"/>.
+        /// </summary>
+        /// <param name="mode">The <see cref="InfoManager.InfoMode"/> to test.</param>
+        /// <returns>Returns <c>true</c> if <paramref name="mode"/> is permitted, otherwise <c>false</c>.</returns>
+        public static bool IsValidUndergroundMode(InfoMode mode) => mode is
+            InfoManager.InfoMode.Underground or
+            InfoManager.InfoMode.Traffic or
+            InfoManager.InfoMode.TrafficRoutes;
+
         protected override void OnDestroy() {
             Log.Info("TrafficManagerTool.OnDestroy() called");
+
+            InfoManager.instance.EventInfoModeChanged -= OnInfoModeChanged;
+
             RemoveUUIButton();
 
             if (nopeCursor_) {
@@ -175,21 +209,20 @@ namespace TrafficManager.UI {
             return Screen.height / 1200f;
         }
 
-        internal const float MAX_ZOOM = 0.05f;
+        internal static float GetWindowAlpha()
+            => TO_ALPHA * Mathf.Clamp(
+                GlobalConfig.Instance.Main.GuiOpacity,
+                MINIMUM_OPACITY,
+                MAXIMUM_OPACITY);
 
-        internal static float GetWindowAlpha() {
-            return Mathf.Clamp(GlobalConfig.Instance.Main.GuiOpacity, 0f, 100f) / 100f;
-        }
-
-        internal static float GetHandleAlpha(bool hovered) {
-            byte transparency = GlobalConfig.Instance.Main.OverlayTransparency;
-            if (hovered) {
-                // reduce transparency when handle is hovered
-                transparency = (byte)Math.Min(20, transparency >> 2);
-            }
-
-            return TransparencyToAlpha(transparency);
-        }
+        /// <summary>
+        /// Get alpha value for an overlay icon, taking in to account hovered state.
+        /// </summary>
+        /// <param name="hovered">Set <c>true</c> if mouse is over handle.</param>
+        /// <returns>Returns alpha value in range 0.1..1f.</returns>
+        internal static float GetHandleAlpha(bool hovered) => hovered
+            ? TO_ALPHA * MAXIMUM_OPACITY
+            : OverlayAlpha;
 
         /// <summary>Gives convenient access to NetTool from the original game.</summary>
         private NetTool NetTool {
@@ -201,10 +234,6 @@ namespace TrafficManager.UI {
 
                 return netTool_;
             }
-        }
-
-        private static float TransparencyToAlpha(byte transparency) {
-            return Mathf.Clamp(100 - transparency, 0f, 100f) / 100f;
         }
 
         internal void Initialize() {
@@ -236,7 +265,23 @@ namespace TrafficManager.UI {
             _confDisposable = GlobalConfig.Instance.Subscribe(this);
 
             AddUUIButton();
+
+            InfoManager.instance.EventInfoModeChanged += OnInfoModeChanged;
+
             Log.Info("TrafficManagerTool: Initialization completed.");
+        }
+
+        /// <summary>When (most) info views are opened, close TM:PE toolbar.</summary>
+        /// <param name="mode">The <see cref="InfoMode"/> which just became active.</param>
+        /// <param name="_">Not used.</param>
+        private void OnInfoModeChanged(InfoManager.InfoMode mode, InfoManager.SubInfoMode _) {
+            Log._Debug($"OnInfoModeChanged: Info manager mode changed to: {mode}");
+
+            if (mode == InfoManager.InfoMode.None || IsValidUndergroundMode(mode)) {
+                return; // TM:PE toolbar can persist in these modes
+            }
+
+            ModUI.Instance.CloseMainMenu();
         }
 
         public void OnUpdate(GlobalConfig config) {
@@ -244,6 +289,7 @@ namespace TrafficManager.UI {
         }
 
         internal void InitializeSubTools() {
+            Log.Info("TrafficManagerTool.InitializeSubTools()");
             foreach (KeyValuePair<ToolMode, LegacySubTool> e in legacySubTools_) {
                 e.Value.Initialize();
             }
@@ -296,6 +342,7 @@ namespace TrafficManager.UI {
             }
 
             SetToolMode_DeactivateTool();
+
             // Try figure out whether legacy subtool or a new subtool is selected
             if (!legacySubTools_.TryGetValue(newToolMode, out activeLegacySubTool_)
                 && !subTools_.TryGetValue(newToolMode, out activeSubTool_)) {
@@ -376,8 +423,10 @@ namespace TrafficManager.UI {
                 ModUI.Instance.CloseMainMenu();
 
             // revert to normal mode if underground
-            if (IsUndergroundMode)
+            if (IsUndergroundMode) {
+                Log._Debug("Toolbar disable: Restoring overground mode");
                 InfoManager.instance.SetCurrentMode(InfoManager.InfoMode.None, InfoManager.SubInfoMode.Default);
+            }
 
             MassEditOverlay.Show = RoadSelectionPanels.Root?.ShouldShowMassEditOverlay() ?? false;
             // no call to base method to disable base class behavior
@@ -954,12 +1003,13 @@ namespace TrafficManager.UI {
 
             uint curLaneId = segment.m_lanes;
             var labelSb = new StringBuilder();
-            NetLane[] lanesBuffer = Singleton<NetManager>.instance.m_lanes.m_buffer;
 
             for (int i = 0; i < segmentInfo.m_lanes.Length; ++i) {
                 if (curLaneId == 0) {
                     break;
                 }
+
+                ref NetLane netLane = ref curLaneId.ToLane();
 
                 bool laneTrafficDataLoaded =
                     TrafficMeasurementManager.Instance.GetLaneTrafficData(
@@ -989,8 +1039,8 @@ namespace TrafficManager.UI {
                     "pos: {7:0.##}, sim: {8} for {9}/{10}",
                     RoutingManager.Instance.CalcInnerSimilarLaneIndex(segmentId, i),
                     RoutingManager.Instance.CalcOuterSimilarLaneIndex(segmentId, i),
-                    (NetLane.Flags)lanesBuffer[curLaneId].m_flags,
-                    SpeedLimitManager.Instance.GetCustomSpeedLimit(curLaneId).ToString(),
+                    (NetLane.Flags)curLaneId.ToLane().m_flags,
+                    SpeedLimitManager.Instance.CalculateCustomSpeedLimit(curLaneId).ToString(),
                     VehicleRestrictionsManager.Instance.GetAllowedVehicleTypes(
                         segmentId,
                         segmentInfo,
@@ -1048,7 +1098,7 @@ namespace TrafficManager.UI {
 #endif
                 }
 
-                labelSb.AppendFormat(", nd: {0}", lanesBuffer[curLaneId].m_nodes);
+                labelSb.AppendFormat(", nd: {0}", netLane.m_nodes);
 #if DEBUG
                 //    labelSb.AppendFormat(
                 //        " ({0}/{1}/{2})",
@@ -1077,7 +1127,7 @@ namespace TrafficManager.UI {
                 //            : "?");
                 labelSb.Append("\n");
 
-                curLaneId = lanesBuffer[curLaneId].m_nextLane;
+                curLaneId = netLane.m_nextLane;
             }
 
             var labelStr = labelSb.ToString();
@@ -1277,23 +1327,26 @@ namespace TrafficManager.UI {
             GUIStyle _counterStyle = new GUIStyle();
             SimulationManager simManager = Singleton<SimulationManager>.instance;
             ExtVehicleManager vehStateManager = ExtVehicleManager.Instance;
-            VehicleManager vehicleManager = Singleton<VehicleManager>.instance;
-            Vehicle[] vehicleBuffer = vehicleManager.m_vehicles.m_buffer;
 
             int startVehicleId = 1;
-            int endVehicleId = vehicleBuffer.Length - 1;
+            int endVehicleId = Singleton<VehicleManager>.instance.m_vehicles.m_buffer.Length - 1;
 #if DEBUG
-            if (DebugSettings.VehicleId != 0) {
-                startVehicleId = endVehicleId = DebugSettings.VehicleId;
+            if (DebugSettings.VehicleId != 0)
+            {
+                startVehicleId = DebugSettings.VehicleId;
+                endVehicleId = DebugSettings.VehicleId;
             }
 #endif
             for (int i = startVehicleId; i <= endVehicleId; ++i) {
-                if (vehicleBuffer[i].m_flags == 0) {
+                ushort vehicleId = (ushort)i;
+                ref Vehicle vehicle = ref vehicleId.ToVehicle();
+
+                if (vehicle.m_flags == 0) {
                     // node is unused
                     continue;
                 }
 
-                Vector3 vehPos = vehicleBuffer[i].GetSmoothPosition((ushort)i);
+                Vector3 vehPos = vehicle.GetSmoothPosition(vehicleId);
                 bool visible = GeometryUtil.WorldToScreenPoint(vehPos, out Vector3 screenPos);
 
                 if (!visible) {
@@ -1318,12 +1371,12 @@ namespace TrafficManager.UI {
                         Constants.ManagerFactory.ExtVehicleManager
                                  .GetDriverInstanceId(
                                      (ushort)i,
-                                     ref vehicleBuffer[i])];
+                                     ref vehicle)];
                 // bool startNode = vState.currentStartNode;
                 // ushort segmentId = vState.currentSegmentId;
 
                 // Converting magnitudes into game speed float, and then into km/h
-                SpeedValue vehSpeed = SpeedValue.FromVelocity(vehicleBuffer[i].GetLastFrameVelocity().magnitude);
+                SpeedValue vehSpeed = SpeedValue.FromVelocity(vehicle.GetLastFrameVelocity().magnitude);
 #if DEBUG
                 if (GlobalConfig.Instance.Debug.ExtPathMode != ExtPathMode.None &&
                     driverInst.pathMode != GlobalConfig.Instance.Debug.ExtPathMode) {
@@ -1349,7 +1402,7 @@ namespace TrafficManager.UI {
                     vState.nextLaneIndex,
                     vState.waitTime,
                     driverInst.instanceId,
-                    ExtCitizenInstanceManager.Instance.GetCitizenId(driverInst.instanceId),
+                    driverInst.instanceId.ToCitizenInstance().m_citizen,
                     driverInst.pathMode,
                     driverInst.failedParkingAttempts,
                     driverInst.parkingSpaceLocation,
@@ -1375,27 +1428,24 @@ namespace TrafficManager.UI {
         // TODO: Extract into a Debug Tool GUI class
         private void DebugGuiDisplayCitizens() {
             GUIStyle counterStyle = new GUIStyle();
-            CitizenManager citManager = Singleton<CitizenManager>.instance;
-            Citizen[] citizensBuffer = Singleton<CitizenManager>.instance.m_citizens.m_buffer;
-            VehicleParked[] parkedVehiclesBuffer = Singleton<VehicleManager>.instance.m_parkedVehicles.m_buffer;
-            Vehicle[] vehiclesBuffer = Singleton<VehicleManager>.instance.m_vehicles.m_buffer;
 
-            for (int i = 1; i < CitizenManager.MAX_INSTANCE_COUNT; ++i) {
-                if ((citManager.m_instances.m_buffer[i].m_flags &
-                     CitizenInstance.Flags.Character) == CitizenInstance.Flags.None) {
+            for (uint citizenInstanceId = 1; citizenInstanceId < CitizenManager.MAX_INSTANCE_COUNT; ++citizenInstanceId) {
+                ref CitizenInstance citizenInstance = ref citizenInstanceId.ToCitizenInstance();
+                
+                if (!citizenInstance.IsCreated()) {
                     continue;
                 }
 #if DEBUG
                 if (DebugSwitch.NoValidPathCitizensOverlay.Get()) {
 #endif
-                    if (citManager.m_instances.m_buffer[i].m_path != 0) {
+                    if (citizenInstance.m_path != 0) {
                         continue;
                     }
 #if DEBUG
                 }
 #endif
 
-                Vector3 pos = citManager.m_instances.m_buffer[i].GetSmoothPosition((ushort)i);
+                Vector3 pos = citizenInstance.GetSmoothPosition((ushort)citizenInstanceId);
                 bool visible = GeometryUtil.WorldToScreenPoint(pos, out Vector3 screenPos);
 
                 if (!visible) {
@@ -1417,7 +1467,7 @@ namespace TrafficManager.UI {
 
 #if DEBUG
                 if (GlobalConfig.Instance.Debug.ExtPathMode != ExtPathMode.None &&
-                    ExtCitizenInstanceManager.Instance.ExtInstances[i].pathMode !=
+                    ExtCitizenInstanceManager.Instance.ExtInstances[citizenInstanceId].pathMode !=
                     GlobalConfig.Instance.Debug.ExtPathMode) {
                     continue;
                 }
@@ -1425,29 +1475,30 @@ namespace TrafficManager.UI {
 
                 var labelSb = new StringBuilder();
                 ExtCitizen[] extCitizensBuf = ExtCitizenManager.Instance.ExtCitizens;
+                uint citizenId = citizenInstance.m_citizen;
                 labelSb.AppendFormat(
                     "Inst. {0}, Cit. {1},\nm: {2}, tm: {3}, ltm: {4}, ll: {5}",
-                    i,
-                    citManager.m_instances.m_buffer[i].m_citizen,
-                    ExtCitizenInstanceManager.Instance.ExtInstances[i].pathMode,
-                    extCitizensBuf[citManager.m_instances.m_buffer[i].m_citizen].transportMode,
-                    extCitizensBuf[citManager.m_instances.m_buffer[i].m_citizen].lastTransportMode,
-                    extCitizensBuf[citManager.m_instances.m_buffer[i].m_citizen].lastLocation);
+                    citizenInstanceId,
+                    citizenId,
+                    ExtCitizenInstanceManager.Instance.ExtInstances[citizenInstanceId].pathMode,
+                    extCitizensBuf[citizenId].transportMode,
+                    extCitizensBuf[citizenId].lastTransportMode,
+                    extCitizensBuf[citizenId].lastLocation);
 
-                if (citManager.m_instances.m_buffer[i].m_citizen != 0) {
-                    Citizen citizen = citizensBuffer[citManager.m_instances.m_buffer[i].m_citizen];
+                if (citizenId != 0) {
+                    ref Citizen citizen = ref citizenId.ToCitizen();
                     if (citizen.m_parkedVehicle != 0) {
                         labelSb.AppendFormat(
                             "\nparked: {0} dist: {1}",
                             citizen.m_parkedVehicle,
-                            (parkedVehiclesBuffer[citizen.m_parkedVehicle].m_position - pos).magnitude);
+                            (citizen.m_parkedVehicle.ToParkedVehicle().m_position - pos).magnitude);
                     }
 
                     if (citizen.m_vehicle != 0) {
                         labelSb.AppendFormat(
                             "\nveh: {0} dist: {1}",
                             citizen.m_vehicle,
-                            (vehiclesBuffer[citizen.m_vehicle].GetLastFramePosition() - pos).magnitude);
+                            (citizen.m_vehicle.ToVehicle().GetLastFramePosition() - pos).magnitude);
                     }
                 }
 

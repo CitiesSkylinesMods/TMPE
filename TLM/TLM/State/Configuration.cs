@@ -8,6 +8,7 @@ namespace TrafficManager {
     using TrafficManager.Traffic;
     using System.Runtime.Serialization;
     using TrafficManager.Lifecycle;
+    using Util;
 
     [Serializable]
     public class Configuration {

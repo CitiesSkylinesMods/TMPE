@@ -8,6 +8,7 @@ namespace TrafficManager.Patch._VehicleAI._CarAI {
     using Manager.Impl;
     using State;
     using State.ConfigData;
+    using TrafficManager.Util.Extensions;
     using UnityEngine;
     using Util;
 
@@ -47,7 +48,6 @@ namespace TrafficManager.Patch._VehicleAI._CarAI {
                                   out Vector3 pos,
                                   out Vector3 dir,
                                   out float maxSpeed) {
-            NetManager netManager = Singleton<NetManager>.instance;
             ushort nextSourceNodeId;
             ushort nextTargetNodeId;
 
@@ -95,7 +95,7 @@ namespace TrafficManager.Patch._VehicleAI._CarAI {
             Vehicle.Frame lastFrameData = vehicleData.GetLastFrameData();
             Vector3 lastFrameVehiclePos = lastFrameData.m_position;
             float sqrVelocity = lastFrameData.m_velocity.sqrMagnitude;
-            netManager.m_lanes.m_buffer[laneID].CalculatePositionAndDirection(
+            laneID.ToLane().CalculatePositionAndDirection(
                 Constants.ByteToFloat(offset),
                 out pos,
                 out dir);
@@ -106,11 +106,9 @@ namespace TrafficManager.Patch._VehicleAI._CarAI {
             }
 
             // car position on the Bezier curve of the lane
-            Vector3 refVehiclePosOnBezier = netManager.m_lanes.m_buffer[prevLaneID]
-                                                      .CalculatePosition(
-                                                          Constants.ByteToFloat(prevOffset));
+            Vector3 refVehiclePosOnBezier = prevLaneID.ToLane().CalculatePosition(Constants.ByteToFloat(prevOffset));
 
-            // ushort currentSegmentId = netManager.m_lanes.m_buffer[prevLaneID].m_segment;
+            // ushort currentSegmentId = prevLaneID.ToLane().m_segment;
             // this seems to be like the required braking force in order to stop the vehicle within its half length.
             float crazyValue = (0.5f * sqrVelocity / braking) +
                                (__instance.m_info.m_generatedInfo.m_size.z * 0.5f);

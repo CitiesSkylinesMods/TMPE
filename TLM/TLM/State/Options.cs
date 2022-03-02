@@ -13,10 +13,9 @@ namespace TrafficManager.State {
     using System;
     using JetBrains.Annotations;
     using UI.Textures;
+    using TrafficManager.Manager.Impl;
 
     public class Options : MonoBehaviour {
-        private const int CHECKBOX_LABEL_MAX_WIDTH = 695;
-        private const int CHECKBOX_LABEL_MAX_WIDTH_INDENTED = 680;
 #if DEBUG
         private static List<UICheckBox> debugSwitchFields = new List<UICheckBox>();
         private static List<UITextField> debugValueFields = new List<UITextField>();
@@ -25,7 +24,24 @@ namespace TrafficManager.State {
         // private static UITextField pathCostMultiplicator2Field = null;
 #endif
 
-        public static bool instantEffects = true;
+        // Likely to change or be removed in future
+        [Flags]
+        public enum PersistTo {
+            None = 0,
+            Global = 1,
+            Savegame = 2,
+            GlobalOrSavegame = Global | Savegame,
+        }
+
+        /// <summary>
+        /// When <c>true</c>, options are safe to query.
+        /// </summary>
+        /// <remarks>
+        /// Is set <c>true</c> after options are loaded via <see cref="Manager.Impl.OptionsManager"/>.
+        /// Is set <c>false</c> while options are being loaded, and also when level unloads.
+        /// </remarks>
+        public static bool Available = false;
+
         public static bool individualDrivingStyle = true;
         public static int recklessDrivers = 3;
 
@@ -43,24 +59,14 @@ namespace TrafficManager.State {
         public static bool junctionRestrictionsOverlay;
         public static bool connectedLanesOverlay;
 #if QUEUEDSTATS
-    #if DEBUG
-        public static bool showPathFindStats = true;
-    #else
-        public static bool showPathFindStats = false;
-    #endif
+        public static bool showPathFindStats = VersionUtil.IS_DEBUG;
 #endif
 
-#if DEBUG
         public static bool nodesOverlay;
         public static bool vehicleOverlay;
         public static bool citizenOverlay;
         public static bool buildingOverlay;
-#else
-        public static bool nodesOverlay = false;
-        public static bool vehicleOverlay = false;
-        public static bool citizenOverlay = false;
-        public static bool buildingOverlay = false;
-#endif
+
         public static bool allowEnterBlockedJunctions;
         public static bool allowUTurns;
         public static bool allowNearTurnOnRed;
@@ -73,125 +79,64 @@ namespace TrafficManager.State {
         public static bool realisticPublicTransport;
         public static byte altLaneSelectionRatio;
         public static bool highwayRules;
-        public static bool automaticallyAddTrafficLightsIfApplicable = true;
-        public static bool NoDoubleCrossings = false;
-        public static bool DedicatedTurningLanes = false;
-#if DEBUG
-        public static bool showLanes = true;
-#else
-        public static bool showLanes = false;
-#endif
+        public static bool automaticallyAddTrafficLightsIfApplicable;
+        public static bool NoDoubleCrossings;
+        public static bool DedicatedTurningLanes;
+
+        public static bool showLanes = VersionUtil.IS_DEBUG;
+
         public static bool strongerRoadConditionEffects;
         public static bool parkingAI;
         public static bool disableDespawning;
         public static bool preferOuterLane;
         //public static byte publicTransportUsage = 1;
 
-        public static bool prioritySignsEnabled = true;
-        public static bool timedLightsEnabled = true;
-        public static bool customSpeedLimitsEnabled = true;
-        public static bool vehicleRestrictionsEnabled = true;
-        public static bool parkingRestrictionsEnabled = true;
-        public static bool junctionRestrictionsEnabled = true;
-        public static bool turnOnRedEnabled = true;
-        public static bool laneConnectorEnabled = true;
-
-        [UsedImplicitly]
-        public static bool scanForKnownIncompatibleModsEnabled = true;
-
-        [UsedImplicitly]
-        public static bool ignoreDisabledModsEnabled;
+        public static bool prioritySignsEnabled;
+        public static bool timedLightsEnabled;
+        public static bool customSpeedLimitsEnabled;
+        public static bool vehicleRestrictionsEnabled;
+        public static bool parkingRestrictionsEnabled;
+        public static bool junctionRestrictionsEnabled;
+        public static bool turnOnRedEnabled;
+        public static bool laneConnectorEnabled;
 
         public static VehicleRestrictionsAggression vehicleRestrictionsAggression =
             VehicleRestrictionsAggression.Medium;
 
-        public static bool RoundAboutQuickFix_DedicatedExitLanes = true;
-        public static bool RoundAboutQuickFix_StayInLaneMainR = true;
-        public static bool RoundAboutQuickFix_StayInLaneNearRabout = true;
-        public static bool RoundAboutQuickFix_NoCrossMainR = true;
-        public static bool RoundAboutQuickFix_NoCrossYieldR = false;
-        public static bool RoundAboutQuickFix_PrioritySigns = true;
-        public static bool RoundAboutQuickFix_KeepClearYieldR = true;
-        public static bool RoundAboutQuickFix_RealisticSpeedLimits = false;
-        public static bool RoundAboutQuickFix_ParkingBanMainR = true;
-        public static bool RoundAboutQuickFix_ParkingBanYieldR = false;
-        public static bool PriorityRoad_CrossMainR = false;
-        public static bool PriorityRoad_AllowLeftTurns = false;
-        public static bool PriorityRoad_EnterBlockedYeild = false;
-        public static bool PriorityRoad_StopAtEntry = false;
+        public static bool RoundAboutQuickFix_DedicatedExitLanes;
+        public static bool RoundAboutQuickFix_StayInLaneMainR;
+        public static bool RoundAboutQuickFix_StayInLaneNearRabout;
+        public static bool RoundAboutQuickFix_NoCrossMainR;
+        public static bool RoundAboutQuickFix_NoCrossYieldR;
+        public static bool RoundAboutQuickFix_PrioritySigns;
+        public static bool RoundAboutQuickFix_KeepClearYieldR;
+        public static bool RoundAboutQuickFix_RealisticSpeedLimits;
+        public static bool RoundAboutQuickFix_ParkingBanMainR;
+        public static bool RoundAboutQuickFix_ParkingBanYieldR;
+        public static bool PriorityRoad_CrossMainR;
+        public static bool PriorityRoad_AllowLeftTurns;
+        public static bool PriorityRoad_EnterBlockedYeild;
+        public static bool PriorityRoad_StopAtEntry;
 
-        /// <summary>
-        /// Invoked on options change to refresh the main menu and possibly update the labels for
-        /// a new language. Takes a second, very slow.
-        /// </summary>
-        internal static void RebuildMenu() {
-            if (ModUI.Instance != null) {
-                Log._Debug("Rebuilding the TM:PE menu...");
-                ModUI.Instance.RebuildMenu();
+        // See PathfinderUpdates.cs
+        public static byte SavegamePathfinderEdition;
 
-                // TM:PE main button also needs to be uidated
-                if (ModUI.Instance.MainMenuButton != null) {
-                    ModUI.Instance.MainMenuButton.UpdateButtonSkinAndTooltip();
-                }
-
-                RoadUI.ReloadTexturesWithTranslation();
-                TrafficLightTextures.ReloadTexturesWithTranslation();
-                TMPELifecycle.Instance.TranslationDatabase.ReloadTutorialTranslations();
-                TMPELifecycle.Instance.TranslationDatabase.ReloadGuideTranslations();
-            } else {
-                Log._Debug("Rebuilding the TM:PE menu: ignored, ModUI is null");
-            }
-        }
+        public static bool showDefaultSpeedSubIcon;
 
         public static void MakeSettings(UIHelper helper) {
+            Log.Info("Options.MakeSettings() - Adding UI to mod options tabs");
+
             try {
                 ExtUITabstrip tabStrip = ExtUITabstrip.Create(helper);
-                OptionsGeneralTab.MakeSettings_General(tabStrip);
-                OptionsGameplayTab.MakeSettings_Gameplay(tabStrip);
-                OptionsVehicleRestrictionsTab.MakeSettings_VehicleRestrictions(tabStrip);
-                OptionsOverlaysTab.MakeSettings_Overlays(tabStrip);
-                OptionsMaintenanceTab.MakeSettings_Maintenance(tabStrip);
-                OptionsKeybindsTab.MakeSettings_Keybinds(tabStrip);
+                GeneralTab.MakeSettings_General(tabStrip);
+                GameplayTab.MakeSettings_Gameplay(tabStrip);
+                PoliciesTab.MakeSettings_VehicleRestrictions(tabStrip);
+                OverlaysTab.MakeSettings_Overlays(tabStrip);
+                MaintenanceTab.MakeSettings_Maintenance(tabStrip);
+                KeybindsTab.MakeSettings_Keybinds(tabStrip);
                 tabStrip.Invalidate();
             } catch (Exception ex) {
                 ex.LogException();
-            }
-        }
-
-        internal static void Indent(UIComponent component) {
-            UILabel label = component.Find<UILabel>("Label");
-
-            if (label != null) {
-                label.padding = new RectOffset(22, 0, 0, 0);
-            }
-
-            UISprite check = component.Find<UISprite>("Unchecked");
-
-            if (check != null) {
-                check.relativePosition += new Vector3(22.0f, 0);
-            }
-        }
-
-        /// <summary>
-        /// Allows long checkbox label text to wrap and adds padding to checkbox
-        /// </summary>
-        /// <param name="checkBox">Checkbox instance</param>
-        /// <param name="indented">Is checkbox indented</param>
-        public static void AllowTextWrap(UICheckBox checkBox, bool indented = false) {
-            UILabel label = checkBox.label;
-            bool requireTextWrap;
-            int maxWidth = indented ? CHECKBOX_LABEL_MAX_WIDTH_INDENTED : CHECKBOX_LABEL_MAX_WIDTH;
-            using (UIFontRenderer renderer = label.ObtainRenderer()) {
-                Vector2 size = renderer.MeasureString(label.text);
-                requireTextWrap = size.x > maxWidth;
-            }
-            label.autoSize = false;
-            label.wordWrap = true;
-            label.verticalAlignment = UIVerticalAlignment.Middle;
-            label.textAlignment = UIHorizontalAlignment.Left;
-            label.size = new Vector2(maxWidth, requireTextWrap ? 40 : 20);
-            if (requireTextWrap) {
-                checkBox.height = 42; // set new height + top/bottom 1px padding
             }
         }
 

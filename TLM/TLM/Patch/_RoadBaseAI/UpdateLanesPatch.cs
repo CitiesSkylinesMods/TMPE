@@ -3,6 +3,7 @@ namespace TrafficManager.Patch._RoadBaseAI {
     using JetBrains.Annotations;
     using TrafficManager.State;
     using TrafficManager.Util;
+    using TrafficManager.Util.Extensions;
 
     [HarmonyPatch(typeof(RoadBaseAI), "UpdateLanes")]
     [UsedImplicitly]
@@ -13,7 +14,7 @@ namespace TrafficManager.Patch._RoadBaseAI {
         /// </summary>
         [UsedImplicitly]
         static void Postfix(ushort segmentID) {
-            if (OptionsVehicleRestrictionsTab.DedicatedTurningLanes) {
+            if (Options.DedicatedTurningLanes) {
                 BuiltIn(segmentID);
             }
 

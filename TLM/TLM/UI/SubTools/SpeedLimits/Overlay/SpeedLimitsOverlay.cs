@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.UI.SubTools.SpeedLimits.Overlay {
+namespace TrafficManager.UI.SubTools.SpeedLimits.Overlay {
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -355,7 +355,7 @@
                     // Defaults can show normal textures if the user holds Alt
                     SpeedlimitsToolMode.Defaults => args.ToolMode == SpeedlimitsToolMode.Defaults
                                                         ? RoadSignThemes.ActiveTheme
-                                                        : RoadSignThemes.RoadDefaults,
+                                                        : RoadSignThemes.Instance.RoadDefaults,
                     _ => throw new ArgumentOutOfRangeException(),
                 },
                 drawDefaults_ = args.ToolMode == SpeedlimitsToolMode.Defaults,
@@ -446,7 +446,7 @@
                 }
 
                 // Place this check last as it might be expensive
-                if (!SpeedLimitManager.Instance.IsKnownNetinfoName(segment.Info.name)) {
+                if (!SpeedLimitManager.Instance.IsCustomisable(segment.Info)) {
                     continue;
                 }
 
@@ -501,7 +501,7 @@
             [NotNull] DrawEnv drawEnv,
             [NotNull] DrawArgs args)
         {
-            Vector2 largeRatio = drawEnv.drawDefaults_
+            Vector2 aspectRatio = drawEnv.drawDefaults_
                                      ? RoadSignThemes.DefaultSpeedlimitsAspectRatio()
                                      : drawEnv.signsThemeAspectRatio_;
 
@@ -513,7 +513,7 @@
             SignRenderer squareSignRenderer = default;
 
             // Recalculate visible rect for screen position and size
-            Rect signScreenRect = signRenderer.Reset(screenPos, size: size * largeRatio);
+            Rect signScreenRect = signRenderer.Reset(screenPos, size: size * aspectRatio);
             bool isHoveredHandle = args.IsInteractive && signRenderer.ContainsMouse(args.Mouse);
 
             //-----------
@@ -528,7 +528,7 @@
             NetSegment segment = segmentId.ToSegment();
             NetInfo neti = segment.Info;
             var defaultSpeedLimit = new SpeedValue(
-                gameUnits: SpeedLimitManager.Instance.GetCustomNetinfoSpeedLimit(info: neti));
+                gameUnits: SpeedLimitManager.Instance.CalculateCustomNetinfoSpeedLimit(info: neti));
 
             // Render override if interactive, or if readonly info layer and override exists
             if (drawEnv.drawDefaults_) {
@@ -540,34 +540,33 @@
                     size: size * RoadSignThemes.DefaultSpeedlimitsAspectRatio());
                 squareSignRenderer.DrawLargeTexture(
                     speedlimit: defaultSpeedLimit,
-                    theme: RoadSignThemes.RoadDefaults);
+                    theme: RoadSignThemes.Instance.RoadDefaults);
             } else {
                 //-------------------------------------
                 // Draw override, if exists, otherwise draw circle and small blue default
                 // Get speed limit override for segment
                 //-------------------------------------
                 SpeedValue? overrideSpeedlimitForward =
-                    SpeedLimitManager.Instance.GetCustomSpeedLimit(segmentId, finalDir: NetInfo.Direction.Forward);
+                    SpeedLimitManager.Instance.CalculateCustomSpeedLimit(segmentId, finalDir: NetInfo.Direction.Forward);
                 SpeedValue? overrideSpeedlimitBack =
-                    SpeedLimitManager.Instance.GetCustomSpeedLimit(segmentId, finalDir: NetInfo.Direction.Backward);
+                    SpeedLimitManager.Instance.CalculateCustomSpeedLimit(segmentId, finalDir: NetInfo.Direction.Backward);
                 SpeedValue? drawSpeedlimit = GetAverageSpeedlimit(
                     forward: overrideSpeedlimitForward,
                     back: overrideSpeedlimitBack);
 
-                if (!drawSpeedlimit.HasValue || drawSpeedlimit.Value.Equals(defaultSpeedLimit)) {
-                    // No value, no override
-                    squareSignRenderer.Reset(
-                        screenPos,
-                        size: size * RoadSignThemes.DefaultSpeedlimitsAspectRatio());
-                    Texture2D chosenTexture = SignRenderer.ChooseTexture(
-                        speedlimit: defaultSpeedLimit,
-                        theme: RoadSignThemes.RoadDefaults);
-                    squareSignRenderer.DrawLargeTexture(chosenTexture);
-                    // squareSignRenderer.DrawSmallTexture_BottomRight(chosenTexture);
-                } else {
-                    signRenderer.DrawLargeTexture(
-                        speedlimit: drawSpeedlimit,
-                        theme: drawEnv.largeSignsTextures_);
+                bool isDefaultSpeed =
+                    !drawSpeedlimit.HasValue ||
+                    drawSpeedlimit.Value.Equals(defaultSpeedLimit);
+
+                signRenderer.DrawLargeTexture(
+                    speedlimit: isDefaultSpeed ? defaultSpeedLimit : drawSpeedlimit,
+                    theme: drawEnv.largeSignsTextures_);
+
+                if (args.IsInteractive &&
+                    drawSpeedlimit.HasValue &&
+                    !isDefaultSpeed &&
+                    Options.showDefaultSpeedSubIcon) {
+                    signRenderer.DrawDefaultSpeedSubIcon(defaultSpeedLimit);
                 }
             }
 
@@ -575,7 +574,7 @@
                 //-----------------------
                 // Draw small arrow down
                 //-----------------------
-                signRenderer.DrawSmallTexture_TopLeft(RoadUI.Underground);
+                signRenderer.DrawSmallTexture_TopLeft(RoadUI.Instance.Underground);
             }
 
             if (!isHoveredHandle) {
@@ -668,9 +667,6 @@
             // Sign renderer logic and chosen texture for signs
             SignRenderer signRenderer = default;
 
-            // For non-square road sign theme, need square renderer to display no-override
-            SignRenderer squareSignRenderer = default;
-
             // Defaults have 1:1 ratio (square textures)
             Vector2 largeRatio = drawEnv.drawDefaults_
                                      ? RoadSignThemes.DefaultSpeedlimitsAspectRatio()
@@ -704,8 +700,9 @@
                     continue;
                 }
 
-                float visibleScale = 100.0f / (worldPos - camPos).magnitude;
+                float visibleScale = drawEnv.baseScreenSizeForSign_ / (worldPos - camPos).magnitude;
                 float size = (args.IsInteractive ? 1f : 0.8f) * SPEED_LIMIT_SIGN_SIZE * visibleScale;
+
                 Rect signScreenRect = signRenderer.Reset(screenPos, size: largeRatio * size);
 
                 // Set render transparency based on mouse hover
@@ -719,39 +716,30 @@
 
                 // Get speed limit override for the lane
                 GetSpeedLimitResult overrideSpeedlimit =
-                    SpeedLimitManager.Instance.GetCustomSpeedLimit(laneId);
+                    SpeedLimitManager.Instance.CalculateCustomSpeedLimit(laneId);
 
-                if (!overrideSpeedlimit.OverrideValue.HasValue
+                bool isDefaultSpeed =
+                    !overrideSpeedlimit.OverrideValue.HasValue
                     || (overrideSpeedlimit.DefaultValue.HasValue &&
-                        overrideSpeedlimit.OverrideValue.Value.Equals(
-                            overrideSpeedlimit.DefaultValue.Value)))
-                {
-                    //-------------------------------------
-                    // Draw default blue speed limit
-                    //-------------------------------------
-                    squareSignRenderer.Reset(
-                        screenPos,
-                        size: size * RoadSignThemes.DefaultSpeedlimitsAspectRatio());
-                    Texture2D chosenTexture = SignRenderer.ChooseTexture(
-                        speedlimit: overrideSpeedlimit.DefaultValue,
-                        theme: RoadSignThemes.RoadDefaults);
-                    squareSignRenderer.DrawLargeTexture(chosenTexture);
-                    // squareSignRenderer.DrawSmallTexture_BottomRight(chosenTexture);
-                } else {
-                    //-------------------------------------
-                    // Draw nice override
-                    //-------------------------------------
-                    signRenderer.DrawLargeTexture(
-                        speedlimit: overrideSpeedlimit.OverrideValue.Value,
-                        theme: drawEnv.largeSignsTextures_);
+                        overrideSpeedlimit.OverrideValue.Value.Equals(overrideSpeedlimit.DefaultValue.Value));
+
+                signRenderer.DrawLargeTexture(
+                    speedlimit: isDefaultSpeed ? overrideSpeedlimit.DefaultValue.Value : overrideSpeedlimit.OverrideValue.Value,
+                    theme: drawEnv.largeSignsTextures_);
+
+                if (args.IsInteractive &&
+                    overrideSpeedlimit.OverrideValue.HasValue &&
+                    !isDefaultSpeed &&
+                    Options.showDefaultSpeedSubIcon) {
+                    signRenderer.DrawDefaultSpeedSubIcon(overrideSpeedlimit.DefaultValue.Value);
                 }
 
                 if (args.IsInteractive
                     && !onlyMonorailLanes
                     && ((laneInfo.m_vehicleType & VehicleInfo.VehicleType.Monorail) != VehicleInfo.VehicleType.None))
                 {
-                    Texture2D tex1 = RoadUI.VehicleInfoSignTextures[
-                        LegacyExtVehicleType.ToNew(old: ExtVehicleType.PassengerTrain)];
+                    var vehicleInfoSignTextures = RoadUI.Instance.VehicleInfoSignTextures;
+                    Texture2D tex1 = vehicleInfoSignTextures[LegacyExtVehicleType.ToNew(old: ExtVehicleType.PassengerTrain)];
 
                     // TODO: Replace with direct call to GUI.DrawTexture as in the func above
                     grid.DrawStaticSquareOverlayGridTexture(
@@ -767,7 +755,7 @@
                     //-------------------------------------
                     // Draw arrow down
                     //-------------------------------------
-                    signRenderer.DrawSmallTexture_TopLeft(RoadUI.Underground);
+                    signRenderer.DrawSmallTexture_TopLeft(RoadUI.Instance.Underground);
                 }
 
                 if (isHoveredHandle) {

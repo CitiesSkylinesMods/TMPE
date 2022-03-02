@@ -9,9 +9,9 @@
     <a href="https://github.com/CitiesSkylinesMods/TMPE/wiki/Report-a-Bug">Report a Bug</a><br />
 </p>
 <p align="center">
-    <a href="https://store.steampowered.com/app/255710/Cities_Skylines/"><img src="https://img.shields.io/static/v1?label=cities:%20skylines&message=v1.13.0-f8&color=01ABF8&logo=unity" /></a>
+    <a href="https://store.steampowered.com/app/255710/Cities_Skylines/"><img src="https://img.shields.io/static/v1?label=cities:%20skylines&message=v1.14.0-f9&color=01ABF8&logo=unity" /></a>
     <a href="https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252"><img src="https://img.shields.io/github/v/release/CitiesSkylinesMods/TMPE?label=stable&color=7cc17b&logo=steam&logoColor=F5F5F5" /></a>
-    <a href="https://steamcommunity.com/sharedfiles/filedetails/?id=1806963141"><img src="https://img.shields.io/github/v/release/CitiesSkylinesMods/TMPE?include_prereleases&label=labs&color=f7b73c&logo=steam&logoColor=F5F5F5" /></a>
+    <a href="https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785"><img src="https://img.shields.io/github/v/release/CitiesSkylinesMods/TMPE?include_prereleases&label=test&color=f7b73c&logo=steam&logoColor=F5F5F5" /></a>
     <a href="https://github.com/CitiesSkylinesMods/TMPE/releases/latest"><img src="https://img.shields.io/github/v/release/CitiesSkylinesMods/TMPE?label=origin&color=F56C2D&logo=origin&logoColor=F56C2D" /></a>
     <a href="https://github.com/CitiesSkylinesMods/TMPE/releases"><img src="https://img.shields.io/github/v/release/CitiesSkylinesMods/TMPE?label=downloads&include_prereleases&logo=ipfs&logoColor=F5F5F5" /></a>
     <a href="https://discord.gg/faKUnST"><img src="https://img.shields.io/discord/545065285862948894?color=7289DA&label=chat&logo=discord" /></a>
@@ -30,74 +30,68 @@
 
 ## Releases
 
-Official releases:
+> See [Full Changelog](https://github.com/CitiesSkylinesMods/TMPE/blob/master/CHANGELOG.md) for details of all releases.
 
-* [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252) (fully tested releases)
-* [TM:PE v11 LABS](https://steamcommunity.com/sharedfiles/filedetails/?id=1806963141) (latest beta test releases)
-* [Download Binaries](https://github.com/CitiesSkylinesMods/TMPE/releases) (for non-Steam users)
-* [Installation Guide](https://github.com/CitiesSkylinesMods/TMPE/wiki/Installation) (for all users)
+- [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252) (fully tested releases)
+- [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785) (latest beta test releases)
+- [Download Binaries](https://github.com/CitiesSkylinesMods/TMPE/releases) (for non-Steam users)
+- [Installation Guide](https://github.com/CitiesSkylinesMods/TMPE/wiki/Installation) (for all users)
 
-Recent updates:
+### Recent releases:
 
-#### TM:PE V[11.4.0](https://github.com/CitiesSkylinesMods/TMPE/compare/11.3.2...11.4.0) STABLE, 22/05/2020
+> Date format: dd/mm/yyyy
 
-- Added: State machine for dedicated turning lanes (#755, #567)
-- Fixed: Default turning lane on wrong side (#755, #671)
-- Meta: Repeat application of turning lane shortcut will cycle through available options
-- Steam: [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
+#### TM:PE V11.6.5.0 TEST, 16/02/2022
 
-#### TM:PE V[11.5.0](https://github.com/CitiesSkylinesMods/TMPE/compare/11.4.0...11.5.0) LABS, 07/05/2020
+- [Meta] Due to targeted malware, we are unable to provide support if you have mods by `Chaos`/`Holy Water`/`drok`, even if those mods are currently malware-free #1391 (TM:PE Team)
+- [Meta] Compatible with Cities: Skylines v1.14.0-f9 #1387 (krzychu124)
+- [New] Overlays mod option to show default speed when overriding segment/lane speeds #1404 (aubergine18)
+- [New] Added API for external mods to query TM:PE mod options #1378 #1376 (aubergine18)
+- [Mod] Compatible: `Reversible Tram AI` full compatibility #1386 #1353 (sway2020)
+- [Mod] Compatible: `Supply Chain Coloring` workshop version only #1390 (aubergine18)
+- [Mod] Compatible: `Transfer Broker BETA` workshop version only #1390 (aubergine18)
+- [Mod] Incompatible: `TM:PE LABS` - discontinued (replaced by TM:PE TEST) #1390 (aubergine18)
+- [Mod] Incompatible: `Traffic Manager (Curated)` - unsupported clone #1390 (aubergine18)
+- [Mod] Incompatible: `TMPE:TrafficManager全部汉化` - unsupported clone #1390 (aubergine18)
+- [Fixed] `StackOverflowException` due to `What's New` panel autolayout #1393 #1314 (krzychu124)
+- [Fixed] Skip searching for best emergency lane for non-car vehicles #1408 (krzychu124)
+- [Updated] Speed Limits: Always use themed icons in segment/lane modes #1404 (aubergine18)
+- [Updated] Extend Harmony patch manager to allow manual patches #1386 #1361 (sway2020)
+- [Updated] Various code clean-up and micro optimisations #1413 #1407 #1406 #1401 #1400 #1399 #1398 #1397 #1396 (egi)
+- [Updated] Remove duplicate button clean-up code in lifecycle #1375 (aubergine18)
+- [Updated] Internal restructuring of mod options code #1403 #1369 #1370 #1371 #1373 #1374 (aubergine18)
+- [Updated] Translations for mod options, speed limits, traffic lights #1415 (krzychu124, freddy0419, Natchanok Kulphiwet, MamylaPuce, ipd, 田七不甜 TianQiBuTian, TwotoolusFLY_LSh.st, Never2333, 문주원 sky162178, MenschLennart, Chamëleon, John Deehe, Skazov, AlexofCA, CrankyAnt, Иван Соколов)
+- [Updated] Update assembly info metadata #1417 (krzychu124)
+- [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
 
-- Added: Bulk customisation buttons on road info panel (#631, #691, #557, #542, #541, #539, #537)
-- Added: While toolbar visible, click road = show info panel; right-click = hide (#631, #822, #557, #29)
-- Added: Custom icons for road panel (thanks Chamëleon!) (#892, #887)
-- Added: Hints for Lane Routing tools (thanks Klyte45 for color info) (#851, #587, #500, #410, #421)
-- Added: Hints for Junction Restrictions, Priority Signs, Parking/Vehicle Restrictions (#868, #720)
-- Added: Czech language translation (thanks jakubpatek, LordOrodreth) (#858)
-- Fixed: Random UI bug when `UIView.GetAView()` is `null` (#868)
-- Fixed: Toolbar can sometimes go off-screen or disappear (#877, #868, #849, #848, #819)
-- Fixed: Toolbar buttons can escape toolbar (thanks to everyone who reported) (#850, #819)
-- Fixed: Toolbar position limited to partial screen area (#819)
-- Fixed: Parking button on toolbar always looks disabled (#858)
-- Fixed: Timed Traffic Light tool doesn't reset state between uses (#880, #861, #893)
-- Fixed: Confusing icon positions for junction restriction overlay (#845, #633)
-- Fixed: Lane connector node highlights not working (thanks Xyrhenix for reporting!) (#851, #830)
-- Fixed: Lane arrow 'reset' feature sometimes doesn't work (#891, #856, #738)
-- Fixed: Mod options sliders don't update tooltip when dragged (#857, #849)
-- Fixed: Slider tooltips update from wrong thread causing CTD (#880, #879)
-- Fixed: `NetSegment.CalculateCorner()` exception for unsubbed roads (#883, #881)
-- Updated: Toolbar rewrite - scalable, auto-arrange buttons, etc (#819, #523, #437, #38)
-- Updated: Replace vanilla priority road checkbox with TMPE tools (#631, #542, #7)
-- Updated: Consistent shortcuts for tools (#437, #587)
-- Updated: Reduced call stack in game bridge, culled unused code (#852)
-- Updated: Chinese Simplified translations (TianQiBuTian) (#720, #819, #851, #858)
-- Updated: Chinese Traditional translations (jrthsr700tmax) (#720, #819, #851, #858)
-- Updated: Czech translations (jakubpatek, LordOrodreth) (#720, #819, #851, #858)
-- Updated: Dutch translations (Headspike, CaptainKlums) (#720, #819, #851, #858)
-- Updated: English translations (kvakvs, kian.zarrin) (#720, #819, #851, #858)
-- Updated: French translations (mjm92150) (#720, #819, #851, #858)
-- Updated: German translations (BanditBloodwyn, Chamëleon, eilmannhenrik) (#720, #819, #851, #858)
-- Updated: Hungarian translations (StummeH) (#720, #819, #851, #858)
-- Updated: Japanese translations (mashitaro) (#720, #819, #851, #858)
-- Updated: Polish translations (krzychu1245, Chamëleon) (#720, #819, #851, #858)
-- Updated: Russian translations (kvakvs) (#720, #819, #851, #858)
-- Updated: Turkish translations (revolter00) (#720, #819, #851, #858)
-- Updated: Ukrainian translations (kvakvs) (#720, #819, #851, #858)
-- Removed: `LogicUtil.CheckFlags()` and associated files evicted (#852)
-- Steam: [TM:PE v11 LABS](https://steamcommunity.com/sharedfiles/filedetails/?id=1806963141)
+#### TM:PE V11.6.4.8 STABLE, 10/02/2022
 
-See [Full Changelog](https://github.com/CitiesSkylinesMods/TMPE/blob/master/CHANGELOG.md) for details of all releases.
+- [Meta] TM:PE 11.6.4-hotfix-8
+- [Meta] Bugfix for vehicle spawning/delivery on restricted lanes
+- [Mod] Malware: We are treating all mods by Chaos/Holy Water (same person) as targeted malware #1389 #1388 (aubergine18)
+- [Fixed] Allow vehicles to use restricted lanes when spawning/delivering #1381 #1380 #494 #85 (krzychu124)
+- [Steam] [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
+
+#### TM:PE V11.6.4.7 STABLE, 06/02/2022
+
+- [Meta] TM:PE 11.6.4-hotfix-7
+- [Meta] Bugfix for default speeds which affects speed limits tool, overlays, and roundabout curvature speed
+- [Fixed] Default netinfo speed should only inspect customisable lanes #1362 #1346 (aubergine18)
+- [Fixed] Fix `SPEED_TO_MPH` value in `ApiConstants.cs` #1364 #1363 #988 (aubergine18)
+- [Removed] Obsolete: `SPEED_TO_MPH` and `SPEED_TO_KMPH` in `Constants.cs` #1367 #1364 #1363 (aubergine18)
+- [Steam] [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
 
 ## Support Policy
 
 Our team is happy to support you if:
-- You are using the latest version of **TM:PE v11 STABLE** or **TM:PE v11 LABS**
+- You are using the latest version of **TM:PE v11 STABLE** or **TM:PE v11 TEST**
 - You are using a properly purchased and latest version of Cities: Skylines
 - You provide useful information when [reporting a bug](https://github.com/CitiesSkylinesMods/TMPE/wiki/Report-a-Bug)
 
 We will _not_ provide support if:
 - You are using a pirated or old version of Cities: Skylines
 - You are using an older version of the mod
+- You are using any mod by Holy Water ([due to malware targeted at our team](https://steamcommunity.com/workshop/filedetails/discussion/1637663252/4731597528356140067/))
 
 TM:PE is only tested on and updated for the latest version of Cities: Skylines.
 

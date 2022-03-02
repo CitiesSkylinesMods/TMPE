@@ -2,14 +2,18 @@ namespace TrafficManager.Util {
     using System.Collections.Generic;
     using System.Linq;
     using CSUtil.Commons;
+    using Manager.Impl;
     using TrafficManager.State.Asset;
     using TrafficManager.Util;
     using TrafficManager.Lifecycle;
+    using TrafficManager.Util.Extensions;
 
     public static class PlaceIntersectionUtil {
         ///<summary>maps old netowkr ids to new network ids</summary>
+        /// <param name="oldSegments">source segment id array created by on asset serialization</param>
         /// <param name="newSegmentIds">segment list provided by LoadPaths.</param>
-        public static void MapSegments(
+        /// <param name="map">segment map to fill in with pairs (old;new)</param>
+        private static void FillSegmentsMap(
             SegmentNetworkIDs[] oldSegments,
             ushort[] newSegmentIds,
             Dictionary<InstanceID, InstanceID> map) {
@@ -33,8 +37,9 @@ namespace TrafficManager.Util {
         /// </summary>
         /// <param name="newSegmentIds">segment list provided by LoadPaths.</param>
         public static void ApplyTrafficRules(BuildingInfo intersectionInfo, ushort[] newSegmentIds) {
-            /*************************
-             * Prepration: */
+            /****************/
+            /* Preparation: */
+            /****************/
 
             Log._Debug($"PlaceIntersectionUtil.ApplyTrafficRules({intersectionInfo?.ToString() ?? "null"})");
 
@@ -63,34 +68,22 @@ namespace TrafficManager.Util {
             var pathNetworkIDs = assetData.PathNetworkIDs;
             if (pathNetworkIDs == null) return;
 
-            /*************************
-             * Apply traffic rules: */
+            /***********************/
+            /* Create segment map: */
+            /***********************/
+            Shortcuts.AssertNotNull(newSegmentIds, "newSegmentIds");
+            FillSegmentsMap(oldSegments: pathNetworkIDs, newSegmentIds: newSegmentIds, map: map);
 
-            MapSegments(oldSegments: pathNetworkIDs, newSegmentIds: newSegmentIds, map: map);
+            // Note to previous solution:
+            // Node/segment calculation shouldn't be performed at this state!
+            // Forcing it here may trigger another 'fake' LoadPaths call breaking other mods attached to that method!
 
-            foreach (var item in map)
-                CalculateNetwork(item.Value);
-
-            assetData.Record.Transfer(map);
+            /*****************************************/
+            /* Queue traffic rules transfer process: */
+            /*****************************************/
+            UtilityManager.Instance.QueueTransferRecordable(assetData.Record, map);
 
             OnPlaceIntersection?.Invoke(intersectionInfo, map);
         }
-
-        /// <summary>
-        /// early calculate networks so that we are able to set traffic rules without delay.
-        /// </summary>
-        public static void CalculateNetwork(InstanceID instanceId) {
-            switch (instanceId.Type) {
-                case InstanceType.NetNode:
-                    ushort nodeId = instanceId.NetNode;
-                    nodeId.ToNode().CalculateNode(nodeId);
-                    break;
-                case InstanceType.NetSegment:
-                    ushort segmentId = instanceId.NetSegment;
-                    segmentId.ToSegment().CalculateSegment(segmentId);
-                    break;
-            }
-        }
-
     }
 }

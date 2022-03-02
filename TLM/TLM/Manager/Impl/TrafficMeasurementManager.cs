@@ -1,3 +1,5 @@
+using TrafficManager.Util.Extensions;
+
 namespace TrafficManager.Manager.Impl {
     using ColossalFramework;
     using CSUtil.Commons;
@@ -5,6 +7,7 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.API.Manager;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.State;
+    using TrafficManager.Util;
     using UnityEngine;
 
     public class TrafficMeasurementManager : AbstractCustomManager, ITrafficMeasurementManager {
@@ -86,7 +89,7 @@ namespace TrafficManager.Manager.Impl {
                 uint laneVehicleSpeedLimit = Math.Min(
                     3u * 8u,
                     (uint)((Options.customSpeedLimitsEnabled
-                                ? SpeedLimitManager.Instance.GetLockFreeGameSpeedLimit(
+                                ? SpeedLimitManager.Instance.GetGameSpeedLimit(
                                     segmentId,
                                     laneIndex,
                                     laneId,
@@ -197,7 +200,7 @@ namespace TrafficManager.Manager.Impl {
                 }
 
                 laneIndex++;
-                curLaneId = Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_nextLane;
+                curLaneId = curLaneId.ToLane().m_nextLane;
             }
 
             for (int i = 0; i < 2; ++i) {

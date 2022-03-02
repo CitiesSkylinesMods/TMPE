@@ -7,6 +7,7 @@ namespace TrafficManager.Util {
     using TrafficManager.UI;
     using UnityEngine;
     using TrafficManager.Util;
+    using TrafficManager.Util.Extensions;
 
     /// <summary>
     /// Helper functions to handle coordinates and transformations, as well as road geometry
@@ -98,8 +99,7 @@ namespace TrafficManager.Util {
                 }
 
                 NetInfo.Direction dir = segmentInfo.m_lanes[laneIndex].m_finalDirection;
-                Vector3 bezierCenter =
-                    netManager.m_lanes.m_buffer[curLaneId].m_bezier.Position(0.5f);
+                Vector3 bezierCenter = curLaneId.ToLane().m_bezier.Position(0.5f);
 
                 if (!outputDict.ContainsKey(dir)) {
                     outputDict[dir] = bezierCenter;
@@ -111,7 +111,7 @@ namespace TrafficManager.Util {
 
                 nextIter:
 
-                curLaneId = netManager.m_lanes.m_buffer[curLaneId].m_nextLane;
+                curLaneId = curLaneId.ToLane().m_nextLane;
                 laneIndex++;
             }
 
@@ -177,7 +177,7 @@ namespace TrafficManager.Util {
                     numLanes++;
                 }
 
-                curLaneId = netManager.m_lanes.m_buffer[curLaneId].m_nextLane;
+                curLaneId = curLaneId.ToLane().m_nextLane;
                 laneIndex++;
             }
 

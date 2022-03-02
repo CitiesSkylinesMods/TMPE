@@ -1,11 +1,11 @@
 namespace TrafficManager.Patch._VehicleAI._PassengerCarAI {
     using System.Reflection;
-    using ColossalFramework;
     using Connection;
     using HarmonyLib;
     using JetBrains.Annotations;
     using Manager.Impl;
     using UnityEngine;
+    using Util.Extensions;
 
     [UsedImplicitly]
     [HarmonyPatch]
@@ -39,7 +39,7 @@ namespace TrafficManager.Patch._VehicleAI._PassengerCarAI {
                        ref vehicleData,
                        ___m_info,
                        driverInstanceId,
-                       ref Singleton<CitizenManager>.instance.m_instances.m_buffer[driverInstanceId],
+                       ref driverInstanceId.ToCitizenInstance(),
                        ref ExtCitizenInstanceManager.Instance.ExtInstances[driverInstanceId],
                        startPos,
                        endPos,

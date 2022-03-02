@@ -12,6 +12,7 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.Traffic;
     using TrafficManager.Util;
     using TrafficManager.Util.Extensions;
+    using TrafficManager.Lifecycle;
 
     public class VehicleRestrictionsManager
         : AbstractGeometryObservingManager,
@@ -151,7 +152,7 @@ namespace TrafficManager.Manager.Impl {
                     }
                 }
 
-                curLaneId = netManager.m_lanes.m_buffer[curLaneId].m_nextLane;
+                curLaneId = curLaneId.ToLane().m_nextLane;
                 ++laneIndex;
             }
 
@@ -324,13 +325,14 @@ namespace TrafficManager.Manager.Impl {
         internal ExtVehicleType GetDefaultAllowedVehicleTypes(
             uint laneId,
             VehicleRestrictionsMode busLaneMode) {
+            ref NetLane netLane = ref laneId.ToLane();
 
-            if (((NetLane.Flags)Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags &
+            if (((NetLane.Flags)netLane.m_flags &
                  NetLane.Flags.Created) == NetLane.Flags.None) {
                 return ExtVehicleType.None;
             }
 
-            ushort segmentId = Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_segment;
+            ushort segmentId = netLane.m_segment;
             ref NetSegment netSegment = ref segmentId.ToSegment();
 
             if ((netSegment.m_flags & NetSegment.Flags.Created) == NetSegment.Flags.None) {
@@ -353,7 +355,7 @@ namespace TrafficManager.Manager.Impl {
                         busLaneMode);
                 }
 
-                curLaneId = Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_nextLane;
+                curLaneId = curLaneId.ToLane().m_nextLane;
                 ++laneIndex;
             }
 
@@ -446,7 +448,7 @@ namespace TrafficManager.Manager.Impl {
 
             NotifyStartEndNode(segmentId);
 
-            if (OptionsManager.Instance.MayPublishSegmentChanges()) {
+            if (TMPELifecycle.Instance.MayPublishSegmentChanges()) {
                 ExtSegmentManager.Instance.PublishSegmentChanges(segmentId);
             }
 
@@ -493,7 +495,7 @@ namespace TrafficManager.Manager.Impl {
             Flags.SetLaneAllowedVehicleTypes(segmentId, laneIndex, laneId, allowedTypes);
             NotifyStartEndNode(segmentId);
 
-            if (OptionsManager.Instance.MayPublishSegmentChanges()) {
+            if (TMPELifecycle.Instance.MayPublishSegmentChanges()) {
                 ExtSegmentManager.Instance.PublishSegmentChanges(segmentId);
             }
         }
@@ -538,7 +540,7 @@ namespace TrafficManager.Manager.Impl {
             Flags.SetLaneAllowedVehicleTypes(segmentId, laneIndex, laneId, allowedTypes);
             NotifyStartEndNode(segmentId);
 
-            if (OptionsManager.Instance.MayPublishSegmentChanges()) {
+            if (TMPELifecycle.Instance.MayPublishSegmentChanges()) {
                 ExtSegmentManager.Instance.PublishSegmentChanges(segmentId);
             }
         }
@@ -651,14 +653,14 @@ namespace TrafficManager.Manager.Impl {
         /// <param name="laneInfo"></param>
         /// <returns></returns>
         public ExtVehicleType GetBaseMask(uint laneId, VehicleRestrictionsMode includeBusLanes) {
-            NetLane[] lanesBuffer = Singleton<NetManager>.instance.m_lanes.m_buffer;
+            ref NetLane netLane = ref laneId.ToLane();
 
-            if (((NetLane.Flags)lanesBuffer[laneId].m_flags &
+            if (((NetLane.Flags)netLane.m_flags &
                  NetLane.Flags.Created) == NetLane.Flags.None) {
                 return ExtVehicleType.None;
             }
 
-            ushort segmentId = lanesBuffer[laneId].m_segment;
+            ushort segmentId = netLane.m_segment;
             ref NetSegment netSegment = ref segmentId.ToSegment();
 
             if ((netSegment.m_flags & NetSegment.Flags.Created) == NetSegment.Flags.None) {
@@ -676,7 +678,7 @@ namespace TrafficManager.Manager.Impl {
                     return GetBaseMask(laneInfo, includeBusLanes);
                 }
 
-                curLaneId = lanesBuffer[curLaneId].m_nextLane;
+                curLaneId = curLaneId.ToLane().m_nextLane;
                 ++laneIndex;
             }
 

@@ -240,7 +240,7 @@ namespace TrafficManager.Manager.Impl {
                 RecalculateLaneEndRoutingData(segmentId, laneIdAndIndex.laneIndex, laneIdAndIndex.laneId, false);
             }
 
-            Notifier.Instance.OnSegmentNodesMofied(segmentId, this);
+            Notifier.Instance.OnSegmentNodesModified(segmentId, this);
         }
 
         protected void ResetIncomingHighwayLaneArrows(ushort centerSegmentId) {

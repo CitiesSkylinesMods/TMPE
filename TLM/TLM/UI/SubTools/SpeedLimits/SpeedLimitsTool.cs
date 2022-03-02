@@ -11,6 +11,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
     using TrafficManager.UI.SubTools.PrioritySigns;
     using TrafficManager.UI.SubTools.SpeedLimits.Overlay;
     using TrafficManager.Util;
+    using TrafficManager.Util.Extensions;
     using UnityEngine;
 
     /// <summary>
@@ -258,22 +259,26 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
             this.overlayDrawArgs_.IsInteractive = interactive;
             this.overlayDrawArgs_.MultiSegmentMode = this.GetMultiSegmentMode();
 
-            var modeWithModifiers = this.speedlimitsToolMode_ switch {
-                SpeedlimitsToolMode.Segments => Shortcuts.AltIsPressed
-                                                    ? SpeedlimitsToolMode.Defaults
-                                                    : (Shortcuts.ControlIsPressed
-                                                           ? SpeedlimitsToolMode.Lanes
-                                                           : SpeedlimitsToolMode.Segments),
-                SpeedlimitsToolMode.Lanes => Shortcuts.AltIsPressed
-                                                 ? SpeedlimitsToolMode.Defaults
-                                                 : (Shortcuts.ControlIsPressed
-                                                        ? SpeedlimitsToolMode.Segments
-                                                        : SpeedlimitsToolMode.Lanes),
-                SpeedlimitsToolMode.Defaults => Shortcuts.AltIsPressed
-                                                    ? SpeedlimitsToolMode.Segments
-                                                    : SpeedlimitsToolMode.Defaults,
-                _ => throw new ArgumentOutOfRangeException()
-            };
+            var modeWithModifiers =
+                (interactive
+                     ? this.speedlimitsToolMode_
+                     : SpeedlimitsToolMode.Segments
+                    ) switch {
+                        SpeedlimitsToolMode.Segments => Shortcuts.AltIsPressed
+                                                            ? SpeedlimitsToolMode.Defaults
+                                                            : (Shortcuts.ControlIsPressed
+                                                                   ? SpeedlimitsToolMode.Lanes
+                                                                   : SpeedlimitsToolMode.Segments),
+                        SpeedlimitsToolMode.Lanes => Shortcuts.AltIsPressed
+                                                         ? SpeedlimitsToolMode.Defaults
+                                                         : (Shortcuts.ControlIsPressed
+                                                                ? SpeedlimitsToolMode.Segments
+                                                                : SpeedlimitsToolMode.Lanes),
+                        SpeedlimitsToolMode.Defaults => Shortcuts.AltIsPressed
+                                                            ? SpeedlimitsToolMode.Segments
+                                                            : SpeedlimitsToolMode.Defaults,
+                        _ => throw new ArgumentOutOfRangeException()
+                    };
             this.overlayDrawArgs_.ToolMode = modeWithModifiers;
         }
 

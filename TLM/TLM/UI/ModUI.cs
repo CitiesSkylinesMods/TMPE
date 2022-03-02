@@ -126,6 +126,10 @@ namespace TrafficManager.UI {
             } else {
                 ShowMainMenu();
                 GetTrafficManagerTool()?.RequestOnscreenDisplayUpdate();
+
+                if (!TMPELifecycle.Instance.WhatsNew.Shown) {
+                    WhatsNew.WhatsNew.OpenModal();
+                }
             }
         }
 
@@ -237,7 +241,7 @@ namespace TrafficManager.UI {
 
             // Do not handle ChangeTheme result assuming that savegame always has the selected theme
             // and MPH display in a consistent state
-            RoadSignThemes.ChangeTheme(
+            RoadSignThemes.Instance.ChangeTheme(
                 newTheme: GlobalConfig.Instance.Main.RoadSignTheme,
                 mphEnabled: GlobalConfig.Instance.Main.DisplaySpeedLimitsMph);
         }

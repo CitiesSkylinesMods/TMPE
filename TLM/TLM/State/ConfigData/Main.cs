@@ -1,10 +1,14 @@
 namespace TrafficManager.State.ConfigData {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
     using System.Linq;
+    using System.Xml.Serialization;
+    using JetBrains.Annotations;
     using TrafficManager.UI.MainMenu;
     using TrafficManager.UI.SubTools.SpeedLimits;
 
+    [SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:Fields should be private", Justification = "Reviewed.")]
     public class Main {
         /// <summary>Whether floating keybinds panel is visible.</summary>
         public bool KeybindsPanelVisible = true;
@@ -33,7 +37,7 @@ namespace TrafficManager.State.ConfigData {
         /// <summary>Speed Limits tool window position Y.</summary>
         public int SpeedLimitsWindowY = 0;
 
-        /// <summary>Put button inisde UUI.</summary>
+        /// <summary>Put button inside UUI.</summary>
         public bool UseUUI = false;
 
         /// <summary>Already displayed tutorial messages.</summary>
@@ -43,29 +47,31 @@ namespace TrafficManager.State.ConfigData {
         public bool EnableTutorial = true;
 
         /// <summary>Determines if the main menu shall be displayed in a tiny format.</summary>
-        [Obsolete("Do not use. TM:PE now has UI scale slider")]
+        [Obsolete("Use GuiScale instead")]
         public bool TinyMainMenu = true;
 
-        /// <summary>User interface transparency, unit: percents, range: 0..100.</summary>
-        [Obsolete("Value is not used anymore, use GuiOpacity instead")]
+        /// <summary>User interface transparency, unit: percents, range: 0..90.</summary>
+        [Obsolete("Use GuiOpacity instead")]
         public byte GuiTransparency = 75;
 
-        /// <summary>User interface opacity, unit: percents, range: 0..100.</summary>
+        /// <summary>User interface opacity, unit: percents, range: 10..100.</summary>
         public byte GuiOpacity = 75;
 
         /// <summary>User interface scale for TM:PE. Unit: percents, range: 30..200f.</summary>
         public float GuiScale = 100f;
 
         /// <summary>
-        /// if checked, size remains constnat but pixel count changes when resolution changes. Quality drops with lower resolutions.
-        /// if unchecked checked, size changes constnat but pixel count remains the same. Maintains same image quality for all resolution.
+        /// if checked, size remains constant but pixel count changes when resolution changes. Quality drops with lower resolutions.
+        /// if unchecked, size changes constant but pixel count remains the same. Maintains same image quality for all resolution.
         /// </summary>
         public bool GuiScaleToResolution = true;
 
-        /// <summary>
-        /// Overlay transparency
-        /// </summary>
+        /// <summary>Overlay transparency, unit: percents, range: 0..90</summary>
+        [Obsolete("Use OverlayOpacity instead")]
         public byte OverlayTransparency = 40;
+
+        /// <summary>Overlay icons opacity, unit: percent, range: 10..100.</summary>
+        public byte OverlayOpacity = 60;
 
         /// <summary>
         /// Extended mod compatibility check
@@ -102,6 +108,37 @@ namespace TrafficManager.State.ConfigData {
         /// <see cref="DisplaySpeedLimitsMph"/>.
         /// </summary>
         public string RoadSignTheme = string.Empty;
+
+        /// <summary>
+        /// If <c>true</c>, <see cref="UI.Helpers.UrlButton"/> links will open in
+        /// Steam Overlay if it is available.
+        /// </summary>
+        public bool OpenUrlsInSteamOverlay = true;
+
+        /// <summary>
+        /// Storing version of What's New panel opened last time
+        /// </summary>
+        [XmlIgnore]
+        [CanBeNull]
+        public Version LastWhatsNewPanelVersion = null;
+
+        /// <summary>
+        /// Property for proper Version serialization
+        /// </summary>
+        [UsedImplicitly]
+        [XmlElement(ElementName = nameof(LastWhatsNewPanelVersion))]
+        public string lastWhatsNewPanelVersion {
+            get {
+                if (this.LastWhatsNewPanelVersion == null)
+                    return string.Empty;
+                else
+                    return this.LastWhatsNewPanelVersion.ToString();
+            }
+            set {
+                if (!string.IsNullOrEmpty(value))
+                    this.LastWhatsNewPanelVersion = new Version(value);
+            }
+        }
 
         public void AddDisplayedTutorialMessage(string messageKey) {
             HashSet<string> newMessages = DisplayedTutorialMessages != null

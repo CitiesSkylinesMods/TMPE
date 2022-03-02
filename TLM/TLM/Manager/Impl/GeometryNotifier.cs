@@ -6,6 +6,7 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.API.Util;
     using TrafficManager.Util;
+    using TrafficManager.Util.Extensions;
 
     internal class GeometryNotifier : IObserver<GeometryUpdate> {
         void IObserver<GeometryUpdate>.OnUpdate(GeometryUpdate subject) {

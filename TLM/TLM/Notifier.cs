@@ -3,6 +3,7 @@ namespace TrafficManager
     using System;
     using TrafficManager.API.Notifier;
     using TrafficManager.Util;
+    using TrafficManager.Util.Extensions;
 
     public class Notifier : INotifier
     {
@@ -39,7 +40,7 @@ namespace TrafficManager
             });
         }
 
-        public void OnSegmentNodesMofied(ushort segmentId, object sender = null, object data = null)
+        public void OnSegmentNodesModified(ushort segmentId, object sender = null, object data = null)
         {
             ref NetSegment netSegment = ref segmentId.ToSegment();
             OnNodeModified(netSegment.m_startNode, sender, data);

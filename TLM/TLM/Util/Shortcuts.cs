@@ -2,8 +2,6 @@ namespace TrafficManager.Util {
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Reflection;
-    using System.Diagnostics;
     using ColossalFramework;
     using ColossalFramework.Math;
     using CSUtil.Commons;
@@ -11,6 +9,7 @@ namespace TrafficManager.Util {
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.Manager.Impl;
+    using TrafficManager.Util.Extensions;
     using UnityEngine;
     using ColossalFramework.UI;
 
@@ -42,37 +41,14 @@ namespace TrafficManager.Util {
             list[index1] = list[index2];
             list[index2] = temp;
         }
-
-        private static NetNode[] _nodeBuffer = Singleton<NetManager>.instance.m_nodes.m_buffer;
-
-        private static NetSegment[] _segBuffer = Singleton<NetManager>.instance.m_segments.m_buffer;
-
-        private static NetLane[] _laneBuffer = Singleton<NetManager>.instance.m_lanes.m_buffer;
-
-        private static Building[] _buildingBuffer = Singleton<BuildingManager>.instance.m_buildings.m_buffer;
-
-        private static CitizenInstance[] _citizenInstanceBuffer = Singleton<CitizenManager>.instance.m_instances.m_buffer;
-
         private static ExtSegmentEnd[] _segEndBuff => segEndMan.ExtSegmentEnds;
 
         internal static IExtSegmentEndManager segEndMan => Constants.ManagerFactory.ExtSegmentEndManager;
 
         internal static IExtSegmentManager segMan => Constants.ManagerFactory.ExtSegmentManager;
 
-        internal static ref NetNode ToNode(this ushort nodeId) => ref _nodeBuffer[nodeId];
-
-        internal static ref NetLane ToLane(this uint laneId) => ref _laneBuffer[laneId];
-
-        internal static ref NetSegment ToSegment(this ushort segmentId) => ref _segBuffer[segmentId];
-
-        internal static ref Building ToBuilding(this ushort buildingId) => ref _buildingBuffer[buildingId];
-
-        internal static ref CitizenInstance ToCitizenInstance(this ushort citizenInstance) => ref _citizenInstanceBuffer[citizenInstance];
-
-        internal static bool IsUndergroundNode(this ushort node) => (_nodeBuffer[node].m_flags & NetNode.Flags.Underground) != NetNode.Flags.None;
-
-        internal static NetInfo.Lane GetLaneInfo(ushort segmentId, int laneIndex) =>
-            segmentId.ToSegment().Info.m_lanes[laneIndex];
+        [Obsolete]
+        internal static bool IsUndergroundNode(this ushort node) => node.ToNode().IsUnderground();
 
         internal static ref ExtSegmentEnd GetSegEnd(ushort segmentId, ushort nodeId) =>
             ref _segEndBuff[segEndMan.GetIndex(segmentId, nodeId)];
@@ -80,13 +56,9 @@ namespace TrafficManager.Util {
         internal static ref ExtSegmentEnd GetSegEnd(ushort segmentId, bool startNode) =>
             ref _segEndBuff[segEndMan.GetIndex(segmentId, startNode)];
 
-        internal static ushort GetNodeId(this ref NetSegment segment, bool startNode) =>
-            startNode ? segment.m_startNode : segment.m_endNode;
+        [Obsolete]
+        internal static bool HasJunctionFlag(ushort nodeId) => nodeId.ToNode().IsJunction();
 
-        internal static bool HasJunctionFlag(ushort nodeId) => HasJunctionFlag(ref nodeId.ToNode());
-
-        internal static bool HasJunctionFlag(ref NetNode node) =>
-            (node.m_flags & NetNode.Flags.Junction) != NetNode.Flags.None;
 
         internal static Func<bool, int> Int = (bool b) => b ? 1 : 0;
 

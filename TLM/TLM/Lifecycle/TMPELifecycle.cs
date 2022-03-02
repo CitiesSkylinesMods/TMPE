@@ -17,6 +17,10 @@ namespace TrafficManager.Lifecycle {
     using UnityEngine.SceneManagement;
     using UnityEngine;
     using JetBrains.Annotations;
+    using TrafficManager.UI.WhatsNew;
+    using System.Diagnostics.CodeAnalysis;
+    using TrafficManager.UI.Helpers;
+    using TrafficManager.API.Traffic.Enums;
 
     /// <summary>
     /// Do not use Singleton<TMPELifecycle>.instance to prevent memory leak.
@@ -31,6 +35,9 @@ namespace TrafficManager.Lifecycle {
 
         public IDisposable GeometryNotifierDisposable;
 
+        /// <summary>Cached value of <see cref="LauncherLoginData.instance.m_continue"/>.</summary>
+        private static bool cache_m_continue;
+
         /// <summary>TMPE is in the middle of deserializing data.</summary>
         public bool Deserializing { get; set; }
 
@@ -43,6 +50,8 @@ namespace TrafficManager.Lifecycle {
         public bool InGameHotReload { get; private set; }
         public bool IsGameLoaded { get; private set; }
 
+        public WhatsNew WhatsNew { get; private set; }
+
         public Dictionary<BuildingInfo, AssetData> Asset2Data { get; set; }
 
         /// <summary>
@@ -53,21 +62,69 @@ namespace TrafficManager.Lifecycle {
             SceneManager.GetActiveScene().name != "MainMenu" &&
             SceneManager.GetActiveScene().name != "Startup";
 
+        /// <summary>
+        /// Determines if modifications to segments may be published in the current state.
+        /// </summary>
+        /// <returns>Returns <c>true</c> if changes may be published, otherwise <c>false</c>.</returns>
+        public bool MayPublishSegmentChanges()
+            => InGameOrEditor() && !Instance.Deserializing;
+
         public static AppMode? AppMode => SimulationManager.instance.m_ManagersWrapper.loading?.currentMode;
 
+        // throws null ref if used from main menu
         public static SimulationManager.UpdateMode UpdateMode => SimulationManager.instance.m_metaData.m_updateMode;
+
+        // throws null ref if used form main menu
         public static LoadMode Mode => (LoadMode)UpdateMode;
+
         public static string Scene => SceneManager.GetActiveScene().name;
 
         /// <summary>
         /// determines whether Game mode as oppose to edit mode (eg asset editor).
         /// </summary>
-        internal static bool PlayMode => AppMode != null && AppMode == ICities.AppMode.Game;
+        internal static bool PlayMode {
+            get {
+                string sceneName = SceneManager.GetActiveScene().name;
+                return sceneName.Equals("Game") || sceneName.Equals("Ingame");
+            }
+        }
+
+        /// <summary>Resumes PDX launcher auto-load of last city if necessary.</summary>
+        [SuppressMessage("Type Safety", "UNT0016:Unsafe way to get the method name", Justification = "Using same code as C:SL.")]
+        private static void AutoResumeLastCityIfNecessary() {
+            if (!cache_m_continue) {
+                return;
+            }
+
+            cache_m_continue = false;
+
+            if (InGameOrEditor()) {
+                return;
+            }
+
+            try {
+                MainMenu menu = FindObjectOfType<MainMenu>();
+                if (menu != null) {
+                    // code from global::MainMenu.Refresh() game code
+                    menu.m_BackgroundImage.zOrder = int.MaxValue;
+                    menu.Invoke("AutoContinue", 2.5f);
+                }
+            }
+            catch (Exception e) {
+                Log.ErrorFormat("Resume AutoContinue Failed:\n{0}", e.ToString());
+            }
+        }
 
         private static void CompatibilityCheck() {
+            bool success = true;
+
             ModsCompatibilityChecker mcc = new ModsCompatibilityChecker();
-            mcc.PerformModCheck();
-            VersionUtil.CheckGameVersion();
+            success &= mcc.PerformModCheck();
+            success &= VersionUtil.CheckGameVersion();
+
+            if (success) {
+                AutoResumeLastCityIfNecessary();
+            }
         }
 
         internal void Preload() {
@@ -105,6 +162,12 @@ namespace TrafficManager.Lifecycle {
             RegisteredManagers.Add(VehicleRestrictionsManager.Instance);
             RegisteredManagers.Add(ExtVehicleManager.Instance);
 
+            // Texture managers
+            RegisteredManagers.Add(UI.Textures.RoadSignThemes.Instance);
+            RegisteredManagers.Add(UI.Textures.JunctionRestrictions.Instance);
+            RegisteredManagers.Add(UI.Textures.RoadUI.Instance);
+            RegisteredManagers.Add(UI.Textures.TrafficLightTextures.Instance);
+
             // depends on TurnOnRedManager, TrafficLightManager, TrafficLightSimulationManager
             RegisteredManagers.Add(JunctionRestrictionsManager.Instance);
         }
@@ -129,6 +192,9 @@ namespace TrafficManager.Lifecycle {
                     LoadingManager.instance.m_introLoaded += CompatibilityCheck;
                 }
 
+                // initialize what's new panel data
+                WhatsNew = new WhatsNew();
+
                 HarmonyHelper.EnsureHarmonyInstalled();
                 LoadingManager.instance.m_levelPreLoaded += Preload;
 
@@ -141,8 +207,9 @@ namespace TrafficManager.Lifecycle {
 
 #if DEBUG
                 const bool installHarmonyASAP = false; // set true for fast testing
-                if (installHarmonyASAP)
+                if (installHarmonyASAP) {
                     HarmonyHelper.DoOnHarmonyReady(Patcher.Install);
+                }
 #endif
             } catch (Exception ex) {
                 ex.LogException(true);
@@ -176,6 +243,11 @@ namespace TrafficManager.Lifecycle {
 #endif
 
         internal static void StartMod() {
+            // Prevent launcher auto-resume now, because we can't do it later
+            // If `CompatibilityCheck()` passes, we'll invoke `AutoResumeLastCityIfNecessary()`
+            cache_m_continue = LauncherLoginData.instance.m_continue;
+            LauncherLoginData.instance.m_continue = false;
+
             var go = new GameObject(nameof(TMPELifecycle), typeof(TMPELifecycle));
             DontDestroyOnLoad(go); // don't destroy when scene changes.
         }
@@ -201,6 +273,7 @@ namespace TrafficManager.Lifecycle {
 
                 ModUI.OnLevelLoaded();
                 if (PlayMode) {
+                    Log._Debug("PlayMode");
                     UIView uiView = UIView.GetAView();
                     uiView.AddUIComponent(typeof(UITransportDemand));
                     uiView.gameObject.AddComponent<RemoveVehicleButtonExtender>();
@@ -220,6 +293,21 @@ namespace TrafficManager.Lifecycle {
                 // after all TMPE rules are applied.
                 GeometryNotifierDisposable = GeometryManager.Instance.Subscribe(new GeometryNotifier());
                 Notifier.Instance.OnLevelLoaded();
+
+                if (PlayMode && (Mode is not LoadMode.NewGame or LoadMode.NewGameFromScenario)) {
+
+                    var despawned = PathfinderUpdates.DespawnVehiclesIfNecessary();
+
+                    if (despawned != ExtVehicleType.None) {
+                        Prompt.Info(
+                            "TM:PE Pathfinder Updated",
+                            $"Some vehicles ({despawned}) had broken paths due to a bug "
+                            + "in an earlier version of the pathfinder. We've despawned "
+                            + "them to prevent further issues. New vehicles will "
+                            + "automatically spawn to replace them.");
+                    }
+                }
+
                 Log.Info("OnLevelLoaded complete.");
             } catch (Exception ex) {
                 ex.LogException(true);
@@ -228,6 +316,8 @@ namespace TrafficManager.Lifecycle {
 
         internal void Unload() {
             try {
+                Options.Available = false;
+
                 GeometryNotifierDisposable?.Dispose();
                 GeometryNotifierDisposable = null;
 
@@ -249,13 +339,14 @@ namespace TrafficManager.Lifecycle {
 
                 GlobalConfig.OnLevelUnloading();
 
-                // destroy immidately to prevent duplicates after hot-reload.
-                var uiviewGO = UIView.GetAView().gameObject;
-                DestroyImmediate(uiviewGO.GetComponent<RoadSelectionPanels>());
-                DestroyImmediate(uiviewGO.GetComponent<RemoveVehicleButtonExtender>());
-                DestroyImmediate(uiviewGO.GetComponent<RemoveCitizenInstanceButtonExtender>());
-                DestroyImmediate(uiviewGO.GetComponent<RemoveCitizenInstanceButtonExtender>());
-                DestroyImmediate(uiviewGO.GetComponent<UITransportDemand>());
+                if (PlayMode) {
+                    // destroy immidately to prevent duplicates after hot-reload.
+                    var uiviewGO = UIView.GetAView().gameObject;
+                    DestroyImmediate(uiviewGO.GetComponent<RoadSelectionPanels>());
+                    DestroyImmediate(uiviewGO.GetComponent<RemoveVehicleButtonExtender>());
+                    DestroyImmediate(uiviewGO.GetComponent<RemoveCitizenInstanceButtonExtender>());
+                    DestroyImmediate(uiviewGO.GetComponent<UITransportDemand>());
+                }
 
                 Log.Info("Removing Controls from UI.");
                 if (ModUI.Instance) {

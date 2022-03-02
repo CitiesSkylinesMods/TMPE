@@ -166,14 +166,12 @@ namespace TrafficManager.UI.SubTools {
             // ShowSigns(false);
         }
 
-        private static NetLane[] laneBuffer => NetManager.instance.m_lanes.m_buffer;
-
         /// <summary>
         /// highlights the given lane according.
         /// the highlight is emboldened if mouse click is pressed.
         /// </summary>
         private void RenderLaneOverlay(RenderManager.CameraInfo cameraInfo, uint laneId) {
-            var marker = new SegmentLaneMarker(laneBuffer[laneId].m_bezier);
+            var marker = new SegmentLaneMarker(laneId.ToLane().m_bezier);
             bool pressed = Input.GetMouseButton(0);
             Color color = HighlightColor;
             color = pressed ? Color.magenta : color;
@@ -451,6 +449,7 @@ namespace TrafficManager.UI.SubTools {
                                                    bool viewOnly,
                                                    out bool stateUpdated) {
             stateUpdated = false;
+            var vehicleRestrictionTextures = RoadUI.Instance.VehicleRestrictionTextures;
 
             if (viewOnly && !Options.vehicleRestrictionsOverlay &&
                 MainTool.GetToolMode() != ToolMode.VehicleRestrictions) {
@@ -586,9 +585,8 @@ namespace TrafficManager.UI.SubTools {
                         continue; // do not draw allowed vehicles in view-only mode
                     }
 
-
                     bool hoveredHandle = gridRenderer.DrawGenericOverlayGridTexture(
-                        texture: RoadUI.VehicleRestrictionTextures[vehicleType][allowed],
+                        texture: vehicleRestrictionTextures[vehicleType][allowed],
                         camPos: camPos,
                         x: x,
                         y: y,
