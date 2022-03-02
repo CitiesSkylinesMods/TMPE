@@ -149,11 +149,6 @@ namespace TrafficManager.Util {
             }
         }
 
-        internal static void ShowErrorDialog(string title, string message) {
-            UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel")
-                .SetMessage(title, message, true);
-        }
-
         internal static Color WithAlpha(this Color color, float alpha) {
             color.a = alpha;
             return color;
