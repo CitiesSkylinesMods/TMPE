@@ -17,17 +17,7 @@ namespace TrafficManager.Manager.Impl {
         : AbstractCustomManager,
           IOptionsManager {
 
-        // TODO I contain ugly code
         public static OptionsManager Instance = new OptionsManager();
-
-        /// <summary>
-        /// If not loading a city savegame, options should be set to defaults.
-        /// </summary>
-        /// <remarks>See: https://github.com/CitiesSkylinesMods/TMPE/pull/1425 for details</remarks>
-        public bool ForceResetToDefaults =>
-            !TMPELifecycle.PlayMode ||
-            TMPELifecycle.Mode == LoadMode.NewGame ||
-            TMPELifecycle.Mode == LoadMode.NewGameFromScenario;
 
         protected override void InternalPrintDebugInfo() {
             base.InternalPrintDebugInfo();

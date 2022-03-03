@@ -74,7 +74,9 @@ namespace TrafficManager.Lifecycle {
             // load options (empty byte array causes default options to be applied)
             try {
                 if (TMPELifecycle.InGameOrEditor()) {
-                    byte[] options = OptionsManager.Instance.ForceResetToDefaults
+                    // Always force default options on new game
+                    // See: https://github.com/CitiesSkylinesMods/TMPE/pull/1425
+                    byte[] options = TMPELifecycle.IsNewGame
                         ? null
                         : SerializableData.LoadData("TMPE_Options");
 
