@@ -3,6 +3,7 @@ namespace TrafficManager.UI.Helpers {
     using ColossalFramework.UI;
     using CSUtil.Commons;
     using System;
+    using TrafficManager.Lifecycle;
     using UnityEngine.SceneManagement;
 
     /// <summary>
@@ -76,7 +77,7 @@ namespace TrafficManager.UI.Helpers {
         /// <param name="title">Dialog title.</param>
         /// <param name="message">Dialog body text.</param>
         /// <param name="isError">If <c>true</c>, the dialog is styled as an error.</param>
-        internal static void ExceptionPanel(string title, string message, bool isError) {
+        private static void ExceptionPanel(string title, string message, bool isError) {
             Action prompt = () => {
                 UIView.library
                     .ShowModal<ExceptionPanel>("ExceptionPanel")
@@ -84,7 +85,7 @@ namespace TrafficManager.UI.Helpers {
             };
 
             try {
-                if (SceneManager.GetActiveScene().name == "Game") {
+                if (TMPELifecycle.InGameOrEditor()) {
                     Singleton<SimulationManager>.instance.m_ThreadingWrapper.QueueMainThread(prompt);
                 } else {
                     prompt();
@@ -115,7 +116,7 @@ namespace TrafficManager.UI.Helpers {
             };
 
             try {
-                if (SceneManager.GetActiveScene().name == "Game") {
+                if (TMPELifecycle.InGameOrEditor()) {
                     Singleton<SimulationManager>.instance.m_ThreadingWrapper.QueueMainThread(prompt);
                 } else {
                     prompt();
