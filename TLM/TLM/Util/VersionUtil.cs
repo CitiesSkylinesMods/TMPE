@@ -1,8 +1,9 @@
 namespace TrafficManager.Util {
-    using CSUtil.Commons;
     using System;
     using System.Reflection;
+    using CSUtil.Commons;
     using TrafficManager.Lifecycle;
+    using TrafficManager.UI.Helpers;
 
     /// <summary>
     /// Much of this stuff will be replaced as part of PR #699.
@@ -142,7 +143,7 @@ namespace TrafficManager.Util {
                         BuildConfig.applicationVersion);
                     Log.Error(msg);
 
-                    Shortcuts.ShowErrorDialog(
+                    Prompt.Error(
                         current > expected
                             ? "TM:PE needs updating!"
                             : "Cities: Skylines needs updating!",
