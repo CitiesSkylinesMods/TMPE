@@ -1,12 +1,14 @@
 [Version] 11.6.5.1
 [Meta] This update focuses on major refactoring of mod options code
-[Fixed] Mod features not enabled if starting new game after asset editing #1423 (NateNate60, aubergine18)
+[Mod] External mods can now access managers directly via TMPE.API.dll #1448 (kianzarrin)
+[Fixed] Mod features not enabled if starting new game after using asset editor #1423 (NateNate60, aubergine18)
 [Fixed] Typo in notifier method name #1440 (aubergine18)
 [Updated] Add/update UI helpers for use in mod options #1431 #1430 #1424 #1419 (aubergine18)
 [Updated] Refactoring mod options #1435 #1432 #1422 #1411 #1416 #1356 #1279 (aubergine18)
 [Updated] Replaced `Overlay Transparency` with `Overlay Opacity` #1432 #1268 (aubergine18)
 [Updated] Minimum GUI/Overlay opacity limited to 10% #1432 #1409 (KHY-afk, aubergine18)
 [Updated] Use `Prompt.Error` for error message display #1445 (aubergine18)
+[Updated] Update to UUI 2.2.1 via Nuget #1442 (kianzarrin)
 [Removed] Obsolete gamebridge stuff from build script #1436 (aubergine18)
 [/Version]
 
