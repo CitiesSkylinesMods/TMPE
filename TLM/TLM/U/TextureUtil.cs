@@ -152,7 +152,6 @@ namespace TrafficManager.U {
         /// <param name="atlas">instance to destroy</param>
         public static void DestroyTextureAtlasAndContents(UITextureAtlas atlas) {
             List<UITextureAtlas.SpriteInfo> atlasSprites = atlas.sprites;
-            Log.Info($"Destroying {atlasSprites.Count} sprites");
             // destroy sprites
             for (int i = 0; i < atlasSprites.Count; i++) {
                 Object.DestroyImmediate(atlasSprites[0].texture);

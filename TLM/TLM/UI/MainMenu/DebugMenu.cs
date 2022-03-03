@@ -128,7 +128,7 @@ namespace TrafficManager.UI.MainMenu {
             textfield.cursorBlinkTime = 0.45f;
             textfield.cursorWidth = 1;
             textfield.selectionBackgroundColor = new Color(233, 201, 148, 255);
-            textfield.atlas = U.TextureUtil.Ingame;
+            textfield.atlas = TextureUtil.Ingame;
             textfield.selectionSprite = "EmptySprite";
             textfield.verticalAlignment = UIVerticalAlignment.Middle;
             textfield.padding = new RectOffset(5, 0, 5, 0);
@@ -150,7 +150,7 @@ namespace TrafficManager.UI.MainMenu {
             button.textScale = 0.8f;
             button.width = Translation.GetMenuWidth() - 30;
             button.height = 30;
-            button.atlas = U.TextureUtil.Ingame;
+            button.atlas = TextureUtil.Ingame;
             button.normalBgSprite = "ButtonMenu";
             button.disabledBgSprite = "ButtonMenuDisabled";
             button.hoveredBgSprite = "ButtonMenuHovered";

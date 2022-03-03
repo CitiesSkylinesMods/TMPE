@@ -1,11 +1,11 @@
 namespace TrafficManager.UI.WhatsNew {
     using System;
     using System.Collections.Generic;
-    using System.Net.Configuration;
     using ColossalFramework;
     using ColossalFramework.UI;
     using CSUtil.Commons;
     using Lifecycle;
+    using U;
     using UnityEngine;
 
     public class WhatsNewPanel : UIPanel {
@@ -37,7 +37,7 @@ namespace TrafficManager.UI.WhatsNew {
             size = new Vector2(_defaultWidth, _defaultHeight);
             backgroundSprite = "GenericPanel";
             color = _panelBgColor;
-            atlas = U.TextureUtil.Ingame;
+            atlas = TextureUtil.Ingame;
 
             AddHeader();
             AddContent();
@@ -195,7 +195,7 @@ namespace TrafficManager.UI.WhatsNew {
             label.textAlignment = UIHorizontalAlignment.Center;
             label.verticalAlignment = UIVerticalAlignment.Middle;
             label.padding = _pillTextPadding;
-            label.atlas = U.TextureUtil.Ingame;
+            label.atlas = TextureUtil.Ingame;
 
             return label;
         }
@@ -211,7 +211,7 @@ namespace TrafficManager.UI.WhatsNew {
             panel.padding = new RectOffset(0, 0, 6, 0);
             panel.height = wasReleased ? 45 : 36;
             panel.relativePosition = Vector3.zero;
-            panel.atlas = U.TextureUtil.Ingame;
+            panel.atlas = TextureUtil.Ingame;
 
             UILabel version = panel.AddUIComponent<UILabel>();
             version.name = "ChangelogVersionNumber";
@@ -269,7 +269,7 @@ namespace TrafficManager.UI.WhatsNew {
             cancel.normalBgSprite = "buttonclose";
             cancel.hoveredBgSprite = "buttonclosehover";
             cancel.pressedBgSprite = "buttonclosepressed";
-            cancel.atlas = U.TextureUtil.Ingame;
+            cancel.atlas = TextureUtil.Ingame;
             cancel.size = new Vector2(32, 32);
             cancel.relativePosition = new Vector2(_defaultWidth - 37, 4);
             cancel.eventClick += (_, _) => HandleClose();
@@ -300,7 +300,7 @@ namespace TrafficManager.UI.WhatsNew {
             thumbSprite.fillDirection = UIFillDirection.Vertical;
             thumbSprite.size = scrollbar.size;
             thumbSprite.spriteName = "ScrollbarTrack"; // "ScrollbarThumb";
-            thumbSprite.atlas = U.TextureUtil.Ingame;
+            thumbSprite.atlas = TextureUtil.Ingame;
             thumbSprite.color = new Color(40, 40, 40);
             scrollbar.thumbObject = thumbSprite;
 

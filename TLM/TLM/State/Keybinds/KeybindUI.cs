@@ -9,6 +9,7 @@ namespace TrafficManager.State.Keybinds {
     using TrafficManager.UI;
     using UnityEngine;
     using TrafficManager.UI.Helpers;
+    using TrafficManager.U;
 
     /// <summary>
     /// Helper for creating keyboard bindings Settings page.
@@ -140,7 +141,7 @@ namespace TrafficManager.State.Keybinds {
             btn.hoveredTextColor = new Color32(128, 128, 255, 255); // darker blue
             btn.pressedTextColor = new Color32(192, 192, 255, 255); // lighter blue
             btn.normalBgSprite = "ButtonMenu";
-            btn.atlas = U.TextureUtil.Ingame;
+            btn.atlas = TextureUtil.Ingame;
 
             btn.eventKeyDown += OnBindingKeyDown;
             btn.eventMouseDown += OnBindingMouseDown;
