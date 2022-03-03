@@ -8,6 +8,7 @@ namespace TrafficManager.UI.AllowDespawn {
     using Helpers;
     using Lifecycle;
     using State;
+    using TrafficManager.U;
     using UnityEngine;
 
     public class AllowDespawningPanel : UIPanel {
@@ -130,6 +131,7 @@ namespace TrafficManager.UI.AllowDespawn {
             size = new Vector2(_defaultWidth, _defaultHeight);
             backgroundSprite = "GenericPanel";
             color = _panelBgColor;
+            atlas = TextureUtil.Ingame;
 
             AddHeader();
             AddContent();
@@ -223,6 +225,7 @@ namespace TrafficManager.UI.AllowDespawn {
             cancel.normalBgSprite = "buttonclose";
             cancel.hoveredBgSprite = "buttonclosehover";
             cancel.pressedBgSprite = "buttonclosepressed";
+            cancel.atlas = TextureUtil.Ingame;
             cancel.size = new Vector2(32, 32);
             cancel.relativePosition = new Vector2(_defaultWidth - 37, 4);
             cancel.eventClick += (_, _) => HandleClose();
