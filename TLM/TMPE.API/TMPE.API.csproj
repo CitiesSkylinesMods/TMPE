@@ -75,6 +75,7 @@
     <Compile Include="..\SharedAssemblyInfo.cs">
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="Implementations.cs" />
     <Compile Include="Geometry\SegmentEndReplacement.cs" />
     <Compile Include="Manager\IAdvancedParkingManager.cs" />
     <Compile Include="Manager\ICustomDataManager.cs" />
