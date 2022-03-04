@@ -86,7 +86,10 @@ namespace TrafficManager.Util.Record {
                 try {
                     record.Transfer(map);
                 }
-                catch (Exception ex) {
+                catch(KeyNotFoundException ex) {
+                    // hide message in release build to avoid scaring the user.
+                    Log._Debug($"Could not map record:{record}. this is expected if move it has not copied all segment[s] from an intersection");
+                } catch (Exception ex) {
                     Log.Error($"could not transfer {record}");
                     ex.LogException();
                 }
