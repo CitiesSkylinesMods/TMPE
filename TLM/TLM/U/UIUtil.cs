@@ -98,11 +98,9 @@ namespace TrafficManager.U {
                 .Replace(
                     sourceText,
                     new MatchEvaluator(
-                        match => {
-                            return i < replacements.Length
-                                       ? $"{UConst.GetKeyboardShortcutColorTagOpener()}{match.Result(replacements[i++])}{UConst.KEYBOARD_SHORTCUT_CLOSING_TAG}"
-                                       : match.Value;
-                        }));
+                        match => i < replacements.Length
+                                     ? $"{UConst.GetKeyboardShortcutColorTagOpener()}{replacements[i++]}{UConst.KEYBOARD_SHORTCUT_CLOSING_TAG}"
+                                     : match.Value));
         }
     }
 }
