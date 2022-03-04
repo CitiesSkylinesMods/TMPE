@@ -8,6 +8,7 @@ namespace TrafficManager.U {
     using TrafficManager.UI.Textures;
     using UnityEngine;
     using TrafficManager.Util;
+    using Object = UnityEngine.Object;
 
     public static class TextureUtil {
         public static UITextureAtlas Ingame =>
@@ -143,6 +144,27 @@ namespace TrafficManager.U {
             }
 
             return null;
+        }
+
+        /// <summary>
+        /// Destroys contents of UITextureAtlas and instance itself
+        /// </summary>
+        /// <param name="atlas">instance to destroy</param>
+        public static void DestroyTextureAtlasAndContents(UITextureAtlas atlas) {
+            List<UITextureAtlas.SpriteInfo> atlasSprites = atlas.sprites;
+            // destroy sprites
+            for (int i = 0; i < atlasSprites.Count; i++) {
+                Object.DestroyImmediate(atlasSprites[0].texture);
+            }
+            atlasSprites.Clear();
+            // reset map
+            atlas.RebuildIndexes();
+            // destroy material texture
+            Object.DestroyImmediate(atlas.texture);
+            // destroy material
+            Object.DestroyImmediate(atlas.material);
+            // destroy atlas scriptable object
+            Object.DestroyImmediate(atlas);
         }
     } // end class
 }

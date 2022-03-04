@@ -411,6 +411,11 @@ namespace TrafficManager.UI.MainMenu {
         public override void OnDestroy() {
             eventVisibilityChanged -= OnVisibilityChanged;
             confDisposable?.Dispose();
+
+            if (allButtonsAtlas_) {
+                TextureUtil.DestroyTextureAtlasAndContents(allButtonsAtlas_);
+                allButtonsAtlas_ = null;
+            }
             base.OnDestroy();
         }
 
