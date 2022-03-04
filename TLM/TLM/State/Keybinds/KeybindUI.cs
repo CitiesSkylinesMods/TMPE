@@ -180,7 +180,8 @@ namespace TrafficManager.State.Keybinds {
         /// </summary>
         /// <param name="parent">The panel to host it</param>
         /// <param name="showKey">The key to display</param>
-        public void CreateKeybindText(UIPanel parent, SavedInputKey showKey, float widthFraction) {
+        /// <returns>The created UILabel</returns>
+        public UILabel CreateKeybindText(UIPanel parent, SavedInputKey showKey, float widthFraction) {
             var label = parent.AddUIComponent<UILabel>();
             label.autoSize = false;
             label.size = new Vector2(ROW_WIDTH * widthFraction, ROW_HEIGHT);
@@ -188,6 +189,7 @@ namespace TrafficManager.State.Keybinds {
             label.verticalAlignment = UIVerticalAlignment.Middle;
             label.textAlignment = UIHorizontalAlignment.Center;
             label.textColor = new Color32(128, 128, 128, 255); // grey
+            return label;
         }
 
         /// <summary>
