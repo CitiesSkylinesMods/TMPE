@@ -20,6 +20,7 @@ namespace TrafficManager.UI.WhatsNew {
             LoadChangelogs();
         }
 
+        [CanBeNull]
         public static Version PreviouslySeenVersion {
             get => GlobalConfig.Instance.Main.LastWhatsNewPanelVersion;
             set {
@@ -31,6 +32,9 @@ namespace TrafficManager.UI.WhatsNew {
             }
         }
 
+        /// <summary>
+        /// Return info if What's new panes was shown in current version
+        /// </summary>
         public bool Shown => CurrentVersion <= PreviouslySeenVersion;
 
         public List<Changelog> Changelogs { get; private set; }
