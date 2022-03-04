@@ -4,20 +4,25 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.API.Manager;
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.State;
+    using TrafficManager.UI;
     using TrafficManager.UI.Helpers;
+    using TrafficManager.UI.Textures;
     using TrafficManager.Lifecycle;
     using JetBrains.Annotations;
     using TrafficManager.Util;
     using System.Reflection;
-    using TrafficManager.UI;
-    using TrafficManager.UI.Textures;
+    using ICities;
 
     public class OptionsManager
         : AbstractCustomManager,
           IOptionsManager {
 
-        // TODO I contain ugly code
         public static OptionsManager Instance = new OptionsManager();
+
+        protected override void InternalPrintDebugInfo() {
+            base.InternalPrintDebugInfo();
+            Log.NotImpl("InternalPrintDebugInfo for OptionsManager");
+        }
 
         // See: OnAfterLoadData() and related methods
         private static bool _needUpdateDedicatedTurningLanes = false;
@@ -66,11 +71,6 @@ namespace TrafficManager.Manager.Impl {
                 _needUpdateJunctionRestrictionsManager = false;
                 UpdateJunctionRestrictionsManager();
             }
-        }
-
-        protected override void InternalPrintDebugInfo() {
-            base.InternalPrintDebugInfo();
-            Log.NotImpl("InternalPrintDebugInfo for OptionsManager");
         }
 
         [Obsolete("Use TMPELifecycle method of same name instead")]
