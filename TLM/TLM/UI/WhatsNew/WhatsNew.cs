@@ -33,7 +33,7 @@ namespace TrafficManager.UI.WhatsNew {
         }
 
         /// <summary>
-        /// Return info if What's new panes was shown in current version
+        /// Return info if What's new panel was shown in current version
         /// </summary>
         public bool Shown => CurrentVersion <= PreviouslySeenVersion;
 
