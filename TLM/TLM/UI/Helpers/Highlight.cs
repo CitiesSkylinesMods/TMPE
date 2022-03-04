@@ -1,6 +1,7 @@
 namespace TrafficManager.UI.Helpers {
     using ColossalFramework;
     using ColossalFramework.Math;
+    using ColossalFramework.UI;
     using TrafficManager.Util;
     using TrafficManager.Util.Extensions;
     using UnityEngine;
@@ -383,6 +384,10 @@ namespace TrafficManager.UI.Helpers {
 
             GUI.color = guiColor;
             GUI.DrawTexture(screenRect, texture);
+
+            if (hovered) {
+                UIInput.MouseUsed();
+            }
 
             return hovered;
         }
