@@ -1446,6 +1446,7 @@ namespace TrafficManager.UI.SubTools {
             };
 
         private static string T(string key) => Translation.LaneRouting.Get(key);
+        private static string ColorKeyDynamic(string key, string[] replacements) => Translation.SpeedLimits.ColorizeDynamicKeybinds(key, replacements);
 
         /// <inheritdoc/>
         public void UpdateOnscreenDisplayPanel() {
@@ -1455,12 +1456,26 @@ namespace TrafficManager.UI.SubTools {
                 case SelectionMode.None: {
                     var items = new List<OsdItem>();
                     items.Add(new Label(localizedText: T("LaneConnector.Mode:Select")));
+                    items.Add(new Label(
+                                  localizedText: ColorKeyDynamic(
+                                      "UI.Key:PageUp/PageDown switch underground",
+                                      new[] {
+                                          KeybindSettingsPage.ElevationUp.ToLocalizedString(),
+                                          KeybindSettingsPage.ElevationDown.ToLocalizedString()
+                                      })));
                     OnscreenDisplay.Display(items);
                     return;
                 }
                 case SelectionMode.SelectTarget:
                 case SelectionMode.SelectSource: {
                     var items = new List<OsdItem>();
+                    items.Add(new Label(
+                                  localizedText: Translation.SpeedLimits.ColorizeDynamicKeybinds(
+                                      key: "UI.Key:PageUp/PageDown switch underground",
+                                      replacements: new[] {
+                                          KeybindSettingsPage.ElevationUp.ToLocalizedString(),
+                                          KeybindSettingsPage.ElevationDown.ToLocalizedString()
+                                      })));
                     items.Add(new Label(
                                   m == SelectionMode.SelectSource
                                       ? T("LaneConnector.Mode:Source")
