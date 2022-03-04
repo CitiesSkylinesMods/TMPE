@@ -1460,8 +1460,8 @@ namespace TrafficManager.UI.SubTools {
                                   localizedText: ColorKeyDynamic(
                                       "UI.Key:PageUp/PageDown switch underground",
                                       new[] {
-                                          KeybindSettingsPage.ElevationUp.ToLocalizedString(),
-                                          KeybindSettingsPage.ElevationDown.ToLocalizedString()
+                                          KeybindSettingsBase.ElevationUp.ToLocalizedString(),
+                                          KeybindSettingsBase.ElevationDown.ToLocalizedString()
                                       })));
                     OnscreenDisplay.Display(items);
                     return;
@@ -1477,8 +1477,8 @@ namespace TrafficManager.UI.SubTools {
                                   localizedText: Translation.SpeedLimits.ColorizeDynamicKeybinds(
                                       key: "UI.Key:PageUp/PageDown switch underground",
                                       replacements: new[] {
-                                          KeybindSettingsPage.ElevationUp.ToLocalizedString(),
-                                          KeybindSettingsPage.ElevationDown.ToLocalizedString()
+                                          KeybindSettingsBase.ElevationUp.ToLocalizedString(),
+                                          KeybindSettingsBase.ElevationDown.ToLocalizedString()
                                       })));
                     items.Add(new Shortcut(
                                   keybindSetting: KeybindSettingsBase.LaneConnectorStayInLane,

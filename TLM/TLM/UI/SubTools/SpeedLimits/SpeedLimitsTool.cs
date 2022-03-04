@@ -382,8 +382,8 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                     localizedText: ColorKeyDynamic(
                         key: "UI.Key:PageUp/PageDown switch underground",
                         replacements: new [] {
-                        KeybindSettingsPage.ElevationUp.ToLocalizedString(),
-                        KeybindSettingsPage.ElevationDown.ToLocalizedString()
+                            KeybindSettingsBase.ElevationUp.ToLocalizedString(),
+                            KeybindSettingsBase.ElevationDown.ToLocalizedString()
                     })),
                 new MainMenu.OSD.Label(
                     localizedText: ColorKey("UI.Key:Unlimited; Default; Select")),
