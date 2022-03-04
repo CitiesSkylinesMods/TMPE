@@ -1470,16 +1470,16 @@ namespace TrafficManager.UI.SubTools {
                 case SelectionMode.SelectSource: {
                     var items = new List<OsdItem>();
                     items.Add(new Label(
+                                  m == SelectionMode.SelectSource
+                                      ? T("LaneConnector.Mode:Source")
+                                      : T("LaneConnector.Mode:Target")));
+                    items.Add(new Label(
                                   localizedText: Translation.SpeedLimits.ColorizeDynamicKeybinds(
                                       key: "UI.Key:PageUp/PageDown switch underground",
                                       replacements: new[] {
                                           KeybindSettingsPage.ElevationUp.ToLocalizedString(),
                                           KeybindSettingsPage.ElevationDown.ToLocalizedString()
                                       })));
-                    items.Add(new Label(
-                                  m == SelectionMode.SelectSource
-                                      ? T("LaneConnector.Mode:Source")
-                                      : T("LaneConnector.Mode:Target")));
                     items.Add(new Shortcut(
                                   keybindSetting: KeybindSettingsBase.LaneConnectorStayInLane,
                                   localizedText: T("LaneConnector.Label:Stay in lane, multiple modes")));
