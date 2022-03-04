@@ -2,8 +2,10 @@
 [Meta] This update adds vehicle type filters to `Disable Despawn`, overhauls mod options code, and improves modding API.
 [Mod] API: Mods can now use TMPE.API.dll without having to reference TrafficManager.dll #1448 (kianzarrin)
 [Mod] Update UUI to 2.2.1 via NuGet #1442 (kianzarrin)
-[Fixed] Mod features not enabled if starting new game after using asset editor #1423 (NateNate60, aubergine18)
+[Fixed] `NullReferenceException` if version in global config is not set #1443 (krzychu124)
+[Fixed] Features not enabled if starting new game after using asset editor #1423 (NateNate60, aubergine18)
 [Fixed] Typo in notifier method name #1440 (aubergine18)
+[Fixed] UI windows/overlays not consuming mouse events #1443 #934 #749 (somethingstarted, MacSergey, krzychu124)
 [Updated] Add/update UI helpers for use in mod options #1431 #1430 #1424 #1419 (aubergine18)
 [Updated] Refactoring mod options #1435 #1432 #1422 #1411 #1416 #1356 #1279 (aubergine18)
 [Updated] Replaced `Overlay Transparency` with `Overlay Opacity` #1432 #1268 (aubergine18)
