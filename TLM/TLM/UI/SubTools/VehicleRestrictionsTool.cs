@@ -2,6 +2,7 @@ namespace TrafficManager.UI.SubTools {
     using ColossalFramework;
     using static Util.SegmentLaneTraverser;
     using System.Collections.Generic;
+    using ColossalFramework.UI;
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.Manager.Impl;
     using TrafficManager.State;
@@ -161,6 +162,10 @@ namespace TrafficManager.UI.SubTools {
                 cursorInSecondaryPanel = windowRect.Contains(Event.current.mousePosition);
                 GUI.color = oldColor;
                 // overlayHandleHovered = false;
+            }
+
+            if (cursorInSecondaryPanel) {
+                UIInput.MouseUsed();
             }
 
             // ShowSigns(false);
