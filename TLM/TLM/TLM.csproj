@@ -154,6 +154,10 @@
     <Compile Include="State\OptionsTabs\GeneralTab_InterfaceGroup.cs" />
     <Compile Include="State\OptionsTabs\GeneralTab_SimulationGroup.cs" />
     <Compile Include="State\OptionsTabs\GameplayTab_VehicleBehaviourGroup.cs" />
+    <Compile Include="State\OptionsTabs\PoliciesTab_RoundaboutsGroup.cs" />
+    <Compile Include="State\OptionsTabs\PoliciesTab_InEmergenciesGroup.cs" />
+    <Compile Include="State\OptionsTabs\PoliciesTab_OnHighwaysGroup.cs" />
+    <Compile Include="State\OptionsTabs\PoliciesTab_OnRoadsGroup.cs" />
     <Compile Include="State\OptionsTabs\PoliciesTab_AtJunctionsGroup.cs" />
     <Compile Include="State\OptionsTabs\OverlaysTab_OverlaysGroup.cs" />
     <Compile Include="State\OptionsTabs\MaintenanceTab_FeaturesGroup.cs" />
@@ -319,7 +323,7 @@
     <Compile Include="State\OptionsTabs\GeneralTab.cs" />
     <Compile Include="State\OptionsTabs\KeybindsTab.cs" />
     <Compile Include="State\OptionsTabs\MaintenanceTab.cs" />
-    <Compile Include="State\OptionsTabs\OptionsMassEditTab.cs" />
+    <Compile Include="State\OptionsTabs\PoliciesTab_PriorityRoadsGroup.cs" />
     <Compile Include="State\OptionsTabs\OverlaysTab.cs" />
     <Compile Include="State\OptionsTabs\PoliciesTab.cs" />
     <Compile Include="TrafficLight\Impl\CustomSegmentLights.cs" />
