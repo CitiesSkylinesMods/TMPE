@@ -12,9 +12,6 @@ namespace TrafficManager.Lifecycle {
     using TrafficManager.UI.Helpers;
 
     public static class Patcher {
-        internal const string HARMONY_ID = "de.viathinksoft.tmpe";
-        internal const string HARMONY_ID_PF = "de.viathinksoft.tmpe.pathfinding";
-
         private const string ERROR_MESSAGE =
             "****** ERRRROOORRRRRR!!!!!!!!!! **************\n" +
             "**********************************************\n" +
@@ -43,7 +40,7 @@ namespace TrafficManager.Lifecycle {
             Harmony.DEBUG = false; // set to true to get harmony debug info.
 #endif
             AssertCitiesHarmonyInstalled();
-            fail = !PatchAll(HARMONY_ID, forbidden: typeof(CustomPathFindPatchAttribute));
+            fail = !PatchAll(API.Harmony.HARMONY_ID, forbidden: typeof(CustomPathFindPatchAttribute));
 
             if (fail) {
                 Log.Info("patcher failed");
@@ -63,7 +60,7 @@ namespace TrafficManager.Lifecycle {
             Harmony.DEBUG = false; // set to true to get harmony debug info.
 #endif
             AssertCitiesHarmonyInstalled();
-            fail = !PatchAll(HARMONY_ID_PF , required: typeof(CustomPathFindPatchAttribute));;
+            fail = !PatchAll(API.Harmony.HARMONY_ID_PATHFINDING , required: typeof(CustomPathFindPatchAttribute));;
 
             if (fail) {
                 Log.Info("TMPE Path-finding patcher failed");
