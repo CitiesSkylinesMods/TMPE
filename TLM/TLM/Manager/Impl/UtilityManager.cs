@@ -45,11 +45,12 @@ namespace TrafficManager.Manager.Impl {
             var vehicleManager = Singleton<VehicleManager>.instance;
 
             try {
-                var logStr = filter.HasValue
-                    ? filter == 0
-                        ? "Nothing (filter == 0)"
-                        : filter.ToString()
-                    : "All vehicles";
+                var logStr =
+                    filter.HasValue
+                        ? (filter == 0)
+                            ? "Nothing (filter == 0)"
+                            : filter.ToString()
+                        : "All vehicles";
 
                 Log.Info($"Utility Manager: Despawning {logStr}");
 
