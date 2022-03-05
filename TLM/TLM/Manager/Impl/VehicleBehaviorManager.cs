@@ -1165,7 +1165,7 @@ namespace TrafficManager.Manager.Impl {
             maxSpeed = 0;
             if (prevTargetNodeId != targetNodeId
                 || (vehicleData.m_blockCounter == 255
-                    && !Instance.MayDespawn(frontVehicleId, ref vehicleData)) // NON-STOCK CODE
+                    && !MayDespawn(frontVehicleId, ref vehicleData)) // NON-STOCK CODE
                 ) {
                 // method should only be called if targetNodeId == prevTargetNode
                 return VehicleJunctionTransitState.Leave;
