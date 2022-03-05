@@ -71,11 +71,16 @@ namespace TrafficManager.Lifecycle {
                 loadingSucceeded = false;
             }
 
-            // load options
+            // load options (empty byte array causes default options to be applied)
             try {
-                byte[] options = SerializableData.LoadData("TMPE_Options");
-                if (options != null) {
-                    if (!OptionsManager.Instance.LoadData(options)) {
+                if (TMPELifecycle.InGameOrEditor()) {
+                    // Always force default options on new game
+                    // See: https://github.com/CitiesSkylinesMods/TMPE/pull/1425
+                    byte[] options = TMPELifecycle.IsNewGame
+                        ? null
+                        : SerializableData.LoadData("TMPE_Options");
+
+                    if (!OptionsManager.Instance.LoadData(options ?? new byte[0])) {
                         loadingSucceeded = false;
                     }
                 }
@@ -437,8 +442,9 @@ namespace TrafficManager.Lifecycle {
                 }
 
                 try {
-                    // save options
-                    SerializableData.SaveData("TMPE_Options", OptionsManager.Instance.SaveData(ref success));
+                    if (TMPELifecycle.PlayMode) {
+                        SerializableData.SaveData("TMPE_Options", OptionsManager.Instance.SaveData(ref success));
+                    }
                 } catch (Exception ex) {
                     Log.Error("Unexpected error while saving options: " + ex.Message);
                     success = false;
