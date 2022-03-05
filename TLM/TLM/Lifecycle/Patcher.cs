@@ -8,8 +8,6 @@ namespace TrafficManager.Lifecycle {
     using TrafficManager.Util;
     using System.Linq;
     using Patch;
-    using Patch._PathFind;
-    using Patch._PathManager;
     using ColossalFramework.Plugins;
     using TrafficManager.UI.Helpers;
 
@@ -46,7 +44,6 @@ namespace TrafficManager.Lifecycle {
 #endif
             AssertCitiesHarmonyInstalled();
             fail = !PatchAll(HARMONY_ID, forbidden: typeof(CustomPathFindPatchAttribute));
-            fail |= !PatchManual(HARMONY_ID);
 
             if (fail) {
                 Log.Info("patcher failed");
@@ -108,32 +105,6 @@ namespace TrafficManager.Lifecycle {
                 }
                 return success;
             } catch (Exception ex) {
-                ex.LogException();
-                return false;
-            }
-        }
-
-        /// <summary>
-        /// manually applying harmony patches if target mods are enabled
-        /// </summary>
-        /// <returns>false if patching failed, true otherwise</returns>
-        private static bool PatchManual(string harmonyId) {
-            try {
-                var harmony = new Harmony(harmonyId);
-
-                // Patching SimulationStepPatch1 in Reversible Tram AI mod
-                if (IsAssemblyEnabled("ReversibleTramAI")) {
-                    Type simulationStepPatch1Type = Type.GetType("ReversibleTramAI.SimulationStepPatch1, ReversibleTramAI", false);
-                    if (simulationStepPatch1Type != null) {
-                        if (!TrafficManager.Patch._External._RTramAIModPatch.RTramAIModPatch.ApplyPatch(harmony, simulationStepPatch1Type)) return false;
-                    }
-                    else {
-                        return false;
-                    }
-                }
-                return true;
-            }
-            catch (Exception ex) {
                 ex.LogException();
                 return false;
             }
