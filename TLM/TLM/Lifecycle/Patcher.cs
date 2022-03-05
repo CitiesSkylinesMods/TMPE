@@ -14,8 +14,8 @@ namespace TrafficManager.Lifecycle {
     using TrafficManager.UI.Helpers;
 
     public static class Patcher {
-        internal const string HARMONY_ID = "de.viathinksoft.tmpe";
-        internal const string HARMONY_ID_PF = "de.viathinksoft.tmpe.pathfinding";
+        internal const string HARMONY_ID = "me.tmpe";
+        internal const string HARMONY_ID_PF = "me.tmpe.pathfinding";
 
         private const string ERROR_MESSAGE =
             "****** ERRRROOORRRRRR!!!!!!!!!! **************\n" +
