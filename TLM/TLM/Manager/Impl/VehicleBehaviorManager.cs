@@ -496,7 +496,7 @@ namespace TrafficManager.Manager.Impl {
                         if (citizenInstanceId == 0) {
                             continue;
                         }
-                        
+
                         ref CitizenInstance citizenInstance = ref citizenInstanceId.ToCitizenInstance();
 
                         // NON-STOCK CODE START
@@ -1167,6 +1167,12 @@ namespace TrafficManager.Manager.Impl {
                 || (vehicleData.m_blockCounter == 255
                     && !Instance.MayDespawn(ref vehicleData)) // NON-STOCK CODE
                 ) {
+                if (logPriority) {
+                    Log._Debug(
+                        $"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): " +
+                        $"PrevTargetNode != targetNodeId: {prevTargetNodeId != targetNodeId}, blockCounter: {vehicleData.m_blockCounter}" +
+                        $"MayDespawn: {Instance.MayDespawn(ref vehicleData)} Returned: LEAVE");
+                }
                 // method should only be called if targetNodeId == prevTargetNode
                 return VehicleJunctionTransitState.Leave;
             }
@@ -1186,7 +1192,8 @@ namespace TrafficManager.Manager.Impl {
 
                     return VehicleJunctionTransitState.Blocked;
                 }
-
+                // todo - priorities: remove or ignore if sim accuracy > high?
+                // (is causing known issues with traffic light/priority sign detection)
                 return VehicleJunctionTransitState.Leave;
             }
 
@@ -1196,6 +1203,11 @@ namespace TrafficManager.Manager.Impl {
                 && extVehicle.lastTransitStateUpdate >> ExtVehicleManager.JUNCTION_RECHECK_SHIFT
                 >= currentFrameIndex >> ExtVehicleManager.JUNCTION_RECHECK_SHIFT)
             {
+                if (logPriority) {
+                    Log._Debug(
+                        $"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): " +
+                        $"Reusing recent state: {extVehicle.junctionTransitState}");
+                }
                 // reuse recent result
                 return extVehicle.junctionTransitState;
             }
@@ -1219,11 +1231,11 @@ namespace TrafficManager.Manager.Impl {
 
             if ((vehicleData.Info.m_vehicleType &
                  (VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Metro |
-                  VehicleInfo.VehicleType.Monorail)) == VehicleInfo.VehicleType.None) {
+                  VehicleInfo.VehicleType.Monorail | VehicleInfo.VehicleType.Plane)) == VehicleInfo.VehicleType.None) {
                 // check if to check space
                 Log._DebugIf(
                     logPriority,
-                    () => $"CustomVehicleAI.MayChangeSegment: Vehicle {frontVehicleId} is not a train.");
+                    () => $"CustomVehicleAI.MayChangeSegment: Vehicle {frontVehicleId} is not a train and plane (check space).");
 
                 // stock priority signs
                 if ((vehicleData.m_flags & Vehicle.Flags.Emergency2) == 0
@@ -1304,7 +1316,7 @@ namespace TrafficManager.Manager.Impl {
                 Log._DebugIf(
                     logPriority,
                     () => $"CustomVehicleAI.MayChangeSegment: Vehicle {frontVehicleId} is " +
-                    "a train/metro/monorail.");
+                    "a train/metro/monorail/plane.");
 
                 switch (vehicleData.Info.m_vehicleType) {
                     case VehicleInfo.VehicleType.Monorail:
@@ -1314,6 +1326,10 @@ namespace TrafficManager.Manager.Impl {
                     case VehicleInfo.VehicleType.Train:
                         // vanilla traffic light flags are not rendered on train tracks, except for level crossings
                         checkTrafficLights = hasActiveTimedSimulation || isLevelCrossing;
+                        break;
+                    case VehicleInfo.VehicleType.Plane:
+                        // vanilla traffic light flags are not rendered on plane allowed taxiways/runways
+                        checkTrafficLights = false;
                         break;
                 }
             }
@@ -1332,7 +1348,9 @@ namespace TrafficManager.Manager.Impl {
             ITrafficPriorityManager prioMan = TrafficPriorityManager.Instance;
             ICustomSegmentLightsManager segLightsMan = CustomSegmentLightsManager.Instance;
 
-            if ((vehicleData.m_flags & Vehicle.Flags.Emergency2) == 0 || isLevelCrossing) {
+            if ((vehicleData.m_flags & Vehicle.Flags.Emergency2) == 0 ||
+                vehicleData.Info.m_vehicleType == VehicleInfo.VehicleType.Plane ||
+                isLevelCrossing) {
                 if (hasTrafficLight && checkTrafficLights) {
                     Log._DebugIf(
                         logPriority,
@@ -1596,6 +1614,7 @@ namespace TrafficManager.Manager.Impl {
 
                         if (sqrVelocity <= GlobalConfig.Instance.PriorityRules.MaxYieldVelocity
                             * GlobalConfig.Instance.PriorityRules.MaxYieldVelocity ||
+                            //todo fix bug with max yield speed if sim >= medium
                             Options.simulationAccuracy >= SimulationAccuracy.Medium) {
                             if (logPriority) {
                                 Log._DebugFormat(
@@ -1637,7 +1656,7 @@ namespace TrafficManager.Manager.Impl {
                                     logPriority,
                                     () =>
                                         $"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): " +
-                                        $"hasPriority: {hasPriority}");
+                                        $"Waiting... hasPriority: {hasPriority}");
 
                                 if (!hasPriority) {
                                     vehicleData.m_blockCounter = 0;
@@ -1652,6 +1671,7 @@ namespace TrafficManager.Manager.Impl {
                                 return VehicleJunctionTransitState.Leave;
                             }
 
+                            // todo - priorities: do we really want allow vehicles to enter junction (might be blocked)?
                             Log._DebugIf(
                                 logPriority,
                                 () =>
@@ -1811,7 +1831,8 @@ namespace TrafficManager.Manager.Impl {
         }
 
         public bool IsRecklessDriver(ushort vehicleId, ref Vehicle vehicleData) {
-            if ((vehicleData.m_flags & Vehicle.Flags.Emergency2) != 0) {
+            if ((vehicleData.m_flags & Vehicle.Flags.Emergency2) != 0 &&
+                 vehicleData.Info.m_vehicleType.IsFlagSet(VehicleInfo.VehicleType.Car)) {
                 return true;
             }
 

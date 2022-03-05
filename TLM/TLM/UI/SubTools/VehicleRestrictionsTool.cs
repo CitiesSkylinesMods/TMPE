@@ -28,6 +28,11 @@ namespace TrafficManager.UI.SubTools {
             ExtVehicleType.Emergency,
         };
 
+        private static readonly ExtVehicleType[] PlaneVehicleTypes = {
+            ExtVehicleType.CargoPlane,
+            ExtVehicleType.PassengerPlane,
+        };
+
         private static readonly ExtVehicleType[] RailVehicleTypes = {
             ExtVehicleType.PassengerTrain,
             ExtVehicleType.CargoTrain,
@@ -454,7 +459,6 @@ namespace TrafficManager.UI.SubTools {
                                                    bool viewOnly,
                                                    out bool stateUpdated) {
             stateUpdated = false;
-            var vehicleRestrictionTextures = RoadUI.Instance.VehicleRestrictionTextures;
 
             if (viewOnly && !Options.vehicleRestrictionsOverlay &&
                 MainTool.GetToolMode() != ToolMode.VehicleRestrictions) {
@@ -495,6 +499,8 @@ namespace TrafficManager.UI.SubTools {
                 maxNumSigns = RoadVehicleTypes.Length;
             } else if (VehicleRestrictionsManager.Instance.IsRailSegment(segmentInfo)) {
                 maxNumSigns = RailVehicleTypes.Length;
+            } else if (VehicleRestrictionsManager.Instance.IsPlaneNetInfo(segmentInfo)) {
+                maxNumSigns = PlaneVehicleTypes.Length;
             }
 
             // Vector3 zero = center - 0.5f * (float)(numLanes + numDirections - 1) * f * (xu + yu); // "bottom left"
@@ -539,6 +545,10 @@ namespace TrafficManager.UI.SubTools {
                     possibleVehicleTypes = RoadVehicleTypes;
                 } else if (VehicleRestrictionsManager.Instance.IsRailLane(laneInfo)) {
                     possibleVehicleTypes = RailVehicleTypes;
+                } else if (VehicleRestrictionsManager.Instance.IsPlaneLane(laneInfo)) {
+                    // assumption we don't support shared lanes
+                    // (plane + other vehicles - will create a lot of issues starting from collision detection)
+                    possibleVehicleTypes = PlaneVehicleTypes;
                 } else {
                     ++x;
                     continue;
@@ -573,6 +583,7 @@ namespace TrafficManager.UI.SubTools {
 
                 ++y;
 #endif
+                var vehicleRestrictionTextures = RoadUI.Instance.VehicleRestrictionTextures;
                 Color guiColor2 = GUI.color; // TODO: Use OverlayHandleColorController
 
                 GUI.color = GUI.color.WithAlpha(TrafficManagerTool.OverlayAlpha);

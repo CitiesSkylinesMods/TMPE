@@ -488,6 +488,11 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                 Debug.LogError("Invalid node or segment ID");
             }
 #endif
+            if (VehicleRestrictionsManager.Instance.IsPlaneNetInfo(netSegment.Info) ||
+                VehicleRestrictionsManager.Instance.IsPlaneNetInfo(netNode.Info)) {
+                return false;
+            }
+
             ExtSegmentEndManager segEndMan = ExtSegmentEndManager.Instance;
             int segmentEndId = segEndMan.GetIndex(segmentId, nodeId);
             if (segmentEndId < 0) {
@@ -575,7 +580,8 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
             NetManager netManager = Singleton<NetManager>.instance;
 
             // If CTRL is held, and hovered something: Draw hovered node
-            if (SeparateNodeLanesModifierIsPressed && HoveredNodeId != 0) {
+            if (SeparateNodeLanesModifierIsPressed && HoveredNodeId != 0 &&
+                !VehicleRestrictionsManager.Instance.IsPlaneNetInfo(HoveredNodeId.ToNode().Info)) {
                 Highlight.DrawNodeCircle(
                     cameraInfo: cameraInfo,
                     nodeId: HoveredNodeId,

@@ -29,7 +29,8 @@ namespace TrafficManager.Manager.Impl {
         private const VehicleInfo.VehicleType ROUTED_VEHICLE_TYPES =
             VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Metro |
             VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Tram |
-            VehicleInfo.VehicleType.Monorail | VehicleInfo.VehicleType.Trolleybus;
+            VehicleInfo.VehicleType.Monorail | VehicleInfo.VehicleType.Trolleybus |
+            VehicleInfo.VehicleType.Plane;
 
         private const VehicleInfo.VehicleType ARROW_VEHICLE_TYPES = VehicleInfo.VehicleType.Car;
 
@@ -979,7 +980,7 @@ namespace TrafficManager.Manager.Impl {
                                     // routed vehicle that does not follow lane arrows (trains, trams,
                                     // metros, monorails)
                                     // TODO [issue #1053] this causes cars to turn on mixed car/track lanes against lane arrows
-                                    transitionType = LaneEndTransitionType.Default; 
+                                    transitionType = LaneEndTransitionType.Default;
 
                                     if (numNextForcedTransitionDatas < MAX_NUM_TRANSITIONS) {
                                         nextForcedTransitionDatas[numNextForcedTransitionDatas].Set(

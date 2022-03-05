@@ -170,6 +170,10 @@ namespace TrafficManager.State {
                 return false;
             }
 
+            if (VehicleRestrictionsManager.Instance.IsPlaneNetInfo(node.Info)) {
+                return false;
+            }
+
             return true;
         }
 

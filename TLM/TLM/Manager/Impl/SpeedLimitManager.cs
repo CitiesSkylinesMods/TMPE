@@ -28,7 +28,8 @@ namespace TrafficManager.Manager.Impl {
         public const VehicleInfo.VehicleType VEHICLE_TYPES =
             VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Tram |
             VehicleInfo.VehicleType.Metro | VehicleInfo.VehicleType.Train |
-            VehicleInfo.VehicleType.Monorail | VehicleInfo.VehicleType.Trolleybus;
+            VehicleInfo.VehicleType.Monorail | VehicleInfo.VehicleType.Trolleybus |
+            VehicleInfo.VehicleType.Plane;
 
         private readonly object laneSpeedLimitLock_ = new();
 
@@ -76,7 +77,7 @@ namespace TrafficManager.Manager.Impl {
 #endif
 
             // Must be road or track based:
-            if (!(netinfo.m_netAI is RoadBaseAI or TrainTrackBaseAI or MetroTrackBaseAI)) {
+            if (!(netinfo.m_netAI is RoadBaseAI or TrainTrackBaseAI or MetroTrackBaseAI or TaxiwayAI)) {
 #if DEBUG
                 if (debugSpeedLimits)
                     Log._Debug($"Skipped NetInfo '{netinfo.name}' because m_netAI is not applicable: {netinfo.m_netAI}");

@@ -42,7 +42,7 @@ namespace TrafficManager.UI.SubTools {
                 return;
             }
 
-            if (HoveredNodeId == 0) {
+            if (HoveredNodeId == 0 || VehicleRestrictionsManager.Instance.IsPlaneNetInfo(HoveredNodeId.ToNode().Info)) {
                 return;
             }
 

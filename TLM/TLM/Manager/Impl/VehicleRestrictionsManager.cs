@@ -24,12 +24,14 @@ namespace TrafficManager.Manager.Impl {
 
         public const VehicleInfo.VehicleType VEHICLE_TYPES =
             VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Tram
-            | VehicleInfo.VehicleType.Monorail | VehicleInfo.VehicleType.Trolleybus;
+            | VehicleInfo.VehicleType.Monorail | VehicleInfo.VehicleType.Trolleybus | VehicleInfo.VehicleType.Plane;
 
         public const ExtVehicleType EXT_VEHICLE_TYPES =
-            ExtVehicleType.PassengerTrain | ExtVehicleType.CargoTrain | ExtVehicleType.PassengerCar
-            | ExtVehicleType.Bus | ExtVehicleType.Taxi | ExtVehicleType.CargoTruck
-            | ExtVehicleType.Service | ExtVehicleType.Emergency | ExtVehicleType.Trolleybus;
+            ExtVehicleType.PassengerTrain | ExtVehicleType.CargoTrain |
+            ExtVehicleType.PassengerCar | ExtVehicleType.Bus |
+            ExtVehicleType.Taxi | ExtVehicleType.CargoTruck |
+            ExtVehicleType.Service | ExtVehicleType.Emergency |
+            ExtVehicleType.Trolleybus | ExtVehicleType.Plane;
 
         public static readonly float[] PATHFIND_PENALTIES = { 10f, 100f, 1000f };
 
@@ -618,7 +620,7 @@ namespace TrafficManager.Manager.Impl {
             NetInfo.Lane laneInfo = segmentInfo.m_lanes[laneIndex];
 
             if ((laneInfo.m_vehicleType &
-                 (VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train)) ==
+                 (VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Plane)) ==
                 VehicleInfo.VehicleType.None) {
                 return true;
             }
@@ -760,6 +762,10 @@ namespace TrafficManager.Manager.Impl {
                    VehicleInfo.VehicleType.None;
         }
 
+        public bool IsPlaneLane(NetInfo.Lane laneInfo) {
+            return laneInfo.m_vehicleType.IsFlagSet(VehicleInfo.VehicleType.Plane);
+        }
+
         public bool IsTramLane(NetInfo.Lane laneInfo) {
             return (laneInfo.m_vehicleType & VehicleInfo.VehicleType.Tram) !=
                    VehicleInfo.VehicleType.None;
@@ -780,6 +786,19 @@ namespace TrafficManager.Manager.Impl {
             ItemClass connectionClass = segmentInfo.GetConnectionClass();
             return connectionClass.m_service == ItemClass.Service.PublicTransport &&
                    connectionClass.m_subService == ItemClass.SubService.PublicTransportMonorail;
+        }
+
+        public bool IsPlaneNetInfo(NetInfo netInfo) {
+            ItemClass connectionClass = netInfo.GetConnectionClass();
+            return connectionClass.m_service == ItemClass.Service.PublicTransport &&
+                   connectionClass.m_subService == ItemClass.SubService.PublicTransportPlane;
+        }
+
+        public bool IsRunwayNetInfo(NetInfo netInfo) {
+            ItemClass connectionClass = netInfo.GetConnectionClass();
+            return connectionClass.m_service == ItemClass.Service.PublicTransport &&
+                   connectionClass.m_subService == ItemClass.SubService.PublicTransportPlane &&
+                   netInfo.m_netAI is RunwayAI;
         }
 
         internal void ClearCache(ushort segmentId) {

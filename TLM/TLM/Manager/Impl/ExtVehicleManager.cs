@@ -37,7 +37,8 @@ namespace TrafficManager.Manager.Impl {
         public const VehicleInfo.VehicleType VEHICLE_TYPES =
             VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train |
             VehicleInfo.VehicleType.Tram | VehicleInfo.VehicleType.Metro |
-            VehicleInfo.VehicleType.Monorail | VehicleInfo.VehicleType.Trolleybus;
+            VehicleInfo.VehicleType.Monorail | VehicleInfo.VehicleType.Trolleybus |
+            VehicleInfo.VehicleType.Plane;
 
         /// <summary>
         /// Known vehicles and their current known positions. Index: vehicle id
@@ -244,7 +245,7 @@ namespace TrafficManager.Manager.Impl {
 
             while (connectedVehicleId != 0) {
                 ref Vehicle connectedVehicle = ref connectedVehicleId.ToVehicle();
-                
+
                 OnSpawn(
                     ref ExtVehicles[connectedVehicleId],
                     ref connectedVehicleId.ToVehicle());
@@ -879,15 +880,16 @@ namespace TrafficManager.Manager.Impl {
         private void DetermineVehicleType(ref ExtVehicle extVehicle, ref Vehicle vehicleData) {
             VehicleAI ai = vehicleData.Info.m_vehicleAI;
 
-            if ((vehicleData.m_flags & Vehicle.Flags.Emergency2) != 0) {
+            if ((vehicleData.m_flags & Vehicle.Flags.Emergency2) != 0 &&
+                vehicleData.Info.m_vehicleType.IsFlagSet(VehicleInfo.VehicleType.Car)) {
                 extVehicle.vehicleType = ExtVehicleType.Emergency;
             } else {
                 ExtVehicleType? type = DetermineVehicleTypeFromAIType(
                     extVehicle.vehicleId,
                     ai,
                     false);
-                if (type != null) {
-                    extVehicle.vehicleType = (ExtVehicleType)type;
+                if (type.HasValue) {
+                    extVehicle.vehicleType = type.Value;
                 } else {
                     extVehicle.vehicleType = ExtVehicleType.None;
                 }
@@ -1028,7 +1030,8 @@ namespace TrafficManager.Manager.Impl {
 
                 OnCreateVehicle(vId, ref vehicle);
 
-                if ((vehicle.m_flags & Vehicle.Flags.Emergency2) != 0) {
+                if ((vehicle.m_flags & Vehicle.Flags.Emergency2) != 0 &&
+                    vehicle.Info.m_vehicleType.IsFlagSet(VehicleInfo.VehicleType.Car)) {
                     OnStartPathFind(vId, ref vehicle, ExtVehicleType.Emergency);
                 }
 

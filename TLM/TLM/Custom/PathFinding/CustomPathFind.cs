@@ -3997,7 +3997,7 @@ namespace TrafficManager.Custom.PathFinding {
                 queueItem_.vehicleType == ExtVehicleType.Tram ||
                 queueItem_.vehicleType == ExtVehicleType.Trolleybus ||
                 (laneInfo.m_vehicleType &
-                 (VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train)) ==
+                 (VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Plane)) ==
                 VehicleInfo.VehicleType.None) {
                 return true;
             }

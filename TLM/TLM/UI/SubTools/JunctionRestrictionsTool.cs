@@ -59,7 +59,11 @@ namespace TrafficManager.UI.SubTools {
                     warning: true);
             }
 
-            if ((HoveredNodeId != 0) && (HoveredNodeId != SelectedNodeId) &&
+            if (HoveredNodeId == 0 || VehicleRestrictionsManager.Instance.IsPlaneNetInfo(HoveredNodeId.ToNode().Info)) {
+                return;
+            }
+
+            if (HoveredNodeId != SelectedNodeId &&
                 ((HoveredNodeId.ToNode().m_flags & (NetNode.Flags.Junction | NetNode.Flags.Bend)) != NetNode.Flags.None)) {
                 // draw hovered node
                 Highlight.DrawNodeCircle(
@@ -161,6 +165,10 @@ namespace TrafficManager.UI.SubTools {
 
             if (!logJunctions &&
                 ((HoveredNodeId.ToNode().m_flags & (NetNode.Flags.Junction | NetNode.Flags.Bend)) == NetNode.Flags.None)) {
+                return;
+            }
+
+            if (VehicleRestrictionsManager.Instance.IsPlaneNetInfo(HoveredNodeId.ToNode().Info)) {
                 return;
             }
 

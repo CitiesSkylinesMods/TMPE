@@ -51,6 +51,10 @@ namespace TrafficManager.UI.SubTools {
             TrafficPriorityManager prioMan = TrafficPriorityManager.Instance;
             ref NetNode hoveredNetNode = ref HoveredNodeId.ToNode();
 
+            if (VehicleRestrictionsManager.Instance.IsPlaneNetInfo(hoveredNetNode.Info)) {
+                return;
+            }
+
             if (!tlsMan.TrafficLightSimulations[HoveredNodeId].IsTimedLight()) {
                 if ((hoveredNetNode.m_flags & NetNode.Flags.TrafficLights) == NetNode.Flags.None) {
                     prioMan.RemovePrioritySignsFromNode(HoveredNodeId);
@@ -988,7 +992,7 @@ namespace TrafficManager.UI.SubTools {
         }
 
         private void RenderManualSelectionOverlay(RenderManager.CameraInfo cameraInfo) {
-            if (HoveredNodeId == 0) {
+            if (HoveredNodeId == 0|| VehicleRestrictionsManager.Instance.IsPlaneNetInfo(SelectedNodeId.ToNode().Info)) {
                 return;
             }
 
@@ -1000,7 +1004,8 @@ namespace TrafficManager.UI.SubTools {
         }
 
         private void RenderManualNodeOverlays(RenderManager.CameraInfo cameraInfo) {
-            if (!TrafficLightSimulationManager.Instance.HasManualSimulation(SelectedNodeId)) {
+            if (!TrafficLightSimulationManager.Instance.HasManualSimulation(SelectedNodeId) ||
+                VehicleRestrictionsManager.Instance.IsPlaneNetInfo(SelectedNodeId.ToNode().Info)) {
                 return;
             }
 

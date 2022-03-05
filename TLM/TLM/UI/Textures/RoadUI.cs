@@ -84,6 +84,13 @@ namespace TrafficManager.UI.Textures {
                 }
             }
 
+            // reuse texture for plane type restrictions
+            VehicleRestrictionTextures[ExtVehicleType.PassengerPlane] =
+                new Dictionary<bool, Texture2D>(VehicleRestrictionTextures[ExtVehicleType.PassengerTrain]);
+            VehicleRestrictionTextures[ExtVehicleType.CargoPlane] =
+                new Dictionary<bool, Texture2D>(
+                    VehicleRestrictionTextures[ExtVehicleType.CargoTrain]);
+
             ParkingRestrictionTextures = new Dictionary<bool, Texture2D>();
             ParkingRestrictionTextures[true] = LoadDllResource("RoadUI.parking_allowed.png", size);
             ParkingRestrictionTextures[false] = LoadDllResource("RoadUI.parking_disallowed.png", size);

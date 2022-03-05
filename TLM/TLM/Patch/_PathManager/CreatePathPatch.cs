@@ -97,7 +97,7 @@ namespace TrafficManager.Patch._PathManager {
                     logParkingAi,
                     () => $"CreatePathPatch.Prefix({args.vehicleId}): " +
                     $"Path-finding starts for vehicle {args.vehicleId}, path={path}, " +
-                    $"extVehicleType={ExtVehicleType}, startPosA.segment={startPosA.m_segment}, " +
+                    $"extVehicleType={ ExtVehicleType}, startPosA.segment={startPosA.m_segment}, " +
                     $"startPosA.lane={startPosA.m_lane}, info.m_vehicleType={info?.m_vehicleType}, " +
                     $"endPosA.segment={endPosA.m_segment}, endPosA.lane={endPosA.m_lane}");
             }

@@ -29,7 +29,8 @@ namespace TrafficManager.Manager.Impl {
                                                              | VehicleInfo.VehicleType.Tram
                                                              | VehicleInfo.VehicleType.Metro
                                                              | VehicleInfo.VehicleType.Monorail
-                                                             | VehicleInfo.VehicleType.Trolleybus;
+                                                             | VehicleInfo.VehicleType.Trolleybus
+                                                             | VehicleInfo.VehicleType.Plane;
         public NetInfo.LaneType LaneTypes => LANE_TYPES;
 
         public VehicleInfo.VehicleType VehicleTypes => VEHICLE_TYPES;
@@ -645,7 +646,7 @@ namespace TrafficManager.Manager.Impl {
 
             IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
             ExtSegmentEnd segEnd = segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segmentId, startNode)];
-            
+
             for (int i = 0; i < 8; ++i) {
                 ushort otherSegmentId = netNode.GetSegment(i);
                 if (otherSegmentId != 0) {

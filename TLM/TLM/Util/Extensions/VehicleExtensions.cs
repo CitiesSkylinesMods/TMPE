@@ -39,9 +39,12 @@ namespace TrafficManager.Util.Extensions {
         /// <param name="vehicle">The vehocle to inspect.</param>
         /// <returns>The extended vehicle type.</returns>
         public static ExtVehicleType ToExtVehicleType(this ref Vehicle vehicle) {
-            var vehicleId = vehicle.Info.m_instanceID.Vehicle;
-            var vehicleAI = vehicle.Info.m_vehicleAI;
-            var emergency = vehicle.m_flags.IsFlagSet(Vehicle.Flags.Emergency2);
+            VehicleInfo info = vehicle.Info;
+            var vehicleId = info.m_instanceID.Vehicle;
+            var vehicleAI = info.m_vehicleAI;
+            // plane can have Emergency2 flag set in normal conditions
+            var emergency = vehicle.m_flags.IsFlagSet(Vehicle.Flags.Emergency2) &&
+                            info.m_vehicleType.IsFlagSet(VehicleInfo.VehicleType.Car);
 
             var ret = ExtVehicleManager.Instance.DetermineVehicleTypeFromAIType(
                 vehicleId,
