@@ -77,6 +77,18 @@ namespace TrafficManager.State.Keybinds {
             defaultKey1: SavedInputKey.Encode(key: KeyCode.Delete, control: false, shift: false, alt: false),
             defaultKey2: SavedInputKey.Encode(key: KeyCode.Backspace, control: false, shift: false, alt: false));
 
+        public static KeybindSetting ElevationUp = new(
+            cat: "Global",
+            keyName: Settings.buildElevationUp,
+            configFile: Settings.gameSettingsFile,
+            inputKey: DefaultSettings.buildElevationUp);
+
+        public static KeybindSetting ElevationDown = new(
+            cat: "Global",
+            keyName: Settings.buildElevationDown,
+            configFile: Settings.gameSettingsFile,
+            inputKey: DefaultSettings.buildElevationDown);
+
         protected KeybindUI keybindUi_ = new();
 
         /// <summary>
@@ -151,14 +163,26 @@ namespace TrafficManager.State.Keybinds {
         /// </summary>
         /// <param name="label">Localized label</param>
         /// <param name="keybind">The setting to edit</param>
-        protected void AddReadOnlyKeybind(string label, KeybindSetting keybind) {
+        /// <param name="autoUpdateText">attach callback to auto-update text on visibility change</param>
+        protected void AddReadOnlyKeybind(string label, KeybindSetting keybind, bool autoUpdateText = false) {
             var settingsRow = keybindUi_.CreateRowPanel();
             if (uiRowCount_++ % 2 == 1) {
                 settingsRow.backgroundSprite = null;
             }
 
             keybindUi_.CreateLabel(settingsRow, label, 0.6f);
-            keybindUi_.CreateKeybindText(settingsRow, keybind.Key, 0.3f);
+            UILabel keybindTextLabel = keybindUi_.CreateKeybindText(settingsRow, keybind.Key, 0.3f);
+
+            if (autoUpdateText) {
+                keybindTextLabel.objectUserData = keybind.Key;
+                keybindTextLabel.eventVisibilityChanged += OnKeybindLabelVisibilityChanged;
+            }
+        }
+
+        private void OnKeybindLabelVisibilityChanged(UIComponent label, bool value) {
+            if (value) {
+                (label as UILabel).text = Keybind.ToLocalizedString(label.objectUserData as SavedInputKey);
+            }
         }
 
         protected void OnEnable() {

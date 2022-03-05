@@ -544,12 +544,12 @@ namespace TrafficManager.UI {
             base.OnToolUpdate();
 
             // Log._Debug($"OnToolUpdate");
-            if (Input.GetKeyUp(KeyCode.PageDown)) {
+            if (KeybindSettingsBase.ElevationDown.KeyUp()) {
                 InfoManager.instance.SetCurrentMode(
                     InfoManager.InfoMode.Underground,
                     InfoManager.SubInfoMode.Default);
                 UIView.library.Hide("TrafficInfoViewPanel");
-            } else if (Input.GetKeyUp(KeyCode.PageUp)) {
+            } else if (KeybindSettingsBase.ElevationUp.KeyUp()) {
                 InfoManager.instance.SetCurrentMode(
                     InfoManager.InfoMode.None,
                     InfoManager.SubInfoMode.Default);

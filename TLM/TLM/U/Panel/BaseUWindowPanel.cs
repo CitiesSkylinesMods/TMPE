@@ -34,6 +34,7 @@ namespace TrafficManager.U.Panel {
             base.Start();
             uiScaleUnsubscriber_ = ModUI.Instance.Events.UiScale.Subscribe(this);
             uiTransparencyUnsubscriber_ = ModUI.Instance.Events.UiOpacity.Subscribe(this);
+            atlas = TextureUtil.Ingame;
         }
 
         public UResizerConfig GetResizerConfig() {
