@@ -9,6 +9,7 @@
 [Fixed] Memory leak when closing Lane Arrows panels #1451 (krzychu124)
 [Fixed] Features not enabled if starting new game after using asset editor #1425 #1423 #1422 (NateNate60, aubergine18)
 [Fixed] Typo in notifier method name #1440 (aubergine18)
+[Updated] TM:PE Harmony ID changed from `de.viathinksoft.tmpe` to `me.tmpe` #1456 #897 (krzychu124)
 [Updated] Use game-defined elevation keymapping to select under/over-ground views #1454 #1326 (krzychu124)
 [Updated] Add/update UI helpers for use in mod options #1431 #1430 #1424 #1419 (aubergine18)
 [Updated] Refactoring mod options #1435 #1432 #1422 #1411 #1416 #1356 #1279 (aubergine18)
@@ -17,6 +18,7 @@
 [Updated] Use `Prompt.Error` for error message display #1445 (aubergine18)
 [Updated] Better handling of `KeyNotFound` exception when copying segments #1453 (kianzarrin)
 [Updated] Improved mod option lifecycle for game/editors #1452 #1449 #1425 (aubergine18)
+[Updated] Extension for managed-type `vehicleId` to `ExtVehicleType` #1444 (aubergine18)
 [Removed] Obsolete gamebridge stuff from build script #1436 (aubergine18)
 [/Version]
 
