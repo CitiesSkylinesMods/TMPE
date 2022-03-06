@@ -1,8 +1,8 @@
-using ColossalFramework;
-using TrafficManager.API.Traffic.Enums;
-using TrafficManager.Manager.Impl;
-
 namespace TrafficManager.Util.Extensions {
+    using ColossalFramework;
+    using TrafficManager.API.Traffic.Enums;
+    using TrafficManager.Manager.Impl;
+
     public static class VehicleExtensions {
         private static Vehicle[] _vehicleBuffer = Singleton<VehicleManager>.instance.m_vehicles.m_buffer;
 
@@ -35,10 +35,40 @@ namespace TrafficManager.Util.Extensions {
         public static bool IsWaitingPath(this ref Vehicle vehicle) =>
             vehicle.m_flags.IsFlagSet(Vehicle.Flags.WaitingPath);
 
-        /// <summary>Determines the <see cref="ExtVehicleType"/> for a vehicle.</summary>
-        /// <param name="vehicle">The vehocle to inspect.</param>
+        /// <summary>Determines the <see cref="ExtVehicleType"/> for a vehicle based on its AI.</summary>
+        /// <param name="vehicle">The vehicle to inspect.</param>
         /// <returns>The extended vehicle type.</returns>
-        public static ExtVehicleType ToExtVehicleType(this ref Vehicle vehicle) {
+        /// <remarks>This works for any vehicle type, including those which TM:PE doesn't manage.</remarks>
+        public static ExtVehicleType ToExtVehicleType(this ref Vehicle vehicle)
+            => vehicle.IsValid()
+                ? GetTypeFromVehicleAI(ref vehicle)
+                : ExtVehicleType.None;
+
+        /// <summary>Determines the <see cref="ExtVehicleType"/> for a managed vehicle type.</summary>
+        /// <param name="vehicleId">The id of the vehicle to inspect.</param>
+        /// <returns>The extended vehicle type.</returns>
+        /// <remarks>
+        /// Only works for managed vehicle types listed in <see cref="ExtVehicleManager.VEHICLE_TYPES"/>
+        /// </remarks>
+        public static ExtVehicleType ToExtVehicleType(this ushort vehicleId)
+            => ExtVehicleManager.Instance.ExtVehicles[vehicleId].vehicleType;
+
+        /// <summary>Determines the <see cref="ExtVehicleType"/> for a managed vehicle type.</summary>
+        /// <param name="vehicleId">The id of the vehicle to inspect.</param>
+        /// <returns>The extended vehicle type.</returns>
+        /// <remarks>
+        /// Only works for managed vehicle types listed in <see cref="ExtVehicleManager.VEHICLE_TYPES"/>
+        /// </remarks>
+        public static ExtVehicleType ToExtVehicleType(this uint vehicleId)
+            => ExtVehicleManager.Instance.ExtVehicles[vehicleId].vehicleType;
+
+        /// <summary>
+        /// Inspects the AI of the <paramref name="vehicle"/> to determine its type.
+        /// </summary>
+        /// <param name="vehicle">The vehicle to inspect.</param>
+        /// <returns>The determined <see cref="ExtVehicleType"/>.</returns>
+        /// <remarks>If vehicle AI not recognised, returns <see cref="ExtVehicleType.None"/>.</remarks>
+        private static ExtVehicleType GetTypeFromVehicleAI(ref Vehicle vehicle) {
             var vehicleId = vehicle.Info.m_instanceID.Vehicle;
             var vehicleAI = vehicle.Info.m_vehicleAI;
             var emergency = vehicle.m_flags.IsFlagSet(Vehicle.Flags.Emergency2);
@@ -50,6 +80,5 @@ namespace TrafficManager.Util.Extensions {
 
             return ret ?? ExtVehicleType.None;
         }
-
     }
 }
