@@ -10,7 +10,6 @@ namespace TrafficManager.State {
 
     [XmlRootAttribute(
         "GlobalConfig",
-        Namespace = "http://www.viathinksoft.de/tmpe",
         IsNullable = false)]
     public class GlobalConfig : GenericObservable<GlobalConfig> {
         public const string FILENAME = "TMPE_GlobalConfig.xml";

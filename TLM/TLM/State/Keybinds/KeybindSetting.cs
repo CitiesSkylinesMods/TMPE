@@ -38,6 +38,25 @@ namespace TrafficManager.State.Keybinds {
         }
 
         /// <summary>
+        /// Keybind Setting for custom readonly keybind
+        /// </summary>
+        /// <param name="cat">Category </param>
+        /// <param name="keyName">key name in the settings file</param>
+        /// <param name="configFile">Config filename</param>
+        /// <param name="inputKey">inputKey instance</param>
+        public KeybindSetting(string cat,
+                              string keyName,
+                              string configFile,
+                              InputKey inputKey) {
+            Category = cat;
+            Key = new SavedInputKey(
+                keyName,
+                configFile,
+                inputKey,
+                true);
+        }
+
+        /// <summary>
         /// Used by the GUI to tell the button event handler which key is being edited
         /// </summary>
         public struct Editable {
@@ -150,6 +169,15 @@ namespace TrafficManager.State.Keybinds {
                 prev_value = value;
             }
             return ret;
+        }
+
+        /// <summary>
+        /// Determines when user releases the key
+        /// </summary>
+        /// <param name="e"></param>
+        /// <returns>true once when user releases the key.</returns>
+        public bool KeyUp() {
+            return Key.IsKeyUp();
         }
 
         /// <summary>

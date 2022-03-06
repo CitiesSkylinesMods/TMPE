@@ -74,7 +74,7 @@ namespace TrafficManager.Lifecycle {
         // throws null ref if used from main menu
         public static SimulationManager.UpdateMode UpdateMode => SimulationManager.instance.m_metaData.m_updateMode;
 
-        // throws null ref if used form main menu
+        // throws null ref if used from main menu
         public static LoadMode Mode => (LoadMode)UpdateMode;
 
         public static string Scene => SceneManager.GetActiveScene().name;
@@ -88,6 +88,15 @@ namespace TrafficManager.Lifecycle {
                 return sceneName.Equals("Game") || sceneName.Equals("Ingame");
             }
         }
+
+        internal static bool IsNewGame
+            => PlayMode && (Mode is LoadMode.NewGame or LoadMode.NewGameFromScenario);
+
+        internal static bool EditorMode
+            => InGameOrEditor() && !PlayMode;
+
+        internal static bool InMapOrScenarioEditor
+            => EditorMode && (AppMode is ICities.AppMode.MapEditor or ICities.AppMode.ScenarioEditor);
 
         /// <summary>Resumes PDX launcher auto-load of last city if necessary.</summary>
         [SuppressMessage("Type Safety", "UNT0016:Unsafe way to get the method name", Justification = "Using same code as C:SL.")]
@@ -358,7 +367,7 @@ namespace TrafficManager.Lifecycle {
                 ex.LogException(true);
             }
 
-            Patcher.Uninstall(Patcher.HARMONY_ID);
+            Patcher.Uninstall(API.Harmony.HARMONY_ID);
 
             IsGameLoaded = false;
             InGameHotReload = false;

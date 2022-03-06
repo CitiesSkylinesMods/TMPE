@@ -1446,6 +1446,7 @@ namespace TrafficManager.UI.SubTools {
             };
 
         private static string T(string key) => Translation.LaneRouting.Get(key);
+        private static string ColorKeyDynamic(string key, string[] replacements) => Translation.SpeedLimits.ColorizeDynamicKeybinds(key, replacements);
 
         /// <inheritdoc/>
         public void UpdateOnscreenDisplayPanel() {
@@ -1455,6 +1456,13 @@ namespace TrafficManager.UI.SubTools {
                 case SelectionMode.None: {
                     var items = new List<OsdItem>();
                     items.Add(new Label(localizedText: T("LaneConnector.Mode:Select")));
+                    items.Add(new Label(
+                                  localizedText: ColorKeyDynamic(
+                                      "UI.Key:PageUp/PageDown switch underground",
+                                      new[] {
+                                          KeybindSettingsBase.ElevationUp.ToLocalizedString(),
+                                          KeybindSettingsBase.ElevationDown.ToLocalizedString()
+                                      })));
                     OnscreenDisplay.Display(items);
                     return;
                 }
@@ -1465,6 +1473,13 @@ namespace TrafficManager.UI.SubTools {
                                   m == SelectionMode.SelectSource
                                       ? T("LaneConnector.Mode:Source")
                                       : T("LaneConnector.Mode:Target")));
+                    items.Add(new Label(
+                                  localizedText: Translation.SpeedLimits.ColorizeDynamicKeybinds(
+                                      key: "UI.Key:PageUp/PageDown switch underground",
+                                      replacements: new[] {
+                                          KeybindSettingsBase.ElevationUp.ToLocalizedString(),
+                                          KeybindSettingsBase.ElevationDown.ToLocalizedString()
+                                      })));
                     items.Add(new Shortcut(
                                   keybindSetting: KeybindSettingsBase.LaneConnectorStayInLane,
                                   localizedText: T("LaneConnector.Label:Stay in lane, multiple modes")));

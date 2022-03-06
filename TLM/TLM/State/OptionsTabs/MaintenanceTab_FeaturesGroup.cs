@@ -17,7 +17,7 @@ namespace TrafficManager.State {
         public static CheckboxOption TimedLightsEnabled =
             new (nameof(Options.timedLightsEnabled), Options.PersistTo.Savegame) {
                 Label = "Checkbox:Timed traffic lights",
-                Validator = NotInEditorValidator,
+                Validator = TrafficLightsValidator,
                 Handler = OnFeatureAvailabilityChanged,
             };
         public static CheckboxOption CustomSpeedLimitsEnabled =
@@ -67,9 +67,8 @@ namespace TrafficManager.State {
             PrioritySignsEnabled.AddUI(group);
 
             // TODO [issue #959] remove `if` when TTL is implemented in asset editor.
-            if (!IsInEditor()) {
+            if (CanTrafficLightsBeUsed)
                 TimedLightsEnabled.AddUI(group);
-            }
 
             CustomSpeedLimitsEnabled.AddUI(group);
             VehicleRestrictionsEnabled.AddUI(group);
@@ -81,14 +80,12 @@ namespace TrafficManager.State {
 
         private static string T(string key) => Translation.Options.Get(key);
 
-        // TODO [issue #959] remove when TTL is implemented in asset editor.
-        private static bool IsInEditor() =>
-            TMPELifecycle.InGameOrEditor() &&
-            TMPELifecycle.AppMode != AppMode.Game;
+        private static bool CanTrafficLightsBeUsed
+            => TMPELifecycle.PlayMode || TMPELifecycle.InMapOrScenarioEditor;
 
         // TODO [issue #959] remove when TTL is implemented in asset editor.
-        private static bool NotInEditorValidator(bool desired, out bool result) {
-            result = !IsInEditor() && desired;
+        private static bool TrafficLightsValidator(bool desired, out bool result) {
+            result = CanTrafficLightsBeUsed && desired;
             return true;
         }
 

@@ -1,6 +1,8 @@
 namespace TrafficManager.U {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Text.RegularExpressions;
     using ColossalFramework.UI;
     using CSUtil.Commons;
     using JetBrains.Annotations;
@@ -80,6 +82,25 @@ namespace TrafficManager.U {
         public static string ColorizeKeybind([NotNull] string s) {
             return s.Replace("[[", UConst.GetKeyboardShortcutColorTagOpener())
                     .Replace("]]", UConst.KEYBOARD_SHORTCUT_CLOSING_TAG);
+        }
+
+        /// <summary>
+        /// Replace special markup with UI shortcut color tag (orange).
+        /// Replace wrapped text from 'replacements' of matching index.
+        /// And place closing tag.
+        /// </summary>
+        /// <param name="sourceText">String with keybind wrapped in [[Ctrl]] double square brackets.</param>
+        /// <param name="replacements">Replacements array, each tag match will take own replacement</param>
+        /// <returns>Updated string.</returns>
+        public static string ColorizeDynamicKeybinds([NotNull] string sourceText, string[] replacements) {
+            int i = 0;
+            return new Regex(@"\[\[(.*?)\]\]")
+                .Replace(
+                    sourceText,
+                    new MatchEvaluator(
+                        match => i < replacements.Length
+                                     ? $"{UConst.GetKeyboardShortcutColorTagOpener()}{replacements[i++]}{UConst.KEYBOARD_SHORTCUT_CLOSING_TAG}"
+                                     : match.Value));
         }
     }
 }
