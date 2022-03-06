@@ -126,6 +126,7 @@
     <Compile Include="Traffic\Data\KmphValue.cs">
       <DependentUpon>SpeedValue.cs</DependentUpon>
     </Compile>
+    <Compile Include="Traffic\Data\LaneConnection.cs" />
     <Compile Include="Traffic\Data\LaneTrafficData.cs" />
     <Compile Include="Traffic\Data\MphValue.cs">
       <DependentUpon>SpeedValue.cs</DependentUpon>

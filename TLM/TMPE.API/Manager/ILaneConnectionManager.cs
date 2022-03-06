@@ -1,3 +1,5 @@
+using TrafficManager.API.Traffic.Data;
+
 namespace TrafficManager.API.Manager {
     public interface ILaneConnectionManager {
         // TODO define me!
@@ -30,5 +32,13 @@ namespace TrafficManager.API.Manager {
         /// </summary>
         /// <param name="sourceStartNode">check at start node of the segment of the source lane?</param>
         public bool AreLanesConnected(uint sourceLaneId, uint targetLaneId, bool sourceStartNode);
+
+        /// <summary>
+        /// All additional data for lane connections.
+        /// </summary>
+        /// <param name="laneId"></param>
+        /// <param name="startNode"></param>
+        /// <returns></returns>
+        public LaneConnection this[uint laneId, bool startNode] { get; }
     }
 }

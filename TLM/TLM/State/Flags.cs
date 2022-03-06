@@ -22,14 +22,6 @@ namespace TrafficManager.State {
         private static LaneArrows?[] laneArrowFlags;
 
         /// <summary>
-        /// For each lane (by id): list of lanes that are connected with this lane by the T++ lane connector
-        /// key 1: source lane id
-        /// key 2: at start node?
-        /// values: target lane id
-        /// </summary>
-        internal static uint[][][] laneConnections;
-
-        /// <summary>
         /// For each lane: Defines the lane arrows which are set in highway rule mode (they are not saved)
         /// </summary>
         private static LaneArrows?[] highwayLaneArrowFlags;
@@ -40,7 +32,6 @@ namespace TrafficManager.State {
         internal static ExtVehicleType?[][] laneAllowedVehicleTypesArray; // for faster, lock-free access, 1st index: segment id, 2nd index: lane index
 
         static Flags() {
-            laneConnections = new uint[NetManager.MAX_LANE_COUNT][][];
             laneAllowedVehicleTypesArray = new ExtVehicleType?[NetManager.MAX_SEGMENT_COUNT][];
             laneArrowFlags = new LaneArrows?[NetManager.MAX_LANE_COUNT];
             highwayLaneArrowFlags = new LaneArrows?[NetManager.MAX_LANE_COUNT];
@@ -64,42 +55,6 @@ namespace TrafficManager.State {
 
                 if (laneArrowFlags[i] != null) {
                     Log.Info($"\tcustom arrows: {laneArrowFlags[i]}");
-                }
-            }
-
-            Log.Info("------------------------");
-            Log.Info("--- LANE CONNECTIONS ---");
-            Log.Info("------------------------");
-            for (uint i = 0; i < laneConnections.Length; ++i) {
-                if (laneConnections[i] == null)
-                    continue;
-
-                ref NetLane netLane = ref i.ToLane();
-
-                ushort segmentId = netLane.m_segment;
-                ref NetSegment netSegment = ref segmentId.ToSegment();
-
-                Log.Info($"Lane {i}: valid? {netLane.IsValidWithSegment()}, seg. valid? {netSegment.IsValid()}");
-
-                //TODO: refactor this
-                for (int x = 0; x < 2; ++x) {
-                    if (laneConnections[i][x] == null)
-                        continue;
-
-                    ushort nodeId = x == 0 ? netSegment.m_startNode : netSegment.m_endNode;
-                    ref NetNode netNode = ref nodeId.ToNode();
-                    Log.Info($"\tNode idx {x} ({nodeId}, seg. {segmentId}): valid? {netNode.IsValid()}");
-
-                    for (int y = 0; y < laneConnections[i][x].Length; ++y) {
-                        uint laneIdOfConnection = laneConnections[i][x][y];
-
-                        if (laneIdOfConnection == 0)
-                            continue;
-
-                        ref NetLane netLaneOfConnection = ref laneIdOfConnection.ToLane();
-
-                        Log.Info($"\t\tEntry {y}: {laneIdOfConnection} (valid? {netLaneOfConnection.IsValidWithSegment()})");
-                    }
                 }
             }
 
@@ -205,258 +160,6 @@ namespace TrafficManager.State {
             node.m_flags = flags;
 
             return true;
-        }
-
-        /// <summary>
-        /// Removes lane connections that point from lane <paramref name="sourceLaneId"/> to lane
-        /// <paramref name="targetLaneId"/> at node <paramref name="startNode"/>.
-        /// </summary>
-        /// <param name="sourceLaneId"></param>
-        /// <param name="targetLaneId"></param>
-        /// <param name="startNode"></param>
-        /// <returns></returns>
-        private static bool RemoveSingleLaneConnection(uint sourceLaneId,
-                                                       uint targetLaneId,
-                                                       bool startNode) {
-#if DEBUGFLAGS
-            Log._Debug(
-                $"Flags.CleanupLaneConnections({sourceLaneId}, {targetLaneId}, {startNode}) called.");
-#endif
-            int nodeArrayIndex = startNode ? 0 : 1;
-
-            if (laneConnections[sourceLaneId] == null ||
-                laneConnections[sourceLaneId][nodeArrayIndex] == null)
-                return false;
-
-            uint[] srcLaneConnections = laneConnections[sourceLaneId][nodeArrayIndex];
-
-            bool ret = false;
-            int remainingConnections = 0;
-            for (int i = 0; i < srcLaneConnections.Length; ++i) {
-                if (srcLaneConnections[i] != targetLaneId) {
-                    ++remainingConnections;
-                } else {
-                    ret = true;
-                    srcLaneConnections[i] = 0;
-                }
-            }
-
-            if (remainingConnections <= 0) {
-                laneConnections[sourceLaneId][nodeArrayIndex] = null;
-                if (laneConnections[sourceLaneId][1 - nodeArrayIndex] == null)
-                    laneConnections[sourceLaneId] = null; // total cleanup
-                return ret;
-            }
-
-            if (remainingConnections != srcLaneConnections.Length) {
-                laneConnections[sourceLaneId][nodeArrayIndex] = new uint[remainingConnections];
-                int k = 0;
-                for (int i = 0; i < srcLaneConnections.Length; ++i) {
-                    if (srcLaneConnections[i] == 0)
-                        continue;
-                    laneConnections[sourceLaneId][nodeArrayIndex][k++] = srcLaneConnections[i];
-                }
-            }
-
-            return ret;
-        }
-
-        /// <summary>
-        /// Removes any lane connections that exist between two given lanes
-        /// </summary>
-        /// <param name="lane1Id"></param>
-        /// <param name="lane2Id"></param>
-        /// <param name="startNode1"></param>
-        /// <returns></returns>
-        internal static bool RemoveLaneConnection(uint lane1Id, uint lane2Id, bool startNode1) {
-#if DEBUG
-            bool debug = DebugSwitch.LaneConnections.Get();
-            if (debug) {
-                Log._Debug($"Flags.RemoveLaneConnection({lane1Id}, {lane2Id}, {startNode1}) called.");
-            }
-#endif
-            bool lane1Valid = CheckLane(lane1Id);
-            bool lane2Valid = CheckLane(lane2Id);
-
-            bool ret = false;
-
-            if (!lane1Valid) {
-                // remove all incoming/outgoing lane connections
-                RemoveLaneConnections(lane1Id);
-                ret = true;
-            }
-
-            if (!lane2Valid) {
-                // remove all incoming/outgoing lane connections
-                RemoveLaneConnections(lane2Id);
-                ret = true;
-            }
-
-            if (lane1Valid || lane2Valid) {
-                LaneConnectionManager.Instance.GetCommonNodeId(
-                    lane1Id,
-                    lane2Id,
-                    startNode1,
-                    out ushort commonNodeId,
-                    out bool startNode2); // TODO refactor
-                if (commonNodeId == 0) {
-                    Log.Warning($"Flags.RemoveLaneConnection({lane1Id}, {lane2Id}, {startNode1}): " +
-                                $"Could not identify common node between lanes {lane1Id} and {lane2Id}");
-                }
-
-                if (RemoveSingleLaneConnection(lane1Id, lane2Id, startNode1)) {
-                    ret = true;
-                }
-
-                if (RemoveSingleLaneConnection(lane2Id, lane1Id, startNode2)) {
-                    ret = true;
-                }
-            }
-
-#if DEBUG
-            if (debug) {
-                Log._Debug($"Flags.RemoveLaneConnection({lane1Id}, {lane2Id}, {startNode1}). ret={ret}");
-            }
-#endif
-            return ret;
-        }
-
-        /// <summary>
-        /// Removes all incoming/outgoing lane connections of the given lane
-        /// </summary>
-        /// <param name="laneId"></param>
-        /// <param name="startNode"></param>
-        internal static void RemoveLaneConnections(uint laneId, bool? startNode = null) {
-#if DEBUG
-            bool debug = DebugSwitch.LaneConnections.Get();
-            if (debug) {
-                Log._Debug($"Flags.RemoveLaneConnections({laneId}, {startNode}) called. " +
-                           $"laneConnections[{laneId}]={laneConnections[laneId]}");
-            }
-#endif
-            if (laneConnections[laneId] == null) {
-                return;
-            }
-
-            bool laneValid = CheckLane(laneId);
-            bool clearBothSides = startNode == null || !laneValid;
-#if DEBUG
-            if (debug) {
-                Log._Debug($"Flags.RemoveLaneConnections({laneId}, {startNode}): laneValid={laneValid}, " +
-                           $"clearBothSides={clearBothSides}");
-            }
-#endif
-            int? nodeArrayIndex = null;
-            if (!clearBothSides) {
-                nodeArrayIndex = (bool)startNode ? 0 : 1;
-            }
-
-            for (int k = 0; k <= 1; ++k) {
-                if (nodeArrayIndex != null && k != (int)nodeArrayIndex) {
-                    continue;
-                }
-
-                bool startNode1 = k == 0;
-
-                if (laneConnections[laneId][k] == null) {
-                    continue;
-                }
-
-                for (int i = 0; i < laneConnections[laneId][k].Length; ++i) {
-                    uint otherLaneId = laneConnections[laneId][k][i];
-                    LaneConnectionManager.Instance.GetCommonNodeId(
-                        laneId,
-                        otherLaneId,
-                        startNode1,
-                        out ushort commonNodeId,
-                        out bool startNode2); // TODO refactor
-
-                    if (commonNodeId == 0) {
-                        Log.Warning($"Flags.RemoveLaneConnections({laneId}, {startNode}): Could " +
-                                    $"not identify common node between lanes {laneId} and {otherLaneId}");
-                    }
-
-                    RemoveSingleLaneConnection(otherLaneId, laneId, startNode2);
-                }
-
-                laneConnections[laneId][k] = null;
-            }
-
-            if (clearBothSides) {
-                laneConnections[laneId] = null;
-            }
-        }
-
-        /// <summary>
-        /// adds lane connections between two given lanes
-        /// </summary>
-        /// <param name="lane1Id"></param>
-        /// <param name="lane2Id"></param>
-        /// <param name="startNode1"></param>
-        /// <returns></returns>
-        internal static bool AddLaneConnection(uint lane1Id, uint lane2Id, bool startNode1) {
-            bool lane1Valid = CheckLane(lane1Id);
-            bool lane2Valid = CheckLane(lane2Id);
-
-            if (!lane1Valid) {
-                // remove all incoming/outgoing lane connections
-                RemoveLaneConnections(lane1Id);
-            }
-
-            if (!lane2Valid) {
-                // remove all incoming/outgoing lane connections
-                RemoveLaneConnections(lane2Id);
-            }
-
-            if (!lane1Valid || !lane2Valid) {
-                return false;
-            }
-
-            LaneConnectionManager.Instance.GetCommonNodeId(
-                lane1Id,
-                lane2Id,
-                startNode1,
-                out ushort commonNodeId,
-                out bool startNode2); // TODO refactor
-
-            if (commonNodeId != 0) {
-                CreateLaneConnection(lane1Id, lane2Id, startNode1);
-                CreateLaneConnection(lane2Id, lane1Id, startNode2);
-
-                return true;
-            }
-
-            return false;
-        }
-
-        /// <summary>
-        /// Adds a lane connection from lane <paramref name="sourceLaneId"/> to lane <paramref name="targetLaneId"/> at node <paramref name="startNode"/>
-        /// Assumes that both lanes are valid.
-        /// </summary>
-        /// <param name="sourceLaneId"></param>
-        /// <param name="targetLaneId"></param>
-        /// <param name="startNode"></param>
-        private static void CreateLaneConnection(uint sourceLaneId,
-                                                 uint targetLaneId,
-                                                 bool startNode) {
-            if (laneConnections[sourceLaneId] == null) {
-                laneConnections[sourceLaneId] = new uint[2][];
-            }
-
-            int nodeArrayIndex = startNode ? 0 : 1;
-
-            if (laneConnections[sourceLaneId][nodeArrayIndex] == null) {
-                laneConnections[sourceLaneId][nodeArrayIndex] = new uint[] { targetLaneId };
-                return;
-            }
-
-            uint[] oldConnections = laneConnections[sourceLaneId][nodeArrayIndex];
-            laneConnections[sourceLaneId][nodeArrayIndex] = new uint[oldConnections.Length + 1];
-            Array.Copy(
-                oldConnections,
-                laneConnections[sourceLaneId][nodeArrayIndex],
-                oldConnections.Length);
-            laneConnections[sourceLaneId][nodeArrayIndex][oldConnections.Length] = targetLaneId;
         }
 
         internal static bool CheckLane(uint laneId) {
@@ -942,10 +645,6 @@ namespace TrafficManager.State {
         }
 
         internal static void OnLevelUnloading() {
-            for (uint i = 0; i < laneConnections.Length; ++i) {
-                laneConnections[i] = null;
-            }
-
             for (uint i = 0; i < laneAllowedVehicleTypesArray.Length; ++i) {
                 laneAllowedVehicleTypesArray[i] = null;
             }
