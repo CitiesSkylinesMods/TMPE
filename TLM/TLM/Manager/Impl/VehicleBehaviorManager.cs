@@ -496,7 +496,7 @@ namespace TrafficManager.Manager.Impl {
                         if (citizenInstanceId == 0) {
                             continue;
                         }
-                        
+
                         ref CitizenInstance citizenInstance = ref citizenInstanceId.ToCitizenInstance();
 
                         // NON-STOCK CODE START
@@ -1165,7 +1165,7 @@ namespace TrafficManager.Manager.Impl {
             maxSpeed = 0;
             if (prevTargetNodeId != targetNodeId
                 || (vehicleData.m_blockCounter == 255
-                    && !Instance.MayDespawn(ref vehicleData)) // NON-STOCK CODE
+                    && !MayDespawn(frontVehicleId, ref vehicleData)) // NON-STOCK CODE
                 ) {
                 // method should only be called if targetNodeId == prevTargetNode
                 return VehicleJunctionTransitState.Leave;
@@ -1714,11 +1714,12 @@ namespace TrafficManager.Manager.Impl {
             return checkSpace;
         }
 
-        public bool MayDespawn(ref Vehicle vehicleData) {
+        public bool MayDespawn(ushort vehicleId, ref Vehicle vehicleData) {
             return !Options.disableDespawning
                    || ((vehicleData.m_flags2 & (Vehicle.Flags2.Blown
                                                 | Vehicle.Flags2.Floating)) != 0)
-                   || (vehicleData.m_flags & Vehicle.Flags.Parking) != 0;
+                   || (vehicleData.m_flags & Vehicle.Flags.Parking) != 0
+                   || GlobalConfig.Instance.Gameplay.AllowedDespawnVehicleTypes.IsFlagSet(ExtVehicleManager.Instance.ExtVehicles[vehicleId].vehicleType);
         }
 
         public float CalcMaxSpeed(ushort vehicleId,
