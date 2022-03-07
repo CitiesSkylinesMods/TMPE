@@ -19,7 +19,7 @@ namespace TrafficManager.UI.MainMenu {
         protected override bool IsActive() => !Options.disableDespawning;
 
         public override void SetupButtonSkin(AtlasBuilder futureAtlas) {
-            // Button backround (from BackgroundPrefix) is provided by MainMenuPanel.Start
+            // Button background (from BackgroundPrefix) is provided by MainMenuPanel.Start
             this.Skin = ButtonSkin.CreateSimple(
                                       foregroundPrefix: "TrafficDespawning",
                                       backgroundPrefix: UConst.MAINMENU_ROUND_BUTTON_BG)
@@ -41,6 +41,18 @@ namespace TrafficManager.UI.MainMenu {
             this.UpdateTooltip(refreshTooltip: true);
             this.ApplyButtonSkin();
             // do not call base -- base.OnClick(p);
+        }
+
+        /// <summary>
+        /// Handle right click, it's filtered out from OnClick() callback
+        /// </summary>
+        /// <param name="p"></param>
+        protected override void OnMouseDown(UIMouseEventParameter p) {
+            if ((p.buttons & UIMouseButton.Right) != 0) {
+                p.Use();
+                UIInput.MouseUsed();
+                AllowDespawn.AllowDespawningPanel.OpenModal();
+            }
         }
     }
 }

@@ -1,4 +1,6 @@
 namespace TrafficManager.Util.Extensions {
+    using API.Traffic.Enums;
+
     internal static class FlagsExtensions {
         internal static bool IsFlagSet(this Building.Flags value, Building.Flags flag) => (value & flag) != 0;
 
@@ -9,6 +11,8 @@ namespace TrafficManager.Util.Extensions {
         internal static bool IsFlagSet(this NetInfo.LaneType value, NetInfo.LaneType flag) => (value & flag) != 0;
 
         internal static bool IsFlagSet(this VehicleInfo.VehicleType value, VehicleInfo.VehicleType flag) => (value & flag) != 0;
+
+        internal static bool IsFlagSet(this ExtVehicleType value, ExtVehicleType flag) => (value & flag) != 0;
 
         internal static bool IsFlagSet(this Vehicle.Flags value, Vehicle.Flags flag) => (value & flag) != 0;
 
