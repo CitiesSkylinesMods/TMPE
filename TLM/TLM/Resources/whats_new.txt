@@ -1,8 +1,9 @@
 [Version] 11.6.5.1
 [Meta] This update adds two new features, overhauls mod options code, and improves modding API.
+[New] `Disable Despawn` feature now has vehicle-type filters #1441 #1434 (Marconius6, lokpro, krzychu124)
 [New] Timed Traffic Lights now available in Map and Scenario editors #1425 #959 (aubergine18)
-[Mod] API: Mods can now use TMPE.API.dll without having to reference TrafficManager.dll #1448 (kianzarrin)
-[Mod] Update UUI to 2.2.1 via NuGet #1442 (kianzarrin)
+[Mod] API: Mods can now use TMPE.API.dll alone, without referencing TrafficManager.dll #1448 (kianzarrin)
+[Mod] Update: UUI version 2.2.1 via NuGet #1442 (kianzarrin)
 [Fixed] `NullReferenceException` if version in global config is not set #1443 (krzychu124)
 [Fixed] UI windows/overlays not consuming mouse events #1443 #934 #749 (somethingstarted, MacSergey, krzychu124)
 [Fixed] Missing textures in Scenario Editor #1451 #1450 #1449 (krzychu124, kianzarrin)
