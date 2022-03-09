@@ -275,8 +275,8 @@ namespace TrafficManager.State {
                 Log._Debug($"Flags.RemoveLaneConnection({lane1Id}, {lane2Id}, {startNode1}) called.");
             }
 #endif
-            bool lane1Valid = CheckLane(lane1Id);
-            bool lane2Valid = CheckLane(lane2Id);
+            bool lane1Valid = lane1Id.IsValidWithSegment();
+            bool lane2Valid = lane2Id.IsValidWithSegment();
 
             bool ret = false;
 
@@ -338,7 +338,7 @@ namespace TrafficManager.State {
                 return;
             }
 
-            bool laneValid = CheckLane(laneId);
+            bool laneValid = laneId.IsValidWithSegment();
             bool clearBothSides = startNode == null || !laneValid;
 #if DEBUG
             if (debug) {
@@ -395,8 +395,8 @@ namespace TrafficManager.State {
         /// <param name="startNode1"></param>
         /// <returns></returns>
         internal static bool AddLaneConnection(uint lane1Id, uint lane2Id, bool startNode1) {
-            bool lane1Valid = CheckLane(lane1Id);
-            bool lane2Valid = CheckLane(lane2Id);
+            bool lane1Valid = lane1Id.IsValidWithSegment();
+            bool lane2Valid = lane2Id.IsValidWithSegment();
 
             if (!lane1Valid) {
                 // remove all incoming/outgoing lane connections
@@ -459,50 +459,15 @@ namespace TrafficManager.State {
             laneConnections[sourceLaneId][nodeArrayIndex][oldConnections.Length] = targetLaneId;
         }
 
-        internal static bool CheckLane(uint laneId) {
-            // TODO refactor
-            if (laneId <= 0) {
-                return false;
-            }
-
-            ref NetLane netLane = ref laneId.ToLane();
-
-            if (((NetLane.Flags)netLane.m_flags & (NetLane.Flags.Created | NetLane.Flags.Deleted)) != NetLane.Flags.Created) {
-                return false;
-            }
-
-            ushort segmentId = netLane.m_segment;
-            if (segmentId <= 0) {
-                return false;
-            }
-
-            ref NetSegment netSegment = ref segmentId.ToSegment();
-
-            return (netSegment.m_flags & (NetSegment.Flags.Created | NetSegment.Flags.Deleted)) == NetSegment.Flags.Created;
-        }
-
         public static void SetLaneAllowedVehicleTypes(uint laneId, ExtVehicleType vehicleTypes) {
-            if (laneId <= 0) {
+            if (!laneId.IsValidWithSegment())
                 return;
-            }
 
             ref NetLane netLane = ref laneId.ToLane();
 
-            if (((NetLane.Flags)netLane.m_flags & (NetLane.Flags.Created | NetLane.Flags.Deleted)) != NetLane.Flags.Created) {
-                return;
-            }
-
             ushort segmentId = netLane.m_segment;
 
-            if (segmentId <= 0) {
-                return;
-            }
-
             ref NetSegment netSegment = ref segmentId.ToSegment();
-
-            if ((netSegment.m_flags & (NetSegment.Flags.Created | NetSegment.Flags.Deleted)) != NetSegment.Flags.Created) {
-                return;
-            }
 
             NetInfo segmentInfo = netSegment.Info;
             uint curLaneId = netSegment.m_lanes;
@@ -524,21 +489,10 @@ namespace TrafficManager.State {
                                                       uint laneId,
                                                       ExtVehicleType vehicleTypes)
         {
-            if (segmentId <= 0 || laneId <= 0) {
+            if (!laneId.IsValidWithSegment())
                 return;
-            }
 
             ref NetSegment netSegment = ref segmentId.ToSegment();
-
-            if ((netSegment.m_flags & (NetSegment.Flags.Created | NetSegment.Flags.Deleted)) != NetSegment.Flags.Created) {
-                return;
-            }
-
-            ref NetLane netLane = ref laneId.ToLane();
-
-            if (((NetLane.Flags)netLane.m_flags & (NetLane.Flags.Created | NetLane.Flags.Deleted)) != NetLane.Flags.Created) {
-                return;
-            }
 
             NetInfo segmentInfo = netSegment.Info;
 

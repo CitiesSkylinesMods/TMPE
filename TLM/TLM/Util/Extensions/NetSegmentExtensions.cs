@@ -44,14 +44,23 @@ namespace TrafficManager.Util.Extensions {
         }
 
         /// <summary>
-        /// Checks if the netSegment is Created, but neither Collapsed nor Deleted.
+        /// Checks <paramref name="netSegment"/> is <c>Created</c> but not <c>Collapsed|Deleted</c>.
         /// </summary>
         /// <param name="netSegment">netSegment</param>
-        /// <returns>True if the netSegment is valid, otherwise false.</returns>
+        /// <returns>Returns <c>true</c> if valid, otherwise <c>false</c>.</returns>
         public static bool IsValid(this ref NetSegment netSegment) =>
             netSegment.m_flags.CheckFlags(
                 required: NetSegment.Flags.Created,
                 forbidden: NetSegment.Flags.Collapsed | NetSegment.Flags.Deleted);
+
+        /// <summary>
+        /// Checks <paramref name="segmentId"/> is not <c>0</c>,
+        /// then checks netSegment is <c>Created</c> but not <c>Collapsed|Deleted</c>.
+        /// </summary>
+        /// <param name="segmentId">The id of the segment to check.</param>
+        /// <returns>Returns <c>true</c> if valid, otherwise <c>false</c>.</returns>
+        public static bool IsValid(this ushort segmentId)
+            => (segmentId != 0) && segmentId.ToSegment().IsValid();
 
         public static NetInfo.Lane GetLaneInfo(this ref NetSegment netSegment, int laneIndex) =>
             netSegment.Info?.m_lanes?[laneIndex];
