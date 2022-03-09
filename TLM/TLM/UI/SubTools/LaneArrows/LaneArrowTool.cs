@@ -248,7 +248,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
 
         private void DestroyToolWindow() {
             if (ToolWindow) {
-                UnityEngine.Object.Destroy(ToolWindow);
+                UnityEngine.Object.Destroy(ToolWindow.gameObject);
                 ToolWindow = null;
             }
         }

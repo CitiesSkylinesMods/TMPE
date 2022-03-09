@@ -11,11 +11,9 @@ namespace TrafficManager.Lifecycle {
     using Patch._PathFind;
     using Patch._PathManager;
     using ColossalFramework.Plugins;
+    using TrafficManager.UI.Helpers;
 
     public static class Patcher {
-        internal const string HARMONY_ID = "de.viathinksoft.tmpe";
-        internal const string HARMONY_ID_PF = "de.viathinksoft.tmpe.pathfinding";
-
         private const string ERROR_MESSAGE =
             "****** ERRRROOORRRRRR!!!!!!!!!! **************\n" +
             "**********************************************\n" +
@@ -33,7 +31,7 @@ namespace TrafficManager.Lifecycle {
 
         internal static void AssertCitiesHarmonyInstalled() {
             if (!HarmonyHelper.IsHarmonyInstalled) {
-                Shortcuts.ShowErrorDialog("Error: Missing Harmony", SOLUTION);
+                Prompt.Error("Error: Missing Harmony", SOLUTION);
                 throw new Exception(ERROR_MESSAGE);
             }
         }
@@ -44,12 +42,12 @@ namespace TrafficManager.Lifecycle {
             Harmony.DEBUG = false; // set to true to get harmony debug info.
 #endif
             AssertCitiesHarmonyInstalled();
-            fail = !PatchAll(HARMONY_ID, forbidden: typeof(CustomPathFindPatchAttribute));
-            fail |= !PatchManual(HARMONY_ID);
+            fail = !PatchAll(API.Harmony.HARMONY_ID, forbidden: typeof(CustomPathFindPatchAttribute));
+            fail |= !PatchManual(API.Harmony.HARMONY_ID);
 
             if (fail) {
                 Log.Info("patcher failed");
-                Shortcuts.ShowErrorDialog(
+                Prompt.Error(
                     "TM:PE failed to load",
                     "Traffic Manager: President Edition failed to load. You can " +
                     "continue playing but it's NOT recommended. Traffic Manager will " +
@@ -65,11 +63,11 @@ namespace TrafficManager.Lifecycle {
             Harmony.DEBUG = false; // set to true to get harmony debug info.
 #endif
             AssertCitiesHarmonyInstalled();
-            fail = !PatchAll(HARMONY_ID_PF , required: typeof(CustomPathFindPatchAttribute));;
+            fail = !PatchAll(API.Harmony.HARMONY_ID_PATHFINDING , required: typeof(CustomPathFindPatchAttribute));;
 
             if (fail) {
                 Log.Info("TMPE Path-finding patcher failed");
-                Shortcuts.ShowErrorDialog(
+                Prompt.Error(
                     "TM:PE failed to patch Path-finding",
                     "Traffic Manager: President Edition failed to load necessary patches. You can " +
                     "continue playing but it's NOT recommended. Traffic Manager will " +

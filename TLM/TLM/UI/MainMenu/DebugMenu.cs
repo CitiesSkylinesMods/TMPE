@@ -15,6 +15,7 @@ namespace TrafficManager.UI.MainMenu {
     using TrafficManager.Lifecycle;
     using TrafficManager.Manager.Impl;
     using TrafficManager.Util.Extensions;
+    using TrafficManager.U;
 
 #if DEBUG // whole class coverage
     public class DebugMenuPanel : UIPanel
@@ -51,6 +52,7 @@ namespace TrafficManager.UI.MainMenu {
 
         public override void Start() {
             isVisible = false;
+            atlas = TextureUtil.Ingame;
 
             backgroundSprite = "GenericPanel";
             color = new Color32(75, 75, 135, 255);
@@ -126,6 +128,7 @@ namespace TrafficManager.UI.MainMenu {
             textfield.cursorBlinkTime = 0.45f;
             textfield.cursorWidth = 1;
             textfield.selectionBackgroundColor = new Color(233, 201, 148, 255);
+            textfield.atlas = TextureUtil.Ingame;
             textfield.selectionSprite = "EmptySprite";
             textfield.verticalAlignment = UIVerticalAlignment.Middle;
             textfield.padding = new RectOffset(5, 0, 5, 0);
@@ -147,6 +150,7 @@ namespace TrafficManager.UI.MainMenu {
             button.textScale = 0.8f;
             button.width = Translation.GetMenuWidth() - 30;
             button.height = 30;
+            button.atlas = TextureUtil.Ingame;
             button.normalBgSprite = "ButtonMenu";
             button.disabledBgSprite = "ButtonMenuDisabled";
             button.hoveredBgSprite = "ButtonMenuHovered";

@@ -107,15 +107,15 @@
     <Reference Include="MoveItIntegration">
       <HintPath>..\libs\MoveItIntegration.dll</HintPath>
     </Reference>
-    <Reference Include="UnifiedUILib">
-      <HintPath>..\libs\UnifiedUILib.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
       <HintPath>$(MangedDLLPath)\System.Core.dll</HintPath>
     </Reference>
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Xml" />
+    <Reference Include="UnifiedUILib, Version=2.2.1.1037, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\UnifiedUILib.2.2.1\lib\net35\UnifiedUILib.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEngine">
       <HintPath>$(MangedDLLPath)\UnityEngine.dll</HintPath>
       <Private>False</Private>
@@ -162,7 +162,9 @@
     <Compile Include="State\OptionsTabs\MaintenanceTab_DespawnGroup.cs" />
     <Compile Include="State\OptionsTabs\MaintenanceTab_ToolsGroup.cs" />
     <Compile Include="State\VersionInfo.cs" />
+    <Compile Include="UI\AllowDespawn\AllowDespawnPanel.cs" />
     <Compile Include="UI\Helpers\ActionButton.cs" />
+    <Compile Include="UI\Helpers\GlobalConfigObserver.cs" />
     <Compile Include="UI\Helpers\SliderOption.cs" />
     <Compile Include="UI\Helpers\OptionButtonBase.cs" />
     <Compile Include="UI\Helpers\UrlButton.cs" />

@@ -4,6 +4,7 @@ namespace TrafficManager.State {
     using ICities;
     using TrafficManager.UI;
     using TrafficManager.UI.Helpers;
+    using UI.AllowDespawn;
 
     public static class GameplayTab_VehicleBehaviourGroup {
 
@@ -22,6 +23,7 @@ namespace TrafficManager.State {
         public static CheckboxOption DisableDespawning =
             new(nameof(Options.disableDespawning), Options.PersistTo.Savegame) {
                 Label = "Maintenance.Checkbox:Disable despawning",
+                Handler = (newValue) => AllowDespawnFiltersButton.ReadOnly = !newValue
             };
 
         private static UIDropDown _recklessDriversDropdown;
@@ -34,6 +36,12 @@ namespace TrafficManager.State {
             }
         }
 
+        public static ActionButton AllowDespawnFiltersButton = new() {
+            Label = "Filter Disable despawning vehicle types",
+            Handler = AllowDespawningPanel.OpenModal,
+            ReadOnly = !Options.disableDespawning
+        };
+
         internal static void AddUI(UIHelperBase tab) {
             var group = tab.AddGroup(T("Gameplay.Group:Vehicle behavior"));
 
@@ -45,6 +53,8 @@ namespace TrafficManager.State {
                 StrongerRoadConditionEffects.AddUI(group);
 
             DisableDespawning.AddUI(group);
+
+            AllowDespawnFiltersButton.AddUI(group);
         }
 
         private static string T(string key) => Translation.Options.Get(key);

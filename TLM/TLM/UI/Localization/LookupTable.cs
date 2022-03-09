@@ -30,6 +30,14 @@ namespace TrafficManager.UI.Localization {
             return UIUtil.ColorizeKeybind(this.Get(lang, key));
         }
 
+        /// <summary>Get a translation string and dynamically find, replace and paint [[Key]] fragments with orange.</summary>
+        /// <param name="key">Translation key.</param>
+        /// <returns>Translated and colorized string.</returns>
+        public string ColorizeDynamicKeybinds(string key, string[] replacements) {
+            string lang = Translation.GetCurrentLanguage();
+            return UIUtil.ColorizeDynamicKeybinds(this.Get(lang, key), replacements);
+        }
+
         public string Get(string lang, string key) {
 #if DEBUG
             if (!AllLanguages.ContainsKey(lang)) {

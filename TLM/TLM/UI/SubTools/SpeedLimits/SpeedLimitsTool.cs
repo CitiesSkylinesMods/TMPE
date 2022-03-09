@@ -80,6 +80,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
 
         private static string T(string key) => Translation.SpeedLimits.Get(key);
         private static string ColorKey(string key) => Translation.SpeedLimits.ColorizeKeybind(key);
+        private static string ColorKeyDynamic(string key, string[] replacements) => Translation.SpeedLimits.ColorizeDynamicKeybinds(key, replacements);
 
         public override void OnActivateTool() {
             if (this.Window == null
@@ -378,7 +379,12 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                     ctrl: true,
                     localizedText: T("UI.Key:Ctrl temporarily toggle between lanes and segments")),
                 new MainMenu.OSD.Label(
-                    localizedText: ColorKey("UI.Key:PageUp/PageDown switch underground")),
+                    localizedText: ColorKeyDynamic(
+                        key: "UI.Key:PageUp/PageDown switch underground",
+                        replacements: new [] {
+                            KeybindSettingsBase.ElevationUp.ToLocalizedString(),
+                            KeybindSettingsBase.ElevationDown.ToLocalizedString()
+                    })),
                 new MainMenu.OSD.Label(
                     localizedText: ColorKey("UI.Key:Unlimited; Default; Select")),
                 new MainMenu.OSD.Shortcut(
