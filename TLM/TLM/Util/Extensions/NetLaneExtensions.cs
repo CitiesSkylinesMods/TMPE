@@ -7,7 +7,7 @@ namespace TrafficManager.Util.Extensions {
         internal static ref NetLane ToLane(this uint laneId) => ref _laneBuffer[laneId];
 
         /// <summary>
-        /// Checks if <paramref name="netLane"/> is <c>Created</c> but not <c>Deleted</c>.
+        /// Checks <paramref name="netLane"/> is <c>Created</c> but not <c>Deleted</c>.
         /// </summary>
         /// <param name="netLane">netLane</param>
         /// <returns>Returns <c>true</c> if valid, otherwise <c>false</c>.</returns>
