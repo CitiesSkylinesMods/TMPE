@@ -1,15 +1,15 @@
 namespace TrafficManager.Util {
     using System;
     public static class ArrayExtensions {
-        public static T[] Append<T>(this T[] source, T item) {
-            if(source == null)
+        public static T[] Append<T>(this T[] array, T item) {
+            if(array == null)
                 throw new ArgumentNullException("source");
-            int n = source.Length;
-            T[] ret = new T[n + 1];
-            Array.Copy(source, ret, n);
-            ret[n] = item;
-            return ret;
+            int n = array.Length;
+            Array.Resize(ref array, n + 1);
+            array[n] = item;
+            return array;
         }
+
         public static T[] AppendOrCreate<T>(this T[] source, T item) {
             int n = source?.Length ?? 0;
             T[] res = new T[n + 1];
