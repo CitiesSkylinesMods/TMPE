@@ -121,6 +121,7 @@ namespace TrafficManager.Patch._External._RTramAIModPatch {
 
             return new List<CodeInstruction> {
                 new CodeInstruction(OpCodes.Ldsfld, instance),
+                new CodeInstruction(OpCodes.Ldarg_1),
                 new CodeInstruction(OpCodes.Ldarg_2),
                 new CodeInstruction(OpCodes.Callvirt, mayDespawn),
                 new CodeInstruction(OpCodes.Brfalse_S, retLabel)

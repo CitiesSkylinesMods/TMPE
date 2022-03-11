@@ -220,7 +220,7 @@ namespace TrafficManager.Patch._VehicleAI._CarAI {
                 Singleton<VehicleManager>.instance.ReleaseVehicle(vehicleID);
             } else if (data.m_blockCounter >= maxBlockCounter) {
                 // NON-STOCK CODE START
-                if (VehicleBehaviorManager.Instance.MayDespawn(ref data)) {
+                if (VehicleBehaviorManager.Instance.MayDespawn(vehicleID, ref data)) {
                     // NON-STOCK CODE END
                     Singleton<VehicleManager>.instance.ReleaseVehicle(vehicleID);
                 } // NON-STOCK CODE
