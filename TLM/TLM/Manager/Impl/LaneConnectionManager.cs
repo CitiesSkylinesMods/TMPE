@@ -110,7 +110,7 @@ namespace TrafficManager.Manager.Impl {
         /// Determines if the given lane has incoming/outgoing connections
         /// </summary>
         public bool HasConnections(uint laneId, bool startNode) =>
-            connections_.HasConnections(laneId, startNode);
+            connections_.GetConnections(laneId, startNode) != null;
 
         /// <summary>
         /// Determines if the given lane has outgoing connections
@@ -156,6 +156,7 @@ namespace TrafficManager.Manager.Impl {
             return false;
         }
 
+        // Note: Not performance critical
         public bool HasUturnConnections(ushort segmentId, bool startNode) {
             if (!Options.laneConnectorEnabled) {
                 return false;
@@ -181,6 +182,7 @@ namespace TrafficManager.Manager.Impl {
 
         /// <summary>
         /// Gets all lane connections for the given lane
+        /// Note: Not performance critical
         /// </summary>
         internal uint[] GetLaneConnections(uint laneId, bool startNode) {
             if (!Options.laneConnectorEnabled) {

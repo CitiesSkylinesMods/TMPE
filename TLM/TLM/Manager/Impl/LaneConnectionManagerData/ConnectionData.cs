@@ -2,10 +2,8 @@ namespace TrafficManager.Manager.Impl.LaneConnectionManagerData {
     using CSUtil.Commons;
     using System.Collections.Generic;
     using System.Diagnostics;
-    using System.Linq;
     using TrafficManager.Util;
     using TrafficManager.Util.Extensions;
-    using static TrafficManager.Util.Shortcuts;
 
     internal struct LaneConnectionData {
         public uint LaneId;
@@ -113,7 +111,6 @@ namespace TrafficManager.Manager.Impl.LaneConnectionManagerData {
                RemoveConnection(targetLaneId, sourceLaneId, nodeId);
                return RemoveConnection(sourceLaneId, targetLaneId, nodeId);
             }
-
         }
 
         /// <summary>
@@ -195,25 +192,6 @@ namespace TrafficManager.Manager.Impl.LaneConnectionManagerData {
              * remove connections from laneId *
              *********************************/
             connections_[laneId].StartConnections = connections_[laneId].EndConnections = null;
-        }
-
-        /// <summary>
-        /// determines if there is any incoming or outgoing connections.
-        /// </summary>
-        internal bool HasConnections(uint laneId, bool startNode) {
-            // assuming that if there is no connection either way, then there should be no LaneConnectionData entry.
-            return GetConnections(laneId, startNode) != null;
-        }
-
-        internal bool HasOutgoingConnections(uint laneId, bool startNode) {
-            ref var connections = ref GetConnections(laneId, startNode);
-            if (connections != null) {
-                for (int i = 0; i < connections.Length; ++i) {
-                    if (connections[i].Enabled)
-                        return true;
-                }
-            }
-            return false;
         }
 
         [Conditional("DEBUG")]
