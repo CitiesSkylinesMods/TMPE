@@ -742,7 +742,7 @@ namespace TrafficManager.Manager.Impl {
                                 bool nextHasConnections =
                                     LaneConnectionManager.Instance.HasConnections(
                                         nextLaneId,
-                                        nextNodeId);
+                                        isNextStartNodeOfNextSegment);
                                 bool nextIsConnectedWithPrev = true;
 
                                 if(nextHasConnections) {
@@ -1324,7 +1324,7 @@ namespace TrafficManager.Manager.Impl {
                                     }
 
                                     // skip lanes having lane connections
-                                    if (LaneConnectionManager.Instance.HasOutgoingConnections(
+                                    if (LaneConnectionManager.Instance.HasConnections(
                                         nextCompatibleTransitionDatas[nextTransitionIndex].laneId,
                                         isNextStartNodeOfNextSegment))
                                     {
