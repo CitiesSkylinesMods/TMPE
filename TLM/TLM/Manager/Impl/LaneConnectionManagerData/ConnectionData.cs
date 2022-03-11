@@ -38,11 +38,6 @@ namespace TrafficManager.Manager.Impl.LaneConnectionManagerData {
         private struct SourceLaneConnectionData {
             public LaneConnectionData[] StartConnections;
             public LaneConnectionData[] EndConnections;
-
-            public IEnumerable<LaneConnectionData[]> BothConnections() {
-                yield return StartConnections;
-                yield return EndConnections;
-            }
         }
 
         internal ref LaneConnectionData[] GetConnections(uint laneId, ushort nodeId) {
@@ -61,7 +56,7 @@ namespace TrafficManager.Manager.Impl.LaneConnectionManagerData {
 
         /// <param name="sourceStartNode">start node for the segment of the source lane</param>
         internal bool IsConnectedTo(uint sourceLaneId, uint targetLaneId, bool sourceStartNode) {
-            var targets = GetConnections(sourceLaneId, sourceStartNode);
+            ref var targets = ref GetConnections(sourceLaneId, sourceStartNode);
             int n = targets?.Length ?? 0;
             for(int i = 0; i < n; ++i) {
                 if(targets[i].Enabled && targets[i].LaneId == targetLaneId) {
@@ -100,8 +95,6 @@ namespace TrafficManager.Manager.Impl.LaneConnectionManagerData {
 
         /// <summary>removes the connection from source to target lane at the given node</summary>
         internal bool Disconnect(uint sourceLaneId, uint targetLaneId, ushort nodeId) {
-            ref var targets = ref GetConnections(sourceLaneId, nodeId);
-
             // if backward connection exists (uni-directional) then just disable the connection.
             // otherwise delete both connections.
             bool backward = IsConnectedTo(targetLaneId, sourceLaneId, nodeId);
