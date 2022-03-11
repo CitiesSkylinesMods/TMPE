@@ -27,7 +27,7 @@ namespace TrafficManager.Manager.Impl {
                                                              | VehicleInfo.VehicleType.Metro
                                                              | VehicleInfo.VehicleType.Monorail
                                                              | VehicleInfo.VehicleType.Trolleybus;
-        private ConnectionData connections_;
+        private ConnectionData connectionData_;
         public NetInfo.LaneType LaneTypes => LANE_TYPES;
 
         public VehicleInfo.VehicleType VehicleTypes => VEHICLE_TYPES;
@@ -40,16 +40,16 @@ namespace TrafficManager.Manager.Impl {
 
         public override void OnBeforeLoadData() {
             base.OnBeforeLoadData();
-            connections_ = new ConnectionData();
+            connectionData_ = new ConnectionData();
         }
         public override void OnLevelUnloading() {
             base.OnLevelUnloading();
-            connections_ = null;
+            connectionData_ = null;
         }
 
         protected override void InternalPrintDebugInfo() {
             base.InternalPrintDebugInfo();
-            connections_.PrintDebugInfo();
+            connectionData_.PrintDebugInfo();
         }
 
         /// <summary>
@@ -58,7 +58,7 @@ namespace TrafficManager.Manager.Impl {
         private bool ValidateLane(uint laneId) {
             bool valid = laneId.ToLane().IsValidWithSegment();
             if (!valid)
-                connections_.RemoveConnections(laneId);
+                connectionData_.RemoveConnections(laneId);
             return valid;
         }
 
@@ -76,7 +76,7 @@ namespace TrafficManager.Manager.Impl {
                 return false;
             }
 
-            return connections_.IsConnectedTo(sourceLaneId, targetLaneId, sourceStartNode);
+            return connectionData_.IsConnectedTo(sourceLaneId, targetLaneId, sourceStartNode);
         }
 
         /// <summary>
@@ -110,7 +110,7 @@ namespace TrafficManager.Manager.Impl {
         /// Determines if the given lane has incoming/outgoing connections
         /// </summary>
         public bool HasConnections(uint laneId, bool startNode) =>
-            connections_.GetConnections(laneId, startNode) != null;
+            connectionData_.ContainsKey(new LaneEnd(laneId, startNode));
 
         /// <summary>
         /// Determines if the given lane has outgoing connections
@@ -122,11 +122,13 @@ namespace TrafficManager.Manager.Impl {
                 return false;
             }
 
-            var targets = connections_.GetConnections(sourceLaneId, startNode);
-            int n = targets?.Length ?? 0;
-            for (int i = 0; i < n; ++i) {
-                if (targets[i].Enabled)
-                    return true;
+            var key = new LaneEnd(sourceLaneId, startNode);
+            if (connectionData_.TryGetValue(key, out var targets)) {
+                int n = targets.Length;
+                for (int i = 0; i < n; ++i) {
+                    if (targets[i].Enabled)
+                        return true;
+                }
             }
             return false;
         }
@@ -147,8 +149,10 @@ namespace TrafficManager.Manager.Impl {
                     ref NetSegment netSegment = ref segmentId.ToSegment();
                     bool startNode = netSegment.IsStartnode(nodeId);
                     foreach (LaneIdAndIndex laneIdAndIndex in netSegment.GetSegmentLaneIdsAndLaneIndexes()) {
-                        if (connections_.GetConnections(laneIdAndIndex.laneId, startNode) != null)
+                        var key = new LaneEnd(laneIdAndIndex.laneId, startNode);
+                        if (connectionData_.ContainsKey(key)) {
                             return true;
+                        }
                     }
                 }
             }
@@ -193,10 +197,14 @@ namespace TrafficManager.Manager.Impl {
                 return null;
             }
 
-            return connections_.GetConnections(laneId, startNode)
-                ?.Where(item => item.Enabled)
-                ?.Select(item => item.LaneId)
+            var key = new LaneEnd(laneId, startNode);
+            if (connectionData_.TryGetValue(key, out var targets)) {
+                return targets
+                .Where(item => item.Enabled)
+                .Select(item => item.LaneId)
                 .ToArray();
+            }
+            return null;
         }
 
         /// <summary>
@@ -222,7 +230,7 @@ namespace TrafficManager.Manager.Impl {
             ushort sourceSegmentId = sourceLaneId.ToLane().m_segment;
             ushort targetSegmentId = targetLaneId.ToLane().m_segment;
             ushort nodeId = sourceSegmentId.ToSegment().GetNodeId(sourceStartNode);
-            var result = connections_.Disconnect(sourceLaneId, targetLaneId, nodeId);
+            var result = connectionData_.Disconnect(sourceLaneId, targetLaneId, nodeId);
 
             if (logLaneConnections) {
                 Log._Debug($"LaneConnectionManager.RemoveLaneConnection({sourceLaneId}, {targetLaneId}, " +
@@ -266,7 +274,8 @@ namespace TrafficManager.Manager.Impl {
                     ref NetSegment netSegment = ref segmentId.ToSegment();
                     bool startNode = netSegment.IsStartnode(nodeId);
                     foreach (LaneIdAndIndex laneIdAndIndex in netSegment.GetSegmentLaneIdsAndLaneIndexes()) {
-                        connections_.GetConnections(laneIdAndIndex.laneId, startNode) = null;
+                        var key = new LaneEnd(laneIdAndIndex.laneId, startNode);
+                        connectionData_.Remove(key);
                     }
                 }
             }
@@ -298,7 +307,8 @@ namespace TrafficManager.Manager.Impl {
                            $"{startNode}) called.");
             }
 
-            connections_.GetConnections(laneId, startNode) = null;
+            var key = new LaneEnd(laneId, startNode);
+            connectionData_.Remove(key);
 
             if (recalcAndPublish) {
                 ushort segment = laneId.ToLane().m_segment;
@@ -330,7 +340,7 @@ namespace TrafficManager.Manager.Impl {
             ushort sourceSegmentId = sourceLaneId.ToLane().m_segment;
             ushort targetSegmentId = targetLaneId.ToLane().m_segment;
             ushort nodeId = sourceSegmentId.ToSegment().GetNodeId(sourceStartNode);
-            connections_.ConnectTo(sourceLaneId, targetLaneId, nodeId);
+            connectionData_.ConnectTo(sourceLaneId, targetLaneId, nodeId);
             Assert(AreLanesConnected(sourceLaneId, targetLaneId, sourceStartNode), $"AreLanesConnected({sourceLaneId}, {targetLaneId}, {sourceStartNode})");
 
 #if DEBUG
@@ -385,7 +395,7 @@ namespace TrafficManager.Manager.Impl {
 
             ref NetSegment netSegment = ref segmentId.ToSegment();
             foreach (LaneIdAndIndex laneIdAndIndex in netSegment.GetSegmentLaneIdsAndLaneIndexes()) {
-                connections_.RemoveConnections(laneIdAndIndex.laneId);
+                connectionData_.RemoveConnections(laneIdAndIndex.laneId);
             }
 
             RoutingManager.Instance.RequestRecalculation(segmentId);
@@ -749,30 +759,25 @@ namespace TrafficManager.Manager.Impl {
         public List<Configuration.LaneConnection> SaveData(ref bool success) {
             var ret = new List<Configuration.LaneConnection>();
 
-            for (uint sourceLaneId = 1; sourceLaneId < NetManager.instance.m_lanes.m_size; sourceLaneId++) {
+            foreach (var pair in connectionData_) {
+                LaneEnd source = pair.Key;
                 try {
-                    foreach (bool startNode in new[] { false, true }) {
-                        var targets = connections_.GetConnections(sourceLaneId, startNode);
-                        if (targets == null) {
+                    var targets = pair.Value;
+                    foreach (var target in pair.Value) {
+                        if (!ValidateLane(target.LaneId)) {
                             continue;
                         }
-
-                        foreach (var target in targets) {
-                            if (!ValidateLane(target.LaneId)) {
-                                continue;
-                            }
-#if DEBUGSAVE 
-                            Log._Debug($"Saving lane connection: lane {sourceLaneId} -> {target}");
+#if DEBUGSAVE
+                        Log._Debug($"Saving lane connection: lane {sourceLaneId} -> {target}");
 #endif
-                            ret.Add(
-                                new Configuration.LaneConnection(
-                                    sourceLaneId,
-                                    target.LaneId,
-                                    startNode));
-                        }
+                        ret.Add(
+                            new Configuration.LaneConnection(
+                                source.LaneId,
+                                target.LaneId,
+                                source.StartNode));
                     }
                 } catch (Exception e) {
-                    Log.Error($"Exception occurred while saving lane data @ {sourceLaneId}: {e.ToString()}");
+                    Log.Error($"Exception occurred while saving lane data @ {source.LaneId}: {e.ToString()}");
                     success = false;
                 }
             }

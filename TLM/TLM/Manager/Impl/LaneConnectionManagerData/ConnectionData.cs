@@ -7,11 +7,12 @@ namespace TrafficManager.Manager.Impl.LaneConnectionManagerData {
 
     internal struct LaneConnectionData {
         public uint LaneId;
+
         /// <summary>
         /// for every connection, both forward and backward connection pairs are created.
         /// for bi-directional connection both forward and backward are enabled.
         /// for uni-directional connection only forward connection is enabled.
-        /// if there is no connection either way, then there should be no LaneConnectionData entry.
+        /// if there is no connection either way, then there must be no LaneConnectionData entry.
         /// </summary>
         public bool Enabled; 
 
@@ -25,40 +26,40 @@ namespace TrafficManager.Manager.Impl.LaneConnectionManagerData {
         public override string ToString() => $"LaneConnectionData({LaneId} ,{Enabled})";
     }
 
-    /// <summary>
-    /// All calls to this class assumes lanes are valid
-    /// </summary>
-    internal class ConnectionData {
-        private Dictionary<LaneEnd, LaneConnectionData[]> connections_;
+    public struct LaneEnd {
+        internal uint LaneId;
+        internal bool StartNode;
 
-        public ConnectionData() {
-            connections_ = new ();
+        public LaneEnd(uint laneId, bool startNode) {
+            LaneId = laneId;
+            StartNode = startNode;
+        }
+        public LaneEnd(uint laneId, ushort nodeId) {
+            LaneId = laneId;
+            StartNode = laneId.ToLane().IsStartNode(nodeId);
         }
 
-        private struct LaneEnd {
-            internal uint LaneId;
-            internal bool StartNode;
-
-            public LaneEnd(uint laneId, bool startNode) {
-                LaneId = laneId;
-                StartNode = startNode;
-            }
-            public LaneEnd(uint laneId, ushort nodeId) {
-                LaneId = laneId;
-                StartNode = laneId.ToLane().IsStartNode(nodeId);
-            }
+        public override int GetHashCode() {
+            if (StartNode)
+                return (int)(LaneId * 2);
+            else
+                return (int)(LaneId * 2 + 1);
         }
+    }
 
+    internal class ConnectionData : Dictionary<LaneEnd, LaneConnectionData[]> {
         internal bool IsConnectedTo(uint sourceLaneId, uint targetLaneId, ushort nodeId) =>
             IsConnectedTo(sourceLaneId, targetLaneId, sourceLaneId.ToLane().IsStartNode(nodeId));
 
         /// <param name="sourceStartNode">start node for the segment of the source lane</param>
         internal bool IsConnectedTo(uint sourceLaneId, uint targetLaneId, bool sourceStartNode) {
-            var targets = GetConnections(sourceLaneId, sourceStartNode);
-            int n = targets?.Length ?? 0;
-            for(int i = 0; i < n; ++i) {
-                if(targets[i].Enabled && targets[i].LaneId == targetLaneId) {
-                    return true;
+            var key = new LaneEnd(sourceLaneId, sourceStartNode);
+            if (this.TryGetValue(key, out var targets)) {
+                int n = targets.Length;
+                for (int i = 0; i < n; ++i) {
+                    if (targets[i].Enabled && targets[i].LaneId == targetLaneId) {
+                        return true;
+                    }
                 }
             }
             return false;
@@ -80,7 +81,7 @@ namespace TrafficManager.Manager.Impl.LaneConnectionManagerData {
         private void AddConnection(uint sourceLaneId, uint targetLaneId, ushort nodeId, bool enable) {
             var key = new LaneEnd(sourceLaneId, nodeId);
             {
-                if (connections_.TryGetValue(key, out var targets)) {
+                if (this.TryGetValue(key, out var targets)) {
                     int n = targets.Length;
                     for (int i = 0; i < n; ++i) {
                         if (targets[i].LaneId == targetLaneId) {
@@ -93,11 +94,12 @@ namespace TrafficManager.Manager.Impl.LaneConnectionManagerData {
             }
 
             {
+                // no connection exists yet. create new connection.
                 var newConnection = new LaneConnectionData(targetLaneId, enable);
-                if (connections_.TryGetValue(key, out var targets)) {
-                    connections_[key] = targets.Append(newConnection);
+                if (this.TryGetValue(key, out var targets)) {
+                    this[key] = targets.Append(newConnection);
                 } else {
-                    connections_[key] = new[] { newConnection };
+                    this[key] = new[] { newConnection };
                 }
             }
         }
@@ -120,10 +122,10 @@ namespace TrafficManager.Manager.Impl.LaneConnectionManagerData {
         /// </summary>
         /// <returns><c>true</c> if any connection was disabled. <c>false</c> otherwise. </returns>
         private bool DisableConnection(uint sourceLaneId, uint targetLaneId, ushort nodeId) {
-            
-            ref var targets = ref GetConnections(sourceLaneId, nodeId);
-            if (targets != null) {
-                for (int i = 0; i < targets.Length; ++i) {
+            var key = new LaneEnd(sourceLaneId, nodeId);
+            if (this.TryGetValue(key, out var targets)) {
+                int n = targets.Length;
+                for (int i = 0; i < n; ++i) {
                     if (targets[i].LaneId == targetLaneId) {
                         bool connectionExisted = targets[i].Enabled;
                         targets[i].Enabled = false;
@@ -146,24 +148,24 @@ namespace TrafficManager.Manager.Impl.LaneConnectionManagerData {
         /// <param name="sourceStartNode">start node for the segment of the source lane</param>
         /// <returns><c>true</c> if any active connection was disabled. <c>false</c> otherwise. </returns>
         private bool RemoveConnection(uint sourceLaneId, uint targetLaneId, bool sourceStartNode) {
-            ref var targets = ref GetConnections(sourceLaneId, sourceStartNode);
-            if (targets == null)
-                return false;
-
             bool ret = false;
-            var newConnections = new List<LaneConnectionData>(targets.Length);
-            for (int i = 0; i < targets.Length; ++i) {
-                if (targets[i].LaneId != targetLaneId) {
-                    newConnections.Add(targets[i]);
-                } else {
-                    ret = targets[i].Enabled;
+            var key = new LaneEnd(sourceLaneId, sourceStartNode);
+            if (this.TryGetValue(key, out var targets)) {
+                int n = targets.Length;
+                var newConnections = new List<LaneConnectionData>(n);
+                for (int i = 0; i < n; ++i) {
+                    if (targets[i].LaneId != targetLaneId) {
+                        newConnections.Add(targets[i]);
+                    } else {
+                        ret = targets[i].Enabled;
+                    }
                 }
-            }
 
-            if (newConnections.Count == 0)
-                targets = null;
-            else
-                targets = newConnections.ToArray();
+                if (newConnections.Count == 0)
+                    this.Remove(key);
+                else
+                    this[key] = newConnections.ToArray();
+            }
 
             return ret;
         }
@@ -172,58 +174,53 @@ namespace TrafficManager.Manager.Impl.LaneConnectionManagerData {
         /// removes all connections from and to the given lane.
         /// </summary>
         internal void RemoveConnections(uint laneId) {
-            /*********************************
-             * remove connections to laneId *
-             *********************************/
-            if (connections_[laneId].StartConnections != null) {
-                foreach (var connection in connections_[laneId].StartConnections) {
+            var laneStart = new LaneEnd(laneId, true);
+            var laneEnd = new LaneEnd(laneId, false);
+            if(this.TryGetValue(laneStart,out var startConnections)) { 
+                foreach (var connection in startConnections) {
                     uint laneId2 = connection.LaneId;
                     ushort nodeId = laneId.ToLane().GetNodeId(true /* StartConnections */); 
                     RemoveConnection(laneId2, laneId, nodeId);
                 }
+                this.Remove(laneStart);
             }
 
-            if (connections_[laneId].EndConnections != null) {
-                foreach (var connection in connections_[laneId].EndConnections) {
+            if (this.TryGetValue(laneEnd, out var endConnections)) {
+                foreach (var connection in endConnections) {
                     uint laneId2 = connection.LaneId;
                     ushort nodeId = laneId.ToLane().GetNodeId(false /* EndConnections */);
                     RemoveConnection(laneId2, laneId, nodeId);
                 }
+                this.Remove(laneEnd);
             }
-
-            /*********************************
-             * remove connections from laneId *
-             *********************************/
-            connections_[laneId].StartConnections = connections_[laneId].EndConnections = null;
         }
 
         [Conditional("DEBUG")]
         internal void PrintDebugInfo() {
-            for(uint sourceLaneId = 0; sourceLaneId < connections_.Length; ++sourceLaneId) {
+            for(uint sourceLaneId = 0; sourceLaneId < NetManager.instance.m_laneCount; ++sourceLaneId) {
                 ref NetLane netLane = ref sourceLaneId.ToLane();
 
                 ushort segmentId = netLane.m_segment;
                 ref NetSegment netSegment = ref segmentId.ToSegment();
 
-                if(GetConnections(sourceLaneId, false) == null && GetConnections(sourceLaneId, true) == null) {
-                    continue;
-                } 
+                var laneStart = new LaneEnd(sourceLaneId, true);
+                var laneEnd = new LaneEnd(sourceLaneId, false);
+                if (this.ContainsKey(laneStart) || this.ContainsKey(laneEnd)) {
 
-                Log.Info($"Lane {sourceLaneId}: valid? {netLane.IsValidWithSegment()}, seg. valid? {netSegment.IsValid()}");
+                    Log.Info($"Lane {sourceLaneId}: valid? {netLane.IsValidWithSegment()}, seg. valid? {netSegment.IsValid()}");
 
-                foreach(bool startNode in new bool[] { false, true }) {
-                    var targets = GetConnections(sourceLaneId, startNode);
-                    if(targets == null)
-                        continue;
-
-                    ushort nodeId = netSegment.GetNodeId(startNode);
-                    ref NetNode netNode = ref nodeId.ToNode();
-                    Log.Info($"\tstartNode:{startNode} ({nodeId}, seg. {segmentId}): valid? {netNode.IsValid()}");
-
-                    for(int i = 0; i < targets.Length; ++i) {
-                        var target = targets[i];
-                        ref NetLane netLaneOfConnection = ref target.LaneId.ToLane();
-                        Log.Info($"\t\tEntry {i}: {target} (valid? {netLaneOfConnection.IsValidWithSegment()})");
+                    foreach (bool startNode in new bool[] { false, true }) {
+                        var key = new LaneEnd(sourceLaneId, startNode);
+                        if (this.TryGetValue(key, out var targets)) {
+                            ushort nodeId = netSegment.GetNodeId(startNode);
+                            ref NetNode netNode = ref nodeId.ToNode();
+                            Log.Info($"\tstartNode:{startNode} ({nodeId}, seg. {segmentId}): valid? {netNode.IsValid()}");
+                            for (int i = 0; i < targets.Length; ++i) {
+                                var target = targets[i];
+                                ref NetLane netLaneOfConnection = ref target.LaneId.ToLane();
+                                Log.Info($"\t\tEntry {i}: {target} (valid? {netLaneOfConnection.IsValidWithSegment()})");
+                            }
+                        }
                     }
                 }
             }
