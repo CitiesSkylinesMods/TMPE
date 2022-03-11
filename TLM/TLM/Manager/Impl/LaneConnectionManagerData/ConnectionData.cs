@@ -29,31 +29,24 @@ namespace TrafficManager.Manager.Impl.LaneConnectionManagerData {
     /// All calls to this class assumes lanes are valid
     /// </summary>
     internal class ConnectionData {
-        private SourceLaneConnectionData[] connections_;
+        private Dictionary<LaneEnd, LaneConnectionData[]> connections_;
 
         public ConnectionData() {
-            connections_ = new SourceLaneConnectionData[NetManager.instance.m_lanes.m_size];
+            connections_ = new ();
         }
 
-        private struct SourceLaneConnectionData {
-            public LaneConnectionData[] StartConnections;
-            public LaneConnectionData[] EndConnections;
+        private struct LaneEnd {
+            internal uint LaneId;
+            internal bool StartNode;
 
-            public IEnumerable<LaneConnectionData[]> BothConnections() {
-                yield return StartConnections;
-                yield return EndConnections;
+            public LaneEnd(uint laneId, bool startNode) {
+                LaneId = laneId;
+                StartNode = startNode;
             }
-        }
-
-        internal ref LaneConnectionData[] GetConnections(uint laneId, ushort nodeId) {
-            return ref GetConnections(laneId, laneId.ToLane().IsStartNode(nodeId));
-        }
-
-        internal ref LaneConnectionData[] GetConnections(uint laneId, bool startNode) {
-            if(startNode)
-                return ref connections_[laneId].StartConnections;
-            else
-                return ref connections_[laneId].EndConnections;
+            public LaneEnd(uint laneId, ushort nodeId) {
+                LaneId = laneId;
+                StartNode = laneId.ToLane().IsStartNode(nodeId);
+            }
         }
 
         internal bool IsConnectedTo(uint sourceLaneId, uint targetLaneId, ushort nodeId) =>
@@ -61,11 +54,13 @@ namespace TrafficManager.Manager.Impl.LaneConnectionManagerData {
 
         /// <param name="sourceStartNode">start node for the segment of the source lane</param>
         internal bool IsConnectedTo(uint sourceLaneId, uint targetLaneId, bool sourceStartNode) {
-            var targets = GetConnections(sourceLaneId, sourceStartNode);
-            int n = targets?.Length ?? 0;
-            for(int i = 0; i < n; ++i) {
-                if(targets[i].Enabled && targets[i].LaneId == targetLaneId) {
-                    return true;
+            var key = new LaneEnd(sourceLaneId, sourceStartNode);
+            if (connections_.TryGetValue(key, out var targets)) {
+                int n = targets.Length;
+                for (int i = 0; i < n; ++i) {
+                    if (targets[i].Enabled && targets[i].LaneId == targetLaneId) {
+                        return true;
+                    }
                 }
             }
             return false;
@@ -85,23 +80,32 @@ namespace TrafficManager.Manager.Impl.LaneConnectionManagerData {
         /// <param name="enable"><c>true</c> for forward/bi-directional connection,
         /// <c>false</c> for backward connection</param>
         private void AddConnection(uint sourceLaneId, uint targetLaneId, ushort nodeId, bool enable) {
-            ref var targets = ref GetConnections(sourceLaneId, nodeId);
-            int n = targets?.Length ?? 0;
-            for (int i = 0; i < n; ++i) {
-                if (targets[i].LaneId == targetLaneId) {
-                    // a uni-directional connection already exist
-                    targets[i].Enabled |= enable;
-                    return;
+            var key = new LaneEnd(sourceLaneId, nodeId);
+            {
+                if (connections_.TryGetValue(key, out var targets)) {
+                    int n = targets.Length;
+                    for (int i = 0; i < n; ++i) {
+                        if (targets[i].LaneId == targetLaneId) {
+                            // a uni-directional connection already exist
+                            targets[i].Enabled |= enable;
+                            return;
+                        }
+                    }
                 }
             }
 
-            targets = targets.AppendOrCreate(new LaneConnectionData(targetLaneId, enable));
+            {
+                var newConnection = new LaneConnectionData(targetLaneId, enable);
+                if (connections_.TryGetValue(key, out var targets)) {
+                    connections_[key] = targets.Append(newConnection);
+                } else {
+                    connections_[key] = new[] { newConnection };
+                }
+            }
         }
 
         /// <summary>removes the connection from source to target lane at the given node</summary>
         internal bool Disconnect(uint sourceLaneId, uint targetLaneId, ushort nodeId) {
-            ref var targets = ref GetConnections(sourceLaneId, nodeId);
-
             // if backward connection exists (uni-directional) then just disable the connection.
             // otherwise delete both connections.
             bool backward = IsConnectedTo(targetLaneId, sourceLaneId, nodeId);
@@ -118,6 +122,7 @@ namespace TrafficManager.Manager.Impl.LaneConnectionManagerData {
         /// </summary>
         /// <returns><c>true</c> if any connection was disabled. <c>false</c> otherwise. </returns>
         private bool DisableConnection(uint sourceLaneId, uint targetLaneId, ushort nodeId) {
+            
             ref var targets = ref GetConnections(sourceLaneId, nodeId);
             if (targets != null) {
                 for (int i = 0; i < targets.Length; ++i) {
