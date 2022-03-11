@@ -54,13 +54,11 @@ namespace TrafficManager.Manager.Impl.LaneConnectionManagerData {
 
         /// <param name="sourceStartNode">start node for the segment of the source lane</param>
         internal bool IsConnectedTo(uint sourceLaneId, uint targetLaneId, bool sourceStartNode) {
-            var key = new LaneEnd(sourceLaneId, sourceStartNode);
-            if (connections_.TryGetValue(key, out var targets)) {
-                int n = targets.Length;
-                for (int i = 0; i < n; ++i) {
-                    if (targets[i].Enabled && targets[i].LaneId == targetLaneId) {
-                        return true;
-                    }
+            var targets = GetConnections(sourceLaneId, sourceStartNode);
+            int n = targets?.Length ?? 0;
+            for(int i = 0; i < n; ++i) {
+                if(targets[i].Enabled && targets[i].LaneId == targetLaneId) {
+                    return true;
                 }
             }
             return false;
