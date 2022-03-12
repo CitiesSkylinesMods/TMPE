@@ -1,4 +1,6 @@
 [Version] 11.6.5.1
+[Released] March 12th 2022
+[Link] tmpe-v11651-test-12032022
 [Meta] This update adds two new features, overhauls mod options code, and improves modding API.
 [New] `Disable Despawn` feature now has vehicle-type filters #1441 #1434 (Marconius6, lokpro, krzychu124)
 [New] Timed Traffic Lights now available in Map and Scenario editors #1425 #959 (aubergine18)
@@ -13,13 +15,14 @@
 [Updated] TM:PE Harmony ID changed from `de.viathinksoft.tmpe` to `me.tmpe` #1456 #897 (krzychu124)
 [Updated] Use game-defined elevation keymapping to select under/over-ground views #1454 #1326 (krzychu124)
 [Updated] Add/update UI helpers for use in mod options #1431 #1430 #1424 #1419 (aubergine18)
-[Updated] Refactoring mod options #1435 #1432 #1422 #1411 #1416 #1356 #1279 (aubergine18)
+[Updated] Refactoring mod options #1455 #1435 #1432 #1422 #1411 #1416 #1356 #1279 #62 (aubergine18)
 [Updated] Replaced `Overlay Transparency` with `Overlay Opacity` #1432 #1268 (aubergine18)
 [Updated] Minimum GUI/Overlay opacity limited to 10% #1432 #1409 (KHY-afk, aubergine18)
 [Updated] Use `Prompt.Error` for error message display #1445 (aubergine18)
 [Updated] Better handling of `KeyNotFound` exception when copying segments #1453 (kianzarrin)
 [Updated] Improved mod option lifecycle for game/editors #1452 #1449 #1425 (aubergine18)
 [Updated] Extension for managed-type `vehicleId` to `ExtVehicleType` #1444 (aubergine18)
+[Updated] Simplify Harmony patching for Reversible Tram AI #1457 (kianzarrin)
 [Removed] Obsolete gamebridge stuff from build script #1436 (aubergine18)
 [/Version]
 

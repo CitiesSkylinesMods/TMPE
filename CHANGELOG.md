@@ -29,6 +29,33 @@ This changelog includes all versions and major variants of the mod going all the
 
 </details>
 
+#### TM:PE V11.6.5.1 TEST, 12/03/2022
+
+- [Meta] This update adds two new features, overhauls mod options code, and improves modding API.
+- [New] `Disable Despawn` feature now has vehicle-type filters #1441 #1434 (Marconius6, lokpro, krzychu124)
+- [New] Timed Traffic Lights now available in Map and Scenario editors #1425 #959 (aubergine18)
+- [Mod] API: Mods can now use TMPE.API.dll alone, without referencing TrafficManager.dll #1448 (kianzarrin)
+- [Mod] Update: UUI version 2.2.1 via NuGet #1442 (kianzarrin)
+- [Fixed] `NullReferenceException` if version in global config is not set #1443 (krzychu124)
+- [Fixed] UI windows/overlays not consuming mouse events #1443 #934 #749 (somethingstarted, MacSergey, krzychu124)
+- [Fixed] Missing textures in Scenario Editor #1451 #1450 #1449 (krzychu124, kianzarrin)
+- [Fixed] Memory leak when closing Lane Arrows panels #1451 (krzychu124)
+- [Fixed] Features not enabled if starting new game after using asset editor #1425 #1423 #1422 (NateNate60, aubergine18)
+- [Fixed] Typo in notifier method name #1440 (aubergine18)
+- [Updated] TM:PE Harmony ID changed from `de.viathinksoft.tmpe` to `me.tmpe` #1456 #897 (krzychu124)
+- [Updated] Use game-defined elevation keymapping to select under/over-ground views #1454 #1326 (krzychu124)
+- [Updated] Add/update UI helpers for use in mod options #1431 #1430 #1424 #1419 (aubergine18)
+- [Updated] Refactoring mod options #1455 #1435 #1432 #1422 #1411 #1416 #1356 #1279 #62 (aubergine18)
+- [Updated] Replaced `Overlay Transparency` with `Overlay Opacity` #1432 #1268 (aubergine18)
+- [Updated] Minimum GUI/Overlay opacity limited to 10% #1432 #1409 (KHY-afk, aubergine18)
+- [Updated] Use `Prompt.Error` for error message display #1445 (aubergine18)
+- [Updated] Better handling of `KeyNotFound` exception when copying segments #1453 (kianzarrin)
+- [Updated] Improved mod option lifecycle for game/editors #1452 #1449 #1425 (aubergine18)
+- [Updated] Extension for managed-type `vehicleId` to `ExtVehicleType` #1444 (aubergine18)
+- [Updated] Simplify Harmony patching for Reversible Tram AI #1457 (kianzarrin)
+- [Removed] Obsolete gamebridge stuff from build script #1436 (aubergine18)
+- [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
+
 #### TM:PE V11.6.5.0 TEST, 16/02/2022
 
 - [Meta] Due to targeted malware, we are unable to provide support if you have mods by `Chaos`/`Holy Water`/`drok`, even if those mods are currently malware-free #1391 (TM:PE Team)
