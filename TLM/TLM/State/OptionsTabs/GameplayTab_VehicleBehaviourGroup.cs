@@ -28,6 +28,9 @@ namespace TrafficManager.State {
 
         private static UIDropDown _recklessDriversDropdown;
 
+        private static bool HasSnowfallDLC
+            => SteamHelper.IsDLCOwned(SteamHelper.DLC.SnowFallDLC);
+
         public static void SetRecklessDrivers(int newRecklessDrivers) {
             Options.recklessDrivers = newRecklessDrivers;
 
@@ -56,11 +59,6 @@ namespace TrafficManager.State {
 
             AllowDespawnFiltersButton.AddUI(group);
         }
-
-        private static string T(string key) => Translation.Options.Get(key);
-
-        private static bool HasSnowfallDLC
-            => SteamHelper.IsDLCOwned(SteamHelper.DLC.SnowFallDLC);
 
         private static bool SnowfallDlcValidator(bool desired, out bool result) {
             result = HasSnowfallDLC && desired;
@@ -91,5 +89,7 @@ namespace TrafficManager.State {
             Log.Info($"Reckless driver amount changed to {newRecklessDrivers}");
             Options.recklessDrivers = newRecklessDrivers;
         }
+
+        private static string T(string key) => Translation.Options.Get(key);
     }
 }
