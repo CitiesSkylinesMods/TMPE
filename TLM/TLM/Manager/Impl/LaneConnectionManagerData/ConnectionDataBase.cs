@@ -5,7 +5,7 @@ namespace TrafficManager.Manager.Impl.LaneConnectionManagerData {
     using TrafficManager.Util;
     using TrafficManager.Util.Extensions;
 
-    internal class ConnectionData : Dictionary<LaneEnd, LaneConnectionData[]> {
+    internal class ConnectionDataBase : Dictionary<LaneEnd, LaneConnectionData[]> {
         internal bool IsConnectedTo(uint sourceLaneId, uint targetLaneId, ushort nodeId) =>
             IsConnectedTo(sourceLaneId, targetLaneId, sourceLaneId.ToLane().IsStartNode(nodeId));
 
