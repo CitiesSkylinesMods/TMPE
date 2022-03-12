@@ -57,7 +57,7 @@
 - [Updated] TM:PE Harmony ID changed from `de.viathinksoft.tmpe` to `me.tmpe` #1456 #897 (krzychu124)
 - [Updated] Use game-defined elevation keymapping to select under/over-ground views #1454 #1326 (krzychu124)
 - [Updated] Add/update UI helpers for use in mod options #1431 #1430 #1424 #1419 (aubergine18)
-- [Updated] Refactoring mod options #1455 #1435 #1432 #1422 #1411 #1416 #1356 #1279 #62 (aubergine18)
+- [Updated] Refactoring mod options #1464 #1455 #1435 #1432 #1422 #1411 #1416 #1356 #1279 #62 (aubergine18)
 - [Updated] Replaced `Overlay Transparency` with `Overlay Opacity` #1432 #1268 (aubergine18)
 - [Updated] Minimum GUI/Overlay opacity limited to 10% #1432 #1409 (KHY-afk, aubergine18)
 - [Updated] Use `Prompt.Error` for error message display #1445 (aubergine18)
