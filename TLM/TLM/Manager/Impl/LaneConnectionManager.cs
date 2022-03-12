@@ -1,8 +1,8 @@
 namespace TrafficManager.Manager.Impl {
-    using CSUtil.Commons;
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using CSUtil.Commons;
     using TrafficManager.API.Manager;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.API.Traffic.Enums;
@@ -12,6 +12,9 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.Util.Extensions;
     using UnityEngine;
     using static TrafficManager.Util.Shortcuts;
+#if DEBUG
+    using TrafficManager.State.ConfigData;
+#endif
 
     public class LaneConnectionManager
         : AbstractGeometryObservingManager,
@@ -137,7 +140,6 @@ namespace TrafficManager.Manager.Impl {
         /// <summary>
         /// Determines if there exist custom lane connections at the specified node
         /// </summary>
-        /// <param name="nodeId"></param>
         public bool HasNodeConnections(ushort nodeId) {
             if (!Options.laneConnectorEnabled) {
                 return false;
