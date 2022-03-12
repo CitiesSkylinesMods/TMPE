@@ -5,48 +5,6 @@ namespace TrafficManager.Manager.Impl.LaneConnectionManagerData {
     using TrafficManager.Util;
     using TrafficManager.Util.Extensions;
 
-    internal struct LaneConnectionData {
-        public uint LaneId;
-
-        /// <summary>
-        /// for every connection, both forward and backward connection pairs are created.
-        /// for bi-directional connection both forward and backward are enabled.
-        /// for uni-directional connection only forward connection is enabled.
-        /// if there is no connection either way, then there must be no LaneConnectionData entry.
-        /// </summary>
-        public bool Enabled; 
-
-        // TODO [issue 354]: add track/car connection type.
-
-        public LaneConnectionData(uint laneId, bool enabled) {
-            LaneId = laneId;
-            Enabled = enabled;
-        }
-
-        public override string ToString() => $"LaneConnectionData({LaneId} ,{Enabled})";
-    }
-
-    public struct LaneEnd {
-        internal uint LaneId;
-        internal bool StartNode;
-
-        public LaneEnd(uint laneId, bool startNode) {
-            LaneId = laneId;
-            StartNode = startNode;
-        }
-        public LaneEnd(uint laneId, ushort nodeId) {
-            LaneId = laneId;
-            StartNode = laneId.ToLane().IsStartNode(nodeId);
-        }
-
-        public override int GetHashCode() {
-            if (StartNode)
-                return (int)(LaneId * 2);
-            else
-                return (int)(LaneId * 2 + 1);
-        }
-    }
-
     internal class ConnectionData : Dictionary<LaneEnd, LaneConnectionData[]> {
         internal bool IsConnectedTo(uint sourceLaneId, uint targetLaneId, ushort nodeId) =>
             IsConnectedTo(sourceLaneId, targetLaneId, sourceLaneId.ToLane().IsStartNode(nodeId));
