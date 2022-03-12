@@ -245,7 +245,7 @@ namespace TrafficManager.Manager.Impl {
                 save[12] = GameplayTab_VehicleBehaviourGroup.StrongerRoadConditionEffects.Save();
                 save[13] = (byte)(Options.allowUTurns ? 1 : 0);
                 save[14] = (byte)(Options.allowLaneChangesWhileGoingStraight ? 1 : 0);
-                save[15] = (byte)(Options.disableDespawning ? 1 : 0); // inverted
+                save[15] = (byte)(Options.disableDespawning ? 1 : 0);
                 save[16] = 0; // Options.IsDynamicPathRecalculationActive
                 save[17] = (byte)(Options.connectedLanesOverlay ? 1 : 0);
                 save[18] = (byte)(Options.prioritySignsEnabled ? 1 : 0);
