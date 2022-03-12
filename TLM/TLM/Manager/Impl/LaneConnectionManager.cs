@@ -27,7 +27,9 @@ namespace TrafficManager.Manager.Impl {
                                                              | VehicleInfo.VehicleType.Metro
                                                              | VehicleInfo.VehicleType.Monorail
                                                              | VehicleInfo.VehicleType.Trolleybus;
+
         private ConnectionDataBase connectionDataBase_;
+
         public NetInfo.LaneType LaneTypes => LANE_TYPES;
 
         public VehicleInfo.VehicleType VehicleTypes => VEHICLE_TYPES;
