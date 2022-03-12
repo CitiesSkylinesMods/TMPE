@@ -1,7 +1,7 @@
 namespace TrafficManager.Manager.Impl.LaneConnectionManagerData {
     using TrafficManager.Util.Extensions;
 
-    public struct LaneEnd {
+    internal struct LaneEnd {
         internal uint LaneId;
         internal bool StartNode;
 
