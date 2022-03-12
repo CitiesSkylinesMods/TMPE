@@ -38,27 +38,26 @@ namespace TrafficManager.Manager.Impl.LaneConnectionManagerData {
         /// <c>false</c> for backward connection</param>
         private void AddConnection(uint sourceLaneId, uint targetLaneId, ushort nodeId, bool enable) {
             var key = new LaneEnd(sourceLaneId, nodeId);
-            {
-                if (this.TryGetValue(key, out var targets)) {
-                    int n = targets.Length;
-                    for (int i = 0; i < n; ++i) {
-                        if (targets[i].LaneId == targetLaneId) {
-                            // a uni-directional connection already exist
-                            targets[i].Enabled |= enable;
-                            return;
-                        }
+
+            bool hasConnections = this.TryGetValue(key, out var targets);
+
+            if (hasConnections) {
+                int n = targets.Length;
+                for (int i = 0; i < n; ++i) {
+                    if (targets[i].LaneId == targetLaneId) {
+                        // a uni-directional connection already exist
+                        targets[i].Enabled |= enable;
+                        return;
                     }
                 }
             }
 
-            {
-                // no connection exists yet. create new connection.
-                var newConnection = new LaneConnectionData(targetLaneId, enable);
-                if (this.TryGetValue(key, out var targets)) {
-                    this[key] = targets.Append(newConnection);
-                } else {
-                    this[key] = new[] { newConnection };
-                }
+            // no such lane connection exists yet. create new connection.
+            var newConnection = new LaneConnectionData(targetLaneId, enable);
+            if (hasConnections) {
+                this[key] = targets.Append(newConnection);
+            } else {
+                this[key] = new[] { newConnection };
             }
         }
 
