@@ -161,7 +161,9 @@
     <Compile Include="State\OptionsTabs\MaintenanceTab_DespawnGroup.cs" />
     <Compile Include="State\OptionsTabs\MaintenanceTab_ToolsGroup.cs" />
     <Compile Include="State\VersionInfo.cs" />
+    <Compile Include="UI\AllowDespawn\AllowDespawnPanel.cs" />
     <Compile Include="UI\Helpers\ActionButton.cs" />
+    <Compile Include="UI\Helpers\GlobalConfigObserver.cs" />
     <Compile Include="UI\Helpers\SliderOption.cs" />
     <Compile Include="UI\Helpers\OptionButtonBase.cs" />
     <Compile Include="UI\Helpers\UrlButton.cs" />
