@@ -1324,6 +1324,7 @@ namespace TrafficManager.Manager.Impl {
                                     }
 
                                     // skip lanes having lane connections
+                                    // in highway-rules HasConnections() gives the same result as HasOutgoingConnections but faster.
                                     if (LaneConnectionManager.Instance.HasConnections(
                                         nextCompatibleTransitionDatas[nextTransitionIndex].laneId,
                                         isNextStartNodeOfNextSegment))

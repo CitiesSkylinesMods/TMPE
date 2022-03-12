@@ -9,7 +9,6 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.Lifecycle;
     using TrafficManager.Manager.Impl.LaneConnectionManagerData;
     using TrafficManager.State;
-    using TrafficManager.State.ConfigData;
     using TrafficManager.Util.Extensions;
     using UnityEngine;
     using static TrafficManager.Util.Shortcuts;
@@ -110,15 +109,15 @@ namespace TrafficManager.Manager.Impl {
 
         /// <summary>
         /// Determines if the given lane has incoming/outgoing connections
+        /// Performance note: This act as HasOutgoingConnections for uni-directional lanes but faster
         /// </summary>
         public bool HasConnections(uint laneId, bool startNode) =>
             connectionDataBase_.ContainsKey(new LaneEnd(laneId, startNode));
 
         /// <summary>
         /// Determines if the given lane has outgoing connections
+        /// Performance note: This act as HasOutgoingConnections for uni-directional lanes but faster
         /// </summary>
-        /// <param name="sourceLaneId"></param>
-        /// <returns></returns>
         public bool HasOutgoingConnections(uint sourceLaneId, bool startNode) {
             if (!Options.laneConnectorEnabled) {
                 return false;
