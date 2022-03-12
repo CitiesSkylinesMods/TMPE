@@ -369,7 +369,7 @@ namespace TrafficManager.Util {
             // Turning allowed when the main road is agnled.
             ArrowDirection dir = GetDirection(nodeSegments[0], nodeSegments[1], nodeId);
             ignoreLanes |= dir != ArrowDirection.Forward;
-            ignoreLanes |= OptionsMassEditTab.PriorityRoad_AllowLeftTurns;
+            ignoreLanes |= Options.PriorityRoad_AllowLeftTurns;
 
             //Log._Debug($"ignorelanes={ignoreLanes} isSemiRoundabout={isSemiRoundabout}\n" +
             //            "segmentList=" + nodeSegments.ToSTR());
@@ -408,7 +408,7 @@ namespace TrafficManager.Util {
             Log._Debug($"FixMajorSegmentRules({segmentId}, {nodeId}) was called");
             bool startNode = (bool)ExtSegmentManager.Instance.IsStartNode(segmentId, nodeId);
             JunctionRestrictionsManager.Instance.SetEnteringBlockedJunctionAllowed(segmentId, startNode, true);
-            if (!OptionsMassEditTab.PriorityRoad_CrossMainR) {
+            if (!Options.PriorityRoad_CrossMainR) {
                 JunctionRestrictionsManager.Instance.SetPedestrianCrossingAllowed(segmentId, startNode, false);
             }
             TrafficPriorityManager.Instance.SetPrioritySign(segmentId, startNode, PriorityType.Main);
@@ -417,12 +417,12 @@ namespace TrafficManager.Util {
         private static void FixMinorSegmentRules(ushort segmentId, ushort nodeId, List<ushort> segmentList) {
             Log._Debug($"FixMinorSegmentRules({segmentId}, {nodeId}, segmentList) was called");
             bool startNode = (bool)ExtSegmentManager.Instance.IsStartNode(segmentId, nodeId);
-            if (OptionsMassEditTab.PriorityRoad_EnterBlockedYeild) {
+            if (Options.PriorityRoad_EnterBlockedYeild) {
                 JunctionRestrictionsManager.Instance.SetEnteringBlockedJunctionAllowed(segmentId, startNode, true);
             }
             if (HasAccelerationLane(segmentList, segmentId, nodeId)) {
                 JunctionRestrictionsManager.Instance.SetEnteringBlockedJunctionAllowed(segmentId, startNode, true);
-            } else if (OptionsMassEditTab.PriorityRoad_StopAtEntry) {
+            } else if (Options.PriorityRoad_StopAtEntry) {
                 TrafficPriorityManager.Instance.SetPrioritySign(segmentId, startNode, PriorityType.Stop);
             } else {
                 TrafficPriorityManager.Instance.SetPrioritySign(segmentId, startNode, PriorityType.Yield);

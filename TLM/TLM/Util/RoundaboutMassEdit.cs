@@ -23,11 +23,11 @@ namespace TrafficManager.Util {
         private List<ushort> segmentList_;
 
         private static void FixSegmentRoundabout(ushort segmentId, ushort nextSegmentId) {
-            if (OptionsMassEditTab.RoundAboutQuickFix_ParkingBanMainR) {
+            if (Options.RoundAboutQuickFix_ParkingBanMainR) {
                 ParkingRestrictionsManager.Instance.SetParkingAllowed(segmentId, false);
             }
 
-            if (OptionsMassEditTab.RoundAboutQuickFix_RealisticSpeedLimits) {
+            if (Options.RoundAboutQuickFix_RealisticSpeedLimits) {
                 SpeedValue? targetSpeed = CalculatePreferedSpeed(segmentId);
                 float defaultSpeed = SpeedLimitManager.Instance.CalculateCustomNetinfoSpeedLimit(segmentId.ToSegment().Info);
 
@@ -45,7 +45,7 @@ namespace TrafficManager.Util {
 
             ushort nodeId = ExtSegmentManager.Instance.GetHeadNode(segmentId);
 
-            if (OptionsMassEditTab.RoundAboutQuickFix_StayInLaneMainR && !HasJunctionFlag(nodeId)) {
+            if (Options.RoundAboutQuickFix_StayInLaneMainR && !HasJunctionFlag(nodeId)) {
                 StayInLane(nodeId, StayInLaneMode.Both);
             }
 
@@ -53,7 +53,7 @@ namespace TrafficManager.Util {
             // in which case the next segment should be straigh ahead.
             bool isStraight = segEndMan.GetDirection(segmentId, nextSegmentId, nodeId) == ArrowDirection.Forward;
 
-            if (OptionsMassEditTab.RoundAboutQuickFix_DedicatedExitLanes &&
+            if (Options.RoundAboutQuickFix_DedicatedExitLanes &&
                 HasJunctionFlag(nodeId) &&
                 SeparateTurningLanesUtil.CanChangeLanes(
                     segmentId, nodeId) == SetLaneArrow_Result.Success &&
@@ -121,14 +121,14 @@ namespace TrafficManager.Util {
         }
 
         private static void FixRulesRoundabout(ushort segmentId, bool startNode) {
-            if (OptionsMassEditTab.RoundAboutQuickFix_PrioritySigns) {
+            if (Options.RoundAboutQuickFix_PrioritySigns) {
                 TrafficPriorityManager.Instance.SetPrioritySign(
                     segmentId,
                     startNode,
                     PriorityType.Main);
             }
 
-            if (OptionsMassEditTab.RoundAboutQuickFix_NoCrossMainR) {
+            if (Options.RoundAboutQuickFix_NoCrossMainR) {
                 JunctionRestrictionsManager.Instance.SetPedestrianCrossingAllowed(
                     segmentId,
                     startNode,
@@ -144,13 +144,13 @@ namespace TrafficManager.Util {
             bool startNode = (bool)ExtSegmentManager.Instance.IsStartNode(segmentId, nodeId);
             bool isHighway = ExtNodeManager.JunctionHasOnlyHighwayRoads(nodeId);
 
-            if (OptionsMassEditTab.RoundAboutQuickFix_NoCrossYieldR) {
+            if (Options.RoundAboutQuickFix_NoCrossYieldR) {
                 JunctionRestrictionsManager.Instance.SetPedestrianCrossingAllowed(
                     segmentId,
                     startNode,
                     false);
             }
-            if (OptionsMassEditTab.RoundAboutQuickFix_PrioritySigns) {
+            if (Options.RoundAboutQuickFix_PrioritySigns) {
                 TrafficPriorityManager.Instance.SetPrioritySign(
                     segmentId,
                     startNode,
@@ -162,7 +162,7 @@ namespace TrafficManager.Util {
                 JunctionRestrictionsManager.Instance.SetLaneChangingAllowedWhenGoingStraight(segmentId, startNode, true);
             } // endif
 
-            if (OptionsMassEditTab.RoundAboutQuickFix_KeepClearYieldR) {
+            if (Options.RoundAboutQuickFix_KeepClearYieldR) {
                 JunctionRestrictionsManager.Instance.SetEnteringBlockedJunctionAllowed(
                     segmentId,
                     startNode,
@@ -171,14 +171,14 @@ namespace TrafficManager.Util {
         }
 
         private static void FixSegmentMinor(ushort segmentId, ushort nodeId) {
-            if (OptionsMassEditTab.RoundAboutQuickFix_ParkingBanYieldR) {
+            if (Options.RoundAboutQuickFix_ParkingBanYieldR) {
                 ParkingRestrictionsManager.Instance.SetParkingAllowed(segmentId, false);
             }
             int shortUnit = 4;
             int meterPerUnit = 8;
             ref NetSegment seg = ref segmentId.ToSegment();
             ushort otherNodeId = seg.GetOtherNode(nodeId);
-            if (OptionsMassEditTab.RoundAboutQuickFix_StayInLaneNearRabout &&
+            if (Options.RoundAboutQuickFix_StayInLaneNearRabout &&
                 !HasJunctionFlag(otherNodeId) &&
                 seg.m_averageLength < shortUnit * meterPerUnit) {
                 StayInLane(otherNodeId, StayInLaneMode.Both);
