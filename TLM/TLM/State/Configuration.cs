@@ -10,6 +10,14 @@ namespace TrafficManager {
 
     [Serializable]
     public class Configuration {
+
+        public const int CURRENT_VERSION = 1;
+
+        /// <summary>
+        /// version at which data was saved
+        /// </summary>
+        public int Version;
+
         [Serializable]
         public class LaneSpeedLimit {
             public uint laneId;
