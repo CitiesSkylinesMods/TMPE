@@ -58,7 +58,7 @@ namespace TrafficManager.UI.Localization {
             return AllLanguages[Translation.DEFAULT_LANGUAGE_CODE]
                        .TryGetValue(key, out string ret2)
                        ? ret2
-                       : (VersionUtil.BRANCH != "STABLE")
+                       : (VersionUtil.BRANCH != "STABLE" && VersionUtil.BRANCH != "TEST")
                             ? "¶" + key
                             : key.IndexOf(":") > 0
                                 ? key.Substring(key.IndexOf(":") + 1)
