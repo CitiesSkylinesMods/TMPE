@@ -29,7 +29,7 @@ This changelog includes all versions and major variants of the mod going all the
 
 </details>
 
-#### TM:PE V11.6.5.1 TEST, 12/03/2022
+#### TM:PE V11.6.5.1 TEST, 13/03/2022
 
 - [Meta] This update adds two new features, overhauls mod options code, and improves modding API.
 - [New] `Disable Despawn` feature now has vehicle-type filters #1441 #1434 (Marconius6, lokpro, krzychu124)
@@ -53,6 +53,7 @@ This changelog includes all versions and major variants of the mod going all the
 - [Updated] Improved mod option lifecycle for game/editors #1452 #1449 #1425 (aubergine18)
 - [Updated] Extension for managed-type `vehicleId` to `ExtVehicleType` #1444 (aubergine18)
 - [Updated] Simplify Harmony patching for Reversible Tram AI #1457 (kianzarrin)
+- [Updated] Un-invert `Options.disableDespawning` data byte (aubergine18, kianzarrin)
 - [Removed] Obsolete gamebridge stuff from build script #1436 (aubergine18)
 - [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
 
