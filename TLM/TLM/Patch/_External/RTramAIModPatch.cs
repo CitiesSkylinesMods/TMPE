@@ -1,55 +1,35 @@
-/// <summary>
-/// Patching SimulationStepPatch1 in Reversible Tram AI mod
-/// https://steamcommunity.com/sharedfiles/filedetails/?id=2740907672
-/// https://github.com/sway2020/ReversibleTramAI
-/// </summary>
-
 namespace TrafficManager.Patch._External._RTramAIModPatch {
     using System;
-    using System.Linq;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Reflection;
     using System.Reflection.Emit;
+    using TrafficManager.API.Manager;
+    using TrafficManager.Manager.Impl;
+    using TrafficManager.Util;
+    using TrafficManager.State;
     using HarmonyLib;
-    using JetBrains.Annotations;
-    using UnityEngine;
-    using Util;
-    using API.Manager;
-    using Manager.Impl;
-    using State;
 
-    [UsedImplicitly]
+    /// <summary>
+    /// Patching SimulationStepPatch1 in Reversible Tram AI mod
+    /// https://steamcommunity.com/sharedfiles/filedetails/?id=2740907672
+    /// https://github.com/sway2020/ReversibleTramAI
+    /// </summary>
+    [HarmonyPatch]
     public static class RTramAIModPatch {
+        private static Type TargetType => Type.GetType("ReversibleTramAI.SimulationStepPatch1, ReversibleTramAI", false);
 
-        private delegate void TargetDelegate(VehicleAI __instance, ushort vehicleID, ref Vehicle data, Vector3 physicsLodRefPos, ref VehicleInfo ___m_info);
-        private delegate bool TrySpawnDelegate(ushort vehicleID, ref Vehicle vehicleData);
+        public static bool Prepare() => TargetType != null;
 
-        public static bool ApplyPatch(Harmony harmonyInstance, Type simulationStepPatch1Type) {
-            try {
-                var original = TranspilerUtil.DeclaredMethod<TargetDelegate>(simulationStepPatch1Type, "Prefix");
-                if (original == null) return false;
-
-                var transpiler = typeof(RTramAIModPatch).GetMethod("TranspileRTramSimulationStepPatch1");
-                harmonyInstance.Patch(original, transpiler: new HarmonyMethod(transpiler));
-                return true;
-            }
-            catch (Exception ex) {
-                ex.LogException();
-                return false;
-            }
-        }
+        public static MethodBase TargetMethod() => AccessTools.DeclaredMethod(TargetType, "Prefix");
 
         /// <summary>
-        /// Revrites instructions adding necessary TMPE calls. Same purpose as TranspileTramTrainSimulationStep()
+        /// Retrieves instructions adding necessary TMPE calls. Same purpose as TranspileTramTrainSimulationStep()
         /// </summary>
-        /// <param name="il"> Il Generator</param>
-        /// <param name="instructions">List of instructions</param>
-        /// <returns></returns>
-        /// <exception cref="Exception"></exception>
-        public static IEnumerable<CodeInstruction> TranspileRTramSimulationStepPatch1(ILGenerator il, IEnumerable<CodeInstruction> instructions) {
+        public static IEnumerable<CodeInstruction> Transpiler(ILGenerator il, IEnumerable<CodeInstruction> instructions) {
             List<CodeInstruction> codes = TranspilerUtil.ToCodeList(instructions);
 
-            MethodBase trySpawnCall = TranspilerUtil.DeclaredMethod<TrySpawnDelegate>(typeof(TramBaseAI), "TrySpawn");
+            MethodBase trySpawnCall = AccessTools.DeclaredMethod(typeof(TramBaseAI), "TrySpawn");
 
             CodeInstruction searchInstruction = new CodeInstruction(OpCodes.Callvirt, trySpawnCall);
             int index = codes.FindIndex(instruction => TranspilerUtil.IsSameInstruction(instruction, searchInstruction));
@@ -121,6 +101,7 @@ namespace TrafficManager.Patch._External._RTramAIModPatch {
 
             return new List<CodeInstruction> {
                 new CodeInstruction(OpCodes.Ldsfld, instance),
+                new CodeInstruction(OpCodes.Ldarg_1),
                 new CodeInstruction(OpCodes.Ldarg_2),
                 new CodeInstruction(OpCodes.Callvirt, mayDespawn),
                 new CodeInstruction(OpCodes.Brfalse_S, retLabel)

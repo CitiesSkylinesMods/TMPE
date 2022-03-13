@@ -1,7 +1,6 @@
 namespace TrafficManager.State {
     using ColossalFramework.UI;
     using CSUtil.Commons;
-    using ICities;
     using System.Collections.Generic;
     using System.Reflection;
     using TrafficManager.API.Traffic.Enums;
@@ -11,9 +10,6 @@ namespace TrafficManager.State {
     using UnityEngine;
     using TrafficManager.Lifecycle;
     using System;
-    using JetBrains.Annotations;
-    using UI.Textures;
-    using TrafficManager.Manager.Impl;
 
     public class Options : MonoBehaviour {
 #if DEBUG
@@ -42,8 +38,8 @@ namespace TrafficManager.State {
         /// </remarks>
         public static bool Available = false;
 
-        public static bool individualDrivingStyle = true;
-        public static int recklessDrivers = 3;
+        public static bool individualDrivingStyle;
+        public static int recklessDrivers;
 
         /// <summary>Option: buses may ignore lane arrows.</summary>
         public static bool relaxedBusses;

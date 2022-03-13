@@ -29,6 +29,38 @@ This changelog includes all versions and major variants of the mod going all the
 
 </details>
 
+#### TM:PE V11.6.5.1 TEST, 13/03/2022
+
+- [Meta] This update adds two new features, overhauls mod options code, and improves modding API.
+- [New] `Disable Despawn` feature now has vehicle-type filters #1465 #1441 #1434 (Marconius6, lokpro, krzychu124)
+- [New] Timed Traffic Lights now available in Map and Scenario editors #1425 #959 (aubergine18)
+- [Mod] API: Mods can now use TMPE.API.dll alone, without referencing TrafficManager.dll #1448 (kianzarrin)
+- [Mod] API: TM:PE Harmony ID changed from `de.viathinksoft.tmpe` to `me.tmpe` #1456 #897 (krzychu124)
+- [Mod] Update: UUI version 2.2.1 via NuGet #1442 (kianzarrin)
+- [Fixed] `NullReferenceException` if version in global config is not set #1443 (krzychu124)
+- [Fixed] UI windows/overlays not consuming mouse events #1443 #934 #749 (somethingstarted, MacSergey, krzychu124)
+- [Fixed] Missing textures in Scenario Editor #1451 #1450 #1449 (krzychu124, kianzarrin)
+- [Fixed] Memory leak when closing Lane Arrows panels #1451 (krzychu124)
+- [Fixed] Features missing if starting new game after using asset editor #1425 #1423 #1422 (NateNate60, aubergine18)
+- [Fixed] Typo in notifier method name #1440 (aubergine18)
+- [Updated] Use game-defined elevation keymapping to select under/over-ground views #1454 #1326 (krzychu124)
+- [Updated] Add/update UI helpers for use in mod options #1431 #1430 #1424 #1419 (aubergine18)
+- [Updated] Refactoring mod options #1464 #1455 #1435 #1432 #1422 #1411 #1416 #1356 #1279 #62 (aubergine18)
+- [Updated] Replaced `Overlay Transparency` with `Overlay Opacity` #1432 #1268 (aubergine18)
+- [Updated] Minimum GUI/Overlay opacity limited to 10% #1432 #1409 (KHY-afk, aubergine18)
+- [Updated] Use `Prompt.Error` for error message display #1445 (aubergine18)
+- [Updated] Better handling of `KeyNotFound` exception when copying segments #1453 (kianzarrin)
+- [Updated] Improved mod option lifecycle for game/editors #1452 #1449 #1425 (aubergine18)
+- [Updated] Extension for managed-type `vehicleId` to `ExtVehicleType` #1444 (aubergine18)
+- [Updated] Simplify Harmony patching for Reversible Tram AI #1457 (kianzarrin)
+- [Updated] Un-invert `Options.disableDespawning` data byte #1465 #1463 (aubergine18, kianzarrin, krzychu124)
+- [Updated] `MayPublishSegmentChanges()` moved to `TMPELifecycle`; API unaffected #1432 (aubergine18)
+- [Updated] `Buses may ignore lane arrows` enabled by default when starting new city #1455 (aubergine18)
+- [Updated] Missing translations show trimmed locale key in `TEST` builds too #1465 (krzychu124)
+- [Removed] Obsolete gamebridge stuff from build script #1436 (aubergine18)
+- [Removed] "Apply AI changes right away" option; changes always applied immediately now #1432 (aubergine18, kvakvs)
+- [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
+
 #### TM:PE V11.6.5.0 TEST, 16/02/2022
 
 - [Meta] Due to targeted malware, we are unable to provide support if you have mods by `Chaos`/`Holy Water`/`drok`, even if those mods are currently malware-free #1391 (TM:PE Team)
@@ -253,7 +285,7 @@ This changelog includes all versions and major variants of the mod going all the
 - [Fixed] Trains not counted as waiting at timed traffic lights at rail junctions #1184 #1173 (DarthJimbo, krzychu124)
 - [Fixed] Toolbar could be dragged through Speed Limits window #1168 #683 (aubergine18, kvakvs)
 - [Updated] Code clean-up: ResetIncomingHighwayLaneArrows #1166 #1178 (egi)
-- [Updated] Incompatible mod detector improvements #1196 (Krzychu124)
+- [Updated] Incompatible mod detector improvements #1196 #439 (Krzychu124)
 - [Updated] Code clean-up: Netutil and Speed Limits #1273 #1275 (kianzarrin)
 - [Updated] Static texture classes now CustomManagers #1265 (kvakvs)
 - [Updated] Performance: GetNode/Segment -> ToNode/Segment #1202 (kianzarrin)
@@ -360,7 +392,7 @@ This changelog includes all versions and major variants of the mod going all the
 - [Fixed] Industries, etc., outside central 25 tile area not spawning vehicles #1097 (klyte45, krzychu124)
 - [Fixed] Cargo trucks ignoring lane routing #1105 (krzychu124)
 - [Fixed] Citizen Not Found error #1091 #1067 (meda22, krzychu124)
-- [Fixed] TMPE state changes after using free camera mode #938 (Biffa, kianzarrin)
+- [Fixed] TMPE state changes after using free camera mode #938 #958 (Biffa, kianzarrin)
 - [Fixed] Typo in priority roads tooltip locale code #904 (TianQiBuTian)
 - [Fixed] Asset data extension lifecycle for hotloading #1096 #1095 (kianzarrin)
 - [Fixed] Lane connector duplicate render bug #1094 (egi)

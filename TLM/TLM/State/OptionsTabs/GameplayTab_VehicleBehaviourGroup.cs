@@ -3,6 +3,7 @@ namespace TrafficManager.State {
     using CSUtil.Commons;
     using ICities;
     using TrafficManager.UI;
+    using TrafficManager.UI.AllowDespawn;
     using TrafficManager.UI.Helpers;
 
     public static class GameplayTab_VehicleBehaviourGroup {
@@ -22,9 +23,13 @@ namespace TrafficManager.State {
         public static CheckboxOption DisableDespawning =
             new(nameof(Options.disableDespawning), Options.PersistTo.Savegame) {
                 Label = "Maintenance.Checkbox:Disable despawning",
+                Handler = (newValue) => AllowDespawnFiltersButton.ReadOnly = !newValue,
             };
 
         private static UIDropDown _recklessDriversDropdown;
+
+        private static bool HasSnowfallDLC
+            => SteamHelper.IsDLCOwned(SteamHelper.DLC.SnowFallDLC);
 
         public static void SetRecklessDrivers(int newRecklessDrivers) {
             Options.recklessDrivers = newRecklessDrivers;
@@ -33,6 +38,12 @@ namespace TrafficManager.State {
                 _recklessDriversDropdown.selectedIndex = newRecklessDrivers;
             }
         }
+
+        public static ActionButton AllowDespawnFiltersButton = new() {
+            Label = "Filter Disable despawning vehicle types",
+            Handler = AllowDespawningPanel.OpenModal,
+            ReadOnly = !Options.disableDespawning,
+        };
 
         internal static void AddUI(UIHelperBase tab) {
             var group = tab.AddGroup(T("Gameplay.Group:Vehicle behavior"));
@@ -45,12 +56,9 @@ namespace TrafficManager.State {
                 StrongerRoadConditionEffects.AddUI(group);
 
             DisableDespawning.AddUI(group);
+
+            AllowDespawnFiltersButton.AddUI(group);
         }
-
-        private static string T(string key) => Translation.Options.Get(key);
-
-        private static bool HasSnowfallDLC
-            => SteamHelper.IsDLCOwned(SteamHelper.DLC.SnowFallDLC);
 
         private static bool SnowfallDlcValidator(bool desired, out bool result) {
             result = HasSnowfallDLC && desired;
@@ -81,5 +89,7 @@ namespace TrafficManager.State {
             Log.Info($"Reckless driver amount changed to {newRecklessDrivers}");
             Options.recklessDrivers = newRecklessDrivers;
         }
+
+        private static string T(string key) => Translation.Options.Get(key);
     }
 }
