@@ -48,7 +48,7 @@ namespace TrafficManager.UI.MainMenu {
         /// </summary>
         /// <param name="p"></param>
         protected override void OnMouseDown(UIMouseEventParameter p) {
-            if ((p.buttons & UIMouseButton.Right) != 0) {
+            if ((p.buttons & UIMouseButton.Right) != 0 && Options.disableDespawning) {
                 p.Use();
                 UIInput.MouseUsed();
                 AllowDespawn.AllowDespawningPanel.OpenModal();
