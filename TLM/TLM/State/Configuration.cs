@@ -287,7 +287,7 @@ namespace TrafficManager {
             }
         }
 
-        public const int CURRENT_VERSION = 1;
+        public const int CURRENT_VERSION = 2;
 
         /// <summary>
         /// version at which data was saved
