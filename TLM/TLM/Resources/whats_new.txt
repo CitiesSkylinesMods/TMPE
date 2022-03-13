@@ -2,7 +2,7 @@
 [Released] March 13th 2022
 [Link] tmpe-v11651-test-13032022
 [Meta] This update adds two new features, overhauls mod options code, and improves modding API.
-[New] `Disable Despawn` feature now has vehicle-type filters #1441 #1434 (Marconius6, lokpro, krzychu124)
+[New] `Disable Despawn` feature now has vehicle-type filters #1465 #1441 #1434 (Marconius6, lokpro, krzychu124)
 [New] Timed Traffic Lights now available in Map and Scenario editors #1425 #959 (aubergine18)
 [Mod] API: Mods can now use TMPE.API.dll alone, without referencing TrafficManager.dll #1448 (kianzarrin)
 [Mod] API: TM:PE Harmony ID changed from `de.viathinksoft.tmpe` to `me.tmpe` #1456 #897 (krzychu124)
@@ -23,9 +23,10 @@
 [Updated] Improved mod option lifecycle for game/editors #1452 #1449 #1425 (aubergine18)
 [Updated] Extension for managed-type `vehicleId` to `ExtVehicleType` #1444 (aubergine18)
 [Updated] Simplify Harmony patching for Reversible Tram AI #1457 (kianzarrin)
-[Updated] Un-invert `Options.disableDespawning` data byte (aubergine18, kianzarrin)
+[Updated] Un-invert `Options.disableDespawning` data byte #1465 #1463 (aubergine18, kianzarrin, krzychu124)
 [Updated] `MayPublishSegmentChanges()` moved to `TMPELifecycle`; API unaffected #1432 (aubergine18)
 [Updated] `Buses may ignore lane arrows` enabled by default when starting new city #1455 (aubergine18)
+[Updated] Missing translations show trimmed locale key in `TEST` builds too #1465 (krzychu124)
 [Removed] Obsolete gamebridge stuff from build script #1436 (aubergine18)
 [Removed] "Apply AI changes right away" option; changes always applied immediately now #1432 (aubergine18, kvakvs)
 [/Version]

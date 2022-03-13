@@ -46,23 +46,24 @@ namespace TrafficManager.UI.Localization {
             }
 #endif
 
-            // Try find translation in the current language first
-            if (AllLanguages[lang].TryGetValue(key, out string ret))
-            {
+            // Current language
+            if (AllLanguages[lang].TryGetValue(key, out string ret)) {
                 return ret;
             }
 
-            // If not found, try also get translation in the default English
-            // Untranslated keys are prefixed with ¶ in TEST & DEBUG builds;
-            // in STABLE builds prefix (upto and including `:`) is trimmed.
-            return AllLanguages[Translation.DEFAULT_LANGUAGE_CODE]
-                       .TryGetValue(key, out string ret2)
-                       ? ret2
-                       : (VersionUtil.BRANCH != "STABLE")
-                            ? "¶" + key
-                            : key.IndexOf(":") > 0
-                                ? key.Substring(key.IndexOf(":") + 1)
-                                : key;
+            // Default language
+            if (AllLanguages[Translation.DEFAULT_LANGUAGE_CODE].TryGetValue(key, out string ret2)) {
+                return ret2;
+            }
+
+#if DEBUG
+            // Prefixed locale key
+            return "¶" + key;
+#else
+            // Trimmed locale key
+            int pos = key.IndexOf(":");
+            return pos > 0 ? key.Substring(pos + 1) : key;
+#endif
         }
 
         public bool HasString(string key) {
