@@ -41,6 +41,37 @@
 
 > Date format: dd/mm/yyyy
 
+#### TM:PE V11.6.5.1 TEST, 13/03/2022
+
+- [Meta] This update adds two new features, overhauls mod options code, and improves modding API.
+- [New] `Disable Despawn` feature now has vehicle-type filters #1441 #1434 (Marconius6, lokpro, krzychu124)
+- [New] Timed Traffic Lights now available in Map and Scenario editors #1425 #959 (aubergine18)
+- [Mod] API: Mods can now use TMPE.API.dll alone, without referencing TrafficManager.dll #1448 (kianzarrin)
+- [Mod] API: TM:PE Harmony ID changed from `de.viathinksoft.tmpe` to `me.tmpe` #1456 #897 (krzychu124)
+- [Mod] Update: UUI version 2.2.1 via NuGet #1442 (kianzarrin)
+- [Fixed] `NullReferenceException` if version in global config is not set #1443 (krzychu124)
+- [Fixed] UI windows/overlays not consuming mouse events #1443 #934 #749 (somethingstarted, MacSergey, krzychu124)
+- [Fixed] Missing textures in Scenario Editor #1451 #1450 #1449 (krzychu124, kianzarrin)
+- [Fixed] Memory leak when closing Lane Arrows panels #1451 (krzychu124)
+- [Fixed] Features missing if starting new game after using asset editor #1425 #1423 #1422 (NateNate60, aubergine18)
+- [Fixed] Typo in notifier method name #1440 (aubergine18)
+- [Updated] Use game-defined elevation keymapping to select under/over-ground views #1454 #1326 (krzychu124)
+- [Updated] Add/update UI helpers for use in mod options #1431 #1430 #1424 #1419 (aubergine18)
+- [Updated] Refactoring mod options #1464 #1455 #1435 #1432 #1422 #1411 #1416 #1356 #1279 #62 (aubergine18)
+- [Updated] Replaced `Overlay Transparency` with `Overlay Opacity` #1432 #1268 (aubergine18)
+- [Updated] Minimum GUI/Overlay opacity limited to 10% #1432 #1409 (KHY-afk, aubergine18)
+- [Updated] Use `Prompt.Error` for error message display #1445 (aubergine18)
+- [Updated] Better handling of `KeyNotFound` exception when copying segments #1453 (kianzarrin)
+- [Updated] Improved mod option lifecycle for game/editors #1452 #1449 #1425 (aubergine18)
+- [Updated] Extension for managed-type `vehicleId` to `ExtVehicleType` #1444 (aubergine18)
+- [Updated] Simplify Harmony patching for Reversible Tram AI #1457 (kianzarrin)
+- [Updated] Un-invert `Options.disableDespawning` data byte (aubergine18, kianzarrin)
+- [Updated] `MayPublishSegmentChanges()` moved to `TMPELifecycle`; API unaffected #1432 (aubergine18)
+- [Updated] `Buses may ignore lane arrows` enabled by default when starting new city #1455 (aubergine18)
+- [Removed] Obsolete gamebridge stuff from build script #1436 (aubergine18)
+- [Removed] "Apply AI changes right away" option; changes always applied immediately now #1432 (aubergine18, kvakvs)
+- [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
+
 #### TM:PE V11.6.5.0 TEST, 16/02/2022
 
 - [Meta] Due to targeted malware, we are unable to provide support if you have mods by `Chaos`/`Holy Water`/`drok`, even if those mods are currently malware-free #1391 (TM:PE Team)
@@ -63,23 +94,6 @@
 - [Updated] Translations for mod options, speed limits, traffic lights #1415 (krzychu124, freddy0419, Natchanok Kulphiwet, MamylaPuce, ipd, 田七不甜 TianQiBuTian, TwotoolusFLY_LSh.st, Never2333, 문주원 sky162178, MenschLennart, Chamëleon, John Deehe, Skazov, AlexofCA, CrankyAnt, Иван Соколов)
 - [Updated] Update assembly info metadata #1417 (krzychu124)
 - [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
-
-#### TM:PE V11.6.4.8 STABLE, 10/02/2022
-
-- [Meta] TM:PE 11.6.4-hotfix-8
-- [Meta] Bugfix for vehicle spawning/delivery on restricted lanes
-- [Mod] Malware: We are treating all mods by Chaos/Holy Water (same person) as targeted malware #1389 #1388 (aubergine18)
-- [Fixed] Allow vehicles to use restricted lanes when spawning/delivering #1381 #1380 #494 #85 (krzychu124)
-- [Steam] [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
-
-#### TM:PE V11.6.4.7 STABLE, 06/02/2022
-
-- [Meta] TM:PE 11.6.4-hotfix-7
-- [Meta] Bugfix for default speeds which affects speed limits tool, overlays, and roundabout curvature speed
-- [Fixed] Default netinfo speed should only inspect customisable lanes #1362 #1346 (aubergine18)
-- [Fixed] Fix `SPEED_TO_MPH` value in `ApiConstants.cs` #1364 #1363 #988 (aubergine18)
-- [Removed] Obsolete: `SPEED_TO_MPH` and `SPEED_TO_KMPH` in `Constants.cs` #1367 #1364 #1363 (aubergine18)
-- [Steam] [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
 
 ## Support Policy
 

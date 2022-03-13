@@ -157,7 +157,7 @@ namespace TrafficManager.Manager.Impl {
                 ToCheckbox(data, idx: 24, MaintenanceTab_FeaturesGroup.JunctionRestrictionsEnabled, true);
                 ToCheckbox(data, idx: 25, GameplayTab_AIGroups.ParkingAI, false);
                 ToCheckbox(data, idx: 26, PoliciesTab_OnHighwaysGroup.PreferOuterLane, false);
-                ToCheckbox(data, idx: 27, GameplayTab_VehicleBehaviourGroup.IndividualDrivingStyle, false);
+                ToCheckbox(data, idx: 27, GameplayTab_VehicleBehaviourGroup.IndividualDrivingStyle, true);
                 ToCheckbox(data, idx: 28, PoliciesTab_InEmergenciesGroup.EvacBussesMayIgnoreRules, false);
                 // skip ToCheckbox(data, idx: 29, GeneralTab_SimulationGroup.InstantEffects, true);
                 ToCheckbox(data, idx: 30, MaintenanceTab_FeaturesGroup.ParkingRestrictionsEnabled, true);
@@ -191,18 +191,18 @@ namespace TrafficManager.Manager.Impl {
                 ToCheckbox(data, idx: 46, PoliciesTab_RoundaboutsGroup.RoundAboutQuickFix_NoCrossYieldR);
                 ToCheckbox(data, idx: 47, PoliciesTab_RoundaboutsGroup.RoundAboutQuickFix_PrioritySigns, true);
 
-                ToCheckbox(data, idx: 48, PoliciesTab_PriorityRoadsGroup.PriorityRoad_CrossMainR);
-                ToCheckbox(data, idx: 49, PoliciesTab_PriorityRoadsGroup.PriorityRoad_AllowLeftTurns);
-                ToCheckbox(data, idx: 50, PoliciesTab_PriorityRoadsGroup.PriorityRoad_EnterBlockedYeild);
-                ToCheckbox(data, idx: 51, PoliciesTab_PriorityRoadsGroup.PriorityRoad_StopAtEntry);
+                ToCheckbox(data, idx: 48, PoliciesTab_PriorityRoadsGroup.PriorityRoad_CrossMainR, false);
+                ToCheckbox(data, idx: 49, PoliciesTab_PriorityRoadsGroup.PriorityRoad_AllowLeftTurns, false);
+                ToCheckbox(data, idx: 50, PoliciesTab_PriorityRoadsGroup.PriorityRoad_EnterBlockedYeild, false);
+                ToCheckbox(data, idx: 51, PoliciesTab_PriorityRoadsGroup.PriorityRoad_StopAtEntry, false);
 
                 ToCheckbox(data, idx: 52, PoliciesTab_RoundaboutsGroup.RoundAboutQuickFix_KeepClearYieldR, true);
                 ToCheckbox(data, idx: 53, PoliciesTab_RoundaboutsGroup.RoundAboutQuickFix_RealisticSpeedLimits, false);
                 ToCheckbox(data, idx: 54, PoliciesTab_RoundaboutsGroup.RoundAboutQuickFix_ParkingBanMainR, true);
-                ToCheckbox(data, idx: 55, PoliciesTab_RoundaboutsGroup.RoundAboutQuickFix_ParkingBanYieldR);
+                ToCheckbox(data, idx: 55, PoliciesTab_RoundaboutsGroup.RoundAboutQuickFix_ParkingBanYieldR, false);
 
-                ToCheckbox(data, idx: 56, PoliciesTab_OnRoadsGroup.NoDoubleCrossings);
-                ToCheckbox(data, idx: 57, PoliciesTab_AtJunctionsGroup.DedicatedTurningLanes);
+                ToCheckbox(data, idx: 56, PoliciesTab_OnRoadsGroup.NoDoubleCrossings, false);
+                ToCheckbox(data, idx: 57, PoliciesTab_AtJunctionsGroup.DedicatedTurningLanes, false);
 
                 Options.SavegamePathfinderEdition = LoadByte(data, idx: 58, defaultVal: 0);
 

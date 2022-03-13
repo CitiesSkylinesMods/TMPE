@@ -38,8 +38,8 @@ namespace TrafficManager.State {
         /// </remarks>
         public static bool Available = false;
 
-        public static bool individualDrivingStyle = true;
-        public static int recklessDrivers = 3;
+        public static bool individualDrivingStyle;
+        public static int recklessDrivers;
 
         /// <summary>Option: buses may ignore lane arrows.</summary>
         public static bool relaxedBusses;
