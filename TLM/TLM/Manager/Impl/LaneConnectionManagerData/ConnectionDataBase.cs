@@ -6,12 +6,14 @@ namespace TrafficManager.Manager.Impl.LaneConnectionManagerData {
     using TrafficManager.Util.Extensions;
 
     internal class ConnectionDataBase : Dictionary<LaneEnd, LaneConnectionData[]> {
+        public ConnectionDataBase() : base(LaneEnd.LaneIdStartNodeComparer) { }
+
         internal bool IsConnectedTo(uint sourceLaneId, uint targetLaneId, ushort nodeId) =>
             IsConnectedTo(sourceLaneId, targetLaneId, sourceLaneId.ToLane().IsStartNode(nodeId));
 
         /// <param name="sourceStartNode">start node for the segment of the source lane</param>
         internal bool IsConnectedTo(uint sourceLaneId, uint targetLaneId, bool sourceStartNode) {
-            var key = new LaneEnd(sourceLaneId, sourceStartNode);
+            LaneEnd key = new(sourceLaneId, sourceStartNode);
             if (this.TryGetValue(key, out var targets)) {
                 int n = targets.Length;
                 for (int i = 0; i < n; ++i) {
@@ -37,7 +39,7 @@ namespace TrafficManager.Manager.Impl.LaneConnectionManagerData {
         /// <param name="enable"><c>true</c> for forward/bi-directional connection,
         /// <c>false</c> for backward connection</param>
         private void AddConnection(uint sourceLaneId, uint targetLaneId, ushort nodeId, bool enable) {
-            var key = new LaneEnd(sourceLaneId, nodeId);
+            LaneEnd key = new(sourceLaneId, nodeId);
 
             bool hasConnections = this.TryGetValue(key, out var targets);
 
@@ -79,7 +81,7 @@ namespace TrafficManager.Manager.Impl.LaneConnectionManagerData {
         /// </summary>
         /// <returns><c>true</c> if any connection was disabled. <c>false</c> otherwise. </returns>
         private bool DisableConnection(uint sourceLaneId, uint targetLaneId, ushort nodeId) {
-            var key = new LaneEnd(sourceLaneId, nodeId);
+            LaneEnd key = new(sourceLaneId, nodeId);
             if (this.TryGetValue(key, out var targets)) {
                 int n = targets.Length;
                 for (int i = 0; i < n; ++i) {
@@ -106,7 +108,7 @@ namespace TrafficManager.Manager.Impl.LaneConnectionManagerData {
         /// <returns><c>true</c> if any active connection was disabled. <c>false</c> otherwise. </returns>
         private bool RemoveConnection(uint sourceLaneId, uint targetLaneId, bool sourceStartNode) {
             bool ret = false;
-            var key = new LaneEnd(sourceLaneId, sourceStartNode);
+            LaneEnd key = new(sourceLaneId, sourceStartNode);
             if (this.TryGetValue(key, out var targets)) {
                 int n = targets.Length;
                 var newConnections = new List<LaneConnectionData>(n);
@@ -167,7 +169,7 @@ namespace TrafficManager.Manager.Impl.LaneConnectionManagerData {
                     Log.Info($"Lane {sourceLaneId}: valid? {netLane.IsValidWithSegment()}, seg. valid? {netSegment.IsValid()}");
 
                     foreach (bool startNode in new bool[] { false, true }) {
-                        var key = new LaneEnd(sourceLaneId, startNode);
+                        LaneEnd key = new(sourceLaneId, startNode);
                         if (this.TryGetValue(key, out var targets)) {
                             ushort nodeId = netSegment.GetNodeId(startNode);
                             ref NetNode netNode = ref nodeId.ToNode();

@@ -115,7 +115,7 @@ namespace TrafficManager.Manager.Impl {
         /// Performance note: This act as HasOutgoingConnections for uni-directional lanes but faster
         /// </summary>
         public bool HasConnections(uint laneId, bool startNode) =>
-            connectionDataBase_.ContainsKey(new LaneEnd(laneId, startNode));
+            Options.laneConnectorEnabled && connectionDataBase_.ContainsKey(new LaneEnd(laneId, startNode));
 
         /// <summary>
         /// Determines if the given lane has outgoing connections
@@ -126,7 +126,7 @@ namespace TrafficManager.Manager.Impl {
                 return false;
             }
 
-            var key = new LaneEnd(sourceLaneId, startNode);
+            LaneEnd key = new(sourceLaneId, startNode);
             if (connectionDataBase_.TryGetValue(key, out var targets)) {
                 int n = targets.Length;
                 for (int i = 0; i < n; ++i) {
@@ -152,7 +152,7 @@ namespace TrafficManager.Manager.Impl {
                     ref NetSegment netSegment = ref segmentId.ToSegment();
                     bool startNode = netSegment.IsStartnode(nodeId);
                     foreach (LaneIdAndIndex laneIdAndIndex in netSegment.GetSegmentLaneIdsAndLaneIndexes()) {
-                        var key = new LaneEnd(laneIdAndIndex.laneId, startNode);
+                        LaneEnd key = new(laneIdAndIndex.laneId, startNode);
                         if (connectionDataBase_.ContainsKey(key)) {
                             return true;
                         }
@@ -200,7 +200,7 @@ namespace TrafficManager.Manager.Impl {
                 return null;
             }
 
-            var key = new LaneEnd(laneId, startNode);
+            LaneEnd key = new(laneId, startNode);
             if (connectionDataBase_.TryGetValue(key, out var targets)) {
                 return targets
                 .Where(item => item.Enabled)
@@ -277,7 +277,7 @@ namespace TrafficManager.Manager.Impl {
                     ref NetSegment netSegment = ref segmentId.ToSegment();
                     bool startNode = netSegment.IsStartnode(nodeId);
                     foreach (LaneIdAndIndex laneIdAndIndex in netSegment.GetSegmentLaneIdsAndLaneIndexes()) {
-                        var key = new LaneEnd(laneIdAndIndex.laneId, startNode);
+                        LaneEnd key = new(laneIdAndIndex.laneId, startNode);
                         connectionDataBase_.Remove(key);
                     }
                 }
@@ -310,7 +310,7 @@ namespace TrafficManager.Manager.Impl {
                            $"{startNode}) called.");
             }
 
-            var key = new LaneEnd(laneId, startNode);
+            LaneEnd key = new(laneId, startNode);
             connectionDataBase_.Remove(key);
 
             if (recalcAndPublish) {
