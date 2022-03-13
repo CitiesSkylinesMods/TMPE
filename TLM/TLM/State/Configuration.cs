@@ -13,7 +13,7 @@ namespace TrafficManager {
     [Serializable]
     public class Configuration {
 
-        public const int CURRENT_VERSION = 1;
+        public const int CURRENT_VERSION = 2;
 
         /// <summary>
         /// version at which data was saved
@@ -186,7 +186,7 @@ namespace TrafficManager {
 
             public bool sourceStartNode;
 
-            public bool Legacy => SerializableDataExtension.Version < 1;
+            public bool Legacy => SerializableDataExtension.Version < 2;
 
             public LaneConnection(uint sourceLaneId, uint targetLaneId, bool sourceStartNode) {
                 this.sourceLaneId = sourceLaneId;
@@ -294,13 +294,6 @@ namespace TrafficManager {
                 lastTransportMode = 0;
             }
         }
-
-        public const int CURRENT_VERSION = 2;
-
-        /// <summary>
-        /// version at which data was saved
-        /// </summary>
-        public int Version;
 
         /// <summary>
         /// Stored ext. citizen data
