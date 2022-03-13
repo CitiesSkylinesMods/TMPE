@@ -19,7 +19,6 @@ namespace TrafficManager.Manager.Impl.LaneConnectionManagerData {
             startNode_ = laneId.ToLane().IsStartNode(nodeId);
         }
 
-
         public override int GetHashCode() {
             unchecked {
                 return ((int)laneId_ * 397) ^ startNode_.GetHashCode();

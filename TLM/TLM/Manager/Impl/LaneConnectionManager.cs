@@ -85,6 +85,8 @@ namespace TrafficManager.Manager.Impl {
 
         /// <summary>
         /// determines whether or not the input lane is heading toward a start node.
+        /// Precondition: should only be used for uni-directional lanes with lane arrows.
+        /// Note: not performance critical
         /// </summary>
         /// <returns>true if heading toward and start node.</returns>
         private bool IsHeadingTowardsStartNode(uint sourceLaneId) {
@@ -95,6 +97,7 @@ namespace TrafficManager.Manager.Impl {
 
             foreach (var laneInfo in segment.Info.m_lanes) {
                 if (laneId == sourceLaneId) {
+                    Assert(laneInfo.m_finalDirection is NetInfo.Direction.Forward or NetInfo.Direction.Backward);
                     return (laneInfo.m_finalDirection == NetInfo.Direction.Forward) ^ !inverted;
                 }
                 laneId = laneId.ToLane().m_nextLane;
