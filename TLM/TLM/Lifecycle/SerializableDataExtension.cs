@@ -16,7 +16,7 @@ namespace TrafficManager.Lifecycle {
     public class SerializableDataExtension
         : SerializableDataExtensionBase
     {
-        public static int Version => _configuration.Version;
+        public static int Version => _configuration?.Version ?? Configuration.CURRENT_VERSION;
 
         private const string DATA_ID = "TrafficManager_v1.0";
         private const string VERSION_INFO_DATA_ID = "TrafficManager_VersionInfo_v1.0";
