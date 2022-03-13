@@ -16,6 +16,8 @@ namespace TrafficManager.Lifecycle {
     public class SerializableDataExtension
         : SerializableDataExtensionBase
     {
+        public static int Version => _configuration.Version;
+
         private const string DATA_ID = "TrafficManager_v1.0";
         private const string VERSION_INFO_DATA_ID = "TrafficManager_VersionInfo_v1.0";
 
@@ -367,7 +369,7 @@ namespace TrafficManager.Lifecycle {
 
             try {
                 Log.Info("Saving Mod Data.");
-                var configuration = new Configuration();
+                var configuration = new Configuration() { Version = Configuration.CURRENT_VERSION };
 
                 //------------------
                 // Citizens

@@ -116,6 +116,9 @@ namespace TrafficManager.Manager.Impl {
         /// <returns>Returns <c>true</c> if successful, otherwise <c>false</c>.</returns>
         /// <remarks>Applies default values if the data for an option does not exist.</remarks>
         public bool LoadData(byte[] data) {
+
+            int dataVersion = SerializableDataExtension.Version;
+
             try {
                 Options.Available = false;
 
@@ -136,7 +139,13 @@ namespace TrafficManager.Manager.Impl {
                 ToCheckbox(data, idx: 12, GameplayTab_VehicleBehaviourGroup.StrongerRoadConditionEffects, false);
                 ToCheckbox(data, idx: 13, PoliciesTab_AtJunctionsGroup.AllowUTurns, false);
                 ToCheckbox(data, idx: 14, PoliciesTab_AtJunctionsGroup.AllowLaneChangesWhileGoingStraight, false);
-                GameplayTab_VehicleBehaviourGroup.DisableDespawning.Value = !LoadBool(data, idx: 15, true); // inverted
+
+                if (dataVersion < 1) {
+                    GameplayTab_VehicleBehaviourGroup.DisableDespawning.Value = !LoadBool(data, idx: 15, true); // inverted
+                } else {
+                    ToCheckbox(data, idx: 15, GameplayTab_VehicleBehaviourGroup.DisableDespawning, false); // not inverted
+                }
+
                 // skip Options.setDynamicPathRecalculation(data[16] == (byte)1);
                 ToCheckbox(data, idx: 17, OverlaysTab_OverlaysGroup.ConnectedLanesOverlay, false);
                 ToCheckbox(data, idx: 18, MaintenanceTab_FeaturesGroup.PrioritySignsEnabled, true);
@@ -236,7 +245,7 @@ namespace TrafficManager.Manager.Impl {
                 save[12] = GameplayTab_VehicleBehaviourGroup.StrongerRoadConditionEffects.Save();
                 save[13] = (byte)(Options.allowUTurns ? 1 : 0);
                 save[14] = (byte)(Options.allowLaneChangesWhileGoingStraight ? 1 : 0);
-                save[15] = (byte)(Options.disableDespawning ? 0 : 1); // inverted
+                save[15] = (byte)(Options.disableDespawning ? 1 : 0);
                 save[16] = 0; // Options.IsDynamicPathRecalculationActive
                 save[17] = (byte)(Options.connectedLanesOverlay ? 1 : 0);
                 save[18] = (byte)(Options.prioritySignsEnabled ? 1 : 0);
