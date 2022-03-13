@@ -55,6 +55,7 @@ This changelog includes all versions and major variants of the mod going all the
 - [Updated] Simplify Harmony patching for Reversible Tram AI #1457 (kianzarrin)
 - [Updated] Un-invert `Options.disableDespawning` data byte (aubergine18, kianzarrin)
 - [Updated] `MayPublishSegmentChanges()` moved to `TMPELifecycle`; API unaffected #1432 (aubergine18)
+- [Updated] `Buses may ignore lane arrows` enabled by default when starting new city #1455 (aubergine18)
 - [Removed] Obsolete gamebridge stuff from build script #1436 (aubergine18)
 - [Removed] "Apply AI changes right away" option; changes always applied immediately now #1432 (aubergine18, kvakvs)
 - [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
