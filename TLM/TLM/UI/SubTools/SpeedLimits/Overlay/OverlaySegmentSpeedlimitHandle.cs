@@ -48,6 +48,24 @@ namespace TrafficManager.UI.SubTools.SpeedLimits.Overlay {
                 netInfo: netInfo,
                 action: action,
                 target: target);
+            Apply(
+                segmentId: this.segmentId_,
+                finalDir: NetInfo.Direction.Both,
+                netInfo: netInfo,
+                action: action,
+                target: target);
+            Apply(
+                segmentId: this.segmentId_,
+                finalDir: NetInfo.Direction.AvoidBackward,
+                netInfo: netInfo,
+                action: action,
+                target: target);
+            Apply(
+                segmentId: this.segmentId_,
+                finalDir: NetInfo.Direction.AvoidForward,
+                netInfo: netInfo,
+                action: action,
+                target: target);
 
             if (multiSegmentMode) {
                 this.ClickMultiSegment(action, target);

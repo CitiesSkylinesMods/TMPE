@@ -110,12 +110,12 @@ namespace TrafficManager.Manager.Impl {
         }
 
         /// <summary>Determines the currently set speed limit for the given segment and lane
-        ///     direction in terms of discrete speed limit levels.</summary>
+        ///     vehicle type in terms of discrete speed limit levels.</summary>
         /// <param name="segmentId">Interested in this segment.</param>
-        /// <param name="finalDir">Direction.</param>
+        /// <param name="vehicleType">Vehicle type</param>
         /// <returns>Mean speed limit, average for custom and default lane speeds or null
         ///     if cannot be determined.</returns>
-        public SpeedValue? CalculateCustomSpeedLimit(ushort segmentId, NetInfo.Direction finalDir) {
+        public SpeedValue? CalculateCustomSpeedLimit(ushort segmentId, VehicleInfo.VehicleType vehicleType) {
             // calculate the currently set mean speed limit
             if (segmentId == 0) {
                 return null;
@@ -135,9 +135,8 @@ namespace TrafficManager.Manager.Impl {
 
             while (laneIndex < netinfo.m_lanes.Length && curLaneId != 0u) {
                 NetInfo.Lane laneInfo = netinfo.m_lanes[laneIndex];
-                NetInfo.Direction d = laneInfo.m_finalDirection;
 
-                if (d != finalDir) {
+                if (!laneInfo.m_vehicleType.IsFlagSet(vehicleType)) {
                     goto nextIter;
                 }
 
