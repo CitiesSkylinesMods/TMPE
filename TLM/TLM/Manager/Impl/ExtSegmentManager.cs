@@ -57,6 +57,33 @@ namespace TrafficManager.Manager.Impl {
             extSegment.Reset();
         }
 
+        private bool CheckNetInfo(ref ExtSegment extSegment) {
+            ref var segment = ref extSegment.segmentId.ToSegment();
+            if (!segment.IsValid())
+                return false;
+
+            if (extSegment.infoIndex != segment.m_infoIndex) {
+                Recalculate(ref extSegment);
+            }
+            return true;
+        }
+
+        public uint GetLaneId(ushort segmentId, int laneIndex) {
+            ref var extSegment = ref ExtSegments[segmentId];
+            if (laneIndex < 0 || !CheckNetInfo(ref extSegment))
+                return 0;
+
+            return laneIndex < extSegment.lanes?.Length ? extSegment.lanes[laneIndex] : 0;
+        }
+
+        internal int GetLaneIndex(ushort segmentId, uint laneId) {
+            ref var extSegment = ref ExtSegments[segmentId];
+            if (!CheckNetInfo(ref extSegment))
+                return -1;
+
+            return Array.IndexOf(extSegment.lanes, laneId);
+        }
+
         public void Recalculate(ushort segmentId) {
             Recalculate(ref ExtSegments[segmentId]);
         }
@@ -97,6 +124,9 @@ namespace TrafficManager.Manager.Impl {
             extSegment.oneWay = CalculateIsOneWay(segmentId);
             extSegment.highway = CalculateIsHighway(segmentId);
             extSegment.buslane = CalculateHasBusLane(segmentId);
+            extSegment.lanes = CalculateLanes(ref netSegment);
+
+            extSegment.infoIndex = netSegment.m_infoIndex;
 
             extSegEndMan.Recalculate(segmentId);
 
@@ -155,6 +185,26 @@ namespace TrafficManager.Manager.Impl {
             }
 
             return true;
+        }
+
+        private uint[] CalculateLanes(ref NetSegment segment) {
+            if (!segment.IsValid()) {
+                return null;
+            }
+
+            var info = segment.Info;
+            int laneCount = info.m_lanes.Length;
+            if (laneCount == 0) {
+                return null;
+            }
+
+            var result = new uint[laneCount];
+
+            uint laneId = segment.m_lanes;
+            for (int i = 0; laneId != 0 && i < laneCount; i++, laneId = laneId.ToLane().m_nextLane) {
+                result[i] = laneId;
+            }
+            return result;
         }
 
         public bool CalculateHasBusLane(ushort segmentId) {

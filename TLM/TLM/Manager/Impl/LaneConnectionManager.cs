@@ -501,8 +501,8 @@ namespace TrafficManager.Manager.Impl {
             }
 
             if (laneId == null) {
-                laneId = FindLaneId(segmentId, laneIndex);
-                if (laneId == null) {
+                laneId = ExtSegmentManager.Instance.GetLaneId(segmentId, laneIndex);
+                if (laneId == 0) {
                     return false;
                 }
             }
@@ -550,23 +550,6 @@ namespace TrafficManager.Manager.Impl {
             }
 
             return true;
-        }
-
-        private uint? FindLaneId(ushort segmentId, byte laneIndex) {
-            ref NetSegment netSegment = ref segmentId.ToSegment();
-
-            NetInfo.Lane[] lanes = netSegment.Info.m_lanes;
-            uint laneId = netSegment.m_lanes;
-
-            for (byte i = 0; i < lanes.Length && laneId != 0; i++) {
-                if (i == laneIndex) {
-                    return laneId;
-                }
-
-                laneId = laneId.ToLane().m_nextLane;
-            }
-
-            return null;
         }
 
         /// <summary>

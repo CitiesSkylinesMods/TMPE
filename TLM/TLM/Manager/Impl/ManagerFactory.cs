@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.Manager.Impl {
+namespace TrafficManager.Manager.Impl {
     using TrafficManager.API.Manager;
 
     public class ManagerFactory : IManagerFactory {
@@ -17,6 +17,8 @@
 
         public IExtCitizenManager ExtCitizenManager => Impl.ExtCitizenManager.Instance;
 
+        public IExtLaneManager ExtLaneManager => Impl.ExtLaneManager.Instance;
+
         public IExtNodeManager ExtNodeManager => Impl.ExtNodeManager.Instance;
 
         public IExtPathManager ExtPathManager => Impl.ExtPathManager.Instance;
@@ -33,7 +35,7 @@
         public ILaneArrowManager LaneArrowManager => Impl.LaneArrowManager.Instance;
 
         public ILaneConnectionManager LaneConnectionManager => Impl.LaneConnectionManager.Instance;
-
+        
         public IGeometryManager GeometryManager => Impl.GeometryManager.Instance;
 
         public IOptionsManager OptionsManager => Impl.OptionsManager.Instance;
