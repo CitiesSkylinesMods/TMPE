@@ -584,18 +584,6 @@ namespace TrafficManager.UI.SubTools.SpeedLimits.Overlay {
             return true;
         }
 
-        private SpeedValue? GetAverageSpeedlimit(SpeedValue? forward, SpeedValue? back, SpeedValue? both) {
-            if (forward.HasValue && back.HasValue && both.HasValue) {
-                return (forward.Value + back.Value + both.Value).Scale(0.33f);
-            }
-
-            if (!both.HasValue && forward.HasValue && back.HasValue) {
-                return (forward.Value + back.Value).Scale(0.5f);
-            }
-
-            return both ?? forward ?? back;
-        }
-
         /// <summary>Draw speed limit handles one per lane.</summary>
         /// <param name="segmentId">Seg id.</param>
         /// <param name="segmentCenterPos">Cached or calculated via Segment.GetCenter() center of bezier.</param>
