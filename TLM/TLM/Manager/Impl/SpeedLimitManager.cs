@@ -510,11 +510,11 @@ namespace TrafficManager.Manager.Impl {
                 NetInfo.Lane laneInfo = segmentInfo.m_lanes[laneIndex];
                 NetInfo.Direction d = laneInfo.m_finalDirection;
 
-                bool applicableLane = finalDir.HasValue
+                bool applicableDir = finalDir.HasValue
                     ? (d == finalDir.Value)
                     : (d == NetInfo.Direction.None);
 
-                if (applicableLane && laneInfo.MayHaveCustomSpeedLimits()) {
+                if (applicableDir && laneInfo.MayHaveCustomSpeedLimits()) {
                     if (action.Type == SetSpeedLimitAction.ActionType.ResetToDefault) {
                         // Setting to 'Default' will instead remove the override
                         Log._Debug($"SpeedLimitManager: Setting speed limit of lane {curLaneId} to default");
