@@ -508,11 +508,8 @@ namespace TrafficManager.Manager.Impl {
             //-------------------------
             while (laneIndex < segmentInfo.m_lanes.Length && curLaneId != 0u) {
                 NetInfo.Lane laneInfo = segmentInfo.m_lanes[laneIndex];
-                NetInfo.Direction d = laneInfo.m_finalDirection;
 
-                bool applicableDir = finalDir.HasValue
-                    ? (d == finalDir.Value)
-                    : (d == NetInfo.Direction.None);
+                bool applicableDir = !finalDir.HasValue || finalDir.Value == laneInfo.m_finalDirection;
 
                 if (applicableDir && laneInfo.MayHaveCustomSpeedLimits()) {
                     if (action.Type == SetSpeedLimitAction.ActionType.ResetToDefault) {
