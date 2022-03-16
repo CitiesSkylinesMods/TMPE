@@ -472,12 +472,17 @@ namespace TrafficManager.Manager.Impl {
 
         /// <summary>Sets the speed limit of a given segment and lane direction.</summary>
         /// <param name="segmentId">Segment id.</param>
-        /// <param name="finalDir">Direction.</param>
+        /// <param name="finalDir">
+        /// Optional: Filter to a specific <see cref="NetInfo.Direction"/>.
+        /// Set <c>null</c> to apply to all directions except <see cref="NetInfo.Direction.None"/>.
+        /// </param>
         /// <param name="action">Game speed units, unlimited, or reset to default.</param>
         /// <returns>Success.</returns>
-        public bool SetSegmentSpeedLimit(ushort segmentId,
-                                         NetInfo.Direction finalDir,
-                                         SetSpeedLimitAction action) {
+        public bool SetSegmentSpeedLimit(
+            ushort segmentId,
+            [CanBeNull] NetInfo.Direction? finalDir,
+            SetSpeedLimitAction action) {
+
             ref NetSegment netSegment = ref segmentId.ToSegment();
 
             if (!netSegment.MayHaveCustomSpeedLimits()) {
@@ -511,7 +516,11 @@ namespace TrafficManager.Manager.Impl {
                 NetInfo.Lane laneInfo = segmentInfo.m_lanes[laneIndex];
                 NetInfo.Direction d = laneInfo.m_finalDirection;
 
-                if (d == finalDir && laneInfo.MayHaveCustomSpeedLimits()) {
+                bool applicableLane = finalDir.HasValue
+                    ? (d == finalDir.Value)
+                    : (d == NetInfo.Direction.None);
+
+                if (applicableLane && laneInfo.MayHaveCustomSpeedLimits()) {
                     if (action.Type == SetSpeedLimitAction.ActionType.ResetToDefault) {
                         // Setting to 'Default' will instead remove the override
                         Log._Debug($"SpeedLimitManager: Setting speed limit of lane {curLaneId} to default");
