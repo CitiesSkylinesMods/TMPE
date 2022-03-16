@@ -460,20 +460,14 @@ namespace TrafficManager.Manager.Impl {
         /// <summary>Sets speed limit for all configurable lanes.</summary>
         /// <param name="action">Speed limit in game units, or null to restore defaults.</param>
         /// <returns><c>true</c> if speed limits were applied to at least one lane.</returns>
-        public bool SetSegmentSpeedLimit(ushort segmentId, SetSpeedLimitAction action) {
-            bool ret = false;
+        public bool SetSegmentSpeedLimit(ushort segmentId, SetSpeedLimitAction action)
+            => SetSegmentSpeedLimit(segmentId, null, action);
 
-            foreach (NetInfo.Direction finaldir in Enum.GetValues(typeof(NetInfo.Direction))) {
-                ret |= this.SetSegmentSpeedLimit(segmentId, finaldir, action);
-            }
-
-            return ret;
-        }
 
         /// <summary>Sets the speed limit of a given segment and lane direction.</summary>
         /// <param name="segmentId">Segment id.</param>
         /// <param name="finalDir">
-        /// Optional: Filter to a specific <see cref="NetInfo.Direction"/>.
+        /// Filter to lanes of a specific <see cref="NetInfo.Direction"/>.
         /// Set <c>null</c> to apply to all directions except <see cref="NetInfo.Direction.None"/>.
         /// </param>
         /// <param name="action">Game speed units, unlimited, or reset to default.</param>
