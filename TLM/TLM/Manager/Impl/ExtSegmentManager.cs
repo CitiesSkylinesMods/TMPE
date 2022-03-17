@@ -26,7 +26,7 @@ namespace TrafficManager.Manager.Impl {
                 ExtSegments[i] = new ExtSegment((ushort)i);
             }
 
-            NetManagerEvents.Instance.SegmentReleased += SegmentReleased;
+            NetManagerEvents.Instance.ReleasedSegment += ReleasedSegment;
         }
 
         public static ExtSegmentManager Instance { get; }
@@ -56,7 +56,7 @@ namespace TrafficManager.Manager.Impl {
             ++segment.m_buildIndex;
         }
 
-        private void SegmentReleased(ushort segmentId) => ExtSegments[segmentId].lanes = null;
+        private void ReleasedSegment(ushort segmentId) => ExtSegments[segmentId].lanes = null;
 
         private void Reset(ref ExtSegment extSegment) {
             extSegment.Reset();

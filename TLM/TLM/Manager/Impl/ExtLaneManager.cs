@@ -23,13 +23,15 @@ namespace TrafficManager.Manager.Impl {
                 lanes[i] = new ExtLane((uint)i);
             }
 
-            NetManagerEvents.Instance.LaneReleased += LaneReleased;
+            NetManagerEvents.Instance.ReleasedLane += ReleasedLane;
         }
 
         public static ExtLaneManager Instance { get; }
 
         public bool GetSegmentAndIndex(uint laneId, out ushort segmentId, out int laneIndex)
             => lanes[laneId].GetSegmentAndIndex(laneId, out segmentId, out laneIndex);
+
+        public int GetLaneIndex(uint laneId) => lanes[laneId].GetLaneIndex(laneId);
 
         public NetInfo.Lane GetLaneInfo(uint laneId) => lanes[laneId].GetLaneInfo(laneId);
 
@@ -52,7 +54,7 @@ namespace TrafficManager.Manager.Impl {
             }
         }
 
-        private void LaneReleased(uint laneId) => lanes[laneId].Reset(laneId);
+        private void ReleasedLane(uint laneId) => lanes[laneId].Reset(laneId);
 
         private struct ExtLane {
             /// <summary>
@@ -86,6 +88,8 @@ namespace TrafficManager.Manager.Impl {
                 return result;
             }
 
+            internal int GetLaneIndex(uint laneId) => CheckLaneIndex(laneId) ? laneIndex : -1;
+
             internal NetInfo.Lane GetLaneInfo(uint laneId) {
                 ref var lane = ref laneId.ToLane();
                 return CheckLaneIndex(laneId, ref lane)
@@ -108,6 +112,9 @@ namespace TrafficManager.Manager.Impl {
 
             private bool CheckLaneIndex(uint laneId, ref NetLane lane)
                 => laneIndex >= 0 || Recalculate(laneId, ref lane);
+
+            private bool CheckLaneIndex(uint laneId)
+                => laneIndex >= 0 || Recalculate(laneId, ref laneId.ToLane());
         }
     }
 }

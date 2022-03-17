@@ -29,7 +29,7 @@ namespace TrafficManager.Patch {
         /// <summary>
         /// Occurs when a lane has been released and is no longer valid.
         /// </summary>
-        public event Action<uint> LaneReleased;
+        public event Action<uint> ReleasedLane;
 
         /// <summary>
         /// Occurs when a segment is about to be released.
@@ -40,14 +40,14 @@ namespace TrafficManager.Patch {
         /// <summary>
         /// Occurs when a segment has been released and is no longer valid.
         /// </summary>
-        public event Action<ushort> SegmentReleased;
+        public event Action<ushort> ReleasedSegment;
 
         public static NetManagerEvents Instance { get; } = new NetManagerEvents();
 
         [HarmonyPostfix]
         [HarmonyPatch("ReleaseLaneImplementation")]
         [UsedImplicitly]
-        internal static void ReleaseLaneImplementationPostfix(uint lane) => Instance.LaneReleased?.Invoke(lane);
+        internal static void ReleaseLaneImplementationPostfix(uint lane) => Instance.ReleasedLane?.Invoke(lane);
 
         [HarmonyPostfix]
         [HarmonyPatch(
@@ -56,7 +56,7 @@ namespace TrafficManager.Patch {
             new[] { ArgumentType.Normal, ArgumentType.Ref, ArgumentType.Normal }
         )]
         [UsedImplicitly]
-        internal static void ReleaseSegmentImplementationPostfix(ushort segment) => Instance.SegmentReleased?.Invoke(segment);
+        internal static void ReleaseSegmentImplementationPostfix(ushort segment) => Instance.ReleasedSegment?.Invoke(segment);
 
         [HarmonyPrefix]
         [HarmonyPatch(

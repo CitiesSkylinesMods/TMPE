@@ -16,6 +16,13 @@ namespace TrafficManager.API.Manager {
         bool GetSegmentAndIndex(uint laneId, out ushort segmentId, out int laneIndex);
 
         /// <summary>
+        /// Returns the Lane Index associated with the specified Lane ID.
+        /// </summary>
+        /// <param name="laneId">The Lane ID</param>
+        /// <returns>The Lane Index if successful, or -1 if <paramref name="laneId"/> does not represent a valid lane</returns>
+        int GetLaneIndex(uint laneId);
+
+        /// <summary>
         /// Returns the prefab info for the specified Lane ID.
         /// </summary>
         /// <param name="laneId">a Lane ID</param>
