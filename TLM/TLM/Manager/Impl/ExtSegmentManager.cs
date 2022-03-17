@@ -62,9 +62,20 @@ namespace TrafficManager.Manager.Impl {
             extSegment.Reset();
         }
 
+        private static readonly object lockObject = new object();
+
+        // If we see evidence of performance-impacting collisions,
+        // this could be enhanced to use objects from a static array
+        // based on an ID-derived index.
+        private static object GetLockObject(ushort segmentId) => lockObject;
+
         private bool CheckLanes(ref ExtSegment segment) {
             if (segment.lanes == null) {
-                segment.lanes = CalculateLanes(ref segment.segmentId.ToSegment());
+                lock (GetLockObject(segment.segmentId)) {
+                    if (segment.lanes == null) {
+                        segment.lanes = CalculateLanes(ref segment.segmentId.ToSegment());
+                    }
+                }
             }
             return segment.lanes != null;
         }

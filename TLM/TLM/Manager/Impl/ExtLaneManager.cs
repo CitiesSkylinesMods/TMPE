@@ -10,6 +10,8 @@ using TrafficManager.Util.Extensions;
 namespace TrafficManager.Manager.Impl {
     internal class ExtLaneManager : AbstractCustomManager, IExtLaneManager {
 
+        private static readonly object lockObject = new object();
+
         private readonly ExtLane[] lanes;
 
         static ExtLaneManager() {
@@ -53,6 +55,11 @@ namespace TrafficManager.Manager.Impl {
                     Log._Debug(lane.ToString(laneId));
             }
         }
+
+        // If we see evidence of performance-impacting collisions,
+        // this could be enhanced to use objects from a static array
+        // based on an ID-derived index.
+        private static object GetLockObject(uint laneId) => lockObject;
 
         private void ReleasedLane(uint laneId) => lanes[laneId].Reset(laneId);
 
@@ -110,11 +117,17 @@ namespace TrafficManager.Manager.Impl {
                 return false;
             }
 
+            private bool LockAndCheckLaneIndex(uint laneId, ref NetLane lane) {
+                lock (GetLockObject(laneId)) {
+                    return laneIndex >= 0 || Recalculate(laneId, ref lane);
+                }
+            }
+
             private bool CheckLaneIndex(uint laneId, ref NetLane lane)
-                => laneIndex >= 0 || Recalculate(laneId, ref lane);
+                => laneIndex >= 0 || LockAndCheckLaneIndex(laneId, ref lane);
 
             private bool CheckLaneIndex(uint laneId)
-                => laneIndex >= 0 || Recalculate(laneId, ref laneId.ToLane());
+                => laneIndex >= 0 || LockAndCheckLaneIndex(laneId, ref laneId.ToLane());
         }
     }
 }
