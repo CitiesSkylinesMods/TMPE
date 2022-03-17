@@ -107,20 +107,6 @@ namespace TrafficManager.Lifecycle {
             }
         }
 
-        /// <summary>
-        /// Check if a mod is enabled
-        /// </summary>
-        private static bool IsAssemblyEnabled(string assemblyName) {
-            foreach (PluginManager.PluginInfo plugin in PluginManager.instance.GetPluginsInfo()) {
-                foreach (Assembly assembly in plugin.GetAssemblies()) {
-                    if (assembly.GetName().Name == assemblyName) {
-                        return plugin.isEnabled;
-                    }
-                }
-            }
-            return false;
-        }
-
         public static void Uninstall(string harmonyId) {
             try {
                 new Harmony(harmonyId).UnpatchAll(harmonyId);

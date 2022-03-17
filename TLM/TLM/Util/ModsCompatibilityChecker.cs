@@ -207,5 +207,19 @@ namespace TrafficManager.Util {
 
             return results;
         }
+
+        /// <summary>
+        /// Check if a mod is enabled
+        /// </summary>
+        public static bool IsModWithAssemblyEnabled(string assemblyName) {
+            foreach (PluginManager.PluginInfo plugin in PluginManager.instance.GetPluginsInfo()) {
+                foreach (Assembly assembly in plugin.GetAssemblies()) {
+                    if (assembly.GetName().Name == assemblyName) {
+                        return plugin.isEnabled;
+                    }
+                }
+            }
+            return false;
+        }
     }
 }
