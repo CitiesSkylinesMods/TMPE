@@ -11,6 +11,15 @@ namespace TrafficManager.Patch {
     /// <summary>
     /// Patches <see cref="NetManager"/> for event handling.
     /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Note on event naming conventions: These events shall typically appear in pairs.
+    /// The present participle (e.g. <see cref="ReleasingLane"/>) identifies a presently/imminently
+    /// occurring event--that is, one that is about to or is in the process of happening. The past
+    /// simple (e.g. <see cref="ReleasedLane"/>) identifies an event that is already completed. In
+    /// most cases, these respectively correspond to prefix and postfix Harmony patches.
+    /// </para>
+    /// </remarks>
     [HarmonyPatch(typeof(NetManager))]
     internal class NetManagerEvents {
 
