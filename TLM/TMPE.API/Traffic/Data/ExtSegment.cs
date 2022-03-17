@@ -28,11 +28,6 @@ namespace TrafficManager.API.Traffic.Data {
         public bool buslane;
 
         /// <summary>
-        /// The NetInfo index for this segment.
-        /// </summary>
-        public ushort infoIndex;
-
-        /// <summary>
         /// The Lane IDs as an array for fast lookup by index.
         /// </summary>
         public uint[] lanes;
@@ -43,7 +38,6 @@ namespace TrafficManager.API.Traffic.Data {
             oneWay = false;
             highway = false;
             buslane = false;
-            infoIndex = 0;
             lanes = null;
         }
 
@@ -63,7 +57,6 @@ namespace TrafficManager.API.Traffic.Data {
             oneWay = false;
             highway = false;
             buslane = false;
-            infoIndex = 0;
             lanes = null;
         }
 

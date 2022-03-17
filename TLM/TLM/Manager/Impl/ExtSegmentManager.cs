@@ -5,6 +5,7 @@ namespace TrafficManager.Manager.Impl {
     using System.Collections.Generic;
     using TrafficManager.API.Manager;
     using TrafficManager.API.Traffic.Data;
+    using TrafficManager.Patch;
     using TrafficManager.State.ConfigData;
     using TrafficManager.Util;
     using TrafficManager.Util.Extensions;
@@ -24,6 +25,8 @@ namespace TrafficManager.Manager.Impl {
             for (uint i = 0; i < ExtSegments.Length; ++i) {
                 ExtSegments[i] = new ExtSegment((ushort)i);
             }
+
+            NetManagerEvents.Instance.SegmentReleased += SegmentReleased;
         }
 
         public static ExtSegmentManager Instance { get; }
@@ -53,24 +56,22 @@ namespace TrafficManager.Manager.Impl {
             ++segment.m_buildIndex;
         }
 
+        private void SegmentReleased(ushort segmentId) => ExtSegments[segmentId].lanes = null;
+
         private void Reset(ref ExtSegment extSegment) {
             extSegment.Reset();
         }
 
-        private bool CheckNetInfo(ref ExtSegment extSegment) {
-            ref var segment = ref extSegment.segmentId.ToSegment();
-            if (!segment.IsValid())
-                return false;
-
-            if (extSegment.infoIndex != segment.m_infoIndex) {
-                Recalculate(ref extSegment);
+        private bool CheckLanes(ref ExtSegment segment) {
+            if (segment.lanes == null) {
+                segment.lanes = CalculateLanes(ref segment.segmentId.ToSegment());
             }
-            return true;
+            return segment.lanes != null;
         }
 
         public uint GetLaneId(ushort segmentId, int laneIndex) {
             ref var extSegment = ref ExtSegments[segmentId];
-            if (laneIndex < 0 || !CheckNetInfo(ref extSegment))
+            if (laneIndex < 0 || !CheckLanes(ref extSegment))
                 return 0;
 
             return laneIndex < extSegment.lanes?.Length ? extSegment.lanes[laneIndex] : 0;
@@ -78,7 +79,7 @@ namespace TrafficManager.Manager.Impl {
 
         internal int GetLaneIndex(ushort segmentId, uint laneId) {
             ref var extSegment = ref ExtSegments[segmentId];
-            if (!CheckNetInfo(ref extSegment))
+            if (!CheckLanes(ref extSegment))
                 return -1;
 
             return Array.IndexOf(extSegment.lanes, laneId);
@@ -125,8 +126,6 @@ namespace TrafficManager.Manager.Impl {
             extSegment.highway = CalculateIsHighway(segmentId);
             extSegment.buslane = CalculateHasBusLane(segmentId);
             extSegment.lanes = CalculateLanes(ref netSegment);
-
-            extSegment.infoIndex = netSegment.m_infoIndex;
 
             extSegEndMan.Recalculate(segmentId);
 

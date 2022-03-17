@@ -15,9 +15,10 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.Util;
     using TrafficManager.Util.Extensions;
     using TrafficManager.Lifecycle;
+    using TrafficManager.Patch;
 
     public class LaneConnectionManager
-        : AbstractGeometryObservingManager,
+        : AbstractCustomManager,
           ICustomDataManager<List<Configuration.LaneConnection>>,
           ILaneConnectionManager
     {
@@ -36,6 +37,10 @@ namespace TrafficManager.Manager.Impl {
 
         static LaneConnectionManager() {
             Instance = new LaneConnectionManager();
+        }
+
+        private LaneConnectionManager() {
+            NetManagerEvents.Instance.ReleasingSegment += ReleasingSegment;
         }
 
         public static LaneConnectionManager Instance { get; }
@@ -437,22 +442,20 @@ namespace TrafficManager.Manager.Impl {
             return true;
         }
 
-        protected override void HandleInvalidSegment(ref ExtSegment seg) {
+        private void ReleasingSegment(ushort segmentId, ref NetSegment segment) {
 #if DEBUG
             bool logLaneConnections = DebugSwitch.LaneConnections.Get();
 #else
             const bool logLaneConnections = false;
 #endif
             if (logLaneConnections) {
-                Log._Debug($"LaneConnectionManager.HandleInvalidSegment({seg.segmentId}): " +
-                           "Segment has become invalid. Removing lane connections.");
+                Log._Debug($"LaneConnectionManager.ReleasingSegment({segmentId}, isValid={segment.IsValid()}): " +
+                           "Segment is about to become invalid. Removing lane connections.");
             }
 
-            RemoveLaneConnectionsFromSegment(seg.segmentId, false, false);
-            RemoveLaneConnectionsFromSegment(seg.segmentId, true);
+            RemoveLaneConnectionsFromSegment(segmentId, false, false);
+            RemoveLaneConnectionsFromSegment(segmentId, true);
         }
-
-        protected override void HandleValidSegment(ref ExtSegment seg) { }
 
         /// <summary>
         /// Given two lane ids and node of the first lane, determines the node id to which both lanes are connected to
