@@ -2,6 +2,7 @@ namespace TrafficManager.Patch._VehicleAI._AircraftAI {
     using System;
     using System.Reflection;
     using API.Manager;
+    using API.Traffic.Data;
     using ColossalFramework;
     using HarmonyLib;
     using JetBrains.Annotations;
@@ -37,6 +38,12 @@ namespace TrafficManager.Patch._VehicleAI._AircraftAI {
                     data.m_pathPositionIndex = byte.MaxValue;
                     data.m_flags &= ~Vehicle.Flags.WaitingPath;
                     __instance.TrySpawn(vehicleID, ref data);
+                    ref ExtVehicle extVehicle = ref vehicleID.ToExtVehicle();
+                    // NON-STOCK CODE START
+                    if (extVehicle.requiresCargoPathRecalculation) {
+                        ExtPathManager.RecalculateCargoPlaneCargoTruckPaths(vehicleID, ref data, ref extVehicle);
+                    }
+                    // NON-STOCK CODE END
                 } else if ((pathFindFlags & 8) != 0) {
                     data.m_flags &= ~Vehicle.Flags.WaitingPath;
                     pathManager.ReleasePath(data.m_path);

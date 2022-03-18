@@ -32,6 +32,8 @@ namespace TrafficManager.API.Traffic.Data {
         public float maxUnsafeSpeedDiff;
         public float minSafeSpeedImprovement;
         public float minSafeTrafficImprovement;
+        // Airplane
+        public bool requiresCargoPathRecalculation;
 
         public ExtVehicle(ushort vehicleId) {
             this.vehicleId = vehicleId;
@@ -62,6 +64,7 @@ namespace TrafficManager.API.Traffic.Data {
             maxUnsafeSpeedDiff = 0;
             minSafeSpeedImprovement = 0;
             minSafeTrafficImprovement = 0;
+            requiresCargoPathRecalculation = false;
         }
 
         public override string ToString() {

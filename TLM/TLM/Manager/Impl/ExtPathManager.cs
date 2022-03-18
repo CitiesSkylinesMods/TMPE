@@ -2,6 +2,9 @@ namespace TrafficManager.Manager.Impl {
     using ColossalFramework;
     using System;
     using System.Linq;
+    using API.Traffic.Data;
+    using ColossalFramework.Math;
+    using CSUtil.Commons;
     using State;
     using TrafficManager.API.Manager;
     using TrafficManager.Util;
@@ -448,8 +451,156 @@ namespace TrafficManager.Manager.Impl {
             return pathPosA.m_segment != 0;
         }
 
-        // protected override void InternalPrintDebugInfo() {
-        //     base.InternalPrintDebugInfo();
-        // }
+        /// <summary>
+        /// Try recalculating paths of transported cargo trucks
+        /// </summary>
+        /// <param name="vehicleId">Cargo plane id</param>
+        /// <param name="vehicle">Cargo plane vehicle data</param>
+        /// <param name="extVehicle">Cargo plane ExtVehicle data</param>
+        internal static void RecalculateCargoPlaneCargoTruckPaths(ushort vehicleId, ref Vehicle vehicle, ref ExtVehicle extVehicle) {
+
+            extVehicle.requiresCargoPathRecalculation = false; // reset flag
+
+            VehicleManager instance = VehicleManager.instance;
+            ref Building aircraftStand = ref vehicle.m_targetBuilding.ToBuilding();
+            int firstCargoVehicleId = vehicle.m_firstCargo;
+            int counter = 0;
+            uint maxVehicles = instance.m_vehicles.m_size;
+            while (firstCargoVehicleId != 0)
+            {
+                ref Vehicle v = ref instance.m_vehicles.m_buffer[firstCargoVehicleId];
+                ushort nextCargo = v.m_nextCargo;
+                VehicleInfo info = v.Info;
+                if (v.m_path != 0) {
+                    if (vehicle.m_targetBuilding != 0 && v.m_targetBuilding != 0 && vehicle.m_targetBuilding != v.m_targetBuilding) {
+                            //source building
+                            Randomizer randomizer = new Randomizer(firstCargoVehicleId);
+                            aircraftStand.Info.m_buildingAI.CalculateSpawnPosition(
+                                vehicle.m_targetBuilding,
+                                ref aircraftStand,
+                                ref randomizer,
+                                info,
+                                out Vector3 _,
+                                out Vector3 dir);
+                            //target building
+                            ref Building targetBuilding = ref v.m_targetBuilding.ToBuilding();
+                            BuildingInfo buildingInfo = targetBuilding.Info;
+                            Randomizer randomizer2 = new Randomizer(firstCargoVehicleId);
+                            buildingInfo.m_buildingAI.CalculateUnspawnPosition(
+                                (ushort)firstCargoVehicleId,
+                                ref targetBuilding,
+                                ref randomizer2,
+                                info,
+                                out Vector3 _,
+                                out Vector3 dir2);
+
+                            if (FindPathTransportedCargoTruck(dir, dir2, (ushort)firstCargoVehicleId, ref v)) {
+                                // Log.Info($"FindPathTransportedCargoTruck success, pos: {pos}, dir: {dir}, target: {dir2} first: {firstCargoVehicleId}");
+                            } else {
+                                // Log.Info($"FindPathTransportedCargoTruck failure, pos: {pos}, dir: {dir}, target: {dir2} first: {firstCargoVehicleId}");
+                            }
+                    } else {
+                        // Log.Info($"Skipped recalculation {firstCargoVehicleId}: veh_target: {vehicle.m_targetBuilding}, v_target: {v.m_targetBuilding}");
+                    }
+                } else {
+                    // Log.Info($"Attached Cargo Vehicle: {firstCargoVehicleId} to :{vehicleId} had no path...");
+                }
+
+                firstCargoVehicleId = nextCargo;
+                if (++counter > maxVehicles) {
+                    CODebugBase<LogChannel>.Error(
+                        LogChannel.Core,
+                        $"Invalid list detected! nextCargo: {nextCargo} vehicleId: {vehicleId} vehicleInfo: {vehicle.Info.name} \n" + Environment.StackTrace);
+                    break;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Slightly modified StartPathFind of CargoTruck
+        /// </summary>
+        /// <param name="startPos">start position</param>
+        /// <param name="endPos">end position</param>
+        /// <param name="vehicleID">vehicle id</param>
+        /// <param name="vehicleData">vehicle data</param>
+        /// <returns>success or fail of swap part of path transported cargo truck</returns>
+        private static bool FindPathTransportedCargoTruck(Vector3 startPos,
+                                          Vector3 endPos,
+                                          ushort vehicleID,
+                                          ref Vehicle vehicleData) {
+            VehicleInfo info = vehicleData.Info;
+            bool allowUnderground = (vehicleData.m_flags & (Vehicle.Flags.Underground | Vehicle.Flags.Transition)) != 0;
+            if (PathManager.FindPathPosition(
+                    startPos,
+                    ItemClass.Service.Road,
+                    NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle,
+                    info.m_vehicleType,
+                    allowUnderground,
+                    requireConnect: false,
+                    32f,
+                    out PathUnit.Position pathPosA,
+                    out PathUnit.Position pathPosB,
+                    out float distanceSqrA,
+                    out float _) &&
+                PathManager.FindPathPosition(
+                    endPos,
+                    ItemClass.Service.Road,
+                    NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle,
+                    info.m_vehicleType,
+                    false,
+                    requireConnect: false,
+                    32f,
+                    out PathUnit.Position pathPosA2,
+                    out PathUnit.Position pathPosB2,
+                    out float distanceSqrA2,
+                    out float _)) {
+
+                if (distanceSqrA < 10f) {
+                    pathPosB = default(PathUnit.Position);
+                }
+
+                if (distanceSqrA2 < 10f) {
+                    pathPosB2 = default(PathUnit.Position);
+                }
+
+                if (Singleton<PathManager>.instance.CreatePath(
+                    out uint unit,
+                    ref Singleton<SimulationManager>.instance.m_randomizer,
+                    Singleton<SimulationManager>.instance.m_currentBuildIndex,
+                    pathPosA,
+                    pathPosB,
+                    pathPosA2,
+                    pathPosB2,
+                    default(PathUnit.Position),
+                    NetInfo.LaneType.Vehicle,
+                    info.m_vehicleType,
+                    20000f,
+                    ((CargoTruckAI)info.m_vehicleAI).m_isHeavyVehicle,
+                    false,
+                    stablePath: false,
+                    skipQueue: false,
+                    randomParking: false,
+                    ignoreFlooded: false,
+                    true)) {
+
+                    // get original path unit and "patch it" to jump to new part of the path
+                    ref PathUnit originalPathUnit = ref PathManager.instance.m_pathUnits.m_buffer[vehicleData.m_path];
+                    int firstIndex = vehicleData.m_pathPositionIndex >> 1;
+                    uint nextOriginalPathUnit = originalPathUnit.m_nextPathUnit;
+                    if (nextOriginalPathUnit != 0) {
+                        // release no longer used, original part of the path (releases all units to the end)
+                        PathManager.instance.ReleasePath(nextOriginalPathUnit);
+                    }
+
+                    originalPathUnit.m_nextPathUnit = unit;
+                    originalPathUnit.m_positionCount = (byte)(firstIndex + 1);
+                    return true;
+                }
+                // Log.Info($"Vehicle: {vehicleID} - CreatePath failed -> pA: {pathPosA} pB: {pathPosB} pA2: {pathPosA2} pB2: {pathPosB2}");
+            }
+
+            // Log.Info($"Vehicle: {vehicleID} - FindPathPosition failed -> pA: {pathPosA} pB: {pathPosB} ");
+            return false;
+        }
     }
 }

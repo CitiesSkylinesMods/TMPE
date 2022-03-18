@@ -486,6 +486,9 @@ namespace TrafficManager.Manager.Impl {
             DetermineVehicleType(ref extVehicle, ref vehicleData);
             extVehicle.recklessDriver = false;
             extVehicle.flags = ExtVehicleFlags.Created;
+            if (extVehicle.vehicleType.IsFlagSet(ExtVehicleType.CargoPlane)) {
+                UpdateCargoAirplaneFlags(ref extVehicle, ref vehicleData);
+            }
 
             if (logVehicleLinking) {
                 Log._Debug(
@@ -535,6 +538,9 @@ namespace TrafficManager.Manager.Impl {
 
             StepRand(ref extVehicle, true);
             UpdateDynamicLaneSelectionParameters(ref extVehicle);
+            if (extVehicle.vehicleType.IsFlagSet(ExtVehicleType.CargoPlane)) {
+                UpdateCargoAirplaneFlags(ref extVehicle, ref vehicleData);
+            }
 
             return extVehicle.vehicleType;
         }
@@ -777,6 +783,21 @@ namespace TrafficManager.Manager.Impl {
                                            ? (byte)rand.UInt32(100)
                                            : (byte)50;
             }
+        }
+
+        public void UpdateCargoAirplaneFlags(ref ExtVehicle extVehicle, ref Vehicle vehicleData) {
+            bool goingToSource = vehicleData.m_flags.IsFlagSet(Vehicle.Flags.GoingBack);
+            extVehicle.flags &= ~(ExtVehicleFlags.GoingToOutside | ExtVehicleFlags.GoingFromOutside);
+            extVehicle.flags |= goingToSource
+                                    ? vehicleData.m_sourceBuilding.ToBuilding().m_flags
+                                                 .IsFlagSet(Building.Flags.IncomingOutgoing)
+                                          ? ExtVehicleFlags.GoingToOutside
+                                          : ExtVehicleFlags.GoingFromOutside
+                                    : vehicleData.m_targetBuilding.ToBuilding().m_flags
+                                                 .IsFlagSet(Building.Flags.IncomingOutgoing)
+                                        ? ExtVehicleFlags.GoingToOutside
+                                        : ExtVehicleFlags.GoingFromOutside;
+            // Log.Info($"Updated CargoPlane {extVehicle.vehicleId} flags: {extVehicle.flags} | s: {vehicleData.m_sourceBuilding} t: {vehicleData.m_targetBuilding} f: {vehicleData.m_flags}");
         }
 
         public void UpdateDynamicLaneSelectionParameters(ref ExtVehicle extVehicle) {
