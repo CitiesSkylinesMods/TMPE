@@ -7,23 +7,53 @@ namespace TrafficManager.Util.Extensions {
         internal static ref NetLane ToLane(this uint laneId) => ref _laneBuffer[laneId];
 
         /// <summary>
-        /// Checks if the netLane is Created, but not Deleted.
+        /// Checks <paramref name="netLane"/> is <c>Created</c> but not <c>Deleted</c>.
         /// </summary>
         /// <param name="netLane">netLane</param>
-        /// <returns>True if the netLane is valid, otherwise false.</returns>
+        /// <returns>Returns <c>true</c> if valid, otherwise <c>false</c>.</returns>
         public static bool IsValid(this ref NetLane netLane) =>
             ((NetLane.Flags)netLane.m_flags).CheckFlags(
                 required: NetLane.Flags.Created,
                 forbidden: NetLane.Flags.Deleted);
 
         /// <summary>
-        /// Checks if the netLane is Created, but not Deleted and if its netSegment is Created, but neither Collapsed nor Deleted.
+        /// Checks <paramref name="laneId"/> is not <c>0</c>,
+        /// then checks netLane is <c>Created</c> but not <c>Deleted</c>.
+        /// </summary>
+        /// <param name="laneId">The id of the lane to check.</param>
+        /// <returns>Returns <c>true</c> if valid, otherwise <c>false</c>.</returns>
+        public static bool IsValid(this uint laneId)
+            => (laneId != 0) && laneId.ToLane().IsValid();
+
+        /// <summary>
+        /// Checks <paramref name="netLane"/> is <c>Created</c> but not <c>Deleted</c>,
+        /// then checks its netSegment is <c>Created</c> but not <c>Collapsed|Deleted</c>.
         /// </summary>
         /// <param name="netLane">netLane</param>
-        /// <returns>True if the netLane and its netSegment is valid, otherwise false.</returns>
+        /// <returns>Returns <c>true</c> if valid, otherwise <c>false</c>.</returns>
         public static bool IsValidWithSegment(this ref NetLane netLane) {
             return netLane.IsValid()
                 && netLane.m_segment.ToSegment().IsValid();
+        }
+
+        /// <summary>
+        /// Checks <paramref name="laneId"/> is not <c>0</c>,
+        /// then checks netLane is <c>Created</c> but not <c>Deleted</c>,
+        /// then checks its segmentId is not <c>0</c>,
+        /// then checks its netSegment is <c>Created</c> but not <c>Collapsed|Deleted</c>.
+        /// </summary>
+        /// <param name="laneId">The id of the lane to check.</param>
+        /// <returns>Returns <c>true</c> if valid, otherwise <c>false</c>.</returns>
+        public static bool IsValidWithSegment(this uint laneId) {
+            if (laneId == 0)
+                return false;
+
+            ref NetLane netLane = ref laneId.ToLane();
+
+            if (!netLane.IsValid())
+                return false;
+
+            return netLane.m_segment.IsValid();
         }
     }
 }

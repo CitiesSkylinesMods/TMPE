@@ -712,9 +712,8 @@ namespace TrafficManager.Manager.Impl {
 
         /// <summary>Private: Do not call from the outside.</summary>
         private void SetLaneSpeedLimit(uint laneId, SetSpeedLimitAction action) {
-            if (!Flags.CheckLane(laneId)) {
+            if (!laneId.IsValidWithSegment())
                 return;
-            }
 
             ushort segmentId = laneId.ToLane().m_segment;
             ref NetSegment netSegment = ref segmentId.ToSegment();
