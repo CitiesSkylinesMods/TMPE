@@ -19,7 +19,11 @@ namespace TrafficManager.Patch._External._RTramAIModPatch {
     public static class RTramAIModPatch {
         private static Type TargetType => Type.GetType("ReversibleTramAI.SimulationStepPatch1, ReversibleTramAI", false);
 
-        public static bool Prepare() => TargetType != null;
+        public static bool Prepare() {
+            return
+                ModsCompatibilityChecker.IsModWithAssemblyEnabled("ReversibleTramAI") &&
+                TargetType != null;
+        }
 
         public static MethodBase TargetMethod() => AccessTools.DeclaredMethod(TargetType, "Prefix");
 
