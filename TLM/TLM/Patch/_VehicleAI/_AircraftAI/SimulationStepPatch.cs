@@ -84,7 +84,7 @@ namespace TrafficManager.Patch._VehicleAI._AircraftAI {
 
             if ((data.m_flags & (Vehicle.Flags.Spawned | Vehicle.Flags.WaitingPath |
                                  Vehicle.Flags.WaitingSpace | Vehicle.Flags.WaitingCargo)) == 0
-                || (data.m_blockCounter == byte.MaxValue && VehicleBehaviorManager.Instance.MayDespawn(ref data))) {
+                || (data.m_blockCounter == byte.MaxValue && VehicleBehaviorManager.Instance.MayDespawn(vehicleID, ref data))) {
                 VehicleManager.instance.ReleaseVehicle(vehicleID);
             }
 

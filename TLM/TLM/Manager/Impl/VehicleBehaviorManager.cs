@@ -1171,7 +1171,7 @@ namespace TrafficManager.Manager.Impl {
                     Log._Debug(
                         $"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): " +
                         $"PrevTargetNode != targetNodeId: {prevTargetNodeId != targetNodeId}, blockCounter: {vehicleData.m_blockCounter}" +
-                        $"MayDespawn: {Instance.MayDespawn(ref vehicleData)} Returned: LEAVE");
+                        $"MayDespawn: {Instance.MayDespawn(frontVehicleId, ref vehicleData)} Returned: LEAVE");
                 }
                 // method should only be called if targetNodeId == prevTargetNode
                 return VehicleJunctionTransitState.Leave;
