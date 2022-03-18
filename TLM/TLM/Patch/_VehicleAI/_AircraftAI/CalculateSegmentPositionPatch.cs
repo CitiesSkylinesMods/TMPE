@@ -52,7 +52,7 @@ namespace TrafficManager.Patch._VehicleAI._AircraftAI {
 
             if (info.m_lanes != null && info.m_lanes.Length > position.m_lane) {
                 // NON-STOCK CODE
-                float speedLimit = Options.customSpeedLimitsEnabled
+                float speedLimit = Options.customSpeedLimitsEnabled && info.m_netAI is not RunwayAI
                                        ? SpeedLimitManager.Instance.GetGameSpeedLimit(
                                            position.m_segment,
                                            position.m_lane,

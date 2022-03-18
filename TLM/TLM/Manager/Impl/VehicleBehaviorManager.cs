@@ -1597,7 +1597,9 @@ namespace TrafficManager.Manager.Impl {
                             {
                                 ++extVehicle.waitTime;
 
-                                if (extVehicle.waitTime < 2) {
+                                //todo aircraft adjust time for LargeVehicles()
+                                int minWaitTime = (extVehicle.vehicleType & ExtVehicleType.Plane) != 0 ? 10 : 2;
+                                if (extVehicle.waitTime < minWaitTime) {
                                     vehicleData.m_blockCounter = 0;
                                     return VehicleJunctionTransitState.Stop;
                                 }

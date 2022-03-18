@@ -265,7 +265,9 @@ namespace TrafficManager.Manager.Impl {
                     return laneInfo.m_speedLimit;
                 }
 
-                return cachedLaneSpeedLimits_[laneId];
+                // TODO looks like a bug -> lane speed limit shouldn't be zero
+                float cachedLimit = cachedLaneSpeedLimits_[laneId];
+                return cachedLimit < 0.1f ? 1f : cachedLimit;
             } catch (Exception ex) {
                 new Exception($"GetGameSpeedLimit({laneId}, {laneInfo}", ex).LogException();
                 return laneInfo?.m_speedLimit ?? 0;

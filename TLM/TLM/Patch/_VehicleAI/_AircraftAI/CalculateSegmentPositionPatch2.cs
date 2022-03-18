@@ -152,7 +152,6 @@ namespace TrafficManager.Patch._VehicleAI._AircraftAI {
             float d = Vector3.Distance(lastFrameVehiclePos, refVehiclePosOnBezier);
             bool withinBrakingDistance = d >= crazyValue - 1f;
 
-            bool speedCalculated = false;
             if (nextSourceNodeId == curTargetNodeId &&
                 withinBrakingDistance) {
                 Log._DebugIf(
@@ -198,7 +197,6 @@ namespace TrafficManager.Patch._VehicleAI._AircraftAI {
                     pos: pos,
                     maxSpeed: maxSpeed,
                     emergency: false);
-                speedCalculated = true;
 
                 if (logLogic) {
                     Log._Debug($"AircraftAI.CalculateSegmentPosition2({vehicleID}): Can change segment! MaxSpeed: {maxSpeed}");
@@ -207,15 +205,13 @@ namespace TrafficManager.Patch._VehicleAI._AircraftAI {
                 ExtVehicleManager.Instance.UpdateVehiclePosition(vehicleID,
                                                                  ref vehicleData);
 
-                if (!lane.CheckSpace(1000f, vehicleID)) {
+                if (!lane.CheckSpace(vehicleData.Info.m_generatedInfo.m_size.z * 3f/*STOCK 1000f*/, vehicleID)) {
                     maxSpeed = 0f;
                     Log._DebugIf(logLogic, () => $"AircraftAI.CalculateSegmentPosition2({vehicleID}): No space on lane: {laneID}!");
                     return false;
                 }
 
                 ref NetSegment segment = ref position.m_segment.ToSegment();
-                ushort startNode = segment.m_startNode;
-                ushort endNode = segment.m_endNode;
                 Vector3 startNodePos = segment.m_startNode.ToNode().m_position;
                 Vector3 endNodePos = segment.m_endNode.ToNode().m_position;
                 if (CheckOverlap(new Segment3(startNodePos, endNodePos), vehicleID)) {
@@ -226,30 +222,31 @@ namespace TrafficManager.Patch._VehicleAI._AircraftAI {
                     }
                     return false;
                 }
+
+                return false;
             }
 
-            if (!speedCalculated) {
-                NetInfo currentPositionSegmentInfo2 = currentPositionSegment.Info;
-                // NON-STOCK CODE START (stock code replaced)
-                VehicleAICommons.CustomCalculateTargetSpeed(
-                    __instance,
+            Log._DebugIf(logLogic, () => $"AircraftAI.CalculateSegmentPosition2({vehicleID}): Speed not calculated yet. Calculating...");
+            NetInfo currentPositionSegmentInfo2 = currentPositionSegment.Info;
+            // NON-STOCK CODE START (stock code replaced)
+            VehicleAICommons.CustomCalculateTargetSpeed(
+                __instance,
+                vehicleID,
+                ref vehicleData,
+                position,
+                laneID,
+                currentPositionSegmentInfo2,
+                out maxSpeed);
+
+            maxSpeed = Constants.ManagerFactory.VehicleBehaviorManager.CalcMaxSpeed(
                     vehicleID,
-                    ref vehicleData,
+                    ref Constants.ManagerFactory.ExtVehicleManager.ExtVehicles[vehicleID],
+                    __instance.m_info,
                     position,
-                    laneID,
-                    currentPositionSegmentInfo2,
-                    out maxSpeed);
-
-                maxSpeed = Constants.ManagerFactory.VehicleBehaviorManager.CalcMaxSpeed(
-                        vehicleID,
-                        ref Constants.ManagerFactory.ExtVehicleManager.ExtVehicles[vehicleID],
-                        __instance.m_info,
-                        position,
-                        ref currentPositionSegment,
-                        pos,
-                        maxSpeed,
-                        false);
-            }
+                    ref currentPositionSegment,
+                    pos,
+                    maxSpeed,
+                    false);
 
             // todo-airplanes: improve lane reservation
             // (currently it checks only current and next lane (might be too short to provide nice gap between planes))
@@ -290,19 +287,10 @@ namespace TrafficManager.Patch._VehicleAI._AircraftAI {
 
 
             Log._DebugIf(logLogic, () => $"AircraftAI.CalculateSegmentPosition2({vehicleID}): NextLaneID {nextLaneID}");
-            if (!nextLaneID.ToLane().CheckSpace(1000f)) {
+            if (!nextLaneID.ToLane().CheckSpace(vehicleData.Info.m_generatedInfo.m_size.z * 3f/*STOCK 1000f*/)) {
                 maxSpeed = 0f;
                 Log._DebugIf(logLogic, () => $"AircraftAI.CalculateSegmentPosition2({vehicleID}): NextLaneID no space!");
                 return false;
-            }
-
-            Vector3 startNodePos2 = nextSegment.m_startNode.ToNode().m_position;
-            Vector3 endNodePos2 = nextSegment.m_endNode.ToNode().m_position;
-            if (CheckOverlap(new Segment3(startNodePos2, endNodePos2), vehicleID)) {
-                maxSpeed = 0f;
-                if (logLogic) {
-                    Log._Debug($"AircraftAI.CalculateSegmentPosition2({vehicleID}): CheckOverlap Next failed! startNodePos: {startNodePos2}, endNodePos: {endNodePos2}, startNode: {nextSegment.m_startNode}, endNode: {nextSegment.m_endNode}");
-                }
             }
 
             return false;

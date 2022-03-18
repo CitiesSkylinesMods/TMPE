@@ -724,6 +724,9 @@ namespace TrafficManager.Manager.Impl {
 
                     // incoming vehicle is (1) entering the junction or (2) leaving
                     Vector3 incomingPos = incomingVehicle.GetLastFramePosition();
+                    if (vehicle.Info.m_vehicleType.IsFlagSet(VehicleInfo.VehicleType.Plane)) {
+                        incomingPos -= Vector3.one * (vehicle.Info.m_generatedInfo.m_size.z * 0.5f);
+                    }
                     Vector3 incomingToNode = transitNodePos - incomingPos;
 
                     // check if incoming vehicle moves towards node
@@ -734,7 +737,7 @@ namespace TrafficManager.Manager.Impl {
                             logPriority,
                             () => $"TrafficPriorityManager.IsConflictingVehicle({vehicleId}, " +
                             $"{incomingVehicleId}): Incoming {incomingVehicleId} is moving away from " +
-                            $"the transit node ({dot}). *IGNORING*");
+                            $"the transit node ({dot}). ({incomingPos}, {incomingToNode}) *IGNORING*");
                         return false;
                     }
 
