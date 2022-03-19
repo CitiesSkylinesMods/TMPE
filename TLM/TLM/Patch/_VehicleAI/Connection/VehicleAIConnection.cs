@@ -15,6 +15,25 @@ namespace TrafficManager.Patch._VehicleAI.Connection {
     public delegate void ArrivingToDestinationDelegate(VehicleAI vehicleAI, ushort vehicleID, ref Vehicle vehicleData);
     public delegate bool LeftHandDriveDelegate(VehicleAI vehicleAI, NetInfo.Lane lane);
 
+    //aircraftAI
+    public delegate void UpdateBuildingTargetPositionsDelegate(VehicleAI vehicleAI,
+                                                               ushort vehicleID,
+                                                               ref Vehicle vehicleData,
+                                                               Vector3 refPos,
+                                                               ushort leaderID,
+                                                               ref Vehicle leaderData,
+                                                               ref int index,
+                                                               float minSqrDistance);
+    public delegate bool ArriveAtDestinationDelegate(VehicleAI vehicleAI, ushort vehicleID, ref Vehicle vehicleData);
+    public delegate void UpdatePathTargetPositionsDelegate(VehicleAI vehicleAI,
+                                                           ushort vehicleID,
+                                                           ref Vehicle vehicleData,
+                                                           Vector3 refPos,
+                                                           ref int index,
+                                                           int max,
+                                                           float minSqrDistanceA,
+                                                           float minSqrDistanceB);
+
     internal class VehicleAIConnection {
         public VehicleAIConnection(CalculateTargetSpeedDelegate calculateTargetSpeedDelegate,
                                    PathfindFailureDelegate pathfindFailureDelegate,
@@ -27,8 +46,12 @@ namespace TrafficManager.Patch._VehicleAI.Connection {
                                    ChangeVehicleTypeDelegate changeVehicleTypeDelegate,
                                    UpdateNodeTargetPosDelegate updateNodeTargetPosDelegate,
                                    ArrivingToDestinationDelegate arrivingToDestinationDelegate,
-                                   LeftHandDriveDelegate leftHandDriveDelegate) {
-            CalculateTargetSpeed = calculateTargetSpeedDelegate ?? throw new ArgumentNullException( nameof(calculateTargetSpeedDelegate));
+                                   LeftHandDriveDelegate leftHandDriveDelegate,
+                                   UpdateBuildingTargetPositionsDelegate updateBuildingTargetPositionsDelegate,
+                                   ArriveAtDestinationDelegate arriveAtDestinationDelegate,
+                                   UpdatePathTargetPositionsDelegate updatePathTargetPositionsDelegate) {
+
+            CalculateTargetSpeed = calculateTargetSpeedDelegate ?? throw new ArgumentNullException(nameof(calculateTargetSpeedDelegate));
             PathfindFailure = pathfindFailureDelegate ?? throw new ArgumentNullException(nameof(pathfindFailureDelegate));
             PathfindSuccess = pathfindSuccessDelegate ?? throw new ArgumentNullException(nameof(pathfindSuccessDelegate));
             InvalidPath = invalidPathDelegate ?? throw new ArgumentNullException(nameof(invalidPathDelegate));
@@ -40,6 +63,10 @@ namespace TrafficManager.Patch._VehicleAI.Connection {
             UpdateNodeTargetPos = updateNodeTargetPosDelegate ?? throw new ArgumentNullException(nameof(updateNodeTargetPosDelegate));
             ArrivingToDestination = arrivingToDestinationDelegate ?? throw new ArgumentNullException(nameof(arrivingToDestinationDelegate));
             LeftHandDrive = leftHandDriveDelegate ?? throw new ArgumentNullException(nameof(leftHandDriveDelegate));
+            //--
+            ArriveAtDestination = arriveAtDestinationDelegate ?? throw new ArgumentNullException(nameof(arriveAtDestinationDelegate));
+            UpdateBuildingTargetPositions = updateBuildingTargetPositionsDelegate ?? throw new ArgumentNullException(nameof(updateBuildingTargetPositionsDelegate));
+            UpdatePathTargetPositions = updatePathTargetPositionsDelegate ?? throw new ArgumentNullException(nameof(updatePathTargetPositionsDelegate));
         }
 
         public CalculateTargetSpeedDelegate CalculateTargetSpeed { get; }
@@ -54,5 +81,8 @@ namespace TrafficManager.Patch._VehicleAI.Connection {
         public UpdateNodeTargetPosDelegate UpdateNodeTargetPos { get; }
         public ArrivingToDestinationDelegate ArrivingToDestination { get; }
         public LeftHandDriveDelegate LeftHandDrive { get; }
+        public UpdateBuildingTargetPositionsDelegate UpdateBuildingTargetPositions { get; }
+        public ArriveAtDestinationDelegate ArriveAtDestination { get; }
+        public UpdatePathTargetPositionsDelegate UpdatePathTargetPositions { get; }
     }
 }

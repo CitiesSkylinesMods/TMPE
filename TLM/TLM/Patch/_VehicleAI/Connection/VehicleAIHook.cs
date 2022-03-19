@@ -18,6 +18,10 @@ namespace TrafficManager.Patch._VehicleAI.Connection {
                 UpdateNodeTargetPosDelegate updateNodeTargetPosDelegate = TranspilerUtil.CreateDelegate<UpdateNodeTargetPosDelegate>(typeof(VehicleAI), "UpdateNodeTargetPos", true);
                 ArrivingToDestinationDelegate arrivingToDestinationDelegate = TranspilerUtil.CreateDelegate<ArrivingToDestinationDelegate>(typeof(VehicleAI), "ArrivingToDestination", true);
                 LeftHandDriveDelegate leftHandDriveDelegate = TranspilerUtil.CreateDelegate<LeftHandDriveDelegate>(typeof(VehicleAI), "LeftHandDrive", true);
+//--
+                ArriveAtDestinationDelegate arriveAtDestinationDelegate = TranspilerUtil.CreateDelegate<ArriveAtDestinationDelegate>(typeof(VehicleAI), "ArriveAtDestination", true);
+                UpdateBuildingTargetPositionsDelegate updateBuildingTargetPositionsDelegate = TranspilerUtil.CreateDelegate<UpdateBuildingTargetPositionsDelegate>(typeof(VehicleAI), "UpdateBuildingTargetPositions", true);
+                UpdatePathTargetPositionsDelegate updatePathTargetPositionsDelegate = TranspilerUtil.CreateDelegate<UpdatePathTargetPositionsDelegate>(typeof(VehicleAI), "UpdatePathTargetPositions", true);
 
                 return new VehicleAIConnection(calculateTargetSpeedDelegate,
                                                pathfindFailureDelegate,
@@ -30,7 +34,10 @@ namespace TrafficManager.Patch._VehicleAI.Connection {
                                                changeVehicleTypeDelegate,
                                                updateNodeTargetPosDelegate,
                                                arrivingToDestinationDelegate,
-                                               leftHandDriveDelegate);
+                                               leftHandDriveDelegate,
+                                               updateBuildingTargetPositionsDelegate,
+                                               arriveAtDestinationDelegate,
+                                               updatePathTargetPositionsDelegate);
             } catch (Exception e) {
                 Log.Error(e.Message);
                 return null;
