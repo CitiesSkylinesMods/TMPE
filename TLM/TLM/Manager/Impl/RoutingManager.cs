@@ -739,13 +739,13 @@ namespace TrafficManager.Manager.Impl {
                                 var transitionType = LaneEndTransitionType.Invalid;
 
                                 // check for lane connections
-                                bool nextHasOutgoingConnections =
+                                bool nextHasConnections =
                                     LaneConnectionManager.Instance.HasConnections(
                                         nextLaneId,
                                         isNextStartNodeOfNextSegment);
                                 bool nextIsConnectedWithPrev = true;
 
-                                if (nextHasOutgoingConnections) {
+                                if(nextHasConnections) {
                                     nextIsConnectedWithPrev =
                                         LaneConnectionManager.Instance.AreLanesConnected(
                                             nextLaneId,
@@ -758,7 +758,7 @@ namespace TrafficManager.Manager.Impl {
                                         "RoutingManager.RecalculateLaneEndRoutingData({0}, {1}, {2}, {3}): " +
                                         "checking lane connections of nextLaneId={4}, idx={5}: " +
                                         "isNextStartNodeOfNextSegment={6}, nextSegmentId={7}, " +
-                                        "nextHasOutgoingConnections={8}, nextIsConnectedWithPrev={9}",
+                                        "nextHasConnections={8}, nextIsConnectedWithPrev={9}",
                                         segmentId,
                                         laneIndex,
                                         laneId,
@@ -767,12 +767,12 @@ namespace TrafficManager.Manager.Impl {
                                         nextLaneIndex,
                                         isNextStartNodeOfNextSegment,
                                         nextSegmentId,
-                                        nextHasOutgoingConnections,
+                                        nextHasConnections,
                                         nextIsConnectedWithPrev);
                                     Log._DebugFormat(
                                         "RoutingManager.RecalculateLaneEndRoutingData({0}, {1}, {2}, {3}): " +
                                         "connection information for nextLaneId={4}, idx={5}: " +
-                                        "nextOuterSimilarLaneIndex={6}, nextHasOutgoingConnections={7}, " +
+                                        "nextOuterSimilarLaneIndex={6}, nextHasConnections={7}, " +
                                         "nextIsConnectedWithPrev={8}",
                                         segmentId,
                                         laneIndex,
@@ -781,13 +781,13 @@ namespace TrafficManager.Manager.Impl {
                                         nextLaneId,
                                         nextLaneIndex,
                                         nextOuterSimilarLaneIndex,
-                                        nextHasOutgoingConnections,
+                                        nextHasConnections,
                                         nextIsConnectedWithPrev);
                                 }
 
                                 int currentLaneConnectionTransIndex = -1;
 
-                                if (nextHasOutgoingConnections) {
+                                if (nextHasConnections) {
                                     // check for lane connections
                                     if (nextIsConnectedWithPrev) {
                                         // lane is connected with previous lane
@@ -962,7 +962,7 @@ namespace TrafficManager.Manager.Impl {
                                                 $"idx {prevLaneIndex} @ seg. {prevSegmentId}");
                                         }
                                     }
-                                } else if (!nextHasOutgoingConnections) {
+                                } else if (!nextHasConnections) {
                                     if (extendedLogRouting) {
                                         Log._DebugFormat(
                                             "RoutingManager.RecalculateLaneEndRoutingData({0}, {1}, " +
@@ -1324,6 +1324,7 @@ namespace TrafficManager.Manager.Impl {
                                     }
 
                                     // skip lanes having lane connections
+                                    // in highway-rules HasConnections() gives the same result as HasOutgoingConnections but faster.
                                     if (LaneConnectionManager.Instance.HasConnections(
                                         nextCompatibleTransitionDatas[nextTransitionIndex].laneId,
                                         isNextStartNodeOfNextSegment))
@@ -1934,7 +1935,7 @@ namespace TrafficManager.Manager.Impl {
                                 }
 
                                 // skip lanes having lane connections
-                                if (LaneConnectionManager.Instance.HasConnections(
+                                if (LaneConnectionManager.Instance.HasOutgoingConnections(
                                     nextCompatibleTransitionDatas[nextTransitionIndex].laneId,
                                     isNextStartNodeOfNextSegment))
                                 {
