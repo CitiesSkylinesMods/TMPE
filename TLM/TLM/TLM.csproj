@@ -147,6 +147,9 @@
     <Compile Include="Manager\Impl\ExtSegmentEndManager.cs" />
     <Compile Include="Manager\Impl\ExtSegmentManager.cs" />
     <Compile Include="Manager\Impl\GeometryNotifier.cs" />
+    <Compile Include="Manager\Impl\LaneConnectionManagerData\ConnectionDataBase.cs" />
+    <Compile Include="Manager\Impl\LaneConnectionManagerData\LaneConnectionData.cs" />
+    <Compile Include="Manager\Impl\LaneConnectionManagerData\LaneEnd.cs" />
     <Compile Include="Patch\_External\RTramAIModPatch.cs" />
     <Compile Include="Patch\_TaxiwayAI\SegmentSimulationStepPatch.cs" />
     <Compile Include="Patch\_VehicleAI\_AircraftAI\CalculateSegmentPositionPatch.cs" />
@@ -451,6 +454,7 @@
     <Compile Include="UI\TrafficManagerSubTool.cs" />
     <Compile Include="UI\TransportDemandViewMode.cs" />
     <Compile Include="UI\UITransportDemand.cs" />
+    <Compile Include="Util\Extensions\ArrayExtensions.cs" />
     <Compile Include="UI\WhatsNew\WhatsNew.cs" />
     <Compile Include="UI\WhatsNew\WhatsNewPanel.cs" />
     <Compile Include="Util\AutoTimedTrafficLights.cs" />
