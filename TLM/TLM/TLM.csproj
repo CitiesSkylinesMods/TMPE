@@ -157,6 +157,7 @@
     <Compile Include="Patch\_VehicleAI\_AircraftAI\CalculateSegmentPositionPatch2.cs" />
     <Compile Include="Patch\_VehicleAI\_AircraftAI\Connection\AircraftAIConnection.cs" />
     <Compile Include="Patch\_VehicleAI\_AircraftAI\Connection\AircraftAIHook.cs" />
+    <Compile Include="Patch\_VehicleAI\_AircraftAI\SimulationStep2Patch.cs" />
     <Compile Include="Patch\_VehicleAI\_AircraftAI\SimulationStepPatch.cs" />
     <Compile Include="Patch\_VehicleAI\_AircraftAI\StartPathFindPatch.cs" />
     <Compile Include="State\OptionsTabs\GameplayTab_AIGroups.cs" />

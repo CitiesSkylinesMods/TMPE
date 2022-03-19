@@ -1,10 +1,8 @@
 namespace TrafficManager.Manager.Impl {
     using ColossalFramework;
     using System;
-    using System.Linq;
     using API.Traffic.Data;
     using ColossalFramework.Math;
-    using CSUtil.Commons;
     using State;
     using TrafficManager.API.Manager;
     using TrafficManager.Util;
@@ -462,7 +460,7 @@ namespace TrafficManager.Manager.Impl {
             extVehicle.requiresCargoPathRecalculation = false; // reset flag
 
             VehicleManager instance = VehicleManager.instance;
-            ref Building aircraftStand = ref vehicle.m_targetBuilding.ToBuilding();
+            ref Building airplaneStand = ref vehicle.m_targetBuilding.ToBuilding();
             int firstCargoVehicleId = vehicle.m_firstCargo;
             int counter = 0;
             uint maxVehicles = instance.m_vehicles.m_size;
@@ -475,9 +473,9 @@ namespace TrafficManager.Manager.Impl {
                     if (vehicle.m_targetBuilding != 0 && v.m_targetBuilding != 0 && vehicle.m_targetBuilding != v.m_targetBuilding) {
                             //source building
                             Randomizer randomizer = new Randomizer(firstCargoVehicleId);
-                            aircraftStand.Info.m_buildingAI.CalculateSpawnPosition(
+                            airplaneStand.Info.m_buildingAI.CalculateSpawnPosition(
                                 vehicle.m_targetBuilding,
-                                ref aircraftStand,
+                                ref airplaneStand,
                                 ref randomizer,
                                 info,
                                 out Vector3 _,
