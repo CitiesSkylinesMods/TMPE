@@ -1,10 +1,12 @@
 namespace TrafficManager.Util.Extensions {
+    using API.Traffic.Data;
     using ColossalFramework;
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.Manager.Impl;
 
     public static class VehicleExtensions {
         private static Vehicle[] _vehicleBuffer = Singleton<VehicleManager>.instance.m_vehicles.m_buffer;
+        private static ExtVehicle[] _extVehicles = ExtVehicleManager.Instance.ExtVehicles;
 
         /// <summary>Returns a reference to the vehicle instance.</summary>
         /// <param name="vehicleId">The ID of the vehicle instance to obtain.</param>
@@ -15,6 +17,11 @@ namespace TrafficManager.Util.Extensions {
         /// <param name="vehicleId">The ID of the vehicle instance to obtain.</param>
         /// <returns>The vehicle instance.</returns>
         public static ref Vehicle ToVehicle(this uint vehicleId) => ref _vehicleBuffer[vehicleId];
+
+        /// <summary>Returns a reference to the ext vehicle instance.</summary>
+        /// <param name="vehicleId">The ID of the ext vehicle instance to obtain.</param>
+        /// <returns>The vehicle instance.</returns>
+        public static ref ExtVehicle ToExtVehicle(this ushort vehicleId) => ref _extVehicles[vehicleId];
 
         public static bool IsCreated(this ref Vehicle vehicle) =>
             vehicle.m_flags.IsFlagSet(Vehicle.Flags.Created);
@@ -51,7 +58,7 @@ namespace TrafficManager.Util.Extensions {
         /// Only works for managed vehicle types listed in <see cref="ExtVehicleManager.VEHICLE_TYPES"/>
         /// </remarks>
         public static ExtVehicleType ToExtVehicleType(this ushort vehicleId)
-            => ExtVehicleManager.Instance.ExtVehicles[vehicleId].vehicleType;
+            => _extVehicles[vehicleId].vehicleType;
 
         /// <summary>Determines the <see cref="ExtVehicleType"/> for a managed vehicle type.</summary>
         /// <param name="vehicleId">The id of the vehicle to inspect.</param>
@@ -60,7 +67,7 @@ namespace TrafficManager.Util.Extensions {
         /// Only works for managed vehicle types listed in <see cref="ExtVehicleManager.VEHICLE_TYPES"/>
         /// </remarks>
         public static ExtVehicleType ToExtVehicleType(this uint vehicleId)
-            => ExtVehicleManager.Instance.ExtVehicles[vehicleId].vehicleType;
+            => _extVehicles[vehicleId].vehicleType;
 
         /// <summary>
         /// Inspects the AI of the <paramref name="vehicle"/> to determine its type.
