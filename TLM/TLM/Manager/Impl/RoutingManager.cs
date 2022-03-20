@@ -19,7 +19,7 @@ namespace TrafficManager.Manager.Impl {
         : AbstractGeometryObservingManager,
           IRoutingManager
     {
-        public static readonly RoutingManager Instance = new RoutingManager();
+        public static readonly RoutingManager Instance = new ();
 
         private RoutingManager() { }
 
@@ -37,7 +37,7 @@ namespace TrafficManager.Manager.Impl {
 
         private readonly ulong[] updatedSegmentBuckets = new ulong[576];
 
-        private readonly object updateLock = new object();
+        private readonly object updateLock = new ();
 
         private bool segmentsUpdated;
 
@@ -64,8 +64,6 @@ namespace TrafficManager.Manager.Impl {
         /// </summary>
         public LaneEndRoutingData[] LaneEndForwardRoutings { get; } =
             new LaneEndRoutingData[(uint)NetManager.MAX_LANE_COUNT * 2u];
-
-
 
         protected override void InternalPrintDebugInfo() {
             base.InternalPrintDebugInfo();
@@ -270,7 +268,6 @@ namespace TrafficManager.Manager.Impl {
         /// <param name="centerSegmentId">The segment in the center.</param>
         /// <param name="centerSegmentNodeId">The node of the segment in the center.</param>
         private void ResetIncomingHighwayLaneArrowsOfNode(ushort centerSegmentId, ushort centerSegmentNodeId) {
-            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
             ref NetNode node = ref centerSegmentNodeId.ToNode();
 
             for (int i = 0; i < Constants.MAX_SEGMENTS_OF_NODE; ++i) {
@@ -408,8 +405,9 @@ namespace TrafficManager.Manager.Impl {
                 return;
             }
 
-            LaneEndRoutingData backwardRouting = new LaneEndRoutingData();
-            backwardRouting.routed = true;
+            LaneEndRoutingData backwardRouting = new () {
+                routed = true,
+            };
 
             int prevSimilarLaneCount = prevLaneInfo.m_similarLaneCount;
             int prevInnerSimilarLaneIndex = CalcInnerSimilarLaneIndex(prevSegmentId, prevLaneIndex);
@@ -1548,8 +1546,8 @@ namespace TrafficManager.Manager.Impl {
                                     }
                                 } else {
                                     // vehicles may change lanes when going straight
-                                    minNextCompatibleOuterSimilarIndex = minNextCompatibleOuterSimilarIndex - 1;
-                                    maxNextCompatibleOuterSimilarIndex = maxNextCompatibleOuterSimilarIndex + 1;
+                                    minNextCompatibleOuterSimilarIndex--;
+                                    maxNextCompatibleOuterSimilarIndex++;
 
                                     if (extendedLogRouting) {
                                         Log._DebugFormat(
@@ -2113,7 +2111,7 @@ namespace TrafficManager.Manager.Impl {
                         newTransitions[i].laneId,
                         newTransitions[i].startNode);
 
-                    LaneTransitionData forwardTransition = new LaneTransitionData {
+                    LaneTransitionData forwardTransition = new() {
                         laneId = laneId,
                         laneIndex = (byte)laneIndex,
                         type = newTransitions[i].type,
