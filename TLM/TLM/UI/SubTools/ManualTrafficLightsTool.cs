@@ -5,8 +5,8 @@ namespace TrafficManager.UI.SubTools {
     using TrafficManager.API.Manager;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.API.Traffic.Enums;
-    using TrafficManager.API.TrafficLight;
     using TrafficManager.Manager.Impl;
+    using TrafficManager.TrafficLight.Impl;
     using TrafficManager.UI.Helpers;
     using TrafficManager.UI.MainMenu.OSD;
     using TrafficManager.UI.Textures;
@@ -109,7 +109,7 @@ namespace TrafficManager.UI.SubTools {
                             segmentId,
                             SelectedNodeId);
                     Vector3 position = CalculateNodePositionForSegment(ref selectedNode, ref segmentId.ToSegment());
-                    ICustomSegmentLights segmentLights =
+                    CustomSegmentLights segmentLights =
                         customTrafficLightsManager.GetSegmentLights(segmentId, startNode, false);
 
                     if (segmentLights == null) {
@@ -194,7 +194,7 @@ namespace TrafficManager.UI.SubTools {
 
                     foreach (ExtVehicleType vehicleType in segmentLights.VehicleTypes) {
                         ++lightOffset;
-                        ICustomSegmentLight segmentLight = segmentLights.GetCustomLight(vehicleType);
+                        CustomSegmentLight segmentLight = segmentLights.GetCustomLight(vehicleType);
 
                         Vector3 offsetScreenPos = screenPos;
                         offsetScreenPos.y -= (lightHeight + (10f * zoom)) * lightOffset;
@@ -384,7 +384,7 @@ namespace TrafficManager.UI.SubTools {
                                                        int segmentId,
                                                        Vector3 screenPos,
                                                        float lightWidth,
-                                                       ICustomSegmentLights segmentLights,
+                                                       CustomSegmentLights segmentLights,
                                                        bool hoveredSegment)
         {
             if (segmentLights.PedestrianLightState == null) {
@@ -432,7 +432,7 @@ namespace TrafficManager.UI.SubTools {
         private bool IsPedestrianLightHovered(Rect myRect3,
                                               int segmentId,
                                               bool hoveredSegment,
-                                              ICustomSegmentLights segmentLights)
+                                              CustomSegmentLights segmentLights)
         {
             if (!myRect3.Contains(Event.current.mousePosition)) {
                 return hoveredSegment;
@@ -461,7 +461,7 @@ namespace TrafficManager.UI.SubTools {
         private bool GetHoveredSegment(Rect myRect1,
                                        int segmentId,
                                        bool hoveredSegment,
-                                       ICustomSegmentLight segmentDict)
+                                       CustomSegmentLight segmentDict)
         {
             if (!myRect1.Contains(Event.current.mousePosition)) {
                 return hoveredSegment;
@@ -484,7 +484,7 @@ namespace TrafficManager.UI.SubTools {
                                    float modeWidth,
                                    float modeHeight,
                                    float zoom,
-                                   ICustomSegmentLights segmentLights,
+                                   CustomSegmentLights segmentLights,
                                    bool hoveredSegment)
         {
             SetAlpha(segmentId, 0);
@@ -527,7 +527,7 @@ namespace TrafficManager.UI.SubTools {
                                                   float pedestrianWidth,
                                                   float zoom,
                                                   float lightHeight,
-                                                  ICustomSegmentLight segmentDict,
+                                                  CustomSegmentLight segmentDict,
                                                   bool hoveredSegment)
         {
             SetAlpha(segmentId, 3);
@@ -573,7 +573,7 @@ namespace TrafficManager.UI.SubTools {
                                                         float pedestrianWidth,
                                                         float zoom,
                                                         float lightHeight,
-                                                        ICustomSegmentLight segmentDict,
+                                                        CustomSegmentLight segmentDict,
                                                         bool hoveredSegment,
                                                         bool hasForwardSegment,
                                                         bool hasRightSegment)
@@ -683,7 +683,7 @@ namespace TrafficManager.UI.SubTools {
                                                    float lightHeight,
                                                    bool hasForwardSegment,
                                                    bool hasLeftSegment,
-                                                   ICustomSegmentLight segmentDict,
+                                                   CustomSegmentLight segmentDict,
                                                    bool hasRightSegment,
                                                    bool hoveredSegment)
         {
@@ -811,7 +811,7 @@ namespace TrafficManager.UI.SubTools {
                                         float pedestrianWidth,
                                         float zoom,
                                         float lightHeight,
-                                        ICustomSegmentLight segmentDict,
+                                        CustomSegmentLight segmentDict,
                                         bool hoveredSegment)
         {
             SetAlpha(segmentId, 3);
@@ -869,7 +869,7 @@ namespace TrafficManager.UI.SubTools {
                                            float pedestrianWidth,
                                            float zoom,
                                            float lightHeight,
-                                           ICustomSegmentLight segmentDict,
+                                           CustomSegmentLight segmentDict,
                                            bool hoveredSegment)
         {
             SetAlpha(segmentId, 4);
@@ -920,7 +920,7 @@ namespace TrafficManager.UI.SubTools {
                                          float pedestrianWidth,
                                          float zoom,
                                          float lightHeight,
-                                         ICustomSegmentLight segmentDict,
+                                         CustomSegmentLight segmentDict,
                                          bool hoveredSegment)
         {
             SetAlpha(segmentId, 5);

@@ -23,7 +23,7 @@ namespace TrafficManager.UI {
     using TrafficManager.UI.MainMenu.OSD;
     using TrafficManager.UI.SubTools.LaneArrows;
     using TrafficManager.UI.SubTools.PrioritySigns;
-    using TrafficManager.UI.SubTools.TimedTrafficLights;
+    using TrafficManager.UI.SubTools.TTL;
     using TrafficManager.Lifecycle;
     using UnifiedUI.Helpers;
 

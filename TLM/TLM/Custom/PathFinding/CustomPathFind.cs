@@ -10,7 +10,6 @@ namespace TrafficManager.Custom.PathFinding {
     using TrafficManager.API.Manager;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.API.Traffic.Enums;
-    using TrafficManager.API.TrafficLight;
     using TrafficManager.Manager.Impl;
     using TrafficManager.Manager;
     using TrafficManager.State;
@@ -21,6 +20,7 @@ namespace TrafficManager.Custom.PathFinding {
 #if DEBUG
     using System.Collections.Generic;
     using State.ConfigData;
+    using TrafficManager.TrafficLight.Impl;
 #endif
 
     /// <summary>
@@ -3200,7 +3200,7 @@ namespace TrafficManager.Custom.PathFinding {
 #if CUSTOMTRAFFICLIGHTS
                     if (Options.timedLightsEnabled) {
                         // check if pedestrian light won't change to green
-                        ICustomSegmentLights lights = customTrafficLightsManager.GetSegmentLights(nextSegmentId, nextIsStartNode, false);
+                        CustomSegmentLights lights = customTrafficLightsManager.GetSegmentLights(nextSegmentId, nextIsStartNode, false);
 
                         if (lights != null && lights.InvalidPedestrianLight) {
                             if (isLogEnabled) {

@@ -5,7 +5,6 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.API.Manager;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.API.Traffic.Enums;
-    using TrafficManager.API.TrafficLight;
     using TrafficManager.TrafficLight.Impl;
     using TrafficManager.TrafficLight;
     using TrafficManager.Util;
@@ -16,6 +15,7 @@ namespace TrafficManager.Manager.Impl {
     /// </summary>
     public class CustomSegmentLightsManager
         : AbstractGeometryObservingManager,
+          ITrafficLightContainer,
           ICustomSegmentLightsManager
     {
         static CustomSegmentLightsManager() {
@@ -48,7 +48,7 @@ namespace TrafficManager.Manager.Impl {
         /// </summary>
         /// <param name="segmentId">SegmentId affected</param>
         /// <param name="startNode">NodeId affected</param>
-        private ICustomSegmentLights AddLiveSegmentLights(ushort segmentId, bool startNode) {
+        private CustomSegmentLights AddLiveSegmentLights(ushort segmentId, bool startNode) {
             ref NetSegment netSegment = ref segmentId.ToSegment();
 
             if (!netSegment.IsValid()) {
@@ -82,7 +82,7 @@ namespace TrafficManager.Manager.Impl {
         /// <param name="segmentId">SegmentId affected</param>
         /// <param name="startNode">NodeId affected</param>
         /// <param name="lightState">(optional) light state to set</param>
-        private ICustomSegmentLights
+        private CustomSegmentLights
             AddSegmentLights(ushort segmentId,
                              bool startNode,
                              RoadBaseAI.TrafficLightState lightState =
@@ -103,7 +103,7 @@ namespace TrafficManager.Manager.Impl {
                 customSegment = new CustomSegment();
                 customSegments_[segmentId] = customSegment;
             } else {
-                ICustomSegmentLights existingLights =
+                CustomSegmentLights existingLights =
                     startNode ? customSegment.StartNodeLights : customSegment.EndNodeLights;
 
                 if (existingLights != null) {
@@ -133,9 +133,9 @@ namespace TrafficManager.Manager.Impl {
             }
         }
 
-        public bool SetSegmentLights(ushort nodeId,
+        internal bool SetSegmentLights(ushort nodeId,
                                      ushort segmentId,
-                                     ICustomSegmentLights lights) {
+                                     CustomSegmentLights lights) {
             bool? startNode = ExtSegmentManager.Instance.IsStartNode(segmentId, nodeId);
             if (startNode == null) {
                 return false;
@@ -148,9 +148,9 @@ namespace TrafficManager.Manager.Impl {
             }
 
             if ((bool)startNode) {
-                customSegment.StartNodeLights = lights;
+                customSegment.StartNodeLights = (CustomSegmentLights)lights;
             } else {
-                customSegment.EndNodeLights = lights;
+                customSegment.EndNodeLights = (CustomSegmentLights)lights;
             }
 
             return true;
@@ -245,7 +245,7 @@ namespace TrafficManager.Manager.Impl {
         /// <param name="segmentId">SegmentId affected</param>
         /// <param name="startNode">NodeId affected</param>
         /// <returns>existing or new custom traffic light at segment end</returns>
-        public ICustomSegmentLights GetOrLiveSegmentLights(ushort segmentId, bool startNode) {
+        public CustomSegmentLights GetOrLiveSegmentLights(ushort segmentId, bool startNode) {
             return !IsSegmentLight(segmentId, startNode)
                        ? AddLiveSegmentLights(segmentId, startNode)
                        : GetSegmentLights(segmentId, startNode);
@@ -257,7 +257,7 @@ namespace TrafficManager.Manager.Impl {
         /// <param name="nodeId">NodeId affected</param>
         /// <param name="segmentId">SegmentId affected</param>
         /// <returns>existing custom traffic light at segment end, <code>null</code> if none exists</returns>
-        public ICustomSegmentLights
+        public CustomSegmentLights
             GetSegmentLights(ushort segmentId,
                              bool startNode,
                              bool add = true,
@@ -275,7 +275,7 @@ namespace TrafficManager.Manager.Impl {
                                  bool startNode,
                                  ExtVehicleType vehicleType,
                                  LightMode mode) {
-            ICustomSegmentLights liveLights = GetSegmentLights(segmentId, startNode);
+            CustomSegmentLights liveLights = GetSegmentLights(segmentId, startNode);
             if (liveLights == null) {
                 Log.Warning(
                     $"CustomSegmentLightsManager.SetLightMode({segmentId}, {startNode}, " +
@@ -283,7 +283,7 @@ namespace TrafficManager.Manager.Impl {
                 return;
             }
 
-            ICustomSegmentLight liveLight = liveLights.GetCustomLight(vehicleType);
+            CustomSegmentLight liveLight = liveLights.GetCustomLight(vehicleType);
             if (liveLight == null) {
                 Log.Error(
                     $"CustomSegmentLightsManager.SetLightMode: Cannot change light mode on seg. " +
@@ -296,8 +296,8 @@ namespace TrafficManager.Manager.Impl {
 
         public bool ApplyLightModes(ushort segmentId,
                                     bool startNode,
-                                    ICustomSegmentLights otherLights) {
-            ICustomSegmentLights sourceLights = GetSegmentLights(segmentId, startNode);
+                                    CustomSegmentLights otherLights) {
+            CustomSegmentLights sourceLights = GetSegmentLights(segmentId, startNode);
             if (sourceLights == null) {
                 Log.Warning(
                     $"CustomSegmentLightsManager.ApplyLightModes({segmentId}, {startNode}, " +
@@ -305,11 +305,11 @@ namespace TrafficManager.Manager.Impl {
                 return false;
             }
 
-            foreach (KeyValuePair<ExtVehicleType, ICustomSegmentLight> e in sourceLights.CustomLights) {
+            foreach (KeyValuePair<ExtVehicleType, CustomSegmentLight> e in sourceLights.CustomLights) {
                 ExtVehicleType vehicleType = e.Key;
-                ICustomSegmentLight targetLight = e.Value;
+                CustomSegmentLight targetLight = e.Value;
 
-                if (otherLights.CustomLights.TryGetValue(vehicleType, out ICustomSegmentLight sourceLight)) {
+                if (otherLights.CustomLights.TryGetValue(vehicleType, out CustomSegmentLight sourceLight)) {
                     targetLight.CurrentMode = sourceLight.CurrentMode;
                 }
             }
@@ -317,7 +317,7 @@ namespace TrafficManager.Manager.Impl {
             return true;
         }
 
-        public ICustomSegmentLights GetSegmentLights(ushort nodeId, ushort segmentId) {
+        public CustomSegmentLights GetSegmentLights(ushort nodeId, ushort segmentId) {
             bool? startNode = ExtSegmentManager.Instance.IsStartNode(segmentId, nodeId);
             return startNode == null ? null : GetSegmentLights(segmentId, (bool)startNode, false);
         }

@@ -8,8 +8,6 @@ namespace TrafficManager.Manager.Impl {
     using TimedTrafficLights = global::TrafficManager.TrafficLight.Impl.TimedTrafficLights;
     using TrafficManager.API.Manager;
     using TrafficManager.API.Traffic.Enums;
-    using TrafficManager.API.TrafficLight.Data;
-    using TrafficManager.API.TrafficLight;
     using TrafficManager.State.ConfigData;
     using TrafficManager.State;
     using TrafficManager.Traffic;
@@ -180,7 +178,7 @@ namespace TrafficManager.Manager.Impl {
                 return;
             }
 
-            ICustomSegmentLights lights =
+            CustomSegmentLights lights =
                 CustomSegmentLightsManager.Instance.GetSegmentLights(
                     fromSegmentId,
                     (bool)isStartNode,
@@ -195,7 +193,7 @@ namespace TrafficManager.Manager.Impl {
                            $"segment {fromSegmentId} found.");
             }
 
-            ICustomSegmentLight light = lights == null ? null : lights.GetCustomLight(fromLaneIndex);
+            CustomSegmentLight light = lights == null ? null : lights.GetCustomLight(fromLaneIndex);
             if (lights == null || light == null) {
                 // Log.Warning($"GetTrafficLightState: No custom light for vehicle {vehicleId} @ node
                 //     {nodeId}, segment {fromSegmentId}, lane {fromLaneIndex} found. lights null?
@@ -399,11 +397,11 @@ namespace TrafficManager.Manager.Impl {
                 return false;
             }
 
-            Constants.ManagerFactory.TrafficLightManager.AddTrafficLight(
+            TrafficLightManager.Instance.AddTrafficLight(
                 sim.nodeId,
                 ref sim.nodeId.ToNode());
 
-            Constants.ManagerFactory.CustomSegmentLightsManager.AddNodeLights(sim.nodeId);
+            CustomSegmentLightsManager.Instance.AddNodeLights(sim.nodeId);
             sim.type = TrafficLightSimulationType.Manual;
             return true;
         }
@@ -418,7 +416,7 @@ namespace TrafficManager.Manager.Impl {
             }
 
             sim.type = TrafficLightSimulationType.None;
-            Constants.ManagerFactory.CustomSegmentLightsManager.RemoveNodeLights(sim.nodeId);
+            CustomSegmentLightsManager.Instance.RemoveNodeLights(sim.nodeId);
             return true;
         }
 
@@ -433,11 +431,11 @@ namespace TrafficManager.Manager.Impl {
                 return false;
             }
 
-            Constants.ManagerFactory.TrafficLightManager.AddTrafficLight(
+            TrafficLightManager.Instance.AddTrafficLight(
                 sim.nodeId,
                 ref sim.nodeId.ToNode());
 
-            Constants.ManagerFactory.CustomSegmentLightsManager.AddNodeLights(sim.nodeId);
+            CustomSegmentLightsManager.Instance.AddNodeLights(sim.nodeId);
             sim.timedLight = new TimedTrafficLights(sim.nodeId, nodeGroup);
             sim.type = TrafficLightSimulationType.Timed;
             return true;
@@ -449,7 +447,7 @@ namespace TrafficManager.Manager.Impl {
             }
 
             sim.type = TrafficLightSimulationType.None;
-            ITimedTrafficLights timedLight = sim.timedLight;
+            TimedTrafficLights timedLight = sim.timedLight;
             sim.timedLight = null;
 
             timedLight?.Destroy();
@@ -516,7 +514,7 @@ namespace TrafficManager.Manager.Impl {
             }
 
             // ensure there is a physical traffic light
-            Constants.ManagerFactory.TrafficLightManager.AddTrafficLight(nodeId, ref node);
+            TrafficLightManager.Instance.AddTrafficLight(nodeId, ref node);
 
             TrafficLightSimulations[nodeId].Update();
         }
@@ -623,7 +621,7 @@ namespace TrafficManager.Manager.Impl {
 #if DEBUGLOAD
                         Log._Debug($"Loading timed step {j} at node {cnfTimedLights.nodeId}");
 #endif
-                        ITimedTrafficLightsStep step =
+                        TimedTrafficLightsStep step =
                             TrafficLightSimulations[cnfTimedLights.nodeId].timedLight.AddStep(
                                 cnfTimedStep.minTime,
                                 cnfTimedStep.maxTime,
@@ -644,7 +642,7 @@ namespace TrafficManager.Manager.Impl {
 #if DEBUGLOAD
                             Log._Debug($"Loading timed step {j}, segment {e.Key} at node {cnfTimedLights.nodeId}");
 #endif
-                            ICustomSegmentLights lights = null;
+                            CustomSegmentLights lights = null;
                             if (!step.CustomSegmentLights.TryGetValue(e.Key, out lights)) {
 #if DEBUGLOAD
                                 Log._Debug($"No segment lights found at timed step {j} for segment "+
@@ -671,7 +669,7 @@ namespace TrafficManager.Manager.Impl {
 #endif
                                 if (!lights.CustomLights.TryGetValue(
                                         LegacyExtVehicleType.ToNew(e2.Key),
-                                        out ICustomSegmentLight light)) {
+                                        out CustomSegmentLight light)) {
 #if DEBUGLOAD
                                     Log._Debug($"No segment light found for timed step {j}, segment "+
                                     $"{e.Key}, vehicleType {e2.Key} at node {cnfTimedLights.nodeId}");
@@ -722,7 +720,7 @@ namespace TrafficManager.Manager.Impl {
 
             foreach (Configuration.TimedTrafficLights cnfTimedLights in data) {
                 try {
-                    ITimedTrafficLights timedNode =
+                    TimedTrafficLights timedNode =
                         TrafficLightSimulations[cnfTimedLights.nodeId].timedLight;
 
                     timedNode.Housekeeping();
@@ -750,7 +748,7 @@ namespace TrafficManager.Manager.Impl {
 #if DEBUGSAVE
                     Log._Debug($"Going to save timed light at node {nodeId}.");
 #endif
-                    ITimedTrafficLights timedNode = TrafficLightSimulations[nodeId].timedLight;
+                    TimedTrafficLights timedNode = TrafficLightSimulations[nodeId].timedLight;
                     timedNode.OnGeometryUpdate();
 
                     var cnfTimedLights = new Configuration.TimedTrafficLights {
@@ -774,7 +772,7 @@ namespace TrafficManager.Manager.Impl {
 #if DEBUGSAVE
                         Log._Debug($"Saving timed light step {j} at node {nodeId}.");
 #endif
-                        ITimedTrafficLightsStep timedStep = timedNode.GetStep(j);
+                        TimedTrafficLightsStep timedStep = timedNode.GetStep(j);
                         var cnfTimedStep = new Configuration.TimedTrafficLightsStep {
                             minTime = timedStep.MinTime,
                             maxTime = timedStep.MaxTime,
@@ -784,13 +782,13 @@ namespace TrafficManager.Manager.Impl {
                         };
                         cnfTimedLights.timedSteps.Add(cnfTimedStep);
 
-                        foreach (KeyValuePair<ushort, ICustomSegmentLights> e
+                        foreach (KeyValuePair<ushort, CustomSegmentLights> e
                             in timedStep.CustomSegmentLights) {
 #if DEBUGSAVE
                             Log._Debug($"Saving timed light step {j}, segment {e.Key} at node {nodeId}.");
 #endif
 
-                            ICustomSegmentLights segLights = e.Value;
+                            CustomSegmentLights segLights = e.Value;
                             ushort lightsNodeId = segLights.NodeId;
 
                             var cnfSegLights = new Configuration.CustomSegmentLights {
@@ -817,12 +815,12 @@ namespace TrafficManager.Manager.Impl {
 #endif
 
                             foreach (KeyValuePair<API.Traffic.Enums.ExtVehicleType,
-                                         ICustomSegmentLight> e2 in segLights.CustomLights) {
+                                         CustomSegmentLight> e2 in segLights.CustomLights) {
 #if DEBUGSAVE
                                 Log._Debug($"Saving timed light step {j}, segment {e.Key}, vehicleType "+
                                 $"{e2.Key} at node {nodeId}.");
 #endif
-                                ICustomSegmentLight segLight = e2.Value;
+                                CustomSegmentLight segLight = e2.Value;
                                 var cnfSegLight = new Configuration.CustomSegmentLight {
                                     nodeId = lightsNodeId, // TODO not needed
                                     segmentId = segLights.SegmentId, // TODO not needed
