@@ -1,3 +1,10 @@
+[Version] 11.6.5.2
+[Meta] This release fixes some bugs.
+[Fixed] Speed limits not working on station tracks (Peacemak3r, FemboyPyro, aubergine18, krzychu124)
+[Fixed] Patching of Reversible Tram AI mod fails if mod is subscribed but disabled #1471 #1470 (kianzarrin)
+[Fixed] Lane connectors buggy on bidirectional tracks #1211 #784 (kianzarrin)
+[/Version]
+
 [Version] 11.6.5.1
 [Released] March 13th 2022
 [Link] tmpe-v11651-test-13032022
