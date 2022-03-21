@@ -742,13 +742,19 @@ namespace TrafficManager.Manager.Impl {
                                         isNodeStartNodeOfNextSegment);
                                 bool nextIsConnectedWithPrev = true;
 
-                                if(nextHasConnections) {
+                                if (nextHasConnections) {
                                     nextIsConnectedWithPrev =
                                         LaneConnectionManager.Instance.AreLanesConnected(
                                             nextLaneId,
                                             prevLaneId,
                                             isNodeStartNodeOfNextSegment);
                                 }
+
+                                bool nextIsTrackOnly = nextLaneInfo.IsTrackOnly();
+                                int nextSimilarLaneCount = nextLaneInfo.m_similarLaneCount;
+                                bool similarLaneCountMatches = prevSimilarLaneCount == nextSimilarLaneCount;
+                                bool outerSimilarLaneIndexMatches = prevOuterSimilarLaneIndex == nextOuterSimilarLaneIndex;
+                                bool stayInlanetracks = similarLaneCountMatches & outerSimilarLaneIndexMatches; 
 
                                 if (extendedLogRouting) {
                                     Log._DebugFormat(
@@ -832,7 +838,7 @@ namespace TrafficManager.Manager.Impl {
                                     }
                                 }
 
-                                if (isTollBooth) {
+                                if (isTollBooth || stayInlanetracks) {
                                     if (extendedLogRouting) {
                                         Log._DebugFormat(
                                             "RoutingManager.RecalculateLaneEndRoutingData({0}, {1}, {2}, {3}): " +
@@ -845,7 +851,7 @@ namespace TrafficManager.Manager.Impl {
                                             buildingId);
                                     }
 
-                                    if (nextOuterSimilarLaneIndex == prevOuterSimilarLaneIndex) {
+                                    if (outerSimilarLaneIndexMatches) {
                                         if (extendedLogRouting) {
                                             Log._DebugFormat(
                                                 "RoutingManager.RecalculateLaneEndRoutingData({0}, {1}, {2}, {3}): " +

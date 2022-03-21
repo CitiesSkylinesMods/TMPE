@@ -488,6 +488,7 @@
     <Compile Include="Util\RoadSelectionUtil.cs" />
     <Compile Include="Util\RoundaboutMassEdit.cs" />
     <Compile Include="Util\SegmentLaneTraverser.cs" />
+    <Compile Include="Util\TrackUtils.cs" />
     <Compile Include="Util\VersionUtil.cs" />
     <Compile Include="Lifecycle\SerializableDataExtension.cs" />
     <Compile Include="Lifecycle\ThreadingExtension.cs" />
