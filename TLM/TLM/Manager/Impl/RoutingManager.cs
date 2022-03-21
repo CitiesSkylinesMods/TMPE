@@ -395,8 +395,8 @@ namespace TrafficManager.Manager.Impl {
             ExtSegment prevSeg = Constants.ManagerFactory.ExtSegmentManager.ExtSegments[segmentId];
             ExtSegmentEnd prevEnd = segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segmentId, startNode)];
 
-            ushort prevSegmentId = segmentId; // this variable is duplicate (prevLaneId == laneId always)
-            int prevLaneIndex = laneIndex;
+            ushort prevSegmentId = segmentId; // this variable is duplicate (prevSegmentId == segmentId always)
+            int prevLaneIndex = laneIndex; // this variable is duplicate (prevLaneIndex == laneIndex always)
             uint prevLaneId = laneId; // this variable is duplicate (prevLaneId == laneId always)
             ushort nodeId = prevEnd.nodeId; // common node
 
