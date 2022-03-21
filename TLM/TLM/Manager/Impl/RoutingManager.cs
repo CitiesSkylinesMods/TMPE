@@ -442,8 +442,8 @@ namespace TrafficManager.Manager.Impl {
                 int numOutgoing = 0;
                 int numIncoming = 0;
 
-                for (int i = 0; i < 8; ++i) {
-                    ushort segId = netNode.GetSegment(i);
+                for (int segIndex = 0; segIndex < 8; ++segIndex) {
+                    ushort segId = netNode.GetSegment(segIndex);
                     if (segId == 0) {
                         continue;
                     }
@@ -563,10 +563,9 @@ namespace TrafficManager.Manager.Impl {
             // running number of next outgoing lanes (number is updated at each segment iteration)
             int totalOutgoingLanes = 0;
 
-            for (int k = 0; k < 8; ++k) {
+            for (int segmentIndex = 0; segmentIndex < 8; ++segmentIndex) {
                 if (!iterateViaGeometry) {
-                    int kCopy = k;
-                    nextSegmentId = netNode.GetSegment(kCopy);
+                    nextSegmentId = netNode.GetSegment(segmentIndex);
 
                     if (nextSegmentId == 0) {
                         continue;
