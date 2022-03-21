@@ -754,7 +754,7 @@ namespace TrafficManager.Manager.Impl {
                                 int nextSimilarLaneCount = nextLaneInfo.m_similarLaneCount;
                                 bool similarLaneCountMatches = prevSimilarLaneCount == nextSimilarLaneCount;
                                 bool outerSimilarLaneIndexMatches = prevOuterSimilarLaneIndex == nextOuterSimilarLaneIndex;
-                                bool stayInlanetracks = similarLaneCountMatches & outerSimilarLaneIndexMatches; 
+                                bool stayInlaneTracks = nextIsTrackOnly & similarLaneCountMatches;
 
                                 if (extendedLogRouting) {
                                     Log._DebugFormat(
@@ -786,6 +786,11 @@ namespace TrafficManager.Manager.Impl {
                                         nextOuterSimilarLaneIndex,
                                         nextHasConnections,
                                         nextIsConnectedWithPrev);
+                                    Log._Debug(
+                                        "prefer stay in lane information:\n" +
+                                        $"prevSegmentId={prevSegmentId} prevLane:[id={prevLaneId} index={prevLaneIndex} outerSimilarLaneIndex:{prevOuterSimilarLaneIndex} similarLaneCount={prevSimilarLaneCount}]\n" +
+                                        $"nextSegmentId={nextSegmentId} nextLane:[id={nextLaneId} index={nextLaneIndex} outerSimilarLaneIndex:{nextOuterSimilarLaneIndex} similarLaneCount={nextSimilarLaneCount}]\n" +
+                                        $"nextIsTrackOnly={nextIsTrackOnly} similarLaneCountMatches={similarLaneCountMatches}  outerSimilarLaneIndexMatches={outerSimilarLaneIndexMatches} stayInlaneTracks={stayInlaneTracks}");
                                 }
 
                                 int currentLaneConnectionTransIndex = -1;
@@ -838,17 +843,19 @@ namespace TrafficManager.Manager.Impl {
                                     }
                                 }
 
-                                if (isTollBooth || stayInlanetracks) {
+                                if (isTollBooth || stayInlaneTracks) {
                                     if (extendedLogRouting) {
                                         Log._DebugFormat(
                                             "RoutingManager.RecalculateLaneEndRoutingData({0}, {1}, {2}, {3}): " +
-                                            "nextNodeId={4}, buildingId={5} is a toll booth. Preventing lane changes.",
+                                            "nextNodeId={4}, buildingId={5} isTollBooth={6} stayInlaneTracks={7}. Preventing lane changes.",
                                             segmentId,
                                             laneIndex,
                                             laneId,
                                             startNode,
                                             nodeId,
-                                            buildingId);
+                                            buildingId,
+                                            isTollBooth,
+                                            stayInlaneTracks);
                                     }
 
                                     if (outerSimilarLaneIndexMatches) {
