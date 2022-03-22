@@ -763,7 +763,8 @@ namespace TrafficManager.Manager.Impl {
                                 int nextSimilarLaneCount = nextLaneInfo.m_similarLaneCount;
                                 bool similarLaneCountMatches = prevSimilarLaneCount == nextSimilarLaneCount;
                                 bool outerSimilarLaneIndexMatches = prevOuterSimilarLaneIndex == nextOuterSimilarLaneIndex;
-                                bool stayInlaneTracks = nextIsTrackOnly & similarLaneCountMatches;
+                                bool biDirectional = prevLaneInfo.IsBidirectional() || nextLaneInfo.IsBidirectional();
+                                bool stayInlaneTracks = nextIsTrackOnly & similarLaneCountMatches & !biDirectional;
 
                                 if (extendedLogRouting) {
                                     Log._DebugFormat(

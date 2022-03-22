@@ -19,5 +19,12 @@ namespace TrafficManager.Util {
                 laneInfo.m_vehicleType.IsFlagSet(VEHICLE_TYPES) &&
                 !laneInfo.m_vehicleType.IsFlagSet(~VEHICLE_TYPES);
         }
+
+        public static bool IsBidirectional(this NetInfo.Lane laneInfo) {
+            // Note that for station tracks we have:
+            // AvoidForward = Both + 4
+            // AvoidBackward = Both + 8
+            return laneInfo.m_direction.CheckFlags(NetInfo.Direction.Both);
+        }
     }
 }
