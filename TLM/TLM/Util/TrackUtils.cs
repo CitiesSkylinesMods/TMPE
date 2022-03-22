@@ -12,9 +12,8 @@ namespace TrafficManager.Util {
             VehicleInfo.VehicleType.Monorail;
 
         internal static bool IsTrackOnly(this NetInfo.Lane laneInfo) {
-            if (laneInfo == null)
-                return false;
             return
+                laneInfo != null &&
                 laneInfo.m_laneType.IsFlagSet(LANE_TYPES) &&
                 !laneInfo.m_laneType.IsFlagSet(~LANE_TYPES) &&
                 laneInfo.m_vehicleType.IsFlagSet(VEHICLE_TYPES) &&
