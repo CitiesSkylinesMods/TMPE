@@ -644,11 +644,10 @@ namespace TrafficManager.Manager.Impl {
                         isNextSegmentValid);
                 }
 
-                NetInfo.Direction nextDir = isNodeStartNodeOfNextSegment
-                                                ? NetInfo.Direction.Backward
-                                                : NetInfo.Direction.Forward;
-                NetInfo.Direction nextDir2 =
-                    !nextSegIsInverted ? nextDir : NetInfo.InvertDirection(nextDir);
+                bool reverseDir = isNodeStartNodeOfNextSegment ^ nextSegIsInverted;
+
+                // expected direction of the next lane
+                NetInfo.Direction nextExpectedDirection = reverseDir ? NetInfo.Direction.Backward : NetInfo.Direction.Forward; 
 
                 LaneTransitionData[] nextRelaxedTransitionDatas = null;
                 byte numNextRelaxedTransitionDatas = 0;
@@ -707,7 +706,7 @@ namespace TrafficManager.Manager.Impl {
                         }
 
                         // next is incoming lane
-                        if ((nextLaneInfo.m_finalDirection & nextDir2) != NetInfo.Direction.None) {
+                        if ((nextLaneInfo.m_finalDirection & nextExpectedDirection) != NetInfo.Direction.None) {
                             if (extendedLogRouting) {
                                 Log._Debug(
                                     $"RoutingManager.RecalculateLaneEndRoutingData({prevSegmentId}, " +
@@ -721,7 +720,7 @@ namespace TrafficManager.Manager.Impl {
                                 Log._DebugFormat(
                                     "RoutingManager.RecalculateLaneEndRoutingData({0}, {1}, {2}, {3}): " +
                                     "increasing number of incoming lanes at nextLaneId={4}, idx={5}: " +
-                                    "isNextValid={6}, nextLaneInfo.m_finalDirection={7}, nextDir2={8}: " +
+                                    "isNextValid={6}, nextLaneInfo.m_finalDirection={7}, nextExpectedDirection={8}: " +
                                     "incomingVehicleLanes={9}, outgoingVehicleLanes={10} ",
                                     prevSegmentId,
                                     prevLaneIndex,
@@ -731,7 +730,7 @@ namespace TrafficManager.Manager.Impl {
                                     nextLaneIndex,
                                     isNextSegmentValid,
                                     nextLaneInfo.m_finalDirection,
-                                    nextDir2,
+                                    nextExpectedDirection,
                                     incomingVehicleLanes,
                                     outgoingVehicleLanes);
                             }
@@ -1064,7 +1063,7 @@ namespace TrafficManager.Manager.Impl {
                                 Log._DebugFormat(
                                     "RoutingManager.RecalculateLaneEndRoutingData({0}, {1}, {2}, {3}): " +
                                     "lane direction check NOT passed for nextLaneId={4}, idx={5}: " +
-                                    "isNextValid={6}, nextLaneInfo.m_finalDirection={7}, nextDir2={8}",
+                                    "isNextValid={6}, nextLaneInfo.m_finalDirection={7}, nextExpectedDirection={8}",
                                     prevSegmentId,
                                     prevLaneIndex,
                                     prevLaneId,
@@ -1073,18 +1072,18 @@ namespace TrafficManager.Manager.Impl {
                                     nextLaneIndex,
                                     isNextSegmentValid,
                                     nextLaneInfo.m_finalDirection,
-                                    nextDir2);
+                                    nextExpectedDirection);
                             }
 
                             if ((nextLaneInfo.m_finalDirection &
-                                 NetInfo.InvertDirection(nextDir2)) != NetInfo.Direction.None)
+                                 NetInfo.InvertDirection(nextExpectedDirection)) != NetInfo.Direction.None)
                             {
                                 ++outgoingVehicleLanes;
                                 if (extendedLogRouting) {
                                     Log._DebugFormat(
                                         "RoutingManager.RecalculateLaneEndRoutingData({0}, {1}, {2}, {3}): " +
                                         "increasing number of outgoing lanes at nextLaneId={4}, idx={5}: " +
-                                        "isNextValid={6}, nextLaneInfo.m_finalDirection={7}, nextDir2={8}: " +
+                                        "isNextValid={6}, nextLaneInfo.m_finalDirection={7}, nextExpectedDirection={8}: " +
                                         "incomingVehicleLanes={9}, outgoingVehicleLanes={10}",
                                         prevSegmentId,
                                         prevLaneIndex,
@@ -1094,7 +1093,7 @@ namespace TrafficManager.Manager.Impl {
                                         nextLaneIndex,
                                         isNextSegmentValid,
                                         nextLaneInfo.m_finalDirection,
-                                        nextDir2,
+                                        nextExpectedDirection,
                                         incomingVehicleLanes,
                                         outgoingVehicleLanes);
                                 }
