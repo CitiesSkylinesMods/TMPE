@@ -399,12 +399,12 @@ namespace TrafficManager.Manager.Impl {
                 return;
             }
 
-            ref NetSegment segment = ref prevSegmentId.ToSegment();
-            NetInfo prevSegmentInfo = segment.Info;
-            bool prevSegIsInverted = (segment.m_flags & NetSegment.Flags.Invert) != NetSegment.Flags.None;
+            ref NetSegment prevSegment = ref prevSegmentId.ToSegment();
+            NetInfo prevSegmentInfo = prevSegment.Info;
+            bool prevSegIsInverted = (prevSegment.m_flags & NetSegment.Flags.Invert) != NetSegment.Flags.None;
 
             IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
-            ExtSegment prevSeg = Constants.ManagerFactory.ExtSegmentManager.ExtSegments[prevSegmentId];
+            ExtSegment prevExtSegment = Constants.ManagerFactory.ExtSegmentManager.ExtSegments[prevSegmentId];
             ExtSegmentEnd prevEnd = segEndMan.ExtSegmentEnds[segEndMan.GetIndex(prevSegmentId, isNodeStartNodeOfPrevSegment)];
 
             ushort nodeId = prevEnd.nodeId; // common node
@@ -421,7 +421,7 @@ namespace TrafficManager.Manager.Impl {
             int prevSimilarLaneCount = prevLaneInfo.m_similarLaneCount;
             int prevInnerSimilarLaneIndex = CalcInnerSimilarLaneIndex(prevSegmentId, prevLaneIndex);
             int prevOuterSimilarLaneIndex = CalcOuterSimilarLaneIndex(prevSegmentId, prevLaneIndex);
-            bool prevHasBusLane = prevSeg.buslane;
+            bool prevHasBusLane = prevExtSegment.buslane;
 
             bool nodeIsJunction = false;
             bool nodeIsTransition = false;
@@ -486,7 +486,7 @@ namespace TrafficManager.Manager.Impl {
 
             // determine if highway rules should be applied
             bool onHighway = Options.highwayRules && nextAreOnlyOneWayHighways &&
-                             prevEnd.outgoing && prevSeg.oneWay && prevSeg.highway;
+                             prevEnd.outgoing && prevExtSegment.oneWay && prevExtSegment.highway;
             bool applyHighwayRules = onHighway && nodeIsSimpleJunction;
             bool applyHighwayRulesAtJunction = applyHighwayRules && nodeIsRealJunction;
             bool iterateViaGeometry = applyHighwayRulesAtJunction &&
@@ -516,8 +516,8 @@ namespace TrafficManager.Manager.Impl {
                     Options.highwayRules,
                     nodeIsSimpleJunction,
                     nextAreOnlyOneWayHighways,
-                    prevEnd.outgoing && prevSeg.oneWay,
-                    prevSeg.highway,
+                    prevEnd.outgoing && prevExtSegment.oneWay,
+                    prevExtSegment.highway,
                     iterateViaGeometry);
                 Log._DebugFormat(
                     "RoutingManager.RecalculateLaneEndRoutingData({0}, {1}, {2}, {3}): " +
@@ -1230,7 +1230,7 @@ namespace TrafficManager.Manager.Impl {
                                         "RoutingManager.RecalculateLaneEndRoutingData({0}, {1}, {2}, {3}): " +
                                         "highway rules at junction: lane splitting junction. " +
                                         "minNextInnerSimilarIndex={4}, maxNextInnerSimilarIndex={5}",
-                                        segmentId, laneIndex, laneId, startNode, minNextInnerSimilarIndex,
+                                        prevSegmentId, nextLaneIndex, prevLaneId, isNodeStartNodeOfPrevSegment, minNextInnerSimilarIndex,
                                         maxNextInnerSimilarIndex);
                                 }
 #endif
@@ -1280,7 +1280,7 @@ namespace TrafficManager.Manager.Impl {
                                         "RoutingManager.RecalculateLaneEndRoutingData({0}, {1}, {2}, " +
                                         "{3}): highway rules at junction: lane merging/unknown junction. " +
                                         "minNextInnerSimilarIndex={4}, maxNextInnerSimilarIndex={5}",
-                                        segmentId, laneIndex, laneId, startNode, minNextInnerSimilarIndex,
+                                        prevSegmentId, nextLaneIndex, prevLaneId, isNodeStartNodeOfPrevSegment, minNextInnerSimilarIndex,
                                         maxNextInnerSimilarIndex);
                                 }
 #endif
@@ -1292,7 +1292,7 @@ namespace TrafficManager.Manager.Impl {
                                     Log._DebugFormat(
                                         "RoutingManager.RecalculateLaneEndRoutingData({0}, {1}, {2}, {3}): " +
                                         "minNextInnerSimilarIndex >= 0. nextCompatibleTransitionDatas={4}",
-                                        segmentId, laneIndex, laneId, startNode,
+                                        prevSegmentId, nextLaneIndex, prevLaneId, isNodeStartNodeOfPrevSegment,
                                         nextCompatibleTransitionDatas.ArrayToString());
                                 }
 #endif
@@ -1313,7 +1313,7 @@ namespace TrafficManager.Manager.Impl {
                                             "RoutingManager.RecalculateLaneEndRoutingData({0}, {1}, " +
                                             "{2}, {3}): highway junction iteration: " +
                                             "nextInnerSimilarIndex={4}, nextTransitionIndex={5}",
-                                            segmentId, laneIndex, laneId, startNode, nextInnerSimilarIndex,
+                                            prevSegmentId, nextLaneIndex, prevLaneId, isNodeStartNodeOfPrevSegment, nextInnerSimilarIndex,
                                             nextTransitionIndex);
                                     }
 #endif
@@ -1368,7 +1368,7 @@ namespace TrafficManager.Manager.Impl {
                                         Log._DebugFormat(
                                             "RoutingManager.RecalculateLaneEndRoutingData({0}, {1}, {2}, " +
                                             "{3}): highway junction iteration: compatibleLaneDist={4}",
-                                            segmentId, laneIndex, laneId, startNode,
+                                            prevSegmentId, nextLaneIndex, prevLaneId, isNodeStartNodeOfPrevSegment, startNode,
                                             compatibleLaneDist);
                                     }
 #endif
@@ -1393,7 +1393,7 @@ namespace TrafficManager.Manager.Impl {
                                     Log._DebugFormat(
                                         "RoutingManager.RecalculateLaneEndRoutingData({0}, {1}, {2}, {3}): " +
                                         "highway junction iterations finished: nextCompatibleTransitionDataIndices={4}",
-                                        segmentId, laneIndex, laneId, startNode,
+                                        prevSegmentId, nextLaneIndex, prevLaneId, isNodeStartNodeOfPrevSegment,
                                         nextCompatibleTransitionDataIndices.ArrayToString());
                                 }
 #endif
