@@ -856,7 +856,7 @@ namespace TrafficManager.Manager.Impl {
                                     if (extendedLogRouting) {
                                         Log._DebugFormat(
                                             "RoutingManager.RecalculateLaneEndRoutingData({0}, {1}, {2}, {3}): " +
-                                            "nextNodeId={4}, buildingId={5} isTollBooth={6} stayInlaneTracks={7}. Preventing lane changes.",
+                                            "nodeId={4}, buildingId={5} isTollBooth={6} stayInlaneTracks={7}. Preventing lane changes.",
                                             prevSegmentId,
                                             prevLaneIndex,
                                             prevLaneId,
