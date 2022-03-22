@@ -644,10 +644,10 @@ namespace TrafficManager.Manager.Impl {
                         isNextSegmentValid);
                 }
 
-                bool reverseDir = isNodeStartNodeOfNextSegment ^ nextSegIsInverted;
+                bool nextSegmentIsReversed = isNodeStartNodeOfNextSegment ^ nextSegIsInverted;
 
                 // expected direction of the next lane
-                NetInfo.Direction nextExpectedDirection = reverseDir ? NetInfo.Direction.Backward : NetInfo.Direction.Forward; 
+                NetInfo.Direction nextExpectedDirection = nextSegmentIsReversed ? NetInfo.Direction.Backward : NetInfo.Direction.Forward; 
 
                 LaneTransitionData[] nextRelaxedTransitionDatas = null;
                 byte numNextRelaxedTransitionDatas = 0;
@@ -736,11 +736,17 @@ namespace TrafficManager.Manager.Impl {
                             }
 
                             if (isNextSegmentValid) {
-                                // calculate current similar lane index starting from outer lane
+                                int nextSimilarLaneCount = nextLaneInfo.m_similarLaneCount;
                                 int nextOuterSimilarLaneIndex = CalcOuterSimilarLaneIndex(nextSegmentId, nextLaneIndex);
+                                bool reverseSimilarLaneIndex = ShouldReverseSimilarLaneIndex(
+                                    segmentInvert1: prevSegIsInverted, laneInfo1: prevLaneInfo, startNode1: isNodeStartNodeOfPrevSegment,
+                                    segmentInvert2: nextSegIsInverted, laneInfo2: nextLaneInfo, startNode2: isNodeStartNodeOfNextSegment);
+                                int nextMatchingOuterSimilarLaneIndex =
+                                    reverseSimilarLaneIndex ?
+                                    nextSimilarLaneCount - 1 - nextOuterSimilarLaneIndex :
+                                    nextOuterSimilarLaneIndex;
 
-                                // int nextInnerSimilarLaneIndex = CalcInnerSimilarLaneIndex(nextSegmentId, nextLaneIndex);
-                                var isCompatibleLane = false;
+                                bool isCompatibleLane = false;
                                 var transitionType = LaneEndTransitionType.Invalid;
 
                                 // check for lane connections
@@ -759,11 +765,9 @@ namespace TrafficManager.Manager.Impl {
                                 }
 
                                 bool nextIsTrackOnly = nextLaneInfo.IsTrackOnly();
-                                int nextSimilarLaneCount = nextLaneInfo.m_similarLaneCount;
                                 bool similarLaneCountMatches = prevSimilarLaneCount == nextSimilarLaneCount;
-                                bool outerSimilarLaneIndexMatches = prevOuterSimilarLaneIndex == nextOuterSimilarLaneIndex;
-                                bool biDirectional = prevLaneInfo.IsBidirectional() || nextLaneInfo.IsBidirectional();
-                                bool stayInlaneTracks = nextIsTrackOnly & similarLaneCountMatches & !biDirectional;
+                                bool outerSimilarLaneIndexMatches = prevOuterSimilarLaneIndex == nextMatchingOuterSimilarLaneIndex;
+                                bool stayInlaneTracks = nextIsTrackOnly & similarLaneCountMatches;
 
                                 if (extendedLogRouting) {
                                     Log._DebugFormat(
@@ -799,7 +803,8 @@ namespace TrafficManager.Manager.Impl {
                                         "prefer stay in lane information:\n" +
                                         $"prevSegmentId={prevSegmentId} prevLane:[id={prevLaneId} index={prevLaneIndex} outerSimilarLaneIndex:{prevOuterSimilarLaneIndex} similarLaneCount={prevSimilarLaneCount}]\n" +
                                         $"nextSegmentId={nextSegmentId} nextLane:[id={nextLaneId} index={nextLaneIndex} outerSimilarLaneIndex:{nextOuterSimilarLaneIndex} similarLaneCount={nextSimilarLaneCount}]\n" +
-                                        $"nextIsTrackOnly={nextIsTrackOnly} similarLaneCountMatches={similarLaneCountMatches}  outerSimilarLaneIndexMatches={outerSimilarLaneIndexMatches} stayInlaneTracks={stayInlaneTracks}");
+                                        $"reverseSimilarLaneIndex={reverseSimilarLaneIndex} nextMatchingOuterSimilarLaneIndex={nextMatchingOuterSimilarLaneIndex}\n" +
+                                        $"nextIsTrackOnly={nextIsTrackOnly} similarLaneCountMatches={similarLaneCountMatches} outerSimilarLaneIndexMatches={outerSimilarLaneIndexMatches} stayInlaneTracks={stayInlaneTracks}");
                                 }
 
                                 int currentLaneConnectionTransIndex = -1;
@@ -1012,7 +1017,7 @@ namespace TrafficManager.Manager.Impl {
                                             // simple forced lane transition: set lane distance
                                             nextForcedTransitionDatas[numNextForcedTransitionDatas]
                                                 .distance = (byte)Math.Abs(
-                                                prevOuterSimilarLaneIndex - nextOuterSimilarLaneIndex);
+                                                prevOuterSimilarLaneIndex - nextMatchingOuterSimilarLaneIndex);
                                         }
 
                                         ++numNextForcedTransitionDatas;
@@ -1032,7 +1037,7 @@ namespace TrafficManager.Manager.Impl {
 
                                     if (numNextCompatibleTransitionDatas < MAX_NUM_TRANSITIONS) {
                                         nextCompatibleOuterSimilarIndices[numNextCompatibleTransitionDatas] =
-                                            nextOuterSimilarLaneIndex;
+                                            nextMatchingOuterSimilarLaneIndex;
 
                                         compatibleLaneIndexToLaneConnectionIndex[numNextCompatibleTransitionDatas] =
                                             currentLaneConnectionTransIndex;
@@ -1319,6 +1324,7 @@ namespace TrafficManager.Manager.Impl {
                                         numNextCompatibleTransitionDatas,
                                         nextSegmentId,
                                         nextInnerSimilarIndex);
+
 
 #if DEBUGHWJUNCTIONROUTING
                                     if (extendedLogRouting) {
@@ -2252,7 +2258,6 @@ namespace TrafficManager.Manager.Impl {
                 Math.Max(0, Math.Min(targetOuterLaneIndex, indicesSortedByOuterIndex.Length - 1))];
         }
 
-        [UsedImplicitly]
         protected int FindLaneByOuterIndex(LaneTransitionData[] laneTransitions,
                                            int num,
                                            ushort segmentId,
@@ -2340,6 +2345,46 @@ namespace TrafficManager.Manager.Impl {
             base.OnAfterLoadData();
 
             RecalculateAll();
+        }
+
+        /// <summary>
+        /// if the direction of the given lanes do not match then similar lane index must be reversed.
+        /// </summary>
+        private bool ShouldReverseSimilarLaneIndex(
+            bool segmentInvert1, NetInfo.Lane laneInfo1, bool startNode1,
+            bool segmentInvert2, NetInfo.Lane laneInfo2, bool startNode2) {
+#if DEBUG
+            bool logRouting = DebugSwitch.Routing.Get(); 
+#else
+            const bool logRouting = false;
+#endif
+            bool both1 = laneInfo1.m_finalDirection == NetInfo.Direction.Both;
+            bool both2 = laneInfo2.m_finalDirection == NetInfo.Direction.Both;
+            bool backward1 = laneInfo1.IsGoingBackward();
+            bool backward2 = laneInfo2.IsGoingBackward();
+
+            bool reverse;
+            if (!both1 && !both2) {
+                // both lanes are one-way or station tracks
+                // [https://github.com/CitiesSkylinesMods/TMPE/issues/1486#issuecomment-1075699771] what about station tracks connecting to unidirectional tracks?
+                reverse = false;
+            } else {
+                // at least one lane is non-station bidirectional
+                reverse = startNode1 == startNode2; // if the common node is start node for both segments then they are facing each other and are in opposite direction.
+                reverse ^= segmentInvert1 != segmentInvert2;
+                reverse ^= backward1 != backward2;
+            }
+
+            if (logRouting) {
+                Log._Debug(
+                    $"ShouldReverseSimilarLaneIndex() : reverse={reverse} " +
+                    $"segmentInvert1={segmentInvert1} segmentInvert2={segmentInvert2} " +
+                    $"startNode1={startNode1} startNode2={startNode2} " +
+                    $"backward1={backward1} backward2={backward2} " +
+                    $"both1={both1} both2={both2} ");
+            }
+
+            return reverse;
         }
     }
 }
