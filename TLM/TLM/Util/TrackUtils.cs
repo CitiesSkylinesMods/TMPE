@@ -29,8 +29,13 @@ namespace TrafficManager.Util {
             (direction & NetInfo.Direction.Both) == NetInfo.Direction.Backward ||
             (direction & NetInfo.Direction.AvoidBoth) == NetInfo.Direction.AvoidForward;
 
+        /// <summary>
+        /// checks if vehicles move forward or bypass forward (considers LHT)
+        /// </summary>
+        /// <returns>true if vehicles move forward including AvoidBackward,
+        /// false if vehicles going backward, bi-directional, or non-directional</returns>
         internal static bool IsGoingForward(this NetInfo.Direction direction) =>
-            (direction & NetInfo.Direction.Both) == NetInfo.Direction.Forward ||
+        (direction & NetInfo.Direction.Both) == NetInfo.Direction.Forward ||
             (direction & NetInfo.Direction.AvoidBoth) == NetInfo.Direction.AvoidBackward;
 
         /// <summary>
@@ -41,6 +46,11 @@ namespace TrafficManager.Util {
         internal static bool IsGoingBackward(this NetInfo.Lane laneInfo) =>
             laneInfo.m_finalDirection.IsGoingBackward();
 
+        /// <summary>
+        /// checks if vehicles move forward or bypass forward (considers LHT)
+        /// </summary>
+        /// <returns>true if vehicles move forward including AvoidBackward,
+        /// false if vehicles going backward, bi-directional, or non-directional</returns>
         internal static bool IsGoingForward(this NetInfo.Lane laneInfo) =>
             laneInfo.m_finalDirection.IsGoingForward();
     }
