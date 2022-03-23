@@ -68,6 +68,41 @@ namespace TrafficManager.Util.Extensions {
         }
 
         /// <summary>
+        /// Iterates the lanes in the specified <paramref name="netSegment"/> until it finds one which matches
+        /// both the specified <paramref name="laneType"/> and <paramref name="vehicleType"/> masks.
+        /// </summary>
+        /// <param name="netSegment">The <see cref="NetSegment"/> to inspect.</param>
+        /// <param name="laneType">The required <see cref="NetInfo.LaneType"/> flags (at least one must match).</param>
+        /// <param name="vehicleType">The required <see cref="VehicleInfo.VehicleType"/> flags (at least one must match).</param>
+        /// <returns>Returns <c>true</c> if a lane matches, otherwise <c>false</c> if none of the lanes match.</returns>
+        public static bool AnyApplicableLane(
+            this ref NetSegment netSegment,
+            NetInfo.LaneType laneType,
+            VehicleInfo.VehicleType vehicleType) {
+
+            NetManager netManager = Singleton<NetManager>.instance;
+
+            NetInfo segmentInfo = netSegment.Info;
+            uint curLaneId = netSegment.m_lanes;
+            byte laneIndex = 0;
+
+            while (laneIndex < segmentInfo.m_lanes.Length && curLaneId != 0u) {
+                NetInfo.Lane laneInfo = segmentInfo.m_lanes[laneIndex];
+
+                if ((laneInfo.m_vehicleType & vehicleType) != 0 &&
+                    (laneInfo.m_laneType & laneType) != 0) {
+
+                    return true;
+                }
+
+                curLaneId = netManager.m_lanes.m_buffer[curLaneId].m_nextLane;
+                ++laneIndex;
+            }
+
+            return false;
+        }
+
+        /// <summary>
         /// Assembles a geometrically sorted list of lanes for the given segment.
         /// If the <paramref name="startNode"/> parameter is set only lanes supporting traffic to flow towards the given node are added to the list, otherwise all matched lanes are added.
         /// </summary>
