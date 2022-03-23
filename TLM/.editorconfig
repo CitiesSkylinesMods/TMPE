@@ -28,6 +28,7 @@ dotnet_diagnostic.SA1310.severity = none
 dotnet_diagnostic.SA1500.severity = none
 dotnet_diagnostic.SA1503.severity = suggestion
 dotnet_diagnostic.SA1505.severity = silent
+dotnet_diagnostic.SA1508.severity = none
 dotnet_diagnostic.SA1512.severity = none
 dotnet_diagnostic.SA1513.severity = none
 dotnet_diagnostic.SA1515.severity = none
