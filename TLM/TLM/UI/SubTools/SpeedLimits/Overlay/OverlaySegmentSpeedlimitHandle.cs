@@ -1,6 +1,6 @@
 namespace TrafficManager.UI.SubTools.SpeedLimits.Overlay {
     using System;
-    using ColossalFramework;
+    using System.Diagnostics.CodeAnalysis;
     using CSUtil.Commons;
     using JetBrains.Annotations;
     using TrafficManager.API.Traffic.Data;
@@ -16,13 +16,13 @@ namespace TrafficManager.UI.SubTools.SpeedLimits.Overlay {
     /// </summary>
     public readonly struct OverlaySegmentSpeedlimitHandle {
         /// <summary>Segment id where the speedlimit sign was displayed.</summary>
+        [SuppressMessage("Usage", "RAS0002:Readonly field for a non-readonly struct", Justification = "Primitive value.")]
         private readonly ushort segmentId_;
 
-        public ushort SegmentId => this.segmentId_;
+        public OverlaySegmentSpeedlimitHandle(ushort segmentId)
+            => this.segmentId_ = segmentId;
 
-        public OverlaySegmentSpeedlimitHandle(ushort segmentId) {
-            this.segmentId_ = segmentId;
-        }
+        public ushort SegmentId => this.segmentId_;
 
         /// <summary>
         /// Called when mouse is down, and when mouse is not in parent tool window area.
@@ -67,6 +67,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits.Overlay {
         private void ClickMultiSegment(SetSpeedLimitAction action, SetSpeedLimitTarget target) {
 
             // Special case for roundabouts
+            // TO-DO: https://github.com/CitiesSkylinesMods/TMPE/issues/1469
             if (new RoundaboutMassEdit().TraverseLoop(this.segmentId_, out var segmentList)) {
                 foreach (ushort segId in segmentList) {
                     SpeedLimitManager.Instance.SetSegmentSpeedLimit(segId, action);
@@ -78,11 +79,18 @@ namespace TrafficManager.UI.SubTools.SpeedLimits.Overlay {
             // Called for each segment in the traversed route
             bool ForEachSegmentFun(SegmentTraverser.SegmentVisitData data) {
                 ushort segmentId = data.CurSeg.segmentId;
-                NetInfo netInfo = segmentId.ToSegment().Info;
+                ref NetSegment netSegment = ref segmentId.ToSegment();
+
+                if (!netSegment.AnyApplicableLane(
+                    SpeedLimitManager.LANE_TYPES,
+                    SpeedLimitManager.VEHICLE_TYPES)) {
+
+                    return false;
+                }
 
                 Apply(
                     segmentId: segmentId,
-                    netInfo: netInfo,
+                    netInfo: netSegment.Info,
                     action: action,
                     target: target);
 
@@ -115,9 +123,11 @@ namespace TrafficManager.UI.SubTools.SpeedLimits.Overlay {
             }
         }
 
-        internal static void ApplyDefaultSpeedLimit(ushort segmentId,
-                                                  [NotNull] NetInfo netInfo,
-                                                  SetSpeedLimitAction action) {
+        internal static void ApplyDefaultSpeedLimit(
+            ushort segmentId,
+            [NotNull] NetInfo netInfo,
+            SetSpeedLimitAction action) {
+
             switch (action.Type) {
                 case SetSpeedLimitAction.ActionType.SetOverride:
                 case SetSpeedLimitAction.ActionType.Unlimited:
