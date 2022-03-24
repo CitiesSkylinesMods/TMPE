@@ -1,18 +1,16 @@
-// #define DEBUGFLAGS
+// #define DEBUGFLAGS // uncomment to print verbose log.
 
 namespace TrafficManager.State {
     using ColossalFramework;
     using CSUtil.Commons;
     using System.Collections.Generic;
     using System;
-    using TrafficManager.API.Traffic.Data;
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.Manager.Impl;
-    using TrafficManager.State.ConfigData;
-    using static TrafficManager.Util.Shortcuts;
     using TrafficManager.Util.Extensions;
 
-    [Obsolete]
+    // [Obsolete] // I commented this on out for now to prevent warning spam
+    // [issue #1476] make flags obsolete.
     public class Flags {
         public static readonly uint lfr = (uint)NetLane.Flags.LeftForwardRight;
 
