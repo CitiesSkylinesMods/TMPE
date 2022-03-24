@@ -168,7 +168,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                 startNode ?? false,
                 LaneArrowManager.LANE_TYPES,
                 LaneArrowManager.VEHICLE_TYPES,
-                reverse: false);
+                reverse: true);
 
             CreateLaneArrowsWindow(sortedLanes.Count);
             SetupLaneArrowsWindowButtons(laneList: sortedLanes,
