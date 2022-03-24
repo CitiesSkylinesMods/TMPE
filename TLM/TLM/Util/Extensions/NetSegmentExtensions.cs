@@ -43,6 +43,12 @@ namespace TrafficManager.Util.Extensions {
             }
         }
 
+        /// <returns><c>true</c> if nodeId is start node.
+        /// <c>false</c> if nodeId is end node.
+        /// Undetermined if segment does not have nodeId</returns>
+        public static bool IsStartnode(this ref NetSegment netSegment, ushort nodeId) =>
+            netSegment.m_startNode == nodeId;
+
         /// <summary>
         /// Checks if the netSegment is Created, but neither Collapsed nor Deleted.
         /// </summary>
@@ -53,11 +59,6 @@ namespace TrafficManager.Util.Extensions {
                 required: NetSegment.Flags.Created,
                 forbidden: NetSegment.Flags.Collapsed | NetSegment.Flags.Deleted);
 
-        /// <returns><c>true</c> if nodeId is start node.
-        /// <c>false</c> if nodeId is end node.
-        /// Undetermined if segment does not have nodeId</returns>
-        public static bool IsStartnode(this ref NetSegment netSegment, ushort nodeId) =>
-            netSegment.m_startNode == nodeId;
         public static NetInfo.Lane GetLaneInfo(this ref NetSegment netSegment, int laneIndex) =>
             netSegment.Info?.m_lanes?[laneIndex];
 
