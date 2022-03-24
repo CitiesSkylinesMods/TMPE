@@ -120,6 +120,8 @@ namespace TrafficManager.UI.SubTools.SpeedLimits.Overlay {
                 case SetSpeedLimitTarget.SegmentDefault:
                     ApplyDefaultSpeedLimit(segmentId, netInfo, action);
                     break;
+                default:
+                    throw new ArgumentOutOfRangeException("Invalid target specified.");
             }
         }
 
@@ -143,7 +145,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits.Overlay {
                     SpeedLimitManager.Instance.ResetCustomNetinfoSpeedLimit(netInfo);
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException();
+                    throw new ArgumentOutOfRangeException("Invalid action type specified.");
             }
         }
     }
