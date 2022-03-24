@@ -85,6 +85,9 @@ namespace TrafficManager.Util.Extensions {
             NetInfo.LaneType laneType,
             VehicleInfo.VehicleType vehicleType) {
 
+            AssertNotNone(laneType, nameof(laneType));
+            AssertNotNone(vehicleType, nameof(vehicleType));
+
             NetManager netManager = Singleton<NetManager>.instance;
 
             NetInfo segmentInfo = netSegment.Info;
