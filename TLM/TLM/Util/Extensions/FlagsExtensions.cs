@@ -24,6 +24,8 @@ namespace TrafficManager.Util.Extensions {
 
         internal static bool IsFlagSet(this VehicleParked.Flags value, VehicleParked.Flags flag) => (value & flag) != 0;
 
+        internal static bool IsFlagSet(this NetInfo.Direction value, NetInfo.Direction flag) => (value & flag) != 0;
+
         internal static bool CheckFlags(this Building.Flags value, Building.Flags required, Building.Flags forbidden = 0) =>
             (value & (required | forbidden)) == required;
 
@@ -46,6 +48,9 @@ namespace TrafficManager.Util.Extensions {
             (value & (required | forbidden)) == required;
 
         internal static bool CheckFlags(this NetLane.Flags value, NetLane.Flags required, NetLane.Flags forbidden = 0) =>
+            (value & (required | forbidden)) == required;
+
+        internal static bool CheckFlags(this NetInfo.Direction value, NetInfo.Direction required, NetInfo.Direction forbidden = 0) =>
             (value & (required | forbidden)) == required;
     }
 }
