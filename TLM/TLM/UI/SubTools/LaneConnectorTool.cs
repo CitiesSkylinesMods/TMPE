@@ -1447,7 +1447,7 @@ namespace TrafficManager.UI.SubTools {
                     t: 2f / 3f,
                     color: Color.blue,
                     length: 0.75f,
-                    size: 0.5f, //0.03f,
+                    size: 0.03f,
                     minY: minY,
                     maxY: maxY,
                     alphaBlend: true,
@@ -1567,6 +1567,15 @@ namespace TrafficManager.UI.SubTools {
                     items.Add(m == SelectionMode.SelectSource
                                   ? OnscreenDisplay.RightClick_LeaveNode()
                                   : OnscreenDisplay.RightClick_LeaveLane());
+
+                    if(selectedLaneEnd != null) {
+                        bool bidirectional = selectedLaneEnd.IsBidirectional;
+                        if (bidirectional) {
+                            string key = "UI.Key:Shift bidirectional";
+                            items.Add(new HoldModifier(shift: true, localizedText: T(key)));
+                        }
+                    }
+
                     OnscreenDisplay.Display(items);
                     return;
                 }
