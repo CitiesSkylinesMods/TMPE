@@ -52,12 +52,12 @@ namespace TrafficManager.UI.SubTools {
             Backward,
         }
 
-        private static bool verbose_ =>
 #if DEBUG
-            DebugSwitch.LaneConnections.Get();
+        private static bool verbose_ => DebugSwitch.LaneConnections.Get();
 #else
-            false;
+        private const bool verbose_  = false;
 #endif
+
         private static readonly Color DefaultLaneEndColor = new Color(1f, 1f, 1f, 0.4f);
         private static readonly Color DefaultDisabledLaneEndColor = new Color(1f, 0.48f, 0.16f, 0.63f);
         private LaneEnd selectedLaneEnd;
@@ -88,6 +88,11 @@ namespace TrafficManager.UI.SubTools {
         /// Stores last cached camera position in <see cref="CachedVisibleNodeIds"/>
         /// </summary>
         private CameraTransformValue LastCachedCamera { get; set; }
+
+        /// <summary>
+        /// create all lane connections (bidirectional, cars+tram).
+        /// </summary>
+        private bool MultiMode => ShiftIsPressed;
 
         private class LaneEnd {
             internal ushort SegmentId;
@@ -382,6 +387,18 @@ namespace TrafficManager.UI.SubTools {
                             size: 0.18f, // Embolden
                             underground: true,
                             showDirection: ShouldShowDirectionOfConnection(selectedLaneEnd, hoveredLaneEnd));
+                        if(!connected && MultiMode && selectedLaneEnd.IsBidirectional && hoveredLaneEnd.IsBidirectional) {
+                            Bezier3 bezier2 = CalculateBezierConnection(hoveredLaneEnd, selectedLaneEnd);
+                            // draw backward arrow only:
+                            DrawLaneCurve(
+                                cameraInfo: cameraInfo,
+                                bezier: ref bezier2,
+                                color: default,
+                                outlineColor: default,
+                                underground: true,
+                                showDirection: true);
+                        }
+
                         OverrideCursor = connected ? removeCursor_ : addCursor_; 
                     }
                 }
@@ -935,42 +952,54 @@ namespace TrafficManager.UI.SubTools {
                     () => "LaneConnectorTool: set selected marker");
                 MainTool.RequestOnscreenDisplayUpdate();
             } else if (GetSelectionMode() == SelectionMode.SelectTarget) {
-                // select target marker
-                // bool success = false;
-                if (LaneConnectionManager.Instance.RemoveLaneConnection(
+                // toggle lane connection
+                bool canBeBidirectional = selectedLaneEnd.IsBidirectional && hoveredLaneEnd.IsBidirectional;
+                if (LaneConnectionManager.Instance.AreLanesConnected(
                     selectedLaneEnd.LaneId,
                     hoveredLaneEnd.LaneId,
                     selectedLaneEnd.StartNode)) {
-
-                    // try to remove connection
-                    selectedLaneEnd.ConnectedLaneEnds.Remove(hoveredLaneEnd);
-                    Log._DebugIf(
-                        logLaneConn,
-                        () => $"LaneConnectorTool: removed lane connection: {selectedLaneEnd.LaneId}, " +
-                        $"{hoveredLaneEnd.LaneId}");
-
-                    // success = true;
-                } else if (LaneConnectionManager.Instance.AddLaneConnection(
-                    selectedLaneEnd.LaneId,
-                    hoveredLaneEnd.LaneId,
-                    selectedLaneEnd.StartNode)) {
-                    // try to add connection
-                    selectedLaneEnd.ConnectedLaneEnds.Add(hoveredLaneEnd);
-                    Log._DebugIf(
-                        logLaneConn,
-                        () => $"LaneConnectorTool: added lane connection: {selectedLaneEnd.LaneId}, " +
-                        $"{hoveredLaneEnd.LaneId}");
-
-                    // success = true;
+                    RemoveLaneConnection(selectedLaneEnd, hoveredLaneEnd);
+                    if (canBeBidirectional && ShiftIsPressed) {
+                        RemoveLaneConnection(hoveredLaneEnd, selectedLaneEnd);
+                    }
+                } else {
+                    AddLaneConnection(selectedLaneEnd, hoveredLaneEnd);
+                    if (canBeBidirectional && ShiftIsPressed) {
+                        AddLaneConnection(hoveredLaneEnd, selectedLaneEnd);
+                    }
                 }
 
-                /*if (success) {
-                            // connection has been modified. switch back to source marker selection
-                            Log._Debug($"LaneConnectorTool: switch back to source marker selection");
-                            selectedMarker = null;
-                            selMode = MarkerSelectionMode.SelectSource;
-                    }*/
                 MainTool.RequestOnscreenDisplayUpdate();
+            }
+        }
+
+        private void RemoveLaneConnection(LaneEnd source, LaneEnd target) {
+            if (LaneConnectionManager.Instance.RemoveLaneConnection(
+                source.LaneId,
+                target.LaneId,
+                source.StartNode)) {
+
+                // try to remove connection
+                source.ConnectedLaneEnds.Remove(target);
+                Log._DebugIf(
+                    verbose_,
+                    () => $"LaneConnectorTool: removed lane connection: {source.LaneId}, " +
+                    $"{target.LaneId}");
+
+            }
+        }
+
+        private void AddLaneConnection(LaneEnd source, LaneEnd target) {
+            if (LaneConnectionManager.Instance.AddLaneConnection(
+            source.LaneId,
+            target.LaneId,
+            source.StartNode)) {
+                // try to add connection
+                source.ConnectedLaneEnds.Add(target);
+                Log._DebugIf(
+                    verbose_,
+                    () => $"LaneConnectorTool: added lane connection: {source.LaneId}, " +
+                    $"{target.LaneId}");
             }
         }
 
@@ -1382,32 +1411,35 @@ namespace TrafficManager.UI.SubTools {
             Bounds bounds = bezier.GetBounds();
             float minY = bounds.min.y - 0.5f;
             float maxY = bounds.max.y + 0.5f;
-            // Draw black outline
-            RenderManager.instance.OverlayEffect.DrawBezier(
-                cameraInfo: cameraInfo,
-                color: outlineColor,
-                bezier: bezier,
-                size: size * 1.5f,
-                cutStart: 0,
-                cutEnd: 0,
-                minY: minY,
-                maxY: maxY,
-                renderLimits: underground,
-                alphaBlend: false);
+            if (outlineColor.a != 0) {
+                // Draw black outline
+                RenderManager.instance.OverlayEffect.DrawBezier(
+                    cameraInfo: cameraInfo,
+                    color: outlineColor,
+                    bezier: bezier,
+                    size: size * 1.5f,
+                    cutStart: 0,
+                    cutEnd: 0,
+                    minY: minY,
+                    maxY: maxY,
+                    renderLimits: underground,
+                    alphaBlend: false);
+            }
 
-            // Inside the outline draw colored bezier
-            RenderManager.instance.OverlayEffect.DrawBezier(
-                cameraInfo: cameraInfo,
-                color: color,
-                bezier: bezier,
-                size: size,
-                cutStart: 0,
-                cutEnd: 0,
-                minY: minY,
-                maxY: maxY,
-                renderLimits: underground,
-                alphaBlend: true);
-
+            if (color.a != 0) {
+                // Inside the outline draw colored bezier
+                RenderManager.instance.OverlayEffect.DrawBezier(
+                    cameraInfo: cameraInfo,
+                    color: color,
+                    bezier: bezier,
+                    size: size,
+                    cutStart: 0,
+                    cutEnd: 0,
+                    minY: minY,
+                    maxY: maxY,
+                    renderLimits: underground,
+                    alphaBlend: true);
+            }
             if (showDirection) {
                 Highlight.DrawArrowHead2(
                     cameraInfo: cameraInfo,
@@ -1415,7 +1447,7 @@ namespace TrafficManager.UI.SubTools {
                     t: 2f / 3f,
                     color: Color.blue,
                     length: 0.75f,
-                    size: 0.03f,
+                    size: 0.5f, //0.03f,
                     minY: minY,
                     maxY: maxY,
                     alphaBlend: true,
