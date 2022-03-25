@@ -99,6 +99,7 @@ namespace TrafficManager.UI.SubTools {
             internal int OuterSimilarLaneIndex;
             internal int InnerSimilarLaneIndex; // used for stay in lane.
             internal int SegmentIndex; // index accesable by NetNode.GetSegment(SegmentIndex);
+            internal bool IsBidirectional; // can be source AND/OR target of a lane connection.
             internal readonly List<LaneEnd> ConnectedLaneEnds = new List<LaneEnd>();
             internal Color Color;
 
@@ -125,6 +126,11 @@ namespace TrafficManager.UI.SubTools {
                 NodeMarker.RenderOverlay(cameraInfo, color, enlarge: highlight, renderLimits);
             }
         }
+
+        // laneEnd1.IsBidirectional && laneEnd2.IsBidirectional would also work
+        // but would require the user to think a little.
+        private bool ShouldShowDirectionOfConnection(LaneEnd laneEnd1, LaneEnd laneEnd2) =>
+            laneEnd1.IsBidirectional || laneEnd2.IsBidirectional;
 
         public override void OnToolGUI(Event e) {
             // Log._Debug(
@@ -244,12 +250,15 @@ namespace TrafficManager.UI.SubTools {
                             // render lane connection from laneEnd to targetLaneEnd
                             Bezier3 bezier = CalculateBezierConnection(laneEnd, targetLaneEnd);
                             Vector3 height = bezier.Max();
+                            bool underground = (height.y + 1f) < intersectionY || laneEnd.NodeId == SelectedNodeId;
+
                             DrawLaneCurve(
                                 cameraInfo: cameraInfo,
                                 bezier: ref bezier,
                                 color: laneEnd.Color.WithAlpha(TrafficManagerTool.OverlayAlpha),
                                 outlineColor: Color.black.WithAlpha(TrafficManagerTool.OverlayAlpha),
-                                underground: (height.y + 1f) < intersectionY || laneEnd.NodeId == SelectedNodeId);
+                                underground: underground,
+                                showDirection: ShouldShowDirectionOfConnection(laneEnd, targetLaneEnd));
                         }
                     }
 
@@ -307,14 +316,14 @@ namespace TrafficManager.UI.SubTools {
                     }
 
                     Bezier3 bezier = CalculateBezierConnection(selectedLaneEnd, targetLaneEnd);
-
                     DrawLaneCurve(
                         cameraInfo: cameraInfo,
                         bezier: ref bezier,
                         color: this.selectedLaneEnd.Color,
                         outlineColor: Color.grey,
                         size: 0.18f, // Embolden
-                        underground: true);
+                        underground: true,
+                        showDirection: ShouldShowDirectionOfConnection(selectedLaneEnd, targetLaneEnd));
                 } // end foreach selectedMarker.ConnectedMarkers
             } // end if selectedMarker != null
         }
@@ -360,9 +369,8 @@ namespace TrafficManager.UI.SubTools {
                         // snap to hovered, render accurate connection bezier
                         Bezier3 bezier = CalculateBezierConnection(selectedLaneEnd, hoveredLaneEnd);
                         bool connected = LaneConnectionManager.Instance.AreLanesConnected(
-                            selectedLaneEnd.LaneId,
-                            hoveredLaneEnd.LaneId,
-                            selectedLaneEnd.StartNode);
+                            selectedLaneEnd.LaneId, hoveredLaneEnd.LaneId, selectedLaneEnd.StartNode);
+
                         Color fillColor = connected ?
                             Color.Lerp(a: selectedLaneEnd.Color, b: Color.white, t: 0.33f) : // show underneath color if there is connection.
                             default; // hollow if there isn't connection
@@ -372,7 +380,8 @@ namespace TrafficManager.UI.SubTools {
                             color: fillColor,
                             outlineColor: Color.white,
                             size: 0.18f, // Embolden
-                            underground: true);
+                            underground: true,
+                            showDirection: ShouldShowDirectionOfConnection(selectedLaneEnd, hoveredLaneEnd));
                         OverrideCursor = connected ? removeCursor_ : addCursor_; 
                     }
                 }
@@ -1173,7 +1182,7 @@ namespace TrafficManager.UI.SubTools {
                                               laneInfo.m_similarLaneIndex - 1;
                             }
                             int outerSimilarLaneIndex = laneInfo.m_similarLaneCount - innerSimilarLaneIndex - 1;
-
+                            bool bidirectional = laneInfo.m_finalDirection.CheckFlags(NetInfo.Direction.Both);
                             laneEnds.Add(
                                 new LaneEnd {
                                     SegmentId = segmentId,
@@ -1188,6 +1197,7 @@ namespace TrafficManager.UI.SubTools {
                                     InnerSimilarLaneIndex = innerSimilarLaneIndex,
                                     OuterSimilarLaneIndex = outerSimilarLaneIndex,
                                     SegmentIndex = segmentIndex,
+                                    IsBidirectional = bidirectional,
                                     NodeMarker = nodeMarker,
                                     SegmentMarker = segmentMarker,
                                 });
@@ -1367,8 +1377,11 @@ namespace TrafficManager.UI.SubTools {
                                    Color color,
                                    Color outlineColor,
                                    float size = 0.08f,
-                                   bool underground = false) {
+                                   bool underground = false,
+                                   bool showDirection = false) {
             Bounds bounds = bezier.GetBounds();
+            float minY = bounds.min.y - 0.5f;
+            float maxY = bounds.max.y + 0.5f;
             // Draw black outline
             RenderManager.instance.OverlayEffect.DrawBezier(
                 cameraInfo: cameraInfo,
@@ -1377,8 +1390,8 @@ namespace TrafficManager.UI.SubTools {
                 size: size * 1.5f,
                 cutStart: 0,
                 cutEnd: 0,
-                minY: bounds.min.y - 0.5f,
-                maxY: bounds.max.y + 0.5f,
+                minY: minY,
+                maxY: maxY,
                 renderLimits: underground,
                 alphaBlend: false);
 
@@ -1390,10 +1403,24 @@ namespace TrafficManager.UI.SubTools {
                 size: size,
                 cutStart: 0,
                 cutEnd: 0,
-                minY: bounds.min.y - 0.5f,
-                maxY: bounds.max.y + 0.5f,
+                minY: minY,
+                maxY: maxY,
                 renderLimits: underground,
                 alphaBlend: true);
+
+            if (showDirection) {
+                Highlight.DrawArrowHead2(
+                    cameraInfo: cameraInfo,
+                    bezier: ref bezier,
+                    t: 2f / 3f,
+                    color: Color.blue,
+                    length: 0.75f,
+                    size: 0.03f,
+                    minY: minY,
+                    maxY: maxY,
+                    alphaBlend: true,
+                    renderLimits: underground);
+            }
         }
 
         /// <summary>
