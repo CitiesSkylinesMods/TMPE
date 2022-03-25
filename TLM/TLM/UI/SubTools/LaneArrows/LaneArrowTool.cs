@@ -165,14 +165,14 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
             }
 
             var sortedLanes = selectedSegment.GetSortedLanes(
-                startNode ?? false,
+                startNode.Value,
                 LaneArrowManager.LANE_TYPES,
                 LaneArrowManager.VEHICLE_TYPES,
                 reverse: true);
 
             CreateLaneArrowsWindow(sortedLanes.Count);
             SetupLaneArrowsWindowButtons(laneList: sortedLanes,
-                                         startNode: startNode ?? false);
+                                         startNode: startNode.Value);
             MainTool.RequestOnscreenDisplayUpdate();
         }
 
