@@ -152,6 +152,9 @@ namespace TrafficManager.UI.Helpers {
             return node.IsUndergroundNode() == IsUndergroundMode;
         }
 
+        /// <summary>
+        /// draw triangular arrow head at the given <paramref name="t"/> of the <paramref name="bezier"/>
+        /// </summary>
         public static void DrawArrowHead(
             RenderManager.CameraInfo cameraInfo,
             ref Bezier3 bezier,
@@ -184,6 +187,9 @@ namespace TrafficManager.UI.Helpers {
                 alphaBlend: alphaBlend);
         }
 
+        /// <summary>
+        /// draw '>' shaped arrow head at the given <paramref name="t"/> of the <paramref name="bezier"/>
+        /// </summary>
         public static void DrawArrowHead2(
             RenderManager.CameraInfo cameraInfo,
             ref Bezier3 bezier,
