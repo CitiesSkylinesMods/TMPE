@@ -123,7 +123,7 @@ namespace TrafficManager.Manager.Impl {
 
             ref NetSegment segment = ref segmentId.ToSegment();
 
-            var sortedLanes = segment.GetSortedLanes(startNode, LANE_TYPES, VEHICLE_TYPES);
+            var sortedLanes = segment.GetSortedLanes(startNode, LANE_TYPES, VEHICLE_TYPES, sort: false);
 
             foreach (var lane in sortedLanes)
                 ResetLaneArrows(lane.laneId);
