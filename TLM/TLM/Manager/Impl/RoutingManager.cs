@@ -650,26 +650,18 @@ namespace TrafficManager.Manager.Impl {
                     NetInfo.Direction nextDir2 =
                         !nextSegIsInverted ? nextDir : NetInfo.InvertDirection(nextDir);
 
-                    LaneTransitionData[] nextRelaxedTransitionDatas = null;
+                    LaneTransitionData[] nextRelaxedTransitionDatas = new LaneTransitionData[MAX_NUM_TRANSITIONS];
                     byte numNextRelaxedTransitionDatas = 0;
-                    LaneTransitionData[] nextCompatibleTransitionDatas = null;
-                    int[] nextCompatibleOuterSimilarIndices = null;
+                    LaneTransitionData[] nextCompatibleTransitionDatas = new LaneTransitionData[MAX_NUM_TRANSITIONS];
+                    int[] nextCompatibleOuterSimilarIndices = new int[MAX_NUM_TRANSITIONS];
                     byte numNextCompatibleTransitionDatas = 0;
-                    LaneTransitionData[] nextLaneConnectionTransitionDatas = null;
+                    LaneTransitionData[] nextLaneConnectionTransitionDatas = new LaneTransitionData[MAX_NUM_TRANSITIONS];
                     byte numNextLaneConnectionTransitionDatas = 0;
-                    LaneTransitionData[] nextForcedTransitionDatas = null;
+                    LaneTransitionData[] nextForcedTransitionDatas = new LaneTransitionData[MAX_NUM_TRANSITIONS];
                     byte numNextForcedTransitionDatas = 0;
-                    int[] nextCompatibleTransitionDataIndices = null;
+                    int[] nextCompatibleTransitionDataIndices = new int[MAX_NUM_TRANSITIONS];
                     byte numNextCompatibleTransitionDataIndices = 0;
-                    int[] compatibleLaneIndexToLaneConnectionIndex = null;
-
-                    nextRelaxedTransitionDatas = new LaneTransitionData[MAX_NUM_TRANSITIONS];
-                    nextCompatibleTransitionDatas = new LaneTransitionData[MAX_NUM_TRANSITIONS];
-                    nextLaneConnectionTransitionDatas = new LaneTransitionData[MAX_NUM_TRANSITIONS];
-                    nextForcedTransitionDatas = new LaneTransitionData[MAX_NUM_TRANSITIONS];
-                    nextCompatibleOuterSimilarIndices = new int[MAX_NUM_TRANSITIONS];
-                    nextCompatibleTransitionDataIndices = new int[MAX_NUM_TRANSITIONS];
-                    compatibleLaneIndexToLaneConnectionIndex = new int[MAX_NUM_TRANSITIONS];
+                    int[] compatibleLaneIndexToLaneConnectionIndex = new int[MAX_NUM_TRANSITIONS];
 
                     uint nextLaneId = nextFirstLaneId;
                     byte nextLaneIndex = 0;
@@ -695,8 +687,7 @@ namespace TrafficManager.Manager.Impl {
 
                         // next is compatible lane
                         if (nextLaneInfo.CheckType(ROUTED_LANE_TYPES, ROUTED_VEHICLE_TYPES) &&
-                            (prevLaneInfo.m_vehicleType & nextLaneInfo.m_vehicleType) != VehicleInfo.VehicleType.None)
-                        {
+                            (prevLaneInfo.m_vehicleType & nextLaneInfo.m_vehicleType) != VehicleInfo.VehicleType.None) {
                             if (extendedLogRouting) {
                                 Log._Debug(
                                     $"RoutingManager.RecalculateLaneEndRoutingData({prevSegmentId}, " +
@@ -713,7 +704,7 @@ namespace TrafficManager.Manager.Impl {
                                         $"for nextLaneId={nextLaneId}, idx={nextLaneIndex}");
                                 }
 
-                                ++incomingVehicleLanes; // I am jumping over this
+                                ++incomingVehicleLanes;
 
                                 if (extendedLogRouting) {
                                     Log._DebugFormat(
@@ -930,8 +921,7 @@ namespace TrafficManager.Manager.Impl {
                                         (nextIncomingDir == ArrowDirection.Right && hasLeftArrow) || // valid incoming right
                                         (nextIncomingDir == ArrowDirection.Left && hasRightArrow) || // valid incoming left
                                         (nextIncomingDir == ArrowDirection.Forward && hasForwardArrow) || // valid incoming straight
-                                        (nextIncomingDir == ArrowDirection.Turn && canTurn) /*valid turning lane*/)
-                                    {
+                                        (nextIncomingDir == ArrowDirection.Turn && canTurn) /*valid turning lane*/) {
                                         if (extendedLogRouting) {
                                             Log._DebugFormat(
                                                 "RoutingManager.RecalculateLaneEndRoutingData({0}, {1}, " +
@@ -995,7 +985,6 @@ namespace TrafficManager.Manager.Impl {
 
                                     // routed vehicle that does not follow lane arrows (trains, trams,
                                     // metros, monorails)
-                                    // TODO [issue #1053] this causes cars to turn on mixed car/track lanes against lane arrows
                                     transitionType = LaneEndTransitionType.Default;
 
                                     if (numNextForcedTransitionDatas < MAX_NUM_TRANSITIONS) {
@@ -1073,9 +1062,8 @@ namespace TrafficManager.Manager.Impl {
                                 }
 
                                 if ((nextLaneInfo.m_finalDirection &
-                                     NetInfo.InvertDirection(nextDir2)) != NetInfo.Direction.None)
-                                {
-                                    ++outgoingVehicleLanes;  // I am jumping over this
+                                     NetInfo.InvertDirection(nextDir2)) != NetInfo.Direction.None) {
+                                    ++outgoingVehicleLanes;
                                     if (extendedLogRouting) {
                                         Log._DebugFormat(
                                             "RoutingManager.RecalculateLaneEndRoutingData({0}, {1}, {2}, {3}): " +
@@ -1275,8 +1263,7 @@ namespace TrafficManager.Manager.Impl {
 
                                     if (totalIncomingLanes > 0
                                         && prevInnerSimilarLaneIndex == prevSimilarLaneCount - 1
-                                        && maxNextInnerSimilarIndex < nextCompatibleLaneCount - 1)
-                                    {
+                                        && maxNextInnerSimilarIndex < nextCompatibleLaneCount - 1) {
                                         // we reached the outermost lane on the previous segment but
                                         // there are still lanes to go on the next segment: allow merging
                                         maxNextInnerSimilarIndex = nextCompatibleLaneCount - 1;
@@ -1342,8 +1329,7 @@ namespace TrafficManager.Manager.Impl {
                                     // in highway-rules HasConnections() gives the same result as HasOutgoingConnections but faster.
                                     if (LaneConnectionManager.Instance.HasConnections(
                                         nextCompatibleTransitionDatas[nextTransitionIndex].laneId,
-                                        isNodeStartNodeOfNextSegment))
-                                    {
+                                        isNodeStartNodeOfNextSegment)) {
                                         int laneConnectionTransIndex =
                                             compatibleLaneIndexToLaneConnectionIndex[nextTransitionIndex];
 
@@ -1446,8 +1432,7 @@ namespace TrafficManager.Manager.Impl {
 
                                 // at junctions: try to match distinct lanes
                                 if (nextCompatibleLaneCount > prevSimilarLaneCount
-                                    && prevOuterSimilarLaneIndex == prevSimilarLaneCount - 1)
-                                {
+                                    && prevOuterSimilarLaneIndex == prevSimilarLaneCount - 1) {
                                     // merge inner lanes
                                     minNextCompatibleOuterSimilarIndex = prevOuterSimilarLaneIndex;
                                     maxNextCompatibleOuterSimilarIndex = nextCompatibleLaneCount - 1;
@@ -1465,8 +1450,7 @@ namespace TrafficManager.Manager.Impl {
                                             maxNextCompatibleOuterSimilarIndex);
                                     }
                                 } else if (nextCompatibleLaneCount < prevSimilarLaneCount
-                                           && prevSimilarLaneCount % nextCompatibleLaneCount == 0)
-                                {
+                                           && prevSimilarLaneCount % nextCompatibleLaneCount == 0) {
                                     // symmetric split
                                     int splitFactor =
                                         prevSimilarLaneCount / nextCompatibleLaneCount;
@@ -1908,8 +1892,7 @@ namespace TrafficManager.Manager.Impl {
                             // find best matching lane(s)
                             for (int nextCompatibleOuterSimilarIndex = minNextCompatibleOuterSimilarIndex;
                                  nextCompatibleOuterSimilarIndex <= maxNextCompatibleOuterSimilarIndex;
-                                 ++nextCompatibleOuterSimilarIndex)
-                            {
+                                 ++nextCompatibleOuterSimilarIndex) {
                                 int nextTransitionIndex = FindLaneWithMaxOuterIndex(
                                     compatibleLaneIndicesSortedByOuterSimilarIndex,
                                     nextCompatibleOuterSimilarIndex);
@@ -1952,8 +1935,7 @@ namespace TrafficManager.Manager.Impl {
                                 // skip lanes having lane connections
                                 if (LaneConnectionManager.Instance.HasOutgoingConnections(
                                     nextCompatibleTransitionDatas[nextTransitionIndex].laneId,
-                                    isNodeStartNodeOfNextSegment))
-                                {
+                                    isNodeStartNodeOfNextSegment)) {
                                     int laneConnectionTransIndex =
                                         compatibleLaneIndexToLaneConnectionIndex[nextTransitionIndex];
 
@@ -1982,8 +1964,7 @@ namespace TrafficManager.Manager.Impl {
                                 if (nextIncomingDir == ArrowDirection.Turn && // u-turn
                                     !nodeIsEndOrOneWayOut && // not a dead end
                                                              // incoming lane is not innermost lane
-                                    nextCompatibleOuterSimilarIndex != maxNextCompatibleOuterSimilarIndex)
-                                {
+                                    nextCompatibleOuterSimilarIndex != maxNextCompatibleOuterSimilarIndex) {
                                     // force u-turns to happen on the innermost lane
                                     ++compatibleLaneDist;
                                     nextCompatibleTransitionDatas[nextTransitionIndex].type =
@@ -2102,7 +2083,16 @@ namespace TrafficManager.Manager.Impl {
                         totalIncomingLanes += incomingVehicleLanes;
                         totalOutgoingLanes += outgoingVehicleLanes;
                     }
-                } // valid segment
+                } else {
+                    // invalid segment
+                    if (extendedLogRouting) {
+                        if (extendedLogRouting) {
+                            Log._DebugFormat(
+                                $"RoutingManager.RecalculateLaneEndRoutingData({prevSegmentId}, {prevLaneIndex}, {prevLaneId}, {isNodeStartNodeOfPrevSegment}): " +
+                                $"valid segment check NOT passed for nextSegmentId={nextSegmentId} idx={segmentIndex}");
+                        }
+                    }
+                }
 
                 if (iterateViaGeometry) {
                     ref NetSegment nextSegment2 = ref nextSegmentId.ToSegment();
