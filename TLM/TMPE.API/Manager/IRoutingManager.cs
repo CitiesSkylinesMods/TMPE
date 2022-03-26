@@ -159,8 +159,8 @@ namespace TrafficManager.API.Manager {
                 LaneEndTransitionType type,
                 ushort segmentId,
                 bool startNode,
-                byte distance = 0,
-                LaneEndTransitionGroup group = LaneEndTransitionGroup.All) {
+                byte distance,
+                LaneEndTransitionGroup group) {
             this.laneId = laneId;
             this.laneIndex = laneIndex;
             this.type = type;

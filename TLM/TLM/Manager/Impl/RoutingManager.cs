@@ -740,31 +740,29 @@ namespace TrafficManager.Manager.Impl {
                                 int currentLaneConnectionTransIndex = -1;
 
                                 if (nextLaneInfo.CheckType(ROUTED_LANE_TYPES, TRACK_VEHICLE_TYPES)) {
-                                    // tram or car+tram lane
-
-                                    bool connected = true;
+                                    // routing tracked vehicles (trains, trams, metros, monorails)
+                                    // lane may be mixed car+tram
                                     bool nextHasConnections =
                                         LaneConnectionManager.Instance.HasConnections(
                                             nextLaneId,
                                             isNodeStartNodeOfNextSegment);
                                     if (nextHasConnections) {
-                                        connected = LaneConnectionManager.Instance.AreLanesConnected(
+                                        bool connected = LaneConnectionManager.Instance.AreLanesConnected(
                                                 nextLaneId,
                                                 prevLaneId,
                                                 isNodeStartNodeOfNextSegment);
                                         if (connected) {
                                             // check for lane connections
-                                            // lane is connected with previous lane
                                             if (numNextLaneConnectionTransitionDatas < MAX_NUM_TRANSITIONS) {
-                                                currentLaneConnectionTransIndex =
-                                                    numNextLaneConnectionTransitionDatas;
-
+                                                currentLaneConnectionTransIndex = numNextLaneConnectionTransitionDatas;
                                                 nextLaneConnectionTransitionDatas[numNextLaneConnectionTransitionDatas++].Set(
                                                     nextLaneId,
                                                     nextLaneIndex,
                                                     LaneEndTransitionType.LaneConnection,
                                                     nextSegmentId,
-                                                    isNodeStartNodeOfNextSegment);
+                                                    isNodeStartNodeOfNextSegment,
+                                                    distance: 0,
+                                                    group: LaneEndTransitionGroup.Track);
                                             } else {
                                                 Log.Warning(
                                                     $"nextTransitionDatas overflow @ source lane {prevLaneId}, " +
@@ -806,6 +804,16 @@ namespace TrafficManager.Manager.Impl {
                                         bool similarLaneCountMatches = prevSimilarLaneCount == nextSimilarLaneCount;
                                         bool stayInlane = nextIsTrackOnly & similarLaneCountMatches & goodTurnAngle;
 
+                                        bool connected;
+                                        if (stayInlane) {
+                                            if (extendedLogRouting) {
+                                                Log._Debug($"similar track networks: Preventing lane changes.");
+                                            }
+                                            connected = outerSimilarLaneIndexMatches;
+                                        } else {
+                                            connected = goodTurnAngle;
+                                        }
+
                                         if (extendedLogRouting) {
                                             Log._Debug(
                                             "prefer stay in lane information:\n" +
@@ -815,21 +823,7 @@ namespace TrafficManager.Manager.Impl {
                                             $"goodTurnAngle={goodTurnAngle} nextIsTrackOnly={nextIsTrackOnly}\n" +
                                             $"similarLaneCountMatches={similarLaneCountMatches} outerSimilarLaneIndexMatches={outerSimilarLaneIndexMatches} stayInlane={stayInlane}");
                                         }
-
                                         if (connected) {
-                                            if (stayInlane) {
-                                                if (extendedLogRouting) {
-                                                    Log._Debug($"similar track networks: Preventing lane changes.");
-                                                }
-                                                connected = outerSimilarLaneIndexMatches;
-                                            } else {
-                                                connected = goodTurnAngle;
-                                            }
-                                        }
-
-                                        if (connected) {
-                                            // routed vehicle that does not follow lane arrows (trains, trams,
-                                            // metros, monorails)
                                             int distance = nodeIsRealJunction ?
                                                 0 :
                                                 Math.Abs(prevOuterSimilarLaneIndex - nextMatchingOuterSimilarLaneIndex);
@@ -863,7 +857,8 @@ namespace TrafficManager.Manager.Impl {
                                 }
 
                                 if (nextLaneInfo.CheckType(ROUTED_LANE_TYPES, ARROW_VEHICLE_TYPES)) {
-                                    // car or mixed car+tram lane
+                                    // routing road vehicles (car, SOS, bus, trolleybus, ...)
+                                    // lane may be mixed car+tram
                                     ++incomingVehicleLanes;
 
                                     bool connected = true;
@@ -889,7 +884,9 @@ namespace TrafficManager.Manager.Impl {
                                                     nextLaneIndex,
                                                     LaneEndTransitionType.LaneConnection,
                                                     nextSegmentId,
-                                                    isNodeStartNodeOfNextSegment);
+                                                    isNodeStartNodeOfNextSegment,
+                                                    distance: 0,
+                                                    group: LaneEndTransitionGroup.Car);
                                             } else {
                                                 Log.Warning(
                                                     $"nextTransitionDatas overflow @ source lane {prevLaneId}, " +
@@ -1043,7 +1040,8 @@ namespace TrafficManager.Manager.Impl {
                                                     transitionType,
                                                     nextSegmentId,
                                                     isNodeStartNodeOfNextSegment,
-                                                    GlobalConfig.Instance.PathFinding.IncompatibleLaneDistance);
+                                                    distance: GlobalConfig.Instance.PathFinding.IncompatibleLaneDistance,
+                                                    group: LaneEndTransitionGroup.Car);
                                             } else {
                                                 Log.Warning(
                                                     $"nextTransitionDatas overflow @ source lane {prevLaneId}, " +
@@ -1073,7 +1071,9 @@ namespace TrafficManager.Manager.Impl {
                                                 nextLaneIndex,
                                                 transitionType,
                                                 nextSegmentId,
-                                                isNodeStartNodeOfNextSegment);
+                                                isNodeStartNodeOfNextSegment,
+                                                distance: 0,
+                                                group: LaneEndTransitionGroup.Car);
                                         } else {
                                             Log.Warning(
                                                 "nextCompatibleTransitionDatas overflow @ source lane " +
