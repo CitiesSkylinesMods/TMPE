@@ -1285,50 +1285,15 @@ namespace TrafficManager.UI.SubTools {
             bool isRoad = IsRoad(source) && IsRoad(target);
 
             // check track turning angles are within bounds
-            ret &= isRoad || CheckSegmentsTurningAngle(
+            ret &= isRoad || TrackUtils.CheckSegmentsTurnAngle(
                     sourceSegment: ref source.SegmentId.ToSegment(),
-                    sourceStartNode: source.StartNode,
                     targetSegment: ref target.SegmentId.ToSegment(),
-                    targetStartNode: target.StartNode);
+                    nodeId: source.NodeId);
 
             return ret;
         }
 
-        /// <summary>
-        /// Checks if the turning angle between two segments at the given node is within bounds.
-        /// </summary>
-        /// <param name="sourceSegmentId"></param>
-        /// <param name="sourceSegment"></param>
-        /// <param name="sourceStartNode"></param>
-        /// <param name="targetSegmentId"></param>
-        /// <param name="targetSegment"></param>
-        /// <param name="targetStartNode"></param>
-        /// <returns></returns>
-        private static bool CheckSegmentsTurningAngle(ref NetSegment sourceSegment,
-                                                      bool sourceStartNode,
-                                                      ref NetSegment targetSegment,
-                                                      bool targetStartNode) {
 
-            float turningAngle = 0.01f - Mathf.Min(
-                sourceSegment.Info.m_maxTurnAngleCos,
-                targetSegment.Info.m_maxTurnAngleCos);
-
-            if (turningAngle < 1f) {
-                Vector3 sourceDirection = sourceStartNode
-                                              ? sourceSegment.m_startDirection
-                                              : sourceSegment.m_endDirection;
-
-                Vector3 targetDirection = targetStartNode
-                                              ? targetSegment.m_startDirection
-                                              : targetSegment.m_endDirection;
-
-                float dirDotProd = (sourceDirection.x * targetDirection.x) +
-                                   (sourceDirection.z * targetDirection.z);
-                return dirDotProd < turningAngle;
-            }
-
-            return true;
-        }
 
         /// <summary>
         /// Draw a bezier curve from `start` to `end` and bent towards `middlePoint` with `color`

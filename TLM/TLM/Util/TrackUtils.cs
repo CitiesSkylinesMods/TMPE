@@ -1,5 +1,7 @@
 namespace TrafficManager.Util {
+    using ColossalFramework.Math;
     using TrafficManager.Util.Extensions;
+    using UnityEngine;
 
     internal static class TrackUtils {
         internal const NetInfo.LaneType LANE_TYPES =
@@ -53,5 +55,27 @@ namespace TrafficManager.Util {
         /// false if vehicles going backward, bi-directional, or non-directional</returns>
         internal static bool IsGoingForward(this NetInfo.Lane laneInfo) =>
             laneInfo.m_finalDirection.IsGoingForward();
+
+        /// <summary>
+        /// Checks if the turning angle between two segments at the given node is within bounds.
+        /// </summary>
+        internal static bool CheckSegmentsTurnAngle(
+            ref NetSegment sourceSegment,
+            ref NetSegment targetSegment,
+            ushort nodeId) {
+
+            float turningAngle = 0.01f - Mathf.Min(
+                sourceSegment.Info.m_maxTurnAngleCos,
+                targetSegment.Info.m_maxTurnAngleCos);
+
+            if (turningAngle < 1f) {
+                Vector3 sourceDirection = sourceSegment.GetDirection(nodeId);
+                Vector3 targetDirection = targetSegment.GetDirection(nodeId);
+                float dot = VectorUtils.DotXZ(sourceDirection, targetDirection);
+                return dot < turningAngle;
+            }
+
+            return true;
+        }
     }
 }
