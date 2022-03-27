@@ -33,6 +33,16 @@ namespace TrafficManager.Util.Extensions {
             }//endif
         }
 
+        /// <summary>
+        /// Determine if specified <paramref name="nodeId"/> is the start node for
+        /// the <paramref name="netSegment"/>.
+        /// </summary>
+        /// <param name="netSegment">The segment to inspect.</param>
+        /// <param name="nodeId">The id of the node to examine.</param>
+        /// <returns>
+        /// Returns <c>true</c> if start node, <c>false</c> if end node,
+        /// or <c>null</c> if the node is not associated with the segment.
+        /// </returns>
         public static bool? IsStartNode(this ref NetSegment netSegment, ushort nodeId) {
             if (netSegment.m_startNode == nodeId) {
                 return true;
@@ -43,9 +53,16 @@ namespace TrafficManager.Util.Extensions {
             }
         }
 
-        /// <returns><c>true</c> if nodeId is start node.
-        /// <c>false</c> if nodeId is end node.
-        /// Undetermined if segment does not have nodeId</returns>
+        /// <summary>
+        /// Determine if specified <paramref name="nodeId"/> is the start node for
+        /// the <paramref name="netSegment"/>.
+        /// </summary>
+        /// <param name="netSegment">The segment to inspect.</param>
+        /// <param name="nodeId">The id of the node to examine.</param>
+        /// <returns>
+        /// Returns <c>true</c> if start node, otherwise <c>false</c> (even if the node
+        /// is not associated with the segment).
+        /// </returns>
         public static bool IsStartnode(this ref NetSegment netSegment, ushort nodeId) =>
             netSegment.m_startNode == nodeId;
 
