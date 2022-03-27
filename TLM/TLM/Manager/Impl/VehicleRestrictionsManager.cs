@@ -363,16 +363,18 @@ namespace TrafficManager.Manager.Impl {
         }
 
         /// <summary>
-        /// Restores all vehicle restrictions on a given segment to default state.
+        /// Reset vehicle restrictions for a specific lane on the specified segment.
         /// </summary>
-        /// <param name="segmentId"></param>
-        /// <returns></returns>
-        internal bool ClearVehicleRestrictions(ushort segmentId, byte laneIndex, uint laneId) {
+        /// <param name="segmentId">The id of the segment containing the lane.</param>
+        /// <param name="laneIndex">The index of the lane in the segment.</param>
+        /// <param name="laneId">The id of the lane.</param>
+        internal void ClearVehicleRestrictions(ushort segmentId, byte laneIndex, uint laneId) {
             NetInfo segmentInfo = segmentId.ToSegment().Info;
             NetInfo.Lane laneInfo = segmentInfo.m_lanes[laneIndex];
-            return SetAllowedVehicleTypes(
+
+            SetAllowedVehicleTypes(
                 segmentId,
-                segmentId.ToSegment().Info,
+                segmentInfo,
                 laneIndex,
                 laneInfo,
                 laneId,
@@ -380,28 +382,23 @@ namespace TrafficManager.Manager.Impl {
         }
 
         /// <summary>
-        /// Restores all vehicle restrictions on a given segment to default state.
+        /// Reset vehicle restrictions for all lanes on the specified segment.
         /// </summary>
-        /// <param name="segmentId"></param>
-        /// <returns></returns>
-        internal bool ClearVehicleRestrictions(ushort segmentId) {
-            NetInfo segmentInfo = segmentId.ToSegment().Info;
-            bool ret = false;
-            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
-            IList<LanePos> lanes = extSegmentManager.GetSortedLanes(
-                segmentId,
-                ref segmentId.ToSegment(),
-                null,
-                LANE_TYPES,
-                VEHICLE_TYPES,
-                sort: false);
+        /// <param name="segmentId">The id of the segment to reset.</param>
+        internal void ClearVehicleRestrictions(ushort segmentId) {
 
-            foreach (LanePos laneData in lanes) {
-                uint laneId = laneData.laneId;
-                byte laneIndex = laneData.laneIndex;
+            ref NetSegment segment = ref segmentId.ToSegment();
+            NetInfo segmentInfo = segment.Info;
+
+            var sortedLanes = segment.GetSortedLanes(null, LANE_TYPES, VEHICLE_TYPES, sort: false);
+
+            foreach (var lane in sortedLanes) {
+
+                uint laneId = lane.laneId;
+                byte laneIndex = lane.laneIndex;
                 NetInfo.Lane laneInfo = segmentInfo.m_lanes[laneIndex];
 
-                ret |= SetAllowedVehicleTypes(
+                SetAllowedVehicleTypes(
                     segmentId,
                     segmentInfo,
                     laneIndex,
@@ -409,7 +406,6 @@ namespace TrafficManager.Manager.Impl {
                     laneId,
                     EXT_VEHICLE_TYPES);
             }
-            return ret;
         }
 
         /// <summary>
