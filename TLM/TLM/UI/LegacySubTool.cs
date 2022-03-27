@@ -1,6 +1,7 @@
 namespace TrafficManager.UI {
     using System;
     using API.Util;
+    using ColossalFramework;
     using ColossalFramework.UI;
     using CSUtil.Commons;
     using JetBrains.Annotations;
@@ -95,6 +96,8 @@ namespace TrafficManager.UI {
         private GUIStyle borderlessStyle_;
 
         private readonly IDisposable uiTransparencyUnbsubscriber_;
+
+        public CursorInfo OverrideCursor;
 
         protected virtual Vector3 HitPos => TrafficManagerTool.HitPos;
 
