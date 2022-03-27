@@ -123,11 +123,11 @@ namespace TrafficManager.API.Traffic.Data {
             => new(left.GameUnits + right.GameUnits);
 
         public static bool operator ==(SpeedValue left, SpeedValue right) {
-            return left.Equals(right);
+            return left.GameUnits.Equals(right.GameUnits);
         }
 
         public static bool operator !=(SpeedValue left, SpeedValue right) {
-            return !left.Equals(right);
+            return !left.GameUnits.Equals(right.GameUnits);
         }
 
         /// <summary>Scales the value by the multiplier.</summary>
