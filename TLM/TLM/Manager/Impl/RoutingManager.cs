@@ -2090,11 +2090,9 @@ namespace TrafficManager.Manager.Impl {
                 } else {
                     // invalid segment
                     if (extendedLogRouting) {
-                        if (extendedLogRouting) {
-                            Log._DebugFormat(
-                                $"RoutingManager.RecalculateLaneEndRoutingData({prevSegmentId}, {prevLaneIndex}, {prevLaneId}, {isNodeStartNodeOfPrevSegment}): " +
-                                $"valid segment check NOT passed for nextSegmentId={nextSegmentId} idx={segmentIndex}");
-                        }
+                        Log._DebugFormat(
+                            $"RoutingManager.RecalculateLaneEndRoutingData({prevSegmentId}, {prevLaneIndex}, {prevLaneId}, {isNodeStartNodeOfPrevSegment}): " +
+                            $"valid segment check NOT passed for nextSegmentId={nextSegmentId} idx={segmentIndex}");
                     }
                 }
 
