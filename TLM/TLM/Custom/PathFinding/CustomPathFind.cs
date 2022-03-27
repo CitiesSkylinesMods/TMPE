@@ -2473,27 +2473,7 @@ namespace TrafficManager.Custom.PathFinding {
             bool acuteTurningAngle = false;
             if (prevLaneType == NetInfo.LaneType.Vehicle &&
                 (prevVehicleType & VehicleInfo.VehicleType.Car) == VehicleInfo.VehicleType.None) {
-                float turningAngle = 1f;
-                if (!nextSegment.m_overridePathFindDirectionLimit)
-                {
-                    turningAngle = 0.01f - Mathf.Min(nextSegmentInfo.m_maxTurnAngleCos, prevSegmentInfo.m_maxTurnAngleCos);
-                }
-                if ((nextSegment.m_flags2 & NetSegment.Flags2.ForbidTurn) != 0 && (netManager.m_nodes.m_buffer[nextNodeId].m_flags & NetNode.Flags.End) == 0)
-                {
-                    turningAngle = -0.99f;
-                }
-                if (turningAngle < 1f) {
-                    Vector3 vector = nextNodeId != prevSegment.m_startNode
-                                     ? prevSegment.m_endDirection
-                                     : prevSegment.m_startDirection;
-                    Vector3 vector2 = (nextDir & NetInfo.Direction.Forward) == NetInfo.Direction.None
-                                      ? nextSegment.m_startDirection
-                                      : nextSegment.m_endDirection;
-                    float dirDotProd = vector.x * vector2.x + vector.z * vector2.z;
-                    if (dirDotProd >= turningAngle) {
-                        acuteTurningAngle = true;
-                    }
-                }
+                acuteTurningAngle = TrackUtils.CheckSegmentsTurnAngle(ref prevSegment, ref nextSegment, nextNodeId);
             }
 
             float prevLength = prevLaneType != NetInfo.LaneType.PublicTransport
@@ -3734,6 +3714,21 @@ namespace TrafficManager.Custom.PathFinding {
                             laneTransitions[k].laneIndex,
                             laneTransitions[k].laneId,
                             "ProcessItemRouted: Skipping transition: Transition is invalid");
+                    }
+
+                    continue;
+                }
+
+                LaneEndTransitionGroup laneEndTransitionGroup = TrackUtils.GetLaneEndTransitionGroup(vehicleTypes_);
+                if (laneTransitions[k].group.IsFlagSet(laneEndTransitionGroup) ) {
+                    if (isLogEnabled) {
+                        DebugLog(
+                            unitId,
+                            item,
+                            laneTransitions[k].segmentId,
+                            laneTransitions[k].laneIndex,
+                            laneTransitions[k].laneId,
+                            $"ProcessItemRouted: Skipping transition: Transition is for '{laneTransitions[k].group}' only not '{vehicleTypes_}'");
                     }
 
                     continue;

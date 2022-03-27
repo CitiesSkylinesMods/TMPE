@@ -1,5 +1,7 @@
 namespace TrafficManager.Util {
     using ColossalFramework.Math;
+    using TrafficManager.API.Traffic.Enums;
+    using TrafficManager.Manager.Impl;
     using TrafficManager.Util.Extensions;
     using UnityEngine;
 
@@ -63,11 +65,14 @@ namespace TrafficManager.Util {
             ref NetSegment sourceSegment,
             ref NetSegment targetSegment,
             ushort nodeId) {
-
-            float turningAngle = 0.01f - Mathf.Min(
-                sourceSegment.Info.m_maxTurnAngleCos,
-                targetSegment.Info.m_maxTurnAngleCos);
-
+            float turningAngle = 1f;
+            if (!targetSegment.m_overridePathFindDirectionLimit) {
+                turningAngle = 0.01f - Mathf.Min(sourceSegment.Info.m_maxTurnAngleCos, targetSegment.Info.m_maxTurnAngleCos);
+            }
+            if ((targetSegment.m_flags2 & NetSegment.Flags2.ForbidTurn) != 0 &&
+                !nodeId.ToNode().m_flags.IsFlagSet(NetNode.Flags.End)) {
+                turningAngle = -0.99f;
+            }
             if (turningAngle < 1f) {
                 Vector3 sourceDirection = sourceSegment.GetDirection(nodeId);
                 Vector3 targetDirection = targetSegment.GetDirection(nodeId);
@@ -76,6 +81,15 @@ namespace TrafficManager.Util {
             }
 
             return true;
+        }
+
+        public static LaneEndTransitionGroup GetLaneEndTransitionGroup(VehicleInfo.VehicleType vehicleType) {
+            LaneEndTransitionGroup ret = 0;
+            if (vehicleType.IsFlagSet(LaneArrowManager.VEHICLE_TYPES))
+                ret |= LaneEndTransitionGroup.Car;
+            if (vehicleType.IsFlagSet(TrackUtils.VEHICLE_TYPES))
+                ret |= LaneEndTransitionGroup.Car;
+            return ret;
         }
     }
 }
