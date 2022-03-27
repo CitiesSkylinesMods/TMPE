@@ -382,7 +382,7 @@ namespace TrafficManager.Manager.Impl {
         }
 
         /// <summary>
-        /// Reset vehicel restrictions for all lanes on the specified segment.
+        /// Reset vehicle restrictions for all lanes on the specified segment.
         /// </summary>
         /// <param name="segmentId">The id of the segment to reset.</param>
         internal void ClearVehicleRestrictions(ushort segmentId) {
