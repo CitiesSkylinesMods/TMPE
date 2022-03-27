@@ -805,15 +805,20 @@ namespace TrafficManager.UI.SubTools {
         }
 
         private static int CountLanes(ushort segmentId, ushort nodeId, bool toward) {
-            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
-            return extSegmentManager.GetSortedLanes(
-                                segmentId,
-                                ref segmentId.ToSegment(),
-                                ExtSegmentManager.Instance.IsStartNode(segmentId, nodeId) ^ (!toward),
-                                LaneConnectionManager.LANE_TYPES,
-                                LaneConnectionManager.VEHICLE_TYPES,
-                                true).Count;
+
+            ref NetSegment segment = ref segmentId.ToSegment();
+
+            bool startNode = segment.IsStartnode(nodeId) ^ (!toward);
+
+            var lanes = segment.GetSortedLanes(
+                startNode,
+                LaneConnectionManager.LANE_TYPES,
+                LaneConnectionManager.VEHICLE_TYPES,
+                sort: false);
+
+            return lanes.Count;
         }
+
         internal static int CountLanesTowardJunction(ushort segmentId, ushort nodeId) => CountLanes(segmentId, nodeId, true);
         internal static int CountLanesAgainstJunction(ushort segmentId, ushort nodeId) => CountLanes(segmentId, nodeId, false);
 

@@ -135,30 +135,28 @@ namespace TrafficManager.UI.SubTools.SpeedLimits.Overlay {
         /// <param name="segmentList">input list of roundabout segments (must be oneway, and in the same direction).</param>
         /// <param name="segmentId0">The segment to match lane agaisnt.</param>
         /// <param name="sortedLaneIndex">Index.</param>
-        internal IEnumerable<LanePos> FollowRoundaboutLane(List<ushort> segmentList,
-                                                           ushort segmentId0,
-                                                           int sortedLaneIndex) {
-            bool invert0 = segmentId0.ToSegment().m_flags.IsFlagSet(NetSegment.Flags.Invert);
-            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
+        internal IEnumerable<LanePos> FollowRoundaboutLane(
+            List<ushort> segmentList,
+            ushort segmentId0,
+            int sortedLaneIndex) {
 
-            int count0 = extSegmentManager.GetSortedLanes(
-               segmentId: segmentId0,
-               segment: ref segmentId0.ToSegment(),
-               startNode: null,
-               laneTypeFilter: SpeedLimitManager.LANE_TYPES,
-               vehicleTypeFilter: SpeedLimitManager.VEHICLE_TYPES,
-               sort: false).Count;
+            bool invert0 = segmentId0.ToSegment().m_flags.IsFlagSet(NetSegment.Flags.Invert);
+
+            int count0 = segmentId0.ToSegment().GetSortedLanes(
+                null,
+                SpeedLimitManager.LANE_TYPES,
+                SpeedLimitManager.VEHICLE_TYPES,
+                sort: false).Count;
 
             foreach (ushort segmentId in segmentList) {
                 bool invert = segmentId.ToSegment().m_flags.IsFlagSet(NetSegment.Flags.Invert);
-                IList<LanePos> lanes = extSegmentManager.GetSortedLanes(
-                    segmentId: segmentId,
-                    segment: ref segmentId.ToSegment(),
-                    startNode: null,
-                    laneTypeFilter: SpeedLimitManager.LANE_TYPES,
-                    vehicleTypeFilter: SpeedLimitManager.VEHICLE_TYPES,
-                    reverse: invert != invert0,
-                    sort: true);
+
+                var lanes = segmentId.ToSegment().GetSortedLanes(
+                    null,
+                    SpeedLimitManager.LANE_TYPES,
+                    SpeedLimitManager.VEHICLE_TYPES,
+                    reverse: invert != invert0);
+
                 int index = sortedLaneIndex;
 
                 // if lane count does not match, assume segments are connected from outer side of the roundabout.
