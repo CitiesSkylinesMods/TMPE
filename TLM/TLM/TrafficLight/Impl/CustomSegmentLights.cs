@@ -28,7 +28,7 @@ namespace TrafficManager.TrafficLight.Impl {
         public const ExtVehicleType DEFAULT_MAIN_VEHICLETYPE = ExtVehicleType.None;
 
         [Obsolete]
-        internal CustomSegmentLights(ITrafficLightContainer lightsContainer,
+        protected CustomSegmentLights(ITrafficLightContainer lightsContainer,
                                       ushort nodeId,
                                       ushort segmentId,
                                       bool calculateAutoPedLight)
@@ -38,7 +38,7 @@ namespace TrafficManager.TrafficLight.Impl {
                 nodeId == segmentId.ToSegment().m_startNode,
                 calculateAutoPedLight) { }
 
-        internal CustomSegmentLights(ITrafficLightContainer lightsContainer,
+        public CustomSegmentLights(ITrafficLightContainer lightsContainer,
                                    ushort segmentId,
                                    bool startNode,
                                    bool calculateAutoPedLight)
@@ -49,7 +49,7 @@ namespace TrafficManager.TrafficLight.Impl {
                 calculateAutoPedLight,
                 true) { }
 
-        internal CustomSegmentLights(ITrafficLightContainer lightsContainer,
+        public CustomSegmentLights(ITrafficLightContainer lightsContainer,
                                    ushort segmentId,
                                    bool startNode,
                                    bool calculateAutoPedLight,
@@ -145,7 +145,7 @@ namespace TrafficManager.TrafficLight.Impl {
             }
         }
 
-        internal ITrafficLightContainer LightsContainer {
+        public ITrafficLightContainer LightsContainer {
             get => lightsContainer;
 
             [UsedImplicitly]
@@ -180,7 +180,7 @@ namespace TrafficManager.TrafficLight.Impl {
                 MainSegmentLight);
         }
 
-        internal bool Relocate(ushort segmentId,
+        public bool Relocate(ushort segmentId,
                              bool startNode,
                              ITrafficLightContainer lightsContainer) {
             if (Relocate(segmentId, startNode)) {
@@ -280,7 +280,7 @@ namespace TrafficManager.TrafficLight.Impl {
             return Clone(LightsContainer, true);
         }
 
-        internal CustomSegmentLights Clone(ITrafficLightContainer newLightsManager,
+        public CustomSegmentLights Clone(ITrafficLightContainer newLightsManager,
                                           bool performHousekeeping = true) {
             var clone = new CustomSegmentLights(
                 newLightsManager ?? LightsContainer,

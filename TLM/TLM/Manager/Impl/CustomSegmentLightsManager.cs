@@ -133,7 +133,7 @@ namespace TrafficManager.Manager.Impl {
             }
         }
 
-        internal bool SetSegmentLights(ushort nodeId,
+        public bool SetSegmentLights(ushort nodeId,
                                      ushort segmentId,
                                      CustomSegmentLights lights) {
             bool? startNode = ExtSegmentManager.Instance.IsStartNode(segmentId, nodeId);
