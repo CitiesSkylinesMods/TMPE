@@ -1,5 +1,5 @@
 [Version] 11.6.5.2
-[Meta] This release fixes some bugs, and updates incompatible mods list.
+[Meta] This release improves lane connectors tool, and fixes some bugs.
 [Mod] Incompatible: Two more CSM mods #1481 (StayHungryStayFoolish, aubergine18)
 [Mod] Incompatible: 交通管理器 汉化版TMPE_V11_STABLE #1481 (StayHungryStayFoolish, aubergine18)
 [Mod] Incompatible: Service Vehicles Manager 2.0 clone #1481 (StayHungryStayFoolish, aubergine18)
@@ -7,7 +7,9 @@
 [Fixed] Patching of Reversible Tram AI mod fails if mod is subscribed but disabled #1471 #1470 (kianzarrin)
 [Fixed] Lane connectors buggy on bidirectional tracks #1211 #784 (kianzarrin)
 [Fixed] Excessive track connections at junctions #1483 #1475 (kianzarrin)
+[Updated] Improve lane connector UI #1491 #1485
 [Updated] Routing Manager code clean-up  #1477 (kianzarrin)
+[Updated] Replace obsolete `GetSortedLanes` with extension #1490 (aubergine18)
 [/Version]
 
 [Version] 11.6.5.1
