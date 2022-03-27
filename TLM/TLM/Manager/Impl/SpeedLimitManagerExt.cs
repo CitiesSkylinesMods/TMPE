@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.Manager.Impl {
+namespace TrafficManager.Manager.Impl {
     /// <summary>Adds extra helper functions to NetSegment and NetInfo.Lane, etc.</summary>
     public static class SpeedLimitManagerExt {
         /// <summary>
@@ -35,10 +35,10 @@
         /// Check whether custom speed limits may be assigned to the given lane info.
         /// </summary>
         /// <param name="laneInfo">The <see cref="NetInfo.Lane"/> that you wish to check.</param>
-        /// <returns>Whether lane for this lane type can have speed limit override.</returns>
-        public static bool MayHaveCustomSpeedLimits(this NetInfo.Lane laneInfo) {
-            return (laneInfo.m_laneType & SpeedLimitManager.LANE_TYPES) != NetInfo.LaneType.None
-                   && (laneInfo.m_vehicleType & SpeedLimitManager.VEHICLE_TYPES) != VehicleInfo.VehicleType.None;
-        }
+        /// <returns>Returns <c>true</c> if speed limit can be customised, otherwise <c>false</c>.</returns>
+        public static bool MayHaveCustomSpeedLimits(this NetInfo.Lane laneInfo)
+            => laneInfo.m_finalDirection != NetInfo.Direction.None
+            && (laneInfo.m_laneType & SpeedLimitManager.LANE_TYPES) != NetInfo.LaneType.None
+            && (laneInfo.m_vehicleType & SpeedLimitManager.VEHICLE_TYPES) != VehicleInfo.VehicleType.None;
     }
 }

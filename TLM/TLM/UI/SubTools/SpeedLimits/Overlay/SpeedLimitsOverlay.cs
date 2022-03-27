@@ -546,13 +546,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits.Overlay {
                 // Draw override, if exists, otherwise draw circle and small blue default
                 // Get speed limit override for segment
                 //-------------------------------------
-                SpeedValue? overrideSpeedlimitForward =
-                    SpeedLimitManager.Instance.CalculateCustomSpeedLimit(segmentId, finalDir: NetInfo.Direction.Forward);
-                SpeedValue? overrideSpeedlimitBack =
-                    SpeedLimitManager.Instance.CalculateCustomSpeedLimit(segmentId, finalDir: NetInfo.Direction.Backward);
-                SpeedValue? drawSpeedlimit = GetAverageSpeedlimit(
-                    forward: overrideSpeedlimitForward,
-                    back: overrideSpeedlimitBack);
+                SpeedValue? drawSpeedlimit = SpeedLimitManager.Instance.CalculateCustomSpeedLimit(segmentId, SpeedLimitManager.VEHICLE_TYPES);
 
                 bool isDefaultSpeed =
                     !drawSpeedlimit.HasValue ||
@@ -588,13 +582,6 @@ namespace TrafficManager.UI.SubTools.SpeedLimits.Overlay {
 
             this.finalDirection_ = NetInfo.Direction.Both;
             return true;
-        }
-
-        private SpeedValue? GetAverageSpeedlimit(SpeedValue? forward, SpeedValue? back) {
-            if (forward.HasValue && back.HasValue) {
-                return (forward.Value + back.Value).Scale(0.5f);
-            }
-            return forward ?? back;
         }
 
         /// <summary>Draw speed limit handles one per lane.</summary>
