@@ -147,6 +147,9 @@
     <Compile Include="Manager\Impl\ExtSegmentEndManager.cs" />
     <Compile Include="Manager\Impl\ExtSegmentManager.cs" />
     <Compile Include="Manager\Impl\GeometryNotifier.cs" />
+    <Compile Include="Manager\Impl\LaneConnectionManagerData\ConnectionDataBase.cs" />
+    <Compile Include="Manager\Impl\LaneConnectionManagerData\LaneConnectionData.cs" />
+    <Compile Include="Manager\Impl\LaneConnectionManagerData\LaneEnd.cs" />
     <Compile Include="Patch\_External\RTramAIModPatch.cs" />
     <Compile Include="State\OptionsTabs\GameplayTab_AIGroups.cs" />
     <Compile Include="State\OptionsTabs\GeneralTab_CompatibilityGroup.cs" />
@@ -445,6 +448,7 @@
     <Compile Include="UI\TrafficManagerSubTool.cs" />
     <Compile Include="UI\TransportDemandViewMode.cs" />
     <Compile Include="UI\UITransportDemand.cs" />
+    <Compile Include="Util\Extensions\ArrayExtensions.cs" />
     <Compile Include="UI\WhatsNew\WhatsNew.cs" />
     <Compile Include="UI\WhatsNew\WhatsNewPanel.cs" />
     <Compile Include="Util\AutoTimedTrafficLights.cs" />
@@ -486,6 +490,7 @@
     <Compile Include="Util\RoadSelectionUtil.cs" />
     <Compile Include="Util\RoundaboutMassEdit.cs" />
     <Compile Include="Util\SegmentLaneTraverser.cs" />
+    <Compile Include="Util\TrackUtils.cs" />
     <Compile Include="Util\VersionUtil.cs" />
     <Compile Include="Lifecycle\SerializableDataExtension.cs" />
     <Compile Include="Lifecycle\ThreadingExtension.cs" />

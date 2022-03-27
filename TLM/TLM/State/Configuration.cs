@@ -6,12 +6,14 @@ namespace TrafficManager {
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.State;
     using TrafficManager.Traffic;
+    using System.Runtime.Serialization;
+    using TrafficManager.Lifecycle;
     using Util;
 
     [Serializable]
     public class Configuration {
 
-        public const int CURRENT_VERSION = 1;
+        public const int CURRENT_VERSION = 2;
 
         /// <summary>
         /// version at which data was saved
@@ -173,20 +175,48 @@ namespace TrafficManager {
             }
         }
 
+        /// <summary>
+        /// in legacy mode connections are always bi-directional.
+        /// </summary>
         [Serializable]
-        public class LaneConnection {
-            public uint lowerLaneId;
-            public uint higherLaneId;
-            public bool lowerStartNode;
+        public class LaneConnection : ISerializable {
+            public uint sourceLaneId;
 
-            public LaneConnection(uint lowerLaneId, uint higherLaneId, bool lowerStartNode) {
-                if (lowerLaneId >= higherLaneId) {
-                    throw new ArgumentException();
+            public uint targetLaneId;
+
+            public bool sourceStartNode;
+
+            public bool Legacy => SerializableDataExtension.Version < 2;
+
+            public LaneConnection(uint sourceLaneId, uint targetLaneId, bool sourceStartNode) {
+                this.sourceLaneId = sourceLaneId;
+                this.targetLaneId = targetLaneId;
+                this.sourceStartNode = sourceStartNode;
+            }
+
+            //serialization
+            public void GetObjectData(SerializationInfo info, StreamingContext context) {
+                info.GetObjectFields(this);
+            }
+
+            // deserialization
+            public LaneConnection(SerializationInfo info, StreamingContext context) {
+                foreach(var item in info) {
+                    switch(item.Name) {
+                        case "lowerLaneId": //legacy
+                        case nameof(sourceLaneId):
+                            sourceLaneId = (uint)item.Value;
+                            break;
+                        case "higherLaneId": //legacy
+                        case nameof(targetLaneId):
+                            targetLaneId = (uint)item.Value;
+                            break;
+                        case "lowerStartNode": //legacy
+                        case nameof(sourceStartNode):
+                            sourceStartNode = (bool)item.Value;
+                            break;
+                    }
                 }
-
-                this.lowerLaneId = lowerLaneId;
-                this.higherLaneId = higherLaneId;
-                this.lowerStartNode = lowerStartNode;
             }
         }
 
