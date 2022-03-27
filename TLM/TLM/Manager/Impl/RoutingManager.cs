@@ -999,7 +999,7 @@ namespace TrafficManager.Manager.Impl {
                                     // routed vehicle that does not follow lane arrows (trains, trams,
                                     // metros, monorails)
                                     // TODO [issue #1053] this causes cars to turn on mixed car/track lanes against lane arrows
-                                    transitionType = LaneEndTransitionType.Default; 
+                                    transitionType = LaneEndTransitionType.Default;
 
                                     if (numNextForcedTransitionDatas < MAX_NUM_TRANSITIONS) {
                                         nextForcedTransitionDatas[numNextForcedTransitionDatas].Set(
@@ -1192,7 +1192,7 @@ namespace TrafficManager.Manager.Impl {
                             // this lane will be referred as the "stay" lane with zero distance
                             int refNextInnerSimilarIndex = -1;
 
-#if DEBUGHWJUNCTIONROUTING 
+#if DEBUGHWJUNCTIONROUTING
                             if (extendedLogRouting) {
                                 Log._DebugFormat(
                                     "RoutingManager.RecalculateLaneEndRoutingData({0}, {1}, {2}, {3}): " +
@@ -1382,7 +1382,7 @@ namespace TrafficManager.Manager.Impl {
                                         Log._DebugFormat(
                                             "RoutingManager.RecalculateLaneEndRoutingData({0}, {1}, {2}, " +
                                             "{3}): highway junction iteration: compatibleLaneDist={4}",
-                                            prevSegmentId, nextLaneIndex, prevLaneId, isNodeStartNodeOfPrevSegment, startNode,
+                                            prevSegmentId, nextLaneIndex, prevLaneId, isNodeStartNodeOfPrevSegment,
                                             compatibleLaneDist);
                                     }
 #endif
