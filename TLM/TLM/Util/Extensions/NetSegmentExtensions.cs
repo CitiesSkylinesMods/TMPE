@@ -33,6 +33,16 @@ namespace TrafficManager.Util.Extensions {
             }//endif
         }
 
+        /// <summary>
+        /// Determine if specified <paramref name="nodeId"/> is the start node for
+        /// the <paramref name="netSegment"/>.
+        /// </summary>
+        /// <param name="netSegment">The segment to inspect.</param>
+        /// <param name="nodeId">The id of the node to examine.</param>
+        /// <returns>
+        /// Returns <c>true</c> if start node, <c>false</c> if end node,
+        /// or <c>null</c> if the node is not associated with the segment.
+        /// </returns>
         public static bool? IsStartNode(this ref NetSegment netSegment, ushort nodeId) {
             if (netSegment.m_startNode == nodeId) {
                 return true;
@@ -44,6 +54,19 @@ namespace TrafficManager.Util.Extensions {
         }
 
         /// <summary>
+        /// Determine if specified <paramref name="nodeId"/> is the start node for
+        /// the <paramref name="netSegment"/>.
+        /// </summary>
+        /// <param name="netSegment">The segment to inspect.</param>
+        /// <param name="nodeId">The id of the node to examine.</param>
+        /// <returns>
+        /// Returns <c>true</c> if start node, otherwise <c>false</c> (even if the node
+        /// is not associated with the segment).
+        /// </returns>
+        public static bool IsStartnode(this ref NetSegment netSegment, ushort nodeId) =>
+            netSegment.m_startNode == nodeId;
+
+        /// <summary>
         /// Checks if the netSegment is Created, but neither Collapsed nor Deleted.
         /// </summary>
         /// <param name="netSegment">netSegment</param>
@@ -53,11 +76,6 @@ namespace TrafficManager.Util.Extensions {
                 required: NetSegment.Flags.Created,
                 forbidden: NetSegment.Flags.Collapsed | NetSegment.Flags.Deleted);
 
-        /// <returns><c>true</c> if nodeId is start node.
-        /// <c>false</c> if nodeId is end node.
-        /// Undetermined if segment does not have nodeId</returns>
-        public static bool IsStartnode(this ref NetSegment netSegment, ushort nodeId) =>
-            netSegment.m_startNode == nodeId;
         public static NetInfo.Lane GetLaneInfo(this ref NetSegment netSegment, int laneIndex) =>
             netSegment.Info?.m_lanes?[laneIndex];
 
@@ -70,6 +88,44 @@ namespace TrafficManager.Util.Extensions {
             }
 
             return new GetSegmentLaneIdsEnumerable(initialLaneId, netInfo.m_lanes.Length, laneBuffer);
+        }
+
+        /// <summary>
+        /// Iterates the lanes in the specified <paramref name="netSegment"/> until it finds one which matches
+        /// both the specified <paramref name="laneType"/> and <paramref name="vehicleType"/> masks.
+        /// </summary>
+        /// <param name="netSegment">The <see cref="NetSegment"/> to inspect.</param>
+        /// <param name="laneType">The required <see cref="NetInfo.LaneType"/> flags (at least one must match).</param>
+        /// <param name="vehicleType">The required <see cref="VehicleInfo.VehicleType"/> flags (at least one must match).</param>
+        /// <returns>Returns <c>true</c> if a lane matches, otherwise <c>false</c> if none of the lanes match.</returns>
+        public static bool AnyApplicableLane(
+            this ref NetSegment netSegment,
+            NetInfo.LaneType laneType,
+            VehicleInfo.VehicleType vehicleType) {
+
+            AssertNotNone(laneType, nameof(laneType));
+            AssertNotNone(vehicleType, nameof(vehicleType));
+
+            NetManager netManager = Singleton<NetManager>.instance;
+
+            NetInfo segmentInfo = netSegment.Info;
+            uint curLaneId = netSegment.m_lanes;
+            byte laneIndex = 0;
+
+            while (laneIndex < segmentInfo.m_lanes.Length && curLaneId != 0u) {
+                NetInfo.Lane laneInfo = segmentInfo.m_lanes[laneIndex];
+
+                if ((laneInfo.m_vehicleType & vehicleType) != 0 &&
+                    (laneInfo.m_laneType & laneType) != 0) {
+
+                    return true;
+                }
+
+                curLaneId = netManager.m_lanes.m_buffer[curLaneId].m_nextLane;
+                ++laneIndex;
+            }
+
+            return false;
         }
 
         /// <summary>

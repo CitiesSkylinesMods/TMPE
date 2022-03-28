@@ -18,6 +18,7 @@ namespace TrafficManager.UI.SubTools {
     using TrafficManager.UI.SubTools.PrioritySigns;
     using TrafficManager.Util.Extensions;
     using TrafficManager.U;
+    using TrafficManager.UI.Textures;
 
     public class LaneConnectorTool
         : LegacySubTool,
@@ -33,6 +34,7 @@ namespace TrafficManager.UI.SubTools {
             nopeCursor_ = CursorUtil.CreateCursor(UIView.GetAView().defaultAtlas["Niet"]?.texture, new Vector2(45, 45));
             addCursor_ = CursorUtil.LoadCursorFromResource("LaneConnectionManager.add_cursor.png"); 
             removeCursor_ = CursorUtil.LoadCursorFromResource("LaneConnectionManager.remove_cursor.png");
+            directionArrow_ = TextureResources.LoadDllResource("LaneConnectionManager.direction_arrow.png", new IntVector2(256, 256));
         }
 
         /// <summary>State of the tool UI.</summary>
@@ -51,6 +53,8 @@ namespace TrafficManager.UI.SubTools {
             Forward,
             Backward,
         }
+
+        private const bool ENABLE_TRANSPARENCY = false;
 
 #if DEBUG
         private static bool verbose_ => DebugSwitch.LaneConnections.Get();
@@ -78,6 +82,8 @@ namespace TrafficManager.UI.SubTools {
         private CursorInfo addCursor_;
 
         private CursorInfo removeCursor_;
+
+        private Texture2D directionArrow_;
 
         /// <summary>
         /// Stores potentially visible ids for nodes while the camera did not move
@@ -131,6 +137,8 @@ namespace TrafficManager.UI.SubTools {
                 NodeMarker.RenderOverlay(cameraInfo, color, enlarge: highlight, renderLimits);
             }
         }
+
+        private float TransparentAlpha => ENABLE_TRANSPARENCY ? TrafficManagerTool.OverlayAlpha : 1f;
 
         // laneEnd1.IsBidirectional && laneEnd2.IsBidirectional would also work
         // but would require the user to think a little.
@@ -229,7 +237,7 @@ namespace TrafficManager.UI.SubTools {
                     Highlight.DrawNodeCircle(
                         cameraInfo: cameraInfo,
                         nodeId: (ushort)nodeId,
-                        color: isNodeVisible? DefaultLaneEndColor : DefaultDisabledLaneEndColor,
+                        color: isNodeVisible ? DefaultLaneEndColor : DefaultDisabledLaneEndColor,
                         alpha: true);
                 }
 
@@ -257,13 +265,17 @@ namespace TrafficManager.UI.SubTools {
                             Vector3 height = bezier.Max();
                             bool underground = (height.y + 1f) < intersectionY || laneEnd.NodeId == SelectedNodeId;
 
+                            Color fillColor = laneEnd.Color.WithAlpha(TransparentAlpha);
+                            Color outlineColor = Color.black.WithAlpha(TransparentAlpha);
+                            bool showArrow = ShouldShowDirectionOfConnection(laneEnd, targetLaneEnd);
                             DrawLaneCurve(
                                 cameraInfo: cameraInfo,
                                 bezier: ref bezier,
-                                color: laneEnd.Color.WithAlpha(TrafficManagerTool.OverlayAlpha),
-                                outlineColor: Color.black.WithAlpha(TrafficManagerTool.OverlayAlpha),
-                                underground: underground,
-                                showDirection: ShouldShowDirectionOfConnection(laneEnd, targetLaneEnd));
+                                color: fillColor,
+                                outlineColor: outlineColor,
+                                arrowColor: showArrow ? fillColor : default,
+                                arrowOutlineColor: showArrow ? outlineColor : default,
+                                underground: underground);
                         }
                     }
 
@@ -321,14 +333,16 @@ namespace TrafficManager.UI.SubTools {
                     }
 
                     Bezier3 bezier = CalculateBezierConnection(selectedLaneEnd, targetLaneEnd);
+                    bool showArrow = ShouldShowDirectionOfConnection(selectedLaneEnd, targetLaneEnd);
                     DrawLaneCurve(
                         cameraInfo: cameraInfo,
                         bezier: ref bezier,
                         color: this.selectedLaneEnd.Color,
-                        outlineColor: Color.grey,
+                        outlineColor: Color.black, 
+                        arrowColor: showArrow ? this.selectedLaneEnd.Color : default,
+                        arrowOutlineColor: showArrow ? Color.black : default,
                         size: 0.18f, // Embolden
-                        underground: true,
-                        showDirection: ShouldShowDirectionOfConnection(selectedLaneEnd, targetLaneEnd));
+                        underground: true);
                 } // end foreach selectedMarker.ConnectedMarkers
             } // end if selectedMarker != null
         }
@@ -379,24 +393,29 @@ namespace TrafficManager.UI.SubTools {
                         Color fillColor = connected ?
                             Color.Lerp(a: selectedLaneEnd.Color, b: Color.white, t: 0.33f) : // show underneath color if there is connection.
                             default; // hollow if there isn't connection
+                        bool showArrow = ShouldShowDirectionOfConnection(selectedLaneEnd, hoveredLaneEnd);
                         DrawLaneCurve(
                             cameraInfo: cameraInfo,
                             bezier: ref bezier,
                             color: fillColor,
                             outlineColor: Color.white,
+                            arrowColor: default, 
+                            arrowOutlineColor: connected ? default : Color.white,
                             size: 0.18f, // Embolden
-                            underground: true,
-                            showDirection: ShouldShowDirectionOfConnection(selectedLaneEnd, hoveredLaneEnd));
+                            underground: true);
                         if(!connected && MultiMode && selectedLaneEnd.IsBidirectional && hoveredLaneEnd.IsBidirectional) {
                             Bezier3 bezier2 = CalculateBezierConnection(hoveredLaneEnd, selectedLaneEnd);
                             // draw backward arrow only:
+                            bool connected2 = LaneConnectionManager.Instance.AreLanesConnected(
+                            hoveredLaneEnd.LaneId, selectedLaneEnd.LaneId, selectedLaneEnd.StartNode);
                             DrawLaneCurve(
                                 cameraInfo: cameraInfo,
                                 bezier: ref bezier2,
                                 color: default,
                                 outlineColor: default,
-                                underground: true,
-                                showDirection: true);
+                                arrowColor: default,
+                                arrowOutlineColor: connected2 ? default : Color.white,
+                                underground: true);
                         }
 
                         OverrideCursor = connected ? removeCursor_ : addCursor_; 
@@ -849,15 +868,19 @@ namespace TrafficManager.UI.SubTools {
         }
 
         private static int CountLanes(ushort segmentId, ushort nodeId, bool toward) {
-            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
-            return extSegmentManager.GetSortedLanes(
-                                segmentId,
-                                ref segmentId.ToSegment(),
-                                ExtSegmentManager.Instance.IsStartNode(segmentId, nodeId) ^ (!toward),
-                                LaneConnectionManager.LANE_TYPES,
-                                LaneConnectionManager.VEHICLE_TYPES,
-                                true).Count;
+            ref NetSegment segment = ref segmentId.ToSegment();
+
+            bool startNode = segment.IsStartnode(nodeId) ^ (!toward);
+
+            var lanes = segment.GetSortedLanes(
+                startNode,
+                LaneConnectionManager.LANE_TYPES,
+                LaneConnectionManager.VEHICLE_TYPES,
+                sort: false);
+
+            return lanes.Count;
         }
+
         internal static int CountLanesTowardJunction(ushort segmentId, ushort nodeId) => CountLanes(segmentId, nodeId, true);
         internal static int CountLanesAgainstJunction(ushort segmentId, ushort nodeId) => CountLanes(segmentId, nodeId, false);
 
@@ -1285,15 +1308,50 @@ namespace TrafficManager.UI.SubTools {
             bool isRoad = IsRoad(source) && IsRoad(target);
 
             // check track turning angles are within bounds
-            ret &= isRoad || TrackUtils.CheckSegmentsTurnAngle(
+            ret &= isRoad || CheckSegmentsTurningAngle(
                     sourceSegment: ref source.SegmentId.ToSegment(),
+                    sourceStartNode: source.StartNode,
                     targetSegment: ref target.SegmentId.ToSegment(),
-                    nodeId: source.NodeId);
+                    targetStartNode: target.StartNode);
 
             return ret;
         }
 
+        /// <summary>
+        /// Checks if the turning angle between two segments at the given node is within bounds.
+        /// </summary>
+        /// <param name="sourceSegmentId"></param>
+        /// <param name="sourceSegment"></param>
+        /// <param name="sourceStartNode"></param>
+        /// <param name="targetSegmentId"></param>
+        /// <param name="targetSegment"></param>
+        /// <param name="targetStartNode"></param>
+        /// <returns></returns>
+        private static bool CheckSegmentsTurningAngle(ref NetSegment sourceSegment,
+                                                      bool sourceStartNode,
+                                                      ref NetSegment targetSegment,
+                                                      bool targetStartNode) {
 
+            float turningAngle = 0.01f - Mathf.Min(
+                sourceSegment.Info.m_maxTurnAngleCos,
+                targetSegment.Info.m_maxTurnAngleCos);
+
+            if (turningAngle < 1f) {
+                Vector3 sourceDirection = sourceStartNode
+                                              ? sourceSegment.m_startDirection
+                                              : sourceSegment.m_endDirection;
+
+                Vector3 targetDirection = targetStartNode
+                                              ? targetSegment.m_startDirection
+                                              : targetSegment.m_endDirection;
+
+                float dirDotProd = (sourceDirection.x * targetDirection.x) +
+                                   (sourceDirection.z * targetDirection.z);
+                return dirDotProd < turningAngle;
+            }
+
+            return true;
+        }
 
         /// <summary>
         /// Draw a bezier curve from `start` to `end` and bent towards `middlePoint` with `color`
@@ -1370,14 +1428,27 @@ namespace TrafficManager.UI.SubTools {
                                    ref Bezier3 bezier,
                                    Color color,
                                    Color outlineColor,
+                                   Color arrowColor,
+                                   Color arrowOutlineColor,
                                    float size = 0.08f,
-                                   bool underground = false,
-                                   bool showDirection = false) {
+                                   bool underground = false) {
             Bounds bounds = bezier.GetBounds();
             float minY = bounds.min.y - 0.5f;
             float maxY = bounds.max.y + 0.5f;
             if (outlineColor.a != 0) {
-                // Draw black outline
+                if (arrowOutlineColor.a != 0) {
+                    Highlight.DrawArrowHead(
+                        cameraInfo: cameraInfo,
+                        bezier: ref bezier,
+                        t: 2f / 3f,
+                        color: arrowOutlineColor,
+                        size: size + 0.5f,
+                        minY: minY,
+                        maxY: maxY,
+                        alphaBlend: arrowColor.a == 0f, // avoid strange shape.
+                        renderLimits: underground);
+                }
+
                 RenderManager.instance.OverlayEffect.DrawBezier(
                     cameraInfo: cameraInfo,
                     color: outlineColor,
@@ -1405,17 +1476,17 @@ namespace TrafficManager.UI.SubTools {
                     renderLimits: underground,
                     alphaBlend: true);
             }
-            if (showDirection) {
-                Highlight.DrawArrowHead2(
+
+            if (arrowColor.a != 0) {
+                Highlight.DrawArrowHead(
                     cameraInfo: cameraInfo,
                     bezier: ref bezier,
                     t: 2f / 3f,
-                    color: Color.blue,
-                    length: 0.75f,
-                    size: 0.03f,
+                    color: arrowColor,
+                    texture: directionArrow_,
+                    size: size + .8f,
                     minY: minY,
                     maxY: maxY,
-                    alphaBlend: true,
                     renderLimits: underground);
             }
         }
@@ -1558,6 +1629,8 @@ namespace TrafficManager.UI.SubTools {
             removeCursor_ = null;
             GameObject.Destroy(nopeCursor_); // don't destroy CS texture.
             nopeCursor_ = null;
+            GameObject.Destroy(directionArrow_);
+            directionArrow_ = null;
         }
     }
 }
