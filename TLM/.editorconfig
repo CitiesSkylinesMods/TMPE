@@ -27,6 +27,8 @@ dotnet_diagnostic.SA1217.severity = none
 dotnet_diagnostic.SA1308.severity = suggestion
 dotnet_diagnostic.SA1309.severity = silent
 dotnet_diagnostic.SA1310.severity = none
+dotnet_diagnostic.SA1401.severity = none # field should be private
+dotnet_diagnostic.SA1407.severity = none # Arithmetic expressions should declare precedence
 dotnet_diagnostic.SA1500.severity = none
 dotnet_diagnostic.SA1502.severity = none # ElementMustNotBeOnSingleLine
 dotnet_diagnostic.SA1503.severity = suggestion
@@ -74,6 +76,7 @@ dotnet_style_qualification_for_field=false:none
 dotnet_style_qualification_for_method=false:none
 dotnet_style_qualification_for_property=false:none
 dotnet_style_require_accessibility_modifiers=for_non_interface_members:hint
+dotnet_style_parentheses_in_arithmetic_binary_operators = never_if_unnecessary # IDE0048: Add parentheses for clarity
 
 # ReSharper properties
 resharper_add_imports_to_deepest_scope=true
