@@ -1179,7 +1179,7 @@ namespace TrafficManager.Manager.Impl {
                             // this lane will be referred as the "stay" lane with zero distance
                             int refNextInnerSimilarIndex = -1;
 
-#if DEBUGHWJUNCTIONROUTING 
+#if DEBUGHWJUNCTIONROUTING
                             if (extendedLogRouting) {
                                 Log._DebugFormat(
                                     "RoutingManager.RecalculateLaneEndRoutingData({0}, {1}, {2}, {3}): " +
@@ -1367,7 +1367,7 @@ namespace TrafficManager.Manager.Impl {
                                         Log._DebugFormat(
                                             "RoutingManager.RecalculateLaneEndRoutingData({0}, {1}, {2}, " +
                                             "{3}): highway junction iteration: compatibleLaneDist={4}",
-                                            prevSegmentId, nextLaneIndex, prevLaneId, isNodeStartNodeOfPrevSegment, startNode,
+                                            prevSegmentId, nextLaneIndex, prevLaneId, isNodeStartNodeOfPrevSegment,
                                             compatibleLaneDist);
                                     }
 #endif
