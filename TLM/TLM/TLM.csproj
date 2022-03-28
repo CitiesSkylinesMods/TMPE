@@ -1148,6 +1148,9 @@
     <EmbeddedResource Include="Resources\LaneConnectionManager\add_cursor.png" />
     <EmbeddedResource Include="Resources\LaneConnectionManager\remove_cursor.png" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\LaneConnectionManager\direction_arrow.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="PostBuildMacros">
     <!-- Code from https://superuser.com/questions/82231/how-do-i-do-comments-at-a-windows-command-prompt -->

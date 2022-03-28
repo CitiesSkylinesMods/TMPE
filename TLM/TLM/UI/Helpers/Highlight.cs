@@ -160,6 +160,7 @@ namespace TrafficManager.UI.Helpers {
             ref Bezier3 bezier,
             float t,
             Color color,
+            Texture2D texture,
             float size,
             float minY,
             float maxY,
@@ -169,16 +170,23 @@ namespace TrafficManager.UI.Helpers {
             Vector3 dir = bezier.Tangent(t).normalized * size;
             Vector3 dir90 = dir.RotateXZ90CW();
 
+            //Quad3 quad = new Quad3 {
+            //    a = center + dir90,
+            //    b = center - dir90,
+            //    c = center + dir,
+            //    d = center + dir,
+            //};
             Quad3 quad = new Quad3 {
-                a = center + dir90,
-                b = center - dir90,
-                c = center + dir,
-                d = center + dir,
+                a = center - dir + dir90,
+                b = center + dir + dir90,
+                c = center + dir - dir90,
+                d = center - dir - dir90,
             };
 
             Singleton<ToolManager>.instance.m_drawCallData.m_overlayCalls++;
             RenderManager.instance.OverlayEffect.DrawQuad(
                 cameraInfo,
+                texture,
                 color,
                 quad,
                 minY,
@@ -221,20 +229,6 @@ namespace TrafficManager.UI.Helpers {
                 renderLimits: renderLimits,
                 alphaBlend: alphaBlend);
         }
-
-        //--- Use DrawNodeCircle with color instead of warning, and call tool.GetToolColor to get the color
-        // public static void DrawNodeCircle(RenderManager.CameraInfo cameraInfo,
-        //                                   ushort nodeId,
-        //                                   bool warning = false,
-        //                                   bool alpha = false,
-        //                                   bool overrideRenderLimits = false) {
-        //     DrawNodeCircle(
-        //         cameraInfo: cameraInfo,
-        //         nodeId: nodeId,
-        //         color: tool.GetToolColor(warning: warning, error: false),
-        //         alpha: alpha,
-        //         overrideRenderLimits: overrideRenderLimits);
-        // }
 
         public static void DrawNodeCircle(RenderManager.CameraInfo cameraInfo,
                                           ushort nodeId,
