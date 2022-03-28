@@ -12,6 +12,7 @@ namespace TrafficManager.Util {
     using TrafficManager.Util.Extensions;
     using UnityEngine;
     using ColossalFramework.UI;
+    using System.Diagnostics;
 
     internal static class Shortcuts {
         internal static bool InSimulationThread() =>
@@ -128,6 +129,29 @@ namespace TrafficManager.Util {
             if (obj == null) {
                 Log.Error("Assertion failed. Expected not null: " + m);
             }
+        }
+
+        /// <summary>
+        /// Designed for testing enum/flag parameter values in DEBUG builds.
+        /// Logs error if <paramref name="value"/> is <c>None</c>, ie. <c>(int)value == 0</c>.
+        /// </summary>
+        /// <typeparam name="T">Must be some kind of <see cref="Enum"/>.</typeparam>
+        /// <param name="value">Value to test.</param>
+        /// <param name="m">Name of the value or other informative messsage.</param>
+        /// <example>AssertNotZero((int)laneType);</example>
+        /// <remarks>Conditional("DEBUG") - no perforamnce impact on release builds.</remarks>
+        /// <exception cref="ArgumentException">
+        /// Thrown if <typeparamref name="T"/> is not some kind of <see cref="Enum"/>.
+        /// </exception>
+        [Conditional("DEBUG")]
+        internal static void AssertNotNone<T>(T value, string m = "") {
+            if (!typeof(T).IsEnum)
+                throw new ArgumentException($"Type '{typeof(T).FullName}' is not an enum");
+
+            T none = default;
+
+            if (value.Equals(none))
+                Log.Error("Assertion failed. Enum value must not be None: " + m);
         }
 
         internal static void Assert(bool con, string m = "") {
