@@ -56,6 +56,8 @@ namespace TrafficManager.UI.SubTools {
             Backward,
         }
 
+        private const bool ENABLE_TRANSPARENCY = false;
+
 #if DEBUG
         private static bool verbose_ => DebugSwitch.LaneConnections.Get();
 #else
@@ -137,6 +139,8 @@ namespace TrafficManager.UI.SubTools {
                 NodeMarker.RenderOverlay(cameraInfo, color, enlarge: highlight, renderLimits);
             }
         }
+
+        float TransparentAlpha => ENABLE_TRANSPARENCY ? TrafficManagerTool.OverlayAlpha : 1f;
 
         // laneEnd1.IsBidirectional && laneEnd2.IsBidirectional would also work
         // but would require the user to think a little.
@@ -263,14 +267,16 @@ namespace TrafficManager.UI.SubTools {
                             Vector3 height = bezier.Max();
                             bool underground = (height.y + 1f) < intersectionY || laneEnd.NodeId == SelectedNodeId;
 
-                            Color fillColor = laneEnd.Color.WithAlpha(TrafficManagerTool.OverlayAlpha);
+                            Color fillColor = laneEnd.Color.WithAlpha(TransparentAlpha);
+                            Color outlineColor = Color.black.WithAlpha(TransparentAlpha);
                             bool showArrow = ShouldShowDirectionOfConnection(laneEnd, targetLaneEnd);
                             DrawLaneCurve(
                                 cameraInfo: cameraInfo,
                                 bezier: ref bezier,
                                 color: fillColor,
-                                outlineColor: Color.black.WithAlpha(TrafficManagerTool.OverlayAlpha),
+                                outlineColor: outlineColor,
                                 arrowColor: showArrow ? fillColor : default,
+                                arrowOutlineColor: showArrow ? outlineColor : default,
                                 underground: underground);
                         }
                     }
@@ -334,8 +340,9 @@ namespace TrafficManager.UI.SubTools {
                         cameraInfo: cameraInfo,
                         bezier: ref bezier,
                         color: this.selectedLaneEnd.Color,
-                        outlineColor: Color.grey,
+                        outlineColor: Color.black, 
                         arrowColor: showArrow ? this.selectedLaneEnd.Color : default,
+                        arrowOutlineColor: showArrow ? Color.black : default,
                         size: 0.18f, // Embolden
                         underground: true);
                 } // end foreach selectedMarker.ConnectedMarkers
@@ -389,20 +396,13 @@ namespace TrafficManager.UI.SubTools {
                             Color.Lerp(a: selectedLaneEnd.Color, b: Color.white, t: 0.33f) : // show underneath color if there is connection.
                             default; // hollow if there isn't connection
                         bool showArrow = ShouldShowDirectionOfConnection(selectedLaneEnd, hoveredLaneEnd);
-                        Color arrowColor;
-                        if (!showArrow) {
-                            arrowColor = default;
-                        } else if(connected) {
-                            arrowColor = fillColor;
-                        } else {
-                            arrowColor = Color.white;
-                        }
                         DrawLaneCurve(
                             cameraInfo: cameraInfo,
                             bezier: ref bezier,
                             color: fillColor,
                             outlineColor: Color.white,
-                            arrowColor: arrowColor,
+                            arrowColor: default, 
+                            arrowOutlineColor: connected ? default : Color.white,
                             size: 0.18f, // Embolden
                             underground: true);
                         if(!connected && MultiMode && selectedLaneEnd.IsBidirectional && hoveredLaneEnd.IsBidirectional) {
@@ -410,17 +410,13 @@ namespace TrafficManager.UI.SubTools {
                             // draw backward arrow only:
                             bool connected2 = LaneConnectionManager.Instance.AreLanesConnected(
                             hoveredLaneEnd.LaneId, selectedLaneEnd.LaneId, selectedLaneEnd.StartNode);
-                            if (connected2) {
-                                arrowColor = hoveredLaneEnd.Color;
-                            } else {
-                                arrowColor = Color.white;
-                            }
                             DrawLaneCurve(
                                 cameraInfo: cameraInfo,
                                 bezier: ref bezier2,
                                 color: default,
                                 outlineColor: default,
-                                arrowColor: arrowColor,
+                                arrowColor: default,
+                                arrowOutlineColor: connected2 ? default : Color.white,
                                 underground: true);
                         }
 
@@ -1431,13 +1427,26 @@ namespace TrafficManager.UI.SubTools {
                                    Color color,
                                    Color outlineColor,
                                    Color arrowColor,
+                                   Color arrowOutlineColor,
                                    float size = 0.08f,
                                    bool underground = false) {
             Bounds bounds = bezier.GetBounds();
             float minY = bounds.min.y - 0.5f;
             float maxY = bounds.max.y + 0.5f;
             if (outlineColor.a != 0) {
-                // Draw black outline
+                if (arrowOutlineColor.a != 0) {
+                    Highlight.DrawArrowHead(
+                        cameraInfo: cameraInfo,
+                        bezier: ref bezier,
+                        t: 2f / 3f,
+                        color: arrowOutlineColor,
+                        size: size + 0.5f,
+                        minY: minY,
+                        maxY: maxY,
+                        alphaBlend: arrowColor.a == 0f, // avoid strange shape.
+                        renderLimits: underground);
+                }
+
                 RenderManager.instance.OverlayEffect.DrawBezier(
                     cameraInfo: cameraInfo,
                     color: outlineColor,
@@ -1465,6 +1474,7 @@ namespace TrafficManager.UI.SubTools {
                     renderLimits: underground,
                     alphaBlend: true);
             }
+
             if (arrowColor.a != 0) {
                 Highlight.DrawArrowHead(
                     cameraInfo: cameraInfo,
@@ -1472,10 +1482,9 @@ namespace TrafficManager.UI.SubTools {
                     t: 2f / 3f,
                     color: arrowColor,
                     texture: directionArrow_,
-                    size: size + .82f,
+                    size: size + .8f,
                     minY: minY,
                     maxY: maxY,
-                    alphaBlend: true,
                     renderLimits: underground);
             }
         }

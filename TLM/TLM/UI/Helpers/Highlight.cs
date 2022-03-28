@@ -165,17 +165,11 @@ namespace TrafficManager.UI.Helpers {
             float minY,
             float maxY,
             bool renderLimits,
-            bool alphaBlend = false) {
+            bool alphaBlend = true) {
             Vector3 center = bezier.Position(t);
             Vector3 dir = bezier.Tangent(t).normalized * size;
             Vector3 dir90 = dir.RotateXZ90CW();
 
-            //Quad3 quad = new Quad3 {
-            //    a = center + dir90,
-            //    b = center - dir90,
-            //    c = center + dir,
-            //    d = center + dir,
-            //};
             Quad3 quad = new Quad3 {
                 a = center - dir + dir90,
                 b = center + dir + dir90,
@@ -187,6 +181,41 @@ namespace TrafficManager.UI.Helpers {
             RenderManager.instance.OverlayEffect.DrawQuad(
                 cameraInfo,
                 texture,
+                color,
+                quad,
+                minY,
+                maxY,
+                renderLimits: renderLimits,
+                alphaBlend: alphaBlend);
+        }
+
+        /// <summary>
+        /// draw triangular arrow head at the given <paramref name="t"/> of the <paramref name="bezier"/>
+        /// </summary>
+        public static void DrawArrowHead(
+            RenderManager.CameraInfo cameraInfo,
+            ref Bezier3 bezier,
+            float t,
+            Color color,
+            float size,
+            float minY,
+            float maxY,
+            bool renderLimits,
+            bool alphaBlend = false) {
+            Vector3 center = bezier.Position(t);
+            Vector3 dir = bezier.Tangent(t).normalized * size;
+            Vector3 dir90 = dir.RotateXZ90CW();
+
+            Quad3 quad = new Quad3 {
+                a = center - dir + dir90,
+                b = center - dir - dir90,
+                c = center + dir,
+                d = center + dir,
+            };
+
+            Singleton<ToolManager>.instance.m_drawCallData.m_overlayCalls++;
+            RenderManager.instance.OverlayEffect.DrawQuad(
+                cameraInfo,
                 color,
                 quad,
                 minY,
