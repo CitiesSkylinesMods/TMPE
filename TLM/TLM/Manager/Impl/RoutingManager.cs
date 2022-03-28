@@ -752,10 +752,8 @@ namespace TrafficManager.Manager.Impl {
                                                 prevLaneId,
                                                 isNodeStartNodeOfNextSegment);
                                         if (connected) {
-                                            // check for lane connections
                                             if (numNextLaneConnectionTransitionDatas < MAX_NUM_TRANSITIONS) {
-                                                currentLaneConnectionTransIndex = numNextLaneConnectionTransitionDatas;
-                                                nextLaneConnectionTransitionDatas[numNextLaneConnectionTransitionDatas++].Set(
+                                                nextForcedTransitionDatas[numNextForcedTransitionDatas++].Set(
                                                     nextLaneId,
                                                     nextLaneIndex,
                                                     LaneEndTransitionType.LaneConnection,
@@ -872,9 +870,7 @@ namespace TrafficManager.Manager.Impl {
                                                 prevLaneId,
                                                 isNodeStartNodeOfNextSegment);
 
-                                        // check for lane connections
                                         if (connected) {
-                                            // lane is connected with previous lane
                                             if (numNextLaneConnectionTransitionDatas < MAX_NUM_TRANSITIONS) {
                                                 currentLaneConnectionTransIndex =
                                                     numNextLaneConnectionTransitionDatas;
