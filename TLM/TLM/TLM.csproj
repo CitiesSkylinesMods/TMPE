@@ -527,6 +527,7 @@
     <Compile Include="U\ControlActiveState.cs" />
     <Compile Include="U\ControlEnabledState.cs" />
     <Compile Include="U\ControlHoveredState.cs" />
+    <Compile Include="U\CursorUtil.cs" />
     <Compile Include="U\FreeTooltip\UFloatingTooltip.cs" />
     <Compile Include="U\HelperExtensions.cs" />
     <Compile Include="U\Label\ULabel.cs" />
@@ -1142,6 +1143,10 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\whats_new.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\LaneConnectionManager\add_cursor.png" />
+    <EmbeddedResource Include="Resources\LaneConnectionManager\remove_cursor.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="PostBuildMacros">
