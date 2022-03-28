@@ -17,6 +17,7 @@ namespace TrafficManager.UI.SubTools {
     using static TrafficManager.Util.Shortcuts;
     using TrafficManager.UI.SubTools.PrioritySigns;
     using TrafficManager.Util.Extensions;
+    using TrafficManager.U;
 
     public class LaneConnectorTool
         : LegacySubTool,
@@ -29,6 +30,9 @@ namespace TrafficManager.UI.SubTools {
 
             CachedVisibleNodeIds = new GenericArrayCache<ushort>(NetManager.MAX_NODE_COUNT);
             LastCachedCamera = new CameraTransformValue();
+            nopeCursor_ = CursorUtil.CreateCursor(UIView.GetAView().defaultAtlas["Niet"]?.texture, new Vector2(45, 45));
+            addCursor_ = CursorUtil.LoadCursorFromResource("LaneConnectionManager.add_cursor.png"); 
+            removeCursor_ = CursorUtil.LoadCursorFromResource("LaneConnectionManager.remove_cursor.png");
         }
 
         /// <summary>State of the tool UI.</summary>
@@ -69,6 +73,12 @@ namespace TrafficManager.UI.SubTools {
         /// <summary>Clear lane lines is Delete/Backspace (configurable)</summary>
         private int frameClearPressed;
 
+        private CursorInfo nopeCursor_;
+
+        private CursorInfo addCursor_;
+
+        private CursorInfo removeCursor_;
+
         /// <summary>
         /// Stores potentially visible ids for nodes while the camera did not move
         /// </summary>
@@ -78,8 +88,6 @@ namespace TrafficManager.UI.SubTools {
         /// Stores last cached camera position in <see cref="CachedVisibleNodeIds"/>
         /// </summary>
         private CameraTransformValue LastCachedCamera { get; set; }
-
-        public bool CanShowNopeCursor => GetSelectionMode() == SelectionMode.None;
 
         private class LaneEnd {
             internal ushort SegmentId;
@@ -201,7 +209,6 @@ namespace TrafficManager.UI.SubTools {
                 }
             }
 
-            bool isUndergroundMode = TrafficManagerTool.IsUndergroundMode;
             for (int cacheIndex = CachedVisibleNodeIds.Size - 1; cacheIndex >= 0; cacheIndex--) {
                 var nodeId = CachedVisibleNodeIds.Values[cacheIndex];
 
@@ -251,9 +258,9 @@ namespace TrafficManager.UI.SubTools {
                     }
 
                     bool drawMarker = false;
-                    bool SourceMode = GetSelectionMode() == SelectionMode.SelectSource;
-                    bool TargetMode = GetSelectionMode() == SelectionMode.SelectTarget;
-                    if ( SourceMode & laneEnd.IsSource) {
+                    bool sourceMode = GetSelectionMode() == SelectionMode.SelectSource;
+                    bool targetMode = GetSelectionMode() == SelectionMode.SelectTarget;
+                    if ( sourceMode & laneEnd.IsSource) {
                         // draw source marker in source selection mode,
                         // make exception for markers that have no target:
                         foreach(var targetLaneEnd in laneEnds) {
@@ -262,7 +269,7 @@ namespace TrafficManager.UI.SubTools {
                                 break;
                             }
                         }
-                    } else if (TargetMode) {
+                    } else if (targetMode) {
                         // selected source marker in target selection mode
                         drawMarker =
                             selectedLaneEnd == laneEnd ||
@@ -300,7 +307,6 @@ namespace TrafficManager.UI.SubTools {
                     }
 
                     Bezier3 bezier = CalculateBezierConnection(selectedLaneEnd, targetLaneEnd);
-                    Vector3 height = bezier.Max();
 
                     DrawLaneCurve(
                         cameraInfo: cameraInfo,
@@ -320,6 +326,10 @@ namespace TrafficManager.UI.SubTools {
 
             // draw lane markers and connections
             hoveredLaneEnd = null;
+            OverrideCursor = null;
+            if (GetSelectionMode() == SelectionMode.None && HoveredNodeId != 0 && !MainTool.IsNodeVisible(HoveredNodeId)) {
+                OverrideCursor = nopeCursor_;
+            }
 
             ShowOverlay(false, cameraInfo);
 
@@ -329,7 +339,7 @@ namespace TrafficManager.UI.SubTools {
                     Vector3 selNodePos = SelectedNodeId.ToNode().m_position;
 
                     // Draw a currently dragged curve
-                    if (hoveredLaneEnd == null) {
+                    if (hoveredLaneEnd == null || hoveredLaneEnd.LaneId == selectedLaneEnd.LaneId) {
                         // get accurate position on a plane positioned at node height
                         Plane plane = new Plane(Vector3.up, Vector3.zero.ChangeY(selNodePos.y));
                         Ray ray = InGameUtil.Instance.CachedMainCamera.ScreenPointToRay(Input.mousePosition);
@@ -342,20 +352,28 @@ namespace TrafficManager.UI.SubTools {
                             start: selectedLaneEnd.NodeMarker.Position,
                             end: pos,
                             middlePoint: selNodePos,
-                            color: Color.Lerp(a: selectedLaneEnd.Color, b: Color.white, t: 0.33f),
+                            color: default,
                             outlineColor: Color.white,
-                            size: 0.11f,
+                            size: 0.18f,
                             renderLimits: true);
                     } else {
                         // snap to hovered, render accurate connection bezier
                         Bezier3 bezier = CalculateBezierConnection(selectedLaneEnd, hoveredLaneEnd);
+                        bool connected = LaneConnectionManager.Instance.AreLanesConnected(
+                            selectedLaneEnd.LaneId,
+                            hoveredLaneEnd.LaneId,
+                            selectedLaneEnd.StartNode);
+                        Color fillColor = connected ?
+                            Color.Lerp(a: selectedLaneEnd.Color, b: Color.white, t: 0.33f) : // show underneath color if there is connection.
+                            default; // hollow if there isn't connection
                         DrawLaneCurve(
                             cameraInfo: cameraInfo,
                             bezier: ref bezier,
-                            color: this.selectedLaneEnd.Color,
-                            outlineColor:  Color.Lerp(a: selectedLaneEnd.Color, b: Color.white, t: 0.33f),
-                            size: 0.11f, // Embolden
+                            color: fillColor,
+                            outlineColor: Color.white,
+                            size: 0.18f, // Embolden
                             underground: true);
+                        OverrideCursor = connected ? removeCursor_ : addCursor_; 
                     }
                 }
 
@@ -1506,6 +1524,16 @@ namespace TrafficManager.UI.SubTools {
 
             // Default: no hint
             OnscreenDisplay.Clear();
+        }
+
+        public override void OnDestroy() {
+            base.OnDestroy();
+            CursorUtil.DestroyCursorAndTexture(addCursor_);
+            addCursor_ = null;
+            CursorUtil.DestroyCursorAndTexture(removeCursor_);
+            removeCursor_ = null;
+            GameObject.Destroy(nopeCursor_); // don't destroy CS texture.
+            nopeCursor_ = null;
         }
     }
 }
