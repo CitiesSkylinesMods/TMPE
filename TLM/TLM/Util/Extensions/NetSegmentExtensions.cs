@@ -1,5 +1,6 @@
 namespace TrafficManager.Util.Extensions {
     using ColossalFramework;
+    using JetBrains.Annotations;
     using System;
     using System.Collections.Generic;
     using TrafficManager.Manager.Impl;
@@ -126,6 +127,34 @@ namespace TrafficManager.Util.Extensions {
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Count the number of lanes matching specified criteria at a segment end.
+        /// </summary>
+        /// <param name="segment">The segment to inspect.</param>
+        /// <param name="nodeId">The id of the node to inspect.</param>
+        /// <param name="laneTypeFilter">Optionally filter to specified lane types.</param>
+        /// <param name="vehicleTypeFilter">Optionally filter to specified vehicle types.</param>
+        /// <param name="incoming">
+        /// If <c>true</c>, count lanes entering the segment via the node.
+        /// if <c>false</c>, count lanes leaving the segment via the node.
+        /// </param>
+        /// <returns>Returns number of lanes matching specified criteria.</returns>
+        public static int CountLanes(
+            this ref NetSegment segment,
+            ushort nodeId,
+            NetInfo.LaneType? laneTypeFilter = null,
+            VehicleInfo.VehicleType? vehicleTypeFilter = null,
+            bool incoming = false) {
+
+            bool startNode = segment.IsStartnode(nodeId) ^ incoming;
+
+            return segment.GetSortedLanes(
+                startNode,
+                laneTypeFilter,
+                vehicleTypeFilter,
+                sort: false).Count;
         }
 
         /// <summary>
