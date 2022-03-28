@@ -582,8 +582,8 @@ namespace TrafficManager.Manager.Impl {
                     }
                 }
 
-                int outgoingVehicleLanes = 0;
-                int incomingVehicleLanes = 0;
+                int outgoingCarLanes = 0;
+                int incomingVCarLanes = 0;
 
                 ref NetSegment nextSegment = ref nextSegmentId.ToSegment();
                 bool isNodeStartNodeOfNextSegment = nextSegment.m_startNode == nodeId;
@@ -709,7 +709,7 @@ namespace TrafficManager.Manager.Impl {
                                         "RoutingManager.RecalculateLaneEndRoutingData({0}, {1}, {2}, {3}): " +
                                         "increasing number of incoming lanes at nextLaneId={4}, idx={5}: " +
                                         "isNextValid={6}, nextLaneInfo.m_finalDirection={7}, nextExpectedDirection={8}: " +
-                                        "incomingVehicleLanes={9}, outgoingVehicleLanes={10} ",
+                                        "incomingVCarLanes={9}, outgoingCarLanes={10} ",
                                         prevSegmentId,
                                         prevLaneIndex,
                                         prevLaneId,
@@ -719,8 +719,8 @@ namespace TrafficManager.Manager.Impl {
                                         isNextSegmentValid,
                                         nextLaneInfo.m_finalDirection,
                                         nextExpectedDirection,
-                                        incomingVehicleLanes,
-                                        outgoingVehicleLanes);
+                                        incomingVCarLanes,
+                                        outgoingCarLanes);
                                 }
 
                                 int nextSimilarLaneCount = nextLaneInfo.m_similarLaneCount;
@@ -857,7 +857,7 @@ namespace TrafficManager.Manager.Impl {
                                 if (nextLaneInfo.CheckType(ROUTED_LANE_TYPES, ARROW_VEHICLE_TYPES)) {
                                     // routing road vehicles (car, SOS, bus, trolleybus, ...)
                                     // lane may be mixed car+tram
-                                    ++incomingVehicleLanes;
+                                    ++incomingVCarLanes;
 
                                     bool connected = true;
                                     bool nextHasConnections =
@@ -1103,13 +1103,13 @@ namespace TrafficManager.Manager.Impl {
 
                                 if ((nextLaneInfo.m_finalDirection &
                                      NetInfo.InvertDirection(nextExpectedDirection)) != NetInfo.Direction.None) {
-                                    ++outgoingVehicleLanes;
+                                    ++outgoingCarLanes;
                                     if (extendedLogRouting) {
                                         Log._DebugFormat(
                                             "RoutingManager.RecalculateLaneEndRoutingData({0}, {1}, {2}, {3}): " +
                                             "increasing number of outgoing lanes at nextLaneId={4}, idx={5}: " +
                                             "isNextValid={6}, nextLaneInfo.m_finalDirection={7}, nextExpectedDirection={8}: " +
-                                            "incomingVehicleLanes={9}, outgoingVehicleLanes={10}",
+                                            "incomingVCarLanes={9}, outgoingCarLanes={10}",
                                             prevSegmentId,
                                             prevLaneIndex,
                                             prevLaneId,
@@ -1119,8 +1119,8 @@ namespace TrafficManager.Manager.Impl {
                                             isNextSegmentValid,
                                             nextLaneInfo.m_finalDirection,
                                             nextExpectedDirection,
-                                            incomingVehicleLanes,
-                                            outgoingVehicleLanes);
+                                            incomingVCarLanes,
+                                            outgoingCarLanes);
                                     }
                                 }
                             }
@@ -2120,8 +2120,8 @@ namespace TrafficManager.Manager.Impl {
                     }
 
                     if (nextSegmentId != prevSegmentId) {
-                        totalIncomingLanes += incomingVehicleLanes;
-                        totalOutgoingLanes += outgoingVehicleLanes;
+                        totalIncomingLanes += incomingVCarLanes;
+                        totalOutgoingLanes += outgoingCarLanes;
                     }
                 } else {
                     // invalid segment
