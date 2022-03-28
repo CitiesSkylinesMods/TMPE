@@ -19,8 +19,6 @@ namespace TrafficManager.UI.SubTools {
     using TrafficManager.Util.Extensions;
     using TrafficManager.U;
     using TrafficManager.UI.Textures;
-    using System.Reflection;
-    using System;
 
     public class LaneConnectorTool
         : LegacySubTool,
@@ -140,7 +138,7 @@ namespace TrafficManager.UI.SubTools {
             }
         }
 
-        float TransparentAlpha => ENABLE_TRANSPARENCY ? TrafficManagerTool.OverlayAlpha : 1f;
+        private float TransparentAlpha => ENABLE_TRANSPARENCY ? TrafficManagerTool.OverlayAlpha : 1f;
 
         // laneEnd1.IsBidirectional && laneEnd2.IsBidirectional would also work
         // but would require the user to think a little.
@@ -239,7 +237,7 @@ namespace TrafficManager.UI.SubTools {
                     Highlight.DrawNodeCircle(
                         cameraInfo: cameraInfo,
                         nodeId: (ushort)nodeId,
-                        color: isNodeVisible? DefaultLaneEndColor : DefaultDisabledLaneEndColor,
+                        color: isNodeVisible ? DefaultLaneEndColor : DefaultDisabledLaneEndColor,
                         alpha: true);
                 }
 
@@ -870,15 +868,19 @@ namespace TrafficManager.UI.SubTools {
         }
 
         private static int CountLanes(ushort segmentId, ushort nodeId, bool toward) {
-            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
-            return extSegmentManager.GetSortedLanes(
-                                segmentId,
-                                ref segmentId.ToSegment(),
-                                ExtSegmentManager.Instance.IsStartNode(segmentId, nodeId) ^ (!toward),
-                                LaneConnectionManager.LANE_TYPES,
-                                LaneConnectionManager.VEHICLE_TYPES,
-                                true).Count;
+            ref NetSegment segment = ref segmentId.ToSegment();
+
+            bool startNode = segment.IsStartnode(nodeId) ^ (!toward);
+
+            var lanes = segment.GetSortedLanes(
+                startNode,
+                LaneConnectionManager.LANE_TYPES,
+                LaneConnectionManager.VEHICLE_TYPES,
+                sort: false);
+
+            return lanes.Count;
         }
+
         internal static int CountLanesTowardJunction(ushort segmentId, ushort nodeId) => CountLanes(segmentId, nodeId, true);
         internal static int CountLanesAgainstJunction(ushort segmentId, ushort nodeId) => CountLanes(segmentId, nodeId, false);
 

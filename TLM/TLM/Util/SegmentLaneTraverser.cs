@@ -64,6 +64,7 @@ namespace TrafficManager.Util {
                                     NetInfo.LaneType? laneTypeFilter,
                                     VehicleInfo.VehicleType? vehicleTypeFilter,
                                     SegmentLaneVisitor laneVisitor) {
+
             IList<LanePos> initialSortedLanes = null;
 
             //-------------------------------------
@@ -77,18 +78,12 @@ namespace TrafficManager.Util {
                 //-------------------------------------
                 // Function applies for each segment
                 //-------------------------------------
-                bool VisitorProcessFun(ushort segmentId, ref NetSegment segment) {
+                bool VisitorProcessFun(ref NetSegment segment) {
                     // Log._Debug($"SegmentLaneTraverser: Reached segment {segmentId}:
                     //     isInitialSeg={isInitialSeg} viaStartNode={segData.viaStartNode}
                     //     viaInitialStartNode={segData.viaInitialStartNode} reverse={reverse}");
-                    ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
-                    IList<LanePos> sortedLanes = extSegmentManager.GetSortedLanes(
-                        segmentId,
-                        ref segment,
-                        null,
-                        laneTypeFilter,
-                        vehicleTypeFilter,
-                        reverse);
+
+                    var sortedLanes = segment.GetSortedLanes(null, laneTypeFilter, vehicleTypeFilter, reverse);
 
                     if (isInitialSeg) {
                         initialSortedLanes = sortedLanes;
@@ -122,7 +117,7 @@ namespace TrafficManager.Util {
                 }
 
                 ushort currentSegmentId = segData.CurSeg.segmentId;
-                VisitorProcessFun(currentSegmentId, ref currentSegmentId.ToSegment());
+                VisitorProcessFun(ref currentSegmentId.ToSegment());
 
                 return ret;
             }
