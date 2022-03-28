@@ -321,8 +321,10 @@ namespace TrafficManager.UI {
                 // Make it impossible for user to undo changes performed by Road selection panels
                 // after changing traffic rule vis other tools.
                 // TODO: This code will not be necessary when we implement intent.
-                SimulationManager.instance.m_ThreadingWrapper.QueueMainThread(RoadSelectionPanels.RoadWorldInfoPanel.Hide);
-                RoadSelectionPanels.Root.Function = RoadSelectionPanels.FunctionModes.None;
+                if(RoadSelectionPanels.RoadWorldInfoPanel != null)
+                    SimulationManager.instance.m_ThreadingWrapper.QueueMainThread(RoadSelectionPanels.RoadWorldInfoPanel.Hide);
+                if(RoadSelectionPanels.Root != null)
+                    RoadSelectionPanels.Root.Function = RoadSelectionPanels.FunctionModes.None;
             }
 
             bool toolModeChanged = newToolMode != toolMode_;
@@ -343,7 +345,7 @@ namespace TrafficManager.UI {
 
                 Log._Debug($"SetToolMode: reset because toolmode not found {newToolMode}");
                 OnscreenDisplay.DisplayIdle();
-                ModUI.Instance.MainMenu.UpdateButtons();
+                ModUI.Instance?.MainMenu?.UpdateButtons();
                 return;
             }
 
