@@ -365,7 +365,7 @@ namespace TrafficManager.Lifecycle {
                 foreach (var e in _configuration.ManagerContainers) {
                     var ms = managerSerialization.SingleOrDefault(ms => ms.ContainerType.FullName == e.Key);
                     if (ms != null) {
-                        ms.LoadData(JsonConvert.DeserializeObject(e.Value));
+                        ms.LoadData(JsonConvert.DeserializeObject(e.Value, ms.ContainerType));
                     }
                 }
             }
