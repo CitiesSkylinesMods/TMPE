@@ -355,6 +355,11 @@ namespace TrafficManager {
         /// </summary>
         public List<ParkingRestriction> ParkingRestrictions = new List<ParkingRestriction>();
 
+        /// <summary>
+        /// Individually serialized manager containers
+        /// </summary>
+        public Dictionary<string, string> ManagerContainers = new Dictionary<string, string>();
+
         [Obsolete]
         public string NodeTrafficLights = string.Empty;
 

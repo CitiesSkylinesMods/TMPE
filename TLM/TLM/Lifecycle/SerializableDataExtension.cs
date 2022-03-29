@@ -11,6 +11,8 @@ namespace TrafficManager.Lifecycle {
     using TrafficManager.State;
     using UI.WhatsNew;
     using Util;
+    using System.Linq;
+    using Newtonsoft.Json;
 
     [UsedImplicitly]
     public class SerializableDataExtension
@@ -27,6 +29,21 @@ namespace TrafficManager.Lifecycle {
 
         public override void OnLoadData() => Load();
         public override void OnSaveData() => Save();
+
+        private static IList<ManagerSerializationReference> GetManagerSerialization() {
+            var result = new List<ManagerSerializationReference>();
+
+            foreach (var manager in TMPELifecycle.Instance.RegisteredManagers) {
+                var serialization = ManagerSerializationReference.ForManager(manager);
+                if (serialization != null) {
+                    result.Add(serialization);
+                }
+            }
+
+            result.Sort();
+
+            return result;
+        }
 
         public static void Load() {
             Log.Info("Loading Traffic Manager: PE Data");
@@ -341,6 +358,17 @@ namespace TrafficManager.Lifecycle {
             } else {
                 Log.Info("Segment-at-node structure undefined!");
             }
+
+            var managerSerialization = GetManagerSerialization();
+
+            if (_configuration.ManagerContainers != null) {
+                foreach (var e in _configuration.ManagerContainers) {
+                    var ms = managerSerialization.SingleOrDefault(ms => ms.ContainerType.FullName == e.Key);
+                    if (ms != null) {
+                        ms.LoadData(JsonConvert.DeserializeObject(e.Value));
+                    }
+                }
+            }
         }
 
         public static void Save() {
@@ -421,6 +449,14 @@ namespace TrafficManager.Lifecycle {
                 //------------------
                 configuration.LaneAllowedVehicleTypes = VehicleRestrictionsManager.Instance.SaveData(ref success);
                 configuration.ParkingRestrictions = ParkingRestrictionsManager.Instance.SaveData(ref success);
+
+                //------------------
+                // Individually Serialized Managers
+                //------------------
+                configuration.ManagerContainers = new Dictionary<string, string>();
+                foreach (var ms in GetManagerSerialization()) {
+                    configuration.ManagerContainers[ms.ContainerType.FullName] = JsonConvert.SerializeObject(ms.SaveData());
+                }
 
                 //------------------
                 // Version
