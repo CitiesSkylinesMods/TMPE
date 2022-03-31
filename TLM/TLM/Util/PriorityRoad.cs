@@ -250,7 +250,8 @@ namespace TrafficManager.Util {
                 var lanes = segmentSrc.GetSortedLanes(
                     startNode,
                     LaneArrowManager.LANE_TYPES,
-                    LaneArrowManager.VEHICLE_TYPES);
+                    LaneArrowManager.VEHICLE_TYPES,
+                    reverse: true);
 
                 foreach (LanePos lane in lanes) {
                     LaneArrowManager.Instance.SetLaneArrows(lane.laneId, arrow, true);
