@@ -239,29 +239,28 @@ namespace TrafficManager.Util {
         private static void HandleSplitAvenue(List<ushort> segmentList, ushort nodeId) {
             Log._Debug($"HandleSplitAvenue(segmentList, {nodeId}) was called");
 
-            // TODO: make static?
-            void SetArrows(ushort segmentIdSrc, ushort segmentIdDst) {
-                LaneArrows arrow = ToLaneArrows(GetDirection(segmentIdSrc, segmentIdDst, nodeId));
-
-                ref NetSegment segmentSrc = ref segmentIdSrc.ToSegment();
-
-                bool startNode = segmentSrc.IsStartnode(nodeId);
-
-                var lanes = segmentSrc.GetSortedLanes(
-                    startNode,
-                    LaneArrowManager.LANE_TYPES,
-                    LaneArrowManager.VEHICLE_TYPES,
-                    reverse: true);
-
-                foreach (LanePos lane in lanes) {
-                    LaneArrowManager.Instance.SetLaneArrows(lane.laneId, arrow, true);
-                }
-            }
-
-            SetArrows(segmentList[0], segmentList[2]);
-            SetArrows(segmentList[2], segmentList[1]);
+            SetArrows(segmentList[0], segmentList[2], nodeId);
+            SetArrows(segmentList[2], segmentList[1], nodeId);
             foreach (ushort segmentId in segmentList) {
                 FixMajorSegmentRules(segmentId, nodeId);
+            }
+        }
+
+        private static void SetArrows(ushort segmentIdSrc, ushort segmentIdDst, ushort nodeId) {
+            LaneArrows arrow = ToLaneArrows(GetDirection(segmentIdSrc, segmentIdDst, nodeId));
+
+            ref NetSegment segmentSrc = ref segmentIdSrc.ToSegment();
+
+            bool startNode = segmentSrc.IsStartnode(nodeId);
+
+            var lanes = segmentSrc.GetSortedLanes(
+                startNode,
+                LaneArrowManager.LANE_TYPES,
+                LaneArrowManager.VEHICLE_TYPES,
+                reverse: true);
+
+            foreach (LanePos lane in lanes) {
+                LaneArrowManager.Instance.SetLaneArrows(lane.laneId, arrow, true);
             }
         }
 
