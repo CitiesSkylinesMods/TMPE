@@ -219,7 +219,7 @@ namespace TrafficManager.Util {
         /// <param name="segmentId"></param>
         /// <param name="m">Determines which directions are green</param>
         private static void SetupHelper(ITimedTrafficLightsStep step, ushort nodeId, ushort segmentId, GreenDir m) {
-            bool startNode = (bool)ExtSegmentManager.Instance.IsStartNode(segmentId, nodeId);
+            bool startNode = segmentId.ToSegment().IsStartnode(nodeId);
             ref NetNode netNode = ref nodeId.ToNode();
 
             //get step data for side seg
