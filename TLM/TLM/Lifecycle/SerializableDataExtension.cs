@@ -13,6 +13,7 @@ namespace TrafficManager.Lifecycle {
     using Util;
     using System.Linq;
     using Newtonsoft.Json;
+    using System.Text;
 
     [UsedImplicitly]
     public class SerializableDataExtension
@@ -199,7 +200,7 @@ namespace TrafficManager.Lifecycle {
             try {
                 if (data?.Length > 0) {
                     using (var memoryStream = new MemoryStream(data)) {
-                        using (var streamReader = new StreamReader(memoryStream)) {
+                        using (var streamReader = new StreamReader(memoryStream, Encoding.UTF8)) {
                             _containers = JsonConvert.DeserializeObject<Dictionary<string, string>>(streamReader.ReadToEnd());
 
                             _managerSerialization = GetManagerSerialization();
@@ -504,7 +505,7 @@ namespace TrafficManager.Lifecycle {
                 }
 
                 using (var memoryStream = new MemoryStream()) {
-                    using (var streamWriter = new StreamWriter(memoryStream)) {
+                    using (var streamWriter = new StreamWriter(memoryStream, Encoding.UTF8)) {
                         streamWriter.Write(JsonConvert.SerializeObject(managerContainers));
                     }
 
