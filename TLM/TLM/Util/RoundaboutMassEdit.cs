@@ -15,7 +15,7 @@ namespace TrafficManager.Util {
     using TrafficManager.Util.Extensions;
 
     public class RoundaboutMassEdit {
-        public static RoundaboutMassEdit Instance = new RoundaboutMassEdit();
+        public static RoundaboutMassEdit Instance = new ();
         public RoundaboutMassEdit() {
             segmentList_ = new List<ushort>();
         }
@@ -37,9 +37,12 @@ namespace TrafficManager.Util {
                 }
             }
 
-            ushort nodeId = ExtSegmentManager.Instance.GetHeadNode(segmentId);
+            ref NetSegment segment = ref segmentId.ToSegment();
+            ushort nodeId = segment.GetHeadNode();
+            ref NetNode node = ref nodeId.ToNode();
+            bool isJunction = node.IsJunction();
 
-            if (Options.RoundAboutQuickFix_StayInLaneMainR && !HasJunctionFlag(nodeId)) {
+            if (Options.RoundAboutQuickFix_StayInLaneMainR && !isJunction) {
                 StayInLane(nodeId, StayInLaneMode.Both);
             }
 
@@ -48,27 +51,23 @@ namespace TrafficManager.Util {
             bool isStraight = segEndMan.GetDirection(segmentId, nextSegmentId, nodeId) == ArrowDirection.Forward;
 
             if (Options.RoundAboutQuickFix_DedicatedExitLanes &&
-                HasJunctionFlag(nodeId) &&
+                isJunction &&
                 SeparateTurningLanesUtil.CanChangeLanes(
                     segmentId, nodeId) == SetLaneArrow_Result.Success &&
                     isStraight) {
 
-                bool startNode = (bool)ExtSegmentManager.Instance.IsStartNode(segmentId, nodeId);
-                ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
-                IList<LanePos> laneList =
-                    extSegmentManager.GetSortedLanes(
-                        segmentId,
-                        ref segmentId.ToSegment(),
-                        startNode,
-                        LaneArrowManager.LANE_TYPES,
-                        LaneArrowManager.VEHICLE_TYPES,
-                        true);
+                var laneList = segment.GetSortedLanes(
+                    segment.IsStartnode(nodeId),
+                    LaneArrowManager.LANE_TYPES,
+                    LaneArrowManager.VEHICLE_TYPES,
+                    reverse: true);
+
                 int nSrc = laneList.Count;
 
                 // check for exits.
                 segEndMan.CalculateOutgoingLeftStraightRightSegments(
                     ref GetSegEnd(segmentId, nodeId),
-                    ref nodeId.ToNode(),
+                    ref node,
                     out bool bLeft,
                     out bool bForward,
                     out bool bRight);
