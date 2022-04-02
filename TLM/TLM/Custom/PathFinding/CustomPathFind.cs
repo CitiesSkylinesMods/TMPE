@@ -16,11 +16,11 @@ namespace TrafficManager.Custom.PathFinding {
     using UnityEngine;
     using TrafficManager.Util;
     using TrafficManager.Util.Extensions;
+    using TrafficManager.TrafficLight.Impl;
 
 #if DEBUG
     using System.Collections.Generic;
     using State.ConfigData;
-    using TrafficManager.TrafficLight.Impl;
 #endif
 
     /// <summary>
