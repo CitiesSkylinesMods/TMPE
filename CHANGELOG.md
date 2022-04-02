@@ -650,7 +650,7 @@ This changelog includes all versions and major variants of the mod going all the
 - [Fixed] Missing despawn buttons on cim and vehicle info panels (#765, #763, #759)
 - [Fixed] Info panel not closing after despawning a cim or tourist (#765)
 - [Fixed] Faulty UI on tourist despawn button (#765)
-- [Updated] Docs - Reference paths for EA Origin deployed game (thanks DannyDannyDan) ( #751)
+- [Updated] Docs - Reference paths for EA Origin deployed game (thanks DannyDannyDan) (#760 #751)
 - [Steam] [TM:PE v11 LABS](https://steamcommunity.com/sharedfiles/filedetails/?id=1806963141)
 
 #### TM:PE V[11.1.1](https://github.com/CitiesSkylinesMods/TMPE/compare/11.1.0...11.1.1) LABS, 29/02/2020
