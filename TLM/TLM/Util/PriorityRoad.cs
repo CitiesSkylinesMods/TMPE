@@ -59,6 +59,7 @@ namespace TrafficManager.Util {
             IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
 
             void ApplyPrioritySigns(ushort segmentId, bool startNode) {
+
                 ref NetSegment netSegment = ref segmentId.ToSegment();
                 ushort nodeId = startNode ? netSegment.m_startNode : netSegment.m_endNode;
 
@@ -79,7 +80,7 @@ namespace TrafficManager.Util {
 
                     TrafficPriorityManager.Instance.SetPrioritySign(
                         otherSegmentId,
-                        (bool)extSegmentManager.IsStartNode(otherSegmentId, nodeId),
+                        otherSegmentId.ToSegment().IsStartnode(nodeId),
                         secondaryPrioType);
                 }
             }
