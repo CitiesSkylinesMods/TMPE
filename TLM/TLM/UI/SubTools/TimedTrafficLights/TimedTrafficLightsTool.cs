@@ -1487,13 +1487,13 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
 
                 ref NetNode node = ref nodeId.ToNode();
 
-                for (int i = 0; i < 8; ++i) {
-                    ushort srcSegmentId = node.GetSegment(i);
+                for (int segmentIndex = 0; segmentIndex < Constants.MAX_SEGMENTS_OF_NODE; ++segmentIndex) {
+                    ushort srcSegmentId = node.GetSegment(segmentIndex);
                     if (srcSegmentId == 0) {
                         continue;
                     }
 
-                    bool startNode = (bool)extSegmentManager.IsStartNode(srcSegmentId, nodeId);
+                    bool startNode = srcSegmentId.ToSegment().IsStartnode(nodeId);
 
                     ICustomSegmentLights liveSegmentLights =
                         customTrafficLightsManager.GetSegmentLights(srcSegmentId, startNode, false);
