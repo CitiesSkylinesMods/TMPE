@@ -22,8 +22,12 @@ namespace TrafficManager.Lifecycle {
 
         private const string DATA_ID = "TrafficManager_v1.0";
         private const string VERSION_INFO_DATA_ID = "TrafficManager_VersionInfo_v1.0";
+        private const string CONTAINERS_ID = "TrafficManager_Containers_v1.0";
 
         private static ISerializableData SerializableData => SimulationManager.instance.m_SerializableDataWrapper;
+        private static Dictionary<string, string> _containers;
+        private static IList<ManagerSerializationReference> _managerSerialization;
+        private static Type[] _managerMigration;
         private static Configuration _configuration;
         private static VersionInfoConfiguration _versionInfoConfiguration;
 
@@ -82,13 +86,34 @@ namespace TrafficManager.Lifecycle {
             }
 
             try {
+                byte[] data = SerializableData.LoadData(CONTAINERS_ID);
+                DeserializeContainerCollection(data);
+            }
+            catch (Exception e) {
+                Log.Error($"OnLoadData: Error while deserializing container collection (old savegame?): {e}");
+            }
+
+            bool loadedData = false;
+            try {
                 byte[] data = SerializableData.LoadData(DATA_ID);
                 DeserializeData(data);
+                loadedData = true;
             }
             catch (Exception e) {
                 Log.Error($"OnLoadData: Error while deserializing data: {e}");
+            }
+
+            bool loadedContainers = false;
+            try {
+                DeserializeContainers();
+                loadedContainers = true;
+            }
+            catch (Exception e) {
+                Log.Error($"OnLoadData: Error while deserializing containers: {e}");
                 loadingSucceeded = false;
             }
+
+            loadingSucceeded &= loadedData || loadedContainers;
 
             // load options (empty byte array causes default options to be applied)
             try {
@@ -170,11 +195,61 @@ namespace TrafficManager.Lifecycle {
             }
         }
 
+        private static void DeserializeContainerCollection(byte[] data) {
+            try {
+                if (data?.Length > 0) {
+                    using (var memoryStream = new MemoryStream(data)) {
+                        using (var streamReader = new StreamReader(memoryStream)) {
+                            _containers = JsonConvert.DeserializeObject<Dictionary<string, string>>(streamReader.ReadToEnd());
+
+                            _managerSerialization = GetManagerSerialization();
+                            _managerMigration = _managerSerialization
+                                                .Where(ms => _containers.ContainsKey(ms.ContainerType.FullName))
+                                                .Select(ms => ms.ManagerType)
+                                                .ToArray();
+                        }
+                    }
+                } else {
+                    Log.Info("No container collection to deserialize!");
+                }
+            }
+            catch (Exception ex) {
+                Log.Error($"Error deserializing containers: {ex}");
+                Log.Info(ex.StackTrace);
+                throw new ApplicationException("An error occurred while loading");
+            }
+        }
+
+        private static void DeserializeContainers() {
+            try {
+                if (_containers?.Count > 0 && _managerSerialization != null) {
+                    foreach (var ms in _managerSerialization) {
+                        if (_containers.TryGetValue(ms.ContainerType.FullName, out var containerData)) {
+                            try {
+                                ms.LoadData(JsonConvert.DeserializeObject(containerData, ms.ContainerType));
+                            }
+                            catch (Exception ex) {
+                                Log.Error($"Error deserializing container {ms.ContainerType.FullName}: {ex}");
+                                Log.Info(ex.StackTrace);
+                            }
+                        }
+                    }
+                } else {
+                    Log.Info("No containers to deserialize!");
+                }
+            }
+            catch (Exception ex) {
+                Log.Error($"Error deserializing containers: {ex}");
+                Log.Info(ex.StackTrace);
+                throw new ApplicationException("An error occurred while loading");
+            }
+        }
+
         private static void DeserializeData(byte[] data) {
             bool error = false;
             try {
                 if (data != null && data.Length != 0) {
-                    Log.Info($"Loading Data from New Load Routine! Length={data.Length}");
+                    Log.Info($"Loading Data from Old 'New' Load Routine! Length={data.Length}");
                     var memoryStream = new MemoryStream();
                     memoryStream.Write(data, 0, data.Length);
                     memoryStream.Position = 0;
@@ -219,6 +294,24 @@ namespace TrafficManager.Lifecycle {
             }
         }
 
+        private static void LoadDataState<T>(ICustomDataManager<T> manager, T data, string description, ref bool error) {
+            if (_managerMigration?.Contains(manager.GetType()) == true) {
+                if (data != null) {
+                    Log.Info($"{manager.GetType().FullName} is in migration to manager-container strategy. {description} data structure ignored.");
+                }
+            }
+            else if (data != null) {
+                if (_managerSerialization?.Any(ms => ms.ManagerType == manager.GetType()) == true) {
+                    Log.Info($"Reading legacy {description} data structure (no manager-container was found).");
+                }
+                if (!manager.LoadData(data)) {
+                    error = true;
+                }
+            } else if (description != null) {
+                Log.Info($"{description} data structure undefined!");
+            }
+        }
+
         private static void LoadDataState(out bool error) {
             error = false;
 
@@ -228,147 +321,21 @@ namespace TrafficManager.Lifecycle {
                 return;
             }
 
-            // load ext. citizens
-            if (_configuration.ExtCitizens != null) {
-                if (!ExtCitizenManager.Instance.LoadData(_configuration.ExtCitizens)) {
-                    error = true;
-                }
-            } else {
-                Log.Info("Ext. citizen data structure undefined!");
-            }
-
-            // load ext. citizen instances
-            if (_configuration.ExtCitizenInstances != null) {
-                if (!ExtCitizenInstanceManager.Instance.LoadData(_configuration.ExtCitizenInstances)) {
-                    error = true;
-                }
-            } else {
-                Log.Info("Ext. citizen instance data structure undefined!");
-            }
-
-            // load priority segments
-            if (_configuration.PrioritySegments != null) {
-                if (!TrafficPriorityManager.Instance.LoadData(_configuration.PrioritySegments)) {
-                    error = true;
-                }
-            } else {
-                Log.Info("Priority segments data structure (old) undefined!");
-            }
-
-            if (_configuration.CustomPrioritySegments != null) {
-                if (!TrafficPriorityManager.Instance.LoadData(_configuration.CustomPrioritySegments)) {
-                    error = true;
-                }
-            } else {
-                Log.Info("Priority segments data structure (new) undefined!");
-            }
-
-            // load parking restrictions
-            if (_configuration.ParkingRestrictions != null) {
-                if (!ParkingRestrictionsManager.Instance.LoadData(_configuration.ParkingRestrictions)) {
-                    error = true;
-                }
-            } else {
-                Log.Info("Parking restrctions structure undefined!");
-            }
-
-            // load vehicle restrictions (warning: has to be done before loading timed lights!)
-            if (_configuration.LaneAllowedVehicleTypes != null) {
-                if (!VehicleRestrictionsManager.Instance.LoadData(_configuration.LaneAllowedVehicleTypes)) {
-                    error = true;
-                }
-            } else {
-                Log.Info("Vehicle restrctions structure undefined!");
-            }
-
-            if (_configuration.TimedLights != null) {
-                if (!TrafficLightSimulationManager.Instance.LoadData(_configuration.TimedLights)) {
-                    error = true;
-                }
-            } else {
-                Log.Info("Timed traffic lights data structure undefined!");
-            }
-
-            // load toggled traffic lights (old method)
-            if (_configuration.NodeTrafficLights != null) {
-                if (!TrafficLightManager.Instance.LoadData(_configuration.NodeTrafficLights)) {
-                    error = true;
-                }
-            } else {
-                Log.Info("Junction traffic lights data structure (old) undefined!");
-            }
-
-            // load toggled traffic lights (new method)
-            if (_configuration.ToggledTrafficLights != null) {
-                if (!TrafficLightManager.Instance.LoadData(_configuration.ToggledTrafficLights)) {
-                    error = true;
-                }
-            } else {
-                Log.Info("Junction traffic lights data structure (new) undefined!");
-            }
-
-            // load lane arrrows (old method)
-            if (_configuration.LaneFlags != null) {
-                if (!LaneArrowManager.Instance.LoadData(_configuration.LaneFlags)) {
-                    error = true;
-                }
-            } else {
-                Log.Info("Lane arrow data structure (old) undefined!");
-            }
-
-            // load lane arrows (new method)
-            if (_configuration.LaneArrows != null) {
-                if (!LaneArrowManager.Instance.LoadData(_configuration.LaneArrows)) {
-                    error = true;
-                }
-            } else {
-                Log.Info("Lane arrow data structure (new) undefined!");
-            }
-
-            // load lane connections
-            if (_configuration.LaneConnections != null) {
-                if (!LaneConnectionManager.Instance.LoadData(_configuration.LaneConnections)) {
-                    error = true;
-                }
-            } else {
-                Log.Info("Lane connection data structure undefined!");
-            }
-
-            // Load custom default speed limits
-            if (_configuration.CustomDefaultSpeedLimits != null) {
-                if (!SpeedLimitManager.Instance.LoadData(_configuration.CustomDefaultSpeedLimits)) {
-                    error = true;
-                }
-            }
-
-            // load speed limits
-            if (_configuration.LaneSpeedLimits != null) {
-                if (!SpeedLimitManager.Instance.LoadData(_configuration.LaneSpeedLimits)) {
-                    error = true;
-                }
-            } else {
-                Log.Info("Lane speed limit structure undefined!");
-            }
-
-            // Load segment-at-node flags
-            if (_configuration.SegmentNodeConfs != null) {
-                if (!JunctionRestrictionsManager.Instance.LoadData(_configuration.SegmentNodeConfs)) {
-                    error = true;
-                }
-            } else {
-                Log.Info("Segment-at-node structure undefined!");
-            }
-
-            var managerSerialization = GetManagerSerialization();
-
-            if (_configuration.ManagerContainers != null) {
-                foreach (var e in _configuration.ManagerContainers) {
-                    var ms = managerSerialization.SingleOrDefault(ms => ms.ContainerType.FullName == e.Key);
-                    if (ms != null) {
-                        ms.LoadData(JsonConvert.DeserializeObject(e.Value, ms.ContainerType));
-                    }
-                }
-            }
+            LoadDataState(ExtCitizenManager.Instance, _configuration.ExtCitizens, "Ext. citizen", ref error);
+            LoadDataState(ExtCitizenInstanceManager.Instance, _configuration.ExtCitizenInstances, "Ext. citizen instance", ref error);
+            LoadDataState(TrafficPriorityManager.Instance, _configuration.PrioritySegments, "Priority segments (old)", ref error);
+            LoadDataState(TrafficPriorityManager.Instance, _configuration.CustomPrioritySegments, "Priority segments (new)", ref error);
+            LoadDataState(ParkingRestrictionsManager.Instance, _configuration.ParkingRestrictions, "Parking restrctions", ref error);
+            LoadDataState(VehicleRestrictionsManager.Instance, _configuration.LaneAllowedVehicleTypes, "Vehicle restrctions", ref error);
+            LoadDataState(TrafficLightSimulationManager.Instance, _configuration.TimedLights, "Timed traffic lights", ref error);
+            LoadDataState(TrafficLightManager.Instance, _configuration.NodeTrafficLights, "Junction traffic lights (old)", ref error);
+            LoadDataState(TrafficLightManager.Instance, _configuration.ToggledTrafficLights, "Junction traffic lights (new)", ref error);
+            LoadDataState(LaneArrowManager.Instance, _configuration.LaneFlags, "Lane arrow (old)", ref error);
+            LoadDataState(LaneArrowManager.Instance, _configuration.LaneArrows, "Lane arrow (new)", ref error);
+            LoadDataState(LaneConnectionManager.Instance, _configuration.LaneConnections, "Lane connection", ref error);
+            LoadDataState(SpeedLimitManager.Instance, _configuration.CustomDefaultSpeedLimits, "Default speed limit", ref error);
+            LoadDataState(SpeedLimitManager.Instance, _configuration.LaneSpeedLimits, "Lane speed limit", ref error);
+            LoadDataState(JunctionRestrictionsManager.Instance, _configuration.SegmentNodeConfs, "Segment-at-node", ref error);
         }
 
         public static void Save() {
@@ -451,14 +418,6 @@ namespace TrafficManager.Lifecycle {
                 configuration.ParkingRestrictions = ParkingRestrictionsManager.Instance.SaveData(ref success);
 
                 //------------------
-                // Individually Serialized Managers
-                //------------------
-                configuration.ManagerContainers = new Dictionary<string, string>();
-                foreach (var ms in GetManagerSerialization()) {
-                    configuration.ManagerContainers[ms.ContainerType.FullName] = JsonConvert.SerializeObject(ms.SaveData());
-                }
-
-                //------------------
                 // Version
                 //------------------
                 VersionInfoConfiguration versionConfig = new VersionInfoConfiguration();
@@ -472,10 +431,12 @@ namespace TrafficManager.Lifecycle {
                     memoryStreamVersion.Position = 0;
                     Log.Info($"Version data byte length {memoryStreamVersion.Length}");
                     SerializableData.SaveData(VERSION_INFO_DATA_ID, memoryStreamVersion.ToArray());
-                } catch (Exception ex) {
+                }
+                catch (Exception ex) {
                     Log.Error("Unexpected error while saving version data: " + ex);
                     success = false;
-                } finally {
+                }
+                finally {
                     memoryStreamVersion.Close();
                 }
 
@@ -483,7 +444,8 @@ namespace TrafficManager.Lifecycle {
                     if (TMPELifecycle.PlayMode) {
                         SerializableData.SaveData("TMPE_Options", OptionsManager.Instance.SaveData(ref success));
                     }
-                } catch (Exception ex) {
+                }
+                catch (Exception ex) {
                     Log.Error("Unexpected error while saving options: " + ex.Message);
                     success = false;
                 }
@@ -496,12 +458,16 @@ namespace TrafficManager.Lifecycle {
                     memoryStream.Position = 0;
                     Log.Info($"Save data byte length {memoryStream.Length}");
                     SerializableData.SaveData(DATA_ID, memoryStream.ToArray());
-                } catch (Exception ex) {
+                }
+                catch (Exception ex) {
                     Log.Error("Unexpected error while saving data: " + ex);
                     success = false;
-                } finally {
+                }
+                finally {
                     memoryStream.Close();
                 }
+
+                SaveContainers(ref success);
 
                 var reverseManagers = new List<ICustomManager>(TMPELifecycle.Instance.RegisteredManagers);
                 reverseManagers.Reverse();
@@ -516,7 +482,8 @@ namespace TrafficManager.Lifecycle {
                         success = false;
                     }
                 }
-            } catch (Exception e) {
+            }
+            catch (Exception e) {
                 success = false;
                 Log.Error($"Error occurred while saving data: {e}");
 
@@ -525,6 +492,31 @@ namespace TrafficManager.Lifecycle {
                 // detected an error while saving. To help preventing future errors, please navigate
                 // to http://steamcommunity.com/sharedfiles/filedetails/?id=583429740 and follow
                 // the steps under 'In case problems arise'.", true);
+            }
+        }
+
+        private static void SaveContainers(ref bool success) {
+
+            try {
+                var managerContainers = new Dictionary<string, string>();
+                foreach (var ms in GetManagerSerialization()) {
+                    managerContainers[ms.ContainerType.FullName] = JsonConvert.SerializeObject(ms.SaveData());
+                }
+
+                using (var memoryStream = new MemoryStream()) {
+                    using (var streamWriter = new StreamWriter(memoryStream)) {
+                        streamWriter.Write(JsonConvert.SerializeObject(managerContainers));
+                    }
+
+                    memoryStream.Position = 0;
+                    Log.Info($"Save containers byte length {memoryStream.Length}");
+
+                    SerializableData.SaveData(CONTAINERS_ID, memoryStream.ToArray());
+                }
+            }
+            catch (Exception ex) {
+                Log.Error("Unexpected error while saving containers: " + ex);
+                success = false;
             }
         }
     }
