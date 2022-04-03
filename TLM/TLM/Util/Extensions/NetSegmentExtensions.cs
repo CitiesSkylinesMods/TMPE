@@ -1,5 +1,6 @@
 namespace TrafficManager.Util.Extensions {
     using ColossalFramework;
+    using JetBrains.Annotations;
     using System;
     using System.Collections.Generic;
     using TrafficManager.Manager.Impl;
@@ -129,6 +130,69 @@ namespace TrafficManager.Util.Extensions {
         }
 
         /// <summary>
+        /// Count the number of lanes matching specified criteria at a segment end.
+        ///
+        /// Faster than doing <c>GetSortedLanes().Count</c>.
+        /// </summary>
+        /// <param name="segment">The segment to inspect.</param>
+        /// <param name="nodeId">The id of the node to inspect.</param>
+        /// <param name="laneTypeFilter">Filter to specified lane types.</param>
+        /// <param name="vehicleTypeFilter">Filter to specified vehicle types.</param>
+        /// <param name="incoming">
+        /// If <c>true</c>, count lanes entering the segment via the node.
+        /// if <c>false</c>, count lanes leaving the segment via the node.
+        /// </param>
+        /// <returns>Returns number of lanes matching specified criteria.</returns>
+        /// <remarks>
+        /// See also: <c>CountLanes()</c> methods on the <see cref="NetSegment"/> struct.
+        /// </remarks>
+        public static int CountLanes(
+            this ref NetSegment segment,
+            ushort nodeId,
+            NetInfo.LaneType laneTypeFilter,
+            VehicleInfo.VehicleType vehicleTypeFilter,
+            bool incoming = false) {
+
+            int count = 0;
+
+            NetInfo segmentInfo = segment.Info;
+
+            if (segmentInfo == null || segmentInfo.m_lanes == null)
+                return count;
+
+            bool startNode = segment.IsStartnode(nodeId) ^ incoming;
+            bool inverted = (segment.m_flags & NetSegment.Flags.Invert) != NetSegment.Flags.None;
+
+            NetInfo.Direction filterDir = startNode
+                ? NetInfo.Direction.Backward
+                : NetInfo.Direction.Forward;
+
+            if (inverted)
+                filterDir = NetInfo.InvertDirection(filterDir);
+
+            uint curLaneId = segment.m_lanes;
+            byte laneIndex = 0;
+
+            NetManager netManager = Singleton<NetManager>.instance;
+
+            while (laneIndex < segmentInfo.m_lanes.Length && curLaneId != 0u) {
+                NetInfo.Lane laneInfo = segmentInfo.m_lanes[laneIndex];
+
+                if ((laneInfo.m_finalDirection == filterDir) &&
+                    (laneInfo.m_laneType & laneTypeFilter) != NetInfo.LaneType.None &&
+                    (laneInfo.m_vehicleType & vehicleTypeFilter) != VehicleInfo.VehicleType.None) {
+
+                    count++;
+                }
+
+                curLaneId = netManager.m_lanes.m_buffer[curLaneId].m_nextLane;
+                ++laneIndex;
+            }
+
+            return count;
+        }
+
+        /// <summary>
         /// Assembles a geometrically sorted list of lanes for the given segment.
         /// If the <paramref name="startNode"/> parameter is set only lanes supporting traffic to flow towards the given node are added to the list, otherwise all matched lanes are added.
         /// </summary>
@@ -149,8 +213,12 @@ namespace TrafficManager.Util.Extensions {
             bool reverse = false,
             bool sort = true) {
             // TODO refactor together with getSegmentNumVehicleLanes, especially the vehicle type and lane type checks
-            NetManager netManager = Singleton<NetManager>.instance;
             var laneList = new List<LanePos>();
+
+            NetInfo segmentInfo = netSegment.Info;
+
+            if (segmentInfo == null || segmentInfo.m_lanes == null)
+                return laneList;
 
             bool inverted = (netSegment.m_flags & NetSegment.Flags.Invert) != NetSegment.Flags.None;
 
@@ -173,9 +241,10 @@ namespace TrafficManager.Util.Extensions {
                 sortDir = NetInfo.InvertDirection(sortDir);
             }
 
-            NetInfo segmentInfo = netSegment.Info;
             uint curLaneId = netSegment.m_lanes;
             byte laneIndex = 0;
+
+            NetManager netManager = Singleton<NetManager>.instance;
 
             while (laneIndex < segmentInfo.m_lanes.Length && curLaneId != 0u) {
                 NetInfo.Lane laneInfo = segmentInfo.m_lanes[laneIndex];
@@ -184,12 +253,12 @@ namespace TrafficManager.Util.Extensions {
                     (vehicleTypeFilter == null || (laneInfo.m_vehicleType & vehicleTypeFilter) !=
                      VehicleInfo.VehicleType.None) &&
                     (filterDir == null ||
-                     segmentInfo.m_lanes[laneIndex].m_finalDirection == filterDir)) {
+                     laneInfo.m_finalDirection == filterDir)) {
                     laneList.Add(
                         new LanePos(
                             curLaneId,
                             laneIndex,
-                            segmentInfo.m_lanes[laneIndex].m_position,
+                            laneInfo.m_position,
                             laneInfo.m_vehicleType,
                             laneInfo.m_laneType));
                 }

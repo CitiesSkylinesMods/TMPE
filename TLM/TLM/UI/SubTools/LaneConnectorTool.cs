@@ -867,22 +867,27 @@ namespace TrafficManager.UI.SubTools {
             return true;
         }
 
-        private static int CountLanes(ushort segmentId, ushort nodeId, bool toward) {
-            ref NetSegment segment = ref segmentId.ToSegment();
-
-            bool startNode = segment.IsStartnode(nodeId) ^ (!toward);
-
-            var lanes = segment.GetSortedLanes(
-                startNode,
+        /// <summary>
+        /// Count number of applicable lanes entering or leaving a segment via specific node.
+        /// </summary>
+        /// <param name="segmentId">The id of the segment to inspect.</param>
+        /// <param name="nodeId">The id of node where lanes should be counted.</param>
+        /// <param name="incoming">
+        /// If <c>true</c>, count lanes entering the segment from the junction.
+        /// If <c>false</c>, count lanes going from the segment to the junction.
+        /// </param>
+        /// <returns>Returns number of lanes matching the specified criteria.</returns>
+        private static int CountLanes(ushort segmentId, ushort nodeId, bool incoming) =>
+            segmentId.ToSegment().CountLanes(
+                nodeId,
                 LaneConnectionManager.LANE_TYPES,
                 LaneConnectionManager.VEHICLE_TYPES,
-                sort: false);
+                incoming);
 
-            return lanes.Count;
-        }
-
-        internal static int CountLanesTowardJunction(ushort segmentId, ushort nodeId) => CountLanes(segmentId, nodeId, true);
-        internal static int CountLanesAgainstJunction(ushort segmentId, ushort nodeId) => CountLanes(segmentId, nodeId, false);
+        internal static int CountLanesTowardJunction(ushort segmentId, ushort nodeId)
+            => CountLanes(segmentId, nodeId, false);
+        internal static int CountLanesAgainstJunction(ushort segmentId, ushort nodeId)
+            => CountLanes(segmentId, nodeId, true);
 
         public override void OnPrimaryClickOverlay() {
 #if DEBUG
