@@ -10,6 +10,7 @@
 [Fixed] Zig-zagging routes on bidirectional tracks #1487 #1486 (kianzarrin)
 [Fixed] Excessive track connections at junctions #1483 #1475 (kianzarrin)
 [Fixed] Main menu button breaks on hot-reload #762 #1492 (kianzarrin)
+[Fixed] Asset Editor crash when saving asset with no segments #1505 #1313 (krzychu124, kianzarrin)
 [Updated] Improve lane connector UI #1491 #1485 (kianzarrin)
 [Updated] Routing Manager code clean-up #1477 (kianzarrin)
 [Updated] Replace obsolete `GetSortedLanes` with extension #1496 #1490 (aubergine18)
