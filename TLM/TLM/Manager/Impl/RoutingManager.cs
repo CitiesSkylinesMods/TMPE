@@ -790,7 +790,6 @@ namespace TrafficManager.Manager.Impl {
                                                     isNodeStartNodeOfPrevSegment,
                                                     nextLaneId,
                                                     nextLaneIndex);
-                                            }
                                         }
                                     } else {
                                         bool goodTurnAngle = TrackUtils.CheckSegmentsTurnAngle(
