@@ -410,7 +410,7 @@ namespace TrafficManager.Util {
 
         private static void FixMajorSegmentRules(ushort segmentId, ushort nodeId) {
             Log._Debug($"FixMajorSegmentRules({segmentId}, {nodeId}) was called");
-            bool startNode = (bool)ExtSegmentManager.Instance.IsStartNode(segmentId, nodeId);
+            bool startNode = segmentId.ToSegment().IsStartnode(nodeId);
             JunctionRestrictionsManager.Instance.SetEnteringBlockedJunctionAllowed(segmentId, startNode, true);
             if (!Options.PriorityRoad_CrossMainR) {
                 JunctionRestrictionsManager.Instance.SetPedestrianCrossingAllowed(segmentId, startNode, false);
@@ -420,7 +420,7 @@ namespace TrafficManager.Util {
 
         private static void FixMinorSegmentRules(ushort segmentId, ushort nodeId, List<ushort> segmentList) {
             Log._Debug($"FixMinorSegmentRules({segmentId}, {nodeId}, segmentList) was called");
-            bool startNode = (bool)ExtSegmentManager.Instance.IsStartNode(segmentId, nodeId);
+            bool startNode = segmentId.ToSegment().IsStartnode(nodeId);
             if (Options.PriorityRoad_EnterBlockedYeild) {
                 JunctionRestrictionsManager.Instance.SetEnteringBlockedJunctionAllowed(segmentId, startNode, true);
             }
@@ -623,12 +623,13 @@ namespace TrafficManager.Util {
         /// <param name="segmentList"></param>
         public static void ClearNode(ushort nodeId) {
             LaneConnectionManager.Instance.RemoveLaneConnectionsFromNode(nodeId);
-            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
+
             ref NetNode node = ref nodeId.ToNode();
-            for (int i = 0; i < 8; ++i) {
-                ushort segmentId = node.GetSegment(i);
+
+            for (int segmentIndex = 0; segmentIndex < Constants.MAX_SEGMENTS_OF_NODE; ++segmentIndex) {
+                ushort segmentId = node.GetSegment(segmentIndex);
                 if (segmentId != 0) {
-                    bool startNode = (bool)extSegmentManager.IsStartNode(segmentId, nodeId);
+                    bool startNode = segmentId.ToSegment().IsStartnode(nodeId);
                     TrafficPriorityManager.Instance.SetPrioritySign(segmentId, startNode, PriorityType.None);
                     JunctionRestrictionsManager.Instance.ClearSegmentEnd(segmentId, startNode);
                     LaneArrowManager.Instance.ResetLaneArrows(segmentId, startNode);
