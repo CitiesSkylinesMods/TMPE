@@ -148,7 +148,8 @@ namespace TrafficManager.Util {
             bool altBus) {
 
             if (!builtIn) {
-                LaneArrowManager.Instance.ResetLaneArrows(segmentId, ExtSegmentManager.Instance.IsStartNode(segmentId, nodeId));
+                bool startNode = segmentId.ToSegment().IsStartnode(nodeId);
+                LaneArrowManager.Instance.ResetLaneArrows(segmentId, startNode);
             }
 
             var busLanes = GetBusLanes(segmentId, nodeId);
