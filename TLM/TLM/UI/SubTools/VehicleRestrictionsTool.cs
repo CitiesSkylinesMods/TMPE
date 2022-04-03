@@ -335,25 +335,23 @@ namespace TrafficManager.UI.SubTools {
 
         private void AllVehiclesFunc(bool allow) {
             // allow all vehicle types
-            NetInfo segmentInfo = SelectedSegmentId.ToSegment().Info;
-            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
-            IList<LanePos> lanes = extSegmentManager.GetSortedLanes(
-                SelectedSegmentId,
-                ref SelectedSegmentId.ToSegment(),
+            ref NetSegment selectedSegment = ref SelectedSegmentId.ToSegment();
+            NetInfo segmentInfo = selectedSegment.Info;
+
+            var lanes = selectedSegment.GetSortedLanes(
                 null,
                 VehicleRestrictionsManager.LANE_TYPES,
                 VehicleRestrictionsManager.VEHICLE_TYPES,
-                sort:false);
+                sort: false);
 
             foreach (LanePos laneData in lanes) {
                 uint laneId = laneData.laneId;
                 byte laneIndex = laneData.laneIndex;
                 NetInfo.Lane laneInfo = segmentInfo.m_lanes[laneIndex];
 
-                ExtVehicleType allowedTypes =
-                    allow ?
-                    VehicleRestrictionsManager.EXT_VEHICLE_TYPES :
-                    ExtVehicleType.None;
+                ExtVehicleType allowedTypes = allow
+                    ? VehicleRestrictionsManager.EXT_VEHICLE_TYPES
+                    : ExtVehicleType.None;
 
                 VehicleRestrictionsManager.Instance.SetAllowedVehicleTypes(
                     SelectedSegmentId,
@@ -507,13 +505,12 @@ namespace TrafficManager.UI.SubTools {
 
             uint x = 0;
             Color guiColor = GUI.color; // TODO: Use OverlayHandleColorController
-            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
-            IList<LanePos> sortedLanes = extSegmentManager.GetSortedLanes(
-                segmentId: segmentId,
-                segment: ref segment,
-                startNode: null,
-                laneTypeFilter: VehicleRestrictionsManager.LANE_TYPES,
-                vehicleTypeFilter: VehicleRestrictionsManager.VEHICLE_TYPES);
+
+            var sortedLanes = segment.GetSortedLanes(
+                null,
+                VehicleRestrictionsManager.LANE_TYPES,
+                VehicleRestrictionsManager.VEHICLE_TYPES);
+
             bool hovered = false;
             HashSet<NetInfo.Direction> directions = new HashSet<NetInfo.Direction>();
             int sortedLaneIndex = -1;

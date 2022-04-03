@@ -238,26 +238,29 @@ namespace TrafficManager.Util {
 
         private static void HandleSplitAvenue(List<ushort> segmentList, ushort nodeId) {
             Log._Debug($"HandleSplitAvenue(segmentList, {nodeId}) was called");
-            void SetArrows(ushort segmentIdSrc, ushort segmentIdDst) {
-                LaneArrows arrow = ToLaneArrows(GetDirection(segmentIdSrc, segmentIdDst, nodeId));
-                ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
-                IList<LanePos> lanes = extSegmentManager.GetSortedLanes(
-                                segmentIdSrc,
-                                ref segmentIdSrc.ToSegment(),
-                                extSegmentManager.IsStartNode(segmentIdSrc, nodeId),
-                                LaneArrowManager.LANE_TYPES,
-                                LaneArrowManager.VEHICLE_TYPES,
-                                true);
 
-                foreach (LanePos lane in lanes) {
-                    LaneArrowManager.Instance.SetLaneArrows(lane.laneId, arrow, true);
-                }
-            }
-
-            SetArrows(segmentList[0], segmentList[2]);
-            SetArrows(segmentList[2], segmentList[1]);
+            SetArrows(segmentList[0], segmentList[2], nodeId);
+            SetArrows(segmentList[2], segmentList[1], nodeId);
             foreach (ushort segmentId in segmentList) {
                 FixMajorSegmentRules(segmentId, nodeId);
+            }
+        }
+
+        private static void SetArrows(ushort segmentIdSrc, ushort segmentIdDst, ushort nodeId) {
+            LaneArrows arrow = ToLaneArrows(GetDirection(segmentIdSrc, segmentIdDst, nodeId));
+
+            ref NetSegment segmentSrc = ref segmentIdSrc.ToSegment();
+
+            bool startNode = segmentSrc.IsStartnode(nodeId);
+
+            var lanes = segmentSrc.GetSortedLanes(
+                startNode,
+                LaneArrowManager.LANE_TYPES,
+                LaneArrowManager.VEHICLE_TYPES,
+                reverse: true);
+
+            foreach (LanePos lane in lanes) {
+                LaneArrowManager.Instance.SetLaneArrows(lane.laneId, arrow, true);
             }
         }
 
@@ -429,18 +432,27 @@ namespace TrafficManager.Util {
             }
         }
 
-        private static int CountLanes(ushort segmentId, ushort nodeId, bool toward) {
-            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
-            return extSegmentManager.GetSortedLanes(
-                                segmentId,
-                                ref segmentId.ToSegment(),
-                                ExtSegmentManager.Instance.IsStartNode(segmentId, nodeId) ^ (!toward),
-                                LaneArrowManager.LANE_TYPES,
-                                LaneArrowManager.VEHICLE_TYPES,
-                                true).Count;
-        }
-        internal static int CountLanesTowardJunction(ushort segmentId, ushort nodeId) => CountLanes(segmentId, nodeId, true);
-        internal static int CountLanesAgainstJunction(ushort segmentId, ushort nodeId) => CountLanes(segmentId, nodeId, false);
+        /// <summary>
+        /// Count number of applicable lanes entering or leaving a segment via specific node.
+        /// </summary>
+        /// <param name="segmentId">The id of the segment to inspect.</param>
+        /// <param name="nodeId">The id of node where lanes should be counted.</param>
+        /// <param name="incoming">
+        /// If <c>true</c>, count lanes entering the segment from the junction.
+        /// If <c>false</c>, count lanes going from the segment to the junction.
+        /// </param>
+        /// <returns>Returns number of lanes matching the specified criteria.</returns>
+        private static int CountLanes(ushort segmentId, ushort nodeId, bool incoming) =>
+            segmentId.ToSegment().CountLanes(
+                nodeId,
+                LaneArrowManager.LANE_TYPES,
+                LaneArrowManager.VEHICLE_TYPES,
+                incoming);
+
+        internal static int CountLanesTowardJunction(ushort segmentId, ushort nodeId)
+            => CountLanes(segmentId, nodeId, false);
+        internal static int CountLanesAgainstJunction(ushort segmentId, ushort nodeId)
+            => CountLanes(segmentId, nodeId, true);
 
         internal static bool HasAccelerationLane(List<ushort> segmentList, ushort segmentId, ushort nodeId) {
             if (!segMan.CalculateIsOneWay(segmentId)) {
@@ -483,19 +495,16 @@ namespace TrafficManager.Util {
 
             ref NetSegment seg = ref segmentId.ToSegment();
             ref NetNode node = ref nodeId.ToNode();
-            bool startNode = (bool)ExtSegmentManager.Instance.IsStartNode(segmentId, nodeId);
+            bool startNode = seg.IsStartnode(nodeId);
             bool lht = LHT;
-            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
 
             //list of outgoing lanes from current segment to current node.
-            IList<LanePos> laneList =
-                extSegmentManager.GetSortedLanes(
-                    segmentId,
-                    ref seg,
-                    startNode,
-                    LaneArrowManager.LANE_TYPES,
-                    LaneArrowManager.VEHICLE_TYPES,
-                    !lht);
+            var laneList = seg.GetSortedLanes(
+                startNode,
+                LaneArrowManager.LANE_TYPES,
+                LaneArrowManager.VEHICLE_TYPES,
+                reverse: !lht);
+
             int srcLaneCount = laneList.Count;
             Log._Debug($"FixMajorSegmentLanes: segment:{segmentId} laneList:" + laneList.ToSTR());
 
@@ -534,18 +543,15 @@ namespace TrafficManager.Util {
             }
             ref NetSegment seg = ref segmentId.ToSegment();
             ref NetNode node = ref nodeId.ToNode();
-            bool startNode = (bool)ExtSegmentManager.Instance.IsStartNode(segmentId, nodeId);
-            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
+            bool startNode = seg.IsStartnode(nodeId);
 
             //list of outgoing lanes from current segment to current node.
-            IList<LanePos> laneList =
-                extSegmentManager.GetSortedLanes(
-                    segmentId,
-                    ref seg,
-                    startNode,
-                    LaneArrowManager.LANE_TYPES,
-                    LaneArrowManager.VEHICLE_TYPES,
-                    true);
+            var laneList = seg.GetSortedLanes(
+                startNode,
+                LaneArrowManager.LANE_TYPES,
+                LaneArrowManager.VEHICLE_TYPES,
+                reverse: true); // should this be `!lht`?
+
             int srcLaneCount = laneList.Count;
 
             bool bLeft, bRight, bForward;
