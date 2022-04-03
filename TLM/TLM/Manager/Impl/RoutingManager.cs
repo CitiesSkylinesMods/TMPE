@@ -583,7 +583,7 @@ namespace TrafficManager.Manager.Impl {
                 }
 
                 int outgoingCarLanes = 0;
-                int incomingVCarLanes = 0;
+                int incomingCarLanes = 0;
 
                 ref NetSegment nextSegment = ref nextSegmentId.ToSegment();
                 bool isNodeStartNodeOfNextSegment = nextSegment.m_startNode == nodeId;
@@ -709,7 +709,7 @@ namespace TrafficManager.Manager.Impl {
                                         "RoutingManager.RecalculateLaneEndRoutingData({0}, {1}, {2}, {3}): " +
                                         "increasing number of incoming lanes at nextLaneId={4}, idx={5}: " +
                                         "isNextValid={6}, nextLaneInfo.m_finalDirection={7}, nextExpectedDirection={8}: " +
-                                        "incomingVCarLanes={9}, outgoingCarLanes={10} ",
+                                        "incomingCarLanes={9}, outgoingCarLanes={10} ",
                                         prevSegmentId,
                                         prevLaneIndex,
                                         prevLaneId,
@@ -719,7 +719,7 @@ namespace TrafficManager.Manager.Impl {
                                         isNextSegmentValid,
                                         nextLaneInfo.m_finalDirection,
                                         nextExpectedDirection,
-                                        incomingVCarLanes,
+                                        incomingCarLanes,
                                         outgoingCarLanes);
                                 }
 
@@ -857,7 +857,7 @@ namespace TrafficManager.Manager.Impl {
                                 if (nextLaneInfo.CheckType(ROUTED_LANE_TYPES, ARROW_VEHICLE_TYPES)) {
                                     // routing road vehicles (car, SOS, bus, trolleybus, ...)
                                     // lane may be mixed car+tram
-                                    ++incomingVCarLanes;
+                                    ++incomingCarLanes;
 
                                     bool connected = true;
                                     bool nextHasConnections =
@@ -1109,7 +1109,7 @@ namespace TrafficManager.Manager.Impl {
                                             "RoutingManager.RecalculateLaneEndRoutingData({0}, {1}, {2}, {3}): " +
                                             "increasing number of outgoing lanes at nextLaneId={4}, idx={5}: " +
                                             "isNextValid={6}, nextLaneInfo.m_finalDirection={7}, nextExpectedDirection={8}: " +
-                                            "incomingVCarLanes={9}, outgoingCarLanes={10}",
+                                            "incomingCarLanes={9}, outgoingCarLanes={10}",
                                             prevSegmentId,
                                             prevLaneIndex,
                                             prevLaneId,
@@ -1119,7 +1119,7 @@ namespace TrafficManager.Manager.Impl {
                                             isNextSegmentValid,
                                             nextLaneInfo.m_finalDirection,
                                             nextExpectedDirection,
-                                            incomingVCarLanes,
+                                            incomingCarLanes,
                                             outgoingCarLanes);
                                     }
                                 }
@@ -2120,7 +2120,7 @@ namespace TrafficManager.Manager.Impl {
                     }
 
                     if (nextSegmentId != prevSegmentId) {
-                        totalIncomingLanes += incomingVCarLanes;
+                        totalIncomingLanes += incomingCarLanes;
                         totalOutgoingLanes += outgoingCarLanes;
                     }
                 } else {
