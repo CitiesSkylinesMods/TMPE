@@ -616,14 +616,11 @@ namespace TrafficManager.UI.SubTools.SpeedLimits.Overlay {
 
             Vector3 drawOriginPos = segmentCenterPos -
                                     (0.5f * (((numLanes - 1) + numDirections) - 1) * signSize * xu);
-            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
 
-            IList<LanePos> sortedLanes = extSegmentManager.GetSortedLanes(
-                segmentId: segmentId,
-                segment: ref segment,
-                startNode: null,
-                laneTypeFilter: SpeedLimitManager.LANE_TYPES,
-                vehicleTypeFilter: SpeedLimitManager.VEHICLE_TYPES);
+            var sortedLanes = segment.GetSortedLanes(
+                null,
+                SpeedLimitManager.LANE_TYPES,
+                SpeedLimitManager.VEHICLE_TYPES);
 
             bool onlyMonorailLanes = sortedLanes.Count > 0;
 
