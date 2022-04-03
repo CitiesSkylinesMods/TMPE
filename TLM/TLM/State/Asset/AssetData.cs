@@ -34,6 +34,10 @@ namespace TrafficManager.State.Asset {
         /// gathers all data for the given asset.
         /// </summary>
         public static AssetData GetAssetData(BuildingInfo prefab) {
+            if (!HasPaths(prefab)) {
+                return null;
+            }
+                
             return new AssetData {
                 Version = VersionUtil.ModVersion,
                 Record = RecordAll(),
@@ -65,6 +69,10 @@ namespace TrafficManager.State.Asset {
         /// </summary>
         public static SegmentNetworkIDs [] GetPathsNetworkIDs(BuildingInfo prefab) {
             // Code based on BuildingDecorations.SavePaths()
+            if (!HasPaths(prefab)) {
+                // null guard
+                return null;
+            }
             List<ushort> assetSegmentIds = new List<ushort>();
             List<ushort> buildingIds = new List<ushort>(prefab.m_paths.Length);
             var ret = new List<SegmentNetworkIDs>();
@@ -86,7 +94,8 @@ namespace TrafficManager.State.Asset {
                 }
             }
             return ret.ToArray();
-
         }
+
+        private static bool HasPaths(BuildingInfo prefab) => prefab.m_paths != null && prefab.m_paths.Length > 0;
     }
 }
