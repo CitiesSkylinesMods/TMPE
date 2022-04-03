@@ -7,7 +7,7 @@ namespace TrafficManager.API.Traffic.Data {
     /// Represents a speed value expressed in game units where 1f = 50 km/h or 32 MPH.
     /// </summary>
     [Serializable]
-    public readonly struct SpeedValue {
+    public readonly struct SpeedValue : IEquatable<SpeedValue> {
         /// <summary>Speed value in game units corresponding to Unlimited speed on that lane.</summary>
         public const float UNLIMITED = 20.0f;
 
@@ -122,6 +122,14 @@ namespace TrafficManager.API.Traffic.Data {
         public static SpeedValue operator +(SpeedValue left, SpeedValue right)
             => new(left.GameUnits + right.GameUnits);
 
+        public static bool operator ==(SpeedValue left, SpeedValue right) {
+            return left.GameUnits.Equals(right.GameUnits);
+        }
+
+        public static bool operator !=(SpeedValue left, SpeedValue right) {
+            return !left.GameUnits.Equals(right.GameUnits);
+        }
+
         /// <summary>Scales the value by the multiplier.</summary>
         /// <param name="n">Scale.</param>
         public SpeedValue Scale(float n) {
@@ -136,6 +144,18 @@ namespace TrafficManager.API.Traffic.Data {
             return displayMph
                        ? (int)this.GetMph() + " MPH"
                        : (int)this.GetKmph() + " km/h";
+        }
+
+        public bool Equals(SpeedValue other) {
+            return GameUnits.Equals(other.GameUnits);
+        }
+
+        public override bool Equals(object obj) {
+            return obj is SpeedValue other && Equals(other);
+        }
+
+        public override int GetHashCode() {
+            return GameUnits.GetHashCode();
         }
 
         public override string ToString() {

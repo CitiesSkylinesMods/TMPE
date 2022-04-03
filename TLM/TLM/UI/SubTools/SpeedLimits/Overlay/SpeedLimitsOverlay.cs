@@ -546,13 +546,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits.Overlay {
                 // Draw override, if exists, otherwise draw circle and small blue default
                 // Get speed limit override for segment
                 //-------------------------------------
-                SpeedValue? overrideSpeedlimitForward =
-                    SpeedLimitManager.Instance.CalculateCustomSpeedLimit(segmentId, finalDir: NetInfo.Direction.Forward);
-                SpeedValue? overrideSpeedlimitBack =
-                    SpeedLimitManager.Instance.CalculateCustomSpeedLimit(segmentId, finalDir: NetInfo.Direction.Backward);
-                SpeedValue? drawSpeedlimit = GetAverageSpeedlimit(
-                    forward: overrideSpeedlimitForward,
-                    back: overrideSpeedlimitBack);
+                SpeedValue? drawSpeedlimit = SpeedLimitManager.Instance.CalculateCustomSpeedLimit(segmentId, SpeedLimitManager.VEHICLE_TYPES);
 
                 bool isDefaultSpeed =
                     !drawSpeedlimit.HasValue ||
@@ -590,13 +584,6 @@ namespace TrafficManager.UI.SubTools.SpeedLimits.Overlay {
             return true;
         }
 
-        private SpeedValue? GetAverageSpeedlimit(SpeedValue? forward, SpeedValue? back) {
-            if (forward.HasValue && back.HasValue) {
-                return (forward.Value + back.Value).Scale(0.5f);
-            }
-            return forward ?? back;
-        }
-
         /// <summary>Draw speed limit handles one per lane.</summary>
         /// <param name="segmentId">Seg id.</param>
         /// <param name="segmentCenterPos">Cached or calculated via Segment.GetCenter() center of bezier.</param>
@@ -629,14 +616,11 @@ namespace TrafficManager.UI.SubTools.SpeedLimits.Overlay {
 
             Vector3 drawOriginPos = segmentCenterPos -
                                     (0.5f * (((numLanes - 1) + numDirections) - 1) * signSize * xu);
-            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
 
-            IList<LanePos> sortedLanes = extSegmentManager.GetSortedLanes(
-                segmentId: segmentId,
-                segment: ref segment,
-                startNode: null,
-                laneTypeFilter: SpeedLimitManager.LANE_TYPES,
-                vehicleTypeFilter: SpeedLimitManager.VEHICLE_TYPES);
+            var sortedLanes = segment.GetSortedLanes(
+                null,
+                SpeedLimitManager.LANE_TYPES,
+                SpeedLimitManager.VEHICLE_TYPES);
 
             bool onlyMonorailLanes = sortedLanes.Count > 0;
 

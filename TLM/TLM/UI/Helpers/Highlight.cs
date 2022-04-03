@@ -152,19 +152,112 @@ namespace TrafficManager.UI.Helpers {
             return node.IsUndergroundNode() == IsUndergroundMode;
         }
 
-        //--- Use DrawNodeCircle with color instead of warning, and call tool.GetToolColor to get the color
-        // public static void DrawNodeCircle(RenderManager.CameraInfo cameraInfo,
-        //                                   ushort nodeId,
-        //                                   bool warning = false,
-        //                                   bool alpha = false,
-        //                                   bool overrideRenderLimits = false) {
-        //     DrawNodeCircle(
-        //         cameraInfo: cameraInfo,
-        //         nodeId: nodeId,
-        //         color: tool.GetToolColor(warning: warning, error: false),
-        //         alpha: alpha,
-        //         overrideRenderLimits: overrideRenderLimits);
-        // }
+        /// <summary>
+        /// draw triangular arrow head at the given <paramref name="t"/> of the <paramref name="bezier"/>
+        /// </summary>
+        public static void DrawArrowHead(
+            RenderManager.CameraInfo cameraInfo,
+            ref Bezier3 bezier,
+            float t,
+            Color color,
+            Texture2D texture,
+            float size,
+            float minY,
+            float maxY,
+            bool renderLimits,
+            bool alphaBlend = true) {
+            Vector3 center = bezier.Position(t);
+            Vector3 dir = bezier.Tangent(t).normalized * size;
+            Vector3 dir90 = dir.RotateXZ90CW();
+
+            Quad3 quad = new Quad3 {
+                a = center - dir + dir90,
+                b = center + dir + dir90,
+                c = center + dir - dir90,
+                d = center - dir - dir90,
+            };
+
+            Singleton<ToolManager>.instance.m_drawCallData.m_overlayCalls++;
+            RenderManager.instance.OverlayEffect.DrawQuad(
+                cameraInfo,
+                texture,
+                color,
+                quad,
+                minY,
+                maxY,
+                renderLimits: renderLimits,
+                alphaBlend: alphaBlend);
+        }
+
+        /// <summary>
+        /// draw triangular arrow head at the given <paramref name="t"/> of the <paramref name="bezier"/>
+        /// </summary>
+        public static void DrawArrowHead(
+            RenderManager.CameraInfo cameraInfo,
+            ref Bezier3 bezier,
+            float t,
+            Color color,
+            float size,
+            float minY,
+            float maxY,
+            bool renderLimits,
+            bool alphaBlend = false) {
+            Vector3 center = bezier.Position(t);
+            Vector3 dir = bezier.Tangent(t).normalized * size;
+            Vector3 dir90 = dir.RotateXZ90CW();
+
+            Quad3 quad = new Quad3 {
+                a = center - dir + dir90,
+                b = center - dir - dir90,
+                c = center + dir,
+                d = center + dir,
+            };
+
+            Singleton<ToolManager>.instance.m_drawCallData.m_overlayCalls++;
+            RenderManager.instance.OverlayEffect.DrawQuad(
+                cameraInfo,
+                color,
+                quad,
+                minY,
+                maxY,
+                renderLimits: renderLimits,
+                alphaBlend: alphaBlend);
+        }
+
+        /// <summary>
+        /// draw '>' shaped arrow head at the given <paramref name="t"/> of the <paramref name="bezier"/>
+        /// </summary>
+        public static void DrawArrowHead2(
+            RenderManager.CameraInfo cameraInfo,
+            ref Bezier3 bezier,
+            float t,
+            Color color,
+            float size,
+            float length,
+            float minY,
+            float maxY,
+            bool renderLimits,
+            bool alphaBlend = false) {
+            Vector3 center = bezier.Position(t);
+            Vector3 dir = bezier.Tangent(t).normalized * length;
+            Vector3 dir90 = dir.RotateXZ90CW();
+
+            Segment3 line1 = new(center + dir, center + dir90);
+            Segment3 line2 = new(center + dir, center - dir90);
+
+            Singleton<ToolManager>.instance.m_drawCallData.m_overlayCalls++;
+            RenderManager.instance.OverlayEffect.DrawSegment(
+                cameraInfo,
+                color,
+                segment1: line1,
+                segment2: line2,
+                size: size,
+                dashLen: 0,
+                minY: minY,
+                maxY: maxY,
+                renderLimits: renderLimits,
+                alphaBlend: alphaBlend);
+        }
 
         public static void DrawNodeCircle(RenderManager.CameraInfo cameraInfo,
                                           ushort nodeId,

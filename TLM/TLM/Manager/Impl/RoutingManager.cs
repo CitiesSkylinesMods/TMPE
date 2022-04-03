@@ -751,13 +751,20 @@ namespace TrafficManager.Manager.Impl {
                                         isNodeStartNodeOfNextSegment);
                                 bool nextIsConnectedWithPrev = true;
 
-                                if(nextHasConnections) {
+                                if (nextHasConnections) {
                                     nextIsConnectedWithPrev =
                                         LaneConnectionManager.Instance.AreLanesConnected(
                                             nextLaneId,
                                             prevLaneId,
                                             isNodeStartNodeOfNextSegment);
                                 }
+
+                                bool nextIsTrackOnly = nextLaneInfo.IsTrackOnly();
+                                int nextSimilarLaneCount = nextLaneInfo.m_similarLaneCount;
+                                bool similarLaneCountMatches = prevSimilarLaneCount == nextSimilarLaneCount;
+                                bool outerSimilarLaneIndexMatches = prevOuterSimilarLaneIndex == nextOuterSimilarLaneIndex;
+                                bool biDirectional = prevLaneInfo.IsBidirectional() || nextLaneInfo.IsBidirectional();
+                                bool stayInlaneTracks = nextIsTrackOnly & similarLaneCountMatches & !biDirectional;
 
                                 if (extendedLogRouting) {
                                     Log._DebugFormat(
@@ -789,6 +796,11 @@ namespace TrafficManager.Manager.Impl {
                                         nextOuterSimilarLaneIndex,
                                         nextHasConnections,
                                         nextIsConnectedWithPrev);
+                                    Log._Debug(
+                                        "prefer stay in lane information:\n" +
+                                        $"prevSegmentId={prevSegmentId} prevLane:[id={prevLaneId} index={prevLaneIndex} outerSimilarLaneIndex:{prevOuterSimilarLaneIndex} similarLaneCount={prevSimilarLaneCount}]\n" +
+                                        $"nextSegmentId={nextSegmentId} nextLane:[id={nextLaneId} index={nextLaneIndex} outerSimilarLaneIndex:{nextOuterSimilarLaneIndex} similarLaneCount={nextSimilarLaneCount}]\n" +
+                                        $"nextIsTrackOnly={nextIsTrackOnly} similarLaneCountMatches={similarLaneCountMatches}  outerSimilarLaneIndexMatches={outerSimilarLaneIndexMatches} stayInlaneTracks={stayInlaneTracks}");
                                 }
 
                                 int currentLaneConnectionTransIndex = -1;
@@ -841,20 +853,22 @@ namespace TrafficManager.Manager.Impl {
                                     }
                                 }
 
-                                if (isTollBooth) {
+                                if (isTollBooth || stayInlaneTracks) {
                                     if (extendedLogRouting) {
                                         Log._DebugFormat(
                                             "RoutingManager.RecalculateLaneEndRoutingData({0}, {1}, {2}, {3}): " +
-                                            "nextNodeId={4}, buildingId={5} is a toll booth. Preventing lane changes.",
+                                            "nodeId={4}, buildingId={5} isTollBooth={6} stayInlaneTracks={7}. Preventing lane changes.",
                                             prevSegmentId,
                                             prevLaneIndex,
                                             prevLaneId,
                                             isNodeStartNodeOfPrevSegment,
                                             nodeId,
-                                            buildingId);
+                                            buildingId,
+                                            isTollBooth,
+                                            stayInlaneTracks);
                                     }
 
-                                    if (nextOuterSimilarLaneIndex == prevOuterSimilarLaneIndex) {
+                                    if (outerSimilarLaneIndexMatches) {
                                         if (extendedLogRouting) {
                                             Log._DebugFormat(
                                                 "RoutingManager.RecalculateLaneEndRoutingData({0}, {1}, {2}, {3}): " +
@@ -985,7 +999,7 @@ namespace TrafficManager.Manager.Impl {
                                     // routed vehicle that does not follow lane arrows (trains, trams,
                                     // metros, monorails)
                                     // TODO [issue #1053] this causes cars to turn on mixed car/track lanes against lane arrows
-                                    transitionType = LaneEndTransitionType.Default; 
+                                    transitionType = LaneEndTransitionType.Default;
 
                                     if (numNextForcedTransitionDatas < MAX_NUM_TRANSITIONS) {
                                         nextForcedTransitionDatas[numNextForcedTransitionDatas].Set(
@@ -1178,7 +1192,7 @@ namespace TrafficManager.Manager.Impl {
                             // this lane will be referred as the "stay" lane with zero distance
                             int refNextInnerSimilarIndex = -1;
 
-#if DEBUGHWJUNCTIONROUTING 
+#if DEBUGHWJUNCTIONROUTING
                             if (extendedLogRouting) {
                                 Log._DebugFormat(
                                     "RoutingManager.RecalculateLaneEndRoutingData({0}, {1}, {2}, {3}): " +
@@ -1368,7 +1382,7 @@ namespace TrafficManager.Manager.Impl {
                                         Log._DebugFormat(
                                             "RoutingManager.RecalculateLaneEndRoutingData({0}, {1}, {2}, " +
                                             "{3}): highway junction iteration: compatibleLaneDist={4}",
-                                            prevSegmentId, nextLaneIndex, prevLaneId, isNodeStartNodeOfPrevSegment, startNode,
+                                            prevSegmentId, nextLaneIndex, prevLaneId, isNodeStartNodeOfPrevSegment,
                                             compatibleLaneDist);
                                     }
 #endif
