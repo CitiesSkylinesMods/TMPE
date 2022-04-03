@@ -779,8 +779,7 @@ namespace TrafficManager.Manager.Impl {
                                                     nextLaneId,
                                                     nextLaneIndex);
                                             }
-                                        } else {
-                                            if (extendedLogRouting) {
+                                        } else if (extendedLogRouting) {
                                                 Log._DebugFormat(
                                                     "RoutingManager.RecalculateLaneEndRoutingData({0}, {1}, " +
                                                     "{2}, {3}): nextLaneId={4}, idx={5} has outgoing connections " +
