@@ -134,7 +134,7 @@ namespace TrafficManager.Util {
         }
 
         internal static void FixRulesMinor(ushort segmentId, ushort nodeId) {
-            bool startNode = (bool)ExtSegmentManager.Instance.IsStartNode(segmentId, nodeId);
+            bool startNode = segmentId.ToSegment().IsStartnode(nodeId);
             bool isHighway = ExtNodeManager.JunctionHasOnlyHighwayRoads(nodeId);
 
             if (Options.RoundAboutQuickFix_NoCrossYieldR) {
