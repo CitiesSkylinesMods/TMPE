@@ -58,23 +58,6 @@ namespace TrafficManager.UI.Helpers {
         public override byte Save() => FloatToByte(Value);
 
         /* UI */
-
-        public string Label {
-            get => _label ?? $"Slider:{FieldName}";
-            set {
-                _label = value;
-                UpdateLabel();
-            }
-        }
-
-        public string Tooltip {
-            get => _tooltip;
-            set {
-                _tooltip = value;
-                UpdateTooltip();
-            }
-        }
-
         public override float Value {
             get => base.Value;
             set {
