@@ -1821,7 +1821,7 @@ namespace TrafficManager.Manager.Impl {
                 return true;
             }
 
-            if (Options.recklessDrivers == TrafficManager.Enum.RecklessDrivers.HolyCity) {
+            if (Options.recklessDrivers == RecklessDrivers.HolyCity) {
                 return false;
             }
 

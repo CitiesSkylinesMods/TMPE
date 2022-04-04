@@ -11,7 +11,6 @@ namespace TrafficManager.Manager.Impl {
     using JetBrains.Annotations;
     using TrafficManager.Util;
     using System.Reflection;
-    using TrafficManager.Enum;
 
     public class OptionsManager
         : AbstractCustomManager,

@@ -10,7 +10,6 @@ namespace TrafficManager.State {
     using UnityEngine;
     using TrafficManager.Lifecycle;
     using System;
-    using TrafficManager.Enum;
 
     public class Options : MonoBehaviour {
 #if DEBUG

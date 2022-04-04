@@ -2,7 +2,7 @@ namespace TrafficManager.State {
     using ColossalFramework.UI;
     using CSUtil.Commons;
     using ICities;
-    using TrafficManager.Enum;
+    using TrafficManager.API.Traffic.Enums;
     using TrafficManager.UI;
     using TrafficManager.UI.AllowDespawn;
     using TrafficManager.UI.Helpers;

@@ -1,6 +1,4 @@
-namespace TrafficManager.Enum {
-    using TrafficManager.API.Traffic.Enums;
-
+namespace TrafficManager.API.Traffic.Enums {
     public enum RecklessDrivers {
         [Key("Gameplay.Dropdown.Option:Path Of Evil (10%)")]
         PathOfEvil,
