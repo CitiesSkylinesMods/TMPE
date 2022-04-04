@@ -88,7 +88,7 @@ namespace TrafficManager.Util {
             if (vehicleType.IsFlagSet(LaneArrowManager.VEHICLE_TYPES))
                 ret |= LaneEndTransitionGroup.Car;
             if (vehicleType.IsFlagSet(TrackUtils.VEHICLE_TYPES))
-                ret |= LaneEndTransitionGroup.Car;
+                ret |= LaneEndTransitionGroup.Track;
             return ret;
         }
     }
