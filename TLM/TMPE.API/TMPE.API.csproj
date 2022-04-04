@@ -151,6 +151,7 @@
     <Compile Include="Traffic\Enums\ExtVehicleType.cs" />
     <Compile Include="Traffic\Enums\FlowWaitCalcMode.cs" />
     <Compile Include="Traffic\Enums\GeometryCalculationMode.cs" />
+    <Compile Include="Traffic\Enums\KeyAttribute.cs" />
     <Compile Include="Traffic\Enums\LaneArrows.cs" />
     <Compile Include="Traffic\Enums\LaneEndTransitionType.cs" />
     <Compile Include="Traffic\Enums\LightMode.cs" />

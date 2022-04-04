@@ -170,7 +170,6 @@
     <Compile Include="State\VersionInfo.cs" />
     <Compile Include="UI\AllowDespawn\AllowDespawnPanel.cs" />
     <Compile Include="UI\Helpers\ActionButton.cs" />
-    <Compile Include="UI\Helpers\KeyAttribute.cs" />
     <Compile Include="UI\Helpers\GlobalConfigObserver.cs" />
     <Compile Include="UI\Helpers\DropDownOption.cs" />
     <Compile Include="UI\Helpers\SliderOption.cs" />

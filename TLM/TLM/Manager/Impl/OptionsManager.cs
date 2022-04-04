@@ -11,7 +11,6 @@ namespace TrafficManager.Manager.Impl {
     using JetBrains.Annotations;
     using TrafficManager.Util;
     using System.Reflection;
-    using ICities;
 
     public class OptionsManager
         : AbstractCustomManager,
@@ -109,6 +108,23 @@ namespace TrafficManager.Manager.Impl {
         private static void ToSlider(byte[] data, uint idx, ILegacySerializableOption opt, byte defaultVal = 0)
             => opt.Load(LoadByte(data, idx, defaultVal));
 
+        private static void ToDropDown(byte[] data, uint idx, ILegacySerializableOption opt, byte defaultVal = 0) {
+            if (idx < data.Length) {
+                    opt.Load(data[idx]);
+            } else {
+                opt.Load(defaultVal);
+            }
+        }
+
+        private static void ToDropDown<TEnum>(byte[] data, uint idx, ILegacySerializableOption opt, TEnum defaultVal) 
+            where TEnum: struct,Enum,IConvertible {
+            if (idx < data.Length) {
+                opt.Load(data[idx]);
+            } else {
+                opt.Load(defaultVal.ToByte(null));
+            }
+        }
+
         /// <summary>
         /// Restores the mod options based on supplied <paramref name="data"/>.
         /// </summary>
@@ -140,10 +156,9 @@ namespace TrafficManager.Manager.Impl {
                 ToCheckbox(data, idx: 13, PoliciesTab_AtJunctionsGroup.AllowUTurns, false);
                 ToCheckbox(data, idx: 14, PoliciesTab_AtJunctionsGroup.AllowLaneChangesWhileGoingStraight, false);
 
+                ToCheckbox(data, idx: 15, GameplayTab_VehicleBehaviourGroup.DisableDespawning, false);
                 if (dataVersion < 1) {
-                    GameplayTab_VehicleBehaviourGroup.DisableDespawning.Value = !LoadBool(data, idx: 15, true); // inverted
-                } else {
-                    ToCheckbox(data, idx: 15, GameplayTab_VehicleBehaviourGroup.DisableDespawning, false); // not inverted
+                    GameplayTab_VehicleBehaviourGroup.DisableDespawning.Value = !GameplayTab_VehicleBehaviourGroup.DisableDespawning.Value;
                 }
 
                 // skip Options.setDynamicPathRecalculation(data[16] == (byte)1);
@@ -166,16 +181,7 @@ namespace TrafficManager.Manager.Impl {
                 ToCheckbox(data, idx: 33, OverlaysTab_OverlaysGroup.ShowPathFindStats, VersionUtil.IS_DEBUG);
                 ToSlider(data, idx: 34, GameplayTab_AIGroups.AltLaneSelectionRatio, 0);
 
-                if (data.Length > 35) {
-                    try {
-                        PoliciesTab_OnRoadsGroup.SetVehicleRestrictionsAggression(
-                            (VehicleRestrictionsAggression)data[35]);
-                    }
-                    catch (Exception e) {
-                        Log.Warning(
-                            $"Skipping invalid value {data[35]} for vehicle restrictions aggression");
-                    }
-                }
+                ToDropDown(data, idx: 35, PoliciesTab_OnRoadsGroup.VehicleRestrictionsAggression);
 
                 ToCheckbox(data, idx: 36, PoliciesTab_AtJunctionsGroup.TrafficLightPriorityRules, false);
                 ToCheckbox(data, idx: 37, GameplayTab_AIGroups.RealisticPublicTransport, false);
@@ -265,7 +271,7 @@ namespace TrafficManager.Manager.Impl {
                 save[32] = (byte)(Options.banRegularTrafficOnBusLanes ? 1 : 0);
                 save[33] = (byte)(Options.showPathFindStats ? 1 : 0);
                 save[34] = Options.altLaneSelectionRatio;
-                save[35] = (byte)Options.vehicleRestrictionsAggression;
+                save[35] = PoliciesTab_OnRoadsGroup.VehicleRestrictionsAggression.Save();
                 save[36] = (byte)(Options.trafficLightPriorityRules ? 1 : 0);
                 save[37] = (byte)(Options.realisticPublicTransport ? 1 : 0);
                 save[38] = (byte)(Options.turnOnRedEnabled ? 1 : 0);

@@ -34,7 +34,9 @@ namespace TrafficManager.UI.Helpers {
         }
 
         public override void Load(byte data) {
-            Value = FromByte(data);
+            if (!TrySetValue(FromByte(data))) {
+                Log.Error($"unrecognised value:{data} for enum:{typeof(TEnum).Name}");
+            }
         }
 
         public override byte Save() => Value.ToByte(null);
@@ -65,10 +67,12 @@ namespace TrafficManager.UI.Helpers {
             }
         }
 
-        public void TrySetValue(TEnum value) {
+        public bool TrySetValue(TEnum value) {
             if (values_.Contains(value)) {
                 Value = value;
+                return true;
             }
+            return false;
         }
 
         public bool ReadOnly {
