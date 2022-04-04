@@ -55,6 +55,7 @@
 - [Fixed] Memory leak when closing Lane Arrows panels #1451 (krzychu124)
 - [Fixed] Features missing if starting new game after using asset editor #1425 #1423 #1422 (NateNate60, aubergine18)
 - [Fixed] Typo in notifier method name #1440 (aubergine18)
+- [Fixed] Roundabout quick setup not working #1494 #1464 #1455 #1429 #1425 #1422 (Abdré Von Rhenen, DeNordian, Tranquility0081, SkillzGamingYT, BenOniKenobi, aubergine18)
 - [Updated] Use game-defined elevation keymapping to select under/over-ground views #1454 #1326 (krzychu124)
 - [Updated] Add/update UI helpers for use in mod options #1431 #1430 #1424 #1419 (aubergine18)
 - [Updated] Refactoring mod options #1464 #1455 #1435 #1432 #1422 #1411 #1416 #1356 #1279 #62 (aubergine18)
