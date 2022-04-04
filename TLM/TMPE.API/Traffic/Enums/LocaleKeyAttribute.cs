@@ -4,16 +4,16 @@ namespace TrafficManager.API.Traffic.Enums {
     using System.Reflection;
 
     [AttributeUsage(AttributeTargets.Field, AllowMultiple = false)]
-    public class KeyAttribute : Attribute {
+    public class LocaleKeyAttribute : Attribute {
         public string Key { get; private set; }
 
-        public KeyAttribute(string key) => Key = key;
+        public LocaleKeyAttribute(string key) => Key = key;
 
         private static MemberInfo ToEnumMember<TEnum>(string name) =>
             typeof(TEnum).GetMember(name).Single();
 
         public static string GetKey(MemberInfo info) {
-            KeyAttribute a = info.GetCustomAttributes(typeof(KeyAttribute), false).FirstOrDefault() as KeyAttribute;
+            LocaleKeyAttribute a = info.GetCustomAttributes(typeof(LocaleKeyAttribute), false).FirstOrDefault() as LocaleKeyAttribute;
             return a?.Key;
         }
 

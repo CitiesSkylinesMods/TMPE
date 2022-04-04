@@ -9,26 +9,26 @@ namespace TrafficManager.API.Traffic.Enums {
         /// Low aggression
         /// </summary>
         [UsedImplicitly]
-        [Key("VR.Dropdown.Option:Low Aggression")]
+        [LocaleKey("VR.Dropdown.Option:Low Aggression")]
         Low = 0,
 
         /// <summary>
         /// Medium aggression
         /// </summary>
-        [Key("VR.Dropdown.Option:Medium Aggression")]
+        [LocaleKey("VR.Dropdown.Option:Medium Aggression")]
         Medium = 1,
 
         /// <summary>
         /// High aggression
         /// </summary>
         [UsedImplicitly]
-        [Key("VR.Dropdown.Option:High Aggression")]
+        [LocaleKey("VR.Dropdown.Option:High Aggression")]
         High = 2,
 
         /// <summary>
         /// Strict aggression
         /// </summary>
-        [Key("VR.Dropdown.Option:Strict")]
+        [LocaleKey("VR.Dropdown.Option:Strict")]
         Strict = 3,
     }
 }

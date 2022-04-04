@@ -21,7 +21,7 @@ namespace TrafficManager.UI.Helpers {
         private static string[] keys_ =
             names_.
             Where(item => item != "MaxValue").
-            Select(KeyAttribute.GetKey<TEnum>).
+            Select(LocaleKeyAttribute.GetKey<TEnum>).
             ToArray();
 
         private string[] GetTranslatedItems() =>
