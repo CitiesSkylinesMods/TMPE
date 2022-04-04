@@ -141,7 +141,14 @@ namespace TrafficManager.Manager.Impl {
 
                 Log.Info($"OptionsManager.LoadData: {data.Length} bytes");
 
-                ToDropDown(data, idx: 0, GeneralTab_SimulationGroup.SimulationAccuracy);
+                if (dataVersion >= 3 || data.Length == 0) {
+                    // new version or default.
+                    ToDropDown(data, idx: 0, GeneralTab_SimulationGroup.SimulationAccuracy, SimulationAccuracy.VeryHigh);
+                } else {
+                    // legacy
+                    GeneralTab_SimulationGroup.SimulationAccuracy.Load((byte)(SimulationAccuracy.MaxValue - data[0]));
+                }
+
                 // skip Options.setLaneChangingRandomization(options[1]);
                 ToDropDown(data, idx: 2, GameplayTab_VehicleBehaviourGroup.RecklessDrivers, RecklessDrivers.HolyCity);
                 ToCheckbox(data, idx: 3, PoliciesTab_AtJunctionsGroup.RelaxedBusses, true);

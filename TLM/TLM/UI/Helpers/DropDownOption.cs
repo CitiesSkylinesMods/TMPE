@@ -120,17 +120,4 @@ namespace TrafficManager.UI.Helpers {
             _ui.isEnabled = !readOnly;
         }
     }
-
-    public class DropDownOptionSimulationAccuracy : DropDownOption<SimulationAccuracy> {
-        public DropDownOptionSimulationAccuracy(string fieldName, Options.PersistTo scope = Options.PersistTo.Savegame)
-            : base(fieldName, scope) { }
-        public override void Load(byte data) {
-            int val = SimulationAccuracy.MaxValue - (SimulationAccuracy)data;
-            Value = (SimulationAccuracy)val;
-        }
-        public override byte Save() {
-            return (byte)(SimulationAccuracy.MaxValue - Value);
-        }
-    }
-
 }
