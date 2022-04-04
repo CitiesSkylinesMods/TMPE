@@ -10,6 +10,7 @@ namespace TrafficManager.State {
     using UnityEngine;
     using TrafficManager.Lifecycle;
     using System;
+    using TrafficManager.Enum;
 
     public class Options : MonoBehaviour {
 #if DEBUG
@@ -39,7 +40,7 @@ namespace TrafficManager.State {
         public static bool Available = false;
 
         public static bool individualDrivingStyle;
-        public static int recklessDrivers;
+        public static RecklessDrivers recklessDrivers;
 
         /// <summary>Option: buses may ignore lane arrows.</summary>
         public static bool relaxedBusses;
@@ -115,7 +116,7 @@ namespace TrafficManager.State {
         public static bool PriorityRoad_StopAtEntry;
 
         // See PathfinderUpdates.cs
-        public static byte SavegamePathfinderEdition;
+        public static byte SavegamePathfinderEdition; // Persist to save-game only
 
         public static bool showDefaultSpeedSubIcon;
 

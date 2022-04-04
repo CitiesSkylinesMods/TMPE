@@ -11,6 +11,7 @@ namespace TrafficManager.Manager.Impl {
     using JetBrains.Annotations;
     using TrafficManager.Util;
     using System.Reflection;
+    using TrafficManager.Enum;
 
     public class OptionsManager
         : AbstractCustomManager,
@@ -140,9 +141,9 @@ namespace TrafficManager.Manager.Impl {
 
                 Log.Info($"OptionsManager.LoadData: {data.Length} bytes");
 
-                GeneralTab_SimulationGroup.SetSimulationAccuracy(ConvertToSimulationAccuracy(LoadByte(data, idx: 0)));
+                ToDropDown(data, idx: 0, GeneralTab_SimulationGroup.SimulationAccuracy);
                 // skip Options.setLaneChangingRandomization(options[1]);
-                GameplayTab_VehicleBehaviourGroup.SetRecklessDrivers(LoadByte(data, idx: 2, 3));
+                ToDropDown(data, idx: 2, GameplayTab_VehicleBehaviourGroup.RecklessDrivers, RecklessDrivers.HolyCity);
                 ToCheckbox(data, idx: 3, PoliciesTab_AtJunctionsGroup.RelaxedBusses, true);
                 ToCheckbox(data, idx: 4, OverlaysTab_OverlaysGroup.NodesOverlay, false);
                 ToCheckbox(data, idx: 5, PoliciesTab_AtJunctionsGroup.AllowEnterBlockedJunctions, false);
@@ -236,9 +237,9 @@ namespace TrafficManager.Manager.Impl {
             var save = new byte[60];
 
             try {
-                save[0] = ConvertFromSimulationAccuracy(Options.simulationAccuracy);
+                save[0] = GeneralTab_SimulationGroup.SimulationAccuracy.Save();
                 save[1] = 0; // Options.laneChangingRandomization
-                save[2] = (byte)Options.recklessDrivers;
+                save[2] = GameplayTab_VehicleBehaviourGroup.RecklessDrivers.Save();
                 save[3] = (byte)(Options.relaxedBusses ? 1 : 0);
                 save[4] = (byte)(Options.nodesOverlay ? 1 : 0);
                 save[5] = (byte)(Options.allowEnterBlockedJunctions ? 1 : 0);

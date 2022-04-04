@@ -18,7 +18,11 @@ namespace TrafficManager.UI.Helpers {
 
         private static string[] names_ = Enum.GetNames(typeof(TEnum));
 
-        private static string[] keys_ = names_.Select(KeyAttribute.GetKey<TEnum>).ToArray();
+        private static string[] keys_ =
+            names_.
+            Where(item => item != "MaxValue").
+            Select(KeyAttribute.GetKey<TEnum>).
+            ToArray();
 
         private string[] GetTranslatedItems() =>
             keys_.Select(Translate).ToArray();
@@ -26,16 +30,14 @@ namespace TrafficManager.UI.Helpers {
         private static int IndexOf(TEnum value) =>
             Array.FindIndex(values_, item => item.Equals(value));
 
-        public TEnum FromByte(byte value) => (TEnum)(object)value;
-
         protected void InvokeOnValueChanged(int index) {
             TEnum val = values_[index];
             InvokeOnValueChanged(val);
         }
 
         public override void Load(byte data) {
-            if (!TrySetValue(FromByte(data))) {
-                Log.Error($"unrecognised value:{data} for enum:{typeof(TEnum).Name}");
+            unchecked {
+                Value = (TEnum)(IConvertible)(int)data;
             }
         }
 
@@ -62,17 +64,13 @@ namespace TrafficManager.UI.Helpers {
         public override TEnum Value {
             get => base.Value;
             set {
-                base.Value = value;
-                _ui.selectedIndex = IndexOf(value);
+                if (values_.Contains(value)) {
+                    base.Value = value;
+                    _ui.selectedIndex = IndexOf(value);
+                } else {
+                    Log.Error($"unrecognised value:{value} for enum:{typeof(TEnum).Name}");
+                }
             }
-        }
-
-        public bool TrySetValue(TEnum value) {
-            if (values_.Contains(value)) {
-                Value = value;
-                return true;
-            }
-            return false;
         }
 
         public bool ReadOnly {
@@ -89,6 +87,8 @@ namespace TrafficManager.UI.Helpers {
                 options: GetTranslatedItems(),
                 defaultSelection: IndexOf(Value),
                 eventCallback: InvokeOnValueChanged) as UIDropDown;
+
+            _ui.width = 350;
 
             UpdateTooltip();
             UpdateReadOnly();
@@ -118,6 +118,18 @@ namespace TrafficManager.UI.Helpers {
             Log._Debug($"DropDownOption.UpdateReadOnly() - `{FieldName}` is {(readOnly ? "read-only" : "writeable")}");
 
             _ui.isEnabled = !readOnly;
+        }
+    }
+
+    public class DropDownOptionSimulationAccuracy : DropDownOption<SimulationAccuracy> {
+        public DropDownOptionSimulationAccuracy(string fieldName, Options.PersistTo scope = Options.PersistTo.Savegame)
+            : base(fieldName, scope) { }
+        public override void Load(byte data) {
+            int val = SimulationAccuracy.MaxValue - (SimulationAccuracy)data;
+            Value = (SimulationAccuracy)val;
+        }
+        public override byte Save() {
+            return (byte)(SimulationAccuracy.MaxValue - Value);
         }
     }
 
