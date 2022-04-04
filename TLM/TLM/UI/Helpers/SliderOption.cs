@@ -16,20 +16,9 @@ namespace TrafficManager.UI.Helpers {
         private UILabel _sliderLabel;
 
         public SliderOption(string fieldName, Options.PersistTo scope = Options.PersistTo.Savegame)
-        : base(fieldName, scope) {
-            OnValueChanged = DefaultOnValueChanged;
-        }
+        : base(fieldName, scope) { }
 
         /* Data */
-
-        public event OnValueChanged OnValueChanged;
-
-        public OnValueChanged Handler {
-            set {
-                OnValueChanged -= value;
-                OnValueChanged += value;
-            }
-        }
 
         public byte Min {
             get => _min;
@@ -119,7 +108,7 @@ namespace TrafficManager.UI.Helpers {
                 max: Max,
                 step: Step,
                 defaultValue: Value,
-                eventCallback: OnValueChanged) as UISlider;
+                eventCallback: InvokeOnValueChanged) as UISlider;
 
             _sliderLabel = _ui.parent.Find<UILabel>("Label");
             _sliderLabel.width = SLIDER_LABEL_MAX_WIDTH;
@@ -130,13 +119,13 @@ namespace TrafficManager.UI.Helpers {
             return this;
         }
 
-        private void UpdateLabel() {
+        protected override void UpdateLabel() {
             if (!HasUI) return;
 
             _sliderLabel.text = T(Label);
         }
 
-        private void UpdateTooltip() {
+        protected override void UpdateTooltip() {
             if (!HasUI) return;
 
             _ui.tooltip = IsInScope
@@ -149,7 +138,7 @@ namespace TrafficManager.UI.Helpers {
             }
         }
 
-        private void UpdateReadOnly() {
+        protected override void UpdateReadOnly() {
             if (!HasUI) return;
 
             var readOnly = !IsInScope || _readOnly;
