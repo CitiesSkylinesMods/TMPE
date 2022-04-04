@@ -44,23 +44,6 @@ namespace TrafficManager.UI.Helpers {
         public override byte Save() => Value.ToByte(null);
 
         /* UI */
-
-        public string Label {
-            get => _label ?? $"Slider:{FieldName}";
-            set {
-                _label = value;
-                UpdateLabel();
-            }
-        }
-
-        public string Tooltip {
-            get => _tooltip;
-            set {
-                _tooltip = value;
-                UpdateTooltip();
-            }
-        }
-
         public override TEnum Value {
             get => base.Value;
             set {
@@ -73,17 +56,9 @@ namespace TrafficManager.UI.Helpers {
             }
         }
 
-        public bool ReadOnly {
-            get => _readOnly;
-            set {
-                _readOnly = !IsInScope || value;
-                UpdateReadOnly();
-            }
-        }
-
         public override DropDownOption<TEnum> AddUI(UIHelperBase container) {
             _ui = container.AddDropdown(
-                text: T(Label) + ":",
+                text: Translate(Label) + ":",
                 options: GetTranslatedItems(),
                 defaultSelection: IndexOf(Value),
                 eventCallback: InvokeOnValueChanged) as UIDropDown;
@@ -98,7 +73,7 @@ namespace TrafficManager.UI.Helpers {
 
         protected override void UpdateLabel() {
             if (!HasUI) return;
-            _ui.text = T(Label) + ":";
+            _ui.text = Translate(Label) + ":";
             _ui.items = GetTranslatedItems();
         }
 
@@ -106,8 +81,8 @@ namespace TrafficManager.UI.Helpers {
             if (!HasUI) return;
 
             _ui.tooltip = IsInScope
-                ? $"{Value}{_tooltip}"
-                : T(INGAME_ONLY_SETTING);
+                ? $"{_tooltip}"
+                : Translate(INGAME_ONLY_SETTING);
         }
 
         protected override void UpdateReadOnly() {

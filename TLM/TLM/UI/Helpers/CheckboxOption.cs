@@ -79,7 +79,7 @@ namespace TrafficManager.UI.Helpers {
         }
 
         public override CheckboxOption AddUI(UIHelperBase container) {
-            _ui = container.AddCheckbox(T(Label), Value, InvokeOnValueChanged) as UICheckBox;
+            _ui = container.AddCheckbox(Translate(Label), Value, InvokeOnValueChanged) as UICheckBox;
 
             if (Indent) ApplyIndent(_ui);
 
@@ -99,7 +99,7 @@ namespace TrafficManager.UI.Helpers {
         protected override void UpdateLabel() {
             if (!HasUI) return;
 
-            _ui.label.text = T(Label);
+            _ui.label.text = Translate(Label);
         }
 
         protected override void UpdateTooltip() {
@@ -108,8 +108,8 @@ namespace TrafficManager.UI.Helpers {
             _ui.tooltip = IsInScope
                 ? string.IsNullOrEmpty(_tooltip)
                     ? string.Empty // avoid invalidating UI if already no tooltip
-                    : T(_tooltip)
-                : T(INGAME_ONLY_SETTING);
+                    : Translate(_tooltip)
+                : Translate(INGAME_ONLY_SETTING);
         }
 
         protected override void UpdateReadOnly() {

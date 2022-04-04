@@ -103,7 +103,7 @@ namespace TrafficManager.UI.Helpers {
 
         public override SliderOption AddUI(UIHelperBase container) {
             _ui = container.AddSlider(
-                text: T(Label) + ":",
+                text: Translate(Label) + ":",
                 min: Min,
                 max: Max,
                 step: Step,
@@ -122,7 +122,7 @@ namespace TrafficManager.UI.Helpers {
         protected override void UpdateLabel() {
             if (!HasUI) return;
 
-            _sliderLabel.text = T(Label);
+            _sliderLabel.text = Translate(Label);
         }
 
         protected override void UpdateTooltip() {
@@ -130,7 +130,7 @@ namespace TrafficManager.UI.Helpers {
 
             _ui.tooltip = IsInScope
                 ? $"{Value}{_tooltip}"
-                : T(INGAME_ONLY_SETTING);
+                : Translate(INGAME_ONLY_SETTING);
 
             if (_ui.thumbObject.hasFocus) {
                 try { _ui.RefreshTooltip(); }

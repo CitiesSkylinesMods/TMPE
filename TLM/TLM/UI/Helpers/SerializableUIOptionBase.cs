@@ -124,11 +124,6 @@ namespace TrafficManager.UI.Helpers {
         /// <returns>Returns localised string for <paramref name="key"/>.</returns>
         protected string Translate(string key) => Translator(key);
 
-        /// <summary>
-        /// shortcut for <see cref="Translate(string)"/>
-        /// </summary>
-        protected string T(string key) => Translate(key);
-
         protected abstract void UpdateTooltip();
 
         protected abstract void UpdateReadOnly();
