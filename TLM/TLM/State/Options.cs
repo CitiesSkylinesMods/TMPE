@@ -160,13 +160,13 @@ namespace TrafficManager.State {
 
         internal static int getRecklessDriverModulo() {
             switch (recklessDrivers) {
-                case 0:
+                case RecklessDrivers.PathOfEvil:
                     return 10;
-                case 1:
+                case RecklessDrivers.RushHour:
                     return 20;
-                case 2:
+                case RecklessDrivers.MinorComplaints:
                     return 50;
-                case 3:
+                case RecklessDrivers.HolyCity:
                     return 10000;
             }
             return 10000;

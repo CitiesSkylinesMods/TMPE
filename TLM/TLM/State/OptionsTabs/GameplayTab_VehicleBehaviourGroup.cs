@@ -61,5 +61,7 @@ namespace TrafficManager.State {
             result = HasSnowfallDLC && desired;
             return true;
         }
+
+        private static string T(string key) => Translation.Options.Get(key);
     }
 }
