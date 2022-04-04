@@ -309,7 +309,7 @@ namespace TrafficManager.Manager.Impl {
         /// Triggers a rebuild of the main menu (toolbar), adding/removing buttons
         /// where applicable, and refreshing all translated text. Very slow.
         /// </summary>
-        internal static void RebuildMenu() {
+        internal static void RebuildMenu(bool reloadTextures = false) {
             if (TMPELifecycle.Instance.Deserializing || ModUI.Instance == null) {
                 Log._Debug("OptionsManager.RebuildMenu() - Ignoring; Deserialising or ModUI.Instance is null");
                 return;
@@ -323,10 +323,12 @@ namespace TrafficManager.Manager.Impl {
                 ModUI.Instance.MainMenuButton.UpdateButtonSkinAndTooltip();
             }
 
-            RoadUI.Instance.ReloadTexturesWithTranslation();
-            TrafficLightTextures.Instance.ReloadTexturesWithTranslation();
-            TMPELifecycle.Instance.TranslationDatabase.ReloadTutorialTranslations();
-            TMPELifecycle.Instance.TranslationDatabase.ReloadGuideTranslations();
+            if (reloadTextures) {
+                RoadUI.Instance.ReloadTexturesWithTranslation();
+                TrafficLightTextures.Instance.ReloadTexturesWithTranslation();
+                TMPELifecycle.Instance.TranslationDatabase.ReloadTutorialTranslations();
+                TMPELifecycle.Instance.TranslationDatabase.ReloadGuideTranslations();
+            }
         }
 
         /// <summary>
