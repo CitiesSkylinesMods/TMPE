@@ -157,9 +157,10 @@ namespace TrafficManager.Manager.Impl {
                 ToCheckbox(data, idx: 13, PoliciesTab_AtJunctionsGroup.AllowUTurns, false);
                 ToCheckbox(data, idx: 14, PoliciesTab_AtJunctionsGroup.AllowLaneChangesWhileGoingStraight, false);
 
-                ToCheckbox(data, idx: 15, GameplayTab_VehicleBehaviourGroup.DisableDespawning, false);
                 if (dataVersion < 1) {
-                    GameplayTab_VehicleBehaviourGroup.DisableDespawning.Value = !GameplayTab_VehicleBehaviourGroup.DisableDespawning.Value;
+                    GameplayTab_VehicleBehaviourGroup.DisableDespawning.Value = !LoadBool(data, idx: 15, true); // inverted
+                } else {
+                    ToCheckbox(data, idx: 15, GameplayTab_VehicleBehaviourGroup.DisableDespawning, false); // not inverted
                 }
 
                 // skip Options.setDynamicPathRecalculation(data[16] == (byte)1);
