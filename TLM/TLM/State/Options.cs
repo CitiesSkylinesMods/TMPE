@@ -157,19 +157,15 @@ namespace TrafficManager.State {
             return false;
         }
 
-        internal static int getRecklessDriverModulo() {
-            switch (recklessDrivers) {
-                case RecklessDrivers.PathOfEvil:
-                    return 10;
-                case RecklessDrivers.RushHour:
-                    return 20;
-                case RecklessDrivers.MinorComplaints:
-                    return 50;
-                case RecklessDrivers.HolyCity:
-                    return 10000;
-            }
-            return 10000;
-        }
+        internal static int getRecklessDriverModulo() => CalculateRecklessDriverModulo(recklessDrivers);
+
+        internal static int CalculateRecklessDriverModulo(RecklessDrivers level) => level switch {
+            RecklessDrivers.PathOfEvil => 10,
+            RecklessDrivers.RushHour => 20,
+            RecklessDrivers.MinorComplaints => 50,
+            RecklessDrivers.HolyCity => 10000,
+            _ => 10000,
+        };
 
         /// <summary>
         /// Determines whether Dynamic Lane Selection (DLS) is enabled.
