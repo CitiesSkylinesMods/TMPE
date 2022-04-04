@@ -110,7 +110,7 @@ namespace TrafficManager.Manager.Impl {
 
         private static void ToDropDown(byte[] data, uint idx, ILegacySerializableOption opt, byte defaultVal = 0) {
             if (idx < data.Length) {
-                    opt.Load(data[idx]);
+                opt.Load(data[idx]);
             } else {
                 opt.Load(defaultVal);
             }
