@@ -103,7 +103,7 @@ namespace TrafficManager.Util.Record {
                     var laneData = new LaneConnectionRecord {
                         LaneId = laneIdAndIndex.laneId,
                         LaneIndex = (byte)laneIdAndIndex.laneIndex,
-                        StartNode = netSegment.IsStartnode(nodeId),
+                        StartNode = netSegment.IsStartNode(nodeId),
                     };
                     ret.Add(laneData);
                 }

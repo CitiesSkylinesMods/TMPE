@@ -106,7 +106,7 @@ namespace TrafficManager.UI.SubTools {
 
                     ref NetSegment segment = ref segmentId.ToSegment();
 
-                    bool startNode = segment.IsStartnode(SelectedNodeId);
+                    bool startNode = segment.IsStartNode(SelectedNodeId);
                     Vector3 position = CalculateNodePositionForSegment(ref selectedNode, ref segment);
                     ICustomSegmentLights segmentLights =
                         customTrafficLightsManager.GetSegmentLights(segmentId, startNode, false);

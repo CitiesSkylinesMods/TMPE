@@ -137,7 +137,7 @@ namespace TrafficManager.Manager.Impl {
                                      ushort segmentId,
                                      ICustomSegmentLights lights) {
 
-            bool? startNode = segmentId.ToSegment().IsStartNode(nodeId);
+            bool? startNode = segmentId.ToSegment().GetRelationToNode(nodeId);
 
             if (!startNode.HasValue)
                 return false;
@@ -319,7 +319,7 @@ namespace TrafficManager.Manager.Impl {
         }
 
         public ICustomSegmentLights GetSegmentLights(ushort nodeId, ushort segmentId) {
-            bool? startNode = segmentId.ToSegment().IsStartNode(nodeId);
+            bool? startNode = segmentId.ToSegment().GetRelationToNode(nodeId);
             return startNode.HasValue
                 ? GetSegmentLights(segmentId, startNode.Value, false)
                 : null;

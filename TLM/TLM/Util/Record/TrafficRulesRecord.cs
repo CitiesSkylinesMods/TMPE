@@ -58,7 +58,7 @@ namespace TrafficManager.Util.Record {
             for(int segmentIndex = 0; segmentIndex < Constants.MAX_SEGMENTS_OF_NODE; ++segmentIndex) {
                 ushort segmentId = node.GetSegment(segmentIndex);
                 if (segmentId == 0) continue;
-                bool startNode = segmentId.ToSegment().IsStartnode(nodeId);
+                bool startNode = segmentId.ToSegment().IsStartNode(nodeId);
                 int index = SegmentEndManager.Instance.GetIndex(segmentId, startNode);
                 SegmentEndIndeces.Add(index);
             }

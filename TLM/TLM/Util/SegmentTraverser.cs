@@ -199,7 +199,7 @@ namespace TrafficManager.Util {
                     continue;
                 }
 
-                bool nextIsStartNode = nextSegmentId.ToSegment().IsStartnode(prevSegEnd.nodeId);
+                bool nextIsStartNode = nextSegmentId.ToSegment().IsStartNode(prevSegEnd.nodeId);
                 ExtSegmentEnd nextSegEnd =
                     extSegEndMan.ExtSegmentEnds[extSegEndMan.GetIndex(nextSegmentId, nextIsStartNode)];
 

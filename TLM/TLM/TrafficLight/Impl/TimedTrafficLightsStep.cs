@@ -46,7 +46,7 @@ namespace TrafficManager.TrafficLight.Impl {
                     continue;
                 }
 
-                bool startNode = segmentId.ToSegment().IsStartnode(timedNode.NodeId);
+                bool startNode = segmentId.ToSegment().IsStartNode(timedNode.NodeId);
 
                 if (!AddSegment(segmentId, startNode, makeRed)) {
                     Log.Warning(
@@ -1228,7 +1228,7 @@ namespace TrafficManager.TrafficLight.Impl {
                 return false;
             }
 
-            bool? startNode = targetSegment.IsStartNode(timedNode.NodeId);
+            bool? startNode = targetSegment.GetRelationToNode(timedNode.NodeId);
 
             if (!startNode.HasValue) {
                 Log.Error(
@@ -1326,7 +1326,7 @@ namespace TrafficManager.TrafficLight.Impl {
                 return false;
             }
 
-            bool? startNode = netSegment.IsStartNode(timedNode.NodeId);
+            bool? startNode = netSegment.GetRelationToNode(timedNode.NodeId);
 
             if (!startNode.HasValue) {
                 Log.Error($"TimedTrafficLightsStep.SetSegmentLights: Segment {segmentId} is not " +

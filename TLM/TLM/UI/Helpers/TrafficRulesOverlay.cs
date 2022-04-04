@@ -192,7 +192,7 @@ namespace TrafficManager.UI.Helpers {
                     continue;
                 }
 
-                bool isStartNode = segmentId.ToSegment().IsStartnode(nodeId);
+                bool isStartNode = segmentId.ToSegment().IsStartNode(nodeId);
 
                 bool isIncoming = segEndMan
                                   .ExtSegmentEnds[segEndMan.GetIndex(segmentId, isStartNode)]

@@ -155,7 +155,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
 
             ref NetSegment selectedSegment = ref SelectedSegmentId.ToSegment();
 
-            bool? startNode = selectedSegment.IsStartNode(SelectedNodeId);
+            bool? startNode = selectedSegment.GetRelationToNode(SelectedNodeId);
 
             if (!startNode.HasValue) {
                 Log.Error(
@@ -602,7 +602,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                 if ((hoveredSegment.m_startNode == HoveredNodeId || hoveredSegment.m_endNode == HoveredNodeId)
                     && (nodeFlags & NetNode.Flags.Junction) != NetNode.Flags.None)
                 {
-                    bool bStartNode = hoveredSegment.IsStartnode(HoveredNodeId);
+                    bool bStartNode = hoveredSegment.IsStartNode(HoveredNodeId);
                     Color color = MainTool.GetToolColor(leftMouseDown, false);
                     bool alpha = !SeparateSegmentLanesModifierIsPressed;
                     DrawSegmentEnd(cameraInfo, HoveredSegmentId, bStartNode, color, alpha);
@@ -617,14 +617,14 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
 
             if (SelectedSegmentId != 0) {
                 Color color = MainTool.GetToolColor(true, false);
-                bool startNode = SelectedSegmentId.ToSegment().IsStartnode(SelectedNodeId);
+                bool startNode = SelectedSegmentId.ToSegment().IsStartNode(SelectedNodeId);
                 bool alpha = !altDown && HoveredSegmentId == SelectedSegmentId;
                 DrawSegmentEnd(cameraInfo, SelectedSegmentId, startNode, color, alpha);
             }
         }
 
         private void OnResetToDefaultPressed() {
-            bool startNode = SelectedSegmentId.ToSegment().IsStartnode(SelectedNodeId);
+            bool startNode = SelectedSegmentId.ToSegment().IsStartNode(SelectedNodeId);
             if (!CanReset(SelectedSegmentId, startNode)) {
                 return;
             }

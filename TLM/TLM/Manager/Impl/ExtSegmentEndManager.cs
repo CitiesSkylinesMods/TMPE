@@ -151,7 +151,7 @@ namespace TrafficManager.Manager.Impl {
                 return ArrowDirection.None;
             }
 
-            bool? targetStartNode = targetSegmentId.ToSegment().IsStartNode(sourceEnd.nodeId);
+            bool? targetStartNode = targetSegmentId.ToSegment().GetRelationToNode(sourceEnd.nodeId);
 
             if (!targetStartNode.HasValue) {
                 return ArrowDirection.None;
@@ -454,7 +454,7 @@ namespace TrafficManager.Manager.Impl {
                     continue;
                 }
 
-                bool? otherStartNode = otherSegmentId.ToSegment().IsStartNode(segEnd.nodeId);
+                bool? otherStartNode = otherSegmentId.ToSegment().GetRelationToNode(segEnd.nodeId);
                 if (!otherStartNode.HasValue) {
                     Log.Warning($"Incorrect ExtSegmentEnd.nodeId - data integrity problem! Segment {otherSegmentId} is not connected to Node {segEnd.nodeId}");
                     continue;

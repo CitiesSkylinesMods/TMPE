@@ -1,8 +1,8 @@
 namespace TrafficManager.Util.Extensions {
     using ColossalFramework;
-    using JetBrains.Annotations;
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
     using TrafficManager.Manager.Impl;
     using TrafficManager.Util.Iterators;
     using static Shortcuts;
@@ -35,16 +35,34 @@ namespace TrafficManager.Util.Extensions {
         }
 
         /// <summary>
-        /// Determine if specified <paramref name="nodeId"/> is the start node for
-        /// the <paramref name="netSegment"/>.
+        /// Check if the <paramref name="nodeId"/> belongs to the
+        /// <paramref name="netSegment"/>, and if so determines
+        /// whether it is the start or end node.
         /// </summary>
         /// <param name="netSegment">The segment to inspect.</param>
         /// <param name="nodeId">The id of the node to examine.</param>
         /// <returns>
-        /// Returns <c>true</c> if start node, <c>false</c> if end node,
-        /// or <c>null</c> if the node is not associated with the segment.
+        /// <list type="bullet">
+        /// <item><term><c>true</c></term> <description>start node</description></item>
+        /// <item><term><c>false</c></term> <description>end node</description></item>
+        /// <item><term><c>null</c></term> <description>not related to segment</description></item>
+        /// </list>
         /// </returns>
-        public static bool? IsStartNode(this ref NetSegment netSegment, ushort nodeId) {
+        /// <example>
+        /// Get and process node relationship:
+        /// <code>
+        /// bool? relation = segmentId.ToSegment().GetRelationToNode(nodeId);
+        ///
+        /// if (!relation.HasValue) {
+        ///     // no relation
+        /// } else if (relation.Value) {
+        ///     // start node
+        /// } else {
+        ///     // end node
+        /// }
+        /// </code>
+        /// </example>
+        public static bool? GetRelationToNode(this ref NetSegment netSegment, ushort nodeId) {
             if (netSegment.m_startNode == nodeId) {
                 return true;
             } else if (netSegment.m_endNode == nodeId) {
@@ -61,10 +79,13 @@ namespace TrafficManager.Util.Extensions {
         /// <param name="netSegment">The segment to inspect.</param>
         /// <param name="nodeId">The id of the node to examine.</param>
         /// <returns>
-        /// Returns <c>true</c> if start node, otherwise <c>false</c> (even if the node
-        /// is not associated with the segment).
+        /// <para>Returns <c>true</c> if start node, otherwise <c>false</c>.</para>
+        /// <para>A <c>false</c> return value does not guarantee the node is the
+        /// segment end node; the node might not belong to the segment.
+        /// If you need to ensure the node is related to the segment, use
+        /// <see cref="GetRelationToNode(ref NetSegment, ushort)"/> instead.</para>
         /// </returns>
-        public static bool IsStartnode(this ref NetSegment netSegment, ushort nodeId) =>
+        public static bool IsStartNode(this ref NetSegment netSegment, ushort nodeId) =>
             netSegment.m_startNode == nodeId;
 
         /// <summary>

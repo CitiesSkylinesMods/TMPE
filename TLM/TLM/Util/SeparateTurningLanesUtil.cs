@@ -55,7 +55,7 @@ namespace TrafficManager.Util {
             ref NetSegment segment = ref segmentId.ToSegment();
 
             return segment.GetSortedLanes(
-                segment.IsStartnode(nodeId),
+                segment.IsStartNode(nodeId),
                 NetInfo.LaneType.TransportVehicle,
                 LaneArrowManager.VEHICLE_TYPES,
                 sort: false);
@@ -148,7 +148,7 @@ namespace TrafficManager.Util {
             bool altBus) {
 
             if (!builtIn) {
-                bool startNode = segmentId.ToSegment().IsStartnode(nodeId);
+                bool startNode = segmentId.ToSegment().IsStartNode(nodeId);
                 LaneArrowManager.Instance.ResetLaneArrows(segmentId, startNode);
             }
 

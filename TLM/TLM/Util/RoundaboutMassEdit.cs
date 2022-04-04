@@ -57,7 +57,7 @@ namespace TrafficManager.Util {
                     isStraight) {
 
                 var laneList = segment.GetSortedLanes(
-                    segment.IsStartnode(nodeId),
+                    segment.IsStartNode(nodeId),
                     LaneArrowManager.LANE_TYPES,
                     LaneArrowManager.VEHICLE_TYPES,
                     reverse: true);
@@ -134,7 +134,7 @@ namespace TrafficManager.Util {
         }
 
         internal static void FixRulesMinor(ushort segmentId, ushort nodeId) {
-            bool startNode = segmentId.ToSegment().IsStartnode(nodeId);
+            bool startNode = segmentId.ToSegment().IsStartNode(nodeId);
             bool isHighway = ExtNodeManager.JunctionHasOnlyHighwayRoads(nodeId);
 
             if (Options.RoundAboutQuickFix_NoCrossYieldR) {

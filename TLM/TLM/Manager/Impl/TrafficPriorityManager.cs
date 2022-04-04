@@ -496,7 +496,7 @@ namespace TrafficManager.Manager.Impl {
                     continue;
                 }
 
-                bool otherStartNode = otherSegmentId.ToSegment().IsStartnode(transitNodeId);
+                bool otherStartNode = otherSegmentId.ToSegment().IsStartNode(transitNodeId);
 
                 // ISegmentEnd incomingEnd =
                 //    SegmentEndManager.Instance.GetSegmentEnd(otherSegmentId, otherStartNode);
@@ -1595,7 +1595,7 @@ namespace TrafficManager.Manager.Impl {
                         continue;
                     }
 
-                    bool? startNode = netSegment.IsStartNode(nodeId);
+                    bool? startNode = netSegment.GetRelationToNode(nodeId);
                     if (!startNode.HasValue) {
                         Log.Error("TrafficPriorityManager.LoadData: No node found for node id " +
                                   $"{nodeId} @ seg. {segmentId}");
@@ -1638,7 +1638,7 @@ namespace TrafficManager.Manager.Impl {
                         continue;
                     }
 
-                    bool? startNode = netSegment.IsStartNode(prioSegData.nodeId);
+                    bool? startNode = netSegment.GetRelationToNode(prioSegData.nodeId);
 
                     if (!startNode.HasValue) {
                         Log.Error(

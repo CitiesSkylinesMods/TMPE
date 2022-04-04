@@ -503,7 +503,7 @@ namespace TrafficManager.TrafficLight.Impl {
                     // ExtSegment otherSeg = segMan.ExtSegments[otherSegmentId];
                     int index0 = segEndMan.GetIndex(
                         otherSegmentId,
-                        otherSegment.IsStartnode(NodeId));
+                        otherSegment.IsStartNode(NodeId));
 
                     if (!segEndMan.ExtSegmentEnds[index0].incoming) {
                         continue;
