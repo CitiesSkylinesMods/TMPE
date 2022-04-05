@@ -7,6 +7,68 @@ namespace TrafficManager.UI.Helpers {
     using System.Linq;
     using TrafficManager.API.Traffic.Enums;
 
+    public class DropDownOption : SerializableUIOptionBase<int, UIDropDown, DropDownOption> {
+        public DropDownOption(string fieldName, Options.PersistTo scope = Options.PersistTo.Savegame)
+        : base(fieldName, scope) { }
+
+        protected string[] Labels;
+
+        /* Data */
+        public override void Load(byte data) => Value = data;
+        public override byte Save() => (byte)Value;
+
+        public override int Value {
+            get => base.Value;
+            set {
+                if (0 <= value && value < Labels.Length) {
+                    _ui.selectedIndex = base.Value = value;
+                } else {
+                    Log.Error($"index:{value} out of range:[0,{Labels.Length - 1}]");
+                }
+            }
+        }
+
+        /* UI */
+        public override DropDownOption AddUI(UIHelperBase container) {
+            _ui = container.AddDropdown(
+                text: Translate(Label) + ":",
+                options: Labels.Select(Translate).ToArray(),
+                defaultSelection: Value,
+                eventCallback: InvokeOnValueChanged) as UIDropDown;
+
+            _ui.width = 350;
+
+            UpdateTooltip();
+            UpdateReadOnly();
+
+            return this;
+        }
+
+        protected override void UpdateLabel() {
+            if (!HasUI) return;
+            _ui.text = Translate(Label) + ":";
+            _ui.items = Labels.Select(Translate).ToArray();
+        }
+
+        protected override void UpdateTooltip() {
+            if (!HasUI) return;
+
+            _ui.tooltip = IsInScope
+                ? $"{_tooltip}"
+                : Translate(INGAME_ONLY_SETTING);
+        }
+
+        protected override void UpdateReadOnly() {
+            if (!HasUI) return;
+
+            var readOnly = !IsInScope || _readOnly;
+
+            Log._Debug($"DropDownOption.UpdateReadOnly() - `{FieldName}` is {(readOnly ? "read-only" : "writeable")}");
+
+            _ui.isEnabled = !readOnly;
+        }
+    }
+
     public class DropDownOption<TEnum> : SerializableUIOptionBase<TEnum, UIDropDown, DropDownOption<TEnum>>
         where TEnum : struct, Enum, IConvertible {
 
@@ -30,7 +92,7 @@ namespace TrafficManager.UI.Helpers {
         private static int IndexOf(TEnum value) =>
             Array.FindIndex(values_, item => item.Equals(value));
 
-        protected void InvokeOnValueChanged(int index) {
+        protected void InvokeOnIndexChanged(int index) {
             TEnum val = values_[index];
             InvokeOnValueChanged(val);
         }
@@ -43,7 +105,6 @@ namespace TrafficManager.UI.Helpers {
 
         public override byte Save() => Value.ToByte(null);
 
-        /* UI */
         public override TEnum Value {
             get => base.Value;
             set {
@@ -56,12 +117,13 @@ namespace TrafficManager.UI.Helpers {
             }
         }
 
+        /* UI */
         public override DropDownOption<TEnum> AddUI(UIHelperBase container) {
             _ui = container.AddDropdown(
                 text: Translate(Label) + ":",
                 options: GetTranslatedItems(),
                 defaultSelection: IndexOf(Value),
-                eventCallback: InvokeOnValueChanged) as UIDropDown;
+                eventCallback: InvokeOnIndexChanged) as UIDropDown;
 
             _ui.width = 350;
 
