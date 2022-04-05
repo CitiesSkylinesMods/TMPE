@@ -76,14 +76,6 @@ namespace TrafficManager.UI.Helpers {
             }
         }
 
-        public bool ReadOnly {
-            get => _readOnly;
-            set {
-                _readOnly = !IsInScope || value;
-                UpdateReadOnly();
-            }
-        }
-
         public override SliderOption AddUI(UIHelperBase container) {
             _ui = container.AddSlider(
                 text: Translate(Label) + ":",
