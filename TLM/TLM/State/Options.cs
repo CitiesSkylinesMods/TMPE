@@ -96,9 +96,7 @@ namespace TrafficManager.State {
         public static bool turnOnRedEnabled;
         public static bool laneConnectorEnabled;
 
-        public static VehicleRestrictionsAggression vehicleRestrictionsAggression =
-            VehicleRestrictionsAggression.Medium;
-
+        public static VehicleRestrictionsAggression vehicleRestrictionsAggression;
         public static bool RoundAboutQuickFix_DedicatedExitLanes;
         public static bool RoundAboutQuickFix_StayInLaneMainR;
         public static bool RoundAboutQuickFix_StayInLaneNearRabout;

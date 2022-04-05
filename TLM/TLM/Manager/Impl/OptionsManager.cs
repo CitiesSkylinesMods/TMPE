@@ -181,7 +181,7 @@ namespace TrafficManager.Manager.Impl {
                 ToCheckbox(data, idx: 33, OverlaysTab_OverlaysGroup.ShowPathFindStats, VersionUtil.IS_DEBUG);
                 ToSlider(data, idx: 34, GameplayTab_AIGroups.AltLaneSelectionRatio, 0);
 
-                ToDropDown(data, idx: 35, PoliciesTab_OnRoadsGroup.VehicleRestrictionsAggression, VehicleRestrictionsAggression.Low);
+                ToDropDown(data, idx: 35, PoliciesTab_OnRoadsGroup.VehicleRestrictionsAggression, VehicleRestrictionsAggression.Medium);
 
                 ToCheckbox(data, idx: 36, PoliciesTab_AtJunctionsGroup.TrafficLightPriorityRules, false);
                 ToCheckbox(data, idx: 37, GameplayTab_AIGroups.RealisticPublicTransport, false);
