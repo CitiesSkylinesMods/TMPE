@@ -108,14 +108,6 @@ namespace TrafficManager.Manager.Impl {
         private static void ToSlider(byte[] data, uint idx, ILegacySerializableOption opt, byte defaultVal = 0)
             => opt.Load(LoadByte(data, idx, defaultVal));
 
-        private static void ToDropDown(byte[] data, uint idx, ILegacySerializableOption opt, byte defaultVal = 0) {
-            if (idx < data.Length) {
-                opt.Load(data[idx]);
-            } else {
-                opt.Load(defaultVal);
-            }
-        }
-
         private static void ToDropDown<TEnum>(byte[] data, uint idx, ILegacySerializableOption opt, TEnum defaultVal) 
             where TEnum: struct,Enum,IConvertible {
             if (idx < data.Length) {
@@ -189,7 +181,7 @@ namespace TrafficManager.Manager.Impl {
                 ToCheckbox(data, idx: 33, OverlaysTab_OverlaysGroup.ShowPathFindStats, VersionUtil.IS_DEBUG);
                 ToSlider(data, idx: 34, GameplayTab_AIGroups.AltLaneSelectionRatio, 0);
 
-                ToDropDown(data, idx: 35, PoliciesTab_OnRoadsGroup.VehicleRestrictionsAggression);
+                ToDropDown(data, idx: 35, PoliciesTab_OnRoadsGroup.VehicleRestrictionsAggression, VehicleRestrictionsAggression.Low);
 
                 ToCheckbox(data, idx: 36, PoliciesTab_AtJunctionsGroup.TrafficLightPriorityRules, false);
                 ToCheckbox(data, idx: 37, GameplayTab_AIGroups.RealisticPublicTransport, false);
