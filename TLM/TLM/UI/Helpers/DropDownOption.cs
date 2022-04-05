@@ -11,7 +11,7 @@ namespace TrafficManager.UI.Helpers {
         public DropDownOption(string fieldName, Options.PersistTo scope = Options.PersistTo.Savegame)
         : base(fieldName, scope) { }
 
-        protected string[] Labels;
+        public string[] Labels;
 
         /* Data */
         public override void Load(byte data) => Value = data;

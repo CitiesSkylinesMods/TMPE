@@ -24,7 +24,18 @@ namespace TrafficManager.State {
                 Handler = OnDisplaySpeedLimitsMphChanged,
             };
 
-        private static UIDropDown _roadSignsThemeDropdown;
+        public static DropDownOption RoadSignsTheme =
+            new(nameof(Main.RoadSignTheme), Options.PersistTo.Global) {
+                Label = "General.Dropdown:Road signs theme",
+                Translator = TSpeedLimits,
+                Handler = OnRoadSignsThemeChanged,
+            };
+
+        public static DropDownOption Language =
+            new(nameof(Main.RoadSignTheme), Options.PersistTo.Global) {
+                Label = "General.Dropdown:Select language",
+                Handler = OnLanguageChanged,
+            };
 
         internal static void AddUI(UIHelperBase tab) {
 
@@ -51,7 +62,7 @@ namespace TrafficManager.State {
             for (int i = 0; i < Translation.AvailableLanguageCodes.Count; ++i) {
                 languageLabels[i + 1] = TLang("General.Dropdown.Option:Language Name", i);
             }
-
+            Language.Labels = languageLabels;
             int languageIndex = 0;
             string curLangCode = GlobalConfig.Instance.LanguageCode;
 
@@ -64,11 +75,9 @@ namespace TrafficManager.State {
                 }
             }
 
-            group.AddDropdown(
-                text: T("General.Dropdown:Select language") + ":",
-                options: languageLabels,
-                defaultSelection: languageIndex,
-                eventCallback: OnLanguageChanged);
+            Language.Value = languageIndex;
+
+            Language.AddUI(group);
         }
 
         private static string TSpeedLimits(string key) => Translation.SpeedLimits.Get(key);
@@ -84,13 +93,13 @@ namespace TrafficManager.State {
             int selectedThemeIndex = themeNames.FindIndex(x => x == mainConfig.RoadSignTheme);
             int defaultSignsThemeIndex = RoadSignThemes.Instance.FindDefaultThemeIndex(mainConfig.DisplaySpeedLimitsMph);
 
-            _roadSignsThemeDropdown = group.AddDropdown(
-                text: TSpeedLimits("General.Dropdown:Road signs theme") + ":",
+            RoadSignsTheme = group.AddDropdown(
+                text: TSpeedLimits() + ":",
                 options: themeOptions,
                 defaultSelection: selectedThemeIndex >= 0 ? selectedThemeIndex : defaultSignsThemeIndex,
                 eventCallback: OnRoadSignsThemeChanged) as UIDropDown;
 
-            _roadSignsThemeDropdown.width *= 2.0f;
+            RoadSignsTheme.width *= 2.0f;
         }
 
         private static void OnLanguageChanged(int newLanguageIndex) {
@@ -133,7 +142,7 @@ namespace TrafficManager.State {
 
             if (!supportedByTheme) {
                 // Reset to German road signs theme
-                _roadSignsThemeDropdown.selectedIndex = RoadSignThemes.Instance.FindDefaultThemeIndex(value);
+                RoadSignsTheme.selectedIndex = RoadSignThemes.Instance.FindDefaultThemeIndex(value);
                 mainConfig.RoadSignTheme = RoadSignThemes.Instance.GetDefaultThemeName(value);
                 Log.Info(
                     $"Display MPH changed to {value}, but was not supported by current theme, "
