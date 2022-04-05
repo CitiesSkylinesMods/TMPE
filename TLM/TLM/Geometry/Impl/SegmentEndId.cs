@@ -1,8 +1,13 @@
-﻿namespace TrafficManager.Geometry.Impl {
+namespace TrafficManager.Geometry.Impl {
     using TrafficManager.API.Traffic;
-    using TrafficManager.Traffic;
+    using TrafficManager.Util.Extensions;
 
     public class SegmentEndId : ISegmentEndId {
+        public SegmentEndId(ushort segmentId, ushort nodeId) {
+            SegmentId = segmentId;
+            StartNode = segmentId.ToSegment().IsStartNode(nodeId);
+        }
+
         public SegmentEndId(ushort segmentId, bool startNode) {
             SegmentId = segmentId;
             StartNode = startNode;

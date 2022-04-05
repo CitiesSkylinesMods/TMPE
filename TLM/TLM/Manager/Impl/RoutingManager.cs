@@ -457,7 +457,7 @@ namespace TrafficManager.Manager.Impl {
                         continue;
                     }
 
-                    bool? start = segId.ToSegment().IsStartNode(nodeId);
+                    bool? start = segId.ToSegment().GetRelationToNode(nodeId);
                     if (!start.HasValue) {
                         Log.Error($"Segment with id: {segId} is not connected to the node {nodeId}");
                         Debug.LogError($"TM:PE RecalculateLaneRoutings - Segment with id {segId} is not connected to the node {nodeId}");
