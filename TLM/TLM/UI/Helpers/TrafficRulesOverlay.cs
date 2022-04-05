@@ -8,6 +8,7 @@ namespace TrafficManager.UI.Helpers {
     using TrafficManager.UI.SubTools.PrioritySigns;
     using TrafficManager.UI.Textures;
     using TrafficManager.Util;
+    using TrafficManager.Util.Extensions;
     using UnityEngine;
 
     /// <summary>
@@ -182,18 +183,16 @@ namespace TrafficManager.UI.Helpers {
             // NetManager netManager = Singleton<NetManager>.instance;
             Color guiColor = GUI.color;
             // Vector3 nodePos = node.m_position;
-            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
             IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
 
-            for (int i = 0; i < 8; ++i) {
-                ushort segmentId = node.GetSegment(i);
+            for (int segmentIndex = 0; segmentIndex < Constants.MAX_SEGMENTS_OF_NODE; ++segmentIndex) {
+                ushort segmentId = node.GetSegment(segmentIndex);
 
                 if (segmentId == 0) {
                     continue;
                 }
 
-                bool isStartNode =
-                    (bool)extSegmentManager.IsStartNode(segmentId, nodeId);
+                bool isStartNode = segmentId.ToSegment().IsStartNode(nodeId);
 
                 bool isIncoming = segEndMan
                                   .ExtSegmentEnds[segEndMan.GetIndex(segmentId, isStartNode)]
