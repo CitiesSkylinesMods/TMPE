@@ -1,8 +1,8 @@
 namespace TrafficManager.Util.Extensions {
     using ColossalFramework;
-    using JetBrains.Annotations;
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
     using TrafficManager.Manager.Impl;
     using TrafficManager.Util.Iterators;
     using static Shortcuts;
@@ -12,39 +12,88 @@ namespace TrafficManager.Util.Extensions {
 
         public static ref NetSegment ToSegment(this ushort segmentId) => ref _segBuffer[segmentId];
 
+        /// <summary>
+        /// Obtain the id of either the start or end node of a segment.
+        /// </summary>
+        /// <param name="segment">The <see cref="NetSegment"/> to inspect.</param>
+        /// <param name="startNode">
+        /// Set <c>true</c> to get start node id, or <c>false</c> for end node id.
+        /// </param>
+        /// <returns>Returns the id of the node.</returns>
+        /// <example>
+        /// Get start <see cref="NetNode"/> from a segment:
+        /// <code>
+        /// ref var node = ref segmentId.ToSegment().GetNodeId(true).ToNode();
+        /// </code>
+        /// </example>
         public static ushort GetNodeId(this ref NetSegment segment, bool startNode) =>
-            startNode ? segment.m_startNode : segment.m_endNode;
-
-        public static ushort GetHeadNode(this ref NetSegment netSegment) {
-            // tail node>-------->head node
-            bool invert = netSegment.m_flags.IsFlagSet(NetSegment.Flags.Invert) ^ LHT;
-            if (invert) {
-                return netSegment.m_startNode;
-            } else {
-                return netSegment.m_endNode;
-            }
-        }
-
-        public static ushort GetTailNode(this ref NetSegment netSegment) {
-            bool invert = netSegment.m_flags.IsFlagSet(NetSegment.Flags.Invert) ^ LHT;
-            if (!invert) {
-                return netSegment.m_startNode;
-            } else {
-                return netSegment.m_endNode;
-            }//endif
-        }
+            startNode
+                ? segment.m_startNode
+                : segment.m_endNode;
 
         /// <summary>
-        /// Determine if specified <paramref name="nodeId"/> is the start node for
-        /// the <paramref name="netSegment"/>.
+        /// Get id of the Head node of the <paramref name="netSegment"/>,
+        /// taking in to account segment inversion and traffic driving side.
+        /// </summary>
+        /// <param name="netSegment">The <see cref="NetSegment"/> to inspect.</param>
+        /// <returns>Returns the id of the Head node.</returns>
+        /// <example>
+        /// Get head <see cref="NetNode"/> from a segment:
+        /// <code>
+        /// ref var node = ref segmentId.ToSegment().GetHeadNode().ToNode();
+        /// </code>
+        /// </example>
+        public static ushort GetHeadNode(this ref NetSegment netSegment) =>
+            netSegment.m_flags.IsFlagSet(NetSegment.Flags.Invert) ^ LHT
+                ? netSegment.m_startNode
+                : netSegment.m_endNode;
+
+        /// <summary>
+        /// Get id of the Tail node of the <paramref name="netSegment"/>,
+        /// taking in to account segment inversion and traffic driving side.
+        /// </summary>
+        /// <param name="netSegment">The <see cref="NetSegment"/> to inspect.</param>
+        /// <returns>Returns the id of the Tail node.</returns>
+        /// <example>
+        /// Get tail <see cref="NetNode"/> from a segment:
+        /// <code>
+        /// ref var node = ref segmentId.ToSegment().GetTailNode().ToNode();
+        /// </code>
+        /// </example>
+        public static ushort GetTailNode(this ref NetSegment netSegment) =>
+            netSegment.m_flags.IsFlagSet(NetSegment.Flags.Invert) ^ LHT
+                ? netSegment.m_endNode
+                : netSegment.m_startNode;
+
+        /// <summary>
+        /// Check if the <paramref name="nodeId"/> belongs to the
+        /// <paramref name="netSegment"/>, and if so determines
+        /// whether it is the start or end node.
         /// </summary>
         /// <param name="netSegment">The segment to inspect.</param>
         /// <param name="nodeId">The id of the node to examine.</param>
         /// <returns>
-        /// Returns <c>true</c> if start node, <c>false</c> if end node,
-        /// or <c>null</c> if the node is not associated with the segment.
+        /// <list type="bullet">
+        /// <item><term><c>true</c></term> <description>start node</description></item>
+        /// <item><term><c>false</c></term> <description>end node</description></item>
+        /// <item><term><c>null</c></term> <description>not related to segment</description></item>
+        /// </list>
         /// </returns>
-        public static bool? IsStartNode(this ref NetSegment netSegment, ushort nodeId) {
+        /// <example>
+        /// Get and process node relationship:
+        /// <code>
+        /// bool? relation = segmentId.ToSegment().GetRelationToNode(nodeId);
+        ///
+        /// if (!relation.HasValue) {
+        ///     // no relation
+        /// } else if (relation.Value) {
+        ///     // start node
+        /// } else {
+        ///     // end node
+        /// }
+        /// </code>
+        /// </example>
+        public static bool? GetRelationToNode(this ref NetSegment netSegment, ushort nodeId) {
             if (netSegment.m_startNode == nodeId) {
                 return true;
             } else if (netSegment.m_endNode == nodeId) {
@@ -61,10 +110,13 @@ namespace TrafficManager.Util.Extensions {
         /// <param name="netSegment">The segment to inspect.</param>
         /// <param name="nodeId">The id of the node to examine.</param>
         /// <returns>
-        /// Returns <c>true</c> if start node, otherwise <c>false</c> (even if the node
-        /// is not associated with the segment).
+        /// <para>Returns <c>true</c> if start node, otherwise <c>false</c>.</para>
+        /// <para>A <c>false</c> return value does not guarantee the node is the
+        /// segment end node; the node might not belong to the segment.
+        /// If you need to ensure the node is related to the segment, use
+        /// <see cref="GetRelationToNode(ref NetSegment, ushort)"/> instead.</para>
         /// </returns>
-        public static bool IsStartnode(this ref NetSegment netSegment, ushort nodeId) =>
+        public static bool IsStartNode(this ref NetSegment netSegment, ushort nodeId) =>
             netSegment.m_startNode == nodeId;
 
         /// <summary>
@@ -77,6 +129,17 @@ namespace TrafficManager.Util.Extensions {
                 required: NetSegment.Flags.Created,
                 forbidden: NetSegment.Flags.Collapsed | NetSegment.Flags.Deleted);
 
+        /// <summary>
+        /// Obtain the <see cref="NetInfo.Lane"/> for the specific <paramref name="laneIndex"/>
+        /// of the <paramref name="netSegment"/>.
+        /// </summary>
+        /// <param name="netSegment">The <see cref="NetSegment"/> to inspect.</param>
+        /// <param name="laneIndex">The index of the lane to retrieve.</param>
+        /// <returns>
+        /// Returns the associated <see cref="NetInfo.Lane"/> if found;
+        /// otherwise <c>null</c>.
+        /// </returns>
+        [SuppressMessage("Correctness", "UNT0008:Null propagation on Unity objects", Justification = "Verified as working.")]
         public static NetInfo.Lane GetLaneInfo(this ref NetSegment netSegment, int laneIndex) =>
             netSegment.Info?.m_lanes?[laneIndex];
 
@@ -99,6 +162,7 @@ namespace TrafficManager.Util.Extensions {
         /// <param name="laneType">The required <see cref="NetInfo.LaneType"/> flags (at least one must match).</param>
         /// <param name="vehicleType">The required <see cref="VehicleInfo.VehicleType"/> flags (at least one must match).</param>
         /// <returns>Returns <c>true</c> if a lane matches, otherwise <c>false</c> if none of the lanes match.</returns>
+        [SuppressMessage("Correctness", "UNT0008:Null propagation on Unity objects", Justification = "Verified as working.")]
         public static bool AnyApplicableLane(
             this ref NetSegment netSegment,
             NetInfo.LaneType laneType,
@@ -107,11 +171,15 @@ namespace TrafficManager.Util.Extensions {
             AssertNotNone(laneType, nameof(laneType));
             AssertNotNone(vehicleType, nameof(vehicleType));
 
-            NetManager netManager = Singleton<NetManager>.instance;
-
             NetInfo segmentInfo = netSegment.Info;
+
+            if (segmentInfo?.m_lanes == null)
+                return false;
+
             uint curLaneId = netSegment.m_lanes;
             byte laneIndex = 0;
+
+            NetManager netManager = Singleton<NetManager>.instance;
 
             while (laneIndex < segmentInfo.m_lanes.Length && curLaneId != 0u) {
                 NetInfo.Lane laneInfo = segmentInfo.m_lanes[laneIndex];
@@ -146,6 +214,7 @@ namespace TrafficManager.Util.Extensions {
         /// <remarks>
         /// See also: <c>CountLanes()</c> methods on the <see cref="NetSegment"/> struct.
         /// </remarks>
+        [SuppressMessage("Correctness", "UNT0008:Null propagation on Unity objects", Justification = "Verified as working.")]
         public static int CountLanes(
             this ref NetSegment segment,
             ushort nodeId,
@@ -157,10 +226,10 @@ namespace TrafficManager.Util.Extensions {
 
             NetInfo segmentInfo = segment.Info;
 
-            if (segmentInfo == null || segmentInfo.m_lanes == null)
+            if (segmentInfo?.m_lanes == null)
                 return count;
 
-            bool startNode = segment.IsStartnode(nodeId) ^ incoming;
+            bool startNode = segment.IsStartNode(nodeId) ^ incoming;
             bool inverted = (segment.m_flags & NetSegment.Flags.Invert) != NetSegment.Flags.None;
 
             NetInfo.Direction filterDir = startNode
@@ -205,6 +274,7 @@ namespace TrafficManager.Util.Extensions {
         /// <param name="sort">if false, no sorting takes place
         ///     regardless of <paramref name="reverse"/></param>
         /// <returns>sorted list of lanes for the given segment</returns>
+        [SuppressMessage("Correctness", "UNT0008:Null propagation on Unity objects", Justification = "Verified as working.")]
         public static IList<LanePos> GetSortedLanes(
             this ref NetSegment netSegment,
             bool? startNode,
@@ -217,7 +287,7 @@ namespace TrafficManager.Util.Extensions {
 
             NetInfo segmentInfo = netSegment.Info;
 
-            if (segmentInfo == null || segmentInfo.m_lanes == null)
+            if (segmentInfo?.m_lanes == null)
                 return laneList;
 
             bool inverted = (netSegment.m_flags & NetSegment.Flags.Invert) != NetSegment.Flags.None;
