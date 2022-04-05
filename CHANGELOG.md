@@ -24,10 +24,33 @@ This changelog includes all versions and major variants of the mod going all the
 > * **TM:PE v11 LABS** - TM:PE versions 11.0 to 11.5.0 (test releases)
 > * **[TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252) - TM:PE versions 11.0 and above (stable releases)**
 > * **[TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785) - TM:PE versions 11.6.0 and above (test releases)**
->  
-> Date format: dd/mm/yyyy
 
 </details>
+
+> Date format: dd/mm/yyyy
+
+#### TM:PE V11.6.5.2 TEST, dd/mm/2022
+
+- [Meta] This release improves lane routing, and fixes some bugs
+- [New] Directional lane connectors #1492 #1214 #1211 (kianzarrin, Chamëleon)
+- [Mod] Incompatible: Two more CSM mods #1481 (StayHungryStayFoolish, aubergine18)
+- [Mod] Incompatible: 交通管理器 汉化版TMPE_V11_STABLE #1481 (StayHungryStayFoolish, aubergine18)
+- [Mod] Incompatible: Service Vehicles Manager 2.0 clone #1481 (StayHungryStayFoolish, aubergine18)
+- [Fixed] Speed limits not working on station tracks #1467 #1337 (Peacemak3r, FemboyPyro, aubergine18, krzychu124)
+- [Fixed] Patching of Reversible Tram AI mod fails if mod is subscribed but disabled #1471 #1470 (kianzarrin)
+- [Fixed] Lane connectors buggy on bidirectional tracks #1211 #784 (kianzarrin)
+- [Fixed] Zig-zagging routes on bidirectional tracks #1487 #1486 (kianzarrin)
+- [Fixed] Excessive track connections at junctions #1483 #1475 (kianzarrin)
+- [Fixed] Main menu button breaks on hot-reload #762 #1492 (kianzarrin)
+- [Fixed] Asset Editor crash when saving asset with no segments #1505 #1313 (krzychu124, kianzarrin)
+- [Fixed] Toggling certain mod options causes blank menu buttons #1516 #1514 (krzychu124)
+- [Updated] Mod options: Drop-down lists converted to custom components #1512 #1510 (kianzarrin)
+- [Updated] Improve lane connector UI #1491 #1485 (kianzarrin)
+- [Updated] Routing Manager code clean-up #1477 (kianzarrin)
+- [Updated] Replace obsolete `GetSortedLanes` with extension #1496 #1490 (aubergine18)
+- [Updated] Replace obsolete `IsStartNode` with extension #1506 (aubergine18)
+- [Updated] Update `Microsoft.Unity.Analyzers` to version 1.13.0 #1513 (aubergine18)
+- [Removed] Flawed TTL API removed to prevent adoption #1495 (Elesbaan70)
 
 #### TM:PE V11.6.5.1 TEST, 13/03/2022
 
