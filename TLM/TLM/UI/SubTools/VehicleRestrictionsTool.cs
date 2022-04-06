@@ -153,12 +153,12 @@ namespace TrafficManager.UI.SubTools {
                 GUI.color = GUI.color.WithAlpha(TrafficManagerTool.GetWindowAlpha());
 
                 windowRect = GUILayout.Window(
-                    255,
-                    windowRect,
-                    _guiVehicleRestrictionsWindowDelegate,
-                    T("Dialog.Title:Vehicle restrictions"),
-                    WindowStyle,
-                    EmptyOptionsArray);
+                    id: 255,
+                    screenRect: windowRect,
+                    func: _guiVehicleRestrictionsWindowDelegate,
+                    text: T("Dialog.Title:Vehicle restrictions"),
+                    style: WindowStyle,
+                    options: EmptyOptionsArray);
                 cursorInSecondaryPanel = windowRect.Contains(Event.current.mousePosition);
                 GUI.color = oldColor;
                 // overlayHandleHovered = false;
@@ -188,16 +188,16 @@ namespace TrafficManager.UI.SubTools {
         /// </summary>
         private void RenderRoadLane(RenderManager.CameraInfo cameraInfo) {
             SegmentLaneTraverser.Traverse(
-                renderData_.segmentId,
-                SegmentTraverser.TraverseDirection.AnyDirection,
-                SegmentTraverser.TraverseSide.AnySide,
-                SegmentLaneTraverser.LaneStopCriterion.LaneCount,
-                SegmentTraverser.SegmentStopCriterion.Junction,
-                SpeedLimitManager.LANE_TYPES,
-                SpeedLimitManager.VEHICLE_TYPES,
-                data => {
+                initialSegmentId: renderData_.segmentId,
+                direction: SegmentTraverser.TraverseDirection.AnyDirection,
+                side: SegmentTraverser.TraverseSide.AnySide,
+                laneStopCrit: SegmentLaneTraverser.LaneStopCriterion.LaneCount,
+                segStopCrit: SegmentTraverser.SegmentStopCriterion.Junction,
+                laneTypeFilter: SpeedLimitManager.LANE_TYPES,
+                vehicleTypeFilter: SpeedLimitManager.VEHICLE_TYPES,
+                laneVisitor: data => {
                     if (renderData_.SortedLaneIndex == data.SortedLaneIndex) {
-                        RenderLaneOverlay(cameraInfo, data.CurLanePos.laneId);
+                        RenderLaneOverlay(cameraInfo: cameraInfo, laneId: data.CurLanePos.laneId);
                     }
                     return true;
                 });
@@ -232,10 +232,10 @@ namespace TrafficManager.UI.SubTools {
             if (HoveredSegmentId != 0 && HoveredSegmentId != SelectedSegmentId &&
                 !overlayHandleHovered) {
                 NetTool.RenderOverlay(
-                    cameraInfo,
-                    ref HoveredSegmentId.ToSegment(),
-                    MainTool.GetToolColor(false, false),
-                    MainTool.GetToolColor(false, false));
+                    cameraInfo: cameraInfo,
+                    segment: ref HoveredSegmentId.ToSegment(),
+                    importantColor: MainTool.GetToolColor(warning: false, error: false),
+                    nonImportantColor: MainTool.GetToolColor(warning: false, error: false));
             }
         }
 
@@ -272,10 +272,10 @@ namespace TrafficManager.UI.SubTools {
 
                 // draw vehicle restrictions
                 if (DrawVehicleRestrictionHandles(
-                    segmentId,
-                    ref netSegment,
-                    viewOnly || segmentId != SelectedSegmentId,
-                    out bool updated)) {
+                    segmentId: segmentId,
+                    segment: ref netSegment,
+                    viewOnly: viewOnly || segmentId != SelectedSegmentId,
+                    stateUpdated: out bool updated)) {
                     handleHovered = true;
                 }
 
@@ -452,7 +452,6 @@ namespace TrafficManager.UI.SubTools {
                                                    bool viewOnly,
                                                    out bool stateUpdated) {
             stateUpdated = false;
-            var vehicleRestrictionTextures = RoadUI.Instance.VehicleRestrictionTextures;
 
             if (viewOnly && !Options.vehicleRestrictionsOverlay &&
                 MainTool.GetToolMode() != ToolMode.VehicleRestrictions) {
@@ -507,9 +506,9 @@ namespace TrafficManager.UI.SubTools {
             Color guiColor = GUI.color; // TODO: Use OverlayHandleColorController
 
             var sortedLanes = segment.GetSortedLanes(
-                null,
-                VehicleRestrictionsManager.LANE_TYPES,
-                VehicleRestrictionsManager.VEHICLE_TYPES);
+                startNode: null,
+                laneTypeFilter: VehicleRestrictionsManager.LANE_TYPES,
+                vehicleTypeFilter: VehicleRestrictionsManager.VEHICLE_TYPES);
 
             bool hovered = false;
             HashSet<NetInfo.Direction> directions = new HashSet<NetInfo.Direction>();
@@ -550,26 +549,6 @@ namespace TrafficManager.UI.SubTools {
                         VehicleRestrictionsMode.Configured);
 
                 uint y = 0;
-#if DEBUG_disabled_xxx
-                Vector3 labelCenter = zero + f * (float)x * xu + f * (float)y * yu; // in game coordinates
-
-                Vector3 labelScreenPos;
-                bool visible = GeometryUtil.WorldToScreenPoint(labelCenter, out labelScreenPos);
-                // BUGBUG: Using screen.height might be wrong, consider U.UIScaler.ScreenHeight (from UIView.fixedHeight)
-                labelScreenPos.y = Screen.height - labelScreenPos.y;
-                diff = labelCenter - camPos;
-
-                var labelZoom = 1.0f / diff.magnitude * 100f;
-                _counterStyle.fontSize = (int)(11f * labelZoom);
-                _counterStyle.normal.textColor = new Color(1f, 1f, 0f);
-
-                string labelStr = $"Idx {laneIndex}";
-                Vector2 dim = _counterStyle.CalcSize(new GUIContent(labelStr));
-                Rect labelRect = new Rect(labelScreenPos.x - dim.x / 2f, labelScreenPos.y, dim.x, dim.y);
-                GUI.Label(labelRect, labelStr, _counterStyle);
-
-                ++y;
-#endif
                 Color guiColor2 = GUI.color; // TODO: Use OverlayHandleColorController
 
                 GUI.color = GUI.color.WithAlpha(TrafficManagerTool.OverlayAlpha);
@@ -580,6 +559,8 @@ namespace TrafficManager.UI.SubTools {
                     xu: xu,
                     yu: yu);
 
+                var theme = RoadSignThemes.ActiveTheme;
+
                 foreach (ExtVehicleType vehicleType in possibleVehicleTypes) {
                     bool allowed = VehicleRestrictionsManager.Instance.IsAllowed(allowedTypes, vehicleType);
 
@@ -588,7 +569,7 @@ namespace TrafficManager.UI.SubTools {
                     }
 
                     bool hoveredHandle = gridRenderer.DrawGenericOverlayGridTexture(
-                        texture: vehicleRestrictionTextures[vehicleType][allowed],
+                        texture: theme.VehicleRestriction(vehicleType, allowed),
                         camPos: camPos,
                         x: x,
                         y: y,

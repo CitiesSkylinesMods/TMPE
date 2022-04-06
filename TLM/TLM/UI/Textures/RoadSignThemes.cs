@@ -9,6 +9,7 @@ namespace TrafficManager.UI.Textures {
     using TrafficManager.Manager;
     using TrafficManager.State;
     using TrafficManager.State.ConfigData;
+    using TrafficManager.UI.SubTools;
     using TrafficManager.UI.SubTools.SpeedLimits;
     using TrafficManager.Util;
     using UnityEngine;
@@ -20,207 +21,16 @@ namespace TrafficManager.UI.Textures {
     public class RoadSignThemes : AbstractCustomManager {
         public static RoadSignThemes Instance = new();
 
-        public class RoadSignTheme {
-            private IntVector2 TextureSize;
-
-            /// <summary>Speed limit signs from 5 to 140 km (from 5 to 90 mph) and zero for no limit.</summary>
-            public readonly Dictionary<int, Texture2D> Textures = new();
-
-            private Dictionary<PriorityType, Texture2D> priority_ = new();
-
-            public Texture2D Priority(PriorityType p) => this.priority_.ContainsKey(p)
-                                                             ? this.priority_[p]
-                                                             : RoadUI.Instance.PrioritySignTextures[p];
-
-            private Dictionary<bool, Texture2D> parking_ = new();
-
-            public Texture2D Parking(bool p) => this.parking_.ContainsKey(p)
-                                                    ? this.parking_[p]
-                                                    : RoadUI.Instance.ParkingRestrictionTextures[p];
-
-            /// <summary>This list of required speed signs is used for loading.</summary>
-            private List<int> SignValues = new();
-
-            private string PathPrefix;
-
-            // Kmph sign sets include range for MPH, but not all pictures are good to go with Kmph or Mph setting.
-            // For example Canadian signs have all values to show MPH, but make no sense because the sign says km/h.
-
-            /// <summary>Whether km/h signs range is supported from 5 to 140 step 5.</summary>
-            public readonly bool SupportsKmph;
-
-            /// <summary>Whether MPH signs range is supported from 5 to 90 step 5.</summary>
-            public readonly bool SupportsMph;
-
-            public readonly string Name;
-
-            /// <summary>Set to true if an attempt to find and load textures was made.</summary>
-            public bool AttemptedToLoad = false;
-
-            public RoadSignTheme(string name,
-                                 bool supportsMph,
-                                 bool supportsKmph,
-                                 IntVector2 size,
-                                 string pathPrefix) {
-                Log._DebugIf(
-                    this.TextureSize.x <= this.TextureSize.y,
-                    () =>
-                        $"Constructing a road sign theme {pathPrefix}: Portrait oriented size not supported");
-
-                this.Name = name;
-                this.SupportsMph = supportsMph;
-                this.SupportsKmph = supportsKmph;
-                this.PathPrefix = pathPrefix;
-                this.TextureSize = size;
-
-                if (supportsKmph) {
-                    // Assumes that signs from 0 to 140 with step 5 exist, 0 denotes no-limit sign
-                    for (var kmphValue = 0; kmphValue <= UPPER_KMPH; kmphValue += LOAD_KMPH_STEP) {
-                        this.SignValues.Add(kmphValue);
-                    }
-                } else if (supportsMph) {
-                    for (var mphValue = 0; mphValue <= UPPER_MPH; mphValue += MPH_STEP) {
-                        this.SignValues.Add(mphValue);
-                    }
-                }
-            }
-
-            public RoadSignTheme Load() {
-                if (this.AttemptedToLoad) {
-                    return this;
-                }
-
-                this.Textures.Clear();
-                this.AttemptedToLoad = true;
-
-                foreach (var speedLimit in this.SignValues) {
-                    // Log._Debug($"Loading sign texture {this.PathPrefix}.{speedLimit}.png");
-                    var resource = LoadDllResource(
-                        resourceName: $"{this.PathPrefix}.{speedLimit}.png",
-                        size: this.TextureSize,
-                        mip: true);
-                    this.Textures.Add(
-                        speedLimit,
-                        resource ? resource : RoadSignThemes.Instance.Clear);
-                }
-
-                var squareSpecialSize = new IntVector2(200);
-
-                LoadPrioritySign(
-                    PriorityType.Main,
-                    LoadDllResource(
-                        resourceName: $"{this.PathPrefix}.RightOfWay.png",
-                        size: squareSpecialSize,
-                        mip: true,
-                        failIfNotFound: false));
-                LoadPrioritySign(
-                    PriorityType.Yield,
-                    LoadDllResource(
-                        resourceName: $"{this.PathPrefix}.Yield.png",
-                        size: squareSpecialSize,
-                        mip: true,
-                        failIfNotFound: false));
-                LoadPrioritySign(
-                    PriorityType.Stop,
-                    LoadDllResource(
-                        resourceName: $"{this.PathPrefix}.Stop.png",
-                        size: squareSpecialSize,
-                        mip: true,
-                        failIfNotFound: false));
-                LoadParkingSign(
-                    true,
-                    LoadDllResource(
-                        resourceName: $"{this.PathPrefix}.Parking.png",
-                        size: squareSpecialSize,
-                        mip: true,
-                        failIfNotFound: false));
-                LoadParkingSign(
-                    false,
-                    LoadDllResource(
-                        resourceName: $"{this.PathPrefix}.NoParking.png",
-                        size: squareSpecialSize,
-                        mip: true,
-                        failIfNotFound: false));
-
-                return this;
-            }
-
-            private void LoadPrioritySign(PriorityType p, Texture2D tex) {
-                if (tex != null) {
-                    this.priority_[p] = tex;
-                }
-            }
-
-            private void LoadParkingSign(bool allow, Texture2D tex) {
-                if (tex != null) {
-                    this.parking_[allow] = tex;
-                }
-            }
-
-            public void Unload() {
-                foreach (var texture in this.Textures) {
-                    UnityEngine.Object.Destroy(texture.Value);
-                }
-
-                this.Textures.Clear();
-
-                foreach (var texture in this.priority_) {
-                    UnityEngine.Object.Destroy(texture.Value);
-                }
-
-                this.priority_.Clear();
-
-                foreach (var texture in this.parking_) {
-                    UnityEngine.Object.Destroy(texture.Value);
-                }
-
-                this.parking_.Clear();
-
-                this.AttemptedToLoad = false;
-            }
-
-            /// <summary>
-            /// Assumes that signs can be square or vertical rectangle, no horizontal themes.
-            /// Aspect ratio value which scales width down to have height fully fit.
-            /// </summary>
-            public Vector2 GetAspectRatio() {
-                return new(this.TextureSize.x / (float)this.TextureSize.y, 1.0f);
-            }
-
-            /// <summary>Given the speed, return a texture to render.</summary>
-            /// <param name="spd">Speed to display.</param>
-            /// <returns>Texture to display.</returns>
-            public Texture2D GetTexture(SpeedValue spd) {
-                // Round to nearest 5 MPH or nearest 5 km/h
-                bool mph = GlobalConfig.Instance.Main.DisplaySpeedLimitsMph;
-                ushort index = mph
-                                   ? spd.ToMphRounded(MPH_STEP).Mph
-                                   : spd.ToKmphRounded(KMPH_STEP).Kmph;
-
-                // Trim the index since 140 km/h / 90 MPH is the max sign we have
-                ushort upper = mph ? UPPER_MPH : UPPER_KMPH;
-
-                try {
-                    // Show unlimited if the speed cannot be represented by the available sign textures
-                    if (index == 0 || index > upper) {
-                        return this.Textures[0];
-                    }
-
-                    // Trim from below to not go below index 5 (5 kmph or 5 mph)
-                    ushort trimIndex = Math.Max((ushort)5, index);
-                    return this.Textures[trimIndex];
-                }
-                catch (KeyNotFoundException) {
-                    return RoadSignThemes.Instance.NoOverride;
-                }
-            }
+        public struct RestrictionTextureDef {
+            public Texture2D allow;
+            public Texture2D restrict;
         }
 
         // We have texture files for every 5 kmph but speed limits palette allows every 10. This is
         // for more precise MPH display.
         internal const ushort KMPH_STEP = 10;
         internal const ushort UPPER_KMPH = 140;
-        private const ushort LOAD_KMPH_STEP = 5;
+        internal const ushort LOAD_KMPH_STEP = 5;
         internal const ushort UPPER_MPH = 90;
         internal const ushort MPH_STEP = 5;
 
@@ -231,8 +41,11 @@ namespace TrafficManager.UI.Textures {
         /// </summary>
         public Texture2D NoOverride;
 
-        /// <summary>Blue textures for road/lane default speed limits. Always loaded.</summary>
-        public readonly RoadSignTheme RoadDefaults;
+        /// <summary>Green textures for road/lane default speed limits. Always loaded.</summary>
+        public readonly RoadSignTheme SpeedLimitDefaults;
+
+        /// <summary>Fallback theme to use when a sign is not found in the user-selected theme.</summary>
+        public readonly RoadSignTheme FallbackTheme;
 
         public Texture2D Clear;
 
@@ -252,6 +65,8 @@ namespace TrafficManager.UI.Textures {
                 return Instance.activeTheme_;
             }
         }
+
+        private const string FALLBACK_THEME = "Fallback";
 
         private const string KMPH_BRAZIL_THEME = "Kmph_Brazil";
         private const string KMPH_CANADA_THEME = "Kmph_Canada";
@@ -297,23 +112,25 @@ namespace TrafficManager.UI.Textures {
         }
 
         private RoadSignThemes() {
-            RoadDefaults = new RoadSignTheme(
+            SpeedLimitDefaults = new RoadSignTheme(
                 name: "Defaults",
                 supportsKmph: true,
                 supportsMph: true,
                 size: new IntVector2(200),
                 pathPrefix: "SignThemes.RoadDefaults");
 
-            void NewTheme(string name, SpeedUnit unit, int height = 200) {
-                Themes.Add(
-                    name,
-                    new RoadSignTheme(
-                        name: name,
-                        supportsKmph: unit == SpeedUnit.Kmph,
-                        supportsMph: unit == SpeedUnit.Mph,
-                        size: new IntVector2(200, height),
-                        pathPrefix: "SignThemes." + name));
+            RoadSignTheme NewTheme(string name, SpeedUnit unit, int height = 200) {
+                var newTheme = new RoadSignTheme(
+                    name: name,
+                    supportsKmph: unit == SpeedUnit.Kmph,
+                    supportsMph: unit == SpeedUnit.Mph,
+                    size: new IntVector2(200, height),
+                    pathPrefix: "SignThemes." + name);
+                Themes.Add(name, newTheme);
+                return newTheme;
             }
+
+            FallbackTheme = NewTheme(name: FALLBACK_THEME, unit: SpeedUnit.Kmph);
 
             NewTheme(name: MPH_UK_THEME, unit: SpeedUnit.Mph);
             NewTheme(name: MPH_US_THEME, unit: SpeedUnit.Mph, height: 250);
@@ -377,7 +194,7 @@ namespace TrafficManager.UI.Textures {
 
         /// <summary>Called by the lifecycle when textures are to be loaded.</summary>
         public override void OnLevelLoading() {
-            RoadDefaults.Load();
+            SpeedLimitDefaults.Load();
 
             NoOverride = LoadDllResource(
                 resourceName: "SpeedLimits.NoOverride.png",
@@ -390,7 +207,7 @@ namespace TrafficManager.UI.Textures {
         /// <summary>Called by the lifecycle when textures are to be unloaded.</summary>
         public override void OnLevelUnloading() {
             // Let all themes know its time to unload, even the ones not loaded
-            RoadDefaults.Unload();
+            SpeedLimitDefaults.Unload();
 
             foreach (var theme in Themes) {
                 theme.Value.Unload();

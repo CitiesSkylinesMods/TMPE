@@ -174,6 +174,7 @@
     <Compile Include="UI\Helpers\SliderOption.cs" />
     <Compile Include="UI\Helpers\OptionButtonBase.cs" />
     <Compile Include="UI\Helpers\UrlButton.cs" />
+    <Compile Include="UI\Textures\RoadSignTheme.cs" />
     <Compile Include="UI\WhatsNew\MarkupKeyword.cs" />
     <Compile Include="UI\WhatsNew\WhatsNewMarkup.cs" />
     <Compile Include="Util\Extensions\CitizenUnitExtensions.cs" />
@@ -567,17 +568,9 @@
     <EmbeddedResource Include="Resources\RoadUI\cargotrain_infosign.png" />
     <EmbeddedResource Include="Resources\RoadUI\cargotruck_infosign.png" />
     <EmbeddedResource Include="Resources\RoadUI\emergency_infosign.png" />
-    <EmbeddedResource Include="Resources\RoadUI\parking_allowed.png" />
-    <EmbeddedResource Include="Resources\RoadUI\parking_disallowed.png" />
     <EmbeddedResource Include="Resources\RoadUI\passengercar_infosign.png" />
     <EmbeddedResource Include="Resources\RoadUI\passengertrain_infosign.png" />
     <EmbeddedResource Include="Resources\RoadUI\service_infosign.png" />
-    <EmbeddedResource Include="Resources\RoadUI\sign_none.png" />
-    <EmbeddedResource Include="Resources\RoadUI\sign_priority.png" />
-    <EmbeddedResource Include="Resources\RoadUI\sign_stop.png" />
-    <EmbeddedResource Include="Resources\RoadUI\sign_stop_zh.png" />
-    <EmbeddedResource Include="Resources\RoadUI\sign_yield.png" />
-    <EmbeddedResource Include="Resources\RoadUI\sign_yield_zh.png" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\RoadUI\taxi_infosign.png" />
@@ -1047,61 +1040,37 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\SignThemes\Kmph_Germany\NoParking.png" />
     <EmbeddedResource Include="Resources\SignThemes\Kmph_Germany\Parking.png" />
-    <EmbeddedResource Include="Resources\SignThemes\Kmph_Germany\RightOfWay.png" />
-    <EmbeddedResource Include="Resources\SignThemes\Kmph_Germany\Stop.png" />
-    <EmbeddedResource Include="Resources\SignThemes\Kmph_Germany\Yield.png" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\SignThemes\Kmph_Brazil\NoParking.png" />
     <EmbeddedResource Include="Resources\SignThemes\Kmph_Brazil\Parking.png" />
-    <EmbeddedResource Include="Resources\SignThemes\Kmph_Brazil\Stop.png" />
-    <EmbeddedResource Include="Resources\SignThemes\Kmph_Brazil\Yield.png" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\SignThemes\Kmph_Canada\NoParking.png" />
     <EmbeddedResource Include="Resources\SignThemes\Kmph_Canada\Parking.png" />
-    <EmbeddedResource Include="Resources\SignThemes\Kmph_Canada\Stop.png" />
-    <EmbeddedResource Include="Resources\SignThemes\Kmph_Canada\Yield.png" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\SignThemes\Kmph_France\NoParking.png" />
     <EmbeddedResource Include="Resources\SignThemes\Kmph_France\Parking.png" />
-    <EmbeddedResource Include="Resources\SignThemes\Kmph_France\RightOfWay.png" />
-    <EmbeddedResource Include="Resources\SignThemes\Kmph_France\Stop.png" />
-    <EmbeddedResource Include="Resources\SignThemes\Kmph_France\Yield.png" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\SignThemes\Kmph_Indonesia\Parking.png" />
-    <EmbeddedResource Include="Resources\SignThemes\Kmph_Indonesia\RightOfWay.png" />
-    <EmbeddedResource Include="Resources\SignThemes\Kmph_Indonesia\Stop.png" />
-    <EmbeddedResource Include="Resources\SignThemes\Kmph_Indonesia\Yield.png" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\SignThemes\Kmph_Japan\NoParking.png" />
     <EmbeddedResource Include="Resources\SignThemes\Kmph_Japan\Parking.png" />
-    <EmbeddedResource Include="Resources\SignThemes\Kmph_Japan\Stop.png" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\SignThemes\Kmph_Sweden\NoParking.png" />
     <EmbeddedResource Include="Resources\SignThemes\Kmph_Sweden\Parking.png" />
-    <EmbeddedResource Include="Resources\SignThemes\Kmph_Sweden\RightOfWay.png" />
-    <EmbeddedResource Include="Resources\SignThemes\Kmph_Sweden\Stop.png" />
-    <EmbeddedResource Include="Resources\SignThemes\Kmph_Sweden\Yield.png" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\SignThemes\MPH_UK\NoParking.png" />
     <EmbeddedResource Include="Resources\SignThemes\MPH_UK\Parking.png" />
-    <EmbeddedResource Include="Resources\SignThemes\MPH_UK\Stop.png" />
-    <EmbeddedResource Include="Resources\SignThemes\MPH_UK\Yield.png" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\SignThemes\MPH_US\NoParking.png" />
     <EmbeddedResource Include="Resources\SignThemes\MPH_US\Parking.png" />
-    <EmbeddedResource Include="Resources\SignThemes\MPH_US\Stop.png" />
-    <EmbeddedResource Include="Resources\SignThemes\MPH_US\Yield.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\SignThemes\Kmph_Japan\Yield.png" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\SignThemes\Kmph_SouthKorea\0.png" />
@@ -1135,8 +1104,6 @@
     <EmbeddedResource Include="Resources\SignThemes\Kmph_SouthKorea\95.png" />
     <EmbeddedResource Include="Resources\SignThemes\Kmph_SouthKorea\NoParking.png" />
     <EmbeddedResource Include="Resources\SignThemes\Kmph_SouthKorea\Parking.png" />
-    <EmbeddedResource Include="Resources\SignThemes\Kmph_SouthKorea\Stop.png" />
-    <EmbeddedResource Include="Resources\SignThemes\Kmph_SouthKorea\Yield.png" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\SignThemes\Kmph_Indonesia\NoParking.png" />
@@ -1150,6 +1117,121 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\LaneConnectionManager\direction_arrow.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\SignThemes\Fallback\Allow-Bus.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Fallback\Allow-CargoTrain.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Fallback\Allow-Emergency.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Fallback\Allow-PassengerTrain.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Fallback\Allow-PersonalCar.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Fallback\Allow-Service.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Fallback\Allow-Taxi.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Fallback\Allow-Truck.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Fallback\NoParking.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Fallback\Parking.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Fallback\PriorityNone.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Fallback\PriorityRightOfWay.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Fallback\PriorityStop.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Fallback\PriorityYield.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Fallback\Restrict-Bus.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Fallback\Restrict-CargoTrain.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Fallback\Restrict-Emergency.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Fallback\Restrict-PassengerTrain.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Fallback\Restrict-PersonalCar.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Fallback\Restrict-Service.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Fallback\Restrict-Taxi.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Fallback\Restrict-Truck.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_China\0.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_China\10.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_China\100.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_China\105.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_China\110.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_China\115.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_China\120.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_China\125.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_China\130.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_China\135.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_China\140.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_China\15.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_China\20.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_China\25.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_China\30.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_China\35.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_China\40.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_China\45.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_China\5.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_China\50.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_China\55.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_China\60.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_China\65.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_China\70.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_China\75.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_China\80.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_China\85.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_China\90.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_China\95.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_China\Allow-Bus.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_China\Allow-CargoTrain.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_China\Allow-Emergency.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_China\Allow-PassengerTrain.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_China\Allow-PersonalCar.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_China\Allow-Service.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_China\Allow-Taxi.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_China\Allow-Truck.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_China\NoParking.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_China\Parking.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_China\PriorityStop.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_China\PriorityYield.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_China\Restrict-Bus.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_China\Restrict-CargoTrain.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_China\Restrict-Emergency.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_China\Restrict-PassengerTrain.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_China\Restrict-PersonalCar.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_China\Restrict-Service.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_China\Restrict-Taxi.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_China\Restrict-Truck.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_Brazil\PriorityStop.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_Brazil\PriorityYield.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_Canada\PriorityStop.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_Canada\PriorityYield.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_France\PriorityRightOfWay.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_France\PriorityStop.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_France\PriorityYield.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_Germany\PriorityRightOfWay.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_Germany\PriorityStop.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_Germany\PriorityYield.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_Indonesia\PriorityRightOfWay.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_Indonesia\PriorityStop.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_Indonesia\PriorityYield.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_Japan\PriorityStop.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_Japan\PriorityYield.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_SouthKorea\PriorityStop.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_SouthKorea\PriorityYield.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_Sweden\PriorityRightOfWay.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_Sweden\PriorityStop.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_Sweden\PriorityYield.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\SignThemes\MPH_UK\PriorityStop.png" />
+    <EmbeddedResource Include="Resources\SignThemes\MPH_UK\PriorityYield.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\SignThemes\MPH_US\PriorityStop.png" />
+    <EmbeddedResource Include="Resources\SignThemes\MPH_US\PriorityYield.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="PostBuildMacros">

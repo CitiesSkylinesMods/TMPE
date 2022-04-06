@@ -85,7 +85,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits.Overlay {
         /// and to carry drawing state between multiple calls without using class fields.</summary>
         private class DrawEnv {
             public Vector2 signsThemeAspectRatio_;
-            public RoadSignThemes.RoadSignTheme largeSignsTextures_;
+            public RoadSignTheme largeSignsTextures_;
 
             /// <summary>
             /// This is set to true if the user will see blue default signs, or the user is holding
@@ -355,7 +355,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits.Overlay {
                     // Defaults can show normal textures if the user holds Alt
                     SpeedlimitsToolMode.Defaults => args.ToolMode == SpeedlimitsToolMode.Defaults
                                                         ? RoadSignThemes.ActiveTheme
-                                                        : RoadSignThemes.Instance.RoadDefaults,
+                                                        : RoadSignThemes.Instance.SpeedLimitDefaults,
                     _ => throw new ArgumentOutOfRangeException(),
                 },
                 drawDefaults_ = args.ToolMode == SpeedlimitsToolMode.Defaults,
@@ -540,7 +540,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits.Overlay {
                     size: size * RoadSignThemes.DefaultSpeedlimitsAspectRatio());
                 squareSignRenderer.DrawLargeTexture(
                     speedlimit: defaultSpeedLimit,
-                    theme: RoadSignThemes.Instance.RoadDefaults);
+                    theme: RoadSignThemes.Instance.SpeedLimitDefaults);
             } else {
                 //-------------------------------------
                 // Draw override, if exists, otherwise draw circle and small blue default

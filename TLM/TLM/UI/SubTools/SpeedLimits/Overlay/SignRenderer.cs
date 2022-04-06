@@ -41,7 +41,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits.Overlay {
         /// <summary>Draw large rect with the speed value or unlimited.</summary>
         /// <param name="speedlimit">Show this speed.</param>
         public void DrawLargeTexture(SpeedValue? speedlimit,
-                                     RoadSignThemes.RoadSignTheme theme) {
+                                     RoadSignTheme theme) {
             Texture2D tex = speedlimit.HasValue
                                 ? theme.GetTexture(speedlimit.Value)
                                 : RoadSignThemes.Instance.NoOverride;
@@ -58,7 +58,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits.Overlay {
         }
 
         internal static Texture2D ChooseTexture(SpeedValue? speedlimit,
-                                                RoadSignThemes.RoadSignTheme theme) {
+                                                RoadSignTheme theme) {
             return speedlimit.HasValue
                        ? theme.GetTexture(speedlimit.Value)
                        : RoadSignThemes.Instance.NoOverride;
@@ -87,7 +87,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits.Overlay {
         public void DrawDefaultSpeedSubIcon(SpeedValue speed) {
             Texture2D tex = SignRenderer.ChooseTexture(
                 speedlimit: speed,
-                theme: RoadSignThemes.Instance.RoadDefaults);
+                theme: RoadSignThemes.Instance.SpeedLimitDefaults);
 
             float size = this.screenRect_.height * 0.4f;
             float half = size / 2;
