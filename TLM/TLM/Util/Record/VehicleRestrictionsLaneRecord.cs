@@ -5,7 +5,6 @@ namespace TrafficManager.Util.Record {
     using TrafficManager.Manager.Impl;
     using TrafficManager.State;
     using TrafficManager.Util.Extensions;
-    using static TrafficManager.Util.Shortcuts;
 
     [Serializable]
     public class VehicleRestrictionsLaneRecord : IRecordable {

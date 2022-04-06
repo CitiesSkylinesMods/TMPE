@@ -1,5 +1,4 @@
 namespace TrafficManager.Util {
-    using ColossalFramework;
     using CSUtil.Commons;
     using System;
     using System.Collections.Generic;

@@ -2,7 +2,6 @@ namespace TrafficManager.Util.Record {
     using System;
     using System.Collections.Generic;
     using TrafficManager.Manager.Impl;
-    using static TrafficManager.Util.Shortcuts;
     using TrafficManager.State;
     using TrafficManager.Util.Extensions;
 
