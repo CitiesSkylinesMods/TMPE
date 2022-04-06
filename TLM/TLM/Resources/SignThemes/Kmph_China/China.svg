@@ -88,9 +88,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="4.1027127"
-     inkscape:cx="584.84296"
-     inkscape:cy="791.63862"
+     inkscape:zoom="5.8021119"
+     inkscape:cx="252.98713"
+     inkscape:cy="643.46995"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -284,14 +284,22 @@
          style="fill:#ffffff;stroke:none" />
     </g>
     <g
-       transform="matrix(0.15870291,0,0,0.15870291,30.799214,151.54886)"
-       id="layer1-5"
-       inkscape:label="Layer 1"
-       inkscape:export-xdpi="241.96001"
-       inkscape:export-ydpi="241.96001">
+       transform="matrix(0.15870291,0,0,0.15870291,30.624618,151.54886)"
+       style="opacity:0.5"
+       id="g1047" />
+    <g
+       id="g1300"
+       inkscape:export-xdpi="241"
+       inkscape:export-ydpi="241">
+      <rect
+         style="color:#000000;overflow:visible;fill:#ff8a3c;stroke-width:0.154663;stroke-opacity:0.759036;stop-color:#000000;fill-opacity:0.01204819"
+         id="rect1282"
+         width="21.122768"
+         height="21.122768"
+         x="39.308247"
+         y="157.31477" />
       <g
-         transform="matrix(0.56771742,0,0,0.56771742,23.406237,19.557511)"
-         style="opacity:1"
+         transform="matrix(0.09009841,0,0,0.09009841,34.513852,154.65269)"
          id="g1183">
         <g
            style="opacity:1"
@@ -309,12 +317,8 @@
         </g>
       </g>
       <g
-         transform="translate(-1.1001426)"
-         style="opacity:0.5"
-         id="g1047" />
-      <g
-         transform="matrix(3.7856116,0,0,3.7856116,-278.67838,-434.63089)"
-         style="opacity:1;fill:#000000;fill-opacity:1"
+         transform="matrix(0.60078758,0,0,0.60078758,-13.427856,82.571673)"
+         style="fill:#000000;fill-opacity:1"
          id="g1650">
         <g
            id="use1648"
