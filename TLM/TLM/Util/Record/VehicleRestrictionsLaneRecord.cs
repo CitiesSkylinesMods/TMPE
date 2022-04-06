@@ -53,26 +53,33 @@ namespace TrafficManager.Util.Record {
             }
         }
 
+        /// <summary>
+        /// Obtain vehicle restriction records for applicable lanes within the segment.
+        /// </summary>
+        /// <param name="segmentId">The id of the segment to inspect.</param>
+        /// <returns>
+        /// Returns a list of <see cref="VehicleRestrictionsLaneRecord"/> for all
+        /// restriction-applicable lanes in the segment. The list may be empty if no
+        /// matching lanes were found.
+        /// </returns>
         public static List<VehicleRestrictionsLaneRecord> GetLanes(ushort segmentId) {
-            int maxLaneCount = segmentId.ToSegment().Info.m_lanes.Length;
-            var ret = new List<VehicleRestrictionsLaneRecord>(maxLaneCount);
-            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
-            var lanes = extSegmentManager.GetSortedLanes(
-                segmentId,
-                ref segmentId.ToSegment(),
+
+            var lanes = segmentId.ToSegment().GetSortedLanes(
                 null,
                 LANE_TYPES,
                 VEHICLE_TYPES,
                 sort: false);
+
+            var ret = new List<VehicleRestrictionsLaneRecord>(lanes.Count);
+
             foreach (var lane in lanes) {
-                VehicleRestrictionsLaneRecord laneData = new VehicleRestrictionsLaneRecord {
+                ret.Add(new VehicleRestrictionsLaneRecord {
                     SegmentId = segmentId,
                     LaneId = lane.laneId,
                     LaneIndex = lane.laneIndex,
-                };
-                ret.Add(laneData);
+                });
             }
-            ret.TrimExcess();
+
             return ret;
         }
 
