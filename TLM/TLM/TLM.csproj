@@ -429,7 +429,7 @@
     <Compile Include="UI\Textures\JunctionRestrictions.cs" />
     <Compile Include="UI\Textures\MainMenu.cs" />
     <Compile Include="UI\Textures\RoadUI.cs" />
-    <Compile Include="UI\Textures\RoadSignThemes.cs" />
+    <Compile Include="UI\Textures\RoadSignThemeManager.cs" />
     <Compile Include="UI\Textures\TextureResources.cs" />
     <Compile Include="UI\Textures\TrafficLightTextures.cs" />
     <Compile Include="UI\TrafficManagerMode.cs" />

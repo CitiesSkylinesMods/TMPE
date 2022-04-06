@@ -44,7 +44,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits.Overlay {
                                      RoadSignTheme theme) {
             Texture2D tex = speedlimit.HasValue
                                 ? theme.GetTexture(speedlimit.Value)
-                                : RoadSignThemes.Instance.NoOverride;
+                                : RoadSignThemeManager.Instance.NoOverride;
 
             GUI.DrawTexture(
                 position: this.screenRect_,
@@ -61,7 +61,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits.Overlay {
                                                 RoadSignTheme theme) {
             return speedlimit.HasValue
                        ? theme.GetTexture(speedlimit.Value)
-                       : RoadSignThemes.Instance.NoOverride;
+                       : RoadSignThemeManager.Instance.NoOverride;
         }
 
         /// <summary>Draws the small texture in the Bottom-Right corner.</summary>
@@ -87,7 +87,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits.Overlay {
         public void DrawDefaultSpeedSubIcon(SpeedValue speed) {
             Texture2D tex = SignRenderer.ChooseTexture(
                 speedlimit: speed,
-                theme: RoadSignThemes.Instance.SpeedLimitDefaults);
+                theme: RoadSignThemeManager.Instance.SpeedLimitDefaults);
 
             float size = this.screenRect_.height * 0.4f;
             float half = size / 2;

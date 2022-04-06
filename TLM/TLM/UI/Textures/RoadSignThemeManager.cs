@@ -18,13 +18,8 @@ namespace TrafficManager.UI.Textures {
     /// Singleton which manages road signs themes dynamically loaded and freed as the user .
     /// The textures are loaded when OnLevelLoaded event is fired from the <see cref="Lifecycle.TMPELifecycle"/>.
     /// </summary>
-    public class RoadSignThemes : AbstractCustomManager {
-        public static RoadSignThemes Instance = new();
-
-        public struct RestrictionTextureDef {
-            public Texture2D allow;
-            public Texture2D restrict;
-        }
+    public class RoadSignThemeManager : AbstractCustomManager {
+        public static RoadSignThemeManager Instance = new();
 
         // We have texture files for every 5 kmph but speed limits palette allows every 10. This is
         // for more precise MPH display.
@@ -76,6 +71,7 @@ namespace TrafficManager.UI.Textures {
         private const string KMPH_JAPAN_THEME = "Kmph_Japan";
         private const string KMPH_SOUTHKOREA_THEME = "Kmph_SouthKorea";
         private const string KMPH_SWEDEN_THEME = "Kmph_Sweden";
+        private const string KMPH_CHINA_THEME = "Kmph_China";
         private const string MPH_UK_THEME = "MPH_UK";
         private const string MPH_US_THEME = "MPH_US";
 
@@ -111,26 +107,30 @@ namespace TrafficManager.UI.Textures {
             return Themes[defaultTheme].Load();
         }
 
-        private RoadSignThemes() {
+        private RoadSignThemeManager() {
             SpeedLimitDefaults = new RoadSignTheme(
                 name: "Defaults",
                 supportsKmph: true,
                 supportsMph: true,
                 size: new IntVector2(200),
                 pathPrefix: "SignThemes.RoadDefaults");
+            FallbackTheme = new RoadSignTheme(
+                name: FALLBACK_THEME,
+                supportsKmph: true,
+                supportsMph: true,
+                size: new IntVector2(200),
+                pathPrefix: "SignThemes.Fallback");
 
-            RoadSignTheme NewTheme(string name, SpeedUnit unit, int height = 200) {
-                var newTheme = new RoadSignTheme(
-                    name: name,
-                    supportsKmph: unit == SpeedUnit.Kmph,
-                    supportsMph: unit == SpeedUnit.Mph,
-                    size: new IntVector2(200, height),
-                    pathPrefix: "SignThemes." + name);
-                Themes.Add(name, newTheme);
-                return newTheme;
+            void NewTheme(string name, SpeedUnit unit, int height = 200) {
+                Themes.Add(
+                    name,
+                    new RoadSignTheme(
+                        name: name,
+                        supportsKmph: unit == SpeedUnit.Kmph,
+                        supportsMph: unit == SpeedUnit.Mph,
+                        size: new IntVector2(200, height),
+                        pathPrefix: $"SignThemes.{name}"));
             }
-
-            FallbackTheme = NewTheme(name: FALLBACK_THEME, unit: SpeedUnit.Kmph);
 
             NewTheme(name: MPH_UK_THEME, unit: SpeedUnit.Mph);
             NewTheme(name: MPH_US_THEME, unit: SpeedUnit.Mph, height: 250);
@@ -143,6 +143,7 @@ namespace TrafficManager.UI.Textures {
             NewTheme(name: KMPH_JAPAN_THEME, unit: SpeedUnit.Kmph);
             NewTheme(name: KMPH_SOUTHKOREA_THEME, unit: SpeedUnit.Kmph);
             NewTheme(name: KMPH_SWEDEN_THEME, unit: SpeedUnit.Kmph);
+            NewTheme(name: KMPH_CHINA_THEME, unit: SpeedUnit.Kmph);
 
             ThemeNames = Themes.Keys.ToList();
             ThemeNames.Sort();
@@ -195,6 +196,7 @@ namespace TrafficManager.UI.Textures {
         /// <summary>Called by the lifecycle when textures are to be loaded.</summary>
         public override void OnLevelLoading() {
             SpeedLimitDefaults.Load();
+            FallbackTheme.Load(whiteTexture: true);
 
             NoOverride = LoadDllResource(
                 resourceName: "SpeedLimits.NoOverride.png",
@@ -208,6 +210,7 @@ namespace TrafficManager.UI.Textures {
         public override void OnLevelUnloading() {
             // Let all themes know its time to unload, even the ones not loaded
             SpeedLimitDefaults.Unload();
+            FallbackTheme.Unload();
 
             foreach (var theme in Themes) {
                 theme.Value.Unload();

@@ -347,15 +347,15 @@ namespace TrafficManager.UI.SubTools.SpeedLimits.Overlay {
 
             bool hover = false;
             DrawEnv drawEnv = new DrawEnv {
-                signsThemeAspectRatio_ = RoadSignThemes.ActiveTheme.GetAspectRatio(),
+                signsThemeAspectRatio_ = RoadSignThemeManager.ActiveTheme.GetAspectRatio(),
                 largeSignsTextures_ = args.ToolMode switch {
-                    SpeedlimitsToolMode.Segments => RoadSignThemes.ActiveTheme,
-                    SpeedlimitsToolMode.Lanes => RoadSignThemes.ActiveTheme,
+                    SpeedlimitsToolMode.Segments => RoadSignThemeManager.ActiveTheme,
+                    SpeedlimitsToolMode.Lanes => RoadSignThemeManager.ActiveTheme,
 
                     // Defaults can show normal textures if the user holds Alt
                     SpeedlimitsToolMode.Defaults => args.ToolMode == SpeedlimitsToolMode.Defaults
-                                                        ? RoadSignThemes.ActiveTheme
-                                                        : RoadSignThemes.Instance.SpeedLimitDefaults,
+                                                        ? RoadSignThemeManager.ActiveTheme
+                                                        : RoadSignThemeManager.Instance.SpeedLimitDefaults,
                     _ => throw new ArgumentOutOfRangeException(),
                 },
                 drawDefaults_ = args.ToolMode == SpeedlimitsToolMode.Defaults,
@@ -502,7 +502,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits.Overlay {
             [NotNull] DrawArgs args)
         {
             Vector2 aspectRatio = drawEnv.drawDefaults_
-                                     ? RoadSignThemes.DefaultSpeedlimitsAspectRatio()
+                                     ? RoadSignThemeManager.DefaultSpeedlimitsAspectRatio()
                                      : drawEnv.signsThemeAspectRatio_;
 
             // TODO: Replace formula in visibleScale and size to use Constants.OVERLAY_INTERACTIVE_SIGN_SIZE and OVERLAY_READONLY_SIGN_SIZE
@@ -537,10 +537,10 @@ namespace TrafficManager.UI.SubTools.SpeedLimits.Overlay {
                 //-------------------------------------
                 squareSignRenderer.Reset(
                     screenPos,
-                    size: size * RoadSignThemes.DefaultSpeedlimitsAspectRatio());
+                    size: size * RoadSignThemeManager.DefaultSpeedlimitsAspectRatio());
                 squareSignRenderer.DrawLargeTexture(
                     speedlimit: defaultSpeedLimit,
-                    theme: RoadSignThemes.Instance.SpeedLimitDefaults);
+                    theme: RoadSignThemeManager.Instance.SpeedLimitDefaults);
             } else {
                 //-------------------------------------
                 // Draw override, if exists, otherwise draw circle and small blue default
@@ -653,7 +653,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits.Overlay {
 
             // Defaults have 1:1 ratio (square textures)
             Vector2 largeRatio = drawEnv.drawDefaults_
-                                     ? RoadSignThemes.DefaultSpeedlimitsAspectRatio()
+                                     ? RoadSignThemeManager.DefaultSpeedlimitsAspectRatio()
                                      : drawEnv.signsThemeAspectRatio_;
 
             // Signs are rendered in a grid starting from col 0
