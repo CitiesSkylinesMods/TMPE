@@ -23,8 +23,9 @@ namespace TrafficManager.Util {
             ExtSegmentEnd segEnd = segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segmentId, startNode)];
 
             ref NetNode node = ref nodeId.ToNode();
-            for (int i = 0; i < 8; ++i) {
-                ushort otherSegmentId = node.GetSegment(i);
+
+            for (int segmentIndex = 0; segmentIndex < Constants.MAX_SEGMENTS_OF_NODE; ++segmentIndex) {
+                ushort otherSegmentId = node.GetSegment(segmentIndex);
                 ref NetSegment otherSeg = ref otherSegmentId.ToSegment();
                 if (segmentId != 0) {
                     ArrowDirection dir2 = segEndMan.GetDirection(ref segEnd, otherSegmentId);
