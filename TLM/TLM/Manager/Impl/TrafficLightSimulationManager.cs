@@ -169,9 +169,9 @@ namespace TrafficManager.Manager.Impl {
 
             // determine node position at `fromSegment` (start/end)
             // bool isStartNode = geometry.StartNodeId == nodeId;
-            bool? isStartNode = fromSegmentId.ToSegment().GetRelationToNode(nodeId);
+            bool? isStartNode = ExtSegmentManager.Instance.IsStartNode(fromSegmentId, nodeId);
 
-            if (!isStartNode.HasValue) {
+            if (isStartNode == null) {
                 Log.Error($"GetTrafficLightState: Invalid node {nodeId} for segment {fromSegmentId}.");
                 vehicleLightState = TrafficLightState.Green;
                 pedestrianLightState = TrafficLightState.Green;
@@ -181,7 +181,7 @@ namespace TrafficManager.Manager.Impl {
             CustomSegmentLights lights =
                 CustomSegmentLightsManager.Instance.GetSegmentLights(
                     fromSegmentId,
-                    isStartNode.Value,
+                    (bool)isStartNode,
                     false);
 
             if (lights != null) {
@@ -193,9 +193,8 @@ namespace TrafficManager.Manager.Impl {
                            $"segment {fromSegmentId} found.");
             }
 
-            CustomSegmentLight light = lights?.GetCustomLight(fromLaneIndex);
-
-            if (light == null) {
+            CustomSegmentLight light = lights == null ? null : lights.GetCustomLight(fromLaneIndex);
+            if (lights == null || light == null) {
                 // Log.Warning($"GetTrafficLightState: No custom light for vehicle {vehicleId} @ node
                 //     {nodeId}, segment {fromSegmentId}, lane {fromLaneIndex} found. lights null?
                 //     {lights == null} light null? {light == null}");
@@ -493,13 +492,14 @@ namespace TrafficManager.Manager.Impl {
                 return;
             }
 
-            for (int segmentIndex = 0; segmentIndex < Constants.MAX_SEGMENTS_OF_NODE; ++segmentIndex) {
-                ushort segmentId = node.GetSegment(segmentIndex);
+            for (int i = 0; i < 8; ++i) {
+                ushort segmentId = node.GetSegment(i);
                 if (segmentId == 0) {
                     continue;
                 }
 
-                var startNode = segmentId.ToSegment().IsStartNode(nodeId);
+                var startNode =
+                    (bool)ExtSegmentManager.Instance.IsStartNode(segmentId, nodeId);
 
                 if (logTrafficLights) {
                     Log._Debug($"TrafficLightSimulationManager.HandleValidNode({nodeId}): Adding " +

@@ -38,13 +38,16 @@ namespace TrafficManager.TrafficLight.Impl {
 
             ref NetNode node = ref timedNode.NodeId.ToNode();
 
-            for (int segmentIndex = 0; segmentIndex < Constants.MAX_SEGMENTS_OF_NODE; ++segmentIndex) {
-                ushort segmentId = node.GetSegment(segmentIndex);
+            for (int i = 0; i < 8; ++i) {
+                ushort segmentId = node.GetSegment(i);
                 if (segmentId == 0) {
                     continue;
                 }
 
-                bool startNode = segmentId.ToSegment().IsStartNode(timedNode.NodeId);
+                bool startNode =
+                    (bool)ExtSegmentManager.Instance.IsStartNode(
+                        segmentId,
+                        timedNode.NodeId);
 
                 if (!AddSegment(segmentId, startNode, makeRed)) {
                     Log.Warning(
@@ -1226,9 +1229,9 @@ namespace TrafficManager.TrafficLight.Impl {
                 return false;
             }
 
-            bool? startNode = targetSegment.GetRelationToNode(timedNode.NodeId);
+            bool? startNode = ExtSegmentManager.Instance.IsStartNode(targetSegmentId, timedNode.NodeId);
 
-            if (!startNode.HasValue) {
+            if (startNode == null) {
                 Log.Error(
                     $"TimedTrafficLightsStep.RelocateSegmentLights({sourceSegmentId}, {targetSegmentId}): " +
                     $"Node {timedNode.NodeId} is neither start nor end node of target segment {targetSegmentId}");
@@ -1237,9 +1240,9 @@ namespace TrafficManager.TrafficLight.Impl {
 
             CustomSegmentLights.Remove(sourceSegmentId);
             CustomSegmentLightsManager.Instance
-                     .GetOrLiveSegmentLights(targetSegmentId, startNode.Value)
+                     .GetOrLiveSegmentLights(targetSegmentId, (bool)startNode)
                      .Housekeeping(true, true);
-            sourceLights.Relocate(targetSegmentId, startNode.Value, this);
+            sourceLights.Relocate(targetSegmentId, (bool)startNode, this);
             CustomSegmentLights[targetSegmentId] = sourceLights;
 
             Log._Debug(
@@ -1324,18 +1327,18 @@ namespace TrafficManager.TrafficLight.Impl {
                 return false;
             }
 
-            bool? startNode = netSegment.GetRelationToNode(timedNode.NodeId);
+            bool? startNode = ExtSegmentManager.Instance.IsStartNode(segmentId, timedNode.NodeId);
 
-            if (!startNode.HasValue) {
+            if (startNode == null) {
                 Log.Error($"TimedTrafficLightsStep.SetSegmentLights: Segment {segmentId} is not " +
                           $"connected to node {timedNode.NodeId}");
                 return false;
             }
 
             CustomSegmentLightsManager.Instance
-                     .GetOrLiveSegmentLights(segmentId, startNode.Value)
+                     .GetOrLiveSegmentLights(segmentId, (bool)startNode)
                      .Housekeeping(true, true);
-            lights.Relocate(segmentId, startNode.Value, this);
+            lights.Relocate(segmentId, (bool)startNode, this);
             CustomSegmentLights[segmentId] = lights;
 
             Log._Debug(
