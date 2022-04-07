@@ -489,17 +489,19 @@ namespace TrafficManager.TrafficLight.Impl {
             ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
 
             if (!(segEnd.incoming && seg.oneWay)) {
-                for (int i = 0; i < 8; ++i) {
-                    ushort otherSegmentId = node.GetSegment(i);
+                for (int segmentIndex = 0; segmentIndex < Constants.MAX_SEGMENTS_OF_NODE; ++segmentIndex) {
+                    ushort otherSegmentId = node.GetSegment(segmentIndex);
 
                     if (otherSegmentId == 0 || otherSegmentId == SegmentId) {
                         continue;
                     }
 
+                    ref NetSegment otherSegment = ref otherSegmentId.ToSegment();
+
                     // ExtSegment otherSeg = segMan.ExtSegments[otherSegmentId];
                     int index0 = segEndMan.GetIndex(
                         otherSegmentId,
-                        (bool)extSegmentManager.IsStartNode(otherSegmentId, NodeId));
+                        otherSegment.IsStartNode(NodeId));
 
                     if (!segEndMan.ExtSegmentEnds[index0].incoming) {
                         continue;
@@ -521,7 +523,7 @@ namespace TrafficManager.TrafficLight.Impl {
                         continue;
                     }
 
-                    ItemClass nextConnectionClass = otherSegmentId.ToSegment().Info.GetConnectionClass();
+                    ItemClass nextConnectionClass = otherSegment.Info.GetConnectionClass();
                     if (nextConnectionClass.m_service != prevConnectionClass.m_service) {
                         if (logTrafficLights) {
                             Log._DebugFormat(

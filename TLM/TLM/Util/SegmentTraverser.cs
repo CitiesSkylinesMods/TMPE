@@ -193,13 +193,13 @@ namespace TrafficManager.Util {
             IExtSegmentEndManager extSegEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
 
             HashSet<ushort> nextSegmentIds = new HashSet<ushort>();
-            for (int i = 0; i < 8; ++i) {
-                ushort nextSegmentId = node.GetSegment(i);
+            for (int segmentIndex = 0; segmentIndex < Constants.MAX_SEGMENTS_OF_NODE; ++segmentIndex) {
+                ushort nextSegmentId = node.GetSegment(segmentIndex);
                 if (nextSegmentId == 0 || nextSegmentId == prevSegEnd.segmentId) {
                     continue;
                 }
 
-                bool nextIsStartNode = (bool)extSegmentManager.IsStartNode(nextSegmentId, prevSegEnd.nodeId);
+                bool nextIsStartNode = nextSegmentId.ToSegment().IsStartNode(prevSegEnd.nodeId);
                 ExtSegmentEnd nextSegEnd =
                     extSegEndMan.ExtSegmentEnds[extSegEndMan.GetIndex(nextSegmentId, nextIsStartNode)];
 

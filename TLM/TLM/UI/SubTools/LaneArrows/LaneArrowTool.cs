@@ -155,7 +155,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
 
             ref NetSegment selectedSegment = ref SelectedSegmentId.ToSegment();
 
-            bool? startNode = selectedSegment.IsStartNode(SelectedNodeId);
+            bool? startNode = selectedSegment.GetRelationToNode(SelectedNodeId);
 
             if (!startNode.HasValue) {
                 Log.Error(
@@ -575,8 +575,6 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
         /// <summary>Render info overlay for active tool, when UI is in Select state.</summary>
         /// <param name="cameraInfo">The camera.</param>
         private void RenderOverlay_Select(RenderManager.CameraInfo cameraInfo) {
-            NetManager netManager = Singleton<NetManager>.instance;
-
             // If CTRL is held, and hovered something: Draw hovered node
             if (SeparateNodeLanesModifierIsPressed && HoveredNodeId != 0) {
                 Highlight.DrawNodeCircle(
@@ -604,7 +602,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                 if ((hoveredSegment.m_startNode == HoveredNodeId || hoveredSegment.m_endNode == HoveredNodeId)
                     && (nodeFlags & NetNode.Flags.Junction) != NetNode.Flags.None)
                 {
-                    bool bStartNode = (bool)ExtSegmentManager.Instance.IsStartNode(HoveredSegmentId, HoveredNodeId);
+                    bool bStartNode = hoveredSegment.IsStartNode(HoveredNodeId);
                     Color color = MainTool.GetToolColor(leftMouseDown, false);
                     bool alpha = !SeparateSegmentLanesModifierIsPressed;
                     DrawSegmentEnd(cameraInfo, HoveredSegmentId, bStartNode, color, alpha);
@@ -619,15 +617,15 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
 
             if (SelectedSegmentId != 0) {
                 Color color = MainTool.GetToolColor(true, false);
-                bool bStartNode = (bool)ExtSegmentManager.Instance.IsStartNode(SelectedSegmentId, SelectedNodeId);
+                bool startNode = SelectedSegmentId.ToSegment().IsStartNode(SelectedNodeId);
                 bool alpha = !altDown && HoveredSegmentId == SelectedSegmentId;
-                DrawSegmentEnd(cameraInfo, SelectedSegmentId, bStartNode, color, alpha);
+                DrawSegmentEnd(cameraInfo, SelectedSegmentId, startNode, color, alpha);
             }
         }
 
         private void OnResetToDefaultPressed() {
-            bool? startNode = ExtSegmentManager.Instance.IsStartNode(SelectedSegmentId, SelectedNodeId);
-            if (!CanReset(SelectedSegmentId, (bool)startNode)) {
+            bool startNode = SelectedSegmentId.ToSegment().IsStartNode(SelectedNodeId);
+            if (!CanReset(SelectedSegmentId, startNode)) {
                 return;
             }
 

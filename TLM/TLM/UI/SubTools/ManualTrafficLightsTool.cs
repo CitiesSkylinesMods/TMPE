@@ -104,11 +104,10 @@ namespace TrafficManager.UI.SubTools {
                         continue;
                     }
 
-                    bool startNode =
-                        (bool)extSegmentManager.IsStartNode(
-                            segmentId,
-                            SelectedNodeId);
-                    Vector3 position = CalculateNodePositionForSegment(ref selectedNode, ref segmentId.ToSegment());
+                    ref NetSegment segment = ref segmentId.ToSegment();
+
+                    bool startNode = segment.IsStartNode(SelectedNodeId);
+                    Vector3 position = CalculateNodePositionForSegment(ref selectedNode, ref segment);
                     CustomSegmentLights segmentLights =
                         customTrafficLightsManager.GetSegmentLights(segmentId, startNode, false);
 
