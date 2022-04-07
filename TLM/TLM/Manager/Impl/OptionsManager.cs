@@ -11,7 +11,6 @@ namespace TrafficManager.Manager.Impl {
     using JetBrains.Annotations;
     using TrafficManager.Util;
     using System.Reflection;
-    using ICities;
 
     public class OptionsManager
         : AbstractCustomManager,
@@ -71,6 +70,8 @@ namespace TrafficManager.Manager.Impl {
                 _needUpdateJunctionRestrictionsManager = false;
                 UpdateJunctionRestrictionsManager();
             }
+
+            CompileOverlayFlags();
         }
 
         [Obsolete("Use TMPELifecycle method of same name instead")]
@@ -391,6 +392,57 @@ namespace TrafficManager.Manager.Impl {
                 Log.Info("OptionsManager.UpdateRoutingManager()");
                 RoutingManager.Instance.RequestFullRecalculation();
             }
+        }
+
+        internal static void CompileOverlayFlags() {
+            if (TMPELifecycle.Instance.Deserializing) {
+                Log._Debug("Options.CompileOverlayFlags() - Waiting for deserialisation");
+                return;
+            }
+
+            var overlays = Overlays.TMPE;
+
+            if (Options.buildingOverlay)
+                overlays |= Overlays.Buildings;
+
+            if (Options.citizenOverlay)
+                overlays |= Overlays.Citizens;
+
+            if (Options.connectedLanesOverlay)
+                overlays |= Overlays.LaneConnectors;
+
+            if (Options.junctionRestrictionsOverlay)
+                overlays |= Overlays.JunctionRestrictions;
+
+            if (Options.nodesOverlay)
+                overlays |= Overlays.Networks;
+
+            if (Options.parkingRestrictionsOverlay)
+                overlays |= Overlays.ParkingRestrictions;
+
+            // Future: ParkingSpaces
+
+            // Future: PathUnits
+
+            if (Options.prioritySignsOverlay)
+                overlays |= Overlays.PrioritySigns;
+
+            if (Options.showLanes)
+                overlays |= Overlays.Lanes;
+
+            if (Options.speedLimitsOverlay)
+                overlays |= Overlays.SpeedLimits;
+
+            if (Options.timedLightsOverlay)
+                overlays |= Overlays.TrafficLights;
+
+            // Future: Tunnels
+
+            if (Options.vehicleOverlay)
+                overlays |= Overlays.Vehicles;
+
+            if (Options.vehicleRestrictionsOverlay)
+                overlays |= Overlays.VehicleRestrictions;
         }
     }
 }

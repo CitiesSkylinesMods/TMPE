@@ -38,6 +38,11 @@ namespace TrafficManager.State {
         /// </remarks>
         public static bool Available = false;
 
+        // OptionsManager.CompileOverlaysFlags() sets this value
+        // based on other mod options. Not currently persisted,
+        // but could be in future.
+        public static Overlays PersistentOverlays;
+
         public static bool individualDrivingStyle;
         public static int recklessDrivers;
 

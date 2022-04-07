@@ -11,17 +11,17 @@ namespace TrafficManager.State {
         public static CheckboxOption PrioritySignsOverlay =
             new (nameof(Options.prioritySignsOverlay), Options.PersistTo.Savegame) {
                 Label = "Checkbox:Priority signs",
-                Handler = OnOverlayChanged,
+                Handler = OnToolOverlayChanged,
             };
         public static CheckboxOption TimedLightsOverlay =
             new (nameof(Options.timedLightsOverlay), Options.PersistTo.Savegame) {
                 Label = "Checkbox:Timed traffic lights",
-                Handler = OnOverlayChanged,
+                Handler = OnToolOverlayChanged,
             };
         public static CheckboxOption SpeedLimitsOverlay =
             new (nameof(Options.speedLimitsOverlay), Options.PersistTo.Savegame) {
                 Label = "Checkbox:Speed limits",
-                Handler = OnOverlayChanged,
+                Handler = OnToolOverlayChanged,
             };
         public static CheckboxOption ShowDefaultSpeedSubIcon =
             new (nameof(Options.showDefaultSpeedSubIcon), Options.PersistTo.Savegame) {
@@ -31,45 +31,50 @@ namespace TrafficManager.State {
         public static CheckboxOption VehicleRestrictionsOverlay =
             new (nameof(Options.vehicleRestrictionsOverlay), Options.PersistTo.Savegame) {
                 Label = "Checkbox:Vehicle restrictions",
-                Handler = OnOverlayChanged,
+                Handler = OnToolOverlayChanged,
             };
         public static CheckboxOption ParkingRestrictionsOverlay =
             new (nameof(Options.parkingRestrictionsOverlay), Options.PersistTo.Savegame) {
                 Label = "Checkbox:Parking restrictions",
-                Handler = OnOverlayChanged,
+                Handler = OnToolOverlayChanged,
             };
         public static CheckboxOption JunctionRestrictionsOverlay =
             new (nameof(Options.junctionRestrictionsOverlay), Options.PersistTo.Savegame) {
                 Label = "Checkbox:Junction restrictions",
-                Handler = OnOverlayChanged,
+                Handler = OnToolOverlayChanged,
             };
         public static CheckboxOption ConnectedLanesOverlay =
             new (nameof(Options.connectedLanesOverlay), Options.PersistTo.Savegame) {
                 Label = "Overlay.Checkbox:Connected lanes",
-                Handler = OnOverlayChanged,
+                Handler = OnToolOverlayChanged,
             };
         public static CheckboxOption NodesOverlay =
             new (nameof(Options.nodesOverlay), Options.PersistTo.Savegame) {
                 Label = "Overlay.Checkbox:Nodes and segments",
+                Handler = OnBasicOverlayChanged,
             };
         public static CheckboxOption ShowLanes =
             new (nameof(Options.showLanes), Options.PersistTo.Savegame) {
                 Label = "Overlay.Checkbox:Lanes",
+                Handler = OnBasicOverlayChanged,
             };
         public static CheckboxOption VehicleOverlay =
             new (nameof(Options.vehicleOverlay), Options.PersistTo.Savegame) {
                 Label = "Overlay.Checkbox:Vehicles",
                 Validator = DebugOnlyValidator,
+                Handler = OnBasicOverlayChanged,
             };
         public static CheckboxOption CitizenOverlay =
             new (nameof(Options.citizenOverlay), Options.PersistTo.Savegame) {
                 Label = "Overlay.Checkbox:Citizens",
                 Validator = DebugOnlyValidator,
+                Handler = OnBasicOverlayChanged,
             };
         public static CheckboxOption BuildingOverlay =
             new (nameof(Options.buildingOverlay), Options.PersistTo.Savegame) {
                 Label = "Overlay.Checkbox:Buildings",
                 Validator = DebugOnlyValidator,
+                Handler = OnBasicOverlayChanged,
             };
         public static CheckboxOption ShowPathFindStats =
             new(nameof(Options.showPathFindStats), Options.PersistTo.Savegame) {
@@ -141,8 +146,13 @@ namespace TrafficManager.State {
             return true;
         }
 
-        private static void OnOverlayChanged(bool _)
-            => OptionsManager.ReinitialiseSubTools();
+        private static void OnToolOverlayChanged(bool _) {
+            OptionsManager.CompileOverlayFlags();
+            OptionsManager.ReinitialiseSubTools();
+        }
+
+        private static void OnBasicOverlayChanged(bool _) =>
+            OptionsManager.CompileOverlayFlags();
 
         private static void OnShowPathFindStatsChanged(bool _)
             => OptionsManager.RebuildMenu();

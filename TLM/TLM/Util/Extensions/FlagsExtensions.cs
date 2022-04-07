@@ -1,7 +1,17 @@
 namespace TrafficManager.Util.Extensions {
-    using API.Traffic.Enums;
+    using System;
+    using TrafficManager.API.Traffic.Enums;
 
     internal static class FlagsExtensions {
+
+        /// <summary>Checks if only a single bit is set in enum or flags.</summary>
+        /// <param name="flags">The enum flags to inspect.</param>
+        /// <returns>Returns <c>true</c> if exactly 1 bit set, otherwise <c>false</c>.</returns>
+        internal static bool IsSingleFlag(this Enum flags) {
+            var bits = (int)(object)flags; // TODO: find a way to avoid this
+            return bits != 0 && (bits & (bits - 1)) == 0; // https://stackoverflow.com/a/4624295/5240636
+        }
+
         internal static bool IsFlagSet(this Building.Flags value, Building.Flags flag) => (value & flag) != 0;
 
         internal static bool IsFlagSet(this Citizen.Flags value, Citizen.Flags flag) => (value & flag) != 0;

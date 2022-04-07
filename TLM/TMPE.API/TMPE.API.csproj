@@ -75,6 +75,10 @@
     <Compile Include="..\SharedAssemblyInfo.cs">
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="Attributes\OnGUI.cs" />
+    <Compile Include="Attributes\Cold.cs" />
+    <Compile Include="Attributes\Hot.cs" />
+    <Compile Include="Attributes\Spike.cs" />
     <Compile Include="Harmony.cs" />
     <Compile Include="Implementations.cs" />
     <Compile Include="Geometry\SegmentEndReplacement.cs" />
@@ -96,6 +100,7 @@
     <Compile Include="Manager\ILaneConnectionManager.cs" />
     <Compile Include="Manager\IManagerFactory.cs" />
     <Compile Include="Manager\IOptionsManager.cs" />
+    <Compile Include="Manager\IOverlayManager.cs" />
     <Compile Include="Manager\IParkingRestrictionsManager.cs" />
     <Compile Include="Manager\IRoutingManager.cs" />
     <Compile Include="Manager\ISegmentEndManager.cs" />
@@ -154,10 +159,15 @@
     <Compile Include="Traffic\Enums\LaneArrows.cs" />
     <Compile Include="Traffic\Enums\LaneEndTransitionType.cs" />
     <Compile Include="Traffic\Enums\LightMode.cs" />
+    <Compile Include="Traffic\Enums\OverlayContext.cs" />
+    <Compile Include="Traffic\Enums\OverlayCulling.cs" />
+    <Compile Include="Traffic\Enums\EntityType.cs" />
+    <Compile Include="Traffic\Enums\Overlays.cs" />
     <Compile Include="Traffic\Enums\ParkedCarApproachState.cs" />
     <Compile Include="Traffic\Enums\ParkingError.cs" />
     <Compile Include="Traffic\Enums\PriorityType.cs" />
     <Compile Include="Traffic\Enums\EmergencyBehavior.cs" />
+    <Compile Include="Traffic\Enums\RestrictedVehicles.cs" />
     <Compile Include="Traffic\Enums\SetLaneArrow_Result.cs" />
     <Compile Include="Traffic\Enums\SetPrioritySignError.cs" />
     <Compile Include="Traffic\Enums\SimulationAccuracy.cs" />

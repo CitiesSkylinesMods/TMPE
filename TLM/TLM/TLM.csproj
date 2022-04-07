@@ -150,6 +150,23 @@
     <Compile Include="Manager\Impl\LaneConnectionManagerData\ConnectionDataBase.cs" />
     <Compile Include="Manager\Impl\LaneConnectionManagerData\LaneConnectionData.cs" />
     <Compile Include="Manager\Impl\LaneConnectionManagerData\LaneEnd.cs" />
+    <Compile Include="Manager\Impl\OverlayManager.cs" />
+    <Compile Include="Manager\Impl\OverlayManagerData\InfoViews.cs" />
+    <Compile Include="Manager\Impl\OverlayManagerData\OverlayConfig.cs" />
+    <Compile Include="Manager\Impl\OverlayManagerData\OverlayState.cs" />
+    <Compile Include="Manager\Impl\OverlayManagerData\ViewportCache.cs" />
+    <Compile Include="Overlays\BuildingsOverlay.cs" />
+    <Compile Include="Overlays\Layers\ILayer.cs" />
+    <Compile Include="Overlays\Layers\Label\ILabel.cs" />
+    <Compile Include="Overlays\Layers\Label\LabelBase.cs" />
+    <Compile Include="Overlays\Layers\Label\LabelLayer.cs" />
+    <Compile Include="Manager\Impl\OverlayManagerData\ToolControllers.cs" />
+    <Compile Include="Overlays\IManagedOverlay.cs" />
+    <Compile Include="Overlays\Layers\LayerState.cs" />
+    <Compile Include="Overlays\Layers\TaskState.cs" />
+    <Compile Include="Overlays\ManagedOverlayBase.cs" />
+    <Compile Include="Overlays\NetworksOverlay.cs" />
+    <Compile Include="Overlays\TunnelsOverlay.cs" />
     <Compile Include="Patch\_External\RTramAIModPatch.cs" />
     <Compile Include="State\OptionsTabs\GameplayTab_AIGroups.cs" />
     <Compile Include="State\OptionsTabs\GeneralTab_CompatibilityGroup.cs" />
@@ -176,8 +193,12 @@
     <Compile Include="UI\Helpers\UrlButton.cs" />
     <Compile Include="UI\WhatsNew\MarkupKeyword.cs" />
     <Compile Include="UI\WhatsNew\WhatsNewMarkup.cs" />
+    <Compile Include="Util\Extensions\CameraInfoExtensions.cs" />
     <Compile Include="Util\Extensions\CitizenUnitExtensions.cs" />
+    <Compile Include="Util\Extensions\FastListExtensions.cs" />
+    <Compile Include="Util\Extensions\InstanceIDExtensions.cs" />
     <Compile Include="Util\Extensions\ParkedVehicleExtensions.cs" />
+    <Compile Include="Util\Extensions\VectorExtensions.cs" />
     <Compile Include="Util\Extensions\VersionExtension.cs" />
     <Compile Include="Util\Iterators\GetNodeSegmentIdsEnumerable.cs" />
     <Compile Include="Util\Iterators\GetNodeSegmentIdsEnumerator.cs" />
@@ -923,12 +944,13 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Analyzer Include="..\packages\Microsoft.Unity.Analyzers.1.7.0\analyzers\dotnet\cs\Microsoft.Unity.Analyzers.dll" />
+    <Analyzer Include="..\packages\Microsoft.Unity.Analyzers.1.13.0\analyzers\dotnet\cs\Microsoft.Unity.Analyzers.dll" />
     <Analyzer Include="..\packages\ReflectionIT.Analyzer.Structs.0.1.0\analyzers\dotnet\cs\ReflectionIT.Analyzer.Structs.dll" />
     <Analyzer Include="..\packages\StyleCop.Analyzers.1.1.118\analyzers\dotnet\cs\StyleCop.Analyzers.CodeFixes.dll" />
     <Analyzer Include="..\packages\StyleCop.Analyzers.1.1.118\analyzers\dotnet\cs\StyleCop.Analyzers.dll" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Overlays\Labels\" />
     <Folder Include="Traffic\Data\" />
   </ItemGroup>
   <ItemGroup>
