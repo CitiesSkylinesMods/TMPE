@@ -107,15 +107,13 @@
     <Reference Include="MoveItIntegration">
       <HintPath>..\libs\MoveItIntegration.dll</HintPath>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.13.0.1\lib\net35\Newtonsoft.Json.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
       <HintPath>$(MangedDLLPath)\System.Core.dll</HintPath>
     </Reference>
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
     <Reference Include="UnifiedUILib, Version=2.2.1.1037, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\UnifiedUILib.2.2.1\lib\net35\UnifiedUILib.dll</HintPath>
     </Reference>
@@ -154,8 +152,11 @@
     <Compile Include="Manager\Impl\LaneConnectionManagerData\LaneConnectionData.cs" />
     <Compile Include="Manager\Impl\LaneConnectionManagerData\LaneEnd.cs" />
     <Compile Include="Patch\_External\RTramAIModPatch.cs" />
-    <Compile Include="State\IManagerSerialization.cs" />
-    <Compile Include="State\ManagerSerializationReference.cs" />
+    <Compile Include="State\FeatureFilter.cs" />
+    <Compile Include="State\IPersistentObject.cs" />
+    <Compile Include="State\Persistence.cs" />
+    <Compile Include="State\PersistenceContext.cs" />
+    <Compile Include="State\PersistentObject.cs" />
     <Compile Include="State\OptionsTabs\GameplayTab_AIGroups.cs" />
     <Compile Include="State\OptionsTabs\GeneralTab_CompatibilityGroup.cs" />
     <Compile Include="State\OptionsTabs\GeneralTab_LocalisationGroup.cs" />
@@ -172,6 +173,8 @@
     <Compile Include="State\OptionsTabs\MaintenanceTab_ConfigGroup.cs" />
     <Compile Include="State\OptionsTabs\MaintenanceTab_DespawnGroup.cs" />
     <Compile Include="State\OptionsTabs\MaintenanceTab_ToolsGroup.cs" />
+    <Compile Include="State\PersistenceResult.cs" />
+    <Compile Include="State\StatePersistenceException.cs" />
     <Compile Include="State\VersionInfo.cs" />
     <Compile Include="UI\AllowDespawn\AllowDespawnPanel.cs" />
     <Compile Include="UI\Helpers\ActionButton.cs" />

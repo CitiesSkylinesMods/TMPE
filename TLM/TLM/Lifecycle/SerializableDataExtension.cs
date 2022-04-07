@@ -12,8 +12,8 @@ namespace TrafficManager.Lifecycle {
     using UI.WhatsNew;
     using Util;
     using System.Linq;
-    using Newtonsoft.Json;
     using System.Text;
+    using System.Xml.Linq;
 
     [UsedImplicitly]
     public class SerializableDataExtension
@@ -23,32 +23,16 @@ namespace TrafficManager.Lifecycle {
 
         private const string DATA_ID = "TrafficManager_v1.0";
         private const string VERSION_INFO_DATA_ID = "TrafficManager_VersionInfo_v1.0";
-        private const string CONTAINERS_ID = "TrafficManager_Containers_v1.0";
+        private const string DOM_ID = "TrafficManager_Document_v1.0";
 
         private static ISerializableData SerializableData => SimulationManager.instance.m_SerializableDataWrapper;
-        private static Dictionary<string, string> _containers;
-        private static IList<ManagerSerializationReference> _managerSerialization;
-        private static Type[] _managerMigration;
+        private static XDocument _dom;
+        private static Type[] _persistenceMigration;
         private static Configuration _configuration;
         private static VersionInfoConfiguration _versionInfoConfiguration;
 
         public override void OnLoadData() => Load();
         public override void OnSaveData() => Save();
-
-        private static IList<ManagerSerializationReference> GetManagerSerialization() {
-            var result = new List<ManagerSerializationReference>();
-
-            foreach (var manager in TMPELifecycle.Instance.RegisteredManagers) {
-                var serialization = ManagerSerializationReference.ForManager(manager);
-                if (serialization != null) {
-                    result.Add(serialization);
-                }
-            }
-
-            result.Sort();
-
-            return result;
-        }
 
         public static void Load() {
             Log.Info("Loading Traffic Manager: PE Data");
@@ -87,8 +71,8 @@ namespace TrafficManager.Lifecycle {
             }
 
             try {
-                byte[] data = SerializableData.LoadData(CONTAINERS_ID);
-                DeserializeContainerCollection(data);
+                byte[] data = SerializableData.LoadData(DOM_ID);
+                LoadDom(data);
             }
             catch (Exception e) {
                 Log.Error($"OnLoadData: Error while deserializing container collection (old savegame?): {e}");
@@ -106,7 +90,7 @@ namespace TrafficManager.Lifecycle {
 
             bool loadedContainers = false;
             try {
-                DeserializeContainers();
+                LoadDomElements();
                 loadedContainers = true;
             }
             catch (Exception e) {
@@ -196,51 +180,55 @@ namespace TrafficManager.Lifecycle {
             }
         }
 
-        private static void DeserializeContainerCollection(byte[] data) {
+        private static void LoadDom(byte[] data) {
             try {
                 if (data?.Length > 0) {
                     using (var memoryStream = new MemoryStream(data)) {
                         using (var streamReader = new StreamReader(memoryStream, Encoding.UTF8)) {
-                            _containers = JsonConvert.DeserializeObject<Dictionary<string, string>>(streamReader.ReadToEnd());
+                            _dom = XDocument.Load(streamReader);
 
-                            _managerSerialization = GetManagerSerialization();
-                            _managerMigration = _managerSerialization
-                                                .Where(ms => _containers.ContainsKey(ms.ContainerType.FullName))
-                                                .Select(ms => ms.ManagerType)
-                                                .ToArray();
+                            _persistenceMigration = Persistence.PersistentObjects
+                                                    .Where(o => _dom.Root.Elements(o.ElementName)?.Any(e => o.CanLoad(e)) == true)
+                                                    .Select(o => o.DependencyTarget)
+                                                    .Distinct()
+                                                    .ToArray();
                         }
                     }
                 } else {
-                    Log.Info("No container collection to deserialize!");
+                    Log.Info("No DOM to load!");
                 }
             }
             catch (Exception ex) {
-                Log.Error($"Error deserializing containers: {ex}");
+                Log.Error($"Error loading DOM: {ex}");
                 Log.Info(ex.StackTrace);
                 throw new ApplicationException("An error occurred while loading");
             }
         }
 
-        private static void DeserializeContainers() {
+        private static void LoadDomElements() {
             try {
-                if (_containers?.Count > 0 && _managerSerialization != null) {
-                    foreach (var ms in _managerSerialization) {
-                        if (_containers.TryGetValue(ms.ContainerType.FullName, out var containerData)) {
+                if (_dom?.Root.HasElements == true && Persistence.PersistentObjects.Count > 0) {
+                    foreach (var o in Persistence.PersistentObjects) {
+                        var containers = _dom.Root.Elements(o.ElementName)?.Where(c => o.CanLoad(c));
+                        if (containers?.Any() == true) {
+                            if (containers.Count() > 1) {
+                                Log.Error($"More than one compatible element {o.ElementName} was found. Using the last one.");
+                            }
                             try {
-                                ms.LoadData(JsonConvert.DeserializeObject(containerData, ms.ContainerType));
+                                o.LoadData(containers.Last(), new PersistenceContext { Version = Version });
                             }
                             catch (Exception ex) {
-                                Log.Error($"Error deserializing container {ms.ContainerType.FullName}: {ex}");
+                                Log.Error($"Error deserializing DOM element {o.ElementName}: {ex}");
                                 Log.Info(ex.StackTrace);
                             }
                         }
                     }
                 } else {
-                    Log.Info("No containers to deserialize!");
+                    Log.Info("No DOM elements to load!");
                 }
             }
             catch (Exception ex) {
-                Log.Error($"Error deserializing containers: {ex}");
+                Log.Error($"Error loading DOM elements: {ex}");
                 Log.Info(ex.StackTrace);
                 throw new ApplicationException("An error occurred while loading");
             }
@@ -296,14 +284,14 @@ namespace TrafficManager.Lifecycle {
         }
 
         private static void LoadDataState<T>(ICustomDataManager<T> manager, T data, string description, ref bool error) {
-            if (_managerMigration?.Contains(manager.GetType()) == true) {
+            if (_persistenceMigration?.Contains(manager.GetType()) == true) {
                 if (data != null) {
-                    Log.Info($"{manager.GetType().FullName} is in migration to manager-container strategy. {description} data structure ignored.");
+                    Log.Info($"{manager.GetType().FullName} is in migration to DOM. {description} data structure ignored.");
                 }
             }
             else if (data != null) {
-                if (_managerSerialization?.Any(ms => ms.ManagerType == manager.GetType()) == true) {
-                    Log.Info($"Reading legacy {description} data structure (no manager-container was found).");
+                if (Persistence.PersistentObjects.Any(o => o.DependencyTarget == manager.GetType())) {
+                    Log.Info($"Reading legacy {description} data structure (no DOM element was found).");
                 }
                 if (!manager.LoadData(data)) {
                     error = true;
@@ -468,7 +456,7 @@ namespace TrafficManager.Lifecycle {
                     memoryStream.Close();
                 }
 
-                SaveContainers(ref success);
+                SaveDom(ref success);
 
                 var reverseManagers = new List<ICustomManager>(TMPELifecycle.Instance.RegisteredManagers);
                 reverseManagers.Reverse();
@@ -496,27 +484,30 @@ namespace TrafficManager.Lifecycle {
             }
         }
 
-        private static void SaveContainers(ref bool success) {
+        private static void SaveDom(ref bool success) {
 
             try {
-                var managerContainers = new Dictionary<string, string>();
-                foreach (var ms in GetManagerSerialization()) {
-                    managerContainers[ms.ContainerType.FullName] = JsonConvert.SerializeObject(ms.SaveData());
+                _dom = new XDocument();
+                foreach (var o in Persistence.PersistentObjects) {
+                    var container = new XElement(o.ElementName);
+                    if (o.SaveData(container, new PersistenceContext { Version = Version }) == PersistenceResult.Success) {
+                        _dom.Root.Add(container);
+                    }
                 }
 
                 using (var memoryStream = new MemoryStream()) {
                     using (var streamWriter = new StreamWriter(memoryStream, Encoding.UTF8)) {
-                        streamWriter.Write(JsonConvert.SerializeObject(managerContainers));
+                        _dom.Save(streamWriter);
                     }
 
                     memoryStream.Position = 0;
-                    Log.Info($"Save containers byte length {memoryStream.Length}");
+                    Log.Info($"Save DOM byte length {memoryStream.Length}");
 
-                    SerializableData.SaveData(CONTAINERS_ID, memoryStream.ToArray());
+                    SerializableData.SaveData(DOM_ID, memoryStream.ToArray());
                 }
             }
             catch (Exception ex) {
-                Log.Error("Unexpected error while saving containers: " + ex);
+                Log.Error("Unexpected error while saving DOM: " + ex);
                 success = false;
             }
         }
