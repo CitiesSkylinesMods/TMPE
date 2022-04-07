@@ -924,7 +924,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Analyzer Include="..\packages\Microsoft.Unity.Analyzers.1.7.0\analyzers\dotnet\cs\Microsoft.Unity.Analyzers.dll" />
+    <Analyzer Include="..\packages\Microsoft.Unity.Analyzers.1.13.0\analyzers\dotnet\cs\Microsoft.Unity.Analyzers.dll" />
     <Analyzer Include="..\packages\ReflectionIT.Analyzer.Structs.0.1.0\analyzers\dotnet\cs\ReflectionIT.Analyzer.Structs.dll" />
     <Analyzer Include="..\packages\StyleCop.Analyzers.1.1.118\analyzers\dotnet\cs\StyleCop.Analyzers.CodeFixes.dll" />
     <Analyzer Include="..\packages\StyleCop.Analyzers.1.1.118\analyzers\dotnet\cs\StyleCop.Analyzers.dll" />
