@@ -224,8 +224,8 @@ namespace TrafficManager.Util.Extensions {
 
             NetInfo segmentInfo = segment.Info;
 
-            byte maxLanes = (byte)(segmentInfo?.m_lanes?.Length ?? 0);
-            if (maxLanes == 0)
+            byte numLanes = (byte)(segmentInfo?.m_lanes?.Length ?? 0);
+            if (numLanes == 0)
                 return 0;
 
             int count = 0;
@@ -245,7 +245,7 @@ namespace TrafficManager.Util.Extensions {
 
             NetManager netManager = Singleton<NetManager>.instance;
 
-            while (laneIndex < maxLanes && curLaneId != 0u) {
+            while (laneIndex < numLanes && curLaneId != 0u) {
                 NetInfo.Lane laneInfo = segmentInfo.m_lanes[laneIndex];
 
                 if ((laneInfo.m_finalDirection == filterDir) &&
@@ -287,11 +287,11 @@ namespace TrafficManager.Util.Extensions {
 
             NetInfo segmentInfo = netSegment.Info;
 
-            byte maxLanes = (byte)(segmentInfo?.m_lanes?.Length ?? 0);
-            if (maxLanes == 0)
-                return new List<LanePos>(0);
+            byte numLanes = (byte)(segmentInfo?.m_lanes?.Length ?? 0);
+            if (numLanes == 0)
+                return EmptyLaneList;
 
-            var laneList = new List<LanePos>(maxLanes);
+            var laneList = new List<LanePos>(numLanes);
 
             bool inverted = (netSegment.m_flags & NetSegment.Flags.Invert) != 0;
 
@@ -318,7 +318,7 @@ namespace TrafficManager.Util.Extensions {
 
             NetManager netManager = Singleton<NetManager>.instance;
 
-            while (laneIndex < maxLanes && curLaneId != 0u) {
+            while (laneIndex < numLanes && curLaneId != 0u) {
                 NetInfo.Lane laneInfo = segmentInfo.m_lanes[laneIndex];
 
                 if ((laneTypeFilter == null || (laneInfo.m_laneType & laneTypeFilter) != 0) &&
@@ -384,5 +384,7 @@ namespace TrafficManager.Util.Extensions {
 
             return laneList;
         }
+
+        private static readonly List<LanePos> EmptyLaneList = new(0);
     }
 }
