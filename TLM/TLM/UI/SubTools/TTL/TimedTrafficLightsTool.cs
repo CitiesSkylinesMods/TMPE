@@ -1479,13 +1479,13 @@ namespace TrafficManager.UI.SubTools.TTL {
 
                 ref NetNode node = ref nodeId.ToNode();
 
-                for (int i = 0; i < 8; ++i) {
-                    ushort srcSegmentId = node.GetSegment(i);
+                for (int segmentIndex = 0; segmentIndex < Constants.MAX_SEGMENTS_OF_NODE; ++segmentIndex) {
+                    ushort srcSegmentId = node.GetSegment(segmentIndex);
                     if (srcSegmentId == 0) {
                         continue;
                     }
 
-                    bool startNode = (bool)extSegmentManager.IsStartNode(srcSegmentId, nodeId);
+                    bool startNode = srcSegmentId.ToSegment().IsStartNode(nodeId);
 
                     CustomSegmentLights liveSegmentLights =
                         customTrafficLightsManager.GetSegmentLights(srcSegmentId, startNode, false);
