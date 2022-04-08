@@ -2,6 +2,7 @@ namespace TrafficManager.Util.Extensions {
     using ColossalFramework;
     using System;
     using System.Collections.Generic;
+    using System.Collections.ObjectModel;
     using System.Diagnostics.CodeAnalysis;
     using TrafficManager.Manager.Impl;
     using TrafficManager.Util.Iterators;
@@ -385,6 +386,6 @@ namespace TrafficManager.Util.Extensions {
             return laneList;
         }
 
-        private static readonly List<LanePos> EmptyLaneList = new(0);
+        private static readonly ReadOnlyCollection<LanePos> EmptyLaneList = new(new List<LanePos>(0));
     }
 }
