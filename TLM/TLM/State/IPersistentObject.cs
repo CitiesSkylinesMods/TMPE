@@ -5,7 +5,7 @@ using System.Text;
 using System.Xml.Linq;
 
 namespace TrafficManager.State {
-    internal interface IPersistentObject {
+    internal interface IPersistentObject : IComparable {
 
         Type DependencyTarget { get; }
 

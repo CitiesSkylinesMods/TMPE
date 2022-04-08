@@ -208,17 +208,18 @@ namespace TrafficManager.Lifecycle {
         private static void LoadDomElements() {
             try {
                 if (_dom?.Root.HasElements == true && Persistence.PersistentObjects.Count > 0) {
-                    foreach (var o in Persistence.PersistentObjects) {
-                        var containers = _dom.Root.Elements(o.ElementName)?.Where(c => o.CanLoad(c));
-                        if (containers?.Any() == true) {
-                            if (containers.Count() > 1) {
+                    foreach (var o in Persistence.PersistentObjects.OrderBy(o => o)) {
+                        var elements = _dom.Root.Elements(o.ElementName)?.Where(c => o.CanLoad(c));
+                        if (elements?.Any() == true) {
+                            if (elements.Count() > 1) {
                                 Log.Error($"More than one compatible element {o.ElementName} was found. Using the last one.");
                             }
                             try {
-                                o.LoadData(containers.Last(), new PersistenceContext { Version = Version });
+                                var result = o.LoadData(elements.Last(), new PersistenceContext { Version = Version });
+                                result.LogMessage($"LoadData for DOM element {o.ElementName} reported {result}.");
                             }
                             catch (Exception ex) {
-                                Log.Error($"Error deserializing DOM element {o.ElementName}: {ex}");
+                                Log.Error($"Error loading DOM element {o.ElementName}: {ex}");
                                 Log.Info(ex.StackTrace);
                             }
                         }
@@ -488,11 +489,9 @@ namespace TrafficManager.Lifecycle {
 
             try {
                 _dom = new XDocument();
-                foreach (var o in Persistence.PersistentObjects) {
-                    var container = new XElement(o.ElementName);
-                    if (o.SaveData(container, new PersistenceContext { Version = Version }) == PersistenceResult.Success) {
-                        _dom.Root.Add(container);
-                    }
+                foreach (var o in Persistence.PersistentObjects.OrderBy(o => o)) {
+                    var result = o.SaveData(_dom.Root, new PersistenceContext { Version = Version });
+                    result.LogMessage($"SaveData for DOM element {o.ElementName} reported {result}.");
                 }
 
                 using (var memoryStream = new MemoryStream()) {

@@ -5,7 +5,7 @@ using System.Text;
 using System.Xml.Linq;
 
 namespace TrafficManager.State {
-    internal abstract class PersistentObject<TObject, TFeature> : IPersistentObject
+    internal abstract class PersistentObject<TObject, TFeature> : IPersistentObject, IComparable<PersistentObject<TObject, TFeature>>
             where TFeature : struct
             {
 
@@ -134,5 +134,18 @@ namespace TrafficManager.State {
             => SaveData(container, default, context);
 
         IEnumerable<Type> IPersistentObject.GetDependencies() => GetDependencies();
+
+        public int CompareTo(PersistentObject<TObject, TFeature> other) {
+
+            bool thisDependsOnOther = GetDependencies()?.Contains(other.DependencyTarget) == true;
+            bool otherDependsOnThis = other.GetDependencies()?.Contains(DependencyTarget) == true;
+
+            return
+                thisDependsOnOther == otherDependsOnThis ? ElementName.CompareTo(other.ElementName)
+                : thisDependsOnOther ? 1
+                : -1;
+        }
+
+        int IComparable.CompareTo(object obj) => CompareTo((PersistentObject<TObject, TFeature>)obj);
     }
 }
