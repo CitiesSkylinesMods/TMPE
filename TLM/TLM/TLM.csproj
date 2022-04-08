@@ -1233,6 +1233,16 @@
     <EmbeddedResource Include="Resources\SignThemes\MPH_US\PriorityStop.png" />
     <EmbeddedResource Include="Resources\SignThemes\MPH_US\PriorityYield.png" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_China_Generic\Allow-Emergency.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_China_Generic\Allow-Taxi.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_China_Generic\PriorityYield.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_China_Generic\Restrict-Emergency.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Kmph_China_Generic\Restrict-Taxi.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Resources\SignThemes\Kmph_China_Generic\README.md" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="PostBuildMacros">
     <!-- Code from https://superuser.com/questions/82231/how-do-i-do-comments-at-a-windows-command-prompt -->

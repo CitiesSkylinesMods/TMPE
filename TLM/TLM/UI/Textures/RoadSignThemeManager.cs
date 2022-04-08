@@ -72,6 +72,7 @@ namespace TrafficManager.UI.Textures {
         private const string KMPH_SOUTHKOREA_THEME = "Kmph_SouthKorea";
         private const string KMPH_SWEDEN_THEME = "Kmph_Sweden";
         private const string KMPH_CHINA_THEME = "Kmph_China";
+        private const string KMPH_CHINA_GENERIC_THEME = "Kmph_China_Generic";
         private const string MPH_UK_THEME = "MPH_UK";
         private const string MPH_US_THEME = "MPH_US";
 
@@ -121,15 +122,19 @@ namespace TrafficManager.UI.Textures {
                 size: new IntVector2(200),
                 pathPrefix: "SignThemes.Fallback");
 
-            void NewTheme(string name, SpeedUnit unit, int height = 200) {
-                Themes.Add(
-                    name,
-                    new RoadSignTheme(
-                        name: name,
-                        supportsKmph: unit == SpeedUnit.Kmph,
-                        supportsMph: unit == SpeedUnit.Mph,
-                        size: new IntVector2(200, height),
-                        pathPrefix: $"SignThemes.{name}"));
+            RoadSignTheme NewTheme(string name,
+                                   SpeedUnit unit,
+                                   int height = 200,
+                                   RoadSignTheme parentTheme = null) {
+                var theme = new RoadSignTheme(
+                    name: name,
+                    supportsMph: unit == SpeedUnit.Mph,
+                    supportsKmph: unit == SpeedUnit.Kmph,
+                    size: new IntVector2(200, height),
+                    pathPrefix: $"SignThemes.{name}",
+                    parentTheme: parentTheme);
+                Themes.Add(name, theme);
+                return theme;
             }
 
             NewTheme(name: MPH_UK_THEME, unit: SpeedUnit.Mph);
@@ -143,7 +148,13 @@ namespace TrafficManager.UI.Textures {
             NewTheme(name: KMPH_JAPAN_THEME, unit: SpeedUnit.Kmph);
             NewTheme(name: KMPH_SOUTHKOREA_THEME, unit: SpeedUnit.Kmph);
             NewTheme(name: KMPH_SWEDEN_THEME, unit: SpeedUnit.Kmph);
-            NewTheme(name: KMPH_CHINA_THEME, unit: SpeedUnit.Kmph);
+
+            // "Mainland" theme defines road signs for mainland China, with chinese text
+            // "Generic" defines more generic signs without text and generic yield sign.
+            RoadSignTheme mainlandChina = NewTheme(
+                name: KMPH_CHINA_THEME,
+                unit: SpeedUnit.Kmph);
+            NewTheme(name: KMPH_CHINA_GENERIC_THEME, unit: SpeedUnit.Kmph, parentTheme: mainlandChina);
 
             ThemeNames = Themes.Keys.ToList();
             ThemeNames.Sort();

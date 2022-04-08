@@ -43,7 +43,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits.Overlay {
         public void DrawLargeTexture(SpeedValue? speedlimit,
                                      RoadSignTheme theme) {
             Texture2D tex = speedlimit.HasValue
-                                ? theme.GetTexture(speedlimit.Value)
+                                ? theme.SpeedLimitTexture(speedlimit.Value)
                                 : RoadSignThemeManager.Instance.NoOverride;
 
             GUI.DrawTexture(
@@ -60,7 +60,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits.Overlay {
         internal static Texture2D ChooseTexture(SpeedValue? speedlimit,
                                                 RoadSignTheme theme) {
             return speedlimit.HasValue
-                       ? theme.GetTexture(speedlimit.Value)
+                       ? theme.SpeedLimitTexture(speedlimit.Value)
                        : RoadSignThemeManager.Instance.NoOverride;
         }
 

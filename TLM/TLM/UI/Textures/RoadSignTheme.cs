@@ -2,6 +2,7 @@
     using System;
     using System.Collections.Generic;
     using CSUtil.Commons;
+    using JetBrains.Annotations;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.State;
@@ -25,14 +26,14 @@
         public Texture2D Priority(PriorityType p) =>
             this.priority_.ContainsKey(p)
                 ? this.priority_[p]
-                : RoadSignThemeManager.Instance.FallbackTheme.priority_[p];
+                : this.ParentTheme.Priority(p);
 
         private Dictionary<bool, Texture2D> parking_ = new();
 
         public Texture2D Parking(bool p) =>
             this.parking_.ContainsKey(p)
                 ? this.parking_[p]
-                : RoadSignThemeManager.Instance.FallbackTheme.parking_[p];
+                : this.ParentTheme.Parking(p);
 
         /// <summary>
         /// Road signs for restrictions per vehicle types. Not all vehicle types have an icon,
@@ -45,12 +46,12 @@
             if (allow) {
                 return this.restrictions_.ContainsKey(type)
                            ? this.restrictions_[type].allow
-                           : RoadSignThemeManager.Instance.FallbackTheme.restrictions_[type].allow;
+                           : this.ParentTheme.VehicleRestriction(type, allow: true);
             }
 
             return this.restrictions_.ContainsKey(type)
                        ? this.restrictions_[type].restrict
-                       : RoadSignThemeManager.Instance.FallbackTheme.restrictions_[type].restrict;
+                       : this.ParentTheme.VehicleRestriction(type, allow: false);
         }
 
         /// <summary>This list of required speed signs is used for loading.</summary>
@@ -72,11 +73,18 @@
         /// <summary>Set to true if an attempt to find and load textures was made.</summary>
         public bool AttemptedToLoad = false;
 
+        /// <summary>
+        /// This theme will be tried instead of the `Fallback` theme. Defaults to <see cref="RoadSignThemeManager.FallbackTheme"/>.
+        /// </summary>
+        private RoadSignTheme ParentTheme;
+
         public RoadSignTheme(string name,
                              bool supportsMph,
                              bool supportsKmph,
                              IntVector2 size,
-                             string pathPrefix) {
+                             string pathPrefix,
+                             [CanBeNull]
+                             RoadSignTheme parentTheme = null) {
             Log._DebugIf(
                 this.TextureSize.x <= this.TextureSize.y,
                 () =>
@@ -87,6 +95,7 @@
             this.SupportsKmph = supportsKmph;
             this.PathPrefix = pathPrefix;
             this.TextureSize = size;
+            this.ParentTheme = parentTheme;
 
             if (supportsKmph) {
                 // Assumes that signs from 0 to 140 with step 5 exist, 0 denotes no-limit sign
@@ -118,7 +127,7 @@
                     resourceName: $"{this.PathPrefix}.{speedLimit}.png",
                     size: this.TextureSize,
                     mip: true,
-                    failIfNotFound: false);
+                    logIfNotFound: false);
                 this.Textures.Add(
                     speedLimit,
                     resource ? resource : Texture2D.whiteTexture);
@@ -132,14 +141,31 @@
             LoadParkingSign(allow: true, name: "Parking", whiteTexture);
             LoadParkingSign(allow: false, name: "NoParking", whiteTexture);
 
-            LoadRestrictionSign(index: ExtVehicleType.PassengerCar, name: "PersonalCar", whiteTexture);
+            LoadRestrictionSign(
+                index: ExtVehicleType.PassengerCar,
+                name: "PersonalCar",
+                whiteTexture);
             LoadRestrictionSign(index: ExtVehicleType.Bus, name: "Bus", whiteTexture);
             LoadRestrictionSign(index: ExtVehicleType.Taxi, name: "Taxi", whiteTexture);
             LoadRestrictionSign(index: ExtVehicleType.CargoTruck, name: "Truck", whiteTexture);
             LoadRestrictionSign(index: ExtVehicleType.Service, name: "Service", whiteTexture);
             LoadRestrictionSign(index: ExtVehicleType.Emergency, name: "Emergency", whiteTexture);
-            LoadRestrictionSign(index: ExtVehicleType.PassengerTrain, name: "PassengerTrain", whiteTexture);
+            LoadRestrictionSign(
+                index: ExtVehicleType.PassengerTrain,
+                name: "PassengerTrain",
+                whiteTexture);
             LoadRestrictionSign(index: ExtVehicleType.CargoTrain, name: "CargoTrain", whiteTexture);
+
+            // Setup parent theme to be `Fallback` theme if ParentTheme is null
+            // For Fallback theme itself, keep it null.
+            if (this.ParentTheme == null
+                && !System.Object.ReferenceEquals(
+                    this,
+                    RoadSignThemeManager.Instance.FallbackTheme)) {
+                this.ParentTheme = RoadSignThemeManager.Instance.FallbackTheme;
+            }
+
+            this.ParentTheme?.Load(); // Reload parent theme if necessary
 
             return this;
         }
@@ -149,7 +175,7 @@
                 resourceName: $"{this.PathPrefix}.{name}.png",
                 size: new IntVector2(200),
                 mip: true,
-                failIfNotFound: false);
+                logIfNotFound: false);
 
             if (tex != null) {
                 this.priority_[p] = tex;
@@ -163,7 +189,7 @@
                 resourceName: $"{this.PathPrefix}.{name}.png",
                 size: new IntVector2(200),
                 mip: true,
-                failIfNotFound: false);
+                logIfNotFound: false);
 
             if (tex != null) {
                 this.parking_[allow] = tex;
@@ -178,18 +204,19 @@
         }
 
         private void LoadRestrictionSign(ExtVehicleType index,
-                                         string name, bool whiteTexture) {
+                                         string name,
+                                         bool whiteTexture) {
             var size200 = new IntVector2(200);
             Texture2D allowTex = TextureResources.LoadDllResource(
                 resourceName: $"{this.PathPrefix}.Allow-{name}.png",
                 size: size200,
                 mip: true,
-                failIfNotFound: false);
+                logIfNotFound: false);
             Texture2D restrictTex = TextureResources.LoadDllResource(
                 resourceName: $"{this.PathPrefix}.Restrict-{name}.png",
                 size: size200,
                 mip: true,
-                failIfNotFound: false);
+                logIfNotFound: false);
             if (allowTex && restrictTex) {
                 var pairOfSigns = new AllowDisallowTexture {
                     allow = allowTex,
@@ -205,32 +232,41 @@
             }
         }
 
+        private void DestroyTexture(Texture2D t) {
+            // Only destroy our textures, don't try to destroy UnityWhite
+            if (!System.Object.ReferenceEquals(t, Texture2D.whiteTexture)) {
+                UnityEngine.Object.Destroy(t);
+            }
+        }
+
         public void Unload() {
+            this.ParentTheme?.Unload(); // Unload parent theme if necessary
+
             // Speed limit textures
             foreach (var texture in this.Textures) {
-                Object.Destroy(texture.Value);
+                DestroyTexture(texture.Value);
             }
 
             this.Textures.Clear();
 
             // Priority signs
             foreach (var texture in this.priority_) {
-                Object.Destroy(texture.Value);
+                DestroyTexture(texture.Value);
             }
 
             this.priority_.Clear();
 
             // Parking signs
             foreach (var texture in this.parking_) {
-                Object.Destroy(texture.Value);
+                DestroyTexture(texture.Value);
             }
 
             this.parking_.Clear();
 
             // Vehicle Restriction signs
             foreach (var rs in this.restrictions_) {
-                Object.Destroy(rs.Value.allow);
-                Object.Destroy(rs.Value.restrict);
+                DestroyTexture(rs.Value.allow);
+                DestroyTexture(rs.Value.restrict);
             }
 
             this.parking_.Clear();
@@ -246,10 +282,13 @@
             return new(this.TextureSize.x / (float)this.TextureSize.y, 1.0f);
         }
 
-        /// <summary>Given the speed, return a texture to render.</summary>
+        /// <summary>
+        /// Given the speed, return a texture to render.
+        /// Does not use <see cref="ParentTheme"/> assuming that all speeds must be covered in a theme.
+        /// </summary>
         /// <param name="spd">Speed to display.</param>
         /// <returns>Texture to display.</returns>
-        public Texture2D GetTexture(SpeedValue spd) {
+        public Texture2D SpeedLimitTexture(SpeedValue spd) {
             // Round to nearest 5 MPH or nearest 5 km/h
             bool mph = GlobalConfig.Instance.Main.DisplaySpeedLimitsMph;
             ushort index = mph
