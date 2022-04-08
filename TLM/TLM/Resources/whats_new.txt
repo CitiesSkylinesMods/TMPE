@@ -15,7 +15,7 @@
 [Updated] Mod options: Drop-down lists converted to custom components #1512 #1510 (kianzarrin)
 [Updated] Improve lane connector UI #1491 #1485 (kianzarrin)
 [Updated] Routing Manager code clean-up #1477 (kianzarrin)
-[Updated] Replace obsolete `GetSortedLanes` with extension #1496 #1490 (aubergine18)
+[Updated] Replace obsolete `GetSortedLanes` with extension #1522 #1521 #1496 #1490 (aubergine18)
 [Updated] Replace obsolete `IsStartNode` with extension #1506 (aubergine18)
 [Updated] Update `Microsoft.Unity.Analyzers` to version 1.13.0 #1513 (aubergine18)
 [Removed] Flawed TTL API removed to prevent adoption #1495 (Elesbaan70)
