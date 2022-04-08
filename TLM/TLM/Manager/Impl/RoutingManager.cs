@@ -363,6 +363,7 @@ namespace TrafficManager.Manager.Impl {
         /// <param name="prevLaneIndex">target lane index</param>
         /// <param name="prevLaneId">target lane id</param>
         /// <param name="isNodeStartNodeOfPrevSegment">start node for the target segment end</param>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1117:Parameters should be on same line or separate lines", Justification = "beauty")]
         private void RecalculateLaneEndRoutingData(
             ushort prevSegmentId,
             int prevLaneIndex,
@@ -1324,7 +1325,6 @@ namespace TrafficManager.Manager.Impl {
                                         numNextCompatibleTransitionDatas,
                                         nextSegmentId,
                                         nextInnerSimilarIndex);
-
 
 #if DEBUGHWJUNCTIONROUTING
                                     if (extendedLogRouting) {
@@ -2350,6 +2350,7 @@ namespace TrafficManager.Manager.Impl {
         /// <summary>
         /// if the direction of the given lanes do not match then similar lane index must be reversed.
         /// </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1117:Parameters should be on same line or separate lines", Justification = "beauty")]
         private bool ShouldReverseSimilarLaneIndex(
             bool segmentInvert1, NetInfo.Lane laneInfo1, bool startNode1,
             bool segmentInvert2, NetInfo.Lane laneInfo2, bool startNode2) {
@@ -2370,18 +2371,18 @@ namespace TrafficManager.Manager.Impl {
                 reverse = false;
             } else {
                 // at least one lane is non-station bidirectional
-                reverse = startNode1 == startNode2; // if the common node is start node for both segments then they are facing each other and are in opposite direction.
-                reverse ^= segmentInvert1 != segmentInvert2;
-                reverse ^= backward1 != backward2;
+
+                reverse = startNode1 == startNode2; // Reverse if segments are facing each other
+                reverse ^= segmentInvert1 != segmentInvert2; // Reverse if segments are different directions
+                reverse ^= backward1 != backward2;  // Reverse if lanes are in different directions
+                // Reversing two times is like not reversing at all. So every time one of the conditions above are met we toggle reverse using the ^= operator.
             }
 
             if (logRouting) {
                 Log._Debug(
                     $"ShouldReverseSimilarLaneIndex() : reverse={reverse} " +
-                    $"segmentInvert1={segmentInvert1} segmentInvert2={segmentInvert2} " +
-                    $"startNode1={startNode1} startNode2={startNode2} " +
-                    $"backward1={backward1} backward2={backward2} " +
-                    $"both1={both1} both2={both2} ");
+                    $"segmentInvert1={segmentInvert1} startNode1={startNode1} backward1={backward1} both1={both1}\n" +
+                    $"segmentInvert2={segmentInvert2}  startNode2={startNode2} backward2={backward2} both2={both2}\n");
             }
 
             return reverse;
