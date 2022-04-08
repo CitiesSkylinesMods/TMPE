@@ -5,8 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Xml.Linq;
 
-namespace TrafficManager.State {
-    internal sealed class FeatureFilter<TFeature> where TFeature : struct {
+namespace TrafficManager.Persistence {
+    internal sealed class FeatureFilter<TFeature>
+            where TFeature : struct {
 
         private const string featuresRequiredAttributeName = "featuresRequired";
         private const string featuresForbiddenAttributeName = "featuresForbidden";
@@ -19,7 +20,7 @@ namespace TrafficManager.State {
         static FeatureFilter() {
             Type tFeature = typeof(TFeature);
             if (!tFeature.IsEnum)
-                throw new StatePersistenceException($"FeatureSet<{tFeature.FullName}>: Type {tFeature.Name} is not an enum");
+                throw new PersistenceException($"FeatureSet<{tFeature.FullName}>: Type {tFeature.Name} is not an enum");
         }
 
         private readonly Dictionary<TFeature, FeatureStatus> filter;
@@ -119,7 +120,7 @@ namespace TrafficManager.State {
                 if (isReadOnly)
                     throw new NotSupportedException();
                 if (featureFilter.filter.TryGetValue(item, out var existingStatus) && existingStatus != collectionFeatureStatus)
-                    throw new StatePersistenceException($"{item} could not be added to the required collection because it is already forbidden.");
+                    throw new PersistenceException($"{item} could not be added to the required collection because it is already forbidden.");
                 featureFilter.filter[item] = collectionFeatureStatus;
             }
 

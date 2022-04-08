@@ -4,10 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Xml.Linq;
 
-namespace TrafficManager.State {
+namespace TrafficManager.Persistence {
     internal abstract class PersistentObject<TObject, TFeature> : IPersistentObject, IComparable<PersistentObject<TObject, TFeature>>
-            where TFeature : struct
-            {
+            where TFeature : struct {
 
         protected abstract Type DependencyTarget { get; }
 

@@ -152,11 +152,11 @@
     <Compile Include="Manager\Impl\LaneConnectionManagerData\LaneConnectionData.cs" />
     <Compile Include="Manager\Impl\LaneConnectionManagerData\LaneEnd.cs" />
     <Compile Include="Patch\_External\RTramAIModPatch.cs" />
-    <Compile Include="State\FeatureFilter.cs" />
-    <Compile Include="State\IPersistentObject.cs" />
-    <Compile Include="State\Persistence.cs" />
-    <Compile Include="State\PersistenceContext.cs" />
-    <Compile Include="State\PersistentObject.cs" />
+    <Compile Include="Persistence\FeatureFilter.cs" />
+    <Compile Include="Persistence\IPersistentObject.cs" />
+    <Compile Include="Persistence\GlobalPersistence.cs" />
+    <Compile Include="Persistence\PersistenceContext.cs" />
+    <Compile Include="Persistence\PersistentObject.cs" />
     <Compile Include="State\OptionsTabs\GameplayTab_AIGroups.cs" />
     <Compile Include="State\OptionsTabs\GeneralTab_CompatibilityGroup.cs" />
     <Compile Include="State\OptionsTabs\GeneralTab_LocalisationGroup.cs" />
@@ -173,8 +173,8 @@
     <Compile Include="State\OptionsTabs\MaintenanceTab_ConfigGroup.cs" />
     <Compile Include="State\OptionsTabs\MaintenanceTab_DespawnGroup.cs" />
     <Compile Include="State\OptionsTabs\MaintenanceTab_ToolsGroup.cs" />
-    <Compile Include="State\PersistenceResult.cs" />
-    <Compile Include="State\StatePersistenceException.cs" />
+    <Compile Include="Persistence\PersistenceResult.cs" />
+    <Compile Include="Persistence\PersistenceException.cs" />
     <Compile Include="State\VersionInfo.cs" />
     <Compile Include="UI\AllowDespawn\AllowDespawnPanel.cs" />
     <Compile Include="UI\Helpers\ActionButton.cs" />

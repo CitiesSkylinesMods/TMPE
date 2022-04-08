@@ -14,6 +14,7 @@ namespace TrafficManager.Lifecycle {
     using System.Linq;
     using System.Text;
     using System.Xml.Linq;
+    using TrafficManager.Persistence;
 
     [UsedImplicitly]
     public class SerializableDataExtension
@@ -187,7 +188,7 @@ namespace TrafficManager.Lifecycle {
                         using (var streamReader = new StreamReader(memoryStream, Encoding.UTF8)) {
                             _dom = XDocument.Load(streamReader);
 
-                            _persistenceMigration = Persistence.PersistentObjects
+                            _persistenceMigration = GlobalPersistence.PersistentObjects
                                                     .Where(o => _dom.Root.Elements(o.ElementName)?.Any(e => o.CanLoad(e)) == true)
                                                     .Select(o => o.DependencyTarget)
                                                     .Distinct()
@@ -207,8 +208,8 @@ namespace TrafficManager.Lifecycle {
 
         private static void LoadDomElements() {
             try {
-                if (_dom?.Root.HasElements == true && Persistence.PersistentObjects.Count > 0) {
-                    foreach (var o in Persistence.PersistentObjects.OrderBy(o => o)) {
+                if (_dom?.Root.HasElements == true && GlobalPersistence.PersistentObjects.Count > 0) {
+                    foreach (var o in GlobalPersistence.PersistentObjects.OrderBy(o => o)) {
                         var elements = _dom.Root.Elements(o.ElementName)?.Where(c => o.CanLoad(c));
                         if (elements?.Any() == true) {
                             if (elements.Count() > 1) {
@@ -291,7 +292,7 @@ namespace TrafficManager.Lifecycle {
                 }
             }
             else if (data != null) {
-                if (Persistence.PersistentObjects.Any(o => o.DependencyTarget == manager.GetType())) {
+                if (GlobalPersistence.PersistentObjects.Any(o => o.DependencyTarget == manager.GetType())) {
                     Log.Info($"Reading legacy {description} data structure (no DOM element was found).");
                 }
                 if (!manager.LoadData(data)) {
@@ -489,7 +490,7 @@ namespace TrafficManager.Lifecycle {
 
             try {
                 _dom = new XDocument();
-                foreach (var o in Persistence.PersistentObjects.OrderBy(o => o)) {
+                foreach (var o in GlobalPersistence.PersistentObjects.OrderBy(o => o)) {
                     var result = o.SaveData(_dom.Root, new PersistenceContext { Version = Version });
                     result.LogMessage($"SaveData for DOM element {o.ElementName} reported {result}.");
                 }

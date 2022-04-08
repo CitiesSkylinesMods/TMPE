@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Xml.Linq;
 
-namespace TrafficManager.State {
+namespace TrafficManager.Persistence {
     internal class PersistenceContext {
 
         public int Version { get; set; }
