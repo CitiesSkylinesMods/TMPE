@@ -40,7 +40,7 @@
                 sizeHint: new IntVector2(256));
             this.Skin.UpdateAtlasBuilder(
                 atlasBuilder: atlasBuilder,
-                spriteSize: new IntVector2(50));
+                spriteSize: new IntVector2(64));
             this.atlas = atlasBuilder.CreateAtlas();
             UpdateButtonSkinAndTooltip();
 
@@ -67,13 +67,7 @@
             }
         }
 
-        private static float GetButtonDimensions() {
-            // The new behaviour, scales with screen size but never less than 50px
-            // var scaledSize = U.UIScaler.ScreenSizeSmallestFraction(0.026f, 0.046f);
-            // return Mathf.Max(scaledSize, 50f);
-
-            return 50f; // always 50px the original behaviour
-        }
+        private static float GetButtonDimensions() => 50f; // always 50px the original behaviour
 
         protected override bool IsActive() {
             return ModUI.Instance.IsVisible();
