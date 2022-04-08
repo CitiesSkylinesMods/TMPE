@@ -151,9 +151,9 @@ namespace TrafficManager.Manager.Impl {
                 return ArrowDirection.None;
             }
 
-            bool? targetStartNode = ExtSegmentManager.Instance.IsStartNode(targetSegmentId, sourceEnd.nodeId);
+            bool? targetStartNode = targetSegmentId.ToSegment().GetRelationToNode(sourceEnd.nodeId);
 
-            if (targetStartNode == null) {
+            if (!targetStartNode.HasValue) {
                 return ArrowDirection.None;
             }
 
@@ -161,7 +161,7 @@ namespace TrafficManager.Manager.Impl {
                 ? sourceEndSegment.m_startDirection
                 : sourceEndSegment.m_endDirection;
 
-            Vector3 targetDir = (bool)targetStartNode
+            Vector3 targetDir = targetStartNode.Value
                 ? targetSegment.m_startDirection
                 : targetSegment.m_endDirection;
 
@@ -448,20 +448,20 @@ namespace TrafficManager.Manager.Impl {
             straight = false;
             right = false;
 
-            for (int i = 0; i < 8; ++i) {
-                ushort otherSegmentId = node.GetSegment(i);
+            for (int segmentIndex = 0; segmentIndex < Constants.MAX_SEGMENTS_OF_NODE; ++segmentIndex) {
+                ushort otherSegmentId = node.GetSegment(segmentIndex);
                 if (otherSegmentId == 0 || otherSegmentId == segEnd.segmentId) {
                     continue;
                 }
 
-                var otherStartNode = ExtSegmentManager.Instance.IsStartNode(otherSegmentId, segEnd.nodeId);
-                if (otherStartNode == null) {
+                bool? otherStartNode = otherSegmentId.ToSegment().GetRelationToNode(segEnd.nodeId);
+                if (!otherStartNode.HasValue) {
                     Log.Warning($"Incorrect ExtSegmentEnd.nodeId - data integrity problem! Segment {otherSegmentId} is not connected to Node {segEnd.nodeId}");
                     continue;
                 }
 
                 ExtSegmentEnd otherSegEnd =
-                    ExtSegmentEnds[GetIndex(otherSegmentId, (bool)otherStartNode)];
+                    ExtSegmentEnds[GetIndex(otherSegmentId, otherStartNode.Value)];
 
                 if (!otherSegEnd.outgoing) {
                     continue;

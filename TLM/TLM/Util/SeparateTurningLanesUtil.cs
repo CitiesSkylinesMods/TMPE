@@ -51,18 +51,17 @@ namespace TrafficManager.Util {
             return count;
         }
 
-        static private IList<LanePos> GetBusLanes(ushort segmentId, ushort nodeId) {
-            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
-            return extSegmentManager.GetSortedLanes(
-                segmentId,
-                ref segmentId.ToSegment(),
-                ExtSegmentManager.Instance.IsStartNode(segmentId, nodeId),
+        private static IList<LanePos> GetBusLanes(ushort segmentId, ushort nodeId) {
+            ref NetSegment segment = ref segmentId.ToSegment();
+
+            return segment.GetSortedLanes(
+                segment.IsStartNode(nodeId),
                 NetInfo.LaneType.TransportVehicle,
                 LaneArrowManager.VEHICLE_TYPES,
                 sort: false);
         }
 
-        static private LaneArrows Arrows(this LanePos lanePos) =>
+        private static LaneArrows Arrows(this LanePos lanePos) =>
             (LaneArrows)lanePos.laneId.ToLane().m_flags & LaneArrows.LeftForwardRight;
 
         /// <summary>
@@ -149,7 +148,8 @@ namespace TrafficManager.Util {
             bool altBus) {
 
             if (!builtIn) {
-                LaneArrowManager.Instance.ResetLaneArrows(segmentId, ExtSegmentManager.Instance.IsStartNode(segmentId, nodeId));
+                bool startNode = segmentId.ToSegment().IsStartNode(nodeId);
+                LaneArrowManager.Instance.ResetLaneArrows(segmentId, startNode);
             }
 
             var busLanes = GetBusLanes(segmentId, nodeId);

@@ -153,7 +153,7 @@ namespace TrafficManager.Manager.Impl {
                 ushort segmentId = node.GetSegment(i);
                 if (segmentId != 0) {
                     ref NetSegment netSegment = ref segmentId.ToSegment();
-                    bool startNode = netSegment.IsStartnode(nodeId);
+                    bool startNode = netSegment.IsStartNode(nodeId);
                     foreach (LaneIdAndIndex laneIdAndIndex in netSegment.GetSegmentLaneIdsAndLaneIndexes()) {
                         LaneEnd key = new(laneIdAndIndex.laneId, startNode);
                         if (connectionDataBase_.ContainsKey(key)) {
@@ -278,7 +278,7 @@ namespace TrafficManager.Manager.Impl {
                 ushort segmentId = node.GetSegment(i);
                 if (segmentId != 0) {
                     ref NetSegment netSegment = ref segmentId.ToSegment();
-                    bool startNode = netSegment.IsStartnode(nodeId);
+                    bool startNode = netSegment.IsStartNode(nodeId);
                     foreach (LaneIdAndIndex laneIdAndIndex in netSegment.GetSegmentLaneIdsAndLaneIndexes()) {
                         LaneEnd key = new(laneIdAndIndex.laneId, startNode);
                         connectionDataBase_.Remove(key);
