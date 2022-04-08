@@ -204,17 +204,6 @@ namespace TrafficManager.Manager.Impl {
         public GetSegmentLaneIdsEnumerable GetSegmentLaneIdsAndLaneIndexes(ushort segmentId) =>
             segmentId.ToSegment().GetSegmentLaneIdsAndLaneIndexes();
 
-        [Obsolete]
-        public IList<LanePos> GetSortedLanes(ushort segmentId,
-                                             ref NetSegment segment,
-                                             bool? startNode,
-                                             NetInfo.LaneType? laneTypeFilter = null,
-                                             VehicleInfo.VehicleType? vehicleTypeFilter = null,
-                                             bool reverse = false,
-                                             bool sort = true) {
-            return segment.GetSortedLanes(startNode, laneTypeFilter, vehicleTypeFilter, reverse, sort);
-        }
-
         protected override void InternalPrintDebugInfo() {
             base.InternalPrintDebugInfo();
             Log._Debug($"Extended segment data:");
