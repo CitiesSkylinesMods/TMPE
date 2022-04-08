@@ -114,7 +114,7 @@ namespace TrafficManager.UI.Textures {
                 supportsKmph: true,
                 supportsMph: true,
                 size: new IntVector2(200),
-                pathPrefix: "SignThemes.RoadDefaults");
+                pathPrefix: "SignThemes.SpeedLimitDefaults");
             FallbackTheme = new RoadSignTheme(
                 name: FALLBACK_THEME,
                 supportsKmph: true,
