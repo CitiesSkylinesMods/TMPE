@@ -146,8 +146,9 @@ namespace TrafficManager.UI {
                     UnityEngine.Object.Destroy(keyHandler);
                 }
 
-                UnityEngine.Object.Destroy(MainMenu);
-                UnityEngine.Object.Destroy(MainMenuButton);
+                // intentionally DestroyImmediate() - normal Destroy() is delayed
+                UnityEngine.Object.DestroyImmediate(MainMenu);
+                UnityEngine.Object.DestroyImmediate(MainMenuButton);
                 MainMenu = null;
                 MainMenuButton = null;
 #if DEBUG

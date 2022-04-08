@@ -101,7 +101,7 @@ namespace TrafficManager.State {
 
                 // TODO: Move this to the owner class and implement IObserver<ModUI.EventPublishers.LanguageChangeNotification>
                 Translation.SetCurrentLanguageToGameLanguage();
-                OptionsManager.RebuildMenu();
+                OptionsManager.RebuildMenu(true);
             } else if (newLanguageIndex - 1 < Translation.AvailableLanguageCodes.Count) {
                 // use tmpe language
                 string newLang = Translation.AvailableLanguageCodes[newLanguageIndex - 1];
@@ -110,7 +110,7 @@ namespace TrafficManager.State {
 
                 // TODO: Move this to the owner class and implement IObserver<ModUI.EventPublishers.LanguageChangeNotification>
                 Translation.SetCurrentLanguageToTMPELanguage();
-                OptionsManager.RebuildMenu();
+                OptionsManager.RebuildMenu(true);
             } else {
                 Log.Warning($"GeneralTab.LocalisationGroup.onLanguageChanged({newLanguageIndex}): Invalid language index");
                 return;
