@@ -90,10 +90,9 @@ namespace TrafficManager.Manager.Impl {
             {
                 var replacement = new SegmentEndReplacement {
                     oldSegmentEndId = ExtNodes[nodeId].removedSegmentEndId,
-                    newSegmentEndId = new SegmentEndId(
-                        segmentId,
-                        (bool)ExtSegmentManager.Instance.IsStartNode(segmentId, nodeId)),
+                    newSegmentEndId = new SegmentEndId(segmentId, nodeId),
                 };
+
                 ExtNodes[nodeId].removedSegmentEndId = null;
                 Constants.ManagerFactory.GeometryManager.OnSegmentEndReplacement(replacement);
             }
@@ -101,9 +100,7 @@ namespace TrafficManager.Manager.Impl {
 
         public void RemoveSegment(ushort nodeId, ushort segmentId) {
             if (ExtNodes[nodeId].segmentIds.Remove(segmentId)) {
-                ExtNodes[nodeId].removedSegmentEndId = new SegmentEndId(
-                    segmentId,
-                    (bool)ExtSegmentManager.Instance.IsStartNode(segmentId, nodeId));
+                ExtNodes[nodeId].removedSegmentEndId = new SegmentEndId(segmentId, nodeId);
             }
         }
 

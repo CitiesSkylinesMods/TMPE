@@ -219,7 +219,7 @@ namespace TrafficManager.Util {
         /// <param name="segmentId"></param>
         /// <param name="m">Determines which directions are green</param>
         private static void SetupHelper(ITimedTrafficLightsStep step, ushort nodeId, ushort segmentId, GreenDir m) {
-            bool startNode = (bool)ExtSegmentManager.Instance.IsStartNode(segmentId, nodeId);
+            bool startNode = segmentId.ToSegment().IsStartNode(nodeId);
             ref NetNode netNode = ref nodeId.ToNode();
 
             //get step data for side seg
@@ -390,24 +390,26 @@ namespace TrafficManager.Util {
         }
 
         /// <summary>
-        /// count the lanes going out or comming in a segment from inpout junctions.
+        /// Count number of applicable lanes entering or leaving a segment via specific node.
         /// </summary>
-        /// <param name="segmentId"></param>
-        /// <param name="nodeId"></param>
-        /// <param name="outgoing">true if lanes our going out toward the junction</param>
-        /// <returns></returns>
-        private static int CountLanes(ushort segmentId, ushort nodeId, bool outgoing = true) {
-            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
-            return extSegmentManager.GetSortedLanes(
-                                segmentId,
-                                ref segmentId.ToSegment(),
-                                extSegmentManager.IsStartNode(segmentId, nodeId) ^ (!outgoing),
-                                LaneArrowManager.LANE_TYPES,
-                                LaneArrowManager.VEHICLE_TYPES,
-                                true).Count;
-        }
-        private static int CountOutgoingLanes(ushort segmentId, ushort nodeId) => CountLanes(segmentId, nodeId, true);
-        private static int CountIncomingLanes(ushort segmentId, ushort nodeId) => CountLanes(segmentId, nodeId, false);
+        /// <param name="segmentId">The id of the segment to inspect.</param>
+        /// <param name="nodeId">The id of node where lanes should be counted.</param>
+        /// <param name="incoming">
+        /// If <c>true</c>, count lanes entering the segment from the junction.
+        /// If <c>false</c>, count lanes going from the segment to the junction.
+        /// </param>
+        /// <returns>Returns number of lanes matching the specified criteria.</returns>
+        private static int CountLanes(ushort segmentId, ushort nodeId, bool incoming) =>
+            segmentId.ToSegment().CountLanes(
+                nodeId,
+                LaneArrowManager.LANE_TYPES,
+                LaneArrowManager.VEHICLE_TYPES,
+                incoming);
+
+        private static int CountOutgoingLanes(ushort segmentId, ushort nodeId)
+            => CountLanes(segmentId, nodeId, false);
+        private static int CountIncomingLanes(ushort segmentId, ushort nodeId)
+            => CountLanes(segmentId, nodeId, true);
 
         /// <summary>
         /// Counts the number of roads toward the given directions.

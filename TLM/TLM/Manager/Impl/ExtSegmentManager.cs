@@ -39,9 +39,6 @@ namespace TrafficManager.Manager.Impl {
         [Obsolete]
         public ushort GetTailNode(ushort segmentId) => segmentId.ToSegment().GetTailNode();
 
-        [Obsolete]
-        public bool? IsStartNode(ushort segmentId, ushort nodeId) => segmentId.ToSegment().IsStartNode(nodeId);
-
         public void PublishSegmentChanges(ushort segmentId) {
             Log._Debug($"NetService.PublishSegmentChanges({segmentId}) called.");
             SimulationManager simulationManager = Singleton<SimulationManager>.instance;

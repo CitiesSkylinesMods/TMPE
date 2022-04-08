@@ -82,3 +82,7 @@
 2730687809;Network Extensions 3 - malware: https://github.com/CitiesSkylinesMods/TMPE/pull/1389 
 2733711176;CSM FIX
 2749420751;Uninspected TM:PE clone
+2759913350;1632320836 Service Vehicles Manager 2.0
+2764576667;CSM
+2781822295;交通管理器 汉化版TMPE_V11_STABLE
+2782552305;CSM

@@ -54,8 +54,6 @@ namespace TrafficManager.UI {
 
         private NetTool netTool_;
 
-        private CursorInfo nopeCursor_;
-
         public const float DEBUG_CLOSE_LOD = 300f;
 
         /// <summary>Square of the distance, where overlays are not rendered.</summary>
@@ -152,10 +150,6 @@ namespace TrafficManager.UI {
 
             RemoveUUIButton();
 
-            if (nopeCursor_) {
-                Destroy(nopeCursor_);
-                nopeCursor_ = null;
-            }
             foreach (var eachLegacyTool in legacySubTools_) {
                 eachLegacyTool.Value.OnDestroy();
             }
@@ -299,9 +293,6 @@ namespace TrafficManager.UI {
             try {
                 Log._Debug($"TrafficManagerTool: Awake {GetHashCode()}");
                 base.Awake();
-                nopeCursor_ = ScriptableObject.CreateInstance<CursorInfo>();
-                nopeCursor_.m_texture = UIView.GetAView().defaultAtlas["Niet"]?.texture;
-                nopeCursor_.m_hotspot = new Vector2(45, 45);
                 Initialize();
             } catch(Exception ex) {
                 ex.LogException();
@@ -330,8 +321,10 @@ namespace TrafficManager.UI {
                 // Make it impossible for user to undo changes performed by Road selection panels
                 // after changing traffic rule vis other tools.
                 // TODO: This code will not be necessary when we implement intent.
-                SimulationManager.instance.m_ThreadingWrapper.QueueMainThread(RoadSelectionPanels.RoadWorldInfoPanel.Hide);
-                RoadSelectionPanels.Root.Function = RoadSelectionPanels.FunctionModes.None;
+                if(RoadSelectionPanels.RoadWorldInfoPanel != null)
+                    SimulationManager.instance.m_ThreadingWrapper.QueueMainThread(RoadSelectionPanels.RoadWorldInfoPanel.Hide);
+                if(RoadSelectionPanels.Root != null)
+                    RoadSelectionPanels.Root.Function = RoadSelectionPanels.FunctionModes.None;
             }
 
             bool toolModeChanged = newToolMode != toolMode_;
@@ -352,7 +345,7 @@ namespace TrafficManager.UI {
 
                 Log._Debug($"SetToolMode: reset because toolmode not found {newToolMode}");
                 OnscreenDisplay.DisplayIdle();
-                ModUI.Instance.MainMenu.UpdateButtons();
+                ModUI.Instance?.MainMenu?.UpdateButtons();
                 return;
             }
 
@@ -560,13 +553,12 @@ namespace TrafficManager.UI {
                         InfoManager.SubInfoMode.Default);
                 }
                 ToolCursor = null;
-                bool elementsHovered = DetermineHoveredElements(activeLegacySubTool_ is not LaneConnectorTool);
-                if (activeLegacySubTool_ != null && NetTool != null && elementsHovered) {
-                    ToolCursor = NetTool.m_upgradeCursor;
-
-
-                    if (activeLegacySubTool_ is LaneConnectorTool lcs && HoveredNodeId != 0 && !IsNodeVisible(HoveredNodeId) && lcs.CanShowNopeCursor) {
-                        ToolCursor = nopeCursor_;
+                if (activeLegacySubTool_?.OverrideCursor != null) {
+                    ToolCursor = activeLegacySubTool_.OverrideCursor;
+                } else {
+                    bool elementsHovered = DetermineHoveredElements(activeLegacySubTool_ is not LaneConnectorTool);
+                    if (activeLegacySubTool_ != null && NetTool != null && elementsHovered) {
+                        ToolCursor = NetTool.m_upgradeCursor;
                     }
                 }
 

@@ -117,19 +117,16 @@ namespace TrafficManager.Manager.Impl {
         /// <summary>
         /// Resets lane arrows to their default value for the given segment end.
         /// </summary>
-        /// <param name="segmentId">segment to reset</param>
-        /// <param name="startNode">determines the segment end to reset. if <c>null</c>
-        /// both ends are reset</param>
+        /// <param name="segmentId">Segment id.</param>
+        /// <param name="startNode">Determines the segment end to reset, or both if <c>null</c>.</param>
         public void ResetLaneArrows(ushort segmentId, bool? startNode = null) {
-            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
-            foreach (var lane in extSegmentManager.GetSortedLanes(
-                segmentId,
-                ref segmentId.ToSegment(),
-                startNode,
-                LANE_TYPES,
-                VEHICLE_TYPES)) {
+
+            ref NetSegment segment = ref segmentId.ToSegment();
+
+            var sortedLanes = segment.GetSortedLanes(startNode, LANE_TYPES, VEHICLE_TYPES, sort: false);
+
+            foreach (var lane in sortedLanes)
                 ResetLaneArrows(lane.laneId);
-            }
         }
 
         /// <summary>
