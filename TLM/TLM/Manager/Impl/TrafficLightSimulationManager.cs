@@ -17,8 +17,9 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.Util;
     using ColossalFramework;
     using TrafficManager.Util.Extensions;
+    using TrafficManager.Persistence;
 
-    public class TrafficLightSimulationManager
+    public partial class TrafficLightSimulationManager
         : AbstractGeometryObservingManager,
           ICustomDataManager<List<Configuration.TimedTrafficLights>>,
           ITrafficLightSimulationManager
@@ -31,6 +32,8 @@ namespace TrafficManager.Manager.Impl {
             for (int i = 0; i < TrafficLightSimulations.Length; ++i) {
                 TrafficLightSimulations[i] = new TrafficLightSimulation((ushort)i);
             }
+
+            GlobalPersistence.PersistentObjects.Add(new Persistence());
         }
 
         public static readonly TrafficLightSimulationManager Instance =

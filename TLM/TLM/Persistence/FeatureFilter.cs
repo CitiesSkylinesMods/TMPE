@@ -26,12 +26,12 @@ namespace TrafficManager.Persistence {
         private readonly Dictionary<TFeature, FeatureStatus> filter;
 
         public static bool CanLoad(XElement element, out FeatureFilter<TFeature> result) {
-            return CanRead(element.Attribute(featuresRequiredAttributeName)?.Value,
+            return CanLoad(element.Attribute(featuresRequiredAttributeName)?.Value,
                             element.Attribute(featuresForbiddenAttributeName)?.Value,
                             out result);
         }
 
-        public static bool CanRead(string requiredAttribute, string forbiddenAttribute, out FeatureFilter<TFeature> result) {
+        private static bool CanLoad(string requiredAttribute, string forbiddenAttribute, out FeatureFilter<TFeature> result) {
 
             result = null;
 

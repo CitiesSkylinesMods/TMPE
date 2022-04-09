@@ -151,9 +151,12 @@
     <Compile Include="Manager\Impl\LaneConnectionManagerData\ConnectionDataBase.cs" />
     <Compile Include="Manager\Impl\LaneConnectionManagerData\LaneConnectionData.cs" />
     <Compile Include="Manager\Impl\LaneConnectionManagerData\LaneEnd.cs" />
+    <Compile Include="Manager\Impl\TrafficLightSimulationManager.Persistence.cs" />
     <Compile Include="Patch\_External\RTramAIModPatch.cs" />
+    <Compile Include="Persistence\AbstractPersistentObject.cs" />
     <Compile Include="Persistence\FeatureFilter.cs" />
-    <Compile Include="Persistence\IPersistentObject.cs" />
+    <Compile Include="Persistence\GlobalPersistentObject.cs" />
+    <Compile Include="Persistence\IGlobalPersistentObject.cs" />
     <Compile Include="Persistence\GlobalPersistence.cs" />
     <Compile Include="Persistence\PersistenceContext.cs" />
     <Compile Include="Persistence\PersistentObject.cs" />

@@ -213,10 +213,10 @@ namespace TrafficManager.Lifecycle {
                         var elements = _dom.Root.Elements(o.ElementName)?.Where(c => o.CanLoad(c));
                         if (elements?.Any() == true) {
                             if (elements.Count() > 1) {
-                                Log.Error($"More than one compatible element {o.ElementName} was found. Using the last one.");
+                                Log.Error($"More than one compatible element {o.ElementName} was found. Using the first one.");
                             }
                             try {
-                                var result = o.LoadData(elements.Last(), new PersistenceContext { Version = Version });
+                                var result = o.LoadData(elements.First(), new PersistenceContext { Version = Version });
                                 result.LogMessage($"LoadData for DOM element {o.ElementName} reported {result}.");
                             }
                             catch (Exception ex) {
