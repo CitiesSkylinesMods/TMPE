@@ -72,13 +72,11 @@ namespace TrafficManager.Util.Record {
             }
         }
 
+        // TODO: This should be called GetAllLaneIDs?
         public static List<uint> GetAllLanes(ushort segmentId) {
-            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
-            var lanes = extSegmentManager.GetSortedLanes(
-                segmentId,
-                ref segmentId.ToSegment(),
-                startNode: null,
-                sort: false);
+
+            var lanes = segmentId.ToSegment().GetSortedLanes(null, sort: false);
+
             return lanes.Select(lane => lane.laneId).ToList();
         }
     }

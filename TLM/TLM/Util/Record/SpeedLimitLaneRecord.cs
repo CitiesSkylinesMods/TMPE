@@ -2,7 +2,6 @@ namespace TrafficManager.Util.Record {
     using System;
     using System.Collections.Generic;
     using TrafficManager.Manager.Impl;
-    using static TrafficManager.Util.Shortcuts;
     using TrafficManager.State;
     using TrafficManager.Util.Extensions;
 
@@ -43,29 +42,35 @@ namespace TrafficManager.Util.Record {
                 action: SetSpeedLimitAction.FromNullableFloat(this.speedLimit_));
         }
 
+        /// <summary>
+        /// Obtain speed limit records for applicable lanes within the segment.
+        /// </summary>
+        /// <param name="segmentId">The id of the segment to inspect.</param>
+        /// <returns>
+        /// Returns a list of <see cref="SpeedLimitLaneRecord"/> for all
+        /// speed-applicable lanes in the segment. The list may be empty if no
+        /// matching lanes were found.
+        /// </returns>
         public static List<SpeedLimitLaneRecord> GetLanes(ushort segmentId) {
-            int maxLaneCount = segmentId.ToSegment().Info.m_lanes.Length;
-            var ret = new List<SpeedLimitLaneRecord>(maxLaneCount);
-            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
-            var lanes = extSegmentManager.GetSortedLanes(
-                segmentId,
-                ref segmentId.ToSegment(),
+
+            var lanes = segmentId.ToSegment().GetSortedLanes(
                 null,
                 LANE_TYPES,
                 VEHICLE_TYPES,
                 sort: false);
+
+            var ret = new List<SpeedLimitLaneRecord>(lanes.Count);
+
             foreach (var lane in lanes) {
-                SpeedLimitLaneRecord laneData = new SpeedLimitLaneRecord {
+                ret.Add(new SpeedLimitLaneRecord {
                     LaneId = lane.laneId,
                     LaneIndex = lane.laneIndex,
-                };
-                ret.Add(laneData);
+                });
             }
-            ret.TrimExcess();
+
             return ret;
         }
 
         public byte[] Serialize() => SerializationUtil.Serialize(this);
-
     }
 }

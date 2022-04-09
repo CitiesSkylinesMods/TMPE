@@ -2,6 +2,7 @@ namespace TrafficManager.Util.Extensions {
     using ColossalFramework;
     using System;
     using System.Collections.Generic;
+    using System.Collections.ObjectModel;
     using System.Diagnostics.CodeAnalysis;
     using TrafficManager.Manager.Impl;
     using TrafficManager.Util.Iterators;
@@ -222,12 +223,13 @@ namespace TrafficManager.Util.Extensions {
             VehicleInfo.VehicleType vehicleTypeFilter,
             bool incoming = false) {
 
-            int count = 0;
-
             NetInfo segmentInfo = segment.Info;
 
-            if (segmentInfo?.m_lanes == null)
-                return count;
+            byte numLanes = (byte)(segmentInfo?.m_lanes?.Length ?? 0);
+            if (numLanes == 0)
+                return 0;
+
+            int count = 0;
 
             bool startNode = segment.IsStartNode(nodeId) ^ incoming;
             bool inverted = (segment.m_flags & NetSegment.Flags.Invert) != NetSegment.Flags.None;
@@ -244,7 +246,7 @@ namespace TrafficManager.Util.Extensions {
 
             NetManager netManager = Singleton<NetManager>.instance;
 
-            while (laneIndex < segmentInfo.m_lanes.Length && curLaneId != 0u) {
+            while (laneIndex < numLanes && curLaneId != 0u) {
                 NetInfo.Lane laneInfo = segmentInfo.m_lanes[laneIndex];
 
                 if ((laneInfo.m_finalDirection == filterDir) &&
@@ -283,32 +285,33 @@ namespace TrafficManager.Util.Extensions {
             bool reverse = false,
             bool sort = true) {
             // TODO refactor together with getSegmentNumVehicleLanes, especially the vehicle type and lane type checks
-            var laneList = new List<LanePos>();
 
             NetInfo segmentInfo = netSegment.Info;
 
-            if (segmentInfo?.m_lanes == null)
-                return laneList;
+            byte numLanes = (byte)(segmentInfo?.m_lanes?.Length ?? 0);
+            if (numLanes == 0)
+                return EmptyLaneList;
 
-            bool inverted = (netSegment.m_flags & NetSegment.Flags.Invert) != NetSegment.Flags.None;
+            var laneList = new List<LanePos>(numLanes);
+
+            bool inverted = (netSegment.m_flags & NetSegment.Flags.Invert) != 0;
 
             NetInfo.Direction? filterDir = null;
-            NetInfo.Direction sortDir = NetInfo.Direction.Forward;
+            NetInfo.Direction sortDir;
 
-            if (startNode != null) {
-                filterDir = (bool)startNode
-                                ? NetInfo.Direction.Backward
-                                : NetInfo.Direction.Forward;
-                filterDir = inverted
-                                ? NetInfo.InvertDirection((NetInfo.Direction)filterDir)
-                                : filterDir;
-                sortDir = NetInfo.InvertDirection((NetInfo.Direction)filterDir);
-            } else if (inverted) {
-                sortDir = NetInfo.Direction.Backward;
-            }
+            if (startNode.HasValue) {
+                filterDir = startNode.Value
+                    ? NetInfo.Direction.Backward
+                    : NetInfo.Direction.Forward;
 
-            if (reverse) {
-                sortDir = NetInfo.InvertDirection(sortDir);
+                if (inverted)
+                    filterDir = NetInfo.InvertDirection(filterDir.Value);
+
+                sortDir = NetInfo.InvertDirection(filterDir.Value);
+            } else {
+                sortDir = inverted
+                    ? NetInfo.Direction.Backward
+                    : NetInfo.Direction.Forward;
             }
 
             uint curLaneId = netSegment.m_lanes;
@@ -316,30 +319,35 @@ namespace TrafficManager.Util.Extensions {
 
             NetManager netManager = Singleton<NetManager>.instance;
 
-            while (laneIndex < segmentInfo.m_lanes.Length && curLaneId != 0u) {
+            while (laneIndex < numLanes && curLaneId != 0u) {
                 NetInfo.Lane laneInfo = segmentInfo.m_lanes[laneIndex];
-                if ((laneTypeFilter == null ||
-                     (laneInfo.m_laneType & laneTypeFilter) != NetInfo.LaneType.None) &&
-                    (vehicleTypeFilter == null || (laneInfo.m_vehicleType & vehicleTypeFilter) !=
-                     VehicleInfo.VehicleType.None) &&
-                    (filterDir == null ||
-                     laneInfo.m_finalDirection == filterDir)) {
-                    laneList.Add(
-                        new LanePos(
-                            curLaneId,
-                            laneIndex,
-                            laneInfo.m_position,
-                            laneInfo.m_vehicleType,
-                            laneInfo.m_laneType));
+
+                if ((laneTypeFilter == null || (laneInfo.m_laneType & laneTypeFilter) != 0) &&
+                    (vehicleTypeFilter == null || (laneInfo.m_vehicleType & vehicleTypeFilter) != 0) &&
+                    (filterDir == null || laneInfo.m_finalDirection == filterDir)) {
+
+                    laneList.Add(new LanePos(
+                        curLaneId,
+                        laneIndex,
+                        laneInfo.m_position,
+                        laneInfo.m_vehicleType,
+                        laneInfo.m_laneType));
                 }
 
                 curLaneId = netManager.m_lanes.m_buffer[curLaneId].m_nextLane;
                 ++laneIndex;
             }
 
-            if (sort) {
+            laneList.TrimExcess();
+
+            if (sort && laneList.Count > 0) {
+                if (reverse)
+                    sortDir = NetInfo.InvertDirection(sortDir);
+
+                bool forward = sortDir == NetInfo.Direction.Forward;
+
                 int CompareLanePositionsFun(LanePos x, LanePos y) {
-                    bool fwd = sortDir == NetInfo.Direction.Forward;
+                    bool fwd = forward;
                     if (Math.Abs(x.position - y.position) < 1e-12) {
                         if (x.position > 0) {
                             // mirror type-bound lanes (e.g. for coherent disply of lane-wise speed limits)
@@ -374,7 +382,10 @@ namespace TrafficManager.Util.Extensions {
 
                 laneList.Sort(CompareLanePositionsFun);
             }
+
             return laneList;
         }
+
+        private static readonly ReadOnlyCollection<LanePos> EmptyLaneList = new(new List<LanePos>(0));
     }
 }

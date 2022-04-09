@@ -1,6 +1,7 @@
 namespace TrafficManager.Patch._TrainTrackBase {
     using HarmonyLib;
     using JetBrains.Annotations;
+    using TrafficManager.Manager.Impl;
     using TrafficManager.State;
 
     [HarmonyPatch(typeof(RoadBaseAI), nameof(RoadBaseAI.TrafficLightSimulationStep))]
@@ -11,8 +12,8 @@ namespace TrafficManager.Patch._TrainTrackBase {
         [UsedImplicitly]
         public static bool Prefix(TrainTrackBaseAI __instance, ushort nodeID, ref NetNode data) {
             return !Options.timedLightsEnabled
-                   || !Constants.ManagerFactory
-                                .TrafficLightSimulationManager
+                   || !TrafficLightSimulationManager
+                                .Instance
                                 .TrafficLightSimulations[nodeID]
                                 .IsSimulationRunning();
         }

@@ -4,8 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
 using TrafficManager.API.Traffic.Enums;
-using TrafficManager.API.TrafficLight;
 using TrafficManager.Persistence;
+using TrafficManager.TrafficLight.Impl;
 using TrafficManager.Util;
 using TrafficManager.Util.Extensions;
 
@@ -57,7 +57,7 @@ namespace TrafficManager.Manager.Impl {
                 return result;
             }
 
-            internal class TtlPersistence : PersistentObject<ITimedTrafficLights, TtlFeature> {
+            internal class TtlPersistence : PersistentObject<TimedTrafficLights, TtlFeature> {
 
                 public override string ElementName => "Ttl";
 
@@ -144,11 +144,11 @@ namespace TrafficManager.Manager.Impl {
                     });
                 }
 
-                protected override PersistenceResult OnLoadData(XElement element, out ITimedTrafficLights obj, ICollection<TtlFeature> featuresRequired, PersistenceContext context) {
+                protected override PersistenceResult OnLoadData(XElement element, out TimedTrafficLights obj, ICollection<TtlFeature> featuresRequired, PersistenceContext context) {
                     throw new NotImplementedException();
                 }
 
-                protected override PersistenceResult OnSaveData(XElement element, ITimedTrafficLights ttl, ICollection<TtlFeature> featuresRequired, ICollection<TtlFeature> featuresForbidden, PersistenceContext context) {
+                protected override PersistenceResult OnSaveData(XElement element, TimedTrafficLights ttl, ICollection<TtlFeature> featuresRequired, ICollection<TtlFeature> featuresForbidden, PersistenceContext context) {
 
                     if (masterNodeIdBySlaveNodeId == null || nodeGroupByMasterNodeId == null) {
                         throw new InvalidOperationException("Must call PrepareForSave() before SaveData in TtlPersistence");
