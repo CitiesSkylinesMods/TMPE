@@ -2356,6 +2356,8 @@ namespace TrafficManager.Manager.Impl {
                 // [https://github.com/CitiesSkylinesMods/TMPE/issues/1486#issuecomment-1075699771] what about station tracks connecting to unidirectional tracks?
                 reverse = false;
             } else {
+                // at least one lane is non-station bidirectional
+
                 reverse = startNode1 == startNode2; // Reverse if segments are facing each other
                 reverse ^= segmentInvert1 != segmentInvert2; // Reverse if segments are different directions
                 reverse ^= backward1 != backward2;  // Reverse if lanes are in different directions
