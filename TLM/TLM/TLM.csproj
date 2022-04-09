@@ -426,7 +426,6 @@
     </Compile>
     <Compile Include="UI\SubTools\TimedTrafficLights\TimedTrafficLightsTool.cs" />
     <Compile Include="UI\SubTools\TimedTrafficLights\TTLToolMode.cs" />
-    <Compile Include="UI\Textures\JunctionRestrictions.cs" />
     <Compile Include="UI\Textures\MainMenu.cs" />
     <Compile Include="UI\Textures\RoadUI.cs" />
     <Compile Include="UI\Textures\RoadSignThemeManager.cs" />
@@ -1225,6 +1224,18 @@
     <EmbeddedResource Include="Resources\SignThemes\Kmph_China_Generic\Restrict-Taxi.png" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Resources\SignThemes\Fallback\Allow-EnterBlocked.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Fallback\Allow-LaneChange.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Fallback\Allow-LeftOnRed.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Fallback\Allow-PedestrianCrossing.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Fallback\Allow-RightOnRed.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Fallback\Allow-UTurn.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Fallback\Restrict-EnterBlocked.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Fallback\Restrict-LaneChange.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Fallback\Restrict-LeftOnRed.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Fallback\Restrict-PedestrianCrossing.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Fallback\Restrict-RightOnRed.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Fallback\Restrict-UTurn.png" />
     <Content Include="Resources\SignThemes\Kmph_China_Generic\README.md" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

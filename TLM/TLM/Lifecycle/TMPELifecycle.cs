@@ -173,7 +173,6 @@ namespace TrafficManager.Lifecycle {
 
             // Texture managers
             RegisteredManagers.Add(UI.Textures.RoadSignThemeManager.Instance);
-            RegisteredManagers.Add(UI.Textures.JunctionRestrictions.Instance);
             RegisteredManagers.Add(UI.Textures.RoadUI.Instance);
             RegisteredManagers.Add(UI.Textures.TrafficLightTextures.Instance);
 

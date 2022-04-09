@@ -40,18 +40,49 @@
         /// only those supported in <see cref="VehicleRestrictionsTool.RoadVehicleTypes"/>
         /// and <see cref="VehicleRestrictionsTool.RailVehicleTypes"/>.
         /// </summary>
-        private Dictionary<ExtVehicleType, AllowDisallowTexture> restrictions_ = new();
+        private Dictionary<ExtVehicleType, AllowDisallowTexture> vehicleRestrictions_ = new();
+
+        public enum OtherRestriction {
+            Crossing,
+            EnterBlockedJunction,
+            LaneChange,
+            LeftOnRed,
+            RightOnRed,
+            UTurn,
+        }
+
+        /// <summary>
+        /// Road signs for other restrictions such as pedestrian crossings, blocked junction, u-turn etc.
+        /// </summary>
+        private Dictionary<OtherRestriction, AllowDisallowTexture> otherRestrictions_ = new();
 
         public Texture2D VehicleRestriction(ExtVehicleType type, bool allow) {
             if (allow) {
-                return this.restrictions_.ContainsKey(type)
-                           ? this.restrictions_[type].allow
+                return this.vehicleRestrictions_.ContainsKey(type)
+                           ? this.vehicleRestrictions_[type].allow
                            : this.ParentTheme.VehicleRestriction(type, allow: true);
             }
 
-            return this.restrictions_.ContainsKey(type)
-                       ? this.restrictions_[type].restrict
+            return this.vehicleRestrictions_.ContainsKey(type)
+                       ? this.vehicleRestrictions_[type].restrict
                        : this.ParentTheme.VehicleRestriction(type, allow: false);
+        }
+
+        /// <summary>
+        /// Returns road sign for other restrictions (pedestrian, blocked junction, u-turn etc).
+        /// </summary>
+        /// <param name="type">The restriction we need.</param>
+        /// <param name="allow">Allow or restrict.</param>
+        public Texture2D GetOtherRestriction(OtherRestriction type, bool allow) {
+            if (allow) {
+                return this.otherRestrictions_.ContainsKey(type)
+                           ? this.otherRestrictions_[type].allow
+                           : this.ParentTheme.GetOtherRestriction(type, allow: true);
+            }
+
+            return this.otherRestrictions_.ContainsKey(type)
+                       ? this.otherRestrictions_[type].restrict
+                       : this.ParentTheme.GetOtherRestriction(type, allow: false);
         }
 
         /// <summary>This list of required speed signs is used for loading.</summary>
@@ -128,9 +159,7 @@
                     size: this.TextureSize,
                     mip: true,
                     logIfNotFound: false);
-                this.Textures.Add(
-                    speedLimit,
-                    resource ? resource : Texture2D.whiteTexture);
+                this.Textures.Add(speedLimit, resource ? resource : Texture2D.whiteTexture);
             }
 
             LoadPrioritySign(p: PriorityType.None, name: "PriorityNone", whiteTexture);
@@ -141,20 +170,23 @@
             LoadParkingSign(allow: true, name: "Parking", whiteTexture);
             LoadParkingSign(allow: false, name: "NoParking", whiteTexture);
 
-            LoadRestrictionSign(
-                index: ExtVehicleType.PassengerCar,
-                name: "PersonalCar",
-                whiteTexture);
-            LoadRestrictionSign(index: ExtVehicleType.Bus, name: "Bus", whiteTexture);
-            LoadRestrictionSign(index: ExtVehicleType.Taxi, name: "Taxi", whiteTexture);
-            LoadRestrictionSign(index: ExtVehicleType.CargoTruck, name: "Truck", whiteTexture);
-            LoadRestrictionSign(index: ExtVehicleType.Service, name: "Service", whiteTexture);
-            LoadRestrictionSign(index: ExtVehicleType.Emergency, name: "Emergency", whiteTexture);
-            LoadRestrictionSign(
-                index: ExtVehicleType.PassengerTrain,
-                name: "PassengerTrain",
-                whiteTexture);
-            LoadRestrictionSign(index: ExtVehicleType.CargoTrain, name: "CargoTrain", whiteTexture);
+            // Load Vehicle type restrictions
+            LoadVehicleRestrictionSign(ExtVehicleType.PassengerCar, "PersonalCar", whiteTexture);
+            LoadVehicleRestrictionSign(ExtVehicleType.Bus, "Bus", whiteTexture);
+            LoadVehicleRestrictionSign(ExtVehicleType.Taxi, "Taxi", whiteTexture);
+            LoadVehicleRestrictionSign(ExtVehicleType.CargoTruck, "Truck", whiteTexture);
+            LoadVehicleRestrictionSign(ExtVehicleType.Service, "Service", whiteTexture);
+            LoadVehicleRestrictionSign(ExtVehicleType.Emergency, "Emergency", whiteTexture);
+            LoadVehicleRestrictionSign(ExtVehicleType.PassengerTrain, "PassengerTrain", whiteTexture);
+            LoadVehicleRestrictionSign(ExtVehicleType.CargoTrain, "CargoTrain", whiteTexture);
+
+            // Load other restrictions
+            LoadOtherRestrictionSign(OtherRestriction.Crossing, "PedestrianCrossing", whiteTexture);
+            LoadOtherRestrictionSign(OtherRestriction.EnterBlockedJunction, "EnterBlocked", whiteTexture);
+            LoadOtherRestrictionSign(OtherRestriction.LaneChange, "LaneChange", whiteTexture);
+            LoadOtherRestrictionSign(OtherRestriction.LeftOnRed, "LeftOnRed", whiteTexture);
+            LoadOtherRestrictionSign(OtherRestriction.RightOnRed, "RightOnRed", whiteTexture);
+            LoadOtherRestrictionSign(OtherRestriction.UTurn, "UTurn", whiteTexture);
 
             // Setup parent theme to be `Fallback` theme if ParentTheme is null
             // For Fallback theme itself, keep it null.
@@ -203,18 +235,30 @@
             public Texture2D restrict;
         }
 
-        private void LoadRestrictionSign(ExtVehicleType index,
-                                         string name,
-                                         bool whiteTexture) {
-            var size200 = new IntVector2(200);
+        /// <summary>
+        /// Generic function to load Allow-X and Restrict-X textures into either
+        /// <see cref="vehicleRestrictions_"/> or <see cref="otherRestrictions_"/>
+        /// </summary>
+        /// <param name="index">The key to store as.</param>
+        /// <param name="dict">The destination dictionary.</param>
+        /// <param name="name">Name to append to either Allow- or Restrict-.</param>
+        /// <param name="whiteTexture">Create record even if resource is missing, using white texture.</param>
+        /// <typeparam name="TIndex">Type of the key.</typeparam>
+        private void LoadRestrictionSignGeneric<TIndex>(
+            TIndex index,
+            Dictionary<TIndex, AllowDisallowTexture> dict,
+            string name,
+            bool whiteTexture,
+            int sizeHint) {
+            var size = new IntVector2(sizeHint);
             Texture2D allowTex = TextureResources.LoadDllResource(
                 resourceName: $"{this.PathPrefix}.Allow-{name}.png",
-                size: size200,
+                size: size,
                 mip: true,
                 logIfNotFound: false);
             Texture2D restrictTex = TextureResources.LoadDllResource(
                 resourceName: $"{this.PathPrefix}.Restrict-{name}.png",
-                size: size200,
+                size: size,
                 mip: true,
                 logIfNotFound: false);
             if (allowTex && restrictTex) {
@@ -222,14 +266,26 @@
                     allow = allowTex,
                     restrict = restrictTex,
                 };
-                this.restrictions_[index] = pairOfSigns;
+                dict[index] = pairOfSigns;
             } else if (whiteTexture) {
                 var whiteBox = new AllowDisallowTexture {
                     allow = Texture2D.whiteTexture,
                     restrict = Texture2D.whiteTexture,
                 };
-                this.restrictions_[index] = whiteBox;
+                dict[index] = whiteBox;
             }
+        }
+
+        private void LoadVehicleRestrictionSign(ExtVehicleType index,
+                                                string name,
+                                                bool whiteTexture) {
+            LoadRestrictionSignGeneric(index, this.vehicleRestrictions_, name, whiteTexture, 200);
+        }
+
+        private void LoadOtherRestrictionSign(OtherRestriction index,
+                                              string name,
+                                              bool whiteTexture) {
+            LoadRestrictionSignGeneric(index, this.otherRestrictions_, name, whiteTexture, 256);
         }
 
         private void DestroyTexture(Texture2D t) {
@@ -264,7 +320,7 @@
             this.parking_.Clear();
 
             // Vehicle Restriction signs
-            foreach (var rs in this.restrictions_) {
+            foreach (var rs in this.vehicleRestrictions_) {
                 DestroyTexture(rs.Value.allow);
                 DestroyTexture(rs.Value.restrict);
             }
