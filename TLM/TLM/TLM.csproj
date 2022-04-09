@@ -187,6 +187,7 @@
     <Compile Include="UI\Helpers\UrlButton.cs" />
     <Compile Include="UI\WhatsNew\MarkupKeyword.cs" />
     <Compile Include="UI\WhatsNew\WhatsNewMarkup.cs" />
+    <Compile Include="Util\AnonymousDisposable.cs" />
     <Compile Include="Util\Extensions\CitizenUnitExtensions.cs" />
     <Compile Include="Util\Extensions\ParkedVehicleExtensions.cs" />
     <Compile Include="Util\Extensions\VersionExtension.cs" />

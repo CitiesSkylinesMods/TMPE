@@ -32,23 +32,23 @@ namespace TrafficManager.Persistence {
         /// <summary>
         /// Override to load data
         /// </summary>
-        /// <param name="element">An XML element that was filled by <see cref="SaveData(XElement, ICollection{TFeature}, ICollection{TFeature}, PersistenceContext)"/></param>
+        /// <param name="element">An XML element that was filled by <see cref="OnSaveData(XElement, ICollection{TFeature}, ICollection{TFeature}, PersistenceContext)"/></param>
         /// <param name="featuresRequired">A read-only collection of features that were known to the build that created this element.
         /// When a particular feature caused a breaking change in the save data, the absence of that feature from this collection
         /// means that the data must be read the old way.</param>
         /// <param name="context">The persistence context of this load operation</param>
         /// <returns></returns>
-        protected abstract PersistenceResult LoadData(XElement element, ICollection<TFeature> featuresRequired, PersistenceContext context);
+        protected abstract PersistenceResult OnLoadData(XElement element, ICollection<TFeature> featuresRequired, PersistenceContext context);
 
         /// <summary>
         /// Verifies feature compatibility and conditionally calls the overridable
-        /// <see cref="LoadData(XElement, ICollection{TFeature}, PersistenceContext)"/>.
+        /// <see cref="OnLoadData(XElement, ICollection{TFeature}, PersistenceContext)"/>.
         /// </summary>
         /// <param name="element"></param>
         /// <param name="context"></param>
         /// <returns></returns>
         public PersistenceResult LoadData(XElement element, PersistenceContext context) {
-            return LoadData(element, f => LoadData(element, f, context));
+            return LoadData(element, f => OnLoadData(element, f, context));
         }
 
         /// <summary>
@@ -62,10 +62,10 @@ namespace TrafficManager.Persistence {
         /// it must return <see cref="PersistenceResult.Skip"/>.</param>
         /// <param name="context">The persistence context of this save operation</param>
         /// <returns></returns>
-        protected abstract PersistenceResult SaveData(XElement element, ICollection<TFeature> featuresRequired, ICollection<TFeature> featuresForbidden, PersistenceContext context);
+        protected abstract PersistenceResult OnSaveData(XElement element, ICollection<TFeature> featuresRequired, ICollection<TFeature> featuresForbidden, PersistenceContext context);
 
         /// <summary>
-        /// Calls <see cref="SaveData(XElement, ICollection{TFeature}, ICollection{TFeature}, PersistenceContext)"/>.
+        /// Calls <see cref="OnSaveData(XElement, ICollection{TFeature}, ICollection{TFeature}, PersistenceContext)"/>.
         /// When that method reports the use of features that introduced breaking changes, successive calls are made to request
         /// backward-compatible save data.
         /// </summary>
@@ -73,7 +73,7 @@ namespace TrafficManager.Persistence {
         /// <param name="context"></param>
         /// <returns></returns>
         public PersistenceResult SaveData(XElement container, PersistenceContext context) {
-            return SaveData(container, (e, r, f) => SaveData(e, r, f, context));
+            return SaveData(container, null, (e, r, f) => OnSaveData(e, r, f, context));
         }
     }
 }

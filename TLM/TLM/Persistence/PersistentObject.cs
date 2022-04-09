@@ -20,11 +20,11 @@ namespace TrafficManager.Persistence {
         /// means that the data must be read the old way.</param>
         /// <param name="context">The persistence context of this load operation</param>
         /// <returns></returns>
-        protected abstract PersistenceResult LoadData(XElement element, out TObject obj, ICollection<TFeature> featuresRequired, PersistenceContext context);
+        protected abstract PersistenceResult OnLoadData(XElement element, out TObject obj, ICollection<TFeature> featuresRequired, PersistenceContext context);
 
         /// <summary>
         /// Verifies feature compatibility and conditionally calls the overridable
-        /// <see cref="LoadData(XElement, out TObject, ICollection{TFeature}, PersistenceContext)"/>.
+        /// <see cref="OnLoadData(XElement, out TObject, ICollection{TFeature}, PersistenceContext)"/>.
         /// </summary>
         /// <param name="element"></param>
         /// <param name="obj"></param>
@@ -33,7 +33,7 @@ namespace TrafficManager.Persistence {
         public PersistenceResult LoadData(XElement element, out TObject obj, PersistenceContext context) {
             TObject result = default;
             try {
-                return LoadData(element, r => LoadData(element, out result, r, context));
+                return LoadData(element, r => OnLoadData(element, out result, r, context));
             }
             finally {
                 obj = result;
@@ -52,10 +52,10 @@ namespace TrafficManager.Persistence {
         /// it must return <see cref="PersistenceResult.Skip"/>.</param>
         /// <param name="context">The persistence context of this save operation</param>
         /// <returns></returns>
-        protected abstract PersistenceResult SaveData(XElement element, TObject obj, ICollection<TFeature> featuresRequired, ICollection<TFeature> featuresForbidden, PersistenceContext context);
+        protected abstract PersistenceResult OnSaveData(XElement element, TObject obj, ICollection<TFeature> featuresRequired, ICollection<TFeature> featuresForbidden, PersistenceContext context);
 
         /// <summary>
-        /// Calls <see cref="SaveData(XElement, TObject, ICollection{TFeature}, ICollection{TFeature}, PersistenceContext)"/>.
+        /// Calls <see cref="OnSaveData(XElement, TObject, ICollection{TFeature}, ICollection{TFeature}, PersistenceContext)"/>.
         /// When that method reports the use of features that introduced breaking changes, successive calls are made to request
         /// backward-compatible save data.
         /// </summary>
@@ -63,8 +63,8 @@ namespace TrafficManager.Persistence {
         /// <param name="obj"></param>
         /// <param name="context"></param>
         /// <returns></returns>
-        public PersistenceResult SaveData(XElement container, TObject obj, PersistenceContext context) {
-            return SaveData(container, (e, r, f) => SaveData(e, obj, r, f, context));
+        public PersistenceResult SaveData(XElement container, TObject obj, ICollection<TFeature> featuresForbidden, PersistenceContext context) {
+            return SaveData(container, featuresForbidden, (e, r, f) => OnSaveData(e, obj, r, f, context));
         }
     }
 }

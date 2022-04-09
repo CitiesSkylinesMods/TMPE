@@ -34,8 +34,14 @@ namespace TrafficManager.Persistence {
                     : PersistenceResult.Skip;
         }
 
-        protected PersistenceResult SaveData(XElement container, Func<XElement, ICollection<TFeature>, ICollection<TFeature>, PersistenceResult> saveData) {
+        protected PersistenceResult SaveData(XElement container, ICollection<TFeature> featuresForbidden, Func<XElement, ICollection<TFeature>, ICollection<TFeature>, PersistenceResult> saveData) {
+
             var featureFilter = new FeatureFilter<TFeature>();
+            if (featuresForbidden != null) {
+                foreach (var feature in featuresForbidden) {
+                    featureFilter.Forbid(feature);
+                }
+            }
 
             var element = new XElement(ElementName);
             var result = saveData(element,

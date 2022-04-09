@@ -62,6 +62,30 @@ namespace TrafficManager.Persistence {
 
         public FeatureFilter() => filter = new Dictionary<TFeature, FeatureStatus>();
 
+        public FeatureFilter(IEnumerable<TFeature> required, IEnumerable<TFeature> forbidden)
+                : this()
+                {
+
+            if (required != null) {
+                if (forbidden != null) {
+                    IEnumerable<TFeature> conflictingFeatures = required.Intersect(forbidden);
+                    if (conflictingFeatures.Any()) {
+                        throw new ArgumentException($"{conflictingFeatures.Count()} features including {conflictingFeatures.First()} were found in both the required and forbidden collections");
+                    }
+                }
+
+                foreach (var f in required) {
+                    Require(f);
+                }
+            }
+
+            if (forbidden != null) {
+                foreach (var f in forbidden) {
+                    Forbid(f);
+                }
+            }
+        }
+
         private FeatureFilter(Dictionary<TFeature, FeatureStatus> filter) => this.filter = filter;
 
         public void Clear() => filter.Clear();

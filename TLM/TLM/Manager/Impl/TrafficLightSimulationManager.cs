@@ -39,6 +39,15 @@ namespace TrafficManager.Manager.Impl {
         public static readonly TrafficLightSimulationManager Instance =
             new TrafficLightSimulationManager();
 
+        private IEnumerable<ITimedTrafficLights> EnumerateTimedTrafficLights() {
+
+            for (int i = 0; i < NetManager.MAX_NODE_COUNT; i++) {
+                if (TrafficLightSimulations[i].IsTimedLight()) {
+                    yield return TrafficLightSimulations[i].timedLight;
+                }
+            }
+        }
+
         /// <summary>
         /// For each node id: traffic light simulation assigned to the node
         /// </summary>
