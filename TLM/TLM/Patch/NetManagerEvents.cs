@@ -24,32 +24,35 @@ namespace TrafficManager.Patch {
     internal class NetManagerEvents {
 
         internal delegate void ReleasingLaneEventHandler(uint laneId, ref NetLane lane);
+        internal delegate void ReleasedLaneEventHandler(uint laneId);
+
         internal delegate void ReleasingSegmentEventHandler(ushort segmentId, ref NetSegment segment);
+        internal delegate void ReleasedSegmentEventHandler(ushort segmentId);
 
         private NetManagerEvents() {
         }
 
         /// <summary>
         /// Occurs when a lane is about to be released.
-        /// <see cref="NetLaneExtensions.IsValidWithSegment(ref NetLane)"/> usually still returns true when this event occurs.
+        /// In most cases the lane is still valid when this event occurs, so that <see cref="NetLaneExtensions.IsValidWithSegment(ref NetLane)"/> will return true.
         /// </summary>
         public event ReleasingLaneEventHandler ReleasingLane;
 
         /// <summary>
         /// Occurs when a lane has been released and is no longer valid.
         /// </summary>
-        public event Action<uint> ReleasedLane;
+        public event ReleasedLaneEventHandler ReleasedLane;
 
         /// <summary>
         /// Occurs when a segment is about to be released.
-        /// <see cref="NetSegmentExtensions.IsValid(ref NetSegment)"/> usually still returns true when this event occurs.
+        /// In most cases the segment is still valid when this event occurs, so that <see cref="NetSegmentExtensions.IsValid(ref NetSegment)"/> will return true.
         /// </summary>
         public event ReleasingSegmentEventHandler ReleasingSegment;
 
         /// <summary>
         /// Occurs when a segment has been released and is no longer valid.
         /// </summary>
-        public event Action<ushort> ReleasedSegment;
+        public event ReleasedSegmentEventHandler ReleasedSegment;
 
         public static NetManagerEvents Instance { get; } = new NetManagerEvents();
 
