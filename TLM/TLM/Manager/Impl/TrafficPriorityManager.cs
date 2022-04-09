@@ -9,7 +9,6 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.API.Traffic;
-    using TrafficManager.API.TrafficLight;
     using TrafficManager.Geometry;
     using TrafficManager.State.ConfigData;
     using TrafficManager.State;
@@ -18,6 +17,7 @@ namespace TrafficManager.Manager.Impl {
     using UnityEngine;
     using TrafficManager.Util;
     using TrafficManager.Util.Extensions;
+    using TrafficManager.TrafficLight.Impl;
 
     public class TrafficPriorityManager
         : AbstractGeometryObservingManager,
@@ -508,7 +508,7 @@ namespace TrafficManager.Manager.Impl {
                 //    return true;
                 // }
 
-                ICustomSegmentLights otherLights = null;
+                CustomSegmentLights otherLights = null;
                 if (Options.trafficLightPriorityRules) {
                     otherLights = segLightsManager.GetSegmentLights(
                         otherSegmentId,
@@ -605,7 +605,7 @@ namespace TrafficManager.Manager.Impl {
                                           ref ExtVehicle incomingState,
                                           bool incomingOnMain,
                                           ref ExtSegmentEnd incomingEnd,
-                                          ICustomSegmentLights incomingLights,
+                                          CustomSegmentLights incomingLights,
                                           ArrowDirection incomingFromDir)
         {
             if (logPriority) {
@@ -659,7 +659,7 @@ namespace TrafficManager.Manager.Impl {
                     incomingState.nextSegmentId);
 
             if (incomingLights != null) {
-                ICustomSegmentLight incomingLight = incomingLights.GetCustomLight(incomingState.currentLaneIndex);
+                CustomSegmentLight incomingLight = incomingLights.GetCustomLight(incomingState.currentLaneIndex);
                 if (logPriority) {
                     Log._DebugFormat(
                         "TrafficPriorityManager.IsConflictingVehicle({0}, {1}): Detected traffic " +
