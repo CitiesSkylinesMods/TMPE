@@ -1,12 +1,10 @@
 namespace TrafficManager.Util.Record {
-    using ColossalFramework;
     using System;
     using System.Collections.Generic;
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.Manager.Impl;
     using TrafficManager.State;
     using TrafficManager.Util.Extensions;
-    using static TrafficManager.Util.Shortcuts;
 
     [Serializable]
     public class LaneArrowsRecord : IRecordable {
@@ -31,24 +29,32 @@ namespace TrafficManager.Util.Record {
             LaneArrowManager.Instance.SetLaneArrows(laneId, arrows_.Value);
         }
 
+        /// <summary>
+        /// Obtain lane arrow records for the lanes exiting the specified
+        /// end of a segment.
+        /// </summary>
+        /// <param name="segmentId">The id of the segment to inspect.</param>
+        /// <param name="startNode">
+        /// If <c>true</c>, get lanes exiting via the start node; otherwise
+        /// get lanes exiting via the end node.</param>
+        /// <returns>
+        /// Returns a sorted list of <see cref="LaneArrowsRecord"/> associated
+        /// with each lane exiting via the specified segment end. The list may
+        /// be empty if no matching lanes were found.
+        /// </returns>
         public static List<LaneArrowsRecord> GetLanes(ushort segmentId, bool startNode) {
-            int maxLaneCount = segmentId.ToSegment().Info.m_lanes.Length;
-            var ret = new List<LaneArrowsRecord>(maxLaneCount);
-            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
-            var lanes = extSegmentManager.GetSortedLanes(
-                segmentId,
-                ref segmentId.ToSegment(),
+
+            var lanes = segmentId.ToSegment().GetSortedLanes(
                 startNode,
                 LaneArrowManager.LANE_TYPES,
                 LaneArrowManager.VEHICLE_TYPES,
                 sort: false);
-            foreach (var lane in lanes) {
-                LaneArrowsRecord laneData = new LaneArrowsRecord {
-                    LaneId = lane.laneId,
-                };
-                ret.Add(laneData);
-            }
-            ret.TrimExcess();
+
+            var ret = new List<LaneArrowsRecord>(lanes.Count);
+
+            foreach (var lane in lanes)
+                ret.Add(new LaneArrowsRecord { LaneId = lane.laneId });
+
             return ret;
         }
 

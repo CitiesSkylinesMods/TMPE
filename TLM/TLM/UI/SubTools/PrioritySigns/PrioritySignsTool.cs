@@ -323,13 +323,13 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                     ref NetNode node = ref nodeId.ToNode();
                     Vector3 nodePos = node.m_position;
 
-                    for (int i = 0; i < 8; ++i) {
-                        ushort segmentId = node.GetSegment(i);
+                    for (int segmentIndex = 0; segmentIndex < Constants.MAX_SEGMENTS_OF_NODE; ++segmentIndex) {
+                        ushort segmentId = node.GetSegment(segmentIndex);
                         if (segmentId == 0) {
                             continue;
                         }
 
-                        bool startNode = (bool)extSegmentManager.IsStartNode(segmentId, nodeId);
+                        bool startNode = segmentId.ToSegment().IsStartNode(nodeId);
                         ExtSegment seg = segMan.ExtSegments[segmentId];
                         ExtSegmentEnd segEnd = segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segmentId, startNode)];
 
@@ -449,13 +449,13 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
             ref NetNode node = ref nodeId.ToNode();
             ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
 
-            for (int i = 0; i < 8; ++i) {
-                ushort otherSegmentId = node.GetSegment(i);
+            for (int segmentIndex = 0; segmentIndex < Constants.MAX_SEGMENTS_OF_NODE; ++segmentIndex) {
+                ushort otherSegmentId = node.GetSegment(segmentIndex);
                 if (otherSegmentId == 0 || otherSegmentId == segmentId) {
                     continue;
                 }
 
-                bool otherStartNode = (bool)extSegmentManager.IsStartNode(otherSegmentId, nodeId);
+                bool otherStartNode = otherSegmentId.ToSegment().IsStartNode(nodeId);
 
                 if (TrafficPriorityManager.Instance.GetPrioritySign(otherSegmentId, otherStartNode)
                     == PriorityType.None)

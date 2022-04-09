@@ -5,11 +5,10 @@ namespace TrafficManager.Util {
     using TrafficManager.API.Manager;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.API.Traffic.Enums;
-    using TrafficManager.API.TrafficLight.Data;
-    using TrafficManager.API.TrafficLight;
     using TrafficManager.Manager.Impl;
     using UnityEngine;
     using TrafficManager.Util.Extensions;
+    using TrafficManager.TrafficLight.Impl;
 
     public static class AutoTimedTrafficLights {
         /// <summary>
@@ -35,7 +34,7 @@ namespace TrafficManager.Util {
         private static IExtSegmentManager segMan = Constants.ManagerFactory.ExtSegmentManager;
         private static IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
         private static ref TrafficLightSimulation Sim(ushort nodeId) => ref tlsMan.TrafficLightSimulations[nodeId];
-        private static ref ITimedTrafficLights TimedLight(ushort nodeId) => ref Sim(nodeId).timedLight;
+        private static ref TimedTrafficLights TimedLight(ushort nodeId) => ref Sim(nodeId).timedLight;
 
         /// <summary>
         /// The directions toward which the traffic light is green
@@ -134,7 +133,7 @@ namespace TrafficManager.Util {
             }
 
             for (int i = 0; i < n; ++i) {
-                ITimedTrafficLightsStep step = TimedLight(nodeId).AddStep(
+                TimedTrafficLightsStep step = TimedLight(nodeId).AddStep(
                     minTime: 3,
                     maxTime: 8,
                     changeMetric: StepChangeMetric.Default,
@@ -174,7 +173,7 @@ namespace TrafficManager.Util {
 
             // the two 2-way roads get a go.
             {
-                ITimedTrafficLightsStep step = TimedLight(nodeId).AddStep(
+                TimedTrafficLightsStep step = TimedLight(nodeId).AddStep(
                     minTime: 3,
                     maxTime: 8,
                     changeMetric: StepChangeMetric.Default,
@@ -190,7 +189,7 @@ namespace TrafficManager.Util {
 
             //each 1-way road gets a go
             for (int i = 0; i < n1; ++i) {
-                ITimedTrafficLightsStep step = TimedLight(nodeId).AddStep(
+                TimedTrafficLightsStep step = TimedLight(nodeId).AddStep(
                     minTime: 3,
                     maxTime: 8,
                     changeMetric: StepChangeMetric.Default,
@@ -218,17 +217,17 @@ namespace TrafficManager.Util {
         /// <param name="nodeId"></param>
         /// <param name="segmentId"></param>
         /// <param name="m">Determines which directions are green</param>
-        private static void SetupHelper(ITimedTrafficLightsStep step, ushort nodeId, ushort segmentId, GreenDir m) {
-            bool startNode = (bool)ExtSegmentManager.Instance.IsStartNode(segmentId, nodeId);
+        private static void SetupHelper(TimedTrafficLightsStep step, ushort nodeId, ushort segmentId, GreenDir m) {
+            bool startNode = segmentId.ToSegment().IsStartNode(nodeId);
             ref NetNode netNode = ref nodeId.ToNode();
 
             //get step data for side seg
-            ICustomSegmentLights liveSegmentLights = customTrafficLightsManager.GetSegmentLights(segmentId, startNode);
+            CustomSegmentLights liveSegmentLights = customTrafficLightsManager.GetSegmentLights(segmentId, startNode);
 
             //for each lane type
             foreach (ExtVehicleType vehicleType in liveSegmentLights.VehicleTypes) {
                 //set light mode
-                ICustomSegmentLight liveSegmentLight = liveSegmentLights.GetCustomLight(vehicleType);
+                CustomSegmentLight liveSegmentLight = liveSegmentLights.GetCustomLight(vehicleType);
                 liveSegmentLight.CurrentMode = LightMode.All;
 
                 TimedLight(nodeId).ChangeLightMode(
@@ -281,7 +280,7 @@ namespace TrafficManager.Util {
         /// whether the traffic is RHT or LHT
         /// </summary>
         private static void SetStates(
-            ICustomSegmentLight liveSegmentLight,
+            CustomSegmentLight liveSegmentLight,
             RoadBaseAI.TrafficLightState sForard,
             RoadBaseAI.TrafficLightState sFar,
             RoadBaseAI.TrafficLightState sShort) {
@@ -390,24 +389,26 @@ namespace TrafficManager.Util {
         }
 
         /// <summary>
-        /// count the lanes going out or comming in a segment from inpout junctions.
+        /// Count number of applicable lanes entering or leaving a segment via specific node.
         /// </summary>
-        /// <param name="segmentId"></param>
-        /// <param name="nodeId"></param>
-        /// <param name="outgoing">true if lanes our going out toward the junction</param>
-        /// <returns></returns>
-        private static int CountLanes(ushort segmentId, ushort nodeId, bool outgoing = true) {
-            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
-            return extSegmentManager.GetSortedLanes(
-                                segmentId,
-                                ref segmentId.ToSegment(),
-                                extSegmentManager.IsStartNode(segmentId, nodeId) ^ (!outgoing),
-                                LaneArrowManager.LANE_TYPES,
-                                LaneArrowManager.VEHICLE_TYPES,
-                                true).Count;
-        }
-        private static int CountOutgoingLanes(ushort segmentId, ushort nodeId) => CountLanes(segmentId, nodeId, true);
-        private static int CountIncomingLanes(ushort segmentId, ushort nodeId) => CountLanes(segmentId, nodeId, false);
+        /// <param name="segmentId">The id of the segment to inspect.</param>
+        /// <param name="nodeId">The id of node where lanes should be counted.</param>
+        /// <param name="incoming">
+        /// If <c>true</c>, count lanes entering the segment from the junction.
+        /// If <c>false</c>, count lanes going from the segment to the junction.
+        /// </param>
+        /// <returns>Returns number of lanes matching the specified criteria.</returns>
+        private static int CountLanes(ushort segmentId, ushort nodeId, bool incoming) =>
+            segmentId.ToSegment().CountLanes(
+                nodeId,
+                LaneArrowManager.LANE_TYPES,
+                LaneArrowManager.VEHICLE_TYPES,
+                incoming);
+
+        private static int CountOutgoingLanes(ushort segmentId, ushort nodeId)
+            => CountLanes(segmentId, nodeId, false);
+        private static int CountIncomingLanes(ushort segmentId, ushort nodeId)
+            => CountLanes(segmentId, nodeId, true);
 
         /// <summary>
         /// Counts the number of roads toward the given directions.

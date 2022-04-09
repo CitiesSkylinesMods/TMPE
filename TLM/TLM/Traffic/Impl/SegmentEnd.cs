@@ -327,15 +327,15 @@ namespace TrafficManager.Traffic.Impl {
             }
 
             IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
-            for (int i = 0; i < 8; ++i) {
-                ushort segId = node.GetSegment(i);
+            for (int segmentIndex = 0; segmentIndex < Constants.MAX_SEGMENTS_OF_NODE; ++segmentIndex) {
+                ushort segId = node.GetSegment(segmentIndex);
                 if (segId == 0) {
                     continue;
                 }
 
                 int index0 = segEndMan.GetIndex(
                     segId,
-                    (bool)extSegmentManager.IsStartNode(segId, NodeId));
+                    segId.ToSegment().IsStartNode(NodeId));
 
                 if (!segEndMan.ExtSegmentEnds[index0].outgoing) {
                     continue;
