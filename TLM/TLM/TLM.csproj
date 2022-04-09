@@ -541,18 +541,6 @@
     <Compile Include="U\UOpacityValue.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\JunctionRestrictions\crossing_allowed.png" />
-    <EmbeddedResource Include="Resources\JunctionRestrictions\crossing_forbidden.png" />
-    <EmbeddedResource Include="Resources\JunctionRestrictions\enterblocked_allowed.png" />
-    <EmbeddedResource Include="Resources\JunctionRestrictions\enterblocked_forbidden.png" />
-    <EmbeddedResource Include="Resources\JunctionRestrictions\lanechange_allowed.png" />
-    <EmbeddedResource Include="Resources\JunctionRestrictions\lanechange_forbidden.png" />
-    <EmbeddedResource Include="Resources\JunctionRestrictions\left_on_red_allowed.png" />
-    <EmbeddedResource Include="Resources\JunctionRestrictions\left_on_red_forbidden.png" />
-    <EmbeddedResource Include="Resources\JunctionRestrictions\right_on_red_allowed.png" />
-    <EmbeddedResource Include="Resources\JunctionRestrictions\right_on_red_forbidden.png" />
-    <EmbeddedResource Include="Resources\JunctionRestrictions\uturn_allowed.png" />
-    <EmbeddedResource Include="Resources\JunctionRestrictions\uturn_forbidden.png" />
     <EmbeddedResource Include="Resources\MainMenu\LegacyButtons.png" />
     <EmbeddedResource Include="Resources\MainMenu\noimage.png" />
     <EmbeddedResource Include="Resources\MainMenu\remove-btn.png" />
