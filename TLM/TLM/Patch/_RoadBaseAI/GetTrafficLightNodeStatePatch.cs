@@ -1,7 +1,8 @@
-﻿namespace TrafficManager.Patch._RoadBaseAI {
+namespace TrafficManager.Patch._RoadBaseAI {
     using ColossalFramework;
     using HarmonyLib;
     using JetBrains.Annotations;
+    using TrafficManager.Manager.Impl;
     using TrafficManager.State;
     using UnityEngine;
 
@@ -20,8 +21,8 @@
                                   ref NetNode.Flags flags,
                                   ref Color color) {
             if (!Options.timedLightsEnabled
-                || !Constants.ManagerFactory
-                             .TrafficLightSimulationManager
+                || !TrafficLightSimulationManager
+                             .Instance
                              .TrafficLightSimulations[nodeID]
                              .IsSimulationRunning())
             {

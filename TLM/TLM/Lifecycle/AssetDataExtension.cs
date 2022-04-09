@@ -40,9 +40,13 @@ namespace TrafficManager.Lifecycle {
             if (asset is BuildingInfo prefab) {
                 Log.Info("AssetDataExtension.OnAssetSavedImpl():  prefab is " + prefab);
                 var assetData = AssetData.GetAssetData(prefab);
-                Log._Debug("AssetDataExtension.OnAssetSavedImpl(): assetData=" + assetData);
-                userData = new Dictionary<string, byte[]>();
-                userData.Add(TMPE_RECORD_ID, SerializationUtil.Serialize(assetData));
+                if (assetData == null) {
+                    Log._Debug("AssetDataExtension.OnAssetSavedImpl(): No segments to record.");
+                } else {
+                    Log._Debug("AssetDataExtension.OnAssetSavedImpl(): assetData=" + assetData);
+                    userData = new Dictionary<string, byte[]>();
+                    userData.Add(TMPE_RECORD_ID, SerializationUtil.Serialize(assetData));
+                }
             }
         }
     }

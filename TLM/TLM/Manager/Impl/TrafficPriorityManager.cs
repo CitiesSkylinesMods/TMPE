@@ -9,7 +9,6 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.API.Traffic;
-    using TrafficManager.API.TrafficLight;
     using TrafficManager.Geometry;
     using TrafficManager.State.ConfigData;
     using TrafficManager.State;
@@ -18,6 +17,7 @@ namespace TrafficManager.Manager.Impl {
     using UnityEngine;
     using TrafficManager.Util;
     using TrafficManager.Util.Extensions;
+    using TrafficManager.TrafficLight.Impl;
 
     public class TrafficPriorityManager
         : AbstractGeometryObservingManager,
@@ -496,7 +496,7 @@ namespace TrafficManager.Manager.Impl {
                     continue;
                 }
 
-                bool otherStartNode = (bool)ExtSegmentManager.Instance.IsStartNode(otherSegmentId, transitNodeId);
+                bool otherStartNode = otherSegmentId.ToSegment().IsStartNode(transitNodeId);
 
                 // ISegmentEnd incomingEnd =
                 //    SegmentEndManager.Instance.GetSegmentEnd(otherSegmentId, otherStartNode);
@@ -508,7 +508,7 @@ namespace TrafficManager.Manager.Impl {
                 //    return true;
                 // }
 
-                ICustomSegmentLights otherLights = null;
+                CustomSegmentLights otherLights = null;
                 if (Options.trafficLightPriorityRules) {
                     otherLights = segLightsManager.GetSegmentLights(
                         otherSegmentId,
@@ -605,7 +605,7 @@ namespace TrafficManager.Manager.Impl {
                                           ref ExtVehicle incomingState,
                                           bool incomingOnMain,
                                           ref ExtSegmentEnd incomingEnd,
-                                          ICustomSegmentLights incomingLights,
+                                          CustomSegmentLights incomingLights,
                                           ArrowDirection incomingFromDir)
         {
             if (logPriority) {
@@ -659,7 +659,7 @@ namespace TrafficManager.Manager.Impl {
                     incomingState.nextSegmentId);
 
             if (incomingLights != null) {
-                ICustomSegmentLight incomingLight = incomingLights.GetCustomLight(incomingState.currentLaneIndex);
+                CustomSegmentLight incomingLight = incomingLights.GetCustomLight(incomingState.currentLaneIndex);
                 if (logPriority) {
                     Log._DebugFormat(
                         "TrafficPriorityManager.IsConflictingVehicle({0}, {1}): Detected traffic " +
@@ -1570,7 +1570,7 @@ namespace TrafficManager.Manager.Impl {
         public bool LoadData(List<int[]> data) {
             bool success = true;
             Log.Info($"Loading {data.Count} priority segments (old method)");
-            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
+
             foreach (int[] segment in data) {
                 try {
                     if (segment.Length < 3) {
@@ -1595,14 +1595,14 @@ namespace TrafficManager.Manager.Impl {
                         continue;
                     }
 
-                    bool? startNode = extSegmentManager.IsStartNode(segmentId, nodeId);
-                    if (startNode == null) {
+                    bool? startNode = netSegment.GetRelationToNode(nodeId);
+                    if (!startNode.HasValue) {
                         Log.Error("TrafficPriorityManager.LoadData: No node found for node id " +
                                   $"{nodeId} @ seg. {segmentId}");
                         continue;
                     }
 
-                    SetPrioritySign(segmentId, (bool)startNode, sign);
+                    SetPrioritySign(segmentId, startNode.Value, sign);
                 } catch (Exception e) {
                     // ignore, as it's probably corrupt save data. it'll be culled on next save
                     Log.Warning($"Error loading data from Priority segments: {e}");
@@ -1638,11 +1638,9 @@ namespace TrafficManager.Manager.Impl {
                         continue;
                     }
 
-                    bool? startNode = extSegmentManager.IsStartNode(
-                        prioSegData.segmentId,
-                        prioSegData.nodeId);
+                    bool? startNode = netSegment.GetRelationToNode(prioSegData.nodeId);
 
-                    if (startNode == null) {
+                    if (!startNode.HasValue) {
                         Log.Error(
                             "TrafficPriorityManager.LoadData: No node found for node id " +
                             $"{prioSegData.nodeId} @ seg. {prioSegData.segmentId}");
@@ -1655,7 +1653,7 @@ namespace TrafficManager.Manager.Impl {
 #endif
                     SetPrioritySign(
                         prioSegData.segmentId,
-                        (bool)startNode,
+                        startNode.Value,
                         (PriorityType)prioSegData.priorityType);
                 }
                 catch (Exception e) {
