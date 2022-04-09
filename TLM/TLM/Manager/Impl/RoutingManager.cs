@@ -1102,8 +1102,8 @@ namespace TrafficManager.Manager.Impl {
                                         nextExpectedDirection);
                                 }
 
-                                if ((nextLaneInfo.m_finalDirection &
-                                     NetInfo.InvertDirection(nextExpectedDirection)) != NetInfo.Direction.None) {
+                                bool outgoing = (nextLaneInfo.m_finalDirection & NetInfo.InvertDirection(nextExpectedDirection)) != NetInfo.Direction.None;
+                                if (outgoing && nextLaneInfo.CheckType(ROUTED_LANE_TYPES, ARROW_VEHICLE_TYPES)) {
                                     ++outgoingCarLanes;
                                     if (extendedLogRouting) {
                                         Log._DebugFormat(
