@@ -194,7 +194,7 @@ namespace TrafficManager.UI.MainMenu {
             // By default the atlas will include backgrounds: DefaultRound-bg-normal
             tmpSkin.UpdateAtlasBuilder(
                 atlasBuilder: builder.AtlasBuilder,
-                spriteSize: new IntVector2(50));
+                spriteSize: new IntVector2(128));
 
             // Create Version Label and Help button:
             // [ TM:PE 11.x ] [?]
@@ -279,7 +279,7 @@ namespace TrafficManager.UI.MainMenu {
                                         .CanActivate();
             skin.UpdateAtlasBuilder(
                 atlasBuilder: builder.AtlasBuilder,
-                spriteSize: new IntVector2(50));
+                spriteSize: new IntVector2(80));
 
             osdToggle.Skin = skin;
             osdToggle.ApplyButtonSkin();

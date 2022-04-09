@@ -27,7 +27,7 @@ namespace TrafficManager.UI.MainMenu {
                                   .CanActivate();
             this.Skin.UpdateAtlasBuilder(
                 atlasBuilder: futureAtlas,
-                spriteSize: new IntVector2(50));
+                spriteSize: new IntVector2(128));
         }
 
         protected override void OnClick(UIMouseEventParameter p) {
