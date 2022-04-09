@@ -168,6 +168,8 @@
     <Compile Include="State\OptionsTabs\MaintenanceTab_DespawnGroup.cs" />
     <Compile Include="State\OptionsTabs\MaintenanceTab_ToolsGroup.cs" />
     <Compile Include="State\VersionInfo.cs" />
+    <Compile Include="TrafficLight\Impl\ITrafficLightContainer.cs" />
+    <Compile Include="TrafficLight\Impl\TrafficLightSimulation.cs" />
     <Compile Include="UI\AllowDespawn\AllowDespawnPanel.cs" />
     <Compile Include="UI\Helpers\ActionButton.cs" />
     <Compile Include="UI\Helpers\GlobalConfigObserver.cs" />
@@ -424,8 +426,8 @@
     <Compile Include="UI\SubTools\SpeedLimits\SpeedLimitsToolWindow.PalettePanel.cs">
       <DependentUpon>SpeedLimitsToolWindow.cs</DependentUpon>
     </Compile>
-    <Compile Include="UI\SubTools\TimedTrafficLights\TimedTrafficLightsTool.cs" />
-    <Compile Include="UI\SubTools\TimedTrafficLights\TTLToolMode.cs" />
+    <Compile Include="UI\SubTools\TTL\TimedTrafficLightsTool.cs" />
+    <Compile Include="UI\SubTools\TTL\TTLToolMode.cs" />
     <Compile Include="UI\Textures\MainMenu.cs" />
     <Compile Include="UI\Textures\RoadUI.cs" />
     <Compile Include="UI\Textures\RoadSignThemeManager.cs" />

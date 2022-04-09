@@ -1,5 +1,4 @@
 namespace TrafficManager.Util {
-    using ColossalFramework;
     using CSUtil.Commons;
     using System;
     using System.Collections.Generic;
@@ -24,8 +23,9 @@ namespace TrafficManager.Util {
             ExtSegmentEnd segEnd = segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segmentId, startNode)];
 
             ref NetNode node = ref nodeId.ToNode();
-            for (int i = 0; i < 8; ++i) {
-                ushort otherSegmentId = node.GetSegment(i);
+
+            for (int segmentIndex = 0; segmentIndex < Constants.MAX_SEGMENTS_OF_NODE; ++segmentIndex) {
+                ushort otherSegmentId = node.GetSegment(segmentIndex);
                 ref NetSegment otherSeg = ref otherSegmentId.ToSegment();
                 if (segmentId != 0) {
                     ArrowDirection dir2 = segEndMan.GetDirection(ref segEnd, otherSegmentId);
@@ -221,18 +221,15 @@ namespace TrafficManager.Util {
 
             ref NetSegment seg = ref segmentId.ToSegment();
             bool startNode = seg.m_startNode == nodeId;
-            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
 
             //list of outgoing lanes from current segment to current node.
-            IList<LanePos> laneList =
-                extSegmentManager.GetSortedLanes(
-                    segmentId,
-                    ref seg,
-                    startNode,
-                    laneType,
-                    vehicleType,
-                    reverse: LHT,
-                    sort: true);
+            var laneList = seg.GetSortedLanes(
+                startNode,
+                laneType,
+                vehicleType,
+                reverse: LHT,
+                sort: true);
+
             int srcLaneCount = laneList.Count();
             if (srcLaneCount <= 1) {
                 return;
@@ -313,18 +310,14 @@ namespace TrafficManager.Util {
 
             ref NetSegment seg = ref segmentId.ToSegment();
             bool startNode = seg.m_startNode == nodeId;
-            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
 
             //list of outgoing lanes from current segment to current node.
-            IList<LanePos> laneList =
-                extSegmentManager.GetSortedLanes(
-                    segmentId,
-                    ref seg,
-                    startNode,
-                    laneType,
-                    vehicleType,
-                    reverse: LHT,
-                    sort: false);
+            var laneList = seg.GetSortedLanes(
+                startNode,
+                laneType,
+                vehicleType,
+                reverse: LHT,
+                sort: false);
 
             int forwardLanesCount = CountTargetLanesTowardDirection(segmentId, nodeId, ArrowDirection.Forward);
             if (forwardLanesCount == 0)
@@ -487,17 +480,14 @@ namespace TrafficManager.Util {
 
             ref NetSegment netSegment = ref segmentId.ToSegment();
             bool startNode = netSegment.m_startNode == nodeId;
-            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
 
             //list of outgoing lanes from current segment to current node.
-            IList<LanePos> laneList =
-                extSegmentManager.GetSortedLanes(
-                    segmentId,
-                    ref netSegment,
-                    startNode,
-                    LaneArrowManager.LANE_TYPES,
-                    LaneArrowManager.VEHICLE_TYPES,
-                    sort: false);
+            var laneList = netSegment.GetSortedLanes(
+                startNode,
+                LaneArrowManager.LANE_TYPES,
+                LaneArrowManager.VEHICLE_TYPES,
+                sort: false);
+
             int srcLaneCount = laneList.Count();
             for (int i = 0; i < srcLaneCount; ++i) {
                 if (LaneConnectionManager.Instance.HasOutgoingConnections(laneList[i].laneId, startNode)) {

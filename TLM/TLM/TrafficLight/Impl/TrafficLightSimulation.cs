@@ -1,14 +1,13 @@
-namespace TrafficManager.API.TrafficLight.Data {
+namespace TrafficManager.TrafficLight.Impl {
     using CSUtil.Commons;
     using System;
     using TrafficManager.API.Traffic.Enums;
-    using TrafficManager.API.TrafficLight;
 
     public struct TrafficLightSimulation {
         /// <summary>
         /// Timed traffic light by node id
         /// </summary>
-        public ITimedTrafficLights timedLight;
+        public TimedTrafficLights timedLight;
 
         public ushort nodeId;
         public TrafficLightSimulationType type;

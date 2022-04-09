@@ -10,6 +10,7 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.Util;
     using TrafficManager.Util.Extensions;
     using ColossalFramework;
+    using TrafficManager.TrafficLight.Impl;
 
     /// <summary>
     /// Manages traffic light toggling

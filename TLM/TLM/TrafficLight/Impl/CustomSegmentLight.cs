@@ -8,7 +8,6 @@ namespace TrafficManager.TrafficLight.Impl {
     using TrafficManager.API.Manager;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.API.Traffic.Enums;
-    using TrafficManager.API.TrafficLight;
     using TrafficManager.Manager.Impl;
     using TrafficManager.State.ConfigData;
     using TrafficManager.Util;
@@ -18,7 +17,6 @@ namespace TrafficManager.TrafficLight.Impl {
     /// Represents the traffic light (left, forward, right) at a specific segment end
     /// </summary>
     public class CustomSegmentLight
-        : ICustomSegmentLight
     {
         public CustomSegmentLight(CustomSegmentLights lights,
                                   RoadBaseAI.TrafficLightState mainLight) {
@@ -370,7 +368,7 @@ namespace TrafficManager.TrafficLight.Impl {
 
             ref NetSegment netSegment = ref SegmentId.ToSegment();
 
-            Constants.ManagerFactory.TrafficLightSimulationManager.SetVisualState(
+            TrafficLightSimulationManager.Instance.SetVisualState(
                 nodeId,
                 ref netSegment,
                 now << 8,
@@ -379,7 +377,7 @@ namespace TrafficManager.TrafficLight.Impl {
                 false,
                 false);
 
-            Constants.ManagerFactory.TrafficLightSimulationManager.SetVisualState(
+            TrafficLightSimulationManager.Instance.SetVisualState(
                 nodeId,
                 ref netSegment,
                 (1u - now) << 8,
@@ -464,33 +462,33 @@ namespace TrafficManager.TrafficLight.Impl {
                 RoadBaseAI.TrafficLightState.Red);
         }
 
-        public void SetStates(RoadBaseAI.TrafficLightState? setMain,
-                              RoadBaseAI.TrafficLightState? setLeft,
-                              RoadBaseAI.TrafficLightState? setRight,
+        public void SetStates(RoadBaseAI.TrafficLightState? mainLight,
+                              RoadBaseAI.TrafficLightState? leftLight,
+                              RoadBaseAI.TrafficLightState? rightLight,
                               bool calcAutoPedLight = true)
         {
-            if ((setMain == null || LightMain == setMain.Value) &&
-                (setLeft == null || LightLeft == setLeft.Value) &&
-                (setRight == null || LightRight == setRight.Value)) {
+            if ((mainLight == null || LightMain == mainLight.Value) &&
+                (leftLight == null || LightLeft == leftLight.Value) &&
+                (rightLight == null || LightRight == rightLight.Value)) {
                 return;
             }
 
-            if (setMain != null) {
-                LightMain = setMain.Value;
+            if (mainLight != null) {
+                LightMain = mainLight.Value;
             }
 
-            if (setLeft != null) {
-                LightLeft = setLeft.Value;
+            if (leftLight != null) {
+                LightLeft = leftLight.Value;
             }
 
-            if (setRight != null) {
-                LightRight = setRight.Value;
+            if (rightLight != null) {
+                LightRight = rightLight.Value;
             }
 
 #if DEBUG
             if (DebugSwitch.TimedTrafficLights.Get() && DebugSettings.NodeId == NodeId) {
                 Log._Debug(
-                    $"CustomSegmentLight.SetStates({setMain}, {setLeft}, {setRight}, {calcAutoPedLight}) for segment {SegmentId} @ {NodeId}: Main={LightMain} L={LightLeft} R={LightRight}");
+                    $"CustomSegmentLight.SetStates({mainLight}, {leftLight}, {rightLight}, {calcAutoPedLight}) for segment {SegmentId} @ {NodeId}: Main={LightMain} L={LightLeft} R={LightRight}");
             }
 #endif
 

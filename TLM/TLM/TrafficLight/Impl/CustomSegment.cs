@@ -1,9 +1,8 @@
 namespace TrafficManager.TrafficLight.Impl {
-    using TrafficManager.API.TrafficLight;
 
     internal class CustomSegment {
-        public ICustomSegmentLights StartNodeLights;
-        public ICustomSegmentLights EndNodeLights;
+        public CustomSegmentLights StartNodeLights;
+        public CustomSegmentLights EndNodeLights;
 
         public override string ToString() {
             return string.Format(
