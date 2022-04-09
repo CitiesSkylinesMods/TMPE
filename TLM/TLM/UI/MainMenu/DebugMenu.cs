@@ -360,7 +360,6 @@ namespace TrafficManager.UI.MainMenu {
         private void ClickPrintFlagsDebugInfo(UIComponent component,
                                               UIMouseEventParameter eventParam) {
             Flags.PrintDebugInfo();
-            SpeedLimitManager.Instance.PrintDebugInfo();
         }
 
         [UsedImplicitly]

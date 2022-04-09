@@ -110,12 +110,12 @@ namespace TrafficManager.Manager.Impl {
         }
 
         /// <summary>Determines the currently set speed limit for the given segment and lane
-        ///     direction in terms of discrete speed limit levels.</summary>
+        ///     vehicle type in terms of discrete speed limit levels.</summary>
         /// <param name="segmentId">Interested in this segment.</param>
-        /// <param name="finalDir">Direction.</param>
+        /// <param name="vehicleType">Vehicle type</param>
         /// <returns>Mean speed limit, average for custom and default lane speeds or null
         ///     if cannot be determined.</returns>
-        public SpeedValue? CalculateCustomSpeedLimit(ushort segmentId, NetInfo.Direction finalDir) {
+        public SpeedValue? CalculateCustomSpeedLimit(ushort segmentId, VehicleInfo.VehicleType vehicleType) {
             // calculate the currently set mean speed limit
             if (segmentId == 0) {
                 return null;
@@ -135,9 +135,8 @@ namespace TrafficManager.Manager.Impl {
 
             while (laneIndex < netinfo.m_lanes.Length && curLaneId != 0u) {
                 NetInfo.Lane laneInfo = netinfo.m_lanes[laneIndex];
-                NetInfo.Direction d = laneInfo.m_finalDirection;
 
-                if (d != finalDir) {
+                if (!laneInfo.m_vehicleType.IsFlagSet(vehicleType)) {
                     goto nextIter;
                 }
 
@@ -458,27 +457,16 @@ namespace TrafficManager.Manager.Impl {
             }
         }
 
-        /// <summary>Sets speed limit for all configurable lanes.</summary>
-        /// <param name="action">Speed limit in game units, or null to restore defaults.</param>
-        /// <returns><c>true</c> if speed limits were applied to at least one lane.</returns>
-        public bool SetSegmentSpeedLimit(ushort segmentId, SetSpeedLimitAction action) {
-            bool ret = false;
-
-            foreach (NetInfo.Direction finaldir in Enum.GetValues(typeof(NetInfo.Direction))) {
-                ret |= this.SetSegmentSpeedLimit(segmentId, finaldir, action);
-            }
-
-            return ret;
-        }
-
-        /// <summary>Sets the speed limit of a given segment and lane direction.</summary>
+        /// <summary>Sets the speed limit for the specified <paramref name="segmentId"/>.</summary>
         /// <param name="segmentId">Segment id.</param>
-        /// <param name="finalDir">Direction.</param>
         /// <param name="action">Game speed units, unlimited, or reset to default.</param>
-        /// <returns>Success.</returns>
-        public bool SetSegmentSpeedLimit(ushort segmentId,
-                                         NetInfo.Direction finalDir,
-                                         SetSpeedLimitAction action) {
+        /// <returns>
+        /// Returns <c>true</c> if speed limits were applied to at least one lane, otherwise <c>false</c>.
+        /// </returns>
+        public bool SetSegmentSpeedLimit(
+            ushort segmentId,
+            SetSpeedLimitAction action) {
+
             ref NetSegment netSegment = ref segmentId.ToSegment();
 
             if (!netSegment.MayHaveCustomSpeedLimits()) {
@@ -505,23 +493,21 @@ namespace TrafficManager.Manager.Impl {
             uint curLaneId = netSegment.m_lanes;
             int laneIndex = 0;
 
-            //-------------------------
-            // For each affected lane
-            //-------------------------
-            while (laneIndex < segmentInfo.m_lanes.Length && curLaneId != 0u) {
+            while (curLaneId != 0u && laneIndex < segmentInfo.m_lanes.Length) {
                 NetInfo.Lane laneInfo = segmentInfo.m_lanes[laneIndex];
-                NetInfo.Direction d = laneInfo.m_finalDirection;
 
-                if (d == finalDir && laneInfo.MayHaveCustomSpeedLimits()) {
+                if (laneInfo.MayHaveCustomSpeedLimits()) {
                     if (action.Type == SetSpeedLimitAction.ActionType.ResetToDefault) {
                         // Setting to 'Default' will instead remove the override
                         Log._Debug($"SpeedLimitManager: Setting speed limit of lane {curLaneId} to default");
                         RemoveLaneSpeedLimit(curLaneId);
                     } else {
+#if DEBUG
                         bool showMph = GlobalConfig.Instance.Main.DisplaySpeedLimitsMph;
                         string overrideStr = action.GuardedValue.Override.FormatStr(showMph);
 
                         Log._Debug($"SpeedLimitManager: Setting lane {curLaneId} to {overrideStr}");
+#endif
                         SetLaneSpeedLimit(curLaneId, action);
                     }
                 }

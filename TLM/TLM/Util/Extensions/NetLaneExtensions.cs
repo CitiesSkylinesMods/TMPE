@@ -25,5 +25,11 @@ namespace TrafficManager.Util.Extensions {
             return netLane.IsValid()
                 && netLane.m_segment.ToSegment().IsValid();
         }
+
+        public static bool IsStartNode(this ref NetLane netLane, ushort nodeId) =>
+            netLane.m_segment.ToSegment().IsStartNode(nodeId);
+
+        public static ushort GetNodeId(this ref NetLane netLane, bool startNode) =>
+            netLane.m_segment.ToSegment().GetNodeId(startNode);
     }
 }

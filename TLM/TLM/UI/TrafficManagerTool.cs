@@ -54,8 +54,6 @@ namespace TrafficManager.UI {
 
         private NetTool netTool_;
 
-        private CursorInfo nopeCursor_;
-
         public const float DEBUG_CLOSE_LOD = 300f;
 
         /// <summary>Square of the distance, where overlays are not rendered.</summary>
@@ -152,10 +150,6 @@ namespace TrafficManager.UI {
 
             RemoveUUIButton();
 
-            if (nopeCursor_) {
-                Destroy(nopeCursor_);
-                nopeCursor_ = null;
-            }
             foreach (var eachLegacyTool in legacySubTools_) {
                 eachLegacyTool.Value.OnDestroy();
             }
@@ -299,9 +293,6 @@ namespace TrafficManager.UI {
             try {
                 Log._Debug($"TrafficManagerTool: Awake {GetHashCode()}");
                 base.Awake();
-                nopeCursor_ = ScriptableObject.CreateInstance<CursorInfo>();
-                nopeCursor_.m_texture = UIView.GetAView().defaultAtlas["Niet"]?.texture;
-                nopeCursor_.m_hotspot = new Vector2(45, 45);
                 Initialize();
             } catch(Exception ex) {
                 ex.LogException();
@@ -330,8 +321,10 @@ namespace TrafficManager.UI {
                 // Make it impossible for user to undo changes performed by Road selection panels
                 // after changing traffic rule vis other tools.
                 // TODO: This code will not be necessary when we implement intent.
-                SimulationManager.instance.m_ThreadingWrapper.QueueMainThread(RoadSelectionPanels.RoadWorldInfoPanel.Hide);
-                RoadSelectionPanels.Root.Function = RoadSelectionPanels.FunctionModes.None;
+                if(RoadSelectionPanels.RoadWorldInfoPanel != null)
+                    SimulationManager.instance.m_ThreadingWrapper.QueueMainThread(RoadSelectionPanels.RoadWorldInfoPanel.Hide);
+                if(RoadSelectionPanels.Root != null)
+                    RoadSelectionPanels.Root.Function = RoadSelectionPanels.FunctionModes.None;
             }
 
             bool toolModeChanged = newToolMode != toolMode_;
@@ -352,7 +345,7 @@ namespace TrafficManager.UI {
 
                 Log._Debug($"SetToolMode: reset because toolmode not found {newToolMode}");
                 OnscreenDisplay.DisplayIdle();
-                ModUI.Instance.MainMenu.UpdateButtons();
+                ModUI.Instance?.MainMenu?.UpdateButtons();
                 return;
             }
 
@@ -452,28 +445,32 @@ namespace TrafficManager.UI {
         /// Must not call base.RenderOverlay() . Doing so may cause infinite recursion with Postfix of base.RenderOverlay()
         /// </summary>
         public void RenderOverlayImpl(RenderManager.CameraInfo cameraInfo) {
-            if (!(isActiveAndEnabled || SubTools.PrioritySigns.MassEditOverlay.IsActive)) {
-                return;
-            }
-
-            activeLegacySubTool_?.RenderOverlay(cameraInfo);
-            activeSubTool_?.RenderActiveToolOverlay(cameraInfo);
-
-            ToolMode currentMode = this.GetToolMode();
-
-            // For all _other_ legacy subtools let them render something too
-            foreach (var legacySubtool in this.legacySubTools_) {
-                if (legacySubtool.Key == currentMode) {
-                    continue;
+            try {
+                if(!(isActiveAndEnabled || SubTools.PrioritySigns.MassEditOverlay.IsActive)) {
+                    return;
                 }
 
-                legacySubtool.Value?.RenderOverlayForOtherTools(cameraInfo);
-            }
+                activeLegacySubTool_?.RenderOverlay(cameraInfo);
+                activeSubTool_?.RenderActiveToolOverlay(cameraInfo);
 
-            foreach (var subtool in this.subTools_) {
-                if (subtool.Key != this.GetToolMode()) {
-                    subtool.Value.RenderGenericInfoOverlay(cameraInfo);
+                ToolMode currentMode = this.GetToolMode();
+
+                // For all _other_ legacy subtools let them render something too
+                foreach (var legacySubtool in this.legacySubTools_) {
+                    if (legacySubtool.Key == currentMode) {
+                        continue;
+                    }
+
+                    legacySubtool.Value?.RenderOverlayForOtherTools(cameraInfo);
                 }
+
+                foreach (var subtool in this.subTools_) {
+                  if (subtool.Key != this.GetToolMode()) {
+                      subtool.Value.RenderGenericInfoOverlay(cameraInfo);
+                  }
+                }
+            } catch(Exception ex) {
+                ex.LogException();                  
             }
         }
 
@@ -541,68 +538,72 @@ namespace TrafficManager.UI {
         /// Primarily handles click events on hovered nodes/segments
         /// </summary>
         protected override void OnToolUpdate() {
-            base.OnToolUpdate();
+            try {
+                base.OnToolUpdate();
 
-            // Log._Debug($"OnToolUpdate");
-            if (KeybindSettingsBase.ElevationDown.KeyUp()) {
-                InfoManager.instance.SetCurrentMode(
-                    InfoManager.InfoMode.Underground,
-                    InfoManager.SubInfoMode.Default);
-                UIView.library.Hide("TrafficInfoViewPanel");
-            } else if (KeybindSettingsBase.ElevationUp.KeyUp()) {
-                InfoManager.instance.SetCurrentMode(
-                    InfoManager.InfoMode.None,
-                    InfoManager.SubInfoMode.Default);
-            }
-            ToolCursor = null;
-            bool elementsHovered = DetermineHoveredElements(activeLegacySubTool_ is not LaneConnectorTool);
-            if (activeLegacySubTool_ != null && NetTool != null && elementsHovered) {
-                ToolCursor = NetTool.m_upgradeCursor;
-
-                if (activeLegacySubTool_ is LaneConnectorTool lcs && HoveredNodeId != 0 && !IsNodeVisible(HoveredNodeId) && lcs.CanShowNopeCursor) {
-                    ToolCursor = nopeCursor_;
+                // Log._Debug($"OnToolUpdate");
+                if (KeybindSettingsBase.ElevationDown.KeyUp()) {
+                    InfoManager.instance.SetCurrentMode(
+                        InfoManager.InfoMode.Underground,
+                        InfoManager.SubInfoMode.Default);
+                    UIView.library.Hide("TrafficInfoViewPanel");
+                } else if (KeybindSettingsBase.ElevationUp.KeyUp()) {
+                    InfoManager.instance.SetCurrentMode(
+                        InfoManager.InfoMode.None,
+                        InfoManager.SubInfoMode.Default);
                 }
-            }
+                ToolCursor = null;
+                if (activeLegacySubTool_?.OverrideCursor != null) {
+                    ToolCursor = activeLegacySubTool_.OverrideCursor;
+                } else {
+                    bool elementsHovered = DetermineHoveredElements(activeLegacySubTool_ is not LaneConnectorTool);
+                    if (activeLegacySubTool_ != null && NetTool != null && elementsHovered) {
+                        ToolCursor = NetTool.m_upgradeCursor;
+                    }
+                }
 
-            bool primaryMouseClicked = Input.GetMouseButtonDown(0);
-            bool secondaryMouseClicked = Input.GetMouseButtonUp(1);
+                bool primaryMouseClicked = Input.GetMouseButtonDown(0);
+                bool secondaryMouseClicked = Input.GetMouseButtonUp(1);
 
-            // check if clicked
-            if (!primaryMouseClicked && !secondaryMouseClicked) {
-                return;
-            }
+                // check if clicked
+                if(!primaryMouseClicked && !secondaryMouseClicked) {
+                    return;
+                }
 
-            // check if mouse is inside panel
+                // check if mouse is inside panel
 #if DEBUG
             bool mouseInsideAnyPanel = ModUI.Instance.GetMenu().containsMouse
                                        || ModUI.Instance.GetDebugMenu().containsMouse;
 #else
-            bool mouseInsideAnyPanel = ModUI.Instance.GetMenu().containsMouse;
+                bool mouseInsideAnyPanel = ModUI.Instance.GetMenu().containsMouse;
 #endif
 
-            // !elementsHovered ||
-            mouseInsideAnyPanel |=
-                activeLegacySubTool_ != null && activeLegacySubTool_.IsCursorInPanel();
+                // !elementsHovered ||
+                mouseInsideAnyPanel |=
+                    activeLegacySubTool_ != null && activeLegacySubTool_.IsCursorInPanel();
 
-            if (!mouseInsideAnyPanel) {
-                if (primaryMouseClicked) {
-                    activeLegacySubTool_?.OnPrimaryClickOverlay();
-                    activeSubTool_?.OnToolLeftClick();
-                }
+                if(!mouseInsideAnyPanel) {
+                    if(primaryMouseClicked) {
+                        activeLegacySubTool_?.OnPrimaryClickOverlay();
+                        activeSubTool_?.OnToolLeftClick();
+                    }
 
-                if (secondaryMouseClicked) {
-                    if (GetToolMode() == ToolMode.None) {
-                        RoadSelectionPanels roadSelectionPanels = UIView.GetAView().GetComponent<RoadSelectionPanels>();
-                        if (roadSelectionPanels && roadSelectionPanels.RoadWorldInfoPanelExt && roadSelectionPanels.RoadWorldInfoPanelExt.isVisible) {
-                            RoadSelectionPanels.RoadWorldInfoPanel.Hide();
+                    if(secondaryMouseClicked) {
+                        if(GetToolMode() == ToolMode.None) {
+                            RoadSelectionPanels roadSelectionPanels = UIView.GetAView().GetComponent<RoadSelectionPanels>();
+                            if(roadSelectionPanels && roadSelectionPanels.RoadWorldInfoPanelExt && roadSelectionPanels.RoadWorldInfoPanelExt.isVisible) {
+                                RoadSelectionPanels.RoadWorldInfoPanel.Hide();
+                            } else {
+                                ModUI.Instance.CloseMainMenu();
+                            }
                         } else {
-                            ModUI.Instance.CloseMainMenu();
+                            activeLegacySubTool_?.OnSecondaryClickOverlay();
+                            activeSubTool_?.OnToolRightClick();
                         }
-                    } else {
-                        activeLegacySubTool_?.OnSecondaryClickOverlay();
-                        activeSubTool_?.OnToolRightClick();
                     }
                 }
+            } catch(Exception ex) {
+                ex.LogException();
             }
         }
 
