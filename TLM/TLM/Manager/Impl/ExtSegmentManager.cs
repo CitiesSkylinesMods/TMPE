@@ -200,7 +200,7 @@ namespace TrafficManager.Manager.Impl {
             }
 
             var info = segment.Info;
-            int laneCount = info.m_lanes.Length;
+            int laneCount = info?.m_lanes?.Length ?? 0;
             if (laneCount == 0) {
                 return null;
             }
