@@ -9,7 +9,7 @@ namespace TrafficManager.Persistence {
     internal abstract class AbstractPersistentObject<TFeature>
             where TFeature : struct {
 
-        public abstract string ElementName { get; }
+        public abstract XName ElementName { get; }
 
         /// <summary>
         /// Moves one or more of <paramref name="featureFilter"/>'s required features to the forbidden list,

@@ -160,6 +160,7 @@
     <Compile Include="Persistence\GlobalPersistence.cs" />
     <Compile Include="Persistence\PersistenceContext.cs" />
     <Compile Include="Persistence\PersistentObject.cs" />
+    <Compile Include="Persistence\XmlLinqExtensions.cs" />
     <Compile Include="State\OptionsTabs\GameplayTab_AIGroups.cs" />
     <Compile Include="State\OptionsTabs\GeneralTab_CompatibilityGroup.cs" />
     <Compile Include="State\OptionsTabs\GeneralTab_LocalisationGroup.cs" />

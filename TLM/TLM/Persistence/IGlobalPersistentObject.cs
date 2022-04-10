@@ -11,7 +11,7 @@ namespace TrafficManager.Persistence {
 
         IEnumerable<Type> GetDependencies();
 
-        string ElementName { get; }
+        XName ElementName { get; }
 
         bool CanLoad(XElement element);
 

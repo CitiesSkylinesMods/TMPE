@@ -22,7 +22,7 @@ namespace TrafficManager.Persistence {
             bool otherDependsOnThis = other.GetDependencies()?.Contains(DependencyTarget) == true;
 
             return
-                thisDependsOnOther == otherDependsOnThis ? ElementName.CompareTo(other.ElementName)
+                thisDependsOnOther == otherDependsOnThis ? ElementName.ToString().CompareTo(other.ElementName.ToString())
                 : thisDependsOnOther ? 1
                 : -1;
         }

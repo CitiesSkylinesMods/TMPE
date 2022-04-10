@@ -29,6 +29,16 @@ namespace TrafficManager.TrafficLight.Impl {
             started = false;
         }
 
+        private TimedTrafficLights(ushort nodeId, IEnumerable<ushort> nodeGroup, bool started)
+                : this(nodeId, nodeGroup)
+                {
+
+            this.started = started;
+        }
+
+        internal static TimedTrafficLights CreateLoadingInstance(ushort nodeId, IEnumerable<ushort> nodeGroup, bool started)
+            => new TimedTrafficLights(nodeId, nodeGroup, started);
+
         public ushort NodeId {
             get;
         }
@@ -324,6 +334,13 @@ namespace TrafficManager.TrafficLight.Impl {
             return step;
         }
 
+        internal void AddLoadingStep(TimedTrafficLightsStep step) {
+            // TODO PERSISTENCE set this up for hot swapping ttl at load time
+
+            step.Initialize(this);
+            Steps.Add(step);
+        }
+
         public void Start() {
             Start(0);
         }
@@ -523,6 +540,8 @@ namespace TrafficManager.TrafficLight.Impl {
         public TimedTrafficLightsStep GetStep(int stepId) {
             return Steps[stepId];
         }
+
+        public IEnumerable<TimedTrafficLightsStep> EnumerateSteps() => Steps;
 
         // TODO this method is currently called on each node, but should be called on the master node only
         public void SimulationStep() {
