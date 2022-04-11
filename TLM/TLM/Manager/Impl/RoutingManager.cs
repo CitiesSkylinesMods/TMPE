@@ -363,6 +363,7 @@ namespace TrafficManager.Manager.Impl {
         /// <param name="prevLaneIndex">target lane index</param>
         /// <param name="prevLaneId">target lane id</param>
         /// <param name="isNodeStartNodeOfPrevSegment">start node for the target segment end</param>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1117:Parameters should be on same line or separate lines", Justification = "beauty")]
         private void RecalculateLaneEndRoutingData(
             ushort prevSegmentId,
             int prevLaneIndex,
@@ -457,7 +458,7 @@ namespace TrafficManager.Manager.Impl {
                         continue;
                     }
 
-                    bool? start = segId.ToSegment().IsStartNode(nodeId);
+                    bool? start = segId.ToSegment().GetRelationToNode(nodeId);
                     if (!start.HasValue) {
                         Log.Error($"Segment with id: {segId} is not connected to the node {nodeId}");
                         Debug.LogError($"TM:PE RecalculateLaneRoutings - Segment with id {segId} is not connected to the node {nodeId}");
@@ -628,120 +629,115 @@ namespace TrafficManager.Manager.Impl {
                 ArrowDirection nextIncomingDir = segEndMan.GetDirection(ref prevEnd, nextSegmentId);
                 bool isNextSegmentValid = nextIncomingDir != ArrowDirection.None;
 
-                if (extendedLogRouting) {
-                    Log._DebugFormat(
-                        "RoutingManager.RecalculateLaneEndRoutingData({0}, {1}, {2}, {3}): " +
-                        "prevSegment={4}. Exploring nextSegment={5} -- nextFirstLaneId={6} " +
-                        "-- nextIncomingDir={7} valid={8}",
-                        prevSegmentId,
-                        prevLaneIndex,
-                        prevLaneId,
-                        isNodeStartNodeOfPrevSegment,
-                        prevSegmentId,
-                        nextSegmentId,
-                        nextFirstLaneId,
-                        nextIncomingDir,
-                        isNextSegmentValid);
-                }
-
-                NetInfo.Direction nextDir = isNodeStartNodeOfNextSegment
-                                                ? NetInfo.Direction.Backward
-                                                : NetInfo.Direction.Forward;
-                NetInfo.Direction nextDir2 =
-                    !nextSegIsInverted ? nextDir : NetInfo.InvertDirection(nextDir);
-
-                LaneTransitionData[] nextRelaxedTransitionDatas = null;
-                byte numNextRelaxedTransitionDatas = 0;
-                LaneTransitionData[] nextCompatibleTransitionDatas = null;
-                int[] nextCompatibleOuterSimilarIndices = null;
-                byte numNextCompatibleTransitionDatas = 0;
-                LaneTransitionData[] nextLaneConnectionTransitionDatas = null;
-                byte numNextLaneConnectionTransitionDatas = 0;
-                LaneTransitionData[] nextForcedTransitionDatas = null;
-                byte numNextForcedTransitionDatas = 0;
-                int[] nextCompatibleTransitionDataIndices = null;
-                byte numNextCompatibleTransitionDataIndices = 0;
-                int[] compatibleLaneIndexToLaneConnectionIndex = null;
-
                 if (isNextSegmentValid) {
-                    nextRelaxedTransitionDatas = new LaneTransitionData[MAX_NUM_TRANSITIONS];
-                    nextCompatibleTransitionDatas = new LaneTransitionData[MAX_NUM_TRANSITIONS];
-                    nextLaneConnectionTransitionDatas = new LaneTransitionData[MAX_NUM_TRANSITIONS];
-                    nextForcedTransitionDatas = new LaneTransitionData[MAX_NUM_TRANSITIONS];
-                    nextCompatibleOuterSimilarIndices = new int[MAX_NUM_TRANSITIONS];
-                    nextCompatibleTransitionDataIndices = new int[MAX_NUM_TRANSITIONS];
-                    compatibleLaneIndexToLaneConnectionIndex = new int[MAX_NUM_TRANSITIONS];
-                }
-
-                uint nextLaneId = nextFirstLaneId;
-                byte nextLaneIndex = 0;
-
-                // ushort compatibleLaneIndicesMask = 0;
-                while (nextLaneIndex < nextSegmentInfo.m_lanes.Length && nextLaneId != 0u) {
-                    // determine valid lanes based on lane arrows
-                    NetInfo.Lane nextLaneInfo = nextSegmentInfo.m_lanes[nextLaneIndex];
-
                     if (extendedLogRouting) {
                         Log._DebugFormat(
                             "RoutingManager.RecalculateLaneEndRoutingData({0}, {1}, {2}, {3}): " +
-                            "prevSegment={4}. Exploring nextSegment={5}, lane {6}, idx {7}",
+                            "prevSegment={4}. Exploring nextSegment={5} -- nextFirstLaneId={6} " +
+                            "-- nextIncomingDir={7} valid={8}",
                             prevSegmentId,
                             prevLaneIndex,
                             prevLaneId,
                             isNodeStartNodeOfPrevSegment,
                             prevSegmentId,
                             nextSegmentId,
-                            nextLaneId,
-                            nextLaneIndex);
+                            nextFirstLaneId,
+                            nextIncomingDir,
+                            isNextSegmentValid);
                     }
 
-                    // next is compatible lane
-                    if (nextLaneInfo.CheckType(ROUTED_LANE_TYPES, ROUTED_VEHICLE_TYPES) &&
-                        (prevLaneInfo.m_vehicleType & nextLaneInfo.m_vehicleType) != VehicleInfo.VehicleType.None)
-                    {
+                    bool nextSegmentIsReversed = isNodeStartNodeOfNextSegment ^ nextSegIsInverted;
+
+                    // expected direction of the next lane
+                    NetInfo.Direction nextExpectedDirection = nextSegmentIsReversed ? NetInfo.Direction.Backward : NetInfo.Direction.Forward;
+
+                    LaneTransitionData[] nextRelaxedTransitionDatas = new LaneTransitionData[MAX_NUM_TRANSITIONS];
+                    byte numNextRelaxedTransitionDatas = 0;
+                    LaneTransitionData[] nextCompatibleTransitionDatas = new LaneTransitionData[MAX_NUM_TRANSITIONS];
+                    int[] nextCompatibleOuterSimilarIndices = new int[MAX_NUM_TRANSITIONS];
+                    byte numNextCompatibleTransitionDatas = 0;
+                    LaneTransitionData[] nextLaneConnectionTransitionDatas = new LaneTransitionData[MAX_NUM_TRANSITIONS];
+                    byte numNextLaneConnectionTransitionDatas = 0;
+                    LaneTransitionData[] nextForcedTransitionDatas = new LaneTransitionData[MAX_NUM_TRANSITIONS];
+                    byte numNextForcedTransitionDatas = 0;
+                    int[] nextCompatibleTransitionDataIndices = new int[MAX_NUM_TRANSITIONS];
+                    byte numNextCompatibleTransitionDataIndices = 0;
+                    int[] compatibleLaneIndexToLaneConnectionIndex = new int[MAX_NUM_TRANSITIONS];
+
+                    uint nextLaneId = nextFirstLaneId;
+                    byte nextLaneIndex = 0;
+
+                    // ushort compatibleLaneIndicesMask = 0;
+                    while (nextLaneIndex < nextSegmentInfo.m_lanes.Length && nextLaneId != 0u) {
+                        // determine valid lanes based on lane arrows
+                        NetInfo.Lane nextLaneInfo = nextSegmentInfo.m_lanes[nextLaneIndex];
+
                         if (extendedLogRouting) {
-                            Log._Debug(
-                                $"RoutingManager.RecalculateLaneEndRoutingData({prevSegmentId}, " +
-                                $"{prevLaneIndex}, {prevLaneId}, {isNodeStartNodeOfPrevSegment}): vehicle type check passed for " +
-                                $"nextLaneId={nextLaneId}, idx={nextLaneIndex}");
+                            Log._DebugFormat(
+                                "RoutingManager.RecalculateLaneEndRoutingData({0}, {1}, {2}, {3}): " +
+                                "prevSegment={4}. Exploring nextSegment={5}, lane {6}, idx {7}",
+                                prevSegmentId,
+                                prevLaneIndex,
+                                prevLaneId,
+                                isNodeStartNodeOfPrevSegment,
+                                prevSegmentId,
+                                nextSegmentId,
+                                nextLaneId,
+                                nextLaneIndex);
                         }
 
-                        // next is incoming lane
-                        if ((nextLaneInfo.m_finalDirection & nextDir2) != NetInfo.Direction.None) {
+                        // next is compatible lane
+                        if (nextLaneInfo.CheckType(ROUTED_LANE_TYPES, ROUTED_VEHICLE_TYPES) &&
+                            (prevLaneInfo.m_vehicleType & nextLaneInfo.m_vehicleType) != VehicleInfo.VehicleType.None) {
+
                             if (extendedLogRouting) {
                                 Log._Debug(
                                     $"RoutingManager.RecalculateLaneEndRoutingData({prevSegmentId}, " +
-                                    $"{prevLaneIndex}, {prevLaneId}, {isNodeStartNodeOfPrevSegment}): lane direction check passed " +
-                                    $"for nextLaneId={nextLaneId}, idx={nextLaneIndex}");
+                                    $"{prevLaneIndex}, {prevLaneId}, {isNodeStartNodeOfPrevSegment}): vehicle type check passed for " +
+                                    $"nextLaneId={nextLaneId}, idx={nextLaneIndex}");
                             }
 
-                            ++incomingVehicleLanes;
+                            // next is incoming lane
+                            if ((nextLaneInfo.m_finalDirection & nextExpectedDirection) != NetInfo.Direction.None) {
+                                if (extendedLogRouting) {
+                                    Log._Debug(
+                                        $"RoutingManager.RecalculateLaneEndRoutingData({prevSegmentId}, " +
+                                        $"{prevLaneIndex}, {prevLaneId}, {isNodeStartNodeOfPrevSegment}): lane direction check passed " +
+                                        $"for nextLaneId={nextLaneId}, idx={nextLaneIndex}");
+                                }
 
-                            if (extendedLogRouting) {
-                                Log._DebugFormat(
-                                    "RoutingManager.RecalculateLaneEndRoutingData({0}, {1}, {2}, {3}): " +
-                                    "increasing number of incoming lanes at nextLaneId={4}, idx={5}: " +
-                                    "isNextValid={6}, nextLaneInfo.m_finalDirection={7}, nextDir2={8}: " +
-                                    "incomingVehicleLanes={9}, outgoingVehicleLanes={10} ",
-                                    prevSegmentId,
-                                    prevLaneIndex,
-                                    prevLaneId,
-                                    isNodeStartNodeOfPrevSegment,
-                                    nextLaneId,
-                                    nextLaneIndex,
-                                    isNextSegmentValid,
-                                    nextLaneInfo.m_finalDirection,
-                                    nextDir2,
-                                    incomingVehicleLanes,
-                                    outgoingVehicleLanes);
-                            }
+                                ++incomingVehicleLanes;
 
-                            if (isNextSegmentValid) {
-                                // calculate current similar lane index starting from outer lane
+                                if (extendedLogRouting) {
+                                    Log._DebugFormat(
+                                        "RoutingManager.RecalculateLaneEndRoutingData({0}, {1}, {2}, {3}): " +
+                                        "increasing number of incoming lanes at nextLaneId={4}, idx={5}: " +
+                                        "isNextValid={6}, nextLaneInfo.m_finalDirection={7}, nextExpectedDirection={8}: " +
+                                        "incomingVehicleLanes={9}, outgoingVehicleLanes={10} ",
+                                        prevSegmentId,
+                                        prevLaneIndex,
+                                        prevLaneId,
+                                        isNodeStartNodeOfPrevSegment,
+                                        nextLaneId,
+                                        nextLaneIndex,
+                                        isNextSegmentValid,
+                                        nextLaneInfo.m_finalDirection,
+                                        nextExpectedDirection,
+                                        incomingVehicleLanes,
+                                        outgoingVehicleLanes);
+                                }
+
+                                int nextSimilarLaneCount = nextLaneInfo.m_similarLaneCount;
                                 int nextOuterSimilarLaneIndex = CalcOuterSimilarLaneIndex(nextSegmentId, nextLaneIndex);
+                                bool reverseSimilarLaneIndex = ShouldReverseSimilarLaneIndex(
+                                    segmentInvert1: prevSegIsInverted, laneInfo1: prevLaneInfo, startNode1: isNodeStartNodeOfPrevSegment,
+                                    segmentInvert2: nextSegIsInverted, laneInfo2: nextLaneInfo, startNode2: isNodeStartNodeOfNextSegment);
+                                int nextMatchingOuterSimilarLaneIndex =
+                                    reverseSimilarLaneIndex ?
+                                    nextSimilarLaneCount - 1 - nextOuterSimilarLaneIndex :
+                                    nextOuterSimilarLaneIndex;
 
-                                // int nextInnerSimilarLaneIndex = CalcInnerSimilarLaneIndex(nextSegmentId, nextLaneIndex);
-                                var isCompatibleLane = false;
+                                bool isCompatibleLane = false;
                                 var transitionType = LaneEndTransitionType.Invalid;
 
                                 // check for lane connections
@@ -760,11 +756,9 @@ namespace TrafficManager.Manager.Impl {
                                 }
 
                                 bool nextIsTrackOnly = nextLaneInfo.IsTrackOnly();
-                                int nextSimilarLaneCount = nextLaneInfo.m_similarLaneCount;
                                 bool similarLaneCountMatches = prevSimilarLaneCount == nextSimilarLaneCount;
-                                bool outerSimilarLaneIndexMatches = prevOuterSimilarLaneIndex == nextOuterSimilarLaneIndex;
-                                bool biDirectional = prevLaneInfo.IsBidirectional() || nextLaneInfo.IsBidirectional();
-                                bool stayInlaneTracks = nextIsTrackOnly & similarLaneCountMatches & !biDirectional;
+                                bool outerSimilarLaneIndexMatches = prevOuterSimilarLaneIndex == nextMatchingOuterSimilarLaneIndex;
+                                bool stayInlaneTracks = nextIsTrackOnly & similarLaneCountMatches;
 
                                 if (extendedLogRouting) {
                                     Log._DebugFormat(
@@ -800,7 +794,8 @@ namespace TrafficManager.Manager.Impl {
                                         "prefer stay in lane information:\n" +
                                         $"prevSegmentId={prevSegmentId} prevLane:[id={prevLaneId} index={prevLaneIndex} outerSimilarLaneIndex:{prevOuterSimilarLaneIndex} similarLaneCount={prevSimilarLaneCount}]\n" +
                                         $"nextSegmentId={nextSegmentId} nextLane:[id={nextLaneId} index={nextLaneIndex} outerSimilarLaneIndex:{nextOuterSimilarLaneIndex} similarLaneCount={nextSimilarLaneCount}]\n" +
-                                        $"nextIsTrackOnly={nextIsTrackOnly} similarLaneCountMatches={similarLaneCountMatches}  outerSimilarLaneIndexMatches={outerSimilarLaneIndexMatches} stayInlaneTracks={stayInlaneTracks}");
+                                        $"reverseSimilarLaneIndex={reverseSimilarLaneIndex} nextMatchingOuterSimilarLaneIndex={nextMatchingOuterSimilarLaneIndex}\n" +
+                                        $"nextIsTrackOnly={nextIsTrackOnly} similarLaneCountMatches={similarLaneCountMatches} outerSimilarLaneIndexMatches={outerSimilarLaneIndexMatches} stayInlaneTracks={stayInlaneTracks}");
                                 }
 
                                 int currentLaneConnectionTransIndex = -1;
@@ -933,8 +928,7 @@ namespace TrafficManager.Manager.Impl {
                                         (nextIncomingDir == ArrowDirection.Right && hasLeftArrow) || // valid incoming right
                                         (nextIncomingDir == ArrowDirection.Left && hasRightArrow) || // valid incoming left
                                         (nextIncomingDir == ArrowDirection.Forward && hasForwardArrow) || // valid incoming straight
-                                        (nextIncomingDir == ArrowDirection.Turn && canTurn) /*valid turning lane*/) 
-                                    {
+                                        (nextIncomingDir == ArrowDirection.Turn && canTurn) /*valid turning lane*/) {
                                         if (extendedLogRouting) {
                                             Log._DebugFormat(
                                                 "RoutingManager.RecalculateLaneEndRoutingData({0}, {1}, " +
@@ -998,7 +992,6 @@ namespace TrafficManager.Manager.Impl {
 
                                     // routed vehicle that does not follow lane arrows (trains, trams,
                                     // metros, monorails)
-                                    // TODO [issue #1053] this causes cars to turn on mixed car/track lanes against lane arrows
                                     transitionType = LaneEndTransitionType.Default;
 
                                     if (numNextForcedTransitionDatas < MAX_NUM_TRANSITIONS) {
@@ -1013,7 +1006,7 @@ namespace TrafficManager.Manager.Impl {
                                             // simple forced lane transition: set lane distance
                                             nextForcedTransitionDatas[numNextForcedTransitionDatas]
                                                 .distance = (byte)Math.Abs(
-                                                prevOuterSimilarLaneIndex - nextOuterSimilarLaneIndex);
+                                                prevOuterSimilarLaneIndex - nextMatchingOuterSimilarLaneIndex);
                                         }
 
                                         ++numNextForcedTransitionDatas;
@@ -1033,7 +1026,7 @@ namespace TrafficManager.Manager.Impl {
 
                                     if (numNextCompatibleTransitionDatas < MAX_NUM_TRANSITIONS) {
                                         nextCompatibleOuterSimilarIndices[numNextCompatibleTransitionDatas] =
-                                            nextOuterSimilarLaneIndex;
+                                            nextMatchingOuterSimilarLaneIndex;
 
                                         compatibleLaneIndexToLaneConnectionIndex[numNextCompatibleTransitionDatas] =
                                             currentLaneConnectionTransIndex;
@@ -1058,33 +1051,33 @@ namespace TrafficManager.Manager.Impl {
                                             $"idx={nextLaneIndex} is NOT compatible.");
                                     }
                                 }
-                            }
-                        } else {
-                            if (extendedLogRouting) {
-                                Log._DebugFormat(
-                                    "RoutingManager.RecalculateLaneEndRoutingData({0}, {1}, {2}, {3}): " +
-                                    "lane direction check NOT passed for nextLaneId={4}, idx={5}: " +
-                                    "isNextValid={6}, nextLaneInfo.m_finalDirection={7}, nextDir2={8}",
-                                    prevSegmentId,
-                                    prevLaneIndex,
-                                    prevLaneId,
-                                    isNodeStartNodeOfPrevSegment,
-                                    nextLaneId,
-                                    nextLaneIndex,
-                                    isNextSegmentValid,
-                                    nextLaneInfo.m_finalDirection,
-                                    nextDir2);
+                            } else {
+                                if (extendedLogRouting) {
+                                    Log._DebugFormat(
+                                        "RoutingManager.RecalculateLaneEndRoutingData({0}, {1}, {2}, {3}): " +
+                                        "lane direction check NOT passed for nextLaneId={4}, idx={5}: " +
+                                        "isNextValid={6}, nextLaneInfo.m_finalDirection={7}, nextExpectedDirection={8}",
+                                        prevSegmentId,
+                                        prevLaneIndex,
+                                        prevLaneId,
+                                        isNodeStartNodeOfPrevSegment,
+                                        nextLaneId,
+                                        nextLaneIndex,
+                                        isNextSegmentValid,
+                                        nextLaneInfo.m_finalDirection,
+                                        nextExpectedDirection);
+                                }
                             }
 
                             if ((nextLaneInfo.m_finalDirection &
-                                 NetInfo.InvertDirection(nextDir2)) != NetInfo.Direction.None)
-                            {
+                                NetInfo.InvertDirection(nextExpectedDirection)) != NetInfo.Direction.None) {
+
                                 ++outgoingVehicleLanes;
                                 if (extendedLogRouting) {
                                     Log._DebugFormat(
                                         "RoutingManager.RecalculateLaneEndRoutingData({0}, {1}, {2}, {3}): " +
                                         "increasing number of outgoing lanes at nextLaneId={4}, idx={5}: " +
-                                        "isNextValid={6}, nextLaneInfo.m_finalDirection={7}, nextDir2={8}: " +
+                                        "isNextValid={6}, nextLaneInfo.m_finalDirection={7}, nextExpectedDirection={8}: " +
                                         "incomingVehicleLanes={9}, outgoingVehicleLanes={10}",
                                         prevSegmentId,
                                         prevLaneIndex,
@@ -1094,44 +1087,42 @@ namespace TrafficManager.Manager.Impl {
                                         nextLaneIndex,
                                         isNextSegmentValid,
                                         nextLaneInfo.m_finalDirection,
-                                        nextDir2,
+                                        nextExpectedDirection,
                                         incomingVehicleLanes,
                                         outgoingVehicleLanes);
                                 }
                             }
+                        } else {
+                            if (extendedLogRouting) {
+                                Log._DebugFormat(
+                                    "RoutingManager.RecalculateLaneEndRoutingData({0}, {1}, {2}, {3}): " +
+                                    "vehicle type check NOT passed for nextLaneId={4}, idx={5}: " +
+                                    "prevLaneInfo.m_vehicleType={6}, nextLaneInfo.m_vehicleType={7}, " +
+                                    "prevLaneInfo.m_laneType={8}, nextLaneInfo.m_laneType={9}",
+                                    prevSegmentId,
+                                    prevLaneIndex,
+                                    prevLaneId,
+                                    isNodeStartNodeOfPrevSegment,
+                                    nextLaneId,
+                                    nextLaneIndex,
+                                    prevLaneInfo.m_vehicleType,
+                                    nextLaneInfo.m_vehicleType,
+                                    prevLaneInfo.m_laneType,
+                                    nextLaneInfo.m_laneType);
+                            }
                         }
-                    } else {
-                        if (extendedLogRouting) {
-                            Log._DebugFormat(
-                                "RoutingManager.RecalculateLaneEndRoutingData({0}, {1}, {2}, {3}): " +
-                                "vehicle type check NOT passed for nextLaneId={4}, idx={5}: " +
-                                "prevLaneInfo.m_vehicleType={6}, nextLaneInfo.m_vehicleType={7}, " +
-                                "prevLaneInfo.m_laneType={8}, nextLaneInfo.m_laneType={9}",
-                                prevSegmentId,
-                                prevLaneIndex,
-                                prevLaneId,
-                                isNodeStartNodeOfPrevSegment,
-                                nextLaneId,
-                                nextLaneIndex,
-                                prevLaneInfo.m_vehicleType,
-                                nextLaneInfo.m_vehicleType,
-                                prevLaneInfo.m_laneType,
-                                nextLaneInfo.m_laneType);
-                        }
+
+                        nextLaneId = nextLaneId.ToLane().m_nextLane;
+                        ++nextLaneIndex;
+                    } // foreach lane
+
+                    if (extendedLogRouting) {
+                        Log._Debug(
+                            $"RoutingManager.RecalculateLaneEndRoutingData({prevSegmentId}, {prevLaneIndex}, " +
+                            $"{prevLaneId}, {isNodeStartNodeOfPrevSegment}): isNextValid={isNextSegmentValid} Compatible lanes: " +
+                            nextCompatibleTransitionDatas?.ArrayToString());
                     }
 
-                    nextLaneId = nextLaneId.ToLane().m_nextLane;
-                    ++nextLaneIndex;
-                } // foreach lane
-
-                if (extendedLogRouting) {
-                    Log._Debug(
-                        $"RoutingManager.RecalculateLaneEndRoutingData({prevSegmentId}, {prevLaneIndex}, " +
-                        $"{prevLaneId}, {isNodeStartNodeOfPrevSegment}): isNextValid={isNextSegmentValid} Compatible lanes: " +
-                        nextCompatibleTransitionDatas?.ArrayToString());
-                }
-
-                if (isNextSegmentValid) {
                     bool laneChangesAllowed
                         = Options.junctionRestrictionsEnabled
                           && JunctionRestrictionsManager.Instance.IsLaneChangingAllowedWhenGoingStraight(
@@ -1280,8 +1271,7 @@ namespace TrafficManager.Manager.Impl {
 
                                     if (totalIncomingLanes > 0
                                         && prevInnerSimilarLaneIndex == prevSimilarLaneCount - 1
-                                        && maxNextInnerSimilarIndex < nextCompatibleLaneCount - 1)
-                                    {
+                                        && maxNextInnerSimilarIndex < nextCompatibleLaneCount - 1) {
                                         // we reached the outermost lane on the previous segment but
                                         // there are still lanes to go on the next segment: allow merging
                                         maxNextInnerSimilarIndex = nextCompatibleLaneCount - 1;
@@ -1347,8 +1337,7 @@ namespace TrafficManager.Manager.Impl {
                                     // in highway-rules HasConnections() gives the same result as HasOutgoingConnections but faster.
                                     if (LaneConnectionManager.Instance.HasConnections(
                                         nextCompatibleTransitionDatas[nextTransitionIndex].laneId,
-                                        isNodeStartNodeOfNextSegment))
-                                    {
+                                        isNodeStartNodeOfNextSegment)) {
                                         int laneConnectionTransIndex =
                                             compatibleLaneIndexToLaneConnectionIndex[nextTransitionIndex];
 
@@ -1451,8 +1440,7 @@ namespace TrafficManager.Manager.Impl {
 
                                 // at junctions: try to match distinct lanes
                                 if (nextCompatibleLaneCount > prevSimilarLaneCount
-                                    && prevOuterSimilarLaneIndex == prevSimilarLaneCount - 1)
-                                {
+                                    && prevOuterSimilarLaneIndex == prevSimilarLaneCount - 1) {
                                     // merge inner lanes
                                     minNextCompatibleOuterSimilarIndex = prevOuterSimilarLaneIndex;
                                     maxNextCompatibleOuterSimilarIndex = nextCompatibleLaneCount - 1;
@@ -1470,8 +1458,7 @@ namespace TrafficManager.Manager.Impl {
                                             maxNextCompatibleOuterSimilarIndex);
                                     }
                                 } else if (nextCompatibleLaneCount < prevSimilarLaneCount
-                                           && prevSimilarLaneCount % nextCompatibleLaneCount == 0)
-                                {
+                                           && prevSimilarLaneCount % nextCompatibleLaneCount == 0) {
                                     // symmetric split
                                     int splitFactor =
                                         prevSimilarLaneCount / nextCompatibleLaneCount;
@@ -1913,8 +1900,7 @@ namespace TrafficManager.Manager.Impl {
                             // find best matching lane(s)
                             for (int nextCompatibleOuterSimilarIndex = minNextCompatibleOuterSimilarIndex;
                                  nextCompatibleOuterSimilarIndex <= maxNextCompatibleOuterSimilarIndex;
-                                 ++nextCompatibleOuterSimilarIndex)
-                            {
+                                 ++nextCompatibleOuterSimilarIndex) {
                                 int nextTransitionIndex = FindLaneWithMaxOuterIndex(
                                     compatibleLaneIndicesSortedByOuterSimilarIndex,
                                     nextCompatibleOuterSimilarIndex);
@@ -1957,8 +1943,7 @@ namespace TrafficManager.Manager.Impl {
                                 // skip lanes having lane connections
                                 if (LaneConnectionManager.Instance.HasOutgoingConnections(
                                     nextCompatibleTransitionDatas[nextTransitionIndex].laneId,
-                                    isNodeStartNodeOfNextSegment))
-                                {
+                                    isNodeStartNodeOfNextSegment)) {
                                     int laneConnectionTransIndex =
                                         compatibleLaneIndexToLaneConnectionIndex[nextTransitionIndex];
 
@@ -1986,9 +1971,8 @@ namespace TrafficManager.Manager.Impl {
 
                                 if (nextIncomingDir == ArrowDirection.Turn && // u-turn
                                     !nodeIsEndOrOneWayOut && // not a dead end
-                                    // incoming lane is not innermost lane
-                                    nextCompatibleOuterSimilarIndex != maxNextCompatibleOuterSimilarIndex)
-                                {
+                                                             // incoming lane is not innermost lane
+                                    nextCompatibleOuterSimilarIndex != maxNextCompatibleOuterSimilarIndex) {
                                     // force u-turns to happen on the innermost lane
                                     ++compatibleLaneDist;
                                     nextCompatibleTransitionDatas[nextTransitionIndex].type =
@@ -2102,11 +2086,18 @@ namespace TrafficManager.Manager.Impl {
                             totalIncomingLanes,
                             totalOutgoingLanes);
                     }
-                } // valid segment
 
-                if (nextSegmentId != prevSegmentId) {
-                    totalIncomingLanes += incomingVehicleLanes;
-                    totalOutgoingLanes += outgoingVehicleLanes;
+                    if (nextSegmentId != prevSegmentId) {
+                        totalIncomingLanes += incomingVehicleLanes;
+                        totalOutgoingLanes += outgoingVehicleLanes;
+                    }
+                } else {
+                    // invalid segment
+                    if (extendedLogRouting) {
+                        Log._DebugFormat(
+                            $"RoutingManager.RecalculateLaneEndRoutingData({prevSegmentId}, {prevLaneIndex}, {prevLaneId}, {isNodeStartNodeOfPrevSegment}): " +
+                            $"valid segment check NOT passed for nextSegmentId={nextSegmentId} idx={segmentIndex}");
+                    }
                 }
 
                 if (iterateViaGeometry) {
@@ -2253,7 +2244,6 @@ namespace TrafficManager.Manager.Impl {
                 Math.Max(0, Math.Min(targetOuterLaneIndex, indicesSortedByOuterIndex.Length - 1))];
         }
 
-        [UsedImplicitly]
         protected int FindLaneByOuterIndex(LaneTransitionData[] laneTransitions,
                                            int num,
                                            ushort segmentId,
@@ -2341,6 +2331,47 @@ namespace TrafficManager.Manager.Impl {
             base.OnAfterLoadData();
 
             RecalculateAll();
+        }
+
+        /// <summary>
+        /// if the direction of the given lanes do not match then similar lane index must be reversed.
+        /// </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1117:Parameters should be on same line or separate lines", Justification = "beauty")]
+        private bool ShouldReverseSimilarLaneIndex(
+            bool segmentInvert1, NetInfo.Lane laneInfo1, bool startNode1,
+            bool segmentInvert2, NetInfo.Lane laneInfo2, bool startNode2) {
+#if DEBUG
+            bool logRouting = DebugSwitch.Routing.Get(); 
+#else
+            const bool logRouting = false;
+#endif
+            bool both1 = laneInfo1.m_finalDirection == NetInfo.Direction.Both;
+            bool both2 = laneInfo2.m_finalDirection == NetInfo.Direction.Both;
+            bool backward1 = laneInfo1.IsGoingBackward();
+            bool backward2 = laneInfo2.IsGoingBackward();
+
+            bool reverse;
+            if (!both1 && !both2) {
+                // both lanes are one-way or station tracks
+                // [https://github.com/CitiesSkylinesMods/TMPE/issues/1486#issuecomment-1075699771] what about station tracks connecting to unidirectional tracks?
+                reverse = false;
+            } else {
+                // at least one lane is non-station bidirectional
+
+                reverse = startNode1 == startNode2; // Reverse if segments are facing each other
+                reverse ^= segmentInvert1 != segmentInvert2; // Reverse if segments are different directions
+                reverse ^= backward1 != backward2;  // Reverse if lanes are in different directions
+                // Reversing two times is like not reversing at all. So every time one of the conditions above are met we toggle reverse using the ^= operator.
+            }
+
+            if (logRouting) {
+                Log._Debug(
+                    $"ShouldReverseSimilarLaneIndex() : reverse={reverse} " +
+                    $"segmentInvert1={segmentInvert1} startNode1={startNode1} backward1={backward1} both1={both1}\n" +
+                    $"segmentInvert2={segmentInvert2}  startNode2={startNode2} backward2={backward2} both2={both2}\n");
+            }
+
+            return reverse;
         }
     }
 }

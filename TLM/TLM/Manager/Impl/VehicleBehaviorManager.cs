@@ -1008,7 +1008,7 @@ namespace TrafficManager.Manager.Impl {
 #if DEBUG
                 Vehicle dummyVeh = default;
 #endif
-                Constants.ManagerFactory.TrafficLightSimulationManager.GetTrafficLightState(
+                TrafficLightSimulationManager.Instance.GetTrafficLightState(
 #if DEBUG
                     0,
                     ref dummyVeh,
@@ -1330,7 +1330,7 @@ namespace TrafficManager.Manager.Impl {
             }
 
             ITrafficPriorityManager prioMan = TrafficPriorityManager.Instance;
-            ICustomSegmentLightsManager segLightsMan = CustomSegmentLightsManager.Instance;
+            CustomSegmentLightsManager segLightsMan = CustomSegmentLightsManager.Instance;
 
             if ((vehicleData.m_flags & Vehicle.Flags.Emergency2) == 0 || isLevelCrossing) {
                 if (hasTrafficLight && checkTrafficLights) {
@@ -1342,7 +1342,7 @@ namespace TrafficManager.Manager.Impl {
                     bool stopCar = false;
                     uint simGroup = (uint)targetNodeId >> 7;
 
-                    Constants.ManagerFactory.TrafficLightSimulationManager.GetTrafficLightState(
+                    TrafficLightSimulationManager.Instance.GetTrafficLightState(
 #if DEBUG
                         frontVehicleId,
                         ref vehicleData,
