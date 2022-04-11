@@ -9,8 +9,15 @@ namespace TrafficManager.State {
 
         public static CheckboxOption HighwayRules =
             new (nameof(Options.highwayRules), Options.PersistTo.Savegame) {
-                Label = "VR.Checkbox:Enable highway merging/splitting rules",
+                Label = "VR.Checkbox:Enable highway merging/splitting rules", //legacy
                 Handler = OnHighwayRulesChanged,
+            };
+
+        public static CheckboxOption HighwayMergingRules =
+            new(nameof(Options.highwayMergingRules), Options.PersistTo.Savegame) {
+                Label = "VR.Checkbox:Enable highway merging rules",
+                Tooltip = "VR.Tooltip: Lightweight",
+                Handler = OnHighwayMergingRulesChanged,
             };
 
         public static CheckboxOption PreferOuterLane =
@@ -24,6 +31,8 @@ namespace TrafficManager.State {
 
             HighwayRules.AddUI(group);
 
+            HighwayMergingRules.AddUI(group);
+
             PreferOuterLane.AddUI(group);
         }
 
@@ -32,9 +41,17 @@ namespace TrafficManager.State {
         private static void OnHighwayRulesChanged(bool _) {
             if (TMPELifecycle.Instance.Deserializing || !TMPELifecycle.InGameOrEditor())
                 return;
+            HighwayMergingRules.Value = false;
 
             Flags.ClearHighwayLaneArrows();
             Flags.ApplyAllFlags();
+            OptionsManager.UpdateRoutingManager();
+        }
+
+        private static void OnHighwayMergingRulesChanged(bool _) {
+            if (TMPELifecycle.Instance.Deserializing || !TMPELifecycle.InGameOrEditor())
+                return;
+            HighwayRules.Value = false;
             OptionsManager.UpdateRoutingManager();
         }
 
