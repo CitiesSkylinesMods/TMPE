@@ -16,20 +16,9 @@ namespace TrafficManager.UI.Helpers {
         private UILabel _sliderLabel;
 
         public SliderOption(string fieldName, Options.PersistTo scope = Options.PersistTo.Savegame)
-        : base(fieldName, scope) {
-            OnValueChanged = DefaultOnValueChanged;
-        }
+        : base(fieldName, scope) { }
 
         /* Data */
-
-        public event OnValueChanged OnValueChanged;
-
-        public OnValueChanged Handler {
-            set {
-                OnValueChanged -= value;
-                OnValueChanged += value;
-            }
-        }
 
         public byte Min {
             get => _min;
@@ -69,23 +58,6 @@ namespace TrafficManager.UI.Helpers {
         public override byte Save() => FloatToByte(Value);
 
         /* UI */
-
-        public string Label {
-            get => _label ?? $"Slider:{FieldName}";
-            set {
-                _label = value;
-                UpdateLabel();
-            }
-        }
-
-        public string Tooltip {
-            get => _tooltip;
-            set {
-                _tooltip = value;
-                UpdateTooltip();
-            }
-        }
-
         public override float Value {
             get => base.Value;
             set {
@@ -104,22 +76,14 @@ namespace TrafficManager.UI.Helpers {
             }
         }
 
-        public bool ReadOnly {
-            get => _readOnly;
-            set {
-                _readOnly = !IsInScope || value;
-                UpdateReadOnly();
-            }
-        }
-
         public override SliderOption AddUI(UIHelperBase container) {
             _ui = container.AddSlider(
-                text: T(Label) + ":",
+                text: Translate(Label) + ":",
                 min: Min,
                 max: Max,
                 step: Step,
                 defaultValue: Value,
-                eventCallback: OnValueChanged) as UISlider;
+                eventCallback: InvokeOnValueChanged) as UISlider;
 
             _sliderLabel = _ui.parent.Find<UILabel>("Label");
             _sliderLabel.width = SLIDER_LABEL_MAX_WIDTH;
@@ -130,18 +94,18 @@ namespace TrafficManager.UI.Helpers {
             return this;
         }
 
-        private void UpdateLabel() {
+        protected override void UpdateLabel() {
             if (!HasUI) return;
 
-            _sliderLabel.text = T(Label);
+            _sliderLabel.text = Translate(Label);
         }
 
-        private void UpdateTooltip() {
+        protected override void UpdateTooltip() {
             if (!HasUI) return;
 
             _ui.tooltip = IsInScope
                 ? $"{Value}{_tooltip}"
-                : T(INGAME_ONLY_SETTING);
+                : Translate(INGAME_ONLY_SETTING);
 
             if (_ui.thumbObject.hasFocus) {
                 try { _ui.RefreshTooltip(); }
@@ -149,7 +113,7 @@ namespace TrafficManager.UI.Helpers {
             }
         }
 
-        private void UpdateReadOnly() {
+        protected override void UpdateReadOnly() {
             if (!HasUI) return;
 
             var readOnly = !IsInScope || _readOnly;
