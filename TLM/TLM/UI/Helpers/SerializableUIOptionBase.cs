@@ -53,18 +53,19 @@ namespace TrafficManager.UI.Helpers {
 
             if (scope.IsFlagSet(Options.PersistTo.Savegame)) {
                 _fieldInfo = typeof(Options).GetField(fieldName, BindingFlags.Static | BindingFlags.Public);
-
-                if (_fieldInfo == null) {
-                    throw new Exception($"SerializableUIOptionBase.ctor: `{fieldName}` does not exist");
-                }
+                getValue_ = _fieldInfo != null ? GetFieldValue : GetBuiltInValue;
             }
 
             OnValueChanged = DefaultOnValueChanged;
         }
 
+        private TVal GetFieldValue() => (TVal)_fieldInfo.GetValue(null);
+        private TVal GetBuiltInValue() => _value; // faster.
+        private Func<TVal> getValue_;
+
         /// <summary>Gets or sets the value of the field this option represents.</summary>
         public virtual TVal Value {
-            get => _fieldInfo != null ? (TVal)_fieldInfo.GetValue(null) : _value;
+            get => getValue_();
             set {
                 if (_fieldInfo != null) {
                     _fieldInfo.SetValue(null, value);
