@@ -695,7 +695,7 @@ This changelog includes all versions and major variants of the mod going all the
 - [Fixed] Wrong texture paths for timed traffic lights (thanks t1a2l for reporting!) (#732, #704, #714)
 - [Fixed] Bug in guide manager that activated guide when trying to deactivate (#729)
 - [Fixed] Double setting of lane speeds on game load, and debug log spamming (#736, #735)
-- [Fixed] Scrollbar position corrected in mod options (#722, #742)
+- [Fixed] Scrollbar position corrected in mod options (#722, #742, #743)
 - [Fixed] Vehicle Restrictions error: `HashSet have been modified` (#746, #744, #721)
 - [Updated] Cleaned up UI panels in Vehicle Restrictions and Speed Limits tools (#721, #709, #657)
 - [Updated] Toolbar UI code overhauled, updated and polished (#656, #523)
