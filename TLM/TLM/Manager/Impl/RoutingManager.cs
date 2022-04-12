@@ -479,9 +479,66 @@ namespace TrafficManager.Manager.Impl {
                 nodeIsSplitJunction = numOutgoing > 1;
             }
 
-            // bool isNextRealJunction = prevSegGeo.CountOtherSegments(startNode) > 1;
+            bool applyHighwayMergingRules= false;
+            bool nodeHasConnections = LaneConnectionManager.Instance.HasNodeConnections(nodeId);
+            if (Options.highwayMergingRules && !nodeHasTrafficLights && !nodeHasPrioritySigns && !nodeHasConnections) {
+                // determine if junction is a simple junction (highway rules only apply to simple junctions)
+                int numIncomingSegents = 0;
+                int numOutgoingSegments = 0;
+                bool laneSwitching = false;
+                bool highwayOnly = true;
+
+                for (int segIndex = 0; segIndex < 8; ++segIndex) {
+                    ushort segmentId = netNode.GetSegment(segIndex);
+                    if (segmentId == 0) {
+                        continue;
+                    }
+
+                    ref NetSegment netSegment = ref segmentId.ToSegment();
+                    highwayOnly &= netSegment.Info?.m_netAI is RoadBaseAI ai && ai.m_highwayRules; 
+
+                    bool? start = netSegment.GetRelationToNode(nodeId);
+                    if (!start.HasValue) {
+                        Log.Error($"Segment with id: {segmentId} is not connected to the node {nodeId}");
+                        Debug.LogError($"TM:PE RecalculateLaneRoutings - Segment with id {segmentId} is not connected to the node {nodeId}");
+                        continue;
+                    }
+                    bool startNode = start.Value;
+
+                    ExtSegmentEnd segEnd = segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segmentId, startNode)];
+                    if (segEnd.incoming) {
+                        ++numIncomingSegents;
+                        laneSwitching |= JunctionRestrictionsManager.Instance.IsLaneChangingAllowedWhenGoingStraight(segmentId, startNode);
+                    }
+
+                    if (segEnd.outgoing) {
+                        ++numOutgoingSegments;
+                    }
+                }
+
+                if (numOutgoingSegments == 1 && numIncomingSegents == 2 && !laneSwitching && highwayOnly) {
+                    // merging
+                    int numIncomingLanes = 0; // toward the node
+                    int numOutgoingLanes = 0; // from the node
+                    nodeId.ToNode().CountLanes(
+                        nodeID: nodeId,
+                        ignoreSegment: 0,
+                        laneTypes: LaneArrowManager.LANE_TYPES,
+                        vehicleTypes: LaneArrowManager.VEHICLE_TYPES,
+                        onePerSegment: false,
+                        forward: ref numIncomingLanes,
+                        backward: ref numOutgoingLanes);
+                    if (numIncomingLanes == numOutgoingSegments) {
+                        // lane arithmetic checks out.
+                        applyHighwayMergingRules = true;
+                    }
+                }
+            }
+
+            bool prevIsCarLane = prevLaneInfo.CheckType(ROUTED_LANE_TYPES, ARROW_VEHICLE_TYPES);
+
             bool nextAreOnlyOneWayHighways =
-                Constants.ManagerFactory.ExtSegmentEndManager.CalculateOnlyHighways(
+                ExtSegmentEndManager.Instance.CalculateOnlyHighways(
                     prevEnd.segmentId,
                     prevEnd.startNode);
 
@@ -490,10 +547,9 @@ namespace TrafficManager.Manager.Impl {
                              prevEnd.outgoing && prevExtSegment.oneWay && prevExtSegment.highway;
             bool applyHighwayRules = onHighway && nodeIsSimpleJunction;
             bool applyHighwayRulesAtJunction = applyHighwayRules && nodeIsRealJunction;
-            bool iterateViaGeometry = applyHighwayRulesAtJunction &&
-                                      prevLaneInfo.CheckType(
-                                          ROUTED_LANE_TYPES,
-                                          ARROW_VEHICLE_TYPES);
+            bool iterateViaGeometry = applyHighwayRulesAtJunction && prevIsCarLane;
+            iterateViaGeometry |= applyHighwayMergingRules && prevIsCarLane;
+
             // start with u-turns at highway junctions
             ushort nextSegmentId = iterateViaGeometry ? prevSegmentId : (ushort)0;
 
@@ -520,6 +576,7 @@ namespace TrafficManager.Manager.Impl {
                     prevEnd.outgoing && prevExtSegment.oneWay,
                     prevExtSegment.highway,
                     iterateViaGeometry);
+                Log._Debug($"Options.highwayMergingRules={Options.highwayMergingRules}, applyHighwayMergingRules={applyHighwayMergingRules}");
                 Log._DebugFormat(
                     "RoutingManager.RecalculateLaneEndRoutingData({0}, {1}, {2}, {3}): " +
                     "prevSegIsInverted={4} leftHandDrive={5}",
@@ -1165,7 +1222,7 @@ namespace TrafficManager.Manager.Impl {
                                 applyHighwayRulesAtSegment);
                         }
 
-                        if (applyHighwayRulesAtJunction) {
+                        if (applyHighwayRulesAtJunction || applyHighwayMergingRules) {
                             // we reached a highway junction where more than two segments are connected to each other
                             if (extendedLogRouting) {
                                 Log._Debug(
@@ -1375,11 +1432,12 @@ namespace TrafficManager.Manager.Impl {
                                             compatibleLaneDist);
                                     }
 #endif
-
-                                    UpdateHighwayLaneArrows(
-                                        nextCompatibleTransitionDatas[nextTransitionIndex].laneId,
-                                        isNodeStartNodeOfNextSegment,
-                                        nextIncomingDir);
+                                    if (Options.highwayRules) {
+                                        UpdateHighwayLaneArrows(
+                                            nextCompatibleTransitionDatas[nextTransitionIndex].laneId,
+                                            isNodeStartNodeOfNextSegment,
+                                            nextIncomingDir);
+                                    }
 
                                     if (numNextCompatibleTransitionDataIndices < MAX_NUM_TRANSITIONS) {
                                         nextCompatibleTransitionDataIndices[numNextCompatibleTransitionDataIndices++] =
