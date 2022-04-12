@@ -176,6 +176,9 @@
     <Compile Include="UI\Helpers\SliderOption.cs" />
     <Compile Include="UI\Helpers\OptionButtonBase.cs" />
     <Compile Include="UI\Helpers\UrlButton.cs" />
+    <Compile Include="UI\SubTools\RoutingDetector\Connection.cs" />
+    <Compile Include="UI\SubTools\RoutingDetector\LaneEnd.cs" />
+    <Compile Include="UI\SubTools\RoutingDetector\RoutingDetectorTool.cs" />
     <Compile Include="UI\WhatsNew\MarkupKeyword.cs" />
     <Compile Include="UI\WhatsNew\WhatsNewMarkup.cs" />
     <Compile Include="Util\Extensions\CitizenUnitExtensions.cs" />
