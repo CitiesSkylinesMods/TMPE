@@ -168,9 +168,12 @@
     <Compile Include="State\OptionsTabs\MaintenanceTab_DespawnGroup.cs" />
     <Compile Include="State\OptionsTabs\MaintenanceTab_ToolsGroup.cs" />
     <Compile Include="State\VersionInfo.cs" />
+    <Compile Include="TrafficLight\Impl\ITrafficLightContainer.cs" />
+    <Compile Include="TrafficLight\Impl\TrafficLightSimulation.cs" />
     <Compile Include="UI\AllowDespawn\AllowDespawnPanel.cs" />
     <Compile Include="UI\Helpers\ActionButton.cs" />
     <Compile Include="UI\Helpers\GlobalConfigObserver.cs" />
+    <Compile Include="UI\Helpers\DropDownOption.cs" />
     <Compile Include="UI\Helpers\SliderOption.cs" />
     <Compile Include="UI\Helpers\OptionButtonBase.cs" />
     <Compile Include="UI\Helpers\UrlButton.cs" />
@@ -423,8 +426,8 @@
     <Compile Include="UI\SubTools\SpeedLimits\SpeedLimitsToolWindow.PalettePanel.cs">
       <DependentUpon>SpeedLimitsToolWindow.cs</DependentUpon>
     </Compile>
-    <Compile Include="UI\SubTools\TimedTrafficLights\TimedTrafficLightsTool.cs" />
-    <Compile Include="UI\SubTools\TimedTrafficLights\TTLToolMode.cs" />
+    <Compile Include="UI\SubTools\TTL\TimedTrafficLightsTool.cs" />
+    <Compile Include="UI\SubTools\TTL\TTLToolMode.cs" />
     <Compile Include="UI\Textures\JunctionRestrictions.cs" />
     <Compile Include="UI\Textures\MainMenu.cs" />
     <Compile Include="UI\Textures\RoadUI.cs" />
@@ -461,6 +464,7 @@
     <Compile Include="Util\InGameUtil.cs" />
     <Compile Include="Util\IntVector2.cs" />
     <Compile Include="Util\LaneUtil.cs" />
+    <Compile Include="Util\TMPEVectorUtil.cs" />
     <Compile Include="Util\RoadFamilyUtil.cs" />
     <Compile Include="Util\Spiral.cs" />
     <Compile Include="Util\Caching\CameraTransformValue.cs" />
@@ -488,6 +492,7 @@
     <Compile Include="Util\RoadSelectionUtil.cs" />
     <Compile Include="Util\RoundaboutMassEdit.cs" />
     <Compile Include="Util\SegmentLaneTraverser.cs" />
+    <Compile Include="Util\TrackUtils.cs" />
     <Compile Include="Util\VersionUtil.cs" />
     <Compile Include="Lifecycle\SerializableDataExtension.cs" />
     <Compile Include="Lifecycle\ThreadingExtension.cs" />
@@ -525,6 +530,7 @@
     <Compile Include="U\ControlActiveState.cs" />
     <Compile Include="U\ControlEnabledState.cs" />
     <Compile Include="U\ControlHoveredState.cs" />
+    <Compile Include="U\CursorUtil.cs" />
     <Compile Include="U\FreeTooltip\UFloatingTooltip.cs" />
     <Compile Include="U\HelperExtensions.cs" />
     <Compile Include="U\Label\ULabel.cs" />
@@ -920,7 +926,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Analyzer Include="..\packages\Microsoft.Unity.Analyzers.1.7.0\analyzers\dotnet\cs\Microsoft.Unity.Analyzers.dll" />
+    <Analyzer Include="..\packages\Microsoft.Unity.Analyzers.1.13.0\analyzers\dotnet\cs\Microsoft.Unity.Analyzers.dll" />
     <Analyzer Include="..\packages\ReflectionIT.Analyzer.Structs.0.1.0\analyzers\dotnet\cs\ReflectionIT.Analyzer.Structs.dll" />
     <Analyzer Include="..\packages\StyleCop.Analyzers.1.1.118\analyzers\dotnet\cs\StyleCop.Analyzers.CodeFixes.dll" />
     <Analyzer Include="..\packages\StyleCop.Analyzers.1.1.118\analyzers\dotnet\cs\StyleCop.Analyzers.dll" />
@@ -1140,6 +1146,13 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\whats_new.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\LaneConnectionManager\add_cursor.png" />
+    <EmbeddedResource Include="Resources\LaneConnectionManager\remove_cursor.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\LaneConnectionManager\direction_arrow.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="PostBuildMacros">

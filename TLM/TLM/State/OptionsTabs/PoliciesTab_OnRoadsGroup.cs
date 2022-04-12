@@ -23,7 +23,10 @@ namespace TrafficManager.State {
                 Handler = JunctionRestrictionsUpdateHandler,
             };
 
-        private static UIDropDown _vehicleRestrictionsAggressionDropDown;
+        public static DropDownOption<VehicleRestrictionsAggression> VehicleRestrictionsAggression =
+            new(nameof(Options.vehicleRestrictionsAggression), Options.PersistTo.Savegame) {
+                Label = "VR.Dropdown:Vehicle restrictions aggression",
+            };
 
         static PoliciesTab_OnRoadsGroup() {
             try {
@@ -35,15 +38,11 @@ namespace TrafficManager.State {
             }
         }
 
-        public static void SetVehicleRestrictionsAggression(VehicleRestrictionsAggression val) {
-            _vehicleRestrictionsAggressionDropDown.selectedIndex = (int)val;
-        }
-
         internal static void AddUI(UIHelperBase tab) {
 
             var group = tab.AddGroup(T("VR.Group:On roads"));
 
-            AddVehicleRestrictionsDropDown(group);
+            VehicleRestrictionsAggression.AddUI(group);
 
             BanRegularTrafficOnBusLanes.AddUI(group);
 
@@ -52,24 +51,6 @@ namespace TrafficManager.State {
 
         private static string T(string key) => Translation.Options.Get(key);
 
-        private static void AddVehicleRestrictionsDropDown(UIHelperBase group) {
-            var items = new[]
-            {
-                T("VR.Dropdown.Option:Low Aggression"),
-                T("VR.Dropdown.Option:Medium Aggression"),
-                T("VR.Dropdown.Option:High Aggression"),
-                T("VR.Dropdown.Option:Strict"),
-            };
-
-            _vehicleRestrictionsAggressionDropDown = group.AddDropdown(
-                T("VR.Dropdown:Vehicle restrictions aggression") + ":",
-                items,
-                (int)Options.vehicleRestrictionsAggression,
-                OnVehicleRestrictionsAggressionChanged) as UIDropDown;
-        }
-
-        private static void OnVehicleRestrictionsAggressionChanged(int val)
-            => Options.vehicleRestrictionsAggression = (VehicleRestrictionsAggression)val;
 
         private static void OnBanRegularTrafficOnBusLanesChanged(bool newValue) {
             VehicleRestrictionsManager.Instance.ClearCache();

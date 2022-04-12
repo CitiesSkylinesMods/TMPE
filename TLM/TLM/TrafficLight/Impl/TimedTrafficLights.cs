@@ -7,7 +7,6 @@ namespace TrafficManager.TrafficLight.Impl {
     using TrafficManager.API.Manager;
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.API.Traffic;
-    using TrafficManager.API.TrafficLight;
     using TrafficManager.Geometry.Impl;
     using TrafficManager.Manager.Impl;
     using TrafficManager.State.ConfigData;
@@ -17,7 +16,7 @@ namespace TrafficManager.TrafficLight.Impl {
     using TrafficManager.Util.Extensions;
 
     // TODO define TimedTrafficLights per node group, not per individual nodes
-    public class TimedTrafficLights : ITimedTrafficLights {
+    public class TimedTrafficLights {
         public TimedTrafficLights(ushort nodeId, IEnumerable<ushort> nodeGroup) {
             NodeId = nodeId;
             NodeGroup = new List<ushort>(nodeGroup);
@@ -80,7 +79,7 @@ namespace TrafficManager.TrafficLight.Impl {
                 segmentEndIds.CollectionToString());
         }
 
-        public void PasteSteps(ITimedTrafficLights sourceTimedLight) {
+        public void PasteSteps(TimedTrafficLights sourceTimedLight) {
             Stop();
             Steps.Clear();
             RotationOffset = 0;
@@ -98,7 +97,7 @@ namespace TrafficManager.TrafficLight.Impl {
             }
 
             for (int stepIndex = 0; stepIndex < sourceTimedLight.NumSteps(); ++stepIndex) {
-                ITimedTrafficLightsStep sourceStep = sourceTimedLight.GetStep(stepIndex);
+                TimedTrafficLightsStep sourceStep = sourceTimedLight.GetStep(stepIndex);
                 TimedTrafficLightsStep targetStep = new TimedTrafficLightsStep(
                     this,
                     sourceStep.MinTime,
@@ -110,17 +109,14 @@ namespace TrafficManager.TrafficLight.Impl {
                     ushort sourceSegmentId = clockSortedSourceSegmentIds[i];
                     ushort targetSegmentId = clockSortedTargetSegmentIds[i];
 
-                    bool targetStartNode =
-                        (bool)ExtSegmentManager.Instance.IsStartNode(
-                            targetSegmentId,
-                            NodeId);
+                    bool targetStartNode = targetSegmentId.ToSegment().IsStartNode(NodeId);
 
-                    ICustomSegmentLights sourceLights =
+                    CustomSegmentLights sourceLights =
                         sourceStep.CustomSegmentLights[sourceSegmentId];
-                    ICustomSegmentLights targetLights = sourceLights.Clone(targetStep, false);
+                    CustomSegmentLights targetLights = sourceLights.Clone(targetStep, false);
 
                     targetStep.SetSegmentLights(targetSegmentId, targetLights);
-                    Constants.ManagerFactory.CustomSegmentLightsManager.ApplyLightModes(
+                    CustomSegmentLightsManager.Instance.ApplyLightModes(
                         targetSegmentId,
                         targetStartNode,
                         targetLights);
@@ -170,7 +166,7 @@ namespace TrafficManager.TrafficLight.Impl {
 
                 foreach (TimedTrafficLightsStep step in Steps) {
                     ++stepIndex;
-                    ICustomSegmentLights bufferedLights = null;
+                    CustomSegmentLights bufferedLights = null;
 
                     for (int sourceIndex = 0;
                          sourceIndex < clockSortedSegmentIds.Count;
@@ -184,7 +180,7 @@ namespace TrafficManager.TrafficLight.Impl {
                             $"TimedTrafficLights.Rotate({dir}) @ node {NodeId}: Moving light @ seg. " +
                             $"{sourceSegmentId} to seg. {targetSegmentId} @ step {stepIndex}");
 
-                        ICustomSegmentLights sourceLights =
+                        CustomSegmentLights sourceLights =
                             sourceIndex == 0
                                 ? step.RemoveSegmentLights(sourceSegmentId)
                                 : bufferedLights;
@@ -200,9 +196,7 @@ namespace TrafficManager.TrafficLight.Impl {
 
                         sourceLights.Relocate(
                             targetSegmentId,
-                            (bool)ExtSegmentManager.Instance.IsStartNode(
-                                targetSegmentId,
-                                NodeId));
+                            targetSegmentId.ToSegment().IsStartNode(NodeId));
 
                         if (!step.SetSegmentLights(targetSegmentId, sourceLights)) {
                             throw new Exception(
@@ -254,8 +248,8 @@ namespace TrafficManager.TrafficLight.Impl {
             IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
             Directions = new Dictionary<ushort, IDictionary<ushort, ArrowDirection>>();
 
-            for (int i = 0; i < 8; ++i) {
-                ushort sourceSegmentId = node.GetSegment(i);
+            for (int sourceSegmentIndex = 0; sourceSegmentIndex < Constants.MAX_SEGMENTS_OF_NODE; ++sourceSegmentIndex) {
+                ushort sourceSegmentId = node.GetSegment(sourceSegmentIndex);
 
                 if (sourceSegmentId == 0) {
                     continue;
@@ -269,10 +263,10 @@ namespace TrafficManager.TrafficLight.Impl {
                 Directions.Add(sourceSegmentId, dirs);
                 int endIndex = segEndMan.GetIndex(
                     sourceSegmentId,
-                    (bool)ExtSegmentManager.Instance.IsStartNode(sourceSegmentId, NodeId));
+                    sourceSegmentId.ToSegment().IsStartNode(NodeId));
 
-                for (int k = 0; k < 8; ++k) {
-                    ushort targetSegmentId = node.GetSegment(k);
+                for (int targetSegmentIndex = 0; targetSegmentIndex < Constants.MAX_SEGMENTS_OF_NODE; ++targetSegmentIndex) {
+                    ushort targetSegmentId = node.GetSegment(targetSegmentIndex);
 
                     if (targetSegmentId == 0) {
                         continue;
@@ -300,7 +294,7 @@ namespace TrafficManager.TrafficLight.Impl {
             return MasterNodeId == NodeId;
         }
 
-        public ITimedTrafficLightsStep AddStep(int minTime,
+        public TimedTrafficLightsStep AddStep(int minTime,
                                                int maxTime,
                                                StepChangeMetric changeMetric,
                                                float waitFlowBalance,
@@ -343,10 +337,10 @@ namespace TrafficManager.TrafficLight.Impl {
             /*if (!housekeeping())
                     return;*/
 
-            Constants.ManagerFactory.TrafficLightManager.AddTrafficLight(NodeId, ref NodeId.ToNode());
+            TrafficLightManager.Instance.AddTrafficLight(NodeId, ref NodeId.ToNode());
 
             foreach (TimedTrafficLightsStep step in Steps) {
-                foreach (ICustomSegmentLights value in step.CustomSegmentLights.Values) {
+                foreach (CustomSegmentLights value in step.CustomSegmentLights.Values) {
                     value.Housekeeping(true, true);
                 }
             }
@@ -361,21 +355,21 @@ namespace TrafficManager.TrafficLight.Impl {
         }
 
         private void CheckInvalidPedestrianLights() {
-            ICustomSegmentLightsManager customTrafficLightsManager = Constants.ManagerFactory.CustomSegmentLightsManager;
+            CustomSegmentLightsManager customTrafficLightsManager = CustomSegmentLightsManager.Instance;
 
             // Log._Debug($"Checking for invalid pedestrian lights @ {NodeId}.");
 
             ref NetNode node = ref NodeId.ToNode();
 
-            for (int i = 0; i < 8; ++i) {
-                ushort segmentId = node.GetSegment(i);
+            for (int segmentIndex = 0; segmentIndex < Constants.MAX_SEGMENTS_OF_NODE; ++segmentIndex) {
+                ushort segmentId = node.GetSegment(segmentIndex);
                 if (segmentId == 0) {
                     continue;
                 }
 
-                bool startNode = (bool)ExtSegmentManager.Instance.IsStartNode(segmentId, NodeId);
+                bool startNode = segmentId.ToSegment().IsStartNode(NodeId);
 
-                ICustomSegmentLights lights = customTrafficLightsManager.GetSegmentLights(segmentId, startNode);
+                CustomSegmentLights lights = customTrafficLightsManager.GetSegmentLights(segmentId, startNode);
                 if (lights == null) {
                     Log.Warning(
                         $"TimedTrafficLights.CheckInvalidPedestrianLights() @ node {NodeId}: " +
@@ -416,21 +410,20 @@ namespace TrafficManager.TrafficLight.Impl {
         }
 
         private void ClearInvalidPedestrianLights() {
-            ICustomSegmentLightsManager customTrafficLightsManager =
-                Constants.ManagerFactory.CustomSegmentLightsManager;
+            CustomSegmentLightsManager customTrafficLightsManager = CustomSegmentLightsManager.Instance;
 
             ref NetNode node = ref NodeId.ToNode();
             ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
 
-            for (int i = 0; i < 8; ++i) {
-                ushort segmentId = node.GetSegment(i);
+            for (int segmentIndex = 0; segmentIndex < Constants.MAX_SEGMENTS_OF_NODE; ++segmentIndex) {
+                ushort segmentId = node.GetSegment(segmentIndex);
                 if (segmentId == 0) {
                     continue;
                 }
 
-                bool startNode = (bool)extSegmentManager.IsStartNode(segmentId, NodeId);
+                bool startNode = segmentId.ToSegment().IsStartNode(NodeId);
 
-                ICustomSegmentLights lights =
+                CustomSegmentLights lights =
                     customTrafficLightsManager.GetSegmentLights(segmentId, startNode);
 
                 if (lights == null) {
@@ -448,7 +441,7 @@ namespace TrafficManager.TrafficLight.Impl {
         public void RemoveNodeFromGroup(ushort otherNodeId) {
             NodeGroup.Remove(otherNodeId);
             if (NodeGroup.Count <= 0) {
-                Constants.ManagerFactory.TrafficLightSimulationManager.RemoveNodeFromSimulation(
+                TrafficLightSimulationManager.Instance.RemoveNodeFromSimulation(
                     NodeId,
                     true,
                     false);
@@ -478,7 +471,7 @@ namespace TrafficManager.TrafficLight.Impl {
             foreach (TimedTrafficLightsStep step in Steps) {
                 foreach (CustomSegmentLights lights in step.CustomSegmentLights.Values) {
                     // Log._Debug($"----- Housekeeping timed light at step {i}, seg. {lights.SegmentId} @ {NodeId}");
-                    Constants.ManagerFactory.CustomSegmentLightsManager
+                    CustomSegmentLightsManager.Instance
                              .GetOrLiveSegmentLights(lights.SegmentId, lights.StartNode)
                              .Housekeeping(true, true);
                     lights.Housekeeping(true, true);
@@ -527,7 +520,7 @@ namespace TrafficManager.TrafficLight.Impl {
         }
 
         // TODO currently, this method must be called for each node in the node group individually
-        public ITimedTrafficLightsStep GetStep(int stepId) {
+        public TimedTrafficLightsStep GetStep(int stepId) {
             return Steps[stepId];
         }
 
@@ -685,7 +678,7 @@ namespace TrafficManager.TrafficLight.Impl {
                                 continue;
                             }
 
-                            ITimedTrafficLights slaveTtl1 =
+                            TimedTrafficLights slaveTtl1 =
                                 tlsMan.TrafficLightSimulations[slaveNodeId].timedLight;
 
                             slaveTtl1.GetStep(CurrentStep).Start(CurrentStep);
@@ -707,7 +700,7 @@ namespace TrafficManager.TrafficLight.Impl {
                             continue;
                         }
 
-                        ITimedTrafficLights slaveTtl2 =
+                        TimedTrafficLights slaveTtl2 =
                             tlsMan.TrafficLightSimulations[slaveNodeId].timedLight;
                         slaveTtl2.GetStep(CurrentStep).NextStepRefIndex = bestNextStepIndex;
                     }
@@ -759,7 +752,7 @@ namespace TrafficManager.TrafficLight.Impl {
                     continue;
                 }
 
-                ITimedTrafficLights slaveTtl3 = tlsMan.TrafficLightSimulations[slaveNodeId].timedLight;
+                TimedTrafficLights slaveTtl3 = tlsMan.TrafficLightSimulations[slaveNodeId].timedLight;
                 slaveTtl3.CurrentStep = newStepIndex;
 
                 Log._DebugIf(
@@ -788,7 +781,7 @@ namespace TrafficManager.TrafficLight.Impl {
                     continue;
                 }
 
-                ITimedTrafficLights slaveTtl = tlsMan.TrafficLightSimulations[slaveNodeId].timedLight;
+                TimedTrafficLights slaveTtl = tlsMan.TrafficLightSimulations[slaveNodeId].timedLight;
                 slaveTtl.GetStep(CurrentStep).UpdateLiveLights(noTransition);
             }
         }
@@ -806,7 +799,7 @@ namespace TrafficManager.TrafficLight.Impl {
                     continue;
                 }
 
-                ITimedTrafficLights slaveTtl = tlsMan.TrafficLightSimulations[slaveNodeId].timedLight;
+                TimedTrafficLights slaveTtl = tlsMan.TrafficLightSimulations[slaveNodeId].timedLight;
 
                 slaveTtl.GetStep(CurrentStep).SetStepDone();
                 slaveTtl.CurrentStep = newCurrentStep;
@@ -828,8 +821,8 @@ namespace TrafficManager.TrafficLight.Impl {
             long numFrames = Steps[CurrentStep].MaxTimeRemaining();
 
             RoadBaseAI.TrafficLightState currentState;
-            ICustomSegmentLights segmentLights =
-                Constants.ManagerFactory.CustomSegmentLightsManager.GetSegmentLights(
+            CustomSegmentLights segmentLights =
+                CustomSegmentLightsManager.Instance.GetSegmentLights(
                     segmentId,
                     startNode,
                     false);
@@ -839,7 +832,7 @@ namespace TrafficManager.TrafficLight.Impl {
                 return 99;
             }
 
-            ICustomSegmentLight segmentLight = segmentLights.GetCustomLight(vehicleType);
+            CustomSegmentLight segmentLight = segmentLights.GetCustomLight(vehicleType);
             if (segmentLight == null) {
                 Log._Debug($"CheckNextChange: No segment light at node {NodeId}, segment {segmentId}");
                 return 99;
@@ -949,7 +942,7 @@ namespace TrafficManager.TrafficLight.Impl {
             foreach (TimedTrafficLightsStep step in Steps) {
                 ICollection<ushort> invalidSegmentIds = new HashSet<ushort>();
 
-                foreach (KeyValuePair<ushort, ICustomSegmentLights> e in step.CustomSegmentLights) {
+                foreach (KeyValuePair<ushort, CustomSegmentLights> e in step.CustomSegmentLights) {
                     if (!validSegments.Contains(e.Key)) {
                         step.InvalidSegmentLights.AddLast(e.Value);
                         invalidSegmentIds.Add(e.Key);
@@ -999,14 +992,14 @@ namespace TrafficManager.TrafficLight.Impl {
             // Log._Debug($"Checking for invalid pedestrian lights @ {NodeId}.");
 
             ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
-            for (int k = 0; k < 8; ++k) {
-                ushort segmentId = node.GetSegment(k);
+            for (int segmentIndex = 0; segmentIndex < Constants.MAX_SEGMENTS_OF_NODE; ++segmentIndex) {
+                ushort segmentId = node.GetSegment(segmentIndex);
 
                 if (segmentId == 0) {
                     continue;
                 }
 
-                var startNode = (bool)extSegmentManager.IsStartNode(segmentId, NodeId);
+                var startNode = segmentId.ToSegment().IsStartNode(NodeId);
 
                 Log._DebugIf(
                     logTrafficLights,
@@ -1027,7 +1020,7 @@ namespace TrafficManager.TrafficLight.Impl {
                 foreach (TimedTrafficLightsStep step in Steps) {
                     ++stepIndex;
 
-                    LinkedListNode<ICustomSegmentLights> lightsToReuseNode = step.InvalidSegmentLights.First;
+                    LinkedListNode<CustomSegmentLights> lightsToReuseNode = step.InvalidSegmentLights.First;
 
                     if (lightsToReuseNode == null) {
                         // no old segment found: create a fresh custom light
@@ -1045,7 +1038,7 @@ namespace TrafficManager.TrafficLight.Impl {
                     } else {
                         // reuse old lights
                         step.InvalidSegmentLights.RemoveFirst();
-                        ICustomSegmentLights lightsToReuse = lightsToReuseNode.Value;
+                        CustomSegmentLights lightsToReuse = lightsToReuseNode.Value;
 
                         Log._DebugIf(
                             logTrafficLights,
@@ -1058,7 +1051,7 @@ namespace TrafficManager.TrafficLight.Impl {
             } // for each segment 0..7
         }
 
-        public ITimedTrafficLights MasterLights() {
+        public TimedTrafficLights MasterLights() {
             return TrafficLightSimulationManager.Instance.TrafficLightSimulations[MasterNodeId].timedLight;
         }
 
@@ -1099,9 +1092,9 @@ namespace TrafficManager.TrafficLight.Impl {
                 return;
             }
 
-            bool? startNode = ExtSegmentManager.Instance.IsStartNode(segmentId, NodeId);
+            bool? startNode = netSegment.GetRelationToNode(NodeId);
 
-            if (startNode == null) {
+            if (!startNode.HasValue) {
                 return;
             }
 
@@ -1109,27 +1102,27 @@ namespace TrafficManager.TrafficLight.Impl {
                 step.ChangeLightMode(segmentId, vehicleType, mode);
             }
 
-            Constants.ManagerFactory.CustomSegmentLightsManager.SetLightMode(
+            CustomSegmentLightsManager.Instance.SetLightMode(
                 segmentId,
-                (bool)startNode,
+                startNode.Value,
                 vehicleType,
                 mode);
         }
 
-        public void Join(ITimedTrafficLights otherTimedLight) {
+        public void Join(TimedTrafficLights otherTimedLight) {
             TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance;
 
             if (NumSteps() < otherTimedLight.NumSteps()) {
                 // increase the number of steps at our timed lights
                 for (int i = NumSteps(); i < otherTimedLight.NumSteps(); ++i) {
-                    ITimedTrafficLightsStep otherStep = otherTimedLight.GetStep(i);
+                    TimedTrafficLightsStep otherStep = otherTimedLight.GetStep(i);
 
                     foreach (ushort slaveNodeId in NodeGroup) {
                         if (!tlsMan.TrafficLightSimulations[slaveNodeId].IsTimedLight()) {
                             continue;
                         }
 
-                        ITimedTrafficLights slaveTtl1 = tlsMan.TrafficLightSimulations[slaveNodeId].timedLight;
+                        TimedTrafficLights slaveTtl1 = tlsMan.TrafficLightSimulations[slaveNodeId].timedLight;
 
                         slaveTtl1.AddStep(
                             otherStep.MinTime,
@@ -1142,14 +1135,14 @@ namespace TrafficManager.TrafficLight.Impl {
             } else {
                 // increase the number of steps at their timed lights
                 for (int i = otherTimedLight.NumSteps(); i < NumSteps(); ++i) {
-                    ITimedTrafficLightsStep ourStep = GetStep(i);
+                    TimedTrafficLightsStep ourStep = GetStep(i);
 
                     foreach (ushort slaveNodeId in otherTimedLight.NodeGroup) {
                         if (!tlsMan.TrafficLightSimulations[slaveNodeId].IsTimedLight()) {
                             continue;
                         }
 
-                        ITimedTrafficLights slaveTtl2 =
+                        TimedTrafficLights slaveTtl2 =
                             tlsMan.TrafficLightSimulations[slaveNodeId].timedLight;
 
                         slaveTtl2.AddStep(
@@ -1179,7 +1172,7 @@ namespace TrafficManager.TrafficLight.Impl {
                     continue;
                 }
 
-                ITimedTrafficLights ttl = tlsMan.TrafficLightSimulations[timedNodeId].timedLight;
+                TimedTrafficLights ttl = tlsMan.TrafficLightSimulations[timedNodeId].timedLight;
 
                 for (int i = 0; i < NumSteps(); ++i) {
                     minTimes[i] += ttl.GetStep(i).MinTime;
@@ -1219,7 +1212,7 @@ namespace TrafficManager.TrafficLight.Impl {
                     continue;
                 }
 
-                ITimedTrafficLights ttl = tlsMan.TrafficLightSimulations[timedNodeId].timedLight;
+                TimedTrafficLights ttl = tlsMan.TrafficLightSimulations[timedNodeId].timedLight;
 
                 ttl.Stop();
                 ttl.TestMode = false;
@@ -1303,7 +1296,7 @@ namespace TrafficManager.TrafficLight.Impl {
                     continue;
                 }
 
-                var startNode = (bool)ExtSegmentManager.Instance.IsStartNode(segmentId, NodeId);
+                var startNode = segmentId.ToSegment().IsStartNode(NodeId);
                 ISegmentEndId endId = new SegmentEndId(segmentId, startNode);
 
                 if (segmentEndIds.Contains(endId)) {

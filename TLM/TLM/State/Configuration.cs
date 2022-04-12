@@ -13,7 +13,7 @@ namespace TrafficManager {
     [Serializable]
     public class Configuration {
 
-        public const int CURRENT_VERSION = 2;
+        public const int CURRENT_VERSION = 3;
 
         /// <summary>
         /// version at which data was saved
