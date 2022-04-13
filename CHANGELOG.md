@@ -51,7 +51,7 @@ This changelog includes all versions and major variants of the mod going all the
 - [Updated] Replace obsolete `GetSortedLanes` with extension #1522 #1521 #1496 #1490 (aubergine18)
 - [Updated] Replace obsolete `IsStartNode` with extension #1506 (aubergine18)
 - [Updated] Update `Microsoft.Unity.Analyzers` to version `1.13.0` #1513 (aubergine18)
-- [Updated] Add UI helpers for mod option sliders #1512 #1510 (kianzarrin)
+- [Updated] Add UI helpers for mod option sliders #1531 #1512 #1510 (kianzarrin)
 - [Removed] Flawed TTL API removed to prevent adoption #1495 (Elesbaan70)
 
 #### TM:PE V11.6.5.1 TEST, 13/03/2022
