@@ -39,7 +39,7 @@ namespace TrafficManager.State {
         public static bool Available = false;
 
         public static bool individualDrivingStyle;
-        public static int recklessDrivers;
+        public static RecklessDrivers recklessDrivers;
 
         /// <summary>Option: buses may ignore lane arrows.</summary>
         public static bool relaxedBusses;
@@ -96,9 +96,7 @@ namespace TrafficManager.State {
         public static bool turnOnRedEnabled;
         public static bool laneConnectorEnabled;
 
-        public static VehicleRestrictionsAggression vehicleRestrictionsAggression =
-            VehicleRestrictionsAggression.Medium;
-
+        public static VehicleRestrictionsAggression vehicleRestrictionsAggression;
         public static bool RoundAboutQuickFix_DedicatedExitLanes;
         public static bool RoundAboutQuickFix_StayInLaneMainR;
         public static bool RoundAboutQuickFix_StayInLaneNearRabout;
@@ -115,7 +113,7 @@ namespace TrafficManager.State {
         public static bool PriorityRoad_StopAtEntry;
 
         // See PathfinderUpdates.cs
-        public static byte SavegamePathfinderEdition;
+        public static byte SavegamePathfinderEdition; // Persist to save-game only
 
         public static bool showDefaultSpeedSubIcon;
 
@@ -157,19 +155,15 @@ namespace TrafficManager.State {
             return false;
         }
 
-        internal static int getRecklessDriverModulo() {
-            switch (recklessDrivers) {
-                case 0:
-                    return 10;
-                case 1:
-                    return 20;
-                case 2:
-                    return 50;
-                case 3:
-                    return 10000;
-            }
-            return 10000;
-        }
+        internal static int getRecklessDriverModulo() => CalculateRecklessDriverModulo(recklessDrivers);
+
+        internal static int CalculateRecklessDriverModulo(RecklessDrivers level) => level switch {
+            RecklessDrivers.PathOfEvil => 10,
+            RecklessDrivers.RushHour => 20,
+            RecklessDrivers.MinorComplaints => 50,
+            RecklessDrivers.HolyCity => 10000,
+            _ => 10000,
+        };
 
         /// <summary>
         /// Determines whether Dynamic Lane Selection (DLS) is enabled.
