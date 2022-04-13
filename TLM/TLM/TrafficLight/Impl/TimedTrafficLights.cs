@@ -541,8 +541,6 @@ namespace TrafficManager.TrafficLight.Impl {
             return Steps[stepId];
         }
 
-        public IEnumerable<TimedTrafficLightsStep> EnumerateSteps() => Steps;
-
         // TODO this method is currently called on each node, but should be called on the master node only
         public void SimulationStep() {
 #if DEBUG

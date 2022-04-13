@@ -25,30 +25,233 @@ namespace TrafficManager.Manager.Impl {
 
             public override XName ElementName => "TimedTrafficLights";
 
+            private static readonly XName ttlNodeName = "TtlNode";
+            private static readonly XName stepName = "Step";
+            private static readonly XName segLightsName = "SegmentLights";
+            private static readonly XName lightName = "Light";
+            private static readonly XName vehicleTypeName = "VehicleType";
+
             public override IEnumerable<Type> GetDependencies() => null;
 
-            private readonly TtlPersistence ttlPersistence = new TtlPersistence();
-
             protected override PersistenceResult OnLoadData(XElement element, ICollection<TtlFeature> featuresRequired, PersistenceContext context) {
-                return PersistenceResult.Skip;
-            }
-
-            protected override PersistenceResult OnSaveData(XElement element, ICollection<TtlFeature> featuresRequired, ICollection<TtlFeature> featuresForbidden, PersistenceContext context) {
-
                 var result = PersistenceResult.Success;
 
-                foreach (var ttl in Instance.EnumerateTimedTrafficLights()) {
-                    try {
-#if DEBUGSAVE
-                        Log._Debug($"Going to save timed light at node {ttl.NodeId}.");
-#endif
-                        ttl.OnGeometryUpdate();
+                Log.Info($"Loading timed traffic lights (XML method)");
 
-                        ttlPersistence.SaveData(element, ttl, featuresForbidden, context);
+                var nodesWithSimulation = new HashSet<ushort>();
+
+                foreach (var ttlElement in element.Elements(ttlNodeName)) {
+                    nodesWithSimulation.Add(ttlElement.Attribute<ushort>(nameof(TimedTrafficLights.NodeId)));
+                }
+
+                var masterNodeIdBySlaveNodeId = new Dictionary<ushort, ushort>();
+                var nodeGroupByMasterNodeId = new Dictionary<ushort, List<ushort>>();
+
+                foreach (var ttlElement in element.Elements(ttlNodeName)) {
+
+                    var ttlNodeId = ttlElement.Attribute<ushort>(nameof(TimedTrafficLights.NodeId));
+
+                    try {
+                        // TODO most of this should not be necessary at all if the classes around TimedTrafficLights class were properly designed
+                        // enforce uniqueness of node ids
+                        List<ushort> currentNodeGroup = ttlElement.Elements<ushort>(nameof(TimedTrafficLights.NodeId))
+                                                            .Distinct().ToList();
+
+                        if (!currentNodeGroup.Contains(ttlNodeId)) {
+                            currentNodeGroup.Add(ttlNodeId);
+                        }
+
+                        // remove any nodes that are not configured to have a simulation
+                        currentNodeGroup = new List<ushort>(
+                            currentNodeGroup.Intersect(nodesWithSimulation));
+
+                        // remove invalid nodes from the group; find if any of the nodes in the group is already a master node
+                        ushort masterNodeId = 0;
+                        int foundMasterNodes = 0;
+
+                        for (int i = 0; i < currentNodeGroup.Count;) {
+                            ushort nodeId = currentNodeGroup[i];
+                            ref NetNode netNode = ref nodeId.ToNode();
+
+                            if (!netNode.IsValid()) {
+                                currentNodeGroup.RemoveAt(i);
+                                continue;
+                            }
+
+                            if (nodeGroupByMasterNodeId.ContainsKey(nodeId)) {
+                                // this is a known master node
+                                if (foundMasterNodes > 0) {
+                                    // we already found another master node. ignore this node.
+                                    currentNodeGroup.RemoveAt(i);
+                                    continue;
+                                }
+
+                                // we found the first master node
+                                masterNodeId = nodeId;
+                                ++foundMasterNodes;
+                            }
+
+                            ++i;
+                        }
+
+                        if (masterNodeId == 0) {
+                            // no master node defined yet, set the first node as a master node
+                            masterNodeId = currentNodeGroup[0];
+                        }
+
+                        // ensure the master node is the first node in the list (TimedTrafficLights
+                        // depends on this at the moment...)
+                        currentNodeGroup.Remove(masterNodeId);
+                        currentNodeGroup.Insert(0, masterNodeId);
+
+                        // update the saved node group and master-slave info
+                        nodeGroupByMasterNodeId[masterNodeId] = currentNodeGroup;
+
+                        foreach (ushort nodeId in currentNodeGroup) {
+                            masterNodeIdBySlaveNodeId[nodeId] = masterNodeId;
+                        }
                     }
                     catch (Exception e) {
-                        Log.Error(
-                            $"Exception occurred while saving timed traffic light @ {ttl.NodeId}: {e}");
+                        Log.WarningFormat(
+                            "Error building timed traffic light group for TimedNode {0} (NodeGroup: {1}): {2}",
+                            ttlNodeId,
+                            string.Join(", ", ttlElement.Elements(nameof(TimedTrafficLights.NodeId)).Select(e => e.Value).ToArray()),
+                            e);
+                        result = PersistenceResult.Failure;
+                    }
+                }
+
+                foreach (var ttlElement in element.Elements(ttlNodeName)) {
+                    try {
+                        var ttlNodeId = ttlElement.Attribute<ushort>(nameof(TimedTrafficLights.NodeId));
+
+                        if (!masterNodeIdBySlaveNodeId.ContainsKey(ttlNodeId)) {
+                            continue;
+                        }
+
+                        ushort masterNodeId = masterNodeIdBySlaveNodeId[ttlNodeId];
+                        List<ushort> nodeGroup = nodeGroupByMasterNodeId[masterNodeId];
+
+#if DEBUGLOAD
+                    Log._Debug($"Adding timed light at node {cnfTimedLights.nodeId}. NodeGroup: "+
+                    $"{string.Join(", ", nodeGroup.Select(x => x.ToString()).ToArray())}");
+#endif
+                        Instance.SetUpTimedTrafficLight(ttlNodeId, nodeGroup);
+
+                        int j = 0;
+                        foreach (var stepElement in ttlElement.Elements(nameof(stepName))) {
+#if DEBUGLOAD
+                        Log._Debug($"Loading timed step {j} at node {cnfTimedLights.nodeId}");
+#endif
+                            TimedTrafficLightsStep step =
+                                Instance.TrafficLightSimulations[ttlNodeId].timedLight.AddStep(
+                                    stepElement.Attribute<int>(nameof(TimedTrafficLightsStep.MinTime)),
+                                    stepElement.Attribute<int>(nameof(TimedTrafficLightsStep.MaxTime)),
+                                    stepElement.Attribute<StepChangeMetric>(nameof(TimedTrafficLightsStep.ChangeMetric)),
+                                    stepElement.Attribute<float>(nameof(TimedTrafficLightsStep.WaitFlowBalance)));
+
+                            foreach (var segLightsElement in stepElement.Elements(segLightsName)) {
+
+                                var segmentId = segLightsElement.Attribute<ushort>(nameof(CustomSegmentLights.SegmentId));
+                                ref NetSegment netSegment = ref segmentId.ToSegment();
+
+                                if (!netSegment.IsValid()) {
+                                    continue;
+                                }
+
+                                var nodeId = ttlNodeId;
+
+#if DEBUGLOAD
+                            Log._Debug($"Loading timed step {j}, segment {e.Key} at node {cnfTimedLights.nodeId}");
+#endif
+                                if (!step.CustomSegmentLights.TryGetValue(segmentId, out var lights)) {
+#if DEBUGLOAD
+                                Log._Debug($"No segment lights found at timed step {j} for segment "+
+                                $"{segmentId}, node {nodeId}");
+#endif
+                                    continue;
+                                }
+
+#if DEBUGLOAD
+                            Log._Debug($"Loading pedestrian light @ seg. {e.Key}, step {j}: "+
+                            $"{cnfLights.pedestrianLightState} {cnfLights.manualPedestrianMode}");
+#endif
+                                lights.ManualPedestrianMode = segLightsElement.Attribute<bool>(nameof(lights.ManualPedestrianMode));
+                                lights.PedestrianLightState = segLightsElement.NullableAttribute<TrafficLightState>(nameof(lights.PedestrianLightState));
+
+                                bool first = true; // v1.10.2 transitional code
+                                foreach (var lightElement in segLightsElement.Elements(lightName)) {
+#if DEBUGLOAD
+                                Log._Debug($"Loading timed step {j}, segment {e.Key}, vehicleType "+
+                                $"{e2.Key} at node {cnfTimedLights.nodeId}");
+#endif
+                                    var vehicleType = lightElement.Attribute<ExtVehicleType>(vehicleTypeName);
+
+                                    if (!lights.CustomLights.TryGetValue(
+                                            vehicleType,
+                                            out CustomSegmentLight light)) {
+#if DEBUGLOAD
+                                    Log._Debug($"No segment light found for timed step {j}, segment "+
+                                    $"{e.Key}, vehicleType {e2.Key} at node {cnfTimedLights.nodeId}");
+#endif
+                                        // v1.10.2 transitional code START
+                                        if (first) {
+                                            first = false;
+                                            if (!lights.CustomLights.TryGetValue(
+                                                    CustomSegmentLights
+                                                        .DEFAULT_MAIN_VEHICLETYPE,
+                                                    out light)) {
+#if DEBUGLOAD
+                                            Log._Debug($"No segment light found for timed step {j}, "+
+                    $"segment {e.Key}, DEFAULT vehicleType {CustomSegmentLights.DEFAULT_MAIN_VEHICLETYPE} "+
+                    $"at node {cnfTimedLights.nodeId}");
+#endif
+                                                continue;
+                                            }
+                                        } else {
+                                            // v1.10.2 transitional code END
+                                            continue;
+
+                                            // v1.10.2 transitional code START
+                                        }
+
+                                        // v1.10.2 transitional code END
+                                    }
+
+                                    light.InternalCurrentMode = lightElement.Attribute<LightMode>(nameof(light.CurrentMode)); // TODO improve & remove
+                                    light.SetStates(
+                                        lightElement.Attribute<TrafficLightState>(nameof(light.LightMain)),
+                                        lightElement.Attribute<TrafficLightState>(nameof(light.LightLeft)),
+                                        lightElement.Attribute<TrafficLightState>(nameof(light.LightRight)),
+                                        false);
+                                }
+                            }
+
+                            ++j;
+                        }
+                    }
+                    catch (Exception e) {
+                        // ignore, as it's probably corrupt save data. it'll be culled on next save
+                        Log.Warning($"Error loading data from TimedNode (new method): {e}");
+                        result = PersistenceResult.Failure;
+                    }
+                }
+
+                foreach (var ttlElement in element.Elements(ttlNodeName)) {
+
+                    var nodeId = ttlElement.Attribute<ushort>(nameof(TimedTrafficLights.NodeId));
+
+                    try {
+                        TimedTrafficLights timedNode =
+                            Instance.TrafficLightSimulations[nodeId].timedLight;
+
+                        timedNode.Housekeeping();
+                        if (ttlElement.Attribute<bool>(nameof(TimedTrafficLights.IsStarted))) {
+                            timedNode.Start(ttlElement.Attribute<int>(nameof(TimedTrafficLights.CurrentStep)));
+                        }
+                    }
+                    catch (Exception e) {
+                        Log.Warning($"Error starting timed light @ {nodeId}: {e}");
                         result = PersistenceResult.Failure;
                     }
                 }
@@ -56,116 +259,107 @@ namespace TrafficManager.Manager.Impl {
                 return result;
             }
 
-            internal class TtlPersistence : PersistentObject<TimedTrafficLights, TtlFeature> {
+            protected override PersistenceResult OnSaveData(XElement element, ICollection<TtlFeature> featuresRequired, ICollection<TtlFeature> featuresForbidden, PersistenceContext context) {
+                var result = PersistenceResult.Success;
 
-                public override XName ElementName => "Ttl";
+                foreach (var timedNode in Instance.EnumerateTimedTrafficLights()) {
 
-                private static readonly XName StepName = "Step";
-                private static readonly XName CustomLightsName = "CustomLight";
-                private static readonly XName VehicleTypeName = "VehicleType";
+                    try {
+#if DEBUGSAVE
+                    Log._Debug($"Going to save timed light at node {nodeId}.");
+#endif
+                        timedNode.OnGeometryUpdate();
 
+                        var ttlNodeElement = new XElement(ttlNodeName);
 
-                protected override PersistenceResult OnLoadData(XElement element, out TimedTrafficLights ttl, ICollection<TtlFeature> featuresRequired, PersistenceContext context) {
+                        ttlNodeElement.AddAttribute(nameof(timedNode.NodeId), timedNode.NodeId);
+                        ttlNodeElement.AddElements(nameof(timedNode.NodeGroup), timedNode.NodeGroup);
+                        ttlNodeElement.AddAttribute(nameof(timedNode.IsStarted), timedNode.IsStarted());
 
-                    var result = PersistenceResult.Success;
+                        element.Add(ttlNodeElement);
 
-                    ushort nodeId = element.Attribute(nameof(ttl.NodeId)).AsUInt16();
-                    var nodeGroup = element.Attributes(nameof(ttl.NodeGroup)).Select(a => a.AsUInt16());
-                    var isStarted = (bool)element.Attribute(nameof(ttl.IsStarted));
-
-                    ttl = TimedTrafficLights.CreateLoadingInstance(nodeId, nodeGroup, isStarted);
-
-                    ttl.CurrentStep = (int)element.Attribute(nameof(ttl.CurrentStep));
-
-                    foreach (var stepElement in element.Elements(StepName)) {
-
-                        var step = TimedTrafficLightsStep.CreateLoadingInstance();
-
-                        step.MinTime = (int)stepElement.Attribute(nameof(step.MinTime));
-                        step.MaxTime = (int)stepElement.Attribute(nameof(step.MaxTime));
-                        step.ChangeMetric = stepElement.Attribute(nameof(step.ChangeMetric)).AsEnum<StepChangeMetric>();
-                        step.WaitFlowBalance = (float)stepElement.Attribute(nameof(step.WaitFlowBalance));
-
-                        foreach (var segLightElement in stepElement.Elements(nameof(step.CustomSegmentLights))) {
-
-                            var segLightNodeId = segLightElement.Attribute(nameof(CustomSegmentLights.NodeId)).AsUInt16();
-                            var segmentId = segLightElement.Attribute(nameof(CustomSegmentLights.SegmentId)).AsUInt16();
-                            var startNode = segmentId.ToSegment().IsStartNode(segLightNodeId);
-                            var segmentLights = new CustomSegmentLights(step, segmentId, startNode, false, false);
-
-                            foreach (var lightElement in segLightElement.Elements(CustomLightsName)) {
-
-                                var vehicleType = lightElement.Attribute(VehicleTypeName).AsEnum<ExtVehicleType>();
-
-                                var lightLeft = lightElement.Attribute(nameof(CustomSegmentLight.LightLeft)).AsEnum<TrafficLightState>();
-                                var lightMain = lightElement.Attribute(nameof(CustomSegmentLight.LightMain)).AsEnum<TrafficLightState>();
-                                var lightRight = lightElement.Attribute(nameof(CustomSegmentLight.LightRight)).AsEnum<TrafficLightState>();
-
-                                var light = new CustomSegmentLight(segmentLights, lightMain, lightLeft, lightRight);
-
-                                light.CurrentMode = lightElement.Attribute(nameof(light.CurrentMode)).AsEnum<LightMode>();
-
-                                segmentLights.CustomLights.Add(vehicleType, light);
-                            }
-
-                            step.AddLoadingSegmentLights(segmentLights);
+                        int stepIndex = timedNode.CurrentStep;
+                        if (timedNode.IsStarted() &&
+                            timedNode.GetStep(timedNode.CurrentStep).IsInEndTransition()) {
+                            // if in end transition save the next step
+                            stepIndex = (stepIndex + 1) % timedNode.NumSteps();
                         }
 
-                        ttl.AddLoadingStep(step);
-                    }
+                        ttlNodeElement.AddAttribute(nameof(timedNode.CurrentStep), stepIndex);
 
-                    return result;
-                }
+                        for (var j = 0; j < timedNode.NumSteps(); j++) {
+#if DEBUGSAVE
+                        Log._Debug($"Saving timed light step {j} at node {nodeId}.");
+#endif
+                            TimedTrafficLightsStep timedStep = timedNode.GetStep(j);
 
-                protected override PersistenceResult OnSaveData(XElement element, TimedTrafficLights ttl, ICollection<TtlFeature> featuresRequired, ICollection<TtlFeature> featuresForbidden, PersistenceContext context) {
+                            var stepElement = new XElement(stepName);
 
-                    element.Add(new XAttribute(nameof(ttl.NodeId), ttl.NodeId));
+                            stepElement.AddAttribute(nameof(timedStep.MinTime), timedStep.MinTime);
+                            stepElement.AddAttribute(nameof(timedStep.MaxTime), timedStep.MaxTime);
+                            stepElement.AddAttribute(nameof(timedStep.ChangeMetric), timedStep.ChangeMetric);
+                            stepElement.AddAttribute(nameof(timedStep.WaitFlowBalance), timedStep.WaitFlowBalance);
 
-                    foreach (var node in ttl.NodeGroup) {
-                        element.Add(new XAttribute(nameof(ttl.NodeGroup), node));
-                    }
+                            ttlNodeElement.Add(stepElement);
 
-                    element.Add(new XAttribute(nameof(ttl.IsStarted), ttl.IsStarted()));
-                    element.Add(new XAttribute(nameof(ttl.CurrentStep), ttl.CurrentStep));
+                            foreach (var segLights in timedStep.CustomSegmentLights.Values) {
+#if DEBUGSAVE
+                            Log._Debug($"Saving timed light step {j}, segment {e.Key} at node {nodeId}.");
+#endif
 
-                    foreach (var step in ttl.EnumerateSteps()) {
-                        var stepElement = new XElement(StepName);
+                                var segLightsElement = new XElement(segLightsName);
 
-                        stepElement.Add(new XAttribute(nameof(step.MinTime), step.MinTime));
-                        stepElement.Add(new XAttribute(nameof(step.MaxTime), step.MaxTime));
-                        stepElement.Add(new XAttribute(nameof(step.ChangeMetric), (int)step.ChangeMetric));
-                        stepElement.Add(new XAttribute(nameof(step.WaitFlowBalance), step.WaitFlowBalance));
+                                segLightsElement.AddAttribute(nameof(segLights.NodeId), segLights.NodeId);
+                                segLightsElement.AddAttribute(nameof(segLights.SegmentId), segLights.SegmentId);
+                                segLightsElement.AddAttribute(nameof(segLights.PedestrianLightState), (int?)segLights.PedestrianLightState);
+                                segLightsElement.AddAttribute(nameof(segLights.ManualPedestrianMode), segLights.ManualPedestrianMode);
 
-                        foreach (var segmentLights in step.CustomSegmentLights.Select(s => s.Value)) {
+                                if (segLights.NodeId == 0 || segLights.NodeId != timedNode.NodeId) {
+                                    Log.Warning(
+                                        "Inconsistency detected: Timed traffic light @ node " +
+                                        $"{timedNode.NodeId} contains custom traffic lights for the invalid " +
+                                        $"segment ({segLights.SegmentId}) at step {j}: nId={segLights.NodeId}");
+                                    continue;
+                                }
 
-                            var segLightElement = new XElement(nameof(step.CustomSegmentLights));
+                                stepElement.Add(segLightsElement);
 
-                            segLightElement.Add(new XAttribute(nameof(segmentLights.NodeId), segmentLights.NodeId));
-                            segLightElement.Add(new XAttribute(nameof(segmentLights.SegmentId), segmentLights.SegmentId));
+#if DEBUGSAVE
+                            Log._Debug($"Saving pedestrian light @ seg. {e.Key}, step {j}: "+
+                            $"{cnfSegLights.pedestrianLightState} {cnfSegLights.manualPedestrianMode}");
+#endif
 
-                            foreach (var light in segmentLights.CustomLights) {
+                                foreach (var e2 in segLights.CustomLights) {
+#if DEBUGSAVE
+                                Log._Debug($"Saving timed light step {j}, segment {e.Key}, vehicleType "+
+                                $"{e2.Key} at node {nodeId}.");
+#endif
 
-                                var lightElement = new XElement(CustomLightsName);
+                                    var lightElement = new XElement(lightName);
+                                    CustomSegmentLight segLight = e2.Value;
 
-                                lightElement.Add(new XAttribute(VehicleTypeName, light.Key));
-                                lightElement.Add(new XAttribute(nameof(light.Value.CurrentMode), (int)light.Value.CurrentMode));
-                                lightElement.Add(new XAttribute(nameof(light.Value.LightLeft), (int)light.Value.LightLeft));
-                                lightElement.Add(new XAttribute(nameof(light.Value.LightMain), (int)light.Value.LightMain));
-                                lightElement.Add(new XAttribute(nameof(light.Value.LightRight), (int)light.Value.LightRight));
+                                    lightElement.AddAttribute(nameof(segLights.NodeId), segLights.NodeId);
+                                    lightElement.AddAttribute(nameof(segLights.SegmentId), segLights.SegmentId);
+                                    lightElement.AddAttribute(nameof(segLight.CurrentMode), segLight.CurrentMode);
+                                    lightElement.AddAttribute(nameof(segLight.LightLeft), segLight.LightLeft);
+                                    lightElement.AddAttribute(nameof(segLight.LightMain), segLight.LightMain);
+                                    lightElement.AddAttribute(nameof(segLight.LightRight), segLight.LightRight);
 
-                                segLightElement.Add(lightElement);
+                                    lightElement.AddAttribute(vehicleTypeName, e2.Key);
+
+                                    segLightsElement.Add(lightElement);
+                                }
                             }
-
-                            segLightElement.Add(new XAttribute(nameof(segmentLights.PedestrianLightState), segmentLights.PedestrianLightState));
-                            segLightElement.Add(new XAttribute(nameof(segmentLights.ManualPedestrianMode), segmentLights.ManualPedestrianMode));
-
-                            stepElement.Add(segLightElement);
                         }
-
-                        element.Add(stepElement);
                     }
-                    return PersistenceResult.Success;
+                    catch (Exception e) {
+                        Log.Error(
+                            $"Exception occurred while saving timed traffic light @ {timedNode.NodeId}: {e}");
+                        result = PersistenceResult.Failure;
+                    }
                 }
+
+                return result;
             }
         }
 
