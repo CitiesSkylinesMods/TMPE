@@ -11,7 +11,6 @@ namespace TrafficManager.Manager.Impl {
     using JetBrains.Annotations;
     using TrafficManager.Util;
     using System.Reflection;
-    using ICities;
 
     public class OptionsManager
         : AbstractCustomManager,
@@ -109,6 +108,15 @@ namespace TrafficManager.Manager.Impl {
         private static void ToSlider(byte[] data, uint idx, ILegacySerializableOption opt, byte defaultVal = 0)
             => opt.Load(LoadByte(data, idx, defaultVal));
 
+        private static void ToDropDown<TEnum>(byte[] data, uint idx, ILegacySerializableOption opt, TEnum defaultVal) 
+            where TEnum: struct,Enum,IConvertible {
+            if (idx < data.Length) {
+                opt.Load(data[idx]);
+            } else {
+                opt.Load(defaultVal.ToByte(null));
+            }
+        }
+
         /// <summary>
         /// Restores the mod options based on supplied <paramref name="data"/>.
         /// </summary>
@@ -124,9 +132,16 @@ namespace TrafficManager.Manager.Impl {
 
                 Log.Info($"OptionsManager.LoadData: {data.Length} bytes");
 
-                GeneralTab_SimulationGroup.SetSimulationAccuracy(ConvertToSimulationAccuracy(LoadByte(data, idx: 0)));
+                if (dataVersion >= 3 || data.Length == 0) {
+                    // new version or default.
+                    ToDropDown(data, idx: 0, GeneralTab_SimulationGroup.SimulationAccuracy, SimulationAccuracy.VeryHigh);
+                } else {
+                    // legacy
+                    GeneralTab_SimulationGroup.SimulationAccuracy.Load((byte)(SimulationAccuracy.MaxValue - data[0]));
+                }
+
                 // skip Options.setLaneChangingRandomization(options[1]);
-                GameplayTab_VehicleBehaviourGroup.SetRecklessDrivers(LoadByte(data, idx: 2, 3));
+                ToDropDown(data, idx: 2, GameplayTab_VehicleBehaviourGroup.RecklessDrivers, RecklessDrivers.HolyCity);
                 ToCheckbox(data, idx: 3, PoliciesTab_AtJunctionsGroup.RelaxedBusses, true);
                 ToCheckbox(data, idx: 4, OverlaysTab_OverlaysGroup.NodesOverlay, false);
                 ToCheckbox(data, idx: 5, PoliciesTab_AtJunctionsGroup.AllowEnterBlockedJunctions, false);
@@ -166,16 +181,7 @@ namespace TrafficManager.Manager.Impl {
                 ToCheckbox(data, idx: 33, OverlaysTab_OverlaysGroup.ShowPathFindStats, VersionUtil.IS_DEBUG);
                 ToSlider(data, idx: 34, GameplayTab_AIGroups.AltLaneSelectionRatio, 0);
 
-                if (data.Length > 35) {
-                    try {
-                        PoliciesTab_OnRoadsGroup.SetVehicleRestrictionsAggression(
-                            (VehicleRestrictionsAggression)data[35]);
-                    }
-                    catch (Exception e) {
-                        Log.Warning(
-                            $"Skipping invalid value {data[35]} for vehicle restrictions aggression");
-                    }
-                }
+                ToDropDown(data, idx: 35, PoliciesTab_OnRoadsGroup.VehicleRestrictionsAggression, VehicleRestrictionsAggression.Medium);
 
                 ToCheckbox(data, idx: 36, PoliciesTab_AtJunctionsGroup.TrafficLightPriorityRules, false);
                 ToCheckbox(data, idx: 37, GameplayTab_AIGroups.RealisticPublicTransport, false);
@@ -230,9 +236,9 @@ namespace TrafficManager.Manager.Impl {
             var save = new byte[60];
 
             try {
-                save[0] = ConvertFromSimulationAccuracy(Options.simulationAccuracy);
+                save[0] = GeneralTab_SimulationGroup.SimulationAccuracy.Save();
                 save[1] = 0; // Options.laneChangingRandomization
-                save[2] = (byte)Options.recklessDrivers;
+                save[2] = GameplayTab_VehicleBehaviourGroup.RecklessDrivers.Save();
                 save[3] = (byte)(Options.relaxedBusses ? 1 : 0);
                 save[4] = (byte)(Options.nodesOverlay ? 1 : 0);
                 save[5] = (byte)(Options.allowEnterBlockedJunctions ? 1 : 0);
@@ -265,7 +271,7 @@ namespace TrafficManager.Manager.Impl {
                 save[32] = (byte)(Options.banRegularTrafficOnBusLanes ? 1 : 0);
                 save[33] = (byte)(Options.showPathFindStats ? 1 : 0);
                 save[34] = Options.altLaneSelectionRatio;
-                save[35] = (byte)Options.vehicleRestrictionsAggression;
+                save[35] = PoliciesTab_OnRoadsGroup.VehicleRestrictionsAggression.Save();
                 save[36] = (byte)(Options.trafficLightPriorityRules ? 1 : 0);
                 save[37] = (byte)(Options.realisticPublicTransport ? 1 : 0);
                 save[38] = (byte)(Options.turnOnRedEnabled ? 1 : 0);
