@@ -234,6 +234,8 @@ namespace TrafficManager.UI.SubTools.RoutingDetector {
         }
 
         public void UpdateOnscreenDisplayPanel() {
+            // no need to translate debug only tool.
+
             var items = new List<OsdItem>();
             if (nodeLaneEnds_ == null) {
                 items.Add(new MainMenu.OSD.HardcodedMouseShortcut(
