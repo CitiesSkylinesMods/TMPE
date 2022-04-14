@@ -3,13 +3,9 @@ namespace TrafficManager.UI.SubTools.RoutingDetector {
     using UnityEngine;
 
     internal class LaneEnd {
-        internal ushort SegmentId;
-        internal ushort NodeId;
-        internal bool StartNode;
         internal uint LaneId;
         internal int LaneIndex;
-        internal NetInfo.Lane LaneInfo;
-        internal bool HasValidTransitions;
+        internal bool StartNode;
 
         internal SegmentLaneMarker SegmentMarker;
         internal NodeLaneMarker NodeMarker;

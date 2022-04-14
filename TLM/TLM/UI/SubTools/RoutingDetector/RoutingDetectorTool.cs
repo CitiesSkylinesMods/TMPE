@@ -71,7 +71,7 @@ namespace TrafficManager.UI.SubTools.RoutingDetector {
                     connection.TargetLaneEnd.RenderOverlay(cameraInfo, color, highlight: highlight);
                 }
 
-                if (!connectionHighlighted) {
+                if (!connectionHighlighted && !hoveredLaneEnd_.Connections.IsNullOrEmpty()) {
                     hoveredLaneEnd_?.RenderOverlay(cameraInfo, Color.white, highlight: true);
                 }
             }
@@ -179,11 +179,8 @@ namespace TrafficManager.UI.SubTools.RoutingDetector {
                         LaneEnd laneEnd = new LaneEnd {
                             LaneId = item.laneId,
                             LaneIndex = item.laneIndex,
-                            LaneInfo = laneInfo,
-
-                            SegmentId = segmentId,
-                            NodeId = nodeId,
                             StartNode = startNode,
+
                             NodeMarker = nodeMarker,
                             SegmentMarker = segmentMarker,
                         };
