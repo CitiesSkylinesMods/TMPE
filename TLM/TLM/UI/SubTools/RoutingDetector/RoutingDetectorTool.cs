@@ -12,13 +12,16 @@ namespace TrafficManager.UI.SubTools.RoutingDetector {
     using ColossalFramework;
     using CSUtil.Commons;
     using ColossalFramework.UI;
+    using TrafficManager.API.Manager;
+    using TrafficManager.UI.MainMenu;
+    using TrafficManager.UI.MainMenu.OSD;
 
-    public class RoutingDetectorTool : TrafficManagerSubTool {
+    public class RoutingDetectorTool : TrafficManagerSubTool, IOnscreenDisplayProvider {
 
         private LaneEnd selectedLaneEnd_;
         private LaneEnd hoveredLaneEnd_;
         private LaneEnd[] nodeLaneEnds_;
-        private RoutingDetectorToolWindow window_;
+        private LaneTransitionData[] transitions_;
 
         public RoutingDetectorTool(TrafficManagerTool mainTool)
             : base(mainTool) {
@@ -32,15 +35,12 @@ namespace TrafficManager.UI.SubTools.RoutingDetector {
             SelectedNodeId = 0;
             selectedLaneEnd_ = null;
             nodeLaneEnds_ = null;
-            window_ = UIView.GetAView().AddUIComponent(typeof(RoutingDetectorToolWindow)) as RoutingDetectorToolWindow;
         }
 
         public override void OnDeactivateTool() {
             SelectedNodeId = 0;
             selectedLaneEnd_ = null;
             nodeLaneEnds_ = null;
-            GameObject.Destroy(window_?.gameObject);
-            window_ = null;
         }
 
         public override void RenderActiveToolOverlay(RenderManager.CameraInfo cameraInfo) {
@@ -90,7 +90,8 @@ namespace TrafficManager.UI.SubTools.RoutingDetector {
 
             if(prev != hoveredLaneEnd_) {
                 var connection = selectedLaneEnd_?.Connections?.FirstOrDefault(item => item.TargetLaneEnd == hoveredLaneEnd_);
-                window_.Info(connection?.Transtitions);
+                transitions_ = connection?.Transtitions;
+                MainTool.RequestOnscreenDisplayUpdate();
             }
         }
 
@@ -230,6 +231,69 @@ namespace TrafficManager.UI.SubTools.RoutingDetector {
             }
 
             return laneEnds.ToArray();
+        }
+
+        public void UpdateOnscreenDisplayPanel() {
+            var items = new List<OsdItem>();
+            if (nodeLaneEnds_ == null) {
+                items.Add(new MainMenu.OSD.HardcodedMouseShortcut(
+                    button: UIMouseButton.Left,
+                    shift: false,
+                    ctrl: false,
+                    alt: false,
+                    localizedText: "Select node"));
+                items.Add(new MainMenu.OSD.HardcodedMouseShortcut(
+                    button: UIMouseButton.Right,
+                    shift: false,
+                    ctrl: false,
+                    alt: false,
+                    localizedText: "Exit subtool"));
+            } else if (selectedLaneEnd_ == null) {
+                items.Add(new MainMenu.OSD.HardcodedMouseShortcut(
+                    button: UIMouseButton.Left,
+                    shift: false,
+                    ctrl: false,
+                    alt: false,
+                    localizedText: "Select source lane"));
+                items.Add(new MainMenu.OSD.HardcodedMouseShortcut(
+                    button: UIMouseButton.Right,
+                    shift: false,
+                    ctrl: false,
+                    alt: false,
+                    localizedText: "Deselect node subtool"));
+            }else if (hoveredLaneEnd_ == null || transitions_.IsNullOrEmpty()) {
+                items.Add(new MainMenu.OSD.HardcodedMouseShortcut(
+                    button: UIMouseButton.Left,
+                    shift: false,
+                    ctrl: false,
+                    alt: false,
+                    localizedText: "Select target lane"));
+                items.Add(new MainMenu.OSD.HardcodedMouseShortcut(
+                    button: UIMouseButton.Right,
+                    shift: false,
+                    ctrl: false,
+                    alt: false,
+                    localizedText: "Deselect source lane"));
+            } else {
+                items.Add(new MainMenu.OSD.HardcodedMouseShortcut(
+                    button: UIMouseButton.Right,
+                    shift: false,
+                    ctrl: false,
+                    alt: false,
+                    localizedText: "Deselect source lane"));
+                items.Add(new MainMenu.OSD.HardcodedMouseShortcut(
+                    button: UIMouseButton.Left,
+                    shift: false,
+                    ctrl: false,
+                    alt: false,
+                    localizedText: "Select target lane"));
+
+                foreach (var transition in transitions_) {
+                    items.Add(new MainMenu.OSD.Label($"type:{transition.type} | distance:{transition.distance}"));
+                }
+            }
+
+            OnscreenDisplay.Display(items: items);
         }
     }
 }
