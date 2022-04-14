@@ -35,6 +35,7 @@ namespace TrafficManager.UI.SubTools.RoutingDetector {
             SelectedNodeId = 0;
             selectedLaneEnd_ = null;
             nodeLaneEnds_ = null;
+            MainTool.RequestOnscreenDisplayUpdate();
         }
 
         public override void OnDeactivateTool() {
@@ -71,7 +72,7 @@ namespace TrafficManager.UI.SubTools.RoutingDetector {
                     connection.TargetLaneEnd.RenderOverlay(cameraInfo, color, highlight: highlight);
                 }
 
-                if (!connectionHighlighted && !hoveredLaneEnd_.Connections.IsNullOrEmpty()) {
+                if (!connectionHighlighted && !(hoveredLaneEnd_?.Connections).IsNullOrEmpty()) {
                     hoveredLaneEnd_?.RenderOverlay(cameraInfo, Color.white, highlight: true);
                 }
             }
@@ -106,19 +107,22 @@ namespace TrafficManager.UI.SubTools.RoutingDetector {
                 if (HoveredNodeId.ToNode().IsValid()) {
                     SelectedNodeId = HoveredNodeId;
                     nodeLaneEnds_ = CalcualteNodeLaneEnds(SelectedNodeId);
+                    MainTool.RequestOnscreenDisplayUpdate();
                 }
             } else if (hoveredLaneEnd_?.Connections != null) {
-                Log._Debug("selecting " + hoveredLaneEnd_.LaneId);
                 selectedLaneEnd_ = hoveredLaneEnd_;
+                MainTool.RequestOnscreenDisplayUpdate();
             }
         }
 
         public override void OnToolRightClick() {
             if(selectedLaneEnd_ != null) {
                 selectedLaneEnd_ = null;
-            } else if(nodeLaneEnds_ == null) {
+                MainTool.RequestOnscreenDisplayUpdate();
+            } else if(nodeLaneEnds_ != null) {
                 SelectedNodeId = 0;
                 nodeLaneEnds_ = null;
+                MainTool.RequestOnscreenDisplayUpdate();
             } else {
                 MainTool.SetToolMode(ToolMode.None);
             }
@@ -259,31 +263,26 @@ namespace TrafficManager.UI.SubTools.RoutingDetector {
                     shift: false,
                     ctrl: false,
                     alt: false,
-                    localizedText: "Deselect node subtool"));
-            }else if (hoveredLaneEnd_ == null || transitions_.IsNullOrEmpty()) {
+                    localizedText: "Deselect node"));
+            } else {
+                items.Add(new MainMenu.OSD.Label("Hover over target lane to show transitions"));
+                items.Add(new MainMenu.OSD.HardcodedMouseShortcut(
+                    button: UIMouseButton.Right,
+                    shift: false,
+                    ctrl: false,
+                    alt: false,
+                    localizedText: "Deselect source lane"));
                 items.Add(new MainMenu.OSD.HardcodedMouseShortcut(
                     button: UIMouseButton.Left,
                     shift: false,
                     ctrl: false,
                     alt: false,
-                    localizedText: "Select target lane"));
-                items.Add(new MainMenu.OSD.HardcodedMouseShortcut(
-                    button: UIMouseButton.Right,
-                    shift: false,
-                    ctrl: false,
-                    alt: false,
-                    localizedText: "Deselect source lane"));
-            } else {
-                items.Add(new MainMenu.OSD.HardcodedMouseShortcut(
-                    button: UIMouseButton.Right,
-                    shift: false,
-                    ctrl: false,
-                    alt: false,
-                    localizedText: "Deselect source lane"));
-                items.Add(new MainMenu.OSD.Label("Hover over target lane to show transitions"));
+                    localizedText: "Select source lane"));
 
-                foreach (var transition in transitions_) {
-                    items.Add(new MainMenu.OSD.Label($"type:{transition.type} | group:{transition.group} | distance:{transition.distance}"));
+                if (hoveredLaneEnd_ != null && !transitions_.IsNullOrEmpty()) {
+                    foreach (var transition in transitions_) {
+                        items.Add(new MainMenu.OSD.Label($"type:{transition.type} | group:{transition.group} | distance:{transition.distance}"));
+                    }
                 }
             }
 
