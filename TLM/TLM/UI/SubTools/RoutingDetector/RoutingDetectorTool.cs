@@ -11,12 +11,14 @@ namespace TrafficManager.UI.SubTools.RoutingDetector {
     using ColossalFramework.Math;
     using ColossalFramework;
     using CSUtil.Commons;
+    using ColossalFramework.UI;
 
     public class RoutingDetectorTool : TrafficManagerSubTool {
 
         private LaneEnd selectedLaneEnd_;
         private LaneEnd hoveredLaneEnd_;
         private LaneEnd[] nodeLaneEnds_;
+        private RoutingDetectorToolWindow window_;
 
         public RoutingDetectorTool(TrafficManagerTool mainTool)
             : base(mainTool) {
@@ -24,33 +26,41 @@ namespace TrafficManager.UI.SubTools.RoutingDetector {
 
         private static RoutingManager RMan => RoutingManager.Instance;
 
+        private uint HoveredLaneId => hoveredLaneEnd_?.LaneId ?? 0;
+
         public override void OnActivateTool() {
             SelectedNodeId = 0;
             selectedLaneEnd_ = null;
             nodeLaneEnds_ = null;
+            window_ = UIView.GetAView().AddUIComponent(typeof(RoutingDetectorToolWindow)) as RoutingDetectorToolWindow;
         }
 
         public override void OnDeactivateTool() {
             SelectedNodeId = 0;
             selectedLaneEnd_ = null;
             nodeLaneEnds_ = null;
+            GameObject.Destroy(window_?.gameObject);
+            window_ = null;
         }
 
         public override void RenderActiveToolOverlay(RenderManager.CameraInfo cameraInfo) {
-            if (SelectedNodeId == 0) {
+            if (nodeLaneEnds_ == null) {
                 if (HoveredNodeId != 0) {
                     Highlight.DrawNodeCircle(cameraInfo, HoveredNodeId);
                 }
             } else if (selectedLaneEnd_ == null) {
                 foreach (var sourceLaneEnd in nodeLaneEnds_) {
                     if (sourceLaneEnd.Connections != null) {
-                        bool highlight = sourceLaneEnd.LaneId == hoveredLaneEnd_.LaneId;
+                        bool highlight = HoveredLaneId == sourceLaneEnd.LaneId;
                         sourceLaneEnd.RenderOverlay(cameraInfo, Color.white, highlight: highlight);
                     }
                 }
             } else {
+                selectedLaneEnd_.RenderOverlay(cameraInfo, Color.white, highlight: true);
+                bool connectionHighlighted = false;
                 foreach (var connection in selectedLaneEnd_.Connections) {
-                    bool highlight = connection.TargetLaneEnd.LaneId == hoveredLaneEnd_.LaneId;
+                    bool highlight = HoveredLaneId == connection.TargetLaneEnd.LaneId;
+                    connectionHighlighted |= highlight;
                     Color color = connection.Transtitions[0].type switch {
                         LaneEndTransitionType.Default => Color.blue,
                         LaneEndTransitionType.LaneConnection => Color.green,
@@ -60,32 +70,44 @@ namespace TrafficManager.UI.SubTools.RoutingDetector {
 
                     connection.TargetLaneEnd.RenderOverlay(cameraInfo, color, highlight: highlight);
                 }
+
+                if (!connectionHighlighted) {
+                    hoveredLaneEnd_?.RenderOverlay(cameraInfo, Color.white, highlight: true);
+                }
             }
         }
 
         public override void UpdateEveryFrame() {
-            //throw new NotImplementedException();
+            var prev = hoveredLaneEnd_;
+            hoveredLaneEnd_ = null;
+            if (nodeLaneEnds_ != null) {
+                foreach(var laneEnd in nodeLaneEnds_) {
+                    if (laneEnd.IntersectRay()) {
+                        hoveredLaneEnd_ = laneEnd;
+                    }
+                }
+            }
+
+            if(prev != hoveredLaneEnd_) {
+                var connection = selectedLaneEnd_?.Connections?.FirstOrDefault(item => item.TargetLaneEnd == hoveredLaneEnd_);
+                window_.Info(connection?.Transtitions);
+            }
         }
 
-        public override void RenderActiveToolOverlay_GUI() {
-            //throw new NotImplementedException();
-        }
+        public override void RenderActiveToolOverlay_GUI() { }
 
-        public override void RenderGenericInfoOverlay(RenderManager.CameraInfo cameraInfo) {
-            //throw new NotImplementedException();
-        }
+        public override void RenderGenericInfoOverlay(RenderManager.CameraInfo cameraInfo) { }
 
-        public override void RenderGenericInfoOverlay_GUI() {
-            //throw new NotImplementedException();
-        }
+        public override void RenderGenericInfoOverlay_GUI() { }
 
         public override void OnToolLeftClick() {
-            if (SelectedNodeId == 0) {
+            if (nodeLaneEnds_ == null) {
                 if (HoveredNodeId.ToNode().IsValid()) {
                     SelectedNodeId = HoveredNodeId;
                     nodeLaneEnds_ = CalcualteNodeLaneEnds(SelectedNodeId);
                 }
             } else if (hoveredLaneEnd_?.Connections != null) {
+                Log._Debug("selecting " + hoveredLaneEnd_.LaneId);
                 selectedLaneEnd_ = hoveredLaneEnd_;
             }
         }
@@ -93,14 +115,13 @@ namespace TrafficManager.UI.SubTools.RoutingDetector {
         public override void OnToolRightClick() {
             if(selectedLaneEnd_ != null) {
                 selectedLaneEnd_ = null;
-            } else if(SelectedNodeId != 0) {
+            } else if(nodeLaneEnds_ == null) {
                 SelectedNodeId = 0;
+                nodeLaneEnds_ = null;
             } else {
                 MainTool.SetToolMode(ToolMode.None);
             }
         }
-
-
 
         private LaneEnd[] CalcualteNodeLaneEnds(ushort nodeId) {
             ref NetNode netNode = ref nodeId.ToNode();
@@ -125,7 +146,7 @@ namespace TrafficManager.UI.SubTools.RoutingDetector {
                     uint laneId = item.laneId;
                     NetInfo.Lane laneInfo = netSegment.Info.m_lanes[item.laneIndex];
                     bool routedLane = laneInfo.CheckType(RoutingManager.ROUTED_LANE_TYPES, RoutingManager.ROUTED_VEHICLE_TYPES);
-                    if (!routedLane) {
+                    if (routedLane) {
                         ref NetLane netLane = ref laneId.ToLane();
                         bool startNode = netLane.IsStartNode(nodeId);
                         uint routingIndex = RoutingManager.Instance.GetLaneEndRoutingIndex(laneId, startNode);
