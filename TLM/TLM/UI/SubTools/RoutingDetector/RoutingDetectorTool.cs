@@ -286,7 +286,7 @@ namespace TrafficManager.UI.SubTools.RoutingDetector {
                 items.Add(new MainMenu.OSD.Label("Hover over target lane to show transitions"));
 
                 foreach (var transition in transitions_) {
-                    items.Add(new MainMenu.OSD.Label($"type:{transition.type} | distance:{transition.distance}"));
+                    items.Add(new MainMenu.OSD.Label($"type:{transition.type} | group:{transition.group} | distance:{transition.distance}"));
                 }
             }
 
