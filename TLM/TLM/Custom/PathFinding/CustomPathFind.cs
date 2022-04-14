@@ -3720,7 +3720,7 @@ namespace TrafficManager.Custom.PathFinding {
                 }
 
                 LaneEndTransitionGroup laneEndTransitionGroup = TrackUtils.GetLaneEndTransitionGroup(vehicleTypes_);
-                if (laneTransitions[k].group.IsFlagSet(laneEndTransitionGroup) ) {
+                if ((laneTransitions[k].group & laneEndTransitionGroup) == 0) {
                     if (isLogEnabled) {
                         DebugLog(
                             unitId,
@@ -3728,7 +3728,7 @@ namespace TrafficManager.Custom.PathFinding {
                             laneTransitions[k].segmentId,
                             laneTransitions[k].laneIndex,
                             laneTransitions[k].laneId,
-                            $"ProcessItemRouted: Skipping transition: Transition is for '{laneTransitions[k].group}' only not '{vehicleTypes_}'");
+                            $"ProcessItemRouted: Skipping transition: Transition '{laneTransitions[k].group}' does not match '{vehicleTypes_}'");
                     }
 
                     continue;
