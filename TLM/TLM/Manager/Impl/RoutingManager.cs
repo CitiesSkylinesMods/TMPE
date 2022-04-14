@@ -2161,6 +2161,7 @@ namespace TrafficManager.Manager.Impl {
                         laneId = prevLaneId,
                         laneIndex = (byte)prevLaneIndex,
                         type = newTransitions[i].type,
+                        group = newTransitions[i].group,
                         distance = newTransitions[i].distance,
                         segmentId = prevSegmentId,
                         startNode = isNodeStartNodeOfPrevSegment,
