@@ -16,8 +16,7 @@ namespace TrafficManager.UI.MainMenu {
                 spriteSize: new IntVector2(50));
         }
 
-        protected override string U_OverrideTooltipText() =>
-            Translation.Menu.Get("Tooltip:Routing detector");
+        protected override string U_OverrideTooltipText() => "Routing detector";
 
         protected override bool IsVisible() => true;
     }
