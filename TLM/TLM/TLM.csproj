@@ -176,6 +176,7 @@
     <Compile Include="UI\Helpers\SliderOption.cs" />
     <Compile Include="UI\Helpers\OptionButtonBase.cs" />
     <Compile Include="UI\Helpers\UrlButton.cs" />
+    <Compile Include="UI\MainMenu\RoutingDetectorButton.cs" />
     <Compile Include="UI\SubTools\RoutingDetector\Connection.cs" />
     <Compile Include="UI\SubTools\RoutingDetector\LaneEnd.cs" />
     <Compile Include="UI\SubTools\RoutingDetector\RoutingDetectorTool.cs" />
@@ -1155,6 +1156,10 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\LaneConnectionManager\direction_arrow.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\MainMenu\Tool\RoutingDetector-fg-active.png" />
+    <EmbeddedResource Include="Resources\MainMenu\Tool\RoutingDetector-fg-normal.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="PostBuildMacros">
