@@ -283,12 +283,7 @@ namespace TrafficManager.UI.SubTools.RoutingDetector {
                     ctrl: false,
                     alt: false,
                     localizedText: "Deselect source lane"));
-                items.Add(new MainMenu.OSD.HardcodedMouseShortcut(
-                    button: UIMouseButton.Left,
-                    shift: false,
-                    ctrl: false,
-                    alt: false,
-                    localizedText: "Select target lane"));
+                items.Add(new MainMenu.OSD.Label("Hover over target lane to show transitions"));
 
                 foreach (var transition in transitions_) {
                     items.Add(new MainMenu.OSD.Label($"type:{transition.type} | distance:{transition.distance}"));
