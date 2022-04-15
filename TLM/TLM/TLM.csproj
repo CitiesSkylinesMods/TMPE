@@ -1158,7 +1158,7 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\LaneConnectionManager\direction_arrow.png" />
   </ItemGroup>
-  <ItemGroup>
+  <ItemGroup Condition="'$(Configuration)'=='Debug'">
     <EmbeddedResource Include="Resources\MainMenu\Tool\RoutingDetector-fg-active.png" />
     <EmbeddedResource Include="Resources\MainMenu\Tool\RoutingDetector-fg-normal.png" />
   </ItemGroup>
