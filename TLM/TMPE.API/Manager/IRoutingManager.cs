@@ -145,12 +145,13 @@ namespace TrafficManager.API.Manager {
         public override string ToString() {
             return string.Format(
                 "[LaneTransitionData\n\tlaneId = {0}\n\tlaneIndex = {1}\n\tsegmentId = {2}\n" +
-                "\tstartNode = {3}\n\ttype = {4}\n\tdistance = {5}\nLaneTransitionData]",
+                "\tstartNode = {3}\n\ttype = {4}\n\tgroup = {5}\n\tdistance = {6}\nLaneTransitionData]",
                 laneId,
                 laneIndex,
                 segmentId,
                 startNode,
                 type,
+                group,
                 distance);
         }
 
