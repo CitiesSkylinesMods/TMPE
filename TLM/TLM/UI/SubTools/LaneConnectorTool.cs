@@ -1314,9 +1314,9 @@ namespace TrafficManager.UI.SubTools {
 
             // check track turning angles are within bounds
             ret &= isRoad || CheckSegmentsTurningAngle(
-                    sourceSegment: ref source.SegmentId.ToSegment(),
+                    sourceSegmentId: source.SegmentId,
                     sourceStartNode: source.StartNode,
-                    targetSegment: ref target.SegmentId.ToSegment(),
+                    targetSegmentId: target.SegmentId,
                     targetStartNode: target.StartNode);
 
             return ret;
@@ -1332,11 +1332,16 @@ namespace TrafficManager.UI.SubTools {
         /// <param name="targetSegment"></param>
         /// <param name="targetStartNode"></param>
         /// <returns></returns>
-        private static bool CheckSegmentsTurningAngle(ref NetSegment sourceSegment,
+        private static bool CheckSegmentsTurningAngle(ushort sourceSegmentId,
                                                       bool sourceStartNode,
-                                                      ref NetSegment targetSegment,
+                                                      ushort targetSegmentId,
                                                       bool targetStartNode) {
+            if(sourceSegmentId == targetSegmentId) {
+                return false;
+            }
 
+            ref NetSegment sourceSegment = ref sourceSegmentId.ToSegment();
+            ref NetSegment targetSegment = ref targetSegmentId.ToSegment();
             float turningAngle = 0.01f - Mathf.Min(
                 sourceSegment.Info.m_maxTurnAngleCos,
                 targetSegment.Info.m_maxTurnAngleCos);

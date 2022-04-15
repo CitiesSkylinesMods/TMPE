@@ -794,7 +794,7 @@ namespace TrafficManager.Manager.Impl {
                                                     nextLaneId,
                                                     nextLaneIndex);
                                         }
-                                    } else {
+                                    } else if(nextSegmentId != prevSegmentId) {
                                         bool goodTurnAngle = TrackUtils.CheckSegmentsTurnAngle(
                                             sourceSegment: ref nextSegment,
                                             targetSegment: ref prevSegment,
