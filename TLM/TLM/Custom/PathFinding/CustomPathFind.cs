@@ -295,7 +295,7 @@ namespace TrafficManager.Custom.PathFinding {
                 (queueItem_.vehicleType & ExtVehicleType.RoadVehicle) != ExtVehicleType.None;
 
             isLaneArrowObeyingEntity_ =
-                (!Options.relaxedBusses || queueItem_.vehicleType != ExtVehicleType.Bus) &&
+                (!Options.relaxedBusses || (queueItem_.vehicleType != ExtVehicleType.Bus && queueItem_.vehicleType != ExtVehicleType.Tram)) &&
                 (vehicleTypes_ & LaneArrowManager.VEHICLE_TYPES) != VehicleInfo.VehicleType.None &&
                 (queueItem_.vehicleType & LaneArrowManager.EXT_VEHICLE_TYPES) != ExtVehicleType.None;
 #if DEBUG
