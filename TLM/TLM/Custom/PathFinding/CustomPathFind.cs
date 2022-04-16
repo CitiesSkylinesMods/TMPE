@@ -2473,7 +2473,7 @@ namespace TrafficManager.Custom.PathFinding {
             bool acuteTurningAngle = false;
             if (prevLaneType == NetInfo.LaneType.Vehicle &&
                 (prevVehicleType & VehicleInfo.VehicleType.Car) == VehicleInfo.VehicleType.None) {
-                acuteTurningAngle = TrackUtils.CheckSegmentsTurnAngle(ref prevSegment, ref nextSegment, nextNodeId);
+                acuteTurningAngle = !TrackUtils.CheckSegmentsTurnAngle(ref prevSegment, ref nextSegment, nextNodeId);
             }
 
             float prevLength = prevLaneType != NetInfo.LaneType.PublicTransport
@@ -2697,6 +2697,13 @@ namespace TrafficManager.Custom.PathFinding {
                             nextLaneInfo.m_laneType == NetInfo.LaneType.Vehicle &&
                             (nextLaneInfo.m_vehicleType & VehicleInfo.VehicleType.Car) ==
                             VehicleInfo.VehicleType.None) {
+                            if (isLogEnabled) {
+                                DebugLog(
+                                    unitId,
+                                    item,
+                                    nextSegmentId,
+                                    $"ProcessItemCosts: Skipping acute turning angle for {nextLaneInfo.m_laneType} {nextLaneInfo.m_vehicleType}");
+                            }
                             continue;
                         }
 
@@ -3730,7 +3737,6 @@ namespace TrafficManager.Custom.PathFinding {
                             laneTransitions[k].laneId,
                             $"ProcessItemRouted: Skipping transition: Transition '{laneTransitions[k].group}' does not match '{vehicleTypes_}'");
                     }
-
                     continue;
                 }
 
