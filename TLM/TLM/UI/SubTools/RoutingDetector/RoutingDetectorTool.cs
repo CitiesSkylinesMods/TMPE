@@ -152,8 +152,6 @@ namespace TrafficManager.UI.SubTools.RoutingDetector {
                     if (routedLane) {
                         ref NetLane netLane = ref laneId.ToLane();
                         bool startNode = netLane.IsStartNode(nodeId);
-                        uint routingIndex = RoutingManager.Instance.GetLaneEndRoutingIndex(laneId, startNode);
-                        var routing = RoutingManager.Instance.LaneEndForwardRoutings[routingIndex];
                         Vector3 pos;
                         Bezier3 bezier = laneId.ToLane().m_bezier;
                         if (startNode) {
