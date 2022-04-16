@@ -56,20 +56,18 @@ namespace TrafficManager.UI.SubTools.RoutingDetector {
                         sourceLaneEnd.RenderOverlay(cameraInfo, Color.white, highlight: highlight);
                     }
                 }
+                if(hoveredLaneEnd_ != null) {
+                    foreach (var connection in hoveredLaneEnd_.Connections) {
+                        connection.TargetLaneEnd.RenderOverlay(cameraInfo, connection.Color, highlight: true);
+                    }
+                }
             } else {
                 selectedLaneEnd_.RenderOverlay(cameraInfo, Color.white, highlight: true);
                 bool connectionHighlighted = false;
                 foreach (var connection in selectedLaneEnd_.Connections) {
                     bool highlight = HoveredLaneId == connection.TargetLaneEnd.LaneId;
                     connectionHighlighted |= highlight;
-                    Color color = connection.Transtitions[0].type switch {
-                        LaneEndTransitionType.Default => Color.blue,
-                        LaneEndTransitionType.LaneConnection => Color.green,
-                        LaneEndTransitionType.Relaxed => Color.yellow,
-                        _ => Color.black,
-                    };
-
-                    connection.TargetLaneEnd.RenderOverlay(cameraInfo, color, highlight: highlight);
+                    connection.TargetLaneEnd.RenderOverlay(cameraInfo, connection.Color, highlight: highlight);
                 }
 
                 if (!connectionHighlighted && !(hoveredLaneEnd_?.Connections).IsNullOrEmpty()) {
@@ -217,9 +215,18 @@ namespace TrafficManager.UI.SubTools.RoutingDetector {
                                 Log.Error($"could not find target lane end for node:{nodeId} laneId:{targetLaneId}");
                                 continue;
                             }
+
+                            Color color = transition.type switch {
+                                LaneEndTransitionType.Default => Color.blue,
+                                LaneEndTransitionType.LaneConnection => Color.green,
+                                LaneEndTransitionType.Relaxed => Color.yellow,
+                                _ => Color.black,
+                            };
+
                             connection = new Connection {
                                 Transtitions = new[] { transition },
                                 TargetLaneEnd = targetLaneEnd,
+                                Color = color,
                             };
                             connections.Add(connection);
                         } else {
