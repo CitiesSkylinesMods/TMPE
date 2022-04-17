@@ -3,7 +3,7 @@ namespace TrafficManager.U {
     using System.Collections.Generic;
     using ColossalFramework.UI;
     using CSUtil.Commons;
-    using TrafficManager.State;
+    using JetBrains.Annotations;
     using TrafficManager.State.ConfigData;
     using TrafficManager.UI.Textures;
     using UnityEngine;
@@ -24,7 +24,7 @@ namespace TrafficManager.U {
         /// <param name="atlasSizeHint">Texture with this side size is created.</param>
         public static UITextureAtlas CreateAtlas(string atlasName,
                                                  string resourcePrefix,
-                                                 U.AtlasSpriteDef[] spriteDefs,
+                                                 [NotNull] U.AtlasSpriteDef[] spriteDefs,
                                                  IntVector2 atlasSizeHint) {
             var loadedTextures = new List<Texture2D>(spriteDefs.Length);
             var loadedSpriteNames = new List<string>();
@@ -36,28 +36,7 @@ namespace TrafficManager.U {
 
             // Load separate sprites and then pack it in a texture together
             foreach (U.AtlasSpriteDef spriteDef in spriteDefs) {
-                // Allow spritedef resouce prefix to override prefix given to this func
-                string prefix = resourcePrefix;
-                string resourceName;
-
-                if (spriteDef.Name.StartsWith("/")) {
-                    // If sprite name starts with /, use it as full resource path without .PNG
-                    resourceName = $"{spriteDef.Name.Substring(1)}.png";
-                } else {
-                    // Otherwise use prefix + sprite name + .PNG
-                    resourceName = $"{prefix}.{spriteDef.Name}.png";
-                }
-
-                //--------------------------
-                // Try loading the texture
-                //--------------------------
-                if (debugResourceLoading) {
-                    Log._Debug($"TextureUtil: Loading {resourceName} for sprite={spriteDef.Name}");
-                }
-
-                Texture2D tex = TextureResources.LoadDllResource(
-                    resourceName: resourceName,
-                    size: spriteDef.Size);
+                Texture2D tex = spriteDef.LoadTexture2D(debugResourceLoading, resourcePrefix);
 
                 if (tex != null) {
                     loadedTextures.Add(tex);
@@ -75,10 +54,10 @@ namespace TrafficManager.U {
             return PackTextures(atlasName, atlasSizeHint, loadedTextures, loadedSpriteNames);
         }
 
-        private static UITextureAtlas PackTextures(string atlasName,
+        private static UITextureAtlas PackTextures([NotNull] string atlasName,
                                                    IntVector2 atlasSizeHint,
-                                                   List<Texture2D> loadedTextures,
-                                                   List<string> loadedSpriteNames) {
+                                                   [NotNull] List<Texture2D> loadedTextures,
+                                                   [NotNull] List<string> loadedSpriteNames) {
             Texture2D texture2D = new Texture2D(
                 width: atlasSizeHint.x,
                 height: atlasSizeHint.y,
@@ -115,7 +94,8 @@ namespace TrafficManager.U {
         /// <param name="tex">Copy from.</param>
         /// <param name="alpha">New alpha.</param>
         /// <returns>New texture.</returns>
-        public static Texture2D AdjustAlpha(Texture2D tex, float alpha) {
+        public static Texture2D AdjustAlpha([NotNull] Texture2D tex,
+                                            float alpha) {
             Color[] texColors = tex.GetPixels();
             Color[] retPixels = new Color[texColors.Length];
 
