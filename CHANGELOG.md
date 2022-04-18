@@ -382,6 +382,7 @@ This changelog includes all versions and major variants of the mod going all the
 
 - [Fixed] Vehicle/cim path invalidation after loading savegame #1117 (kianzarrin)
 - [Fixed] Reloading localised textures for Priority Signs and TTL #1121 #1099 (TianQiBuTian, krzychu124)
+- [Fixed] Monorail lane connectors render on the road #985 #654 (krzychu124)
 - [Updated] Lane Connectors: New shape, changed interactions in over/under-ground mode #985 #282 #3 (krzychu124)
 - [Updated] Performance: Network flag detection #1118 (kianzarrin)
 - [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
