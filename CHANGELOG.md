@@ -29,9 +29,10 @@ This changelog includes all versions and major variants of the mod going all the
 
 > Date format: dd/mm/yyyy
 
-#### TM:PE V11.6.5.2 TEST, dd/04/2022
+#### TM:PE V11.6.5.2 TEST, 18/04/2022
 
 - [Meta] This release improves lane routing, and fixes some bugs.
+- [Meta] Due to data format change, games saved with TM:PE 11.6.5.2 can not be loaded with earlier versions of the mod. You can still load old savegames as the old data will be converted to new format.
 - [New] Directional lane connectors #1492 #1214 #1211 (kianzarrin, Chamëleon)
 - [Mod] Incompatible: Two more CSM mods #1481 (StayHungryStayFoolish, aubergine18)
 - [Mod] Incompatible: 交通管理器 汉化版TMPE_V11_STABLE #1481 (StayHungryStayFoolish, aubergine18)
@@ -45,7 +46,7 @@ This changelog includes all versions and major variants of the mod going all the
 - [Fixed] Asset Editor crash when saving asset with no segments #1505 #1313 (krzychu124, kianzarrin)
 - [Fixed] Toggling certain mod options causes blank menu buttons #1516 #1514 (krzychu124)
 - [Updated] Trains prefer to stay in lane at intersection #1483 #1475 (kianzarrin)
-- [Updated] Mod options: Drop-down lists converted to custom components #1512 #1510 (kianzarrin)
+- [Updated] Mod options: Drop-down lists converted to custom components #1512 #1510 #1468 (kianzarrin)
 - [Updated] Improve lane connector UI #1491 #1485 (kianzarrin)
 - [Updated] Routing Manager code clean-up #1493 #1477 (kianzarrin)
 - [Updated] Replace obsolete `GetSortedLanes` with extension #1522 #1521 #1496 #1490 (aubergine18)
