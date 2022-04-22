@@ -49,7 +49,9 @@ namespace TrafficManager.UI.Helpers {
             set {
                 if (values_.Contains(value)) {
                     base.Value = value;
-                    _ui.selectedIndex = IndexOf(value);
+                    if (HasUI) {
+                        _ui.selectedIndex = IndexOf(value);
+                    }
                 } else {
                     Log.Error($"unrecognised value:{value} for enum:{typeof(TEnum).Name}");
                 }
