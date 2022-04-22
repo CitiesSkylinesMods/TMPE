@@ -11,6 +11,7 @@ namespace TrafficManager.Manager.Impl {
     using JetBrains.Annotations;
     using TrafficManager.Util;
     using System.Reflection;
+    using System.Collections.Generic;
 
     public class OptionsManager
         : AbstractCustomManager,
@@ -234,8 +235,7 @@ namespace TrafficManager.Manager.Impl {
         /// <returns>Returns <c>true</c> if successful, otherwise <c>false</c>.</returns>
         public byte[] SaveData(ref bool success) {
 
-            // Remember to update this when adding new options (lastIdx + 1)
-            var save = new byte[60];
+            var save = new List<byte>(100);
 
             try {
                 save[0] = GeneralTab_SimulationGroup.SimulationAccuracy.Save();
@@ -307,11 +307,11 @@ namespace TrafficManager.Manager.Impl {
 
                 save[60] = PoliciesTab_OnHighwaysGroup.HighwayMergingRules.Save();
 
-                return save;
+                return save.ToArray();
             }
             catch (Exception ex) {
                 ex.LogException();
-                return save; // try and salvage some of the settings
+                return save.ToArray(); // try and salvage some of the settings
             }
         }
 
