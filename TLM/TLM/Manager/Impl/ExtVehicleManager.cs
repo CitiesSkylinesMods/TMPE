@@ -244,7 +244,7 @@ namespace TrafficManager.Manager.Impl {
 
             while (connectedVehicleId != 0) {
                 ref Vehicle connectedVehicle = ref connectedVehicleId.ToVehicle();
-                
+
                 OnSpawn(
                     ref ExtVehicles[connectedVehicleId],
                     ref connectedVehicleId.ToVehicle());
@@ -1093,6 +1093,26 @@ namespace TrafficManager.Manager.Impl {
         public override void OnAfterLoadData() {
             base.OnAfterLoadData();
             InitAllVehicles();
+        }
+
+        /// <summary>
+        /// Checks if home building is located in a district that requires electric cars
+        /// </summary>
+        /// <param name="homeBuilding">id of home building</param>
+        /// <param name="isTourist">citizen is tourist - they don't have home</param>
+        /// <returns>true if discrict enforces use of electirc cars
+        /// otherwise false</returns>
+        internal static bool ShouldSpawnElectricCar(ushort homeBuilding, bool isTourist) {
+            // Green cities DLC must be available, required to set ElectricCars district policy
+            if (!Shortcuts.IsGreenCitiesAvailable || isTourist || homeBuilding == 0) {
+                return false;
+            }
+
+            Vector3 position = homeBuilding.ToBuilding().m_position;
+            DistrictManager districtManager = Singleton<DistrictManager>.instance;
+            byte districtId = districtManager.GetDistrict(position);
+            return (districtManager.m_districts.m_buffer[districtId].m_cityPlanningPolicies &
+                    DistrictPolicies.CityPlanning.ElectricCars) != DistrictPolicies.CityPlanning.None;
         }
     }
 }

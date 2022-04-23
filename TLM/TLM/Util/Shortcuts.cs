@@ -243,5 +243,8 @@ namespace TrafficManager.Util {
 
             return dlcBitMask;
         }
+
+        internal static bool IsGreenCitiesAvailable { get; } =
+            SteamHelper.IsDLCAvailable(SteamHelper.DLC.GreenCitiesDLC);
     }
 }
