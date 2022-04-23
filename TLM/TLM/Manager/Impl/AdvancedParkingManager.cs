@@ -2139,6 +2139,24 @@ namespace TrafficManager.Manager.Impl {
             return false;
         }
 
+        internal static void SwapParkedVehicleWithElectric(uint citizenId,
+                                                    ref Citizen citizen,
+                                                    Vector3 position,
+                                                    Quaternion rotation,
+                                                    VehicleInfo electricVehicleInfo) {
+            if (VehicleManager.instance.CreateParkedVehicle(
+                    out ushort parkedVehicleId,
+                    ref Singleton<SimulationManager>.instance.m_randomizer,
+                    electricVehicleInfo,
+                    position,
+                    rotation,
+                    citizenId)) {
+                // releases existing parked car, set new one
+                citizen.SetParkedVehicle(citizenId, parkedVehicleId);
+                parkedVehicleId.ToParkedVehicle().m_flags &= 65527; // update flags (remove all skipping Created)
+            }
+        }
+
         public bool FindParkingSpaceInVicinity(Vector3 targetPos,
                                                Vector3 searchDir,
                                                VehicleInfo vehicleInfo,
