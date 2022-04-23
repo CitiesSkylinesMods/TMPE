@@ -51,14 +51,14 @@ namespace TrafficManager.UI.SubTools.SpeedLimits.Overlay {
                 image: tex);
         }
 
-        public void DrawLargeTexture(Texture2D tex) {
-            GUI.DrawTexture(
-                position: this.screenRect_,
-                image: tex);
-        }
+        // public void DrawLargeTexture(Texture2D tex) {
+        //     GUI.DrawTexture(
+        //         position: this.screenRect_,
+        //         image: tex);
+        // }
 
-        internal static Texture2D ChooseTexture(SpeedValue? speedlimit,
-                                                RoadSignTheme theme) {
+        private static Texture2D ChooseTexture(SpeedValue? speedlimit,
+                                               RoadSignTheme theme) {
             return speedlimit.HasValue
                        ? theme.SpeedLimitTexture(speedlimit.Value)
                        : RoadSignThemeManager.Instance.NoOverride;

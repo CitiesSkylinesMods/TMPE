@@ -125,14 +125,16 @@ namespace TrafficManager.UI.Textures {
             RoadSignTheme NewTheme(string name,
                                    SpeedUnit unit,
                                    int height = 200,
-                                   RoadSignTheme parentTheme = null) {
+                                   RoadSignTheme parentTheme = null,
+                                   bool speedLimitSigns = true) {
                 var theme = new RoadSignTheme(
                     name: name,
                     supportsMph: unit == SpeedUnit.Mph,
                     supportsKmph: unit == SpeedUnit.Kmph,
                     size: new IntVector2(200, height),
                     pathPrefix: $"SignThemes.{name}",
-                    parentTheme: parentTheme);
+                    parentTheme: parentTheme,
+                    speedLimitSigns: speedLimitSigns);
                 Themes.Add(name, theme);
                 return theme;
             }
@@ -154,7 +156,10 @@ namespace TrafficManager.UI.Textures {
             RoadSignTheme mainlandChina = NewTheme(
                 name: KMPH_CHINA_THEME,
                 unit: SpeedUnit.Kmph);
-            NewTheme(name: KMPH_CHINA_GENERIC_THEME, unit: SpeedUnit.Kmph, parentTheme: mainlandChina);
+            NewTheme(name: KMPH_CHINA_GENERIC_THEME,
+                     unit: SpeedUnit.Kmph,
+                     parentTheme: mainlandChina,
+                    speedLimitSigns: false);
 
             ThemeNames = Themes.Keys.ToList();
             ThemeNames.Sort();

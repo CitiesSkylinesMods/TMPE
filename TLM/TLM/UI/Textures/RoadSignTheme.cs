@@ -104,6 +104,8 @@
         /// <summary>Set to true if an attempt to find and load textures was made.</summary>
         public bool AttemptedToLoad = false;
 
+        private bool HaveSpeedLimitSigns = false;
+
         /// <summary>
         /// This theme will be tried instead of the `Fallback` theme. Defaults to <see cref="RoadSignThemeManager.FallbackTheme"/>.
         /// </summary>
@@ -115,7 +117,8 @@
                              IntVector2 size,
                              string pathPrefix,
                              [CanBeNull]
-                             RoadSignTheme parentTheme = null) {
+                             RoadSignTheme parentTheme = null,
+                             bool speedLimitSigns = true) {
             Log._DebugIf(
                 this.TextureSize.x <= this.TextureSize.y,
                 () =>
@@ -127,6 +130,7 @@
             this.PathPrefix = pathPrefix;
             this.TextureSize = size;
             this.ParentTheme = parentTheme;
+            this.HaveSpeedLimitSigns = speedLimitSigns;
 
             if (supportsKmph) {
                 // Assumes that signs from 0 to 140 with step 5 exist, 0 denotes no-limit sign
@@ -345,6 +349,10 @@
         /// <param name="spd">Speed to display.</param>
         /// <returns>Texture to display.</returns>
         public Texture2D SpeedLimitTexture(SpeedValue spd) {
+            if (!this.HaveSpeedLimitSigns) {
+                return this.ParentTheme.SpeedLimitTexture(spd);
+            }
+
             // Round to nearest 5 MPH or nearest 5 km/h
             bool mph = GlobalConfig.Instance.Main.DisplaySpeedLimitsMph;
             ushort index = mph
