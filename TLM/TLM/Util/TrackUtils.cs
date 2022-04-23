@@ -6,22 +6,26 @@ namespace TrafficManager.Util {
     using UnityEngine;
 
     internal static class TrackUtils {
-        internal const NetInfo.LaneType LANE_TYPES =
+        internal const NetInfo.LaneType TRACK_LANE_TYPES =
             NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle;
 
-        internal const VehicleInfo.VehicleType VEHICLE_TYPES =
+        internal const VehicleInfo.VehicleType TRACK_VEHICLE_TYPES =
             VehicleInfo.VehicleType.Metro |
             VehicleInfo.VehicleType.Train |
             VehicleInfo.VehicleType.Tram |
             VehicleInfo.VehicleType.Monorail;
 
+        internal const NetInfo.LaneType ROAD_LANE_TYPES = LaneArrowManager.LANE_TYPES;
+
+        internal const VehicleInfo.VehicleType ROAD_VEHICLE_TYPES = LaneArrowManager.VEHICLE_TYPES | VehicleInfo.VehicleType.Trolleybus;
+
         internal static bool IsTrackOnly(this NetInfo.Lane laneInfo) {
             return
                 laneInfo != null &&
-                laneInfo.m_laneType.IsFlagSet(LANE_TYPES) &&
-                !laneInfo.m_laneType.IsFlagSet(~LANE_TYPES) &&
-                laneInfo.m_vehicleType.IsFlagSet(VEHICLE_TYPES) &&
-                !laneInfo.m_vehicleType.IsFlagSet(~VEHICLE_TYPES);
+                laneInfo.m_laneType.IsFlagSet(TRACK_LANE_TYPES) &&
+                !laneInfo.m_laneType.IsFlagSet(~TRACK_LANE_TYPES) &&
+                laneInfo.m_vehicleType.IsFlagSet(TRACK_VEHICLE_TYPES) &&
+                !laneInfo.m_vehicleType.IsFlagSet(~TRACK_VEHICLE_TYPES);
         }
 
         /// <summary>
@@ -85,9 +89,9 @@ namespace TrafficManager.Util {
 
         public static LaneEndTransitionGroup GetLaneEndTransitionGroup(VehicleInfo.VehicleType vehicleType) {
             LaneEndTransitionGroup ret = 0;
-            if (vehicleType.IsFlagSet(LaneArrowManager.VEHICLE_TYPES))
+            if (vehicleType.IsFlagSet(ROAD_VEHICLE_TYPES))
                 ret |= LaneEndTransitionGroup.Car;
-            if (vehicleType.IsFlagSet(TrackUtils.VEHICLE_TYPES))
+            if (vehicleType.IsFlagSet(TRACK_VEHICLE_TYPES))
                 ret |= LaneEndTransitionGroup.Track;
             return ret;
         }
