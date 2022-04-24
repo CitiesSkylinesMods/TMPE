@@ -7,10 +7,11 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.API.Manager;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.API.Traffic.Enums;
+    using TrafficManager.Patch._CitizenAI._ResidentAI.Connection;
+    using TrafficManager.Patch._CitizenAI._TouristAI.Connection;
     using TrafficManager.State.ConfigData;
     using TrafficManager.State;
     using UnityEngine;
-    using TrafficManager.Util;
     using TrafficManager.Util.Extensions;
 
     public class ExtVehicleManager
@@ -27,10 +28,15 @@ namespace TrafficManager.Manager.Impl {
             for (uint i = 0; i < maxVehicleCount; ++i) {
                 ExtVehicles[i] = new ExtVehicle((ushort)i);
             }
+
+            _touristElectricCarProbability = GameConnectionManager.Instance.TouristAIConnection.GetElectricCarProbability;
+            _residentElectricCarProbability = GameConnectionManager.Instance.ResidentAIConnection.GetElectricCarProbability;
         }
 
         public static readonly ExtVehicleManager Instance = new ExtVehicleManager();
 
+        private readonly GetElectricCarProbabilityDelegate _touristElectricCarProbability;
+        private readonly GetElectricCarProbabilityResidentDelegate _residentElectricCarProbability;
         private const int STATE_UPDATE_SHIFT = 6;
         public const int JUNCTION_RECHECK_SHIFT = 4;
 
@@ -1096,23 +1102,28 @@ namespace TrafficManager.Manager.Impl {
         }
 
         /// <summary>
-        /// Checks if home building is located in a district that requires electric cars
+        /// Checks if citizen should use electric car
         /// </summary>
-        /// <param name="homeBuilding">id of home building</param>
-        /// <param name="isTourist">citizen is tourist - they don't have home</param>
-        /// <returns>true if discrict enforces use of electirc cars
-        /// otherwise false</returns>
-        internal static bool ShouldSpawnElectricCar(ushort homeBuilding, bool isTourist) {
-            // Green cities DLC must be available, required to set ElectricCars district policy
-            if (!Shortcuts.IsGreenCitiesAvailable || isTourist || homeBuilding == 0) {
-                return false;
+        /// <param name="citizen">Citizen data</param>
+        /// <param name="citizenInstance">CitizenInstance data (spawned instance)</param>
+        /// <returns>true if should use electric car otherwise false</returns>
+        internal bool MustUseElectricCar(ref Citizen citizen, ref CitizenInstance citizenInstance) {
+            CitizenInfo citizenInfo = citizenInstance.Info;
+            int probability;
+            if (citizen.m_flags.IsFlagSet(Citizen.Flags.Tourist)) {
+                probability = _touristElectricCarProbability(
+                    instance: citizenInfo.m_citizenAI as TouristAI,
+                    wealth: citizen.WealthLevel);
+            } else {
+                probability = _residentElectricCarProbability(
+                    instance: citizenInfo.m_citizenAI as ResidentAI,
+                    instanceID: citizen.m_instance,
+                    citizenData: ref citizenInstance,
+                    agePhase: citizenInfo.m_agePhase);
             }
 
-            Vector3 position = homeBuilding.ToBuilding().m_position;
-            DistrictManager districtManager = Singleton<DistrictManager>.instance;
-            byte districtId = districtManager.GetDistrict(position);
-            return (districtManager.m_districts.m_buffer[districtId].m_cityPlanningPolicies &
-                    DistrictPolicies.CityPlanning.ElectricCars) != DistrictPolicies.CityPlanning.None;
+            Randomizer randomizer = new Randomizer(citizenInstance.m_citizen);
+            return randomizer.Int32(100u) < probability;
         }
     }
 }

@@ -1339,7 +1339,7 @@ namespace TrafficManager.Manager.Impl {
                     // try to spawn parked vehicle in the vicinity of the starting point.
                     VehicleInfo vehicleInfo = null;
                     if (instanceData.Info.m_agePhase > Citizen.AgePhase.Child) {
-                        bool useElectric = ExtVehicleManager.ShouldSpawnElectricCar(homeId, citizen.m_flags.IsFlagSet(Citizen.Flags.Tourist));
+                        bool useElectric = ExtVehicleManager.Instance.MustUseElectricCar(ref citizen, ref instanceData);
                         vehicleInfo =
                             Singleton<VehicleManager>.instance.GetRandomVehicleInfo(
                                 ref Singleton<SimulationManager>.instance.m_randomizer,
