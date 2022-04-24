@@ -4,6 +4,7 @@ namespace TrafficManager.Util.Record {
     using System.Collections.Generic;
     using System.Linq;
     using TrafficManager.Manager.Impl;
+    using TrafficManager.Manager.Impl.LaneConnection;
     using TrafficManager.State;
     using TrafficManager.Util.Extensions;
     using static TrafficManager.Util.Shortcuts;

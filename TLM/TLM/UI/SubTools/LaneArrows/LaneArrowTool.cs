@@ -6,6 +6,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.Manager.Impl;
+    using TrafficManager.Manager.Impl.LaneConnection;
     using TrafficManager.State;
     using TrafficManager.State.Keybinds;
     using TrafficManager.U;
