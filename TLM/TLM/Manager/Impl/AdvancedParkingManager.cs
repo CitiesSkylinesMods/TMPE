@@ -1379,7 +1379,7 @@ namespace TrafficManager.Manager.Impl {
                     // try to spawn parked vehicle in the vicinity of the starting point.
                     VehicleInfo vehicleInfo = null;
                     if (instanceData.Info.m_agePhase > Citizen.AgePhase.Child) {
-                        bool useElectric = ExtVehicleManager.Instance.MustUseElectricCar(ref citizen, ref instanceData);
+                        bool useElectric = ExtVehicleManager.Instance.ShouldUseElectricCar(ref citizen, ref instanceData);
                         vehicleInfo =
                             Singleton<VehicleManager>.instance.GetRandomVehicleInfo(
                                 ref Singleton<SimulationManager>.instance.m_randomizer,
@@ -2167,7 +2167,7 @@ namespace TrafficManager.Manager.Impl {
                     citizenId)) {
                 // releases existing parked car, set new one
                 citizen.SetParkedVehicle(citizenId, parkedVehicleId);
-                parkedVehicleId.ToParkedVehicle().m_flags &= 65527; // update flags (remove all skipping Created)
+                parkedVehicleId.ToParkedVehicle().m_flags &= 65527; // clear Parking flag
             }
         }
 

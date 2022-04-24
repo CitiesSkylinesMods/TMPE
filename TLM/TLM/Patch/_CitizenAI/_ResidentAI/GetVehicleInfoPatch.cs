@@ -113,7 +113,9 @@ namespace TrafficManager.Patch._CitizenAI._ResidentAI {
                                                              ref citizenData,
                                                              __instance.m_info.m_agePhase);
                 useElectricCar = randomizer.Int32(100u) < electricProb;
+                // NON-STOCK CODE START
                 forceElectric = useElectricCar && electricProb == 100;
+                // NON-STOCK CODE END
             }
 
             ItemClass.Service service = ItemClass.Service.Residential;

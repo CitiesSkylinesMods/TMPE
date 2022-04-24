@@ -227,24 +227,5 @@ namespace TrafficManager.Util {
             vector.y = newY;
             return vector;
         }
-
-        /// <summary>
-        /// Appends DLC_BitMasks not assigned in SteamHelper.GetOwnedDLCMask() (probably vanilla bug)
-        /// </summary>
-        /// <param name="dlcBitMask">bitMask value to append missing flags</param>
-        /// <returns></returns>
-        internal static SteamHelper.DLC_BitMask IncludingMissingGameDlcBitmasks(this SteamHelper.DLC_BitMask dlcBitMask) {
-            if (SteamHelper.IsDLCOwned(SteamHelper.DLC.ModderPack7)) {
-                dlcBitMask |= SteamHelper.DLC_BitMask.ModderPack7; //Bridges & Piers
-            }
-            if (SteamHelper.IsDLCOwned(SteamHelper.DLC.ModderPack8)) {
-                dlcBitMask |= SteamHelper.DLC_BitMask.ModderPack8; //Train Stations
-            }
-
-            return dlcBitMask;
-        }
-
-        internal static bool IsGreenCitiesAvailable { get; } =
-            SteamHelper.IsDLCAvailable(SteamHelper.DLC.GreenCitiesDLC);
     }
 }

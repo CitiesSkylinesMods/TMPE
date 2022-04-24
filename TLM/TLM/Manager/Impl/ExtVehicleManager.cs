@@ -1107,7 +1107,7 @@ namespace TrafficManager.Manager.Impl {
         /// <param name="citizen">Citizen data</param>
         /// <param name="citizenInstance">CitizenInstance data (spawned instance)</param>
         /// <returns>true if should use electric car otherwise false</returns>
-        internal bool MustUseElectricCar(ref Citizen citizen, ref CitizenInstance citizenInstance) {
+        internal bool ShouldUseElectricCar(ref Citizen citizen, ref CitizenInstance citizenInstance) {
             CitizenInfo citizenInfo = citizenInstance.Info;
             int probability;
             if (citizen.m_flags.IsFlagSet(Citizen.Flags.Tourist)) {
