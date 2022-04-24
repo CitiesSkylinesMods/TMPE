@@ -31,7 +31,7 @@ This changelog includes all versions and major variants of the mod going all the
 
 #### TM:PE V11.6.5.2 TEST, 18/04/2022
 
-- [Meta] This release improves lane routing, and fixes some bugs.
+- [Meta] This release improves Lane Routing (trams, trains, etc.) and Parking AI (electric cars).
 - [Meta] Due to data format change, games saved with TM:PE 11.6.5.2 can not be loaded with earlier versions of the mod. You can still load old savegames as the old data will be converted to new format.
 - [New] Directional lane connectors #1492 #1214 #1211 (kianzarrin, Chamëleon)
 - [Mod] Incompatible: Two more CSM mods #1481 (StayHungryStayFoolish, aubergine18)
@@ -45,6 +45,12 @@ This changelog includes all versions and major variants of the mod going all the
 - [Fixed] Main menu button breaks on hot-reload #762 #1492 (kianzarrin)
 - [Fixed] Asset Editor crash when saving asset with no segments #1505 #1313 (krzychu124, kianzarrin)
 - [Fixed] Toggling certain mod options causes blank menu buttons #1516 #1514 (krzychu124)
+- [Fixed] Trams unable to turn due to lane arrows #1501 #1053 (WildQuoll, RLemonache, kianzarrin)
+- [Fixed] Parking AI: Residents ignoring `Electric Cars` district policy #1543 #1527 (krzychu124)
+- [Fixed] Parking AI: Drivers leaving city try to park at outside connection #1543 #1527 (krzychu124)
+- [Fixed] Parking AI: Non-dummy tourists not using electric cars #1543 #1527 (krzychu124)
+- [Fixed] Parking AI: Residents moving into city never have electric cars #1543 #1527 (krzychu124)
+- [Updated] Separated road and tracked vehicle routing in Routing Manager #1501 (kianzarrin)
 - [Updated] Trains prefer to stay in lane at intersection #1483 #1475 (kianzarrin)
 - [Updated] Mod options: Drop-down lists converted to custom components #1512 #1510 #1468 (kianzarrin)
 - [Updated] Improve lane connector UI #1491 #1485 (kianzarrin)
