@@ -1336,6 +1336,46 @@ namespace TrafficManager.Manager.Impl {
                             $"vehicle! CurrentPathMode={extInstance.pathMode}");
                     }
 
+                    // determine current position vector
+                    Vector3 currentPos;
+                    ushort currentBuildingId = citizen.GetBuildingByLocation();
+                    if (currentBuildingId != 0) {
+                        currentPos = currentBuildingId.ToBuilding().m_position;
+                        if (logParkingAi) {
+                            Log._Debug(
+                                $"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): " +
+                                $"Taking current position from current building {currentBuildingId} " +
+                                $"for citizen {instanceData.m_citizen} (citizen instance {instanceId}): " +
+                                $"{currentPos} CurrentPathMode={extInstance.pathMode}");
+                        }
+                    } else {
+                        currentBuildingId = sourceBuildingId;
+                        currentPos = instanceData.GetLastFramePosition();
+                        if (logParkingAi) {
+                            Log._Debug(
+                                $"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): " +
+                                "Taking current position from last frame position for citizen " +
+                                $"{instanceData.m_citizen} (citizen instance {instanceId}): " +
+                                $"{currentPos}. Home {homeId} pos: " +
+                                $"{homeId.ToBuilding().m_position} " +
+                                $"CurrentPathMode={extInstance.pathMode}");
+                        }
+                    }
+
+                    // if tourist (does not have home) and at outside connection, don't try to spawn parked vehicle
+                    // cim might just exit the vehicle to despawn at outside connection
+                    // or just spawned at the edge of the map - must walk to closest node to spawn the vehicle to enter city(resident/tourist) or go to different conneciton(dummy traffic)
+                    if (homeId == 0 && ExtCitizenInstanceManager.Instance.IsAtOutsideConnection(instanceId, ref instanceData, ref extInstance, currentPos)) {
+                        Log._DebugIf(
+                            !logParkingAi,
+                            () => $"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): " +
+                                  $">> Skipped spawning parked vehicle for citizen {instanceData.m_citizen} " +
+                                  $"(instance {instanceId}) is at/near outside conneciton, currentPos: {currentPos}");
+
+                        extInstance.pathMode = ExtPathMode.RequiresWalkingPathToTarget;
+                        return ExtSoftPathState.FailedSoft;
+                    }
+
                     // try to spawn parked vehicle in the vicinity of the starting point.
                     VehicleInfo vehicleInfo = null;
                     if (instanceData.Info.m_agePhase > Citizen.AgePhase.Child) {
@@ -1355,46 +1395,6 @@ namespace TrafficManager.Manager.Impl {
                                 $"Citizen {instanceData.m_citizen} (citizen instance {instanceId}), " +
                                 $"source building {sourceBuildingId} is using their own passenger car. " +
                                 $"CurrentPathMode={extInstance.pathMode}");
-                        }
-
-                        // determine current position vector
-                        Vector3 currentPos;
-                        ushort currentBuildingId = citizen.GetBuildingByLocation();
-                        if (currentBuildingId != 0) {
-                            currentPos = currentBuildingId.ToBuilding().m_position;
-                            if (logParkingAi) {
-                                Log._Debug(
-                                    $"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): " +
-                                    $"Taking current position from current building {currentBuildingId} " +
-                                    $"for citizen {instanceData.m_citizen} (citizen instance {instanceId}): " +
-                                    $"{currentPos} CurrentPathMode={extInstance.pathMode}");
-                            }
-                        } else {
-                            currentBuildingId = sourceBuildingId;
-                            currentPos = instanceData.GetLastFramePosition();
-                            if (logParkingAi) {
-                                Log._Debug(
-                                    $"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): " +
-                                    "Taking current position from last frame position for citizen " +
-                                    $"{instanceData.m_citizen} (citizen instance {instanceId}): " +
-                                    $"{currentPos}. Home {homeId} pos: " +
-                                    $"{homeId.ToBuilding().m_position} " +
-                                    $"CurrentPathMode={extInstance.pathMode}");
-                            }
-                        }
-
-                        // if tourist (does not have home) and at outside connection, don't try to spawn parked vehicle
-                        // cim might just exit the vehicle to despawn at outside connection
-                        // or just spawned at the edge of the map - must walk to closest node to spawn the vehicle to enter city(resident/tourist) or go to different conneciton(dummy traffic)
-                        if (homeId == 0 && ExtCitizenInstanceManager.Instance.IsAtOutsideConnection(instanceId, ref instanceData, ref extInstance, currentPos)) {
-                            Log._DebugIf(
-                                logParkingAi,
-                                () => $"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): " +
-                                      $">> Skipped spawning parked vehicle for citizen {instanceData.m_citizen} " +
-                                      $"(instance {instanceId}) is at/near outside conneciton, currentPos: {currentPos}");
-
-                            extInstance.pathMode = ExtPathMode.RequiresWalkingPathToTarget;
-                            return ExtSoftPathState.FailedSoft;
                         }
 
                         // spawn a passenger car near the current position
