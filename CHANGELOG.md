@@ -29,9 +29,9 @@ This changelog includes all versions and major variants of the mod going all the
 
 > Date format: dd/mm/yyyy
 
-#### TM:PE V11.6.5.2 TEST, 18/04/2022
+#### TM:PE V11.6.5.2 TEST, 24/04/2022
 
-- [Meta] This release improves Lane Routing (trams, trains, etc.) and Parking AI (electric cars).
+- [Meta] This release improves Lane Routing (UI, trams, trains, etc.) and Parking AI (electric cars).
 - [Meta] Due to data format change, games saved with TM:PE 11.6.5.2 can not be loaded with earlier versions of the mod. You can still load old savegames as the old data will be converted to new format.
 - [New] Directional lane connectors #1492 #1214 #1211 (kianzarrin, Chamëleon)
 - [Mod] Incompatible: Two more CSM mods #1481 (StayHungryStayFoolish, aubergine18)
