@@ -1367,7 +1367,7 @@ namespace TrafficManager.Manager.Impl {
                     // or just spawned at the edge of the map - must walk to closest node to spawn the vehicle to enter city(resident/tourist) or go to different conneciton(dummy traffic)
                     if (homeId == 0 && ExtCitizenInstanceManager.Instance.IsAtOutsideConnection(instanceId, ref instanceData, ref extInstance, currentPos)) {
                         Log._DebugIf(
-                            !logParkingAi,
+                            logParkingAi,
                             () => $"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): " +
                                   $">> Skipped spawning parked vehicle for citizen {instanceData.m_citizen} " +
                                   $"(instance {instanceId}) is at/near outside conneciton, currentPos: {currentPos}");
