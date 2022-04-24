@@ -86,7 +86,14 @@ namespace TrafficManager.UI.MainMenu {
                     Mode = ToolMode.ParkingRestrictions,
                     IsEnabledFunc = ParkingRestrictionsButton.IsButtonEnabled,
                 },
-            };
+#if DEBUG
+                new() {
+                    ButtonType = typeof(RoutingDetectorButton),
+                    Mode = ToolMode.RoutingDetector,
+                    IsEnabledFunc = () => true, // always ON in debug mode
+                },
+#endif
+        };
 
         /// <summary>Extra buttons occupy the right side of the main menu.</summary>
         private static readonly MenuButtonDef[] EXTRA_BUTTON_DEFS
