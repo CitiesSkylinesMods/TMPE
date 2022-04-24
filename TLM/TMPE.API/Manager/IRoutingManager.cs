@@ -133,7 +133,6 @@ namespace TrafficManager.API.Manager {
             AddTransitions(new LaneTransitionData[1] { transition });
         }
     }
-
     public struct LaneTransitionData {
         public uint laneId;
         public byte laneIndex;
@@ -141,39 +140,35 @@ namespace TrafficManager.API.Manager {
         public byte distance;
         public ushort segmentId;
         public bool startNode;
+        public LaneEndTransitionGroup group;
 
         public override string ToString() {
             return string.Format(
                 "[LaneTransitionData\n\tlaneId = {0}\n\tlaneIndex = {1}\n\tsegmentId = {2}\n" +
-                "\tstartNode = {3}\n\ttype = {4}\n\tdistance = {5}\nLaneTransitionData]",
+                "\tstartNode = {3}\n\ttype = {4}\n\tgroup = {5}\n\tdistance = {6}\nLaneTransitionData]",
                 laneId,
                 laneIndex,
                 segmentId,
                 startNode,
                 type,
+                group,
                 distance);
         }
 
         public void Set(uint laneId,
-                        byte laneIndex,
-                        LaneEndTransitionType type,
-                        ushort segmentId,
-                        bool startNode,
-                        byte distance) {
+                byte laneIndex,
+                LaneEndTransitionType type,
+                ushort segmentId,
+                bool startNode,
+                byte distance,
+                LaneEndTransitionGroup group) {
             this.laneId = laneId;
             this.laneIndex = laneIndex;
             this.type = type;
             this.distance = distance;
             this.segmentId = segmentId;
             this.startNode = startNode;
-        }
-
-        public void Set(uint laneId,
-                        byte laneIndex,
-                        LaneEndTransitionType type,
-                        ushort segmentId,
-                        bool startNode) {
-            Set(laneId, laneIndex, type, segmentId, startNode, 0);
+            this.group = group;
         }
     }
 }
