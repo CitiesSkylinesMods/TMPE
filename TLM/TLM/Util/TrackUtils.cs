@@ -90,7 +90,7 @@ namespace TrafficManager.Util {
         public static LaneEndTransitionGroup GetLaneEndTransitionGroup(VehicleInfo.VehicleType vehicleType) {
             LaneEndTransitionGroup ret = 0;
             if (vehicleType.IsFlagSet(ROAD_VEHICLE_TYPES))
-                ret |= LaneEndTransitionGroup.Car;
+                ret |= LaneEndTransitionGroup.Road;
             if (vehicleType.IsFlagSet(TRACK_VEHICLE_TYPES))
                 ret |= LaneEndTransitionGroup.Track;
             return ret;

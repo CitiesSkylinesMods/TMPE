@@ -883,7 +883,7 @@ namespace TrafficManager.Manager.Impl {
                                                     nextSegmentId,
                                                     isNodeStartNodeOfNextSegment,
                                                     distance: 0,
-                                                    group: LaneEndTransitionGroup.Car);
+                                                    group: LaneEndTransitionGroup.Road);
                                             } else {
                                                 Log.Warning(
                                                     $"nextTransitionDatas overflow @ source lane {prevLaneId}, " +
@@ -1038,7 +1038,7 @@ namespace TrafficManager.Manager.Impl {
                                                     nextSegmentId,
                                                     isNodeStartNodeOfNextSegment,
                                                     distance: GlobalConfig.Instance.PathFinding.IncompatibleLaneDistance,
-                                                    group: LaneEndTransitionGroup.Car);
+                                                    group: LaneEndTransitionGroup.Road);
                                             } else {
                                                 Log.Warning(
                                                     $"nextTransitionDatas overflow @ source lane {prevLaneId}, " +
@@ -1070,7 +1070,7 @@ namespace TrafficManager.Manager.Impl {
                                                 nextSegmentId,
                                                 isNodeStartNodeOfNextSegment,
                                                 distance: 0,
-                                                group: LaneEndTransitionGroup.Car);
+                                                group: LaneEndTransitionGroup.Road);
                                         } else {
                                             Log.Warning(
                                                 "nextCompatibleTransitionDatas overflow @ source lane " +
