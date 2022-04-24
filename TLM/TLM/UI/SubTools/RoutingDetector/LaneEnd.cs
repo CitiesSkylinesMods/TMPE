@@ -10,7 +10,8 @@ namespace TrafficManager.UI.SubTools.RoutingDetector {
         internal SegmentLaneMarker SegmentMarker;
         internal NodeLaneMarker NodeMarker;
 
-        internal Connection[] Connections;
+        internal Connection[] ForwardConnections;
+        internal Connection[] BackwardConnections;
 
         /// <summary>
         ///  Intersects mouse ray with marker bounds.

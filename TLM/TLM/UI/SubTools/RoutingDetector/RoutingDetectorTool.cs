@@ -22,14 +22,27 @@ namespace TrafficManager.UI.SubTools.RoutingDetector {
         private LaneEnd hoveredLaneEnd_;
         private LaneEnd[] nodeLaneEnds_;
         private LaneTransitionData[] transitions_;
+        private bool backwardModeSelected_;
 
         public RoutingDetectorTool(TrafficManagerTool mainTool)
             : base(mainTool) {
         }
 
         private static RoutingManager RMan => RoutingManager.Instance;
-
         private uint HoveredLaneId => hoveredLaneEnd_?.LaneId ?? 0;
+
+        private bool BackwardMode {
+            get {
+                if (selectedLaneEnd_ == null) {
+                    return Shortcuts.AltIsPressed;
+                } else {
+                    return backwardModeSelected_;
+                }
+            }
+        }
+
+        private Connection[] GetConnections(LaneEnd laneEnd) =>
+            BackwardMode ? laneEnd?.BackwardConnections : laneEnd?.ForwardConnections;
 
         public override void OnActivateTool() {
             SelectedNodeId = 0;
@@ -51,26 +64,26 @@ namespace TrafficManager.UI.SubTools.RoutingDetector {
                 }
             } else if (selectedLaneEnd_ == null) {
                 foreach (var sourceLaneEnd in nodeLaneEnds_) {
-                    if (sourceLaneEnd.Connections != null) {
+                    if (!GetConnections(sourceLaneEnd).IsNullOrEmpty()) {
                         bool highlight = HoveredLaneId == sourceLaneEnd.LaneId;
                         sourceLaneEnd.RenderOverlay(cameraInfo, Color.white, highlight: highlight);
                     }
                 }
                 if(hoveredLaneEnd_ != null) {
-                    foreach (var connection in hoveredLaneEnd_.Connections) {
+                    foreach (var connection in GetConnections(hoveredLaneEnd_)) {
                         connection.TargetLaneEnd.RenderOverlay(cameraInfo, connection.Color, highlight: true);
                     }
                 }
             } else {
                 selectedLaneEnd_.RenderOverlay(cameraInfo, Color.white, highlight: true);
                 bool connectionHighlighted = false;
-                foreach (var connection in selectedLaneEnd_.Connections) {
+                foreach (var connection in GetConnections(selectedLaneEnd_)) {
                     bool highlight = HoveredLaneId == connection.TargetLaneEnd.LaneId;
                     connectionHighlighted |= highlight;
                     connection.TargetLaneEnd.RenderOverlay(cameraInfo, connection.Color, highlight: highlight);
                 }
 
-                if (!connectionHighlighted && !(hoveredLaneEnd_?.Connections).IsNullOrEmpty()) {
+                if (!connectionHighlighted && !GetConnections(hoveredLaneEnd_).IsNullOrEmpty()) {
                     hoveredLaneEnd_?.RenderOverlay(cameraInfo, Color.white, highlight: true);
                 }
             }
@@ -88,7 +101,7 @@ namespace TrafficManager.UI.SubTools.RoutingDetector {
             }
 
             if(prev != hoveredLaneEnd_) {
-                var connection = selectedLaneEnd_?.Connections?.FirstOrDefault(item => item.TargetLaneEnd == hoveredLaneEnd_);
+                var connection = GetConnections(selectedLaneEnd_)?.FirstOrDefault(item => item.TargetLaneEnd == hoveredLaneEnd_);
                 transitions_ = connection?.Transtitions;
                 MainTool.RequestOnscreenDisplayUpdate();
             }
@@ -107,7 +120,8 @@ namespace TrafficManager.UI.SubTools.RoutingDetector {
                     nodeLaneEnds_ = CalcualteNodeLaneEnds(SelectedNodeId);
                     MainTool.RequestOnscreenDisplayUpdate();
                 }
-            } else if (hoveredLaneEnd_?.Connections != null) {
+            } else if (!GetConnections(hoveredLaneEnd_).IsNullOrEmpty()) {
+                backwardModeSelected_ = BackwardMode;
                 selectedLaneEnd_ = hoveredLaneEnd_;
                 MainTool.RequestOnscreenDisplayUpdate();
             }
@@ -192,51 +206,57 @@ namespace TrafficManager.UI.SubTools.RoutingDetector {
             // populate target lane ends:
             foreach (LaneEnd sourceLaneEnd in laneEnds) {
                 uint routingIndex = RMan.GetLaneEndRoutingIndex(sourceLaneEnd.LaneId, sourceLaneEnd.StartNode);
-                var routing = RMan.LaneEndForwardRoutings[routingIndex];
-                bool hasValidTransitions =
-                    routing.routed &&
-                    routing.transitions != null &&
-                    routing.transitions.Any(item => item.type != LaneEndTransitionType.Invalid);
-                if (!hasValidTransitions) {
-                    sourceLaneEnd.Connections = null;
-                    continue;
-                }
-
-                List<Connection> connections = new();
-                foreach (var transition in routing.transitions) {
-                    if (transition.type != LaneEndTransitionType.Invalid) {
-                        uint targetLaneId = transition.laneId;
-                        Connection connection = connections.FirstOrDefault(item => item.TargetLaneEnd.LaneId == targetLaneId);
-                        if (connection == null) {
-                            LaneEnd targetLaneEnd = laneEnds.FirstOrDefault(item => item.LaneId == targetLaneId);
-                            if (targetLaneEnd == null) {
-                                Log.Error($"could not find target lane end for node:{nodeId} laneId:{targetLaneId}");
-                                continue;
-                            }
-
-                            Color color = transition.type switch {
-                                LaneEndTransitionType.Default => Color.blue,
-                                LaneEndTransitionType.LaneConnection => Color.green,
-                                LaneEndTransitionType.Relaxed => Color.yellow,
-                                _ => Color.black,
-                            };
-
-                            connection = new Connection {
-                                Transtitions = new[] { transition },
-                                TargetLaneEnd = targetLaneEnd,
-                                Color = color,
-                            };
-                            connections.Add(connection);
-                        } else {
-                            connection.Transtitions = connection.Transtitions.Append(transition);
-                        }
-                    }
-                }
-
-                sourceLaneEnd.Connections = connections.ToArray();
+                var forwardRouting = RMan.LaneEndForwardRoutings[routingIndex];
+                sourceLaneEnd.ForwardConnections = CalculateConnections(forwardRouting, laneEnds);
+                var backwardRouting = RMan.LaneEndBackwardRoutings[routingIndex];
+                sourceLaneEnd.BackwardConnections = CalculateConnections(backwardRouting, laneEnds);
             }
 
             return laneEnds.ToArray();
+        }
+
+        private static Connection[] CalculateConnections(LaneEndRoutingData routing, List<LaneEnd> laneEnds) {
+            bool hasValidTransitions =
+                routing.routed &&
+                routing.transitions != null &&
+                routing.transitions.Any(item => item.type != LaneEndTransitionType.Invalid);
+            if (!hasValidTransitions) {
+                return null;
+            }
+
+            List<Connection> connections = new();
+            foreach (var transition in routing.transitions) {
+                if (transition.type != LaneEndTransitionType.Invalid) {
+                    uint targetLaneId = transition.laneId;
+                    Connection connection = connections.FirstOrDefault(item => item.TargetLaneEnd.LaneId == targetLaneId);
+                    if (connection == null) {
+                        LaneEnd targetLaneEnd = laneEnds.FirstOrDefault(item => item.LaneId == targetLaneId);
+                        if (targetLaneEnd == null) {
+                            ushort nodeId = transition.segmentId.ToSegment().GetNodeId(transition.startNode);
+                            Log.Error($"could not find target lane end for laneId:{targetLaneId} node:{nodeId}");
+                            continue;
+                        }
+
+                        Color color = transition.type switch {
+                            LaneEndTransitionType.Default => Color.blue,
+                            LaneEndTransitionType.LaneConnection => Color.green,
+                            LaneEndTransitionType.Relaxed => Color.yellow,
+                            _ => Color.black,
+                        };
+
+                        connection = new Connection {
+                            Transtitions = new[] { transition },
+                            TargetLaneEnd = targetLaneEnd,
+                            Color = color,
+                        };
+                        connections.Add(connection);
+                    } else {
+                        connection.Transtitions = connection.Transtitions.Append(transition);
+                    }
+                }
+            }
+
+            return connections.ToArray();
         }
 
         public void UpdateOnscreenDisplayPanel() {
@@ -257,6 +277,11 @@ namespace TrafficManager.UI.SubTools.RoutingDetector {
                     alt: false,
                     localizedText: "Exit subtool"));
             } else if (selectedLaneEnd_ == null) {
+                items.Add(new MainMenu.OSD.HoldModifier(
+                    shift: false,
+                    ctrl: false,
+                    alt: true,
+                    localizedText: "Backward routing mode"));
                 items.Add(new MainMenu.OSD.HardcodedMouseShortcut(
                     button: UIMouseButton.Left,
                     shift: false,
