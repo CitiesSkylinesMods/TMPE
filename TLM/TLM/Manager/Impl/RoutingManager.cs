@@ -23,10 +23,10 @@ namespace TrafficManager.Manager.Impl {
 
         private RoutingManager() { }
 
-        private const NetInfo.LaneType ROUTED_LANE_TYPES =
+        public const NetInfo.LaneType ROUTED_LANE_TYPES =
             NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle;
 
-        private const VehicleInfo.VehicleType ROUTED_VEHICLE_TYPES =
+        public const VehicleInfo.VehicleType ROUTED_VEHICLE_TYPES =
             VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Metro |
             VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Tram |
             VehicleInfo.VehicleType.Monorail | VehicleInfo.VehicleType.Trolleybus;
