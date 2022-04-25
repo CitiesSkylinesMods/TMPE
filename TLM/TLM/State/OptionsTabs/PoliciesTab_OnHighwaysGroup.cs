@@ -38,21 +38,29 @@ namespace TrafficManager.State {
 
         private static string T(string key) => Translation.Options.Get(key);
 
-        private static void OnHighwayRulesChanged(bool _) {
+        private static void OnHighwayRulesChanged(bool enabled) {
             if (TMPELifecycle.Instance.Deserializing || !TMPELifecycle.InGameOrEditor())
                 return;
-            HighwayMergingRules.Value = false;
-
-            Flags.ClearHighwayLaneArrows();
-            Flags.ApplyAllFlags();
-            OptionsManager.UpdateRoutingManager();
+            if (enabled) {
+                Flags.ClearHighwayLaneArrows();
+                Flags.ApplyAllFlags();
+                HighwayMergingRules.Value = false; // also updates routing manager
+            } else {
+                Flags.ClearHighwayLaneArrows();
+                Flags.ApplyAllFlags();
+                OptionsManager.UpdateRoutingManager();
+            }
         }
 
-        private static void OnHighwayMergingRulesChanged(bool _) {
+        private static void OnHighwayMergingRulesChanged(bool enabled) {
             if (TMPELifecycle.Instance.Deserializing || !TMPELifecycle.InGameOrEditor())
                 return;
-            HighwayRules.Value = false;
-            OptionsManager.UpdateRoutingManager();
+            if (enabled) {
+                HighwayRules.Value = false; // also updates routing manager
+            } else {
+                OptionsManager.UpdateRoutingManager();
+            }
+            
         }
 
     }

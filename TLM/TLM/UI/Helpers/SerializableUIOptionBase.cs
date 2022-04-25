@@ -38,7 +38,6 @@ namespace TrafficManager.UI.Helpers {
 
         protected Options.PersistTo _scope;
 
-        [CanBeNull]
         private FieldInfo _fieldInfo;
 
         private string _fieldName;
@@ -54,6 +53,8 @@ namespace TrafficManager.UI.Helpers {
             if (scope.IsFlagSet(Options.PersistTo.Savegame)) {
                 _fieldInfo = typeof(Options).GetField(fieldName, BindingFlags.Static | BindingFlags.Public);
                 getValue_ = _fieldInfo != null ? GetFieldValue : GetBuiltInValue;
+            } else {
+                getValue_ = GetBuiltInValue;
             }
 
             OnValueChanged = DefaultOnValueChanged;
