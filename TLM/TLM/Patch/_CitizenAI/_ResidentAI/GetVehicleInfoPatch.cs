@@ -146,7 +146,11 @@ namespace TrafficManager.Patch._CitizenAI._ResidentAI {
                                      () => $"CustomResidentAI.CustomGetVehicleInfo({instanceID}): " +
                                                          $"Force electric! Parked vehicle {parkedVehicleId} is not electric vehicle, wwap with electric one.");
                         // get electric car vehicleInfo
-                        carInfo = Singleton<VehicleManager>.instance.GetRandomVehicleInfo(ref randomizer, service, subService, ItemClass.Level.Level1);
+                        carInfo = Singleton<VehicleManager>.instance.GetRandomVehicleInfo(
+                            ref randomizer,
+                            ItemClass.Service.Residential,
+                            ItemClass.SubService.ResidentialLowEco,
+                            ItemClass.Level.Level1);
                         AdvancedParkingManager.SwapParkedVehicleWithElectric(
                             citizenId: citizenData.m_citizen,
                             citizen: ref citizen,
