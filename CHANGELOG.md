@@ -29,7 +29,7 @@ This changelog includes all versions and major variants of the mod going all the
 
 > Date format: dd/mm/yyyy
 
-#### TM:PE V11.6.5.2 TEST, 24/04/2022
+#### TM:PE V11.6.5.2 TEST, 26/04/2022
 
 - [Meta] This release improves Lane Routing (UI, trams, trains, etc.) and Parking AI (electric cars).
 - [Meta] Due to data format change, games saved with TM:PE 11.6.5.2 can not be loaded with earlier versions of the mod. You can still load old savegames as the old data will be converted to new format.
@@ -51,6 +51,7 @@ This changelog includes all versions and major variants of the mod going all the
 - [Fixed] Parking AI: Drivers leaving city try to park at outside connection #1543 #1527 (krzychu124)
 - [Fixed] Parking AI: Non-dummy tourists not using electric cars #1543 #1527 (krzychu124)
 - [Fixed] Parking AI: Residents moving into city never have electric cars #1543 #1527 (krzychu124)
+- [Fixed] API: `ManagersFactory` not working #1548 (kianzarrin)
 - [Updated] Separated road and tracked vehicle routing in Routing Manager #1501 (kianzarrin)
 - [Updated] Trains prefer to stay in lane at intersection #1483 #1475 (kianzarrin)
 - [Updated] Mod options: Drop-down lists converted to custom components #1512 #1510 #1468 (kianzarrin)
