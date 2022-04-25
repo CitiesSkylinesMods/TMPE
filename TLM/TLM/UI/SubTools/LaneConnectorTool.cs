@@ -32,7 +32,7 @@ namespace TrafficManager.UI.SubTools {
             CachedVisibleNodeIds = new GenericArrayCache<ushort>(NetManager.MAX_NODE_COUNT);
             LastCachedCamera = new CameraTransformValue();
             nopeCursor_ = CursorUtil.CreateCursor(UIView.GetAView().defaultAtlas["Niet"]?.texture, new Vector2(45, 45));
-            addCursor_ = CursorUtil.LoadCursorFromResource("LaneConnectionManager.add_cursor.png"); 
+            addCursor_ = CursorUtil.LoadCursorFromResource("LaneConnectionManager.add_cursor.png");
             removeCursor_ = CursorUtil.LoadCursorFromResource("LaneConnectionManager.remove_cursor.png");
             directionArrow_ = TextureResources.LoadDllResource("LaneConnectionManager.direction_arrow.png", new IntVector2(256, 256));
         }
@@ -101,23 +101,23 @@ namespace TrafficManager.UI.SubTools {
         private bool MultiMode => ShiftIsPressed;
 
         private class LaneEnd {
-            internal ushort SegmentId;
-            internal ushort NodeId;
-            internal bool StartNode;
-            internal uint LaneId;
-            internal bool IsSource;
-            internal bool IsTarget;
-            internal int OuterSimilarLaneIndex;
-            internal int InnerSimilarLaneIndex; // used for stay in lane.
-            internal int SegmentIndex; // index accesable by NetNode.GetSegment(SegmentIndex);
-            internal bool IsBidirectional; // can be source AND/OR target of a lane connection.
             internal readonly List<LaneEnd> ConnectedLaneEnds = new List<LaneEnd>();
             internal Color Color;
-
-            internal SegmentLaneMarker SegmentMarker;
-            internal NodeLaneMarker NodeMarker;
+            internal int InnerSimilarLaneIndex; // used for stay in lane.
+            internal bool IsBidirectional; // can be source AND/OR target of a lane connection.
+            internal bool IsSource;
+            internal bool IsTarget;
+            internal uint LaneId;
 
             internal NetInfo.LaneType LaneType;
+            internal ushort NodeId;
+            internal NodeLaneMarker NodeMarker;
+            internal int OuterSimilarLaneIndex;
+            internal ushort SegmentId;
+            internal int SegmentIndex; // index accesable by NetNode.GetSegment(SegmentIndex);
+
+            internal SegmentLaneMarker SegmentMarker;
+            internal bool StartNode;
             internal VehicleInfo.VehicleType VehicleType;
 
             /// <summary>
@@ -338,7 +338,7 @@ namespace TrafficManager.UI.SubTools {
                         cameraInfo: cameraInfo,
                         bezier: ref bezier,
                         color: this.selectedLaneEnd.Color,
-                        outlineColor: Color.black, 
+                        outlineColor: Color.black,
                         arrowColor: showArrow ? this.selectedLaneEnd.Color : default,
                         arrowOutlineColor: showArrow ? Color.black : default,
                         size: 0.18f, // Embolden
@@ -399,7 +399,7 @@ namespace TrafficManager.UI.SubTools {
                             bezier: ref bezier,
                             color: fillColor,
                             outlineColor: Color.white,
-                            arrowColor: default, 
+                            arrowColor: default,
                             arrowOutlineColor: connected ? default : Color.white,
                             size: 0.18f, // Embolden
                             underground: true);
@@ -418,7 +418,7 @@ namespace TrafficManager.UI.SubTools {
                                 underground: true);
                         }
 
-                        OverrideCursor = connected ? removeCursor_ : addCursor_; 
+                        OverrideCursor = connected ? removeCursor_ : addCursor_;
                     }
                 }
 
@@ -1314,9 +1314,9 @@ namespace TrafficManager.UI.SubTools {
 
             // check track turning angles are within bounds
             ret &= isRoad || CheckSegmentsTurningAngle(
-                    sourceSegment: ref source.SegmentId.ToSegment(),
+                    sourceSegmentId: source.SegmentId,
                     sourceStartNode: source.StartNode,
-                    targetSegment: ref target.SegmentId.ToSegment(),
+                    targetSegmentId: target.SegmentId,
                     targetStartNode: target.StartNode);
 
             return ret;
@@ -1332,11 +1332,16 @@ namespace TrafficManager.UI.SubTools {
         /// <param name="targetSegment"></param>
         /// <param name="targetStartNode"></param>
         /// <returns></returns>
-        private static bool CheckSegmentsTurningAngle(ref NetSegment sourceSegment,
+        private static bool CheckSegmentsTurningAngle(ushort sourceSegmentId,
                                                       bool sourceStartNode,
-                                                      ref NetSegment targetSegment,
+                                                      ushort targetSegmentId,
                                                       bool targetStartNode) {
+            if(sourceSegmentId == targetSegmentId) {
+                return false;
+            }
 
+            ref NetSegment sourceSegment = ref sourceSegmentId.ToSegment();
+            ref NetSegment targetSegment = ref targetSegmentId.ToSegment();
             float turningAngle = 0.01f - Mathf.Min(
                 sourceSegment.Info.m_maxTurnAngleCos,
                 targetSegment.Info.m_maxTurnAngleCos);

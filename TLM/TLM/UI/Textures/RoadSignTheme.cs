@@ -16,32 +16,6 @@
     /// <see cref="RoadSignThemeManager"/>.
     /// </summary>
     public class RoadSignTheme {
-        private IntVector2 TextureSize;
-
-        /// <summary>Speed limit signs from 5 to 140 km (from 5 to 90 mph) and zero for no limit.</summary>
-        public readonly Dictionary<int, Texture2D> Textures = new();
-
-        private Dictionary<PriorityType, Texture2D> priority_ = new();
-
-        public Texture2D Priority(PriorityType p) =>
-            this.priority_.ContainsKey(p)
-                ? this.priority_[p]
-                : this.ParentTheme.Priority(p);
-
-        private Dictionary<bool, Texture2D> parking_ = new();
-
-        public Texture2D Parking(bool p) =>
-            this.parking_.ContainsKey(p)
-                ? this.parking_[p]
-                : this.ParentTheme.Parking(p);
-
-        /// <summary>
-        /// Road signs for restrictions per vehicle types. Not all vehicle types have an icon,
-        /// only those supported in <see cref="VehicleRestrictionsTool.RoadVehicleTypes"/>
-        /// and <see cref="VehicleRestrictionsTool.RailVehicleTypes"/>.
-        /// </summary>
-        private Dictionary<ExtVehicleType, AllowDisallowTexture> vehicleRestrictions_ = new();
-
         public enum OtherRestriction {
             Crossing,
             EnterBlockedJunction,
@@ -51,44 +25,7 @@
             UTurn,
         }
 
-        /// <summary>
-        /// Road signs for other restrictions such as pedestrian crossings, blocked junction, u-turn etc.
-        /// </summary>
-        private Dictionary<OtherRestriction, AllowDisallowTexture> otherRestrictions_ = new();
-
-        public Texture2D VehicleRestriction(ExtVehicleType type, bool allow) {
-            if (allow) {
-                return this.vehicleRestrictions_.ContainsKey(type)
-                           ? this.vehicleRestrictions_[type].allow
-                           : this.ParentTheme.VehicleRestriction(type, allow: true);
-            }
-
-            return this.vehicleRestrictions_.ContainsKey(type)
-                       ? this.vehicleRestrictions_[type].restrict
-                       : this.ParentTheme.VehicleRestriction(type, allow: false);
-        }
-
-        /// <summary>
-        /// Returns road sign for other restrictions (pedestrian, blocked junction, u-turn etc).
-        /// </summary>
-        /// <param name="type">The restriction we need.</param>
-        /// <param name="allow">Allow or restrict.</param>
-        public Texture2D GetOtherRestriction(OtherRestriction type, bool allow) {
-            if (allow) {
-                return this.otherRestrictions_.ContainsKey(type)
-                           ? this.otherRestrictions_[type].allow
-                           : this.ParentTheme.GetOtherRestriction(type, allow: true);
-            }
-
-            return this.otherRestrictions_.ContainsKey(type)
-                       ? this.otherRestrictions_[type].restrict
-                       : this.ParentTheme.GetOtherRestriction(type, allow: false);
-        }
-
-        /// <summary>This list of required speed signs is used for loading.</summary>
-        private List<int> SignValues = new();
-
-        private string PathPrefix;
+        public readonly string Name;
 
         // Kmph sign sets include range for MPH, but not all pictures are good to go with Kmph or Mph setting.
         // For example Canadian signs have all values to show MPH, but make no sense because the sign says km/h.
@@ -99,7 +36,8 @@
         /// <summary>Whether MPH signs range is supported from 5 to 90 step 5.</summary>
         public readonly bool SupportsMph;
 
-        public readonly string Name;
+        /// <summary>Speed limit signs from 5 to 140 km (from 5 to 90 mph) and zero for no limit.</summary>
+        public readonly Dictionary<int, Texture2D> Textures = new();
 
         /// <summary>Set to true if an attempt to find and load textures was made.</summary>
         public bool AttemptedToLoad = false;
@@ -107,9 +45,32 @@
         private bool HaveSpeedLimitSigns = false;
 
         /// <summary>
+        /// Road signs for other restrictions such as pedestrian crossings, blocked junction, u-turn etc.
+        /// </summary>
+        private Dictionary<OtherRestriction, AllowDisallowTexture> otherRestrictions_ = new();
+
+        /// <summary>
         /// This theme will be tried instead of the `Fallback` theme. Defaults to <see cref="RoadSignThemeManager.FallbackTheme"/>.
         /// </summary>
         private RoadSignTheme ParentTheme;
+
+        private Dictionary<bool, Texture2D> parking_ = new();
+
+        private string PathPrefix;
+
+        private Dictionary<PriorityType, Texture2D> priority_ = new();
+
+        /// <summary>This list of required speed signs is used for loading.</summary>
+        private List<int> SignValues = new();
+
+        private IntVector2 TextureSize;
+
+        /// <summary>
+        /// Road signs for restrictions per vehicle types. Not all vehicle types have an icon,
+        /// only those supported in <see cref="VehicleRestrictionsTool.RoadVehicleTypes"/>
+        /// and <see cref="VehicleRestrictionsTool.RailVehicleTypes"/>.
+        /// </summary>
+        private Dictionary<ExtVehicleType, AllowDisallowTexture> vehicleRestrictions_ = new();
 
         public RoadSignTheme(string name,
                              bool supportsMph,
@@ -148,6 +109,45 @@
             }
         }
 
+        public Texture2D Priority(PriorityType p) =>
+            this.priority_.ContainsKey(p)
+                ? this.priority_[p]
+                : this.ParentTheme.Priority(p);
+
+        public Texture2D Parking(bool p) =>
+            this.parking_.ContainsKey(p)
+                ? this.parking_[p]
+                : this.ParentTheme.Parking(p);
+
+        public Texture2D VehicleRestriction(ExtVehicleType type, bool allow) {
+            if (allow) {
+                return this.vehicleRestrictions_.ContainsKey(type)
+                           ? this.vehicleRestrictions_[type].allow
+                           : this.ParentTheme.VehicleRestriction(type, allow: true);
+            }
+
+            return this.vehicleRestrictions_.ContainsKey(type)
+                       ? this.vehicleRestrictions_[type].restrict
+                       : this.ParentTheme.VehicleRestriction(type, allow: false);
+        }
+
+        /// <summary>
+        /// Returns road sign for other restrictions (pedestrian, blocked junction, u-turn etc).
+        /// </summary>
+        /// <param name="type">The restriction we need.</param>
+        /// <param name="allow">Allow or restrict.</param>
+        public Texture2D GetOtherRestriction(OtherRestriction type, bool allow) {
+            if (allow) {
+                return this.otherRestrictions_.ContainsKey(type)
+                           ? this.otherRestrictions_[type].allow
+                           : this.ParentTheme.GetOtherRestriction(type, allow: true);
+            }
+
+            return this.otherRestrictions_.ContainsKey(type)
+                       ? this.otherRestrictions_[type].restrict
+                       : this.ParentTheme.GetOtherRestriction(type, allow: false);
+        }
+
         public RoadSignTheme Load(bool whiteTexture = false) {
             if (this.AttemptedToLoad) {
                 return this;
@@ -181,12 +181,18 @@
             LoadVehicleRestrictionSign(ExtVehicleType.CargoTruck, "Truck", whiteTexture);
             LoadVehicleRestrictionSign(ExtVehicleType.Service, "Service", whiteTexture);
             LoadVehicleRestrictionSign(ExtVehicleType.Emergency, "Emergency", whiteTexture);
-            LoadVehicleRestrictionSign(ExtVehicleType.PassengerTrain, "PassengerTrain", whiteTexture);
+            LoadVehicleRestrictionSign(
+                ExtVehicleType.PassengerTrain,
+                "PassengerTrain",
+                whiteTexture);
             LoadVehicleRestrictionSign(ExtVehicleType.CargoTrain, "CargoTrain", whiteTexture);
 
             // Load other restrictions
             LoadOtherRestrictionSign(OtherRestriction.Crossing, "PedestrianCrossing", whiteTexture);
-            LoadOtherRestrictionSign(OtherRestriction.EnterBlockedJunction, "EnterBlocked", whiteTexture);
+            LoadOtherRestrictionSign(
+                OtherRestriction.EnterBlockedJunction,
+                "EnterBlocked",
+                whiteTexture);
             LoadOtherRestrictionSign(OtherRestriction.LaneChange, "LaneChange", whiteTexture);
             LoadOtherRestrictionSign(OtherRestriction.LeftOnRed, "LeftOnRed", whiteTexture);
             LoadOtherRestrictionSign(OtherRestriction.RightOnRed, "RightOnRed", whiteTexture);
@@ -232,11 +238,6 @@
             } else if (whiteTexture) {
                 this.parking_[allow] = Texture2D.whiteTexture;
             }
-        }
-
-        public struct AllowDisallowTexture {
-            public Texture2D allow;
-            public Texture2D restrict;
         }
 
         /// <summary>
@@ -375,6 +376,11 @@
             catch (KeyNotFoundException) {
                 return RoadSignThemeManager.Instance.NoOverride;
             }
+        }
+
+        public struct AllowDisallowTexture {
+            public Texture2D allow;
+            public Texture2D restrict;
         }
     }
 }

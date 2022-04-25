@@ -178,6 +178,10 @@
     <Compile Include="UI\Helpers\OptionButtonBase.cs" />
     <Compile Include="UI\Helpers\UrlButton.cs" />
     <Compile Include="UI\Textures\RoadSignTheme.cs" />
+    <Compile Include="UI\MainMenu\RoutingDetectorButton.cs" />
+    <Compile Include="UI\SubTools\RoutingDetector\Connection.cs" />
+    <Compile Include="UI\SubTools\RoutingDetector\LaneEnd.cs" />
+    <Compile Include="UI\SubTools\RoutingDetector\RoutingDetectorTool.cs" />
     <Compile Include="UI\WhatsNew\MarkupKeyword.cs" />
     <Compile Include="UI\WhatsNew\WhatsNewMarkup.cs" />
     <Compile Include="Util\Extensions\CitizenUnitExtensions.cs" />
@@ -1228,6 +1232,10 @@
     <EmbeddedResource Include="Resources\SignThemes\Fallback\Restrict-RightOnRed.png" />
     <EmbeddedResource Include="Resources\SignThemes\Fallback\Restrict-UTurn.png" />
     <Content Include="Resources\SignThemes\Kmph_China_Generic\README.md" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(Configuration)'=='Debug'">
+    <EmbeddedResource Include="Resources\MainMenu\Tool\RoutingDetector-fg-active.png" />
+    <EmbeddedResource Include="Resources\MainMenu\Tool\RoutingDetector-fg-normal.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="PostBuildMacros">

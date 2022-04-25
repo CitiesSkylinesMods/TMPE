@@ -32,34 +32,20 @@ namespace TrafficManager.UI.SubTools {
             ExtVehicleType.CargoTrain,
         };
 
+        private readonly GUI.WindowFunction _guiVehicleRestrictionsWindowDelegate;
+
         private readonly float vehicleRestrictionsSignSize = 80f;
 
-        private readonly GUI.WindowFunction _guiVehicleRestrictionsWindowDelegate;
+        private HashSet<ushort> currentRestrictedSegmentIds;
 
         private bool cursorInSecondaryPanel;
 
         private bool overlayHandleHovered;
 
-        private Color HighlightColor => MainTool.GetToolColor(false, false);
-        private static bool RoadMode => ShiftIsPressed;
+        private RenderData renderData_;
 
         private Rect windowRect =
             TrafficManagerTool.GetDefaultScreenPositionForRect(new Rect(0, 0, 620, 100));
-
-        private HashSet<ushort> currentRestrictedSegmentIds;
-
-        private static string T(string m) => Translation.VehicleRestrictions.Get(m);
-
-        private struct RenderData {
-            internal ushort segmentId;
-            internal uint laneId;
-            internal byte laneIndex;
-            internal NetInfo.Lane laneInfo;
-            internal int SortedLaneIndex;
-            internal bool GUIButtonHovered;
-        }
-
-        private RenderData renderData_;
 
         public VehicleRestrictionsTool(TrafficManagerTool mainTool)
             : base(mainTool) {
@@ -67,6 +53,30 @@ namespace TrafficManager.UI.SubTools {
 
             currentRestrictedSegmentIds = new HashSet<ushort>();
         }
+
+        private Color HighlightColor => MainTool.GetToolColor(false, false);
+        private static bool RoadMode => ShiftIsPressed;
+
+        public void UpdateOnscreenDisplayPanel() {
+            if (SelectedSegmentId == 0) {
+                // Select mode
+                var items = new List<OsdItem>();
+                items.Add(new Label(localizedText: T("VR.OnscreenHint.Mode:Select segment")));
+                OnscreenDisplay.Display(items);
+            } else {
+                // Modify traffic light settings
+                var items = new List<OsdItem>();
+                items.Add(new Label(localizedText: T("VR.OnscreenHint.Mode:Toggle restrictions")));
+                items.Add(
+                    item: new Shortcut(
+                        keybindSetting: KeybindSettingsBase.RestoreDefaultsKey,
+                        localizedText: T("VR.Label:Revert to default")));
+                items.Add(OnscreenDisplay.RightClick_LeaveSegment());
+                OnscreenDisplay.Display(items);
+            }
+        }
+
+        private static string T(string m) => Translation.VehicleRestrictions.Get(m);
 
         public override void OnActivate() {
             base.OnActivate();
@@ -410,7 +420,7 @@ namespace TrafficManager.UI.SubTools {
                         selectedLaneIndex,
                         selectedLaneInfo,
                         VehicleRestrictionsMode.Configured);
-                ;
+
                 if (vehicleTypes != null) {
                     ExtVehicleType currentMask =
                         VehicleRestrictionsManager.Instance.GetAllowedVehicleTypes(
@@ -630,23 +640,13 @@ namespace TrafficManager.UI.SubTools {
             return hovered;
         }
 
-        public void UpdateOnscreenDisplayPanel() {
-            if (SelectedSegmentId == 0) {
-                // Select mode
-                var items = new List<OsdItem>();
-                items.Add(new Label(localizedText: T("VR.OnscreenHint.Mode:Select segment")));
-                OnscreenDisplay.Display(items);
-            } else {
-                // Modify traffic light settings
-                var items = new List<OsdItem>();
-                items.Add(new Label(localizedText: T("VR.OnscreenHint.Mode:Toggle restrictions")));
-                items.Add(
-                    item: new Shortcut(
-                        keybindSetting: KeybindSettingsBase.RestoreDefaultsKey,
-                        localizedText: T("VR.Label:Revert to default")));
-                items.Add(OnscreenDisplay.RightClick_LeaveSegment());
-                OnscreenDisplay.Display(items);
-            }
+        private struct RenderData {
+            internal ushort segmentId;
+            internal uint laneId;
+            internal byte laneIndex;
+            internal NetInfo.Lane laneInfo;
+            internal int SortedLaneIndex;
+            internal bool GUIButtonHovered;
         }
     }
 }
