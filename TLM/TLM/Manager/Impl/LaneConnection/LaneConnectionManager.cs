@@ -23,8 +23,8 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
                                                              | VehicleInfo.VehicleType.Monorail
                                                              | VehicleInfo.VehicleType.Trolleybus;
 
-        public LaneConnectionSubManager Sub = // TODO #354 divide into Road/Track
-            new LaneConnectionSubManager(LaneEndTransitionGroup.All);
+        public LaneConnectionSubManager Road = new LaneConnectionSubManager(LaneEndTransitionGroup.Road);
+        public LaneConnectionSubManager Track = new LaneConnectionSubManager(LaneEndTransitionGroup.Track);
 
         public NetInfo.LaneType LaneTypes => LANE_TYPES;
 
@@ -38,16 +38,19 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
 
         public override void OnBeforeLoadData() {
             base.OnBeforeLoadData();
-            Sub.OnBeforeLoadData();
+            Road.OnBeforeLoadData();
+            Track.OnBeforeLoadData();
         }
         public override void OnLevelUnloading() {
             base.OnLevelUnloading();
-            Sub.OnLevelUnloading();
+            Road.OnLevelUnloading();
+            Track.OnLevelUnloading();
         }
 
         protected override void InternalPrintDebugInfo() {
             base.InternalPrintDebugInfo();
-            Sub.PrintDebugInfo();
+            Road.PrintDebugInfo();
+            Track.PrintDebugInfo();
         }
 
         /// <summary>
@@ -55,7 +58,8 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
         /// </summary>
         /// <param name="sourceStartNode">check at start node of source lane?</param>
         public bool AreLanesConnected(uint sourceLaneId, uint targetLaneId, bool sourceStartNode) {
-            return Sub.AreLanesConnected(sourceLaneId, targetLaneId, sourceStartNode);
+            return Road.AreLanesConnected(sourceLaneId, targetLaneId, sourceStartNode) ||
+                  Track.AreLanesConnected(sourceLaneId, targetLaneId, sourceStartNode);
         }
 
         /// <summary>
@@ -63,27 +67,30 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
         /// Performance note: This act as HasOutgoingConnections for uni-directional lanes but faster
         /// </summary>
         public bool HasConnections(uint laneId, bool startNode) =>
-            Sub.HasConnections(laneId, startNode);
+            Road.HasConnections(laneId, startNode) || Track.HasConnections(laneId, startNode);
 
         /// <summary>
         /// Determines if there exist custom lane connections at the specified node
         /// </summary>
-        public bool HasNodeConnections(ushort nodeId) => Sub.HasNodeConnections(nodeId);
+        public bool HasNodeConnections(ushort nodeId) =>
+            Road.HasNodeConnections(nodeId) || Track.HasNodeConnections(nodeId);
 
         // Note: Not performance critical
         public bool HasUturnConnections(ushort segmentId, bool startNode) =>
-            Sub.HasUturnConnections(segmentId, startNode);
+            Road.HasUturnConnections(segmentId, startNode) || Track.HasUturnConnections(segmentId, startNode);
 
         /// <summary>
         /// Removes all lane connections at the specified node
         /// </summary>
         /// <param name="nodeId">Affected node</param>
         internal void RemoveLaneConnectionsFromNode(ushort nodeId) {
-            Sub.RemoveLaneConnectionsFromNode(nodeId);
+            Road.RemoveLaneConnectionsFromNode(nodeId);
+            Track.RemoveLaneConnectionsFromNode(nodeId);
         }
 
         protected override void HandleInvalidSegment(ref ExtSegment seg) {
-            Sub.HandleInvalidSegmentImpl(seg.segmentId);
+            Road.HandleInvalidSegmentImpl(seg.segmentId);
+            Track.HandleInvalidSegmentImpl(seg.segmentId);
         }
 
         internal bool GetLaneEndPoint(ushort segmentId,
@@ -174,14 +181,17 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
         }
 
         public bool LoadData(List<Configuration.LaneConnection> data) {
-            bool success = true;
+            bool success;
             Log.Info($"Loading {data.Count} lane connections");
-            success = Sub.LoadData(data);
+            success = Road.LoadData(data);
+            success &= Track.LoadData(data);
             return success;
         }
 
         public List<Configuration.LaneConnection> SaveData(ref bool success) {
-            return Sub.SaveData(ref success);
+            var ret = Road.SaveData(ref success);
+            ret.AddRange(Track.SaveData(ref success));
+            return ret;
         }
     }
 }
