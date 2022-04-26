@@ -1078,6 +1078,25 @@ namespace TrafficManager.Manager.Impl {
             return extVehicleType;
         }
 
+        /// <summary>
+        /// Determine if vehicle has to be swapped with electric
+        /// </summary>
+        /// <param name="currentVehicleInfo">current parked vehicle Info</param>
+        /// <param name="homeId">home id</param>
+        /// <returns>true if vehicle swap has to be performed otherwise false</returns>
+        internal static bool MustSwapParkedCarWithElectric(VehicleInfo currentVehicleInfo, ushort homeId) {
+            if (currentVehicleInfo.m_class.m_subService == ItemClass.SubService.ResidentialLowEco) {
+                return false;
+            }
+
+            Vector3 position = Singleton<BuildingManager>.instance.m_buildings.m_buffer[homeId].m_position;
+            DistrictManager districtManager = Singleton<DistrictManager>.instance;
+            byte district = districtManager.GetDistrict(position);
+            DistrictPolicies.CityPlanning cityPlanningPolicies = districtManager.m_districts.m_buffer[district].m_cityPlanningPolicies;
+            // force electric cars in district
+            return (cityPlanningPolicies & DistrictPolicies.CityPlanning.ElectricCars) != 0;
+        }
+
         [UsedImplicitly]
         public ushort GetFrontVehicleId(ushort vehicleId, ref Vehicle vehicleData) {
             bool reversed = (vehicleData.m_flags & Vehicle.Flags.Reversed) != 0;

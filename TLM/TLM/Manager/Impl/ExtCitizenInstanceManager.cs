@@ -4,6 +4,7 @@ namespace TrafficManager.Manager.Impl {
     using CSUtil.Commons;
     using System.Collections.Generic;
     using System;
+    using ColossalFramework.Math;
     using TrafficManager.API.Manager;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.API.Traffic.Enums;
@@ -616,6 +617,28 @@ namespace TrafficManager.Manager.Impl {
                     // Reuse parked vehicle info
                     ref VehicleParked parkedVehicle = ref parkedVehicleId.ToParkedVehicle();
                     vehicleInfo = parkedVehicle.Info;
+
+                    if (homeId != 0 && vehicleInfo &&
+                        !citizen.m_flags.IsFlagSet(Citizen.Flags.Tourist) &&
+                        ExtVehicleManager.MustSwapParkedCarWithElectric(vehicleInfo, homeId)) {
+                        if (logParkingAi) {
+                            Log.Info($"CustomCitizenAI.ExtStartPathFind({instanceID}): Citizen {instanceData.m_citizen}. Swapping currently parked vehicle ({parkedVehicleId}) with electric");
+                        }
+
+                        Randomizer randomizer = new Randomizer(instanceData.m_citizen);
+                        vehicleInfo = Singleton<VehicleManager>.instance.GetRandomVehicleInfo(
+                            ref randomizer,
+                            ItemClass.Service.Residential,
+                            ItemClass.SubService.ResidentialLowEco,
+                            ItemClass.Level.Level1);
+                        AdvancedParkingManager.SwapParkedVehicleWithElectric(
+                            logParkingAi: logParkingAi,
+                            citizenId: instanceData.m_citizen,
+                            citizen: ref citizen,
+                            position: parkedVehicle.m_position,
+                            rotation: parkedVehicle.m_rotation,
+                            electricVehicleInfo: vehicleInfo);
+                    }
 
                     // Check if the citizen should return their car back home
                     if (extInstance.pathMode == ExtPathMode.None && // initiating a new path

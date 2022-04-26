@@ -152,6 +152,7 @@ namespace TrafficManager.Patch._CitizenAI._ResidentAI {
                             ItemClass.SubService.ResidentialLowEco,
                             ItemClass.Level.Level1);
                         AdvancedParkingManager.SwapParkedVehicleWithElectric(
+                            logParkingAi: logParkingAi,
                             citizenId: citizenData.m_citizen,
                             citizen: ref citizen,
                             position: parkedVehicle.m_position,

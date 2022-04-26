@@ -2153,11 +2153,21 @@ namespace TrafficManager.Manager.Impl {
             return false;
         }
 
-        internal static void SwapParkedVehicleWithElectric(uint citizenId,
+        internal static void SwapParkedVehicleWithElectric(
+                                                    bool logParkingAi,
+                                                    uint citizenId,
                                                     ref Citizen citizen,
                                                     Vector3 position,
                                                     Quaternion rotation,
                                                     VehicleInfo electricVehicleInfo) {
+            if (!electricVehicleInfo) {
+                if (logParkingAi) {
+                    Log._Debug($"SwapParkedVehicleWithElectric({citizenId}): Electric VehicleInfo is null! Could not swap parked vehicle.");
+                }
+
+                return;
+            }
+
             if (VehicleManager.instance.CreateParkedVehicle(
                     out ushort parkedVehicleId,
                     ref Singleton<SimulationManager>.instance.m_randomizer,
