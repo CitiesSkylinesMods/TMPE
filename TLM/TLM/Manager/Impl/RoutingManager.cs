@@ -480,8 +480,11 @@ namespace TrafficManager.Manager.Impl {
                 nodeIsSplitJunction = numOutgoing > 1;
             }
 
-            bool applyHighwayMergingRules= false;
+            bool applyHighwayMergingRules = false;
             bool nodeHasConnections = LaneConnectionManager.Instance.HasNodeConnections(nodeId);
+            if (extendedLogRouting) {
+                Log._Debug($"Options.highwayMergingRules={Options.highwayMergingRules}, nodeHasTrafficLights={nodeHasTrafficLights} nodeHasPrioritySigns={nodeHasPrioritySigns}, nodeHasConnections={nodeHasConnections}");
+            }
             if (Options.highwayMergingRules && !nodeHasTrafficLights && !nodeHasPrioritySigns && !nodeHasConnections) {
                 // determine if junction is a simple junction (highway rules only apply to simple junctions)
                 int numIncomingSegents = 0;
@@ -529,10 +532,19 @@ namespace TrafficManager.Manager.Impl {
                         onePerSegment: false,
                         forward: ref numIncomingLanes,
                         backward: ref numOutgoingLanes);
-                    if (numIncomingLanes == numOutgoingSegments) {
+                    if (numIncomingLanes == numOutgoingLanes) {
                         // lane arithmetic checks out.
                         applyHighwayMergingRules = true;
                     }
+                    if (extendedLogRouting) {
+                        Log._Debug($"applyHighwayMergingRules data: numIncomingLanes={numIncomingLanes} numOutgoingLanes={numOutgoingLanes} ");
+                    }
+                }
+
+                if (extendedLogRouting) {
+                    Log._Debug(
+                        $"applyHighwayMergingRules data: numIncomingSegents={numIncomingSegents} numOutgoingSegments={numOutgoingSegments} " +
+                        $"laneSwitching={laneSwitching} highwayOnly={highwayOnly} applyHighwayMergingRules={applyHighwayMergingRules}");
                 }
             }
 
