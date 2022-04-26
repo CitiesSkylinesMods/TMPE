@@ -1,5 +1,7 @@
 namespace TrafficManager.Util {
     using System;
+    using System.Collections;
+
     public static class ArrayExtensions {
         public static T[] Append<T>(this T[] array, T item) {
             if(array == null)
@@ -18,6 +20,10 @@ namespace TrafficManager.Util {
             }
             res[n] = item;
             return res;
+        }
+
+        public static bool IsNullOrEmpty(this Array array) {
+            return array == null || array.Length == 0;
         }
     }
 }
