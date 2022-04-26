@@ -13,6 +13,7 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
     using static TrafficManager.Util.Shortcuts;
 #if DEBUG
     using TrafficManager.State.ConfigData;
+    using TrafficManager.Util;
 #endif
 
     public class LaneConnectionSubManager :
@@ -20,13 +21,37 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
           ICustomDataManager<List<Configuration.LaneConnection>>, ILaneConnectionManager {
         private ConnectionDataBase connectionDataBase_;
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "RAS0002:Readonly field for a non-readonly struct", Justification = "False alarm")]
+#pragma warning disable RAS0002 // Readonly field for a non-readonly struct
         public readonly LaneEndTransitionGroup Group;
+        public readonly NetInfo.LaneType laneTypes_;
+        public readonly VehicleInfo.VehicleType vehicleTypes_;
+#pragma warning restore RAS0002 // Readonly field for a non-readonly struct
 
-        internal LaneConnectionSubManager(LaneEndTransitionGroup group) => Group = group;
+        internal LaneConnectionSubManager(LaneEndTransitionGroup group) {
+            Group = group;
+            laneTypes_ = default;
+            vehicleTypes_ = default;
+            if (Group == LaneEndTransitionGroup.Road) {
+                laneTypes_ |= TrackUtils.ROAD_LANE_TYPES;
+                vehicleTypes_ |= TrackUtils.ROAD_VEHICLE_TYPES;
+            }
+            if(Group == LaneEndTransitionGroup.Track) {
+                laneTypes_ |= TrackUtils.TRACK_LANE_TYPES;
+                vehicleTypes_ |= TrackUtils.TRACK_VEHICLE_TYPES;
+            }
+        }
 
-        public NetInfo.LaneType LaneTypes => LaneConnectionManager.LANE_TYPES;
-        public VehicleInfo.VehicleType VehicleTypes => LaneConnectionManager.VEHICLE_TYPES;
+        public NetInfo.LaneType LaneTypes => laneTypes_;
+
+        public VehicleInfo.VehicleType VehicleTypes => vehicleTypes_;
+
+        /// <summary>
+        /// tests if the input group is supported by this sub-manager.
+        /// </summary>
+        public bool Supports(LaneEndTransitionGroup group) => (group & Group) != 0;
+
+        public bool Supports(NetInfo.Lane laneInfo) =>
+            laneInfo.m_laneType.IsFlagSet(LaneTypes) && laneInfo.m_vehicleType.IsFlagSet(VehicleTypes);
 
         public override void OnBeforeLoadData() {
             base.OnBeforeLoadData();
@@ -332,6 +357,13 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
                 return false;
             }
 
+            var sourceLaneInfo = LaneUtil.GetLaneInfo(sourceLaneId);
+            var targetLaneInfo = LaneUtil.GetLaneInfo(targetLaneId);
+            bool canConnect = Supports(sourceLaneInfo) && Supports(targetLaneInfo);
+            if (!canConnect) {
+                return false;
+            }
+
             ushort sourceSegmentId = sourceLaneId.ToLane().m_segment;
             ushort targetSegmentId = targetLaneId.ToLane().m_segment;
             ushort nodeId = sourceSegmentId.ToSegment().GetNodeId(sourceStartNode);
@@ -348,8 +380,6 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
                 Log._Debug($"LaneConnectionSubManager({Group}).AddLaneConnection({sourceLaneId}, " +
                            $"{targetLaneId}, {sourceStartNode})");
             }
-
-
 
             RecalculateLaneArrows(sourceLaneId, nodeId, sourceStartNode);
 
@@ -711,7 +741,7 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
 
             foreach (Configuration.LaneConnection conn in data) {
                 try {
-                    if((conn.group & Group) == 0) {
+                    if(!Supports(conn.group)) {
                         continue;
                     }
 
