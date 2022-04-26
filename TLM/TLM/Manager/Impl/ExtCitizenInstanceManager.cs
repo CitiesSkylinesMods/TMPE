@@ -625,19 +625,15 @@ namespace TrafficManager.Manager.Impl {
                             Log.Info($"CustomCitizenAI.ExtStartPathFind({instanceID}): Citizen {instanceData.m_citizen}. Swapping currently parked vehicle ({parkedVehicleId}) with electric");
                         }
 
-                        Randomizer randomizer = new Randomizer(instanceData.m_citizen);
-                        vehicleInfo = Singleton<VehicleManager>.instance.GetRandomVehicleInfo(
-                            ref randomizer,
-                            ItemClass.Service.Residential,
-                            ItemClass.SubService.ResidentialLowEco,
-                            ItemClass.Level.Level1);
-                        AdvancedParkingManager.SwapParkedVehicleWithElectric(
-                            logParkingAi: logParkingAi,
-                            citizenId: instanceData.m_citizen,
-                            citizen: ref citizen,
-                            position: parkedVehicle.m_position,
-                            rotation: parkedVehicle.m_rotation,
-                            electricVehicleInfo: vehicleInfo);
+                        if (AdvancedParkingManager.SwapParkedVehicleWithElectric(
+                                logParkingAi: logParkingAi,
+                                citizenId: instanceData.m_citizen,
+                                citizen: ref citizen,
+                                position: parkedVehicle.m_position,
+                                rotation: parkedVehicle.m_rotation,
+                                electricVehicleInfo: out VehicleInfo electricVehicleInfo)) {
+                            vehicleInfo = electricVehicleInfo;
+                        }
                     }
 
                     // Check if the citizen should return their car back home

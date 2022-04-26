@@ -145,19 +145,16 @@ namespace TrafficManager.Patch._CitizenAI._ResidentAI {
                         Log._DebugIf(logParkingAi,
                                      () => $"CustomResidentAI.CustomGetVehicleInfo({instanceID}): " +
                                                          $"Force electric! Parked vehicle {parkedVehicleId} is not electric vehicle, wwap with electric one.");
-                        // get electric car vehicleInfo
-                        carInfo = Singleton<VehicleManager>.instance.GetRandomVehicleInfo(
-                            ref randomizer,
-                            ItemClass.Service.Residential,
-                            ItemClass.SubService.ResidentialLowEco,
-                            ItemClass.Level.Level1);
-                        AdvancedParkingManager.SwapParkedVehicleWithElectric(
-                            logParkingAi: logParkingAi,
-                            citizenId: citizenData.m_citizen,
-                            citizen: ref citizen,
-                            position: parkedVehicle.m_position,
-                            rotation: parkedVehicle.m_rotation,
-                            electricVehicleInfo: carInfo);
+
+                        if (AdvancedParkingManager.SwapParkedVehicleWithElectric(
+                                logParkingAi: logParkingAi,
+                                citizenId: citizenData.m_citizen,
+                                citizen: ref citizen,
+                                position: parkedVehicle.m_position,
+                                rotation: parkedVehicle.m_rotation,
+                                electricVehicleInfo: out VehicleInfo electricVehicleInfo)) {
+                            carInfo = electricVehicleInfo;
+                        }
                     } else {
                         Log._DebugIf(
                             logParkingAi,

@@ -2153,32 +2153,57 @@ namespace TrafficManager.Manager.Impl {
             return false;
         }
 
-        internal static void SwapParkedVehicleWithElectric(
+        /// <summary>
+        /// Swaps parked car with electric, returns electric vehicle info on success
+        /// </summary>
+        /// <param name="logParkingAi">should log</param>
+        /// <param name="citizenId">citizen id</param>
+        /// <param name="citizen">citizen data</param>
+        /// <param name="position">parked vehicle position</param>
+        /// <param name="rotation">parked vehicle rotation</param>
+        /// <param name="electricVehicleInfo">electric vehicle info</param>
+        /// <returns>true only if electric vehicle info exists and parked vehicle was swapped
+        /// otherwise false
+        /// </returns>
+        internal static bool SwapParkedVehicleWithElectric(
                                                     bool logParkingAi,
                                                     uint citizenId,
                                                     ref Citizen citizen,
                                                     Vector3 position,
                                                     Quaternion rotation,
-                                                    VehicleInfo electricVehicleInfo) {
+                                                    out VehicleInfo electricVehicleInfo) {
+            Randomizer randomizer = new Randomizer(citizenId);
+            electricVehicleInfo = Singleton<VehicleManager>.instance.GetRandomVehicleInfo(
+                ref randomizer,
+                ItemClass.Service.Residential,
+                ItemClass.SubService.ResidentialLowEco,
+                ItemClass.Level.Level1);
             if (!electricVehicleInfo) {
                 if (logParkingAi) {
                     Log._Debug($"SwapParkedVehicleWithElectric({citizenId}): Electric VehicleInfo is null! Could not swap parked vehicle.");
                 }
-
-                return;
+                // no electric cars available
+                return false;
             }
 
-            if (VehicleManager.instance.CreateParkedVehicle(
+            if (!VehicleManager.instance.CreateParkedVehicle(
                     out ushort parkedVehicleId,
                     ref Singleton<SimulationManager>.instance.m_randomizer,
                     electricVehicleInfo,
                     position,
                     rotation,
                     citizenId)) {
-                // releases existing parked car, set new one
-                citizen.SetParkedVehicle(citizenId, parkedVehicleId);
-                parkedVehicleId.ToParkedVehicle().m_flags &= 65527; // clear Parking flag
+                if (logParkingAi) {
+                    Log._Debug($"SwapParkedVehicleWithElectric({citizenId}): Could not create parked vehicle. Out of free instances?");
+                }
+                return false;
             }
+
+            // releases existing parked car, set new one
+            citizen.SetParkedVehicle(citizenId, parkedVehicleId);
+            parkedVehicleId.ToParkedVehicle().m_flags &= 65527; // clear Parking flag
+            return true;
+
         }
 
         public bool FindParkingSpaceInVicinity(Vector3 targetPos,
