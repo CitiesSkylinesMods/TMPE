@@ -9,6 +9,7 @@ namespace TrafficManager {
     using System.Runtime.Serialization;
     using TrafficManager.Lifecycle;
     using Util;
+    using LaneEndTransitionGroup = TrafficManager.API.Traffic.Enums.LaneEndTransitionGroup;
 
     [Serializable]
     public class Configuration {
@@ -186,12 +187,15 @@ namespace TrafficManager {
 
             public bool sourceStartNode;
 
-            public bool Legacy => SerializableDataExtension.Version < 2;
+            public LaneEndTransitionGroup group = LaneEndTransitionGroup.All;
 
-            public LaneConnection(uint sourceLaneId, uint targetLaneId, bool sourceStartNode) {
+            public bool LegacyBidirectional => SerializableDataExtension.Version < 2;
+
+            public LaneConnection(uint sourceLaneId, uint targetLaneId, bool sourceStartNode, LaneEndTransitionGroup group) {
                 this.sourceLaneId = sourceLaneId;
                 this.targetLaneId = targetLaneId;
                 this.sourceStartNode = sourceStartNode;
+                this.group = group;
             }
 
             //serialization
@@ -214,6 +218,9 @@ namespace TrafficManager {
                         case "lowerStartNode": //legacy
                         case nameof(sourceStartNode):
                             sourceStartNode = (bool)item.Value;
+                            break;
+                        case nameof(group):
+                            group = (LaneEndTransitionGroup)item.Value;
                             break;
                     }
                 }

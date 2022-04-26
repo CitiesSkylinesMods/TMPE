@@ -711,6 +711,10 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
 
             foreach (Configuration.LaneConnection conn in data) {
                 try {
+                    if((conn.group & Group) == 0) {
+                        continue;
+                    }
+
                     ref NetLane lowerLane = ref conn.sourceLaneId.ToLane();
                     if (!lowerLane.IsValidWithSegment()) {
                         continue;
@@ -729,7 +733,7 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
                     Log._Debug($"Loading lane connection: lane {conn.sourceLaneId} -> {conn.targetLaneId}");
 #endif
                     AddLaneConnection(conn.sourceLaneId, conn.targetLaneId, conn.sourceStartNode);
-                    if (conn.Legacy) {
+                    if (conn.LegacyBidirectional) {
                         ushort segmentId = conn.sourceLaneId.ToLane().m_segment;
                         ushort nodeId = segmentId.ToSegment().GetNodeId(conn.sourceStartNode);
                         bool targetStartNode = conn.targetLaneId.ToLane().IsStartNode(nodeId);
@@ -763,7 +767,8 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
                             new Configuration.LaneConnection(
                                 source.LaneId,
                                 target.LaneId,
-                                source.StartNode));
+                                source.StartNode,
+                                Group));
                     }
                 } catch (Exception e) {
                     Log.Error($"Exception occurred while saving lane data @ {source.LaneId}: {e.ToString()}");
