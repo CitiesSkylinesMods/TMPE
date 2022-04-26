@@ -225,6 +225,40 @@ namespace TrafficManager.UI.Helpers {
         }
 
         /// <summary>
+        /// like DrawArrowHead but accepts position
+        /// </summary>
+        public static void DrawArrowHeadAt(
+            RenderManager.CameraInfo cameraInfo,
+            Vector3 center,
+            Vector3 tangent,
+            Color color,
+            float size,
+            float minY,
+            float maxY,
+            bool renderLimits,
+            bool alphaBlend = false) {
+            Vector3 dir = tangent * size;
+            Vector3 dir90 = dir.RotateXZ90CW();
+
+            Quad3 quad = new Quad3 {
+                a = center - dir + dir90,
+                b = center - dir - dir90,
+                c = center + dir,
+                d = center + dir,
+            };
+
+            Singleton<ToolManager>.instance.m_drawCallData.m_overlayCalls++;
+            RenderManager.instance.OverlayEffect.DrawQuad(
+                cameraInfo,
+                color,
+                quad,
+                minY,
+                maxY,
+                renderLimits: renderLimits,
+                alphaBlend: alphaBlend);
+        }
+
+        /// <summary>
         /// draw '>' shaped arrow head at the given <paramref name="t"/> of the <paramref name="bezier"/>
         /// </summary>
         public static void DrawArrowHead2(

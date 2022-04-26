@@ -66,9 +66,17 @@ namespace TrafficManager.UI.Helpers {
         }
 
         /// <summary>Renders lane overlay.</summary>
-        internal void RenderOverlay(RenderManager.CameraInfo cameraInfo, Color color, bool enlarge = false, bool renderLimits = false) {
+        internal void RenderOverlay(
+            RenderManager.CameraInfo cameraInfo,
+            Color color,
+            bool enlarge = false,
+            bool renderLimits = false,
+            bool alphaBlend = false,
+            bool cutStart = false,
+            bool cutEnd = false) {
             float minH = Mathf.Min(Bezier.a.y, Bezier.d.y);
             float maxH = Mathf.Max(Bezier.a.y, Bezier.d.y);
+            float size = enlarge ? Size * 1.41f : Size;
 
             float overdrawHeight = IsUnderground || renderLimits ? 0f : 5f;
             ColossalFramework.Singleton<ToolManager>.instance.m_drawCallData.m_overlayCalls++;
@@ -76,13 +84,13 @@ namespace TrafficManager.UI.Helpers {
                 cameraInfo: cameraInfo,
                 color: color,
                 bezier: Bezier,
-                size: enlarge ? Size * 1.41f : Size,
-                cutStart: 0,
-                cutEnd: 0,
+                size: size,
+                cutStart: cutStart ? size * 0.50f : 0,
+                cutEnd: cutEnd ? size * 0.50f : 0,
                 minY: minH - overdrawHeight,
                 maxY: maxH + overdrawHeight,
                 renderLimits: IsUnderground || renderLimits,
-                alphaBlend: false);
+                alphaBlend: alphaBlend);
         }
     }
 }
