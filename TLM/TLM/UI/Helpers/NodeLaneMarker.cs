@@ -58,7 +58,7 @@ namespace TrafficManager.UI.Helpers {
                     renderLimits,
                     false);
             } else {
-                float magnification = enlarge ? 1f : 0.60f;
+                float magnification = enlarge ? 1f : 0.65f;
                 float size = RADIUS * magnification;
                 if ((shape & Shape.Out) != 0) {
                     Highlight.DrawArrowHeadAt(

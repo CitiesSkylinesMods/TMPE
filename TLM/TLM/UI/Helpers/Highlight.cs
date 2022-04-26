@@ -239,6 +239,7 @@ namespace TrafficManager.UI.Helpers {
             bool alphaBlend = false) {
             Vector3 dir = tangent * size;
             Vector3 dir90 = dir.RotateXZ90CW();
+            dir *= 0.85f;
 
             Quad3 quad = new Quad3 {
                 a = center - dir + dir90,
