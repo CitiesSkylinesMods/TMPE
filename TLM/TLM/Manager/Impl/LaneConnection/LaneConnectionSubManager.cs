@@ -11,9 +11,9 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
     using TrafficManager.Util.Extensions;
     using UnityEngine;
     using static TrafficManager.Util.Shortcuts;
+    using TrafficManager.Util;
 #if DEBUG
     using TrafficManager.State.ConfigData;
-    using TrafficManager.Util;
 #endif
 
     public class LaneConnectionSubManager :

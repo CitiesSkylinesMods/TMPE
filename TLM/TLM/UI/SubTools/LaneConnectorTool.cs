@@ -487,7 +487,6 @@ namespace TrafficManager.UI.SubTools {
                             // draw backward arrow only:
                             bool connected2 = LaneConnectionManager.Instance.AreLanesConnected(
                             hoveredLaneEnd.LaneId, selectedLaneEnd.LaneId, selectedLaneEnd.StartNode, group_);
-                            Log._Debug("connected2=" + connected2);
                             DrawLaneCurve(
                                 cameraInfo: cameraInfo,
                                 bezier: ref bezier2,
