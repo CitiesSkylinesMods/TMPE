@@ -14,9 +14,9 @@ namespace TrafficManager.API {
 
         private static T GetImplementation<T>()
             where T : class {
-            constantsType_ ??= Type.GetType("TrafficManger.Constants, TrafficManager", throwOnError: true);
-            var field = constantsType_.GetFields().Single(item => typeof(T).IsAssignableFrom(item.FieldType));
-            return field.GetValue(null) as T;
+            constantsType_ ??= Type.GetType("TrafficManager.Constants, TrafficManager", throwOnError: true);
+            var propertyInfo = constantsType_.GetProperties().Single(item => typeof(T).IsAssignableFrom(item.PropertyType));
+            return propertyInfo.GetValue(null, null) as T;
         }
     }
 }
