@@ -32,9 +32,9 @@ This changelog includes all versions and major variants of the mod going all the
 #### TM:PE V11.6.5.2 TEST, 26/04/2022
 
 - [Meta] This release improves Lane Routing (UI, trams, trains, etc.) and Parking AI (electric cars).
-- [Meta] Due to data format change, games saved with TM:PE 11.6.5.2 can not be loaded with earlier versions of the mod. You can still load old savegames as the old data will be converted to new format.
+- [Meta] TM:PE data format change: Old cities will still load (data converted automatically), but after saving you'll need TM:PE 11.6.5.2 (or newer) for those saves.
 - [New] Directional lane connectors #1492 #1214 #1211 (kianzarrin, Chamëleon)
-- [New] Lane routing diagnostic tool for developers #1537 #1534 (kianzarrin)
+- [New] Lane routing diagnostic tool for developers #1549 #1537 #1534 (kianzarrin)
 - [Mod] Incompatible: Two more CSM mods #1481 (StayHungryStayFoolish, aubergine18)
 - [Mod] Incompatible: 交通管理器 汉化版TMPE_V11_STABLE #1481 (StayHungryStayFoolish, aubergine18)
 - [Mod] Incompatible: Service Vehicles Manager 2.0 clone #1481 (StayHungryStayFoolish, aubergine18)
