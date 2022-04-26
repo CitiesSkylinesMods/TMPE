@@ -1,18 +1,12 @@
 namespace TrafficManager.Manager.Impl.LaneConnection {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
     using CSUtil.Commons;
+    using System.Collections.Generic;
     using TrafficManager.API.Manager;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.API.Traffic.Enums;
-    using TrafficManager.Lifecycle;
-    using TrafficManager.State;
     using TrafficManager.Util.Extensions;
     using UnityEngine;
-    using static TrafficManager.Util.Shortcuts;
 #if DEBUG
-    using TrafficManager.State.ConfigData;
 #endif
 
     public class LaneConnectionManager
@@ -61,10 +55,6 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
         /// </summary>
         /// <param name="sourceStartNode">check at start node of source lane?</param>
         public bool AreLanesConnected(uint sourceLaneId, uint targetLaneId, bool sourceStartNode) {
-            if (!Options.laneConnectorEnabled) {
-                return true;
-            }
-
             return Sub.AreLanesConnected(sourceLaneId, targetLaneId, sourceStartNode);
         }
 
@@ -73,46 +63,27 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
         /// Performance note: This act as HasOutgoingConnections for uni-directional lanes but faster
         /// </summary>
         public bool HasConnections(uint laneId, bool startNode) =>
-            Options.laneConnectorEnabled && Sub.HasConnections(laneId, startNode);
-
+            Sub.HasConnections(laneId, startNode);
 
         /// <summary>
         /// Determines if there exist custom lane connections at the specified node
         /// </summary>
-        public bool HasNodeConnections(ushort nodeId) {
-            if (!Options.laneConnectorEnabled) {
-                return false;
-            }
-
-            return Sub.HasNodeConnections(nodeId);
-        }
+        public bool HasNodeConnections(ushort nodeId) => Sub.HasNodeConnections(nodeId);
 
         // Note: Not performance critical
-        public bool HasUturnConnections(ushort segmentId, bool startNode) {
-            if (!Options.laneConnectorEnabled) {
-                return false;
-            }
-
-            return Sub.HasUturnConnections(segmentId, startNode);
-        }
+        public bool HasUturnConnections(ushort segmentId, bool startNode) =>
+            Sub.HasUturnConnections(segmentId, startNode);
 
         /// <summary>
         /// Removes all lane connections at the specified node
         /// </summary>
         /// <param name="nodeId">Affected node</param>
         internal void RemoveLaneConnectionsFromNode(ushort nodeId) {
-#if DEBUG
-            if (DebugSwitch.LaneConnections.Get()) {
-                Log._Debug($"LaneConnectionManager.RemoveLaneConnectionsFromNode({nodeId}) called.");
-            }
-#endif
-
             Sub.RemoveLaneConnectionsFromNode(nodeId);
         }
 
         protected override void HandleInvalidSegment(ref ExtSegment seg) {
             Sub.HandleInvalidSegmentImpl(seg.segmentId);
-
         }
 
         internal bool GetLaneEndPoint(ushort segmentId,

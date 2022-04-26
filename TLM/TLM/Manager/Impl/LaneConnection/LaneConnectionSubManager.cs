@@ -211,7 +211,7 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
 #endif
 
             if (logLaneConnections) {
-                Log._Debug($"LaneConnectionSubManager.RemoveLaneConnection({sourceLaneId}, {targetLaneId}, " +
+                Log._Debug($"LaneConnectionSubManager({Group}).RemoveLaneConnection({sourceLaneId}, {targetLaneId}, " +
                            $"{sourceStartNode}) called.");
             }
 
@@ -226,7 +226,7 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
             var result = connectionDataBase_.Disconnect(sourceLaneId, targetLaneId, nodeId);
 
             if (logLaneConnections) {
-                Log._Debug($"LaneConnectionSubManager.RemoveLaneConnection({sourceLaneId}, {targetLaneId}, " +
+                Log._Debug($"LaneConnectionSubManager({Group}).RemoveLaneConnection({sourceLaneId}, {targetLaneId}, " +
                            $"{sourceStartNode}): ret={result}");
             }
 
@@ -258,7 +258,7 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
         internal void RemoveLaneConnectionsFromNode(ushort nodeId) {
 #if DEBUG
             if (DebugSwitch.LaneConnections.Get()) {
-                Log._Debug($"LaneConnectionSubManager.RemoveLaneConnectionsFromNode({nodeId}) called.");
+                Log._Debug($"LaneConnectionSubManager({Group}).RemoveLaneConnectionsFromNode({nodeId}) called.");
             }
 #endif
 
@@ -298,7 +298,7 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
             const bool logLaneConnections = false;
 #endif
             if (logLaneConnections) {
-                Log._Debug($"LaneConnectionSubManager.RemoveLaneConnections({laneId}, " +
+                Log._Debug($"LaneConnectionSubManager({Group}).RemoveLaneConnections({laneId}, " +
                            $"{startNode}) called.");
             }
 
@@ -345,7 +345,7 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
 #endif
 
             if (logLaneConnections) {
-                Log._Debug($"LaneConnectionSubManager.AddLaneConnection({sourceLaneId}, " +
+                Log._Debug($"LaneConnectionSubManager({Group}).AddLaneConnection({sourceLaneId}, " +
                            $"{targetLaneId}, {sourceStartNode})");
             }
 
@@ -380,7 +380,7 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
             const bool logLaneConnections = false;
 #endif
             if (logLaneConnections) {
-                Log._Debug($"LaneConnectionSubManager.HandleInvalidSegment({segmentId}): " +
+                Log._Debug($"LaneConnectionSubManager({Group}).HandleInvalidSegment({segmentId}): " +
                            "Segment has become invalid. Removing lane connections.");
             }
 
@@ -494,7 +494,7 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
             const bool logLaneConnections = false;
 #endif
             if (logLaneConnections) {
-                Log._Debug($"LaneConnectionSubManager.RecalculateLaneArrows({laneId}, {nodeId}) called");
+                Log._Debug($"LaneConnectionSubManager({Group}).RecalculateLaneArrows({laneId}, {nodeId}) called");
             }
 
             if (!Options.laneConnectorEnabled) {
@@ -503,7 +503,7 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
 
             if (!Flags.CanHaveLaneArrows(laneId, startNode)) {
                 if (logLaneConnections) {
-                    Log._Debug($"LaneConnectionSubManager.RecalculateLaneArrows({laneId}, {nodeId}): " +
+                    Log._Debug($"LaneConnectionSubManager({Group}).RecalculateLaneArrows({laneId}, {nodeId}): " +
                                $"lane {laneId}, startNode? {startNode} must not have lane arrows");
                 }
 
@@ -512,7 +512,7 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
 
             if (!HasOutgoingConnections(laneId, startNode)) {
                 if (logLaneConnections) {
-                    Log._Debug($"LaneConnectionSubManager.RecalculateLaneArrows({laneId}, {nodeId}): " +
+                    Log._Debug($"LaneConnectionSubManager({Group}).RecalculateLaneArrows({laneId}, {nodeId}): " +
                                $"lane {laneId} does not have outgoing connections");
                 }
 
@@ -521,7 +521,7 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
 
             if (nodeId == 0) {
                 if (logLaneConnections) {
-                    Log._Debug($"LaneConnectionSubManager.RecalculateLaneArrows({laneId}, {nodeId}): " +
+                    Log._Debug($"LaneConnectionSubManager({Group}).RecalculateLaneArrows({laneId}, {nodeId}): " +
                                "invalid node");
                 }
 
@@ -533,7 +533,7 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
 
             if (segmentId == 0) {
                 if (logLaneConnections) {
-                    Log._Debug($"LaneConnectionSubManager.RecalculateLaneArrows({laneId}, {nodeId}): " +
+                    Log._Debug($"LaneConnectionSubManager({Group}).RecalculateLaneArrows({laneId}, {nodeId}): " +
                                "invalid segment");
                 }
 
@@ -541,7 +541,7 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
             }
 
             if (logLaneConnections) {
-                Log._Debug($"LaneConnectionSubManager.RecalculateLaneArrows({laneId}, {nodeId}): " +
+                Log._Debug($"LaneConnectionSubManager({Group}).RecalculateLaneArrows({laneId}, {nodeId}): " +
                            $"startNode? {startNode}");
             }
 
@@ -549,7 +549,7 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
 
             if (!netNode.IsValid()) {
                 if (logLaneConnections) {
-                    Log._Debug($"LaneConnectionSubManager.RecalculateLaneArrows({laneId}, {nodeId}): " +
+                    Log._Debug($"LaneConnectionSubManager({Group}).RecalculateLaneArrows({laneId}, {nodeId}): " +
                                "Node is invalid");
                 }
 
@@ -567,7 +567,7 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
 
                     if (logLaneConnections) {
                         Log._Debug(
-                            $"LaneConnectionSubManager.RecalculateLaneArrows({laneId}, {nodeId}): " +
+                            $"LaneConnectionSubManager({Group}).RecalculateLaneArrows({laneId}, {nodeId}): " +
                             $"processing connected segment {otherSegmentId}. dir={dir}");
                     }
 
@@ -618,7 +618,7 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
 
                     if (logLaneConnections) {
                         Log._Debug(
-                            $"LaneConnectionSubManager.RecalculateLaneArrows({laneId}, {nodeId}): " +
+                            $"LaneConnectionSubManager({Group}).RecalculateLaneArrows({laneId}, {nodeId}): " +
                             $"processing connected segment {otherSegmentId}: need to determine arrows");
                     }
 
@@ -628,14 +628,14 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
                     while (curLaneId != 0) {
                         if (logLaneConnections) {
                             Log._Debug(
-                                $"LaneConnectionSubManager.RecalculateLaneArrows({laneId}, {nodeId}): " +
+                                $"LaneConnectionSubManager({Group}).RecalculateLaneArrows({laneId}, {nodeId}): " +
                                 $"processing connected segment {otherSegmentId}: checking lane {curLaneId}");
                         }
 
                         if (AreLanesConnected(laneId, curLaneId, startNode)) {
                             if (logLaneConnections) {
                                 Log._Debug(
-                                    $"LaneConnectionSubManager.RecalculateLaneArrows({laneId}, {nodeId}): " +
+                                    $"LaneConnectionSubManager({Group}).RecalculateLaneArrows({laneId}, {nodeId}): " +
                                     $"processing connected segment {otherSegmentId}: checking lane " +
                                     $"{curLaneId}: lanes are connected");
                             }
@@ -649,7 +649,7 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
 
                     if (logLaneConnections) {
                         Log._Debug(
-                            $"LaneConnectionSubManager.RecalculateLaneArrows({laneId}, {nodeId}): " +
+                            $"LaneConnectionSubManager({Group}).RecalculateLaneArrows({laneId}, {nodeId}): " +
                             $"processing connected segment {otherSegmentId}: finished processing " +
                             $"lanes. addArrow={addArrow} arrows (before)={arrows}");
                     }
@@ -691,14 +691,14 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
 
                     if (logLaneConnections) {
                         Log._Debug(
-                            $"LaneConnectionSubManager.RecalculateLaneArrows({laneId}, {nodeId}): " +
+                            $"LaneConnectionSubManager({Group}).RecalculateLaneArrows({laneId}, {nodeId}): " +
                             $"processing connected segment {otherSegmentId}: arrows={arrows}");
                     }
                 }
             }
 
             if (logLaneConnections) {
-                Log._Debug($"LaneConnectionSubManager.RecalculateLaneArrows({laneId}, {nodeId}): " +
+                Log._Debug($"LaneConnectionSubManager({Group}).RecalculateLaneArrows({laneId}, {nodeId}): " +
                            $"setting lane arrows to {arrows}");
             }
 
