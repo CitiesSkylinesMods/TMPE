@@ -111,9 +111,9 @@ namespace TrafficManager.UI.SubTools {
         private bool MultiMode => ShiftIsPressed;
 
         private void UpdateGroup() {
-            if(selectedLaneTransitionGroup_ != LaneEndTransitionGroup.None) {
+            if (selectedLaneTransitionGroup_ != LaneEndTransitionGroup.None) {
                 group_ = selectedLaneTransitionGroup_;
-            } else if(selectedNodeTransitionGroups_ is LaneEndTransitionGroup.All or LaneEndTransitionGroup.None) {
+            } else if (selectedNodeTransitionGroups_ == LaneEndTransitionGroup.All) {
                 // No node is selected or selected node has road+track
                 if (MultiMode) {
                     group_ = LaneEndTransitionGroup.All;
@@ -301,6 +301,15 @@ namespace TrafficManager.UI.SubTools {
 
                 float intersectionY = Singleton<TerrainManager>.instance.SampleDetailHeightSmooth(nodeId.ToNode().m_position);
 
+                LaneEndTransitionGroup groupAtNode = group_;
+                if (nodeId != SelectedNodeId) {
+                    if (AltIsPressed) {
+                        groupAtNode = LaneEndTransitionGroup.Track;
+                    } else {
+                        groupAtNode = LaneEndTransitionGroup.All;
+                    }
+                }
+
                 foreach (LaneEnd laneEnd in laneEnds) {
                     ref NetLane sourceLane = ref laneEnd.LaneId.ToLane();
                     if (!sourceLane.IsValidWithSegment()) {
@@ -309,7 +318,7 @@ namespace TrafficManager.UI.SubTools {
 
                     if (laneEnd != selectedLaneEnd) {
                         foreach (var group in ALL_GROUPS) {
-                            if((group & group_) == 0) {
+                            if((group & groupAtNode) == 0) {
                                 continue;
                             }
                             bool track = group == LaneEndTransitionGroup.Track;
