@@ -334,7 +334,6 @@ namespace TrafficManager.Manager.Impl {
             }
 
             if (languageChanged) {
-                RoadUI.Instance.ReloadTexturesWithTranslation();
                 TrafficLightTextures.Instance.ReloadTexturesWithTranslation();
                 TMPELifecycle.Instance.TranslationDatabase.ReloadTutorialTranslations();
                 TMPELifecycle.Instance.TranslationDatabase.ReloadGuideTranslations();

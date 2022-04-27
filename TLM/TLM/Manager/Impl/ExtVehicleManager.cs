@@ -7,10 +7,11 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.API.Manager;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.API.Traffic.Enums;
+    using TrafficManager.Patch._CitizenAI._ResidentAI.Connection;
+    using TrafficManager.Patch._CitizenAI._TouristAI.Connection;
     using TrafficManager.State.ConfigData;
     using TrafficManager.State;
     using UnityEngine;
-    using TrafficManager.Util;
     using TrafficManager.Util.Extensions;
 
     public class ExtVehicleManager
@@ -27,10 +28,15 @@ namespace TrafficManager.Manager.Impl {
             for (uint i = 0; i < maxVehicleCount; ++i) {
                 ExtVehicles[i] = new ExtVehicle((ushort)i);
             }
+
+            _touristElectricCarProbability = GameConnectionManager.Instance.TouristAIConnection.GetElectricCarProbability;
+            _residentElectricCarProbability = GameConnectionManager.Instance.ResidentAIConnection.GetElectricCarProbability;
         }
 
         public static readonly ExtVehicleManager Instance = new ExtVehicleManager();
 
+        private readonly GetElectricCarProbabilityDelegate _touristElectricCarProbability;
+        private readonly GetElectricCarProbabilityResidentDelegate _residentElectricCarProbability;
         private const int STATE_UPDATE_SHIFT = 6;
         public const int JUNCTION_RECHECK_SHIFT = 4;
 
@@ -244,7 +250,7 @@ namespace TrafficManager.Manager.Impl {
 
             while (connectedVehicleId != 0) {
                 ref Vehicle connectedVehicle = ref connectedVehicleId.ToVehicle();
-                
+
                 OnSpawn(
                     ref ExtVehicles[connectedVehicleId],
                     ref connectedVehicleId.ToVehicle());
@@ -1072,6 +1078,25 @@ namespace TrafficManager.Manager.Impl {
             return extVehicleType;
         }
 
+        /// <summary>
+        /// Determine if vehicle has to be swapped with electric
+        /// </summary>
+        /// <param name="currentVehicleInfo">current parked vehicle Info</param>
+        /// <param name="homeId">home id</param>
+        /// <returns>true if vehicle swap has to be performed otherwise false</returns>
+        internal static bool MustSwapParkedCarWithElectric(VehicleInfo currentVehicleInfo, ushort homeId) {
+            if (currentVehicleInfo.m_class.m_subService == ItemClass.SubService.ResidentialLowEco) {
+                return false;
+            }
+
+            Vector3 position = Singleton<BuildingManager>.instance.m_buildings.m_buffer[homeId].m_position;
+            DistrictManager districtManager = Singleton<DistrictManager>.instance;
+            byte district = districtManager.GetDistrict(position);
+            DistrictPolicies.CityPlanning cityPlanningPolicies = districtManager.m_districts.m_buffer[district].m_cityPlanningPolicies;
+            // force electric cars in district
+            return (cityPlanningPolicies & DistrictPolicies.CityPlanning.ElectricCars) != 0;
+        }
+
         [UsedImplicitly]
         public ushort GetFrontVehicleId(ushort vehicleId, ref Vehicle vehicleData) {
             bool reversed = (vehicleData.m_flags & Vehicle.Flags.Reversed) != 0;
@@ -1093,6 +1118,31 @@ namespace TrafficManager.Manager.Impl {
         public override void OnAfterLoadData() {
             base.OnAfterLoadData();
             InitAllVehicles();
+        }
+
+        /// <summary>
+        /// Checks if citizen should use electric car
+        /// </summary>
+        /// <param name="citizen">Citizen data</param>
+        /// <param name="citizenInstance">CitizenInstance data (spawned instance)</param>
+        /// <returns>true if should use electric car otherwise false</returns>
+        internal bool ShouldUseElectricCar(ref Citizen citizen, ref CitizenInstance citizenInstance) {
+            CitizenInfo citizenInfo = citizenInstance.Info;
+            int probability;
+            if (citizen.m_flags.IsFlagSet(Citizen.Flags.Tourist)) {
+                probability = _touristElectricCarProbability(
+                    instance: citizenInfo.m_citizenAI as TouristAI,
+                    wealth: citizen.WealthLevel);
+            } else {
+                probability = _residentElectricCarProbability(
+                    instance: citizenInfo.m_citizenAI as ResidentAI,
+                    instanceID: citizen.m_instance,
+                    citizenData: ref citizenInstance,
+                    agePhase: citizenInfo.m_agePhase);
+            }
+
+            Randomizer randomizer = new Randomizer(citizenInstance.m_citizen);
+            return randomizer.Int32(100u) < probability;
         }
     }
 }
