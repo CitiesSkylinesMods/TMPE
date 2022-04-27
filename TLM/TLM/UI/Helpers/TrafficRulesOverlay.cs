@@ -184,6 +184,7 @@ namespace TrafficManager.UI.Helpers {
             Color guiColor = GUI.color;
             // Vector3 nodePos = node.m_position;
             IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
+            var theme = RoadSignThemeManager.ActiveTheme;
 
             for (int segmentIndex = 0; segmentIndex < Constants.MAX_SEGMENTS_OF_NODE; ++segmentIndex) {
                 ushort segmentId = node.GetSegment(segmentIndex);
@@ -244,9 +245,9 @@ namespace TrafficManager.UI.Helpers {
                         small: !configurable,
                         camPos: ref camPos,
                         guiColor: guiColor,
-                        signTexture: allowed
-                                         ? JunctionRestrictions.Instance.LaneChangeAllowed
-                                         : JunctionRestrictions.Instance.LaneChangeForbidden);
+                        signTexture: theme.GetOtherRestriction(
+                            RoadSignTheme.OtherRestriction.LaneChange,
+                            allowed));
 
                     if (signHovered && this.handleClick_) {
                         isAnyHovered = true;
@@ -278,9 +279,9 @@ namespace TrafficManager.UI.Helpers {
                         small: !configurable,
                         camPos: ref camPos,
                         guiColor: guiColor,
-                        signTexture: allowed
-                                         ? JunctionRestrictions.Instance.UturnAllowed
-                                         : JunctionRestrictions.Instance.UturnForbidden);
+                        signTexture: theme.GetOtherRestriction(
+                            RoadSignTheme.OtherRestriction.UTurn,
+                            allowed));
 
                     if (signHovered && this.handleClick_) {
                         isAnyHovered = true;
@@ -319,9 +320,9 @@ namespace TrafficManager.UI.Helpers {
                         small: !configurable,
                         camPos: ref camPos,
                         guiColor: guiColor,
-                        signTexture: allowed
-                                         ? JunctionRestrictions.Instance.EnterBlockedJunctionAllowed
-                                         : JunctionRestrictions.Instance.EnterBlockedJunctionForbidden);
+                        signTexture: theme.GetOtherRestriction(
+                            RoadSignTheme.OtherRestriction.EnterBlockedJunction,
+                            allowed));
 
                     if (signHovered && this.handleClick_) {
                         isAnyHovered = true;
@@ -351,9 +352,9 @@ namespace TrafficManager.UI.Helpers {
                         small: !configurable,
                         camPos: ref camPos,
                         guiColor: guiColor,
-                        signTexture: allowed
-                                         ? JunctionRestrictions.Instance.PedestrianCrossingAllowed
-                                         : JunctionRestrictions.Instance.PedestrianCrossingForbidden);
+                        signTexture: theme.GetOtherRestriction(
+                            RoadSignTheme.OtherRestriction.Crossing,
+                            allowed));
 
                     if (signHovered && this.handleClick_) {
                         isAnyHovered = true;
@@ -400,9 +401,9 @@ namespace TrafficManager.UI.Helpers {
                         small: !configurable,
                         camPos: ref camPos,
                         guiColor: guiColor,
-                        signTexture: allowed
-                                         ? JunctionRestrictions.Instance.LeftOnRedAllowed
-                                         : JunctionRestrictions.Instance.LeftOnRedForbidden);
+                        signTexture: theme.GetOtherRestriction(
+                            RoadSignTheme.OtherRestriction.LeftOnRed,
+                            allowed));
 
                     if (signHovered && this.handleClick_) {
                         isAnyHovered = true;
@@ -441,9 +442,9 @@ namespace TrafficManager.UI.Helpers {
                         small: !configurable,
                         camPos: ref camPos,
                         guiColor: guiColor,
-                        signTexture: allowed
-                                         ? JunctionRestrictions.Instance.RightOnRedAllowed
-                                         : JunctionRestrictions.Instance.RightOnRedForbidden);
+                        signTexture: theme.GetOtherRestriction(
+                            RoadSignTheme.OtherRestriction.RightOnRed,
+                            allowed));
 
                     if (signHovered && this.handleClick_) {
                         isAnyHovered = true;

@@ -24,10 +24,47 @@ This changelog includes all versions and major variants of the mod going all the
 > * **TM:PE v11 LABS** - TM:PE versions 11.0 to 11.5.0 (test releases)
 > * **[TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252) - TM:PE versions 11.0 and above (stable releases)**
 > * **[TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785) - TM:PE versions 11.6.0 and above (test releases)**
->  
-> Date format: dd/mm/yyyy
 
 </details>
+
+> Date format: dd/mm/yyyy
+
+#### TM:PE V11.6.5.2 TEST, 27/04/2022
+
+- [Meta] This release improves Lane Routing (UI, trams, trains, etc.), Parking AI (electric cars), and icon themes.
+- [Meta] TM:PE data format change: Old cities will still load (data converted automatically), but after saving you'll need TM:PE 11.6.5.2 (or newer) for those saves.
+- [New] Directional lane connectors #1492 #1214 #1211 (kianzarrin, Chamëleon)
+- [New] Lane routing diagnostic tool for developers #1549 #1537 #1534 (kianzarrin)
+- [New] Chinese road sign theme #1523 (kvakvs, lokpro, TianQiBuTian)
+- [Mod] Incompatible: Two more CSM mods #1481 (StayHungryStayFoolish, aubergine18)
+- [Mod] Incompatible: 交通管理器 汉化版TMPE_V11_STABLE #1481 (StayHungryStayFoolish, aubergine18)
+- [Mod] Incompatible: Service Vehicles Manager 2.0 clone #1481 (StayHungryStayFoolish, aubergine18)
+- [Fixed] Speed limits not working on station tracks #1467 #1337 (Peacemak3r, FemboyPyro, aubergine18, krzychu124)
+- [Fixed] Patching `Reversible Tram AI` fails if mod subscribed but disabled #1471 #1470 (kianzarrin)
+- [Fixed] Lane connectors buggy on bidirectional tracks #1211 #784 (kianzarrin)
+- [Fixed] Zig-zagging routes on bidirectional tracks #1487 #1486 (kianzarrin)
+- [Fixed] Excessive track connections at junctions #1483 #1475 (kianzarrin)
+- [Fixed] Main menu button breaks on hot-reload #762 #1492 (kianzarrin)
+- [Fixed] Asset Editor crash when saving asset with no segments #1505 #1313 (krzychu124, kianzarrin)
+- [Fixed] Toggling certain mod options causes blank menu buttons #1516 #1514 (krzychu124)
+- [Fixed] Trams unable to turn due to lane arrows #1501 #1053 (WildQuoll, RLemonache, kianzarrin)
+- [Fixed] Parking AI: Residents ignoring `Electric Cars` district policy #1543 #1527 (krzychu124)
+- [Fixed] Parking AI: Drivers leaving city try to park at outside connection #1543 #1527 (krzychu124)
+- [Fixed] Parking AI: Non-dummy tourists not using electric cars #1543 #1527 (krzychu124)
+- [Fixed] Parking AI: Residents moving into city never have electric cars #1543 #1527 (krzychu124)
+- [Fixed] API: `ManagersFactory` not working #1548 (kianzarrin)
+- [Updated] 419 localisations updated #1523 (Dominik Kawula, shg166, John Lok Ho, Skazov, kvakvs, TwotoolusFLY_LSh.st, DucAnhLam, Márcio Saeger, Sanam Rao, Naruebet Chaipin, Nguyễn Tài Đức)
+- [Updated] Multiple icons updated, fallback theme, etc. #1523 (kvakvs)
+- [Updated] Separated road and tracked vehicle routing in Routing Manager #1501 (kianzarrin)
+- [Updated] Trains prefer to stay in lane at intersection #1483 #1475 (kianzarrin)
+- [Updated] Mod options: Drop-down lists converted to custom components #1512 #1510 #1468 (kianzarrin)
+- [Updated] Improve lane connector UI #1491 #1485 (kianzarrin)
+- [Updated] Routing Manager code clean-up #1493 #1477 (kianzarrin)
+- [Updated] Replace obsolete `GetSortedLanes` with extension #1522 #1521 #1496 #1490 (aubergine18)
+- [Updated] Replace obsolete `IsStartNode` with extension #1506 (aubergine18)
+- [Updated] Update `Microsoft.Unity.Analyzers` to version `1.13.0` #1513 (aubergine18)
+- [Updated] Add UI helpers for mod option sliders #1531 #1512 #1510 (kianzarrin)
+- [Removed] Flawed TTL API removed to prevent adoption #1495 (Elesbaan70)
 
 #### TM:PE V11.6.5.1 TEST, 13/03/2022
 
@@ -43,6 +80,7 @@ This changelog includes all versions and major variants of the mod going all the
 - [Fixed] Memory leak when closing Lane Arrows panels #1451 (krzychu124)
 - [Fixed] Features missing if starting new game after using asset editor #1425 #1423 #1422 (NateNate60, aubergine18)
 - [Fixed] Typo in notifier method name #1440 (aubergine18)
+- [Fixed] Roundabout quick setup not working #1494 #1464 #1455 #1429 #1425 #1422 (Abdré Von Rhenen, DeNordian, Tranquility0081, SkillzGamingYT, BenOniKenobi, aubergine18)
 - [Updated] Use game-defined elevation keymapping to select under/over-ground views #1454 #1326 (krzychu124)
 - [Updated] Add/update UI helpers for use in mod options #1431 #1430 #1424 #1419 (aubergine18)
 - [Updated] Refactoring mod options #1464 #1455 #1435 #1432 #1422 #1411 #1416 #1356 #1279 #62 (aubergine18)
@@ -355,6 +393,7 @@ This changelog includes all versions and major variants of the mod going all the
 
 - [Fixed] Vehicle/cim path invalidation after loading savegame #1117 (kianzarrin)
 - [Fixed] Reloading localised textures for Priority Signs and TTL #1121 #1099 (TianQiBuTian, krzychu124)
+- [Fixed] Monorail lane connectors render on the road #985 #654 (krzychu124)
 - [Updated] Lane Connectors: New shape, changed interactions in over/under-ground mode #985 #282 #3 (krzychu124)
 - [Updated] Performance: Network flag detection #1118 (kianzarrin)
 - [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
@@ -650,7 +689,7 @@ This changelog includes all versions and major variants of the mod going all the
 - [Fixed] Missing despawn buttons on cim and vehicle info panels (#765, #763, #759)
 - [Fixed] Info panel not closing after despawning a cim or tourist (#765)
 - [Fixed] Faulty UI on tourist despawn button (#765)
-- [Updated] Docs - Reference paths for EA Origin deployed game (thanks DannyDannyDan) ( #751)
+- [Updated] Docs - Reference paths for EA Origin deployed game (thanks DannyDannyDan) (#760 #751)
 - [Steam] [TM:PE v11 LABS](https://steamcommunity.com/sharedfiles/filedetails/?id=1806963141)
 
 #### TM:PE V[11.1.1](https://github.com/CitiesSkylinesMods/TMPE/compare/11.1.0...11.1.1) LABS, 29/02/2020
@@ -669,7 +708,7 @@ This changelog includes all versions and major variants of the mod going all the
 - [Fixed] Wrong texture paths for timed traffic lights (thanks t1a2l for reporting!) (#732, #704, #714)
 - [Fixed] Bug in guide manager that activated guide when trying to deactivate (#729)
 - [Fixed] Double setting of lane speeds on game load, and debug log spamming (#736, #735)
-- [Fixed] Scrollbar position corrected in mod options (#722, #742)
+- [Fixed] Scrollbar position corrected in mod options (#722, #742, #743)
 - [Fixed] Vehicle Restrictions error: `HashSet have been modified` (#746, #744, #721)
 - [Updated] Cleaned up UI panels in Vehicle Restrictions and Speed Limits tools (#721, #709, #657)
 - [Updated] Toolbar UI code overhauled, updated and polished (#656, #523)

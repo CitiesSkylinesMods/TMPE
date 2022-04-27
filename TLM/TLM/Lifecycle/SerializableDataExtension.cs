@@ -10,7 +10,6 @@ namespace TrafficManager.Lifecycle {
     using TrafficManager.Manager.Impl;
     using TrafficManager.Manager.Impl.LaneConnection;
     using TrafficManager.State;
-    using UI.WhatsNew;
     using Util;
 
     [UsedImplicitly]
