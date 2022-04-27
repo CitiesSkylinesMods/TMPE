@@ -29,7 +29,7 @@ This changelog includes all versions and major variants of the mod going all the
 
 > Date format: dd/mm/yyyy
 
-#### TM:PE V11.6.5.2 TEST, 26/04/2022
+#### TM:PE V11.6.5.2 TEST, 27/04/2022
 
 - [Meta] This release improves Lane Routing (UI, trams, trains, etc.) and Parking AI (electric cars).
 - [Meta] TM:PE data format change: Old cities will still load (data converted automatically), but after saving you'll need TM:PE 11.6.5.2 (or newer) for those saves.

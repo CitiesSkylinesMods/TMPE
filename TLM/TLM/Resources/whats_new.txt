@@ -1,6 +1,6 @@
 [Version] 11.6.5.2
-[Released] April 26th 2022
-[Link] tmpe-v11652-test-26042022
+[Released] April 27th 2022
+[Link] tmpe-v11652-test-27042022
 [Meta] This release improves Lane Routing (UI, trams, trains, etc.) and Parking AI (electric cars).
 [Meta] [Meta] TM:PE data format change: Old cities will still load (data converted automatically), but after saving you'll need TM:PE 11.6.5.2 (or newer) for those saves.
 [New] Directional lane connectors #1492 #1214 #1211 (kianzarrin, Chamëleon)
