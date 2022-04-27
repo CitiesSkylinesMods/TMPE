@@ -19,12 +19,21 @@ namespace TrafficManager.Util {
 
         internal const VehicleInfo.VehicleType ROAD_VEHICLE_TYPES = LaneArrowManager.VEHICLE_TYPES | VehicleInfo.VehicleType.Trolleybus;
 
+        internal static bool MatchesTrack(this NetInfo.Lane laneInfo) {
+            return laneInfo != null &&
+                laneInfo.m_laneType.IsFlagSet(TRACK_LANE_TYPES) &&
+                laneInfo.m_vehicleType.IsFlagSet(TRACK_VEHICLE_TYPES);
+        }
+        internal static bool MatchesRoad(this NetInfo.Lane laneInfo) {
+            return laneInfo != null &&
+                laneInfo.m_laneType.IsFlagSet(ROAD_LANE_TYPES) &&
+                laneInfo.m_vehicleType.IsFlagSet(ROAD_VEHICLE_TYPES);
+        }
+
         internal static bool IsTrackOnly(this NetInfo.Lane laneInfo) {
             return
-                laneInfo != null &&
-                laneInfo.m_laneType.IsFlagSet(TRACK_LANE_TYPES) &&
+                laneInfo.MatchesTrack() && 
                 !laneInfo.m_laneType.IsFlagSet(~TRACK_LANE_TYPES) &&
-                laneInfo.m_vehicleType.IsFlagSet(TRACK_VEHICLE_TYPES) &&
                 !laneInfo.m_vehicleType.IsFlagSet(~TRACK_VEHICLE_TYPES);
         }
 

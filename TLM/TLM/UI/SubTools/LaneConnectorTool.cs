@@ -146,8 +146,7 @@ namespace TrafficManager.UI.SubTools {
             internal SegmentLaneMarker SegmentMarker;
             internal NodeLaneMarker NodeMarker;
 
-            internal NetInfo.LaneType LaneType;
-            internal VehicleInfo.VehicleType VehicleType;
+            internal NetInfo.Lane LaneInfo;
 
             /// <summary>
             ///  Intersects mouse ray with marker bounds.
@@ -166,7 +165,7 @@ namespace TrafficManager.UI.SubTools {
                 bool renderLimits = false,
                 LaneEndTransitionGroup groupFilter = LaneEndTransitionGroup.All) {
 
-                var groups = TrackUtils.GetLaneEndTransitionGroup(VehicleType);
+                var groups = TrackUtils.GetLaneEndTransitionGroup(LaneInfo.m_vehicleType);
                 groups &= groupFilter;
                 NodeLaneMarker.Shape shape = 0;
                 if ((groups & LaneEndTransitionGroup.Track) != 0) {
@@ -391,7 +390,7 @@ namespace TrafficManager.UI.SubTools {
                             }
                         }
 
-                        LaneEndTransitionGroup group = TrackUtils.GetLaneEndTransitionGroup(laneEnd.VehicleType);
+                        LaneEndTransitionGroup group = TrackUtils.GetLaneEndTransitionGroup(laneEnd.LaneInfo.m_vehicleType);
                         group &= group_;
                         if (acute) {
                             group &= ~LaneEndTransitionGroup.Track;
@@ -1358,8 +1357,7 @@ namespace TrafficManager.UI.SubTools {
                                     Color = nodeMarkerColor,
                                     IsSource = isSource,
                                     IsTarget = isTarget,
-                                    LaneType = laneInfo.m_laneType,
-                                    VehicleType = laneInfo.m_vehicleType,
+                                    LaneInfo = laneInfo,
                                     InnerSimilarLaneIndex = innerSimilarLaneIndex,
                                     OuterSimilarLaneIndex = outerSimilarLaneIndex,
                                     SegmentIndex = segmentIndex,
@@ -1421,18 +1419,20 @@ namespace TrafficManager.UI.SubTools {
         }
 
         private static bool CanConnect(LaneEnd source, LaneEnd target, LaneEndTransitionGroup groups, out bool acute) {
-            bool ret = source != target && source.IsSource && target.IsTarget;
-            ret &= (target.VehicleType & source.VehicleType) != 0;
-
-            bool IsRoad(LaneEnd laneEnd) =>
-                (laneEnd.LaneType & TrackUtils.ROAD_LANE_TYPES) != 0 &&
-                (laneEnd.VehicleType & TrackUtils.ROAD_VEHICLE_TYPES) != 0;
-            bool IsTrack(LaneEnd laneEnd) =>
-                (laneEnd.LaneType & TrackUtils.TRACK_LANE_TYPES) != 0 &&
-                (laneEnd.VehicleType & TrackUtils.TRACK_VEHICLE_TYPES) != 0;
+            acute = true;
+            bool canConnect = target.LaneInfo.CheckType(source.LaneInfo.m_laneType, source.LaneInfo.m_vehicleType);
+            if (!canConnect) {
+                return false;
+            }
+            canConnect = source != target && source.IsSource && target.IsTarget;
+            if (!canConnect) {
+                return false;
+            }
 
             // turning angle does not apply to roads.
-            bool isRoad = groups != LaneEndTransitionGroup.Track && IsRoad(source) && IsRoad(target);
+            bool road = groups != LaneEndTransitionGroup.Track &&
+                source.LaneInfo.MatchesRoad() &&
+                target.LaneInfo.MatchesRoad();
 
             // check track turning angles are within bounds
             acute = !LaneConnectionManager.CheckSegmentsTurningAngle(
@@ -1441,7 +1441,7 @@ namespace TrafficManager.UI.SubTools {
                     targetSegmentId: target.SegmentId,
                     targetStartNode: target.StartNode);
 
-            return isRoad || !acute;
+            return road || !acute;
         }
 
         /// <summary>
