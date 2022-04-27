@@ -372,7 +372,7 @@ namespace TrafficManager.UI.SubTools {
                         // selected source marker in target selection mode
                         if(selectedLaneEnd == laneEnd) {
                             drawMarker = true;
-
+                            acute = false;
                         } else {
                             drawMarker = CanConnect(selectedLaneEnd, laneEnd, group_, out acute);
                         }
@@ -1700,6 +1700,9 @@ namespace TrafficManager.UI.SubTools {
                             string key = "UI.Key:Shift bidirectional";
                             items.Add(new HoldModifier(shift: true, localizedText: T(key)));
                         }
+                    } else if(selectedNodeTransitionGroups_ == LaneEndTransitionGroup.All) {
+                        items.Add(new HoldModifier(shift: true, localizedText: T("UI.Key:alt track mode")));
+                        items.Add(new HoldModifier(shift: true, localizedText: T("UI.Key:Shift car+track mode")));
                     }
 
                     OnscreenDisplay.Display(items);
