@@ -4,6 +4,7 @@ namespace TrafficManager.Manager.Impl {
     using CSUtil.Commons;
     using System.Collections.Generic;
     using System;
+    using ColossalFramework.Math;
     using TrafficManager.API.Manager;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.API.Traffic.Enums;
@@ -573,7 +574,7 @@ namespace TrafficManager.Manager.Impl {
                                                 $"CustomCitizenAI.ExtStartPathFind({instanceID}): " +
                                                 "Citizen is located at a road outside connection: " +
                                                 "Setting path mode to 'RequiresCarPath' and carUsageMode " +
-                                                "to 'ForcedPocket'");
+                                                $"to 'ForcedPocket', pos: {instanceData.GetLastFramePosition()}");
                                         }
 
                                         extInstance.pathMode = ExtPathMode.RequiresCarPath;
@@ -599,7 +600,7 @@ namespace TrafficManager.Manager.Impl {
                                         Log.Info(
                                             $"CustomCitizenAI.ExtStartPathFind({instanceID}): " +
                                             "Citizen is located at a non-road outside connection: " +
-                                            "Setting path mode to 'CalculatingWalkingPathToTarget'");
+                                            $"Setting path mode to 'CalculatingWalkingPathToTarget', pos: {instanceData.GetLastFramePosition()}");
                                     }
 
                                     extInstance.pathMode =
@@ -616,6 +617,24 @@ namespace TrafficManager.Manager.Impl {
                     // Reuse parked vehicle info
                     ref VehicleParked parkedVehicle = ref parkedVehicleId.ToParkedVehicle();
                     vehicleInfo = parkedVehicle.Info;
+
+                    if (homeId != 0 && vehicleInfo &&
+                        !citizen.m_flags.IsFlagSet(Citizen.Flags.Tourist) &&
+                        ExtVehicleManager.MustSwapParkedCarWithElectric(vehicleInfo, homeId)) {
+                        if (logParkingAi) {
+                            Log.Info($"CustomCitizenAI.ExtStartPathFind({instanceID}): Citizen {instanceData.m_citizen}. Swapping currently parked vehicle ({parkedVehicleId}) with electric");
+                        }
+
+                        if (AdvancedParkingManager.SwapParkedVehicleWithElectric(
+                                logParkingAi: logParkingAi,
+                                citizenId: instanceData.m_citizen,
+                                citizen: ref citizen,
+                                position: parkedVehicle.m_position,
+                                rotation: parkedVehicle.m_rotation,
+                                electricVehicleInfo: out VehicleInfo electricVehicleInfo)) {
+                            vehicleInfo = electricVehicleInfo;
+                        }
+                    }
 
                     // Check if the citizen should return their car back home
                     if (extInstance.pathMode == ExtPathMode.None && // initiating a new path
@@ -1175,7 +1194,7 @@ namespace TrafficManager.Manager.Impl {
         /// </summary>
         public void ReleaseReturnPath(ref ExtCitizenInstance extInstance) {
 #if DEBUG
-            bool citizenDebug = DebugSettings.CitizenId == 0 
+            bool citizenDebug = DebugSettings.CitizenId == 0
                                 || DebugSettings.CitizenId == extInstance.instanceId.ToCitizenInstance().m_citizen;
 
             bool logParkingAi = DebugSwitch.BasicParkingAILog.Get() && citizenDebug;
@@ -1382,7 +1401,7 @@ namespace TrafficManager.Manager.Impl {
                 try
                 {
                     ref CitizenInstance citizenInstance = ref instanceId.ToCitizenInstance();
-                    
+
                     if (!citizenInstance.IsCreated()) {
                         continue;
                     }
@@ -1427,34 +1446,37 @@ namespace TrafficManager.Manager.Impl {
         public bool IsAtOutsideConnection(ushort instanceId,
                                           ref CitizenInstance instanceData,
                                           ref ExtCitizenInstance extInstance,
-                                          Vector3 startPos)
-        {
+                                          Vector3 startPos) {
 #if DEBUG
-            ref CitizenInstance citizenInstance = ref extInstance.instanceId.ToCitizenInstance();
-            
             bool citizenDebug =
-                (DebugSettings.CitizenId == 0 || DebugSettings.CitizenId == citizenInstance.m_citizen)
+                (DebugSettings.CitizenId == 0 || DebugSettings.CitizenId == instanceData.m_citizen)
                 && (DebugSettings.CitizenInstanceId == 0 || DebugSettings.CitizenInstanceId == instanceId)
-                && (DebugSettings.SourceBuildingId == 0 || DebugSettings.SourceBuildingId == citizenInstance.m_sourceBuilding)
-                && (DebugSettings.TargetBuildingId == 0 || DebugSettings.TargetBuildingId == citizenInstance.m_targetBuilding);
+                && (DebugSettings.SourceBuildingId == 0 || DebugSettings.SourceBuildingId == instanceData.m_sourceBuilding)
+                && (DebugSettings.TargetBuildingId == 0 || DebugSettings.TargetBuildingId == instanceData.m_targetBuilding);
 
             bool logParkingAi = DebugSwitch.BasicParkingAILog.Get() && citizenDebug;
-            // bool fineDebug = DebugSwitch.ExtendedParkingAILog.Get() && citizenDebug;
 
             if (logParkingAi) {
-                Log._Debug(
-                    $"ExtCitizenInstanceManager.IsAtOutsideConnection({extInstance.instanceId}): " +
-                    $"called. Path: {instanceData.m_path} sourceBuilding={instanceData.m_sourceBuilding}");
+                Log._Debug($"ExtCitizenInstanceManager.IsAtOutsideConnection({extInstance.instanceId}): " +
+                           $"called. Path: {instanceData.m_path} sourceBuilding={instanceData.m_sourceBuilding} targetBuilding={instanceData.m_targetBuilding}");
             }
 #else
             const bool logParkingAi = false;
 #endif
 
             ParkingAI parkingAiConf = GlobalConfig.Instance.ParkingAI;
-            ref Building sourceBuilding = ref instanceData.m_sourceBuilding.ToBuilding();
+            float sqrMaxDistToPedestrianLane = parkingAiConf.MaxBuildingToPedestrianLaneDistance *
+                                               parkingAiConf.MaxBuildingToPedestrianLaneDistance;
 
-            bool ret = (sourceBuilding.m_flags & Building.Flags.IncomingOutgoing) != Building.Flags.None &&
-                (startPos - sourceBuilding.m_position).magnitude <= parkingAiConf.MaxBuildingToPedestrianLaneDistance;
+            ref Building sourceBuilding = ref instanceData.m_sourceBuilding.ToBuilding();
+            bool ret = sourceBuilding.m_flags.IsFlagSet(Building.Flags.IncomingOutgoing) &&
+                       (startPos - sourceBuilding.m_position).sqrMagnitude <= sqrMaxDistToPedestrianLane;
+
+            if (!ret) {
+                ref Building targetBuilding = ref instanceData.m_targetBuilding.ToBuilding();
+                ret = targetBuilding.m_flags.IsFlagSet(Building.Flags.IncomingOutgoing) &&
+                      (startPos - targetBuilding.m_position).sqrMagnitude <= sqrMaxDistToPedestrianLane;
+            }
 
             if (logParkingAi) {
                 Log._Debug($"ExtCitizenInstanceManager.IsAtOutsideConnection({instanceId}): ret={ret}");
