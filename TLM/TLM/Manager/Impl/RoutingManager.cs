@@ -499,15 +499,8 @@ namespace TrafficManager.Manager.Impl {
                     }
 
                     ref NetSegment netSegment = ref segmentId.ToSegment();
+                    bool startNode = netSegment.IsStartNode(nodeId);
                     highwayOnly &= netSegment.Info?.m_netAI is RoadBaseAI ai && ai.m_highwayRules; 
-
-                    bool? start = netSegment.GetRelationToNode(nodeId);
-                    if (!start.HasValue) {
-                        Log.Error($"Segment with id: {segmentId} is not connected to the node {nodeId}");
-                        Debug.LogError($"TM:PE RecalculateLaneRoutings - Segment with id {segmentId} is not connected to the node {nodeId}");
-                        continue;
-                    }
-                    bool startNode = start.Value;
 
                     ExtSegmentEnd segEnd = segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segmentId, startNode)];
                     if (segEnd.incoming) {

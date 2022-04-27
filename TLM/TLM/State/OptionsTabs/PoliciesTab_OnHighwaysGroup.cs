@@ -38,29 +38,41 @@ namespace TrafficManager.State {
 
         private static string T(string key) => Translation.Options.Get(key);
 
+        static bool dontUpdateRoutingManager;
         private static void OnHighwayRulesChanged(bool enabled) {
-            if (TMPELifecycle.Instance.Deserializing || !TMPELifecycle.InGameOrEditor())
-                return;
-            if (enabled) {
+            try {
+                if (TMPELifecycle.Instance.Deserializing || !TMPELifecycle.InGameOrEditor())
+                    return;
+                if (enabled) {
+                    dontUpdateRoutingManager = true;
+                    HighwayMergingRules.Value = false; // don't call UpdateRoutingManager() 2 times.
+                    dontUpdateRoutingManager = false;
+                }
                 Flags.ClearHighwayLaneArrows();
                 Flags.ApplyAllFlags();
-                HighwayMergingRules.Value = false; // also updates routing manager
-            } else {
-                Flags.ClearHighwayLaneArrows();
-                Flags.ApplyAllFlags();
-                OptionsManager.UpdateRoutingManager();
+                if (!dontUpdateRoutingManager) {
+                    OptionsManager.UpdateRoutingManager();
+                }
+            } finally {
+                dontUpdateRoutingManager = false;
             }
         }
 
         private static void OnHighwayMergingRulesChanged(bool enabled) {
-            if (TMPELifecycle.Instance.Deserializing || !TMPELifecycle.InGameOrEditor())
-                return;
-            if (enabled) {
-                HighwayRules.Value = false; // also updates routing manager
-            } else {
-                OptionsManager.UpdateRoutingManager();
+            try {
+                if (TMPELifecycle.Instance.Deserializing || !TMPELifecycle.InGameOrEditor())
+                    return;
+                if (enabled) {
+                    dontUpdateRoutingManager = true;
+                    HighwayRules.Value = false; // don't call UpdateRoutingManager() 2 times.
+                    dontUpdateRoutingManager = false;
+                }
+                if (!dontUpdateRoutingManager) {
+                    OptionsManager.UpdateRoutingManager();
+                }
+            } finally {
+                dontUpdateRoutingManager = false;
             }
-            
         }
 
     }
