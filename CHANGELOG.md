@@ -53,6 +53,7 @@ This changelog includes all versions and major variants of the mod going all the
 - [Fixed] Parking AI: Non-dummy tourists not using electric cars #1543 #1527 (krzychu124)
 - [Fixed] Parking AI: Residents moving into city never have electric cars #1543 #1527 (krzychu124)
 - [Fixed] API: `ManagersFactory` not working #1548 (kianzarrin)
+- [Updated] 419 localisations updated #1523 (Dominik Kawula, shg166, John Lok Ho, Skazov, kvakvs, TwotoolusFLY_LSh.st, DucAnhLam, Márcio Saeger, Sanam Rao, Naruebet Chaipin, Nguyễn Tài Đức)
 - [Updated] Multiple icons updated, fallback theme, etc. #1523 (kvakvs)
 - [Updated] Separated road and tracked vehicle routing in Routing Manager #1501 (kianzarrin)
 - [Updated] Trains prefer to stay in lane at intersection #1483 #1475 (kianzarrin)
