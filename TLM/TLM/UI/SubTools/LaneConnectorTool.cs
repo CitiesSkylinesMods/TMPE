@@ -147,6 +147,7 @@ namespace TrafficManager.UI.SubTools {
             internal NodeLaneMarker NodeMarker;
 
             internal NetInfo.Lane LaneInfo;
+            internal LaneEndTransitionGroup TransitionGroup;
 
             /// <summary>
             ///  Intersects mouse ray with marker bounds.
@@ -165,8 +166,7 @@ namespace TrafficManager.UI.SubTools {
                 bool renderLimits = false,
                 LaneEndTransitionGroup groupFilter = LaneEndTransitionGroup.All) {
 
-                var groups = TrackUtils.GetLaneEndTransitionGroup(LaneInfo.m_vehicleType);
-                groups &= groupFilter;
+                var groups = TransitionGroup & groupFilter;
                 NodeLaneMarker.Shape shape = 0;
                 if ((groups & LaneEndTransitionGroup.Track) != 0) {
                     if (this.IsBidirectional) {
@@ -390,8 +390,7 @@ namespace TrafficManager.UI.SubTools {
                             }
                         }
 
-                        LaneEndTransitionGroup group = TrackUtils.GetLaneEndTransitionGroup(laneEnd.LaneInfo.m_vehicleType);
-                        group &= group_;
+                        var group = laneEnd.TransitionGroup & group_;
                         if (acute) {
                             group &= ~LaneEndTransitionGroup.Track;
                         }
@@ -1070,7 +1069,7 @@ namespace TrafficManager.UI.SubTools {
             if (GetSelectionMode() == SelectionMode.SelectSource) {
                 // select source marker
                 selectedLaneEnd = hoveredLaneEnd;
-                selectedLaneTransitionGroup_ = group_;
+                selectedLaneTransitionGroup_ = group_ & selectedLaneEnd.TransitionGroup;
                 Log._DebugIf(
                     logLaneConn,
                     () => "LaneConnectorTool: set selected marker");
@@ -1309,7 +1308,7 @@ namespace TrafficManager.UI.SubTools {
                             incoming: out bool isTarget,
                             pos: out _))
                         {
-                            groups |= TrackUtils.GetLaneEndTransitionGroup(laneInfo.m_vehicleType);
+                            groups |= laneInfo.GetLaneEndTransitionGroup();
                             Bezier3 bezier = netLane.m_bezier;
                             if (startNode) {
                                 // reverse bezier.
@@ -1358,6 +1357,7 @@ namespace TrafficManager.UI.SubTools {
                                     IsSource = isSource,
                                     IsTarget = isTarget,
                                     LaneInfo = laneInfo,
+                                    TransitionGroup = laneInfo.GetLaneEndTransitionGroup(),
                                     InnerSimilarLaneIndex = innerSimilarLaneIndex,
                                     OuterSimilarLaneIndex = outerSimilarLaneIndex,
                                     SegmentIndex = segmentIndex,

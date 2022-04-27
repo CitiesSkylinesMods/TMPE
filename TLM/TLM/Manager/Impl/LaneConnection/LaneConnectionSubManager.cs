@@ -50,8 +50,7 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
         /// </summary>
         public bool Supports(LaneEndTransitionGroup group) => (group & Group) != 0;
 
-        public bool Supports(NetInfo.Lane laneInfo) =>
-            laneInfo.m_laneType.IsFlagSet(LaneTypes) && laneInfo.m_vehicleType.IsFlagSet(VehicleTypes);
+        public bool Supports(NetInfo.Lane laneInfo) => laneInfo.Matches(laneTypes_, vehicleTypes_);
 
         public override void OnBeforeLoadData() {
             base.OnBeforeLoadData();

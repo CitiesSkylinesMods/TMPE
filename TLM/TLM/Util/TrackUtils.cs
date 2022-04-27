@@ -1,5 +1,6 @@
 namespace TrafficManager.Util {
     using ColossalFramework.Math;
+    using JetBrains.Annotations;
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.Manager.Impl;
     using TrafficManager.Util.Extensions;
@@ -19,15 +20,14 @@ namespace TrafficManager.Util {
 
         internal const VehicleInfo.VehicleType ROAD_VEHICLE_TYPES = LaneArrowManager.VEHICLE_TYPES | VehicleInfo.VehicleType.Trolleybus;
 
-        internal static bool MatchesTrack(this NetInfo.Lane laneInfo) {
-            return laneInfo != null &&
-                laneInfo.m_laneType.IsFlagSet(TRACK_LANE_TYPES) &&
-                laneInfo.m_vehicleType.IsFlagSet(TRACK_VEHICLE_TYPES);
-        }
-        internal static bool MatchesRoad(this NetInfo.Lane laneInfo) {
-            return laneInfo != null &&
-                laneInfo.m_laneType.IsFlagSet(ROAD_LANE_TYPES) &&
-                laneInfo.m_vehicleType.IsFlagSet(ROAD_VEHICLE_TYPES);
+        internal static bool MatchesTrack([NotNull] this NetInfo.Lane laneInfo) =>
+            laneInfo.Matches(TRACK_LANE_TYPES, TRACK_VEHICLE_TYPES);
+    
+        internal static bool MatchesRoad([NotNull] this NetInfo.Lane laneInfo) =>
+            laneInfo.Matches(ROAD_LANE_TYPES, ROAD_VEHICLE_TYPES);
+
+        internal static bool Matches([NotNull] this NetInfo.Lane laneInfo , NetInfo.LaneType laneType, VehicleInfo.VehicleType vehicleType) {
+            return (laneType & laneInfo.m_laneType) != 0 && (vehicleType & laneInfo.m_vehicleType) != 0;
         }
 
         internal static bool IsTrackOnly(this NetInfo.Lane laneInfo) {
@@ -101,6 +101,15 @@ namespace TrafficManager.Util {
             if (vehicleType.IsFlagSet(ROAD_VEHICLE_TYPES))
                 ret |= LaneEndTransitionGroup.Road;
             if (vehicleType.IsFlagSet(TRACK_VEHICLE_TYPES))
+                ret |= LaneEndTransitionGroup.Track;
+            return ret;
+        }
+
+        public static LaneEndTransitionGroup GetLaneEndTransitionGroup(this NetInfo.Lane laneInfo) {
+            LaneEndTransitionGroup ret = 0;
+            if(laneInfo.MatchesRoad())
+                ret |= LaneEndTransitionGroup.Road;
+            if (laneInfo.MatchesTrack())
                 ret |= LaneEndTransitionGroup.Track;
             return ret;
         }
