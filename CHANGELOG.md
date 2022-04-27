@@ -32,7 +32,7 @@ This changelog includes all versions and major variants of the mod going all the
 #### TM:PE V11.6.5.2 TEST, 27/04/2022
 
 - [Meta] This release improves Lane Routing (UI, trams, trains, etc.), Parking AI (electric cars), and icon themes.
-- [Meta] [Meta] TM:PE data format change: Old cities will still load (data converted automatically), but after saving you'll need TM:PE 11.6.5.2 (or newer) for those saves.
+- [Meta] TM:PE data format change: Old cities will still load (data converted automatically), but after saving you'll need TM:PE 11.6.5.2 (or newer) for those saves.
 - [New] Directional lane connectors #1492 #1214 #1211 (kianzarrin, Chamëleon)
 - [New] Lane routing diagnostic tool for developers #1549 #1537 #1534 (kianzarrin)
 - [New] Chinese road sign theme #1523 (kvakvs, lokpro, TianQiBuTian)
