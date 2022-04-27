@@ -1380,36 +1380,27 @@ namespace TrafficManager.UI.SubTools {
                 return null;
             }
 
-            foreach (LaneEnd laneEnd1 in laneEnds) {
-                if (!laneEnd1.IsSource) {
+            foreach (LaneEnd sourceLaneEnd in laneEnds) {
+                if (!sourceLaneEnd.IsSource) {
                     continue;
                 }
 
                 uint[] carConnections = LaneConnectionManager.Instance.Road.GetLaneConnections(
-                        laneEnd1.LaneId, laneEnd1.StartNode);
-
+                        sourceLaneEnd.LaneId, sourceLaneEnd.StartNode);
                 if (!carConnections.IsNullOrEmpty()) {
-                    foreach (LaneEnd laneEnd2 in laneEnds) {
-                        if (!laneEnd2.IsTarget) {
-                            continue;
-                        }
-
-                        if (carConnections.Contains(laneEnd2.LaneId)) {
-                            laneEnd1.ConnectedCarLaneEnds.Add(laneEnd2);
+                    foreach (LaneEnd targetLaneEnd in laneEnds) {
+                        if (targetLaneEnd.IsTarget && carConnections.Contains(targetLaneEnd.LaneId)) {
+                            sourceLaneEnd.ConnectedCarLaneEnds.Add(targetLaneEnd);
                         }
                     }
                 }
 
                 uint[] trackConnections = LaneConnectionManager.Instance.Track.GetLaneConnections(
-                    laneEnd1.LaneId, laneEnd1.StartNode);
+                    sourceLaneEnd.LaneId, sourceLaneEnd.StartNode);
                 if (!trackConnections.IsNullOrEmpty()) {
-                    foreach (LaneEnd laneEnd2 in laneEnds) {
-                        if (!laneEnd2.IsTarget) {
-                            continue;
-                        }
-
-                        if (trackConnections.Contains(laneEnd2.LaneId)) {
-                            laneEnd1.ConnectedTrackLaneEnds.Add(laneEnd2);
+                    foreach (LaneEnd targetLaneEnd in laneEnds) {
+                        if (targetLaneEnd.IsTarget && trackConnections.Contains(targetLaneEnd.LaneId)) {
+                            sourceLaneEnd.ConnectedTrackLaneEnds.Add(targetLaneEnd);
                         }
                     }
                 }
