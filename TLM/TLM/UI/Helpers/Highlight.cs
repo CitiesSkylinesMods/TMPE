@@ -330,6 +330,39 @@ namespace TrafficManager.UI.Helpers {
                 alphaBlend: alphaBlend);
         }
 
+        public static void DrawTriangleAt(
+            RenderManager.CameraInfo cameraInfo,
+            Vector3 center,
+            Vector3 tangent,
+            Texture2D texture,
+            Color color,
+            float size,
+            float minY,
+            float maxY,
+            bool renderLimits,
+            bool alphaBlend = false) {
+            Vector3 dir = tangent * size;
+            Vector3 dir90 = dir.RotateXZ90CW();
+
+            Quad3 quad = new Quad3 {
+                a = center,
+                b = center + dir90,
+                c = center + dir * Mathf.Sqrt(2),
+                d = center - dir90,
+            };
+
+            Singleton<ToolManager>.instance.m_drawCallData.m_overlayCalls++;
+            RenderManager.instance.OverlayEffect.DrawQuad(
+                cameraInfo,
+                texture,
+                color,
+                quad,
+                minY,
+                maxY,
+                renderLimits: renderLimits,
+                alphaBlend: alphaBlend);
+        }
+
         public static void DrawSquareAt(
             RenderManager.CameraInfo cameraInfo,
             Vector3 center,

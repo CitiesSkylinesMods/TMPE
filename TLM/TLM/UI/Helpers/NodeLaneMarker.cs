@@ -59,10 +59,25 @@ namespace TrafficManager.UI.Helpers {
                     renderLimits,
                     false);
             } else {
+                float magnification = enlarge ? 1.23f : 0.8f;
+                float size = RADIUS * magnification;
+                float size2 = size * 1.4f;
+                float shift = -0.2f; // to match exactly with lane end.
+                float shift2 = (size2 - size) * .5f;
                 if ((shape & Shape.InOut) == Shape.InOut) {
-                    float magnification = enlarge ? 1.1f : 0.9f;
-                    float size = RADIUS * magnification;
-                    float shift = -0.15f; // to match exactly with lane end.
+                    if (!enlarge) {
+                        Highlight.DrawDiamondAt(
+                             cameraInfo,
+                             center: Position + Direction * shift,
+                             tangent: Direction,
+                             texture: Highlight.SquareTexture,
+                             color: Color.black, // outer black
+                             size: size2,
+                             minY: Position.y - overdrawHeight,
+                             maxY: Position.y + overdrawHeight,
+                             renderLimits: renderLimits,
+                             alphaBlend: true);
+                    }
                     Highlight.DrawDiamondAt(
                         cameraInfo,
                         center: Position + Direction * shift,
@@ -74,36 +89,60 @@ namespace TrafficManager.UI.Helpers {
                         maxY: Position.y + overdrawHeight,
                         renderLimits: renderLimits,
                         alphaBlend: true);
+
                 } else if ((shape & Shape.In) != 0) {
-                    float magnification = enlarge ? 1.1f : 0.9f;
-                    float size = RADIUS * magnification;
-                    float shift = size - 0.5f; // to match exactly with lane end.
-                    Highlight.DrawSquareAt(
+                    if (!enlarge) {
+                        Highlight.DrawTriangleAt(
+                            cameraInfo,
+                            center: Position + Direction * (shift - shift2),
+                            tangent: Direction,
+                            texture: Highlight.SquareTexture,
+                            color: Color.black,
+                            size: size2,
+                            minY: Position.y - overdrawHeight,
+                            maxY: Position.y + overdrawHeight,
+                            renderLimits: renderLimits,
+                            alphaBlend: true);
+                    }
+                    Highlight.DrawTriangleAt(
                         cameraInfo,
                         center: Position + Direction * shift,
                         tangent: Direction,
-                        texture: Highlight.TriangleTexture,
+                        texture: Highlight.SquareTexture,
                         color: color,
                         size: size,
                         minY: Position.y - overdrawHeight,
                         maxY: Position.y + overdrawHeight,
                         renderLimits: renderLimits,
                         alphaBlend: true);
+
                 } else if ((shape & Shape.Out) != 0) {
-                    float magnification = enlarge ? 1.1f : 0.9f;
-                    float size = RADIUS * magnification;
-                    float shift = size; // to match exactly with lane end.
-                    Highlight.DrawSquareAt(
+                    shift += .1f;
+                    if (!enlarge) {
+                        Highlight.DrawTriangleAt(
+                            cameraInfo,
+                            center: Position - Direction * (shift-shift2),
+                            tangent: -Direction,
+                            texture: Highlight.SquareTexture,
+                            color: Color.black,
+                            size: size2,
+                            minY: Position.y - overdrawHeight,
+                            maxY: Position.y + overdrawHeight,
+                            renderLimits: renderLimits,
+                            alphaBlend: true);
+                    }
+                    Highlight.DrawTriangleAt(
                         cameraInfo,
                         center: Position - Direction * shift,
                         tangent: -Direction,
-                        texture: Highlight.TriangleTexture,
+                        texture: Highlight.SquareTexture,
                         color: color,
                         size: size,
                         minY: Position.y - overdrawHeight,
                         maxY: Position.y + overdrawHeight,
                         renderLimits: renderLimits,
                         alphaBlend: true);
+
                 }
             }
         }
