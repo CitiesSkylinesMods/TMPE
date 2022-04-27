@@ -553,8 +553,7 @@ namespace TrafficManager.Manager.Impl {
                              prevEnd.outgoing && prevExtSegment.oneWay && prevExtSegment.highway;
             bool applyHighwayRules = onHighway && nodeIsSimpleJunction;
             bool applyHighwayRulesAtJunction = applyHighwayRules && nodeIsRealJunction;
-            bool iterateViaGeometry = applyHighwayRulesAtJunction && prevIsRoadLane;
-            iterateViaGeometry |= applyHighwayMergingRules && prevIsRoadLane;
+            bool iterateViaGeometry = (applyHighwayRulesAtJunction || applyHighwayMergingRules) && prevIsRoadLane;
             // start with u-turns at highway junctions
             ushort nextSegmentId = iterateViaGeometry ? prevSegmentId : (ushort)0;
 

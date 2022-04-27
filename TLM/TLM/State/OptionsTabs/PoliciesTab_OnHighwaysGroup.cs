@@ -29,9 +29,9 @@ namespace TrafficManager.State {
 
             var group = tab.AddGroup(T("VR.Group:Highways"));
 
-            HighwayRules.AddUI(group);
-
             HighwayMergingRules.AddUI(group);
+
+            HighwayRules.AddUI(group);
 
             PreferOuterLane.AddUI(group);
         }
