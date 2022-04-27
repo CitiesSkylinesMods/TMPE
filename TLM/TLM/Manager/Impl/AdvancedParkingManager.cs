@@ -104,7 +104,7 @@ namespace TrafficManager.Manager.Impl {
 
             ref VehicleParked parkedVehicle = ref parkedVehicleId.ToParkedVehicle();
             VehicleInfo parkedVehicleInfo = parkedVehicle.Info;
-            
+
             if (!CustomPathManager._instance.m_pathUnits.m_buffer[instanceData.m_path]
                                   .GetPosition(0, out PathUnit.Position vehLanePathPos)) {
                 Log._DebugIf(
@@ -143,7 +143,7 @@ namespace TrafficManager.Manager.Impl {
                 false)) {
                 // update frame data
                 ref Vehicle vehicle = ref vehicleId.ToVehicle();
-                
+
                 Vehicle.Frame frame = vehicle.m_frame0;
                 frame.m_rotation = parkedVehicle.m_rotation;
 
@@ -191,7 +191,7 @@ namespace TrafficManager.Manager.Impl {
                 // set vehicle id for citizen instance
                 instanceData.m_path = 0u;
                 ref Citizen citizen = ref instanceData.m_citizen.ToCitizen();
-                
+
                 citizen.SetParkedVehicle(instanceData.m_citizen, 0);
                 citizen.SetVehicle(instanceData.m_citizen, vehicleId, 0u);
 
@@ -374,7 +374,7 @@ namespace TrafficManager.Manager.Impl {
             bool citizenDebug =
                 (DebugSettings.VehicleId == 0 || DebugSettings.VehicleId == vehicleId)
                 && (DebugSettings.CitizenInstanceId == 0 || DebugSettings.CitizenInstanceId == driverExtInstance.instanceId)
-                && (DebugSettings.CitizenId == 0 || DebugSettings.CitizenId == driverInstance.m_citizen) 
+                && (DebugSettings.CitizenId == 0 || DebugSettings.CitizenId == driverInstance.m_citizen)
                 && (DebugSettings.SourceBuildingId == 0 || DebugSettings.SourceBuildingId == driverInstance.m_sourceBuilding)
                 && (DebugSettings.TargetBuildingId == 0 || DebugSettings.TargetBuildingId == driverInstance.m_targetBuilding);
 
@@ -1336,19 +1336,55 @@ namespace TrafficManager.Manager.Impl {
                             $"vehicle! CurrentPathMode={extInstance.pathMode}");
                     }
 
+                    // determine current position vector
+                    Vector3 currentPos;
+                    ushort currentBuildingId = citizen.GetBuildingByLocation();
+                    if (currentBuildingId != 0) {
+                        currentPos = currentBuildingId.ToBuilding().m_position;
+                        if (logParkingAi) {
+                            Log._Debug(
+                                $"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): " +
+                                $"Taking current position from current building {currentBuildingId} " +
+                                $"for citizen {instanceData.m_citizen} (citizen instance {instanceId}): " +
+                                $"{currentPos} CurrentPathMode={extInstance.pathMode}");
+                        }
+                    } else {
+                        currentBuildingId = sourceBuildingId;
+                        currentPos = instanceData.GetLastFramePosition();
+                        if (logParkingAi) {
+                            Log._Debug(
+                                $"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): " +
+                                "Taking current position from last frame position for citizen " +
+                                $"{instanceData.m_citizen} (citizen instance {instanceId}): " +
+                                $"{currentPos}. Home {homeId} pos: " +
+                                $"{homeId.ToBuilding().m_position} " +
+                                $"CurrentPathMode={extInstance.pathMode}");
+                        }
+                    }
+
+                    // if tourist (does not have home) and at outside connection, don't try to spawn parked vehicle
+                    // cim might just exit the vehicle to despawn at outside connection
+                    // or just spawned at the edge of the map - must walk to closest node to spawn the vehicle to enter city(resident/tourist) or go to different conneciton(dummy traffic)
+                    if (homeId == 0 && ExtCitizenInstanceManager.Instance.IsAtOutsideConnection(instanceId, ref instanceData, ref extInstance, currentPos)) {
+                        Log._DebugIf(
+                            logParkingAi,
+                            () => $"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): " +
+                                  $">> Skipped spawning parked vehicle for citizen {instanceData.m_citizen} " +
+                                  $"(instance {instanceId}) is at/near outside conneciton, currentPos: {currentPos}");
+
+                        extInstance.pathMode = ExtPathMode.RequiresWalkingPathToTarget;
+                        return ExtSoftPathState.FailedSoft;
+                    }
+
                     // try to spawn parked vehicle in the vicinity of the starting point.
                     VehicleInfo vehicleInfo = null;
                     if (instanceData.Info.m_agePhase > Citizen.AgePhase.Child) {
-                        // get a random car info (due to the fact we are using a
-                        // different randomizer, car assignment differs from the
-                        // selection in ResidentAI.GetVehicleInfo/TouristAI.GetVehicleInfo
-                        // method, but this should not matter since we are reusing
-                        // parked vehicle infos there)
+                        bool useElectric = ExtVehicleManager.Instance.ShouldUseElectricCar(ref citizen, ref instanceData);
                         vehicleInfo =
                             Singleton<VehicleManager>.instance.GetRandomVehicleInfo(
                                 ref Singleton<SimulationManager>.instance.m_randomizer,
                                 ItemClass.Service.Residential,
-                                ItemClass.SubService.ResidentialLow,
+                                useElectric ? ItemClass.SubService.ResidentialLowEco : ItemClass.SubService.ResidentialLow,
                                 ItemClass.Level.Level1);
                     }
 
@@ -1361,40 +1397,14 @@ namespace TrafficManager.Manager.Impl {
                                 $"CurrentPathMode={extInstance.pathMode}");
                         }
 
-                        // determine current position vector
-                        Vector3 currentPos;
-                        ushort currentBuildingId = citizen.GetBuildingByLocation();
-                        if (currentBuildingId != 0) {
-                            currentPos = currentBuildingId.ToBuilding().m_position;
-                            if (logParkingAi) {
-                                Log._Debug(
-                                    $"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): " +
-                                    $"Taking current position from current building {currentBuildingId} " +
-                                    $"for citizen {instanceData.m_citizen} (citizen instance {instanceId}): " +
-                                    $"{currentPos} CurrentPathMode={extInstance.pathMode}");
-                            }
-                        } else {
-                            currentBuildingId = sourceBuildingId;
-                            currentPos = instanceData.GetLastFramePosition();
-                            if (logParkingAi) {
-                                Log._Debug(
-                                    $"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): " +
-                                    "Taking current position from last frame position for citizen " +
-                                    $"{instanceData.m_citizen} (citizen instance {instanceId}): " +
-                                    $"{currentPos}. Home {homeId} pos: " +
-                                    $"{homeId.ToBuilding().m_position} " +
-                                    $"CurrentPathMode={extInstance.pathMode}");
-                            }
-                        }
-
                         // spawn a passenger car near the current position
                         if (AdvancedParkingManager.Instance.TrySpawnParkedPassengerCar(
-                            instanceData.m_citizen,
-                            homeId,
-                            currentPos,
-                            vehicleInfo,
-                            out Vector3 parkPos,
-                            out ParkingError parkReason)) {
+                                citizenId: instanceData.m_citizen,
+                                homeId: homeId,
+                                refPos: currentPos,
+                                vehicleInfo: vehicleInfo,
+                                parkPos: out Vector3 parkPos,
+                                reason: out ParkingError parkReason)) {
                             parkedVehicleId = citizen.m_parkedVehicle;
                             Log._DebugIf(
                                 logParkingAi,
@@ -1415,7 +1425,7 @@ namespace TrafficManager.Manager.Impl {
                                 () => $"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): " +
                                 $">> Failed to spawn parked vehicle for citizen {instanceData.m_citizen} " +
                                 $"(citizen instance {instanceId}). reason={parkReason}. homePos: " +
-                                $"{homeId.ToBuilding().m_position}");
+                                $"{homeId.ToBuilding().m_position}, currentPos: {currentPos}");
 
                             if (parkReason == ParkingError.NoSpaceFound &&
                                 currentBuildingId != 0) {
@@ -1672,7 +1682,7 @@ namespace TrafficManager.Manager.Impl {
                                                         ref ExtCitizenInstance driverExtInstance) {
             IExtCitizenInstanceManager extCitizenInstanceManager = Constants.ManagerFactory.ExtCitizenInstanceManager;
 #if DEBUG
-            bool citizenDebug = 
+            bool citizenDebug =
                 (DebugSettings.VehicleId == 0 || DebugSettings.VehicleId == vehicleId)
                 && (DebugSettings.CitizenInstanceId == 0 || DebugSettings.CitizenInstanceId == driverExtInstance.instanceId)
                 && (DebugSettings.CitizenId == 0 || DebugSettings.CitizenId == driverInstanceData.m_citizen)
@@ -2141,6 +2151,59 @@ namespace TrafficManager.Manager.Impl {
                 () => "[FAIL] Failed to spawn parked passenger car next to building " +
                 $"for citizen {citizenId}");
             return false;
+        }
+
+        /// <summary>
+        /// Swaps parked car with electric, returns electric vehicle info on success
+        /// </summary>
+        /// <param name="logParkingAi">should log</param>
+        /// <param name="citizenId">citizen id</param>
+        /// <param name="citizen">citizen data</param>
+        /// <param name="position">parked vehicle position</param>
+        /// <param name="rotation">parked vehicle rotation</param>
+        /// <param name="electricVehicleInfo">electric vehicle info</param>
+        /// <returns>true only if electric vehicle info exists and parked vehicle was swapped
+        /// otherwise false
+        /// </returns>
+        internal static bool SwapParkedVehicleWithElectric(
+                                                    bool logParkingAi,
+                                                    uint citizenId,
+                                                    ref Citizen citizen,
+                                                    Vector3 position,
+                                                    Quaternion rotation,
+                                                    out VehicleInfo electricVehicleInfo) {
+            Randomizer randomizer = new Randomizer(citizenId);
+            electricVehicleInfo = Singleton<VehicleManager>.instance.GetRandomVehicleInfo(
+                ref randomizer,
+                ItemClass.Service.Residential,
+                ItemClass.SubService.ResidentialLowEco,
+                ItemClass.Level.Level1);
+            if (!electricVehicleInfo) {
+                if (logParkingAi) {
+                    Log._Debug($"SwapParkedVehicleWithElectric({citizenId}): Electric VehicleInfo is null! Could not swap parked vehicle.");
+                }
+                // no electric cars available
+                return false;
+            }
+
+            if (!VehicleManager.instance.CreateParkedVehicle(
+                    out ushort parkedVehicleId,
+                    ref Singleton<SimulationManager>.instance.m_randomizer,
+                    electricVehicleInfo,
+                    position,
+                    rotation,
+                    citizenId)) {
+                if (logParkingAi) {
+                    Log._Debug($"SwapParkedVehicleWithElectric({citizenId}): Could not create parked vehicle. Out of free instances?");
+                }
+                return false;
+            }
+
+            // releases existing parked car, set new one
+            citizen.SetParkedVehicle(citizenId, parkedVehicleId);
+            parkedVehicleId.ToParkedVehicle().m_flags &= 65527; // clear Parking flag
+            return true;
+
         }
 
         public bool FindParkingSpaceInVicinity(Vector3 targetPos,
