@@ -69,20 +69,23 @@ namespace TrafficManager.UI.SubTools.RoutingDetector {
                         sourceLaneEnd.RenderOverlay(cameraInfo, Color.white, highlight: highlight);
                     }
                 }
-                if(hoveredLaneEnd_ != null) {
-                    foreach (var connection in GetConnections(hoveredLaneEnd_)) {
+                var connections = GetConnections(hoveredLaneEnd_);
+                if (connections != null) {
+                    foreach (var connection in connections) {
                         connection.TargetLaneEnd.RenderOverlay(cameraInfo, connection.Color, highlight: true);
                     }
                 }
             } else {
                 selectedLaneEnd_.RenderOverlay(cameraInfo, Color.white, highlight: true);
                 bool connectionHighlighted = false;
-                foreach (var connection in GetConnections(selectedLaneEnd_)) {
-                    bool highlight = HoveredLaneId == connection.TargetLaneEnd.LaneId;
-                    connectionHighlighted |= highlight;
-                    connection.TargetLaneEnd.RenderOverlay(cameraInfo, connection.Color, highlight: highlight);
+                var connections = GetConnections(selectedLaneEnd_);
+                if (connections != null) {
+                    foreach (var connection in GetConnections(selectedLaneEnd_)) {
+                        bool highlight = HoveredLaneId == connection.TargetLaneEnd.LaneId;
+                        connectionHighlighted |= highlight;
+                        connection.TargetLaneEnd.RenderOverlay(cameraInfo, connection.Color, highlight: highlight);
+                    }
                 }
-
                 if (!connectionHighlighted && !GetConnections(hoveredLaneEnd_).IsNullOrEmpty()) {
                     hoveredLaneEnd_?.RenderOverlay(cameraInfo, Color.white, highlight: true);
                 }
