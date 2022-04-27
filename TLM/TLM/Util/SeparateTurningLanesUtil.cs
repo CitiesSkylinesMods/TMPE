@@ -7,6 +7,7 @@ namespace TrafficManager.Util {
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.Manager.Impl;
+    using TrafficManager.Manager.Impl.LaneConnection;
     using TrafficManager.State;
     using TrafficManager.Util.Extensions;
     using UnityEngine;

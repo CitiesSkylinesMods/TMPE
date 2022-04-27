@@ -7,6 +7,7 @@ namespace TrafficManager.State {
     using System;
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.Manager.Impl;
+    using TrafficManager.Manager.Impl.LaneConnection;
     using TrafficManager.Util.Extensions;
 
     // [Obsolete] // I commented this on out for now to prevent warning spam

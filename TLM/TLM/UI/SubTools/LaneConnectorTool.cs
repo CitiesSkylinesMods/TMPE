@@ -6,6 +6,7 @@ namespace TrafficManager.UI.SubTools {
     using System.Linq;
     using ColossalFramework.UI;
     using TrafficManager.Manager.Impl;
+    using TrafficManager.Manager.Impl.LaneConnection;
     using TrafficManager.State.ConfigData;
     using TrafficManager.State.Keybinds;
     using TrafficManager.State;

@@ -1,4 +1,5 @@
 namespace TrafficManager.Manager.Impl {
+    using TrafficManager.Manager.Impl.LaneConnection;
     using ColossalFramework;
     using CSUtil.Commons;
     using JetBrains.Annotations;

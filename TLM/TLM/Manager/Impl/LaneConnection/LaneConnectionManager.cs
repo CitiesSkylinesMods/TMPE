@@ -1,4 +1,4 @@
-namespace TrafficManager.Manager.Impl {
+namespace TrafficManager.Manager.Impl.LaneConnection {
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -7,7 +7,6 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.Lifecycle;
-    using TrafficManager.Manager.Impl.LaneConnectionManagerData;
     using TrafficManager.State;
     using TrafficManager.Util.Extensions;
     using UnityEngine;

@@ -10,6 +10,7 @@ namespace TrafficManager.Lifecycle {
     using TrafficManager.API.Manager;
     using TrafficManager.Custom.PathFinding;
     using TrafficManager.Manager.Impl;
+    using TrafficManager.Manager.Impl.LaneConnection;
     using TrafficManager.State;
     using TrafficManager.UI;
     using TrafficManager.Util;

@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.Manager.Impl {
+namespace TrafficManager.Manager.Impl {
     using TrafficManager.API.Manager;
 
     public class ManagerFactory : IManagerFactory {
@@ -32,7 +32,7 @@
 
         public ILaneArrowManager LaneArrowManager => Impl.LaneArrowManager.Instance;
 
-        public ILaneConnectionManager LaneConnectionManager => Impl.LaneConnectionManager.Instance;
+        public ILaneConnectionManager LaneConnectionManager => Impl.LaneConnection.LaneConnectionManager.Instance;
 
         public IGeometryManager GeometryManager => Impl.GeometryManager.Instance;
 
