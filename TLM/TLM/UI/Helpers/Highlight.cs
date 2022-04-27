@@ -117,6 +117,9 @@ namespace TrafficManager.UI.Helpers {
             }
         }
 
+        public static Texture2D SquareTexture;
+        public static Texture2D TriangleTexture;
+
         public static void DrawNodeCircle(RenderManager.CameraInfo cameraInfo,
                                           ushort nodeId,
                                           bool warning = false,
@@ -290,6 +293,103 @@ namespace TrafficManager.UI.Helpers {
                 dashLen: 0,
                 minY: minY,
                 maxY: maxY,
+                renderLimits: renderLimits,
+                alphaBlend: alphaBlend);
+        }
+
+        public static void DrawDiamondAt(
+            RenderManager.CameraInfo cameraInfo,
+            Vector3 center,
+            Vector3 tangent,
+            Texture2D texture,
+            Color color,
+            float size,
+            float minY,
+            float maxY,
+            bool renderLimits,
+            bool alphaBlend = false) {
+            Vector3 dir = tangent * size;
+            Vector3 dir90 = dir.RotateXZ90CW();
+
+            Quad3 quad = new Quad3 {
+                a = center + dir,
+                b = center - dir90,
+                c = center - dir,
+                d = center + dir90,
+            };
+
+            Singleton<ToolManager>.instance.m_drawCallData.m_overlayCalls++;
+            RenderManager.instance.OverlayEffect.DrawQuad(
+                cameraInfo,
+                texture,
+                color,
+                quad,
+                minY,
+                maxY,
+                renderLimits: renderLimits,
+                alphaBlend: alphaBlend);
+        }
+
+        public static void DrawSquareAt(
+            RenderManager.CameraInfo cameraInfo,
+            Vector3 center,
+            Vector3 tangent,
+            Texture2D texture,
+            Color color,
+            float size,
+            float minY,
+            float maxY,
+            bool renderLimits,
+            bool alphaBlend = false) {
+            Vector3 dir = tangent * size;
+            Vector3 dir90 = dir.RotateXZ90CW();
+
+            Quad3 quad = new Quad3 {
+                a = center - dir + dir90,
+                b = center + dir + dir90,
+                c = center + dir - dir90,
+                d = center - dir - dir90,
+            };
+
+            Singleton<ToolManager>.instance.m_drawCallData.m_overlayCalls++;
+            RenderManager.instance.OverlayEffect.DrawQuad(
+                cameraInfo,
+                texture,
+                color,
+                quad,
+                minY,
+                maxY,
+                renderLimits: renderLimits,
+                alphaBlend: alphaBlend);
+        }
+
+        public static void DrawDiamondAt(
+            RenderManager.CameraInfo cameraInfo,
+            Vector3 center,
+            Vector3 tangent,
+            Color color,
+            float size,
+            float minY,
+            float maxY,
+            bool renderLimits,
+            bool alphaBlend = false) {
+            Vector3 dir = tangent * size;
+            Vector3 dir90 = dir.RotateXZ90CW();
+
+            Quad3 quad = new Quad3 {
+                a = center + dir,
+                b = center + dir90,
+                c = center - dir,
+                d = center - dir90,
+            };
+
+            Singleton<ToolManager>.instance.m_drawCallData.m_overlayCalls++;
+            RenderManager.instance.OverlayEffect.DrawQuad(
+                cameraInfo,
+                color,
+                quad,
+                minY,
+                maxY,
                 renderLimits: renderLimits,
                 alphaBlend: alphaBlend);
         }

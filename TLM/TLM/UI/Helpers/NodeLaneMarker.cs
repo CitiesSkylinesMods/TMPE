@@ -2,6 +2,7 @@ namespace TrafficManager.UI.Helpers {
     using UnityEngine;
     using System;
     using TrafficManager.Util;
+    using TrafficManager.UI.SubTools;
 
     internal class NodeLaneMarker {
         [Flags]
@@ -16,7 +17,7 @@ namespace TrafficManager.UI.Helpers {
 
         internal Vector3 TerrainPosition; // projected on terrain
         internal Vector3 Position; // original height.
-        internal Vector3 Direction;
+        internal Vector3 Direction; // pointing toward the lane.
 
         /// <summary>
         ///  Intersects mouse ray with marker bounds.
@@ -58,25 +59,45 @@ namespace TrafficManager.UI.Helpers {
                     renderLimits,
                     false);
             } else {
-                float magnification = enlarge ? 1f : 0.65f;
-                float size = RADIUS * magnification;
-                if ((shape & Shape.Out) != 0) {
-                    Highlight.DrawArrowHeadAt(
+                if ((shape & Shape.InOut) == Shape.InOut) {
+                    float magnification = enlarge ? 1.1f : 0.9f;
+                    float size = RADIUS * magnification;
+                    float shift = -0.15f; // to match exactly with lane end.
+                    Highlight.DrawDiamondAt(
                         cameraInfo,
-                        center: Position + Direction * size,
+                        center: Position + Direction * shift,
                         tangent: Direction,
+                        texture: Highlight.SquareTexture,
                         color: color,
                         size: size,
                         minY: Position.y - overdrawHeight,
                         maxY: Position.y + overdrawHeight,
                         renderLimits: renderLimits,
                         alphaBlend: true);
-                }
-                if ((shape & Shape.In) != 0) {
-                    Highlight.DrawArrowHeadAt(
+                } else if ((shape & Shape.In) != 0) {
+                    float magnification = enlarge ? 1.1f : 0.9f;
+                    float size = RADIUS * magnification;
+                    float shift = size - 0.5f; // to match exactly with lane end.
+                    Highlight.DrawSquareAt(
                         cameraInfo,
-                        center: Position - Direction * size,
+                        center: Position + Direction * shift,
+                        tangent: Direction,
+                        texture: Highlight.TriangleTexture,
+                        color: color,
+                        size: size,
+                        minY: Position.y - overdrawHeight,
+                        maxY: Position.y + overdrawHeight,
+                        renderLimits: renderLimits,
+                        alphaBlend: true);
+                } else if ((shape & Shape.Out) != 0) {
+                    float magnification = enlarge ? 1.1f : 0.9f;
+                    float size = RADIUS * magnification;
+                    float shift = size; // to match exactly with lane end.
+                    Highlight.DrawSquareAt(
+                        cameraInfo,
+                        center: Position - Direction * shift,
                         tangent: -Direction,
+                        texture: Highlight.TriangleTexture,
                         color: color,
                         size: size,
                         minY: Position.y - overdrawHeight,
