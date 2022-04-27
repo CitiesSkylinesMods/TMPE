@@ -1,10 +1,11 @@
 [Version] 11.6.5.2
 [Released] April 27th 2022
 [Link] tmpe-v11652-test-27042022
-[Meta] This release improves Lane Routing (UI, trams, trains, etc.) and Parking AI (electric cars).
+[Meta] This release improves Lane Routing (UI, trams, trains, etc.), Parking AI (electric cars), and icon themes.
 [Meta] [Meta] TM:PE data format change: Old cities will still load (data converted automatically), but after saving you'll need TM:PE 11.6.5.2 (or newer) for those saves.
 [New] Directional lane connectors #1492 #1214 #1211 (kianzarrin, Chamëleon)
 [New] Lane routing diagnostic tool for developers #1549 #1537 #1534 (kianzarrin)
+[New] Chinese road sign theme #1523 (kvakvs, lokpro, TianQiBuTian)
 [Mod] Incompatible: Two more CSM mods #1481 (StayHungryStayFoolish, aubergine18)
 [Mod] Incompatible: 交通管理器 汉化版TMPE_V11_STABLE #1481 (StayHungryStayFoolish, aubergine18)
 [Mod] Incompatible: Service Vehicles Manager 2.0 clone #1481 (StayHungryStayFoolish, aubergine18)
@@ -22,6 +23,7 @@
 [Fixed] Parking AI: Non-dummy tourists not using electric cars #1543 #1527 (krzychu124)
 [Fixed] Parking AI: Residents moving into city never have electric cars #1543 #1527 (krzychu124)
 [Fixed] API: `ManagersFactory` not working #1548 (kianzarrin)
+[Updated] Multiple icons updated, fallback theme, etc. #1523 (kvakvs)
 [Updated] Separated road and tracked vehicle routing in Routing Manager #1501 (kianzarrin)
 [Updated] Trains prefer to stay in lane at intersection #1483 #1475 (kianzarrin)
 [Updated] Mod options: Drop-down lists converted to custom components #1512 #1510 #1468 (kianzarrin)
