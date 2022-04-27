@@ -29,7 +29,7 @@ namespace TrafficManager.State.Keybinds {
             AddReadOnlyKeybind(Translation.Options.Get("Keybind:Overground view"),
                                ElevationUp,
                                autoUpdateText: true);
-            AddReadOnlyKeybind(Translation.Options.Get("Keybind:Undeground view"),
+            AddReadOnlyKeybind(Translation.Options.Get("Keybind:Underground view"),
                                ElevationDown,
                                autoUpdateText: true);
 
