@@ -69,20 +69,23 @@ namespace TrafficManager.UI.SubTools.RoutingDetector {
                         sourceLaneEnd.RenderOverlay(cameraInfo, Color.white, highlight: highlight);
                     }
                 }
-                if(hoveredLaneEnd_ != null) {
-                    foreach (var connection in GetConnections(hoveredLaneEnd_)) {
+                var connections = GetConnections(hoveredLaneEnd_);
+                if (connections != null) {
+                    foreach (var connection in connections) {
                         connection.TargetLaneEnd.RenderOverlay(cameraInfo, connection.Color, highlight: true);
                     }
                 }
             } else {
                 selectedLaneEnd_.RenderOverlay(cameraInfo, Color.white, highlight: true);
                 bool connectionHighlighted = false;
-                foreach (var connection in GetConnections(selectedLaneEnd_)) {
-                    bool highlight = HoveredLaneId == connection.TargetLaneEnd.LaneId;
-                    connectionHighlighted |= highlight;
-                    connection.TargetLaneEnd.RenderOverlay(cameraInfo, connection.Color, highlight: highlight);
+                var connections = GetConnections(selectedLaneEnd_);
+                if (connections != null) {
+                    foreach (var connection in GetConnections(selectedLaneEnd_)) {
+                        bool highlight = HoveredLaneId == connection.TargetLaneEnd.LaneId;
+                        connectionHighlighted |= highlight;
+                        connection.TargetLaneEnd.RenderOverlay(cameraInfo, connection.Color, highlight: highlight);
+                    }
                 }
-
                 if (!connectionHighlighted && !GetConnections(hoveredLaneEnd_).IsNullOrEmpty()) {
                     hoveredLaneEnd_?.RenderOverlay(cameraInfo, Color.white, highlight: true);
                 }
@@ -294,6 +297,7 @@ namespace TrafficManager.UI.SubTools.RoutingDetector {
                     ctrl: false,
                     alt: false,
                     localizedText: "Deselect node"));
+                DisplayConnections(hoveredLaneEnd_);
             } else {
                 items.Add(new MainMenu.OSD.Label("Hover over target lane to show transitions"));
                 items.Add(new MainMenu.OSD.HardcodedMouseShortcut(
@@ -312,6 +316,20 @@ namespace TrafficManager.UI.SubTools.RoutingDetector {
                 if (hoveredLaneEnd_ != null && !transitions_.IsNullOrEmpty()) {
                     foreach (var transition in transitions_) {
                         items.Add(new MainMenu.OSD.Label($"type:{transition.type} | group:{transition.group} | distance:{transition.distance}"));
+                    }
+                } else {
+                    DisplayConnections(selectedLaneEnd_);
+                }
+            }
+
+            void DisplayConnections(LaneEnd laneEnd) {
+                if (GetConnections(laneEnd) is Connection[] connections) {
+                    foreach (Connection connection in connections) {
+                        if (connection.Transtitions != null) {
+                            foreach (var transition in connection.Transtitions) {
+                                items.Add(new MainMenu.OSD.Label($"type:{transition.type} | group:{transition.group} | distance:{transition.distance} laneId:{transition.laneId}"));
+                            }
+                        }
                     }
                 }
             }
