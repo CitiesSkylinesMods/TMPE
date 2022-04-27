@@ -353,22 +353,29 @@ namespace TrafficManager.UI.SubTools {
                     }
 
                     bool drawMarker = false;
+                    bool acute = true;
                     bool sourceMode = GetSelectionMode() == SelectionMode.SelectSource;
                     bool targetMode = GetSelectionMode() == SelectionMode.SelectTarget;
                     if ( sourceMode & laneEnd.IsSource) {
                         // draw source marker in source selection mode,
                         // make exception for markers that have no target:
                         foreach(var targetLaneEnd in laneEnds) {
-                            if (CanConnect(laneEnd, targetLaneEnd)) {
+                            if (CanConnect(laneEnd, targetLaneEnd, group_, out bool acute2)) {
                                 drawMarker = true;
-                                break;
+                                if (!acute2) {
+                                    acute = false;
+                                    break;
+                                }
                             }
                         }
                     } else if (targetMode) {
                         // selected source marker in target selection mode
-                        drawMarker =
-                            selectedLaneEnd == laneEnd ||
-                            CanConnect(selectedLaneEnd, laneEnd);
+                        if(selectedLaneEnd == laneEnd) {
+                            drawMarker = true;
+
+                        } else {
+                            drawMarker = CanConnect(selectedLaneEnd, laneEnd, group_, out acute);
+                        }
                     }
 
                     // highlight hovered marker and selected marker
@@ -385,11 +392,15 @@ namespace TrafficManager.UI.SubTools {
                         }
 
                         LaneEndTransitionGroup group = TrackUtils.GetLaneEndTransitionGroup(laneEnd.VehicleType);
-                        if ((group & group_) != 0) {
+                        group &= group_;
+                        if (acute) {
+                            group &= ~LaneEndTransitionGroup.Track;
+                        }
+                        if (group != 0) {
                             bool isTarget = selectedLaneEnd != null && laneEnd != selectedLaneEnd;
                             var color = isTarget ? Color.white : laneEnd.Color;
                             bool highlightMarker = laneEnd == selectedLaneEnd || markerIsHovered;
-                            laneEnd.RenderOverlay(cameraInfo, color, highlightMarker, true, group_);
+                            laneEnd.RenderOverlay(cameraInfo, color, highlightMarker, true, group);
                         }
                     } // if drawMarker
                 } // end foreach lanemarker in node markers
@@ -897,8 +908,7 @@ namespace TrafficManager.UI.SubTools {
                     if (!targetLaneEnd.IsTarget ||
                         targetLaneEnd.SegmentId == sourceLaneEnd.SegmentId ||
                         targetLaneEnd.SegmentId == mainSegmentSourceId ||
-                        !CanConnect(sourceLaneEnd, targetLaneEnd)
-                        ) {
+                        !CanConnect(sourceLaneEnd, targetLaneEnd, LaneEndTransitionGroup.All, out _)) {
                         continue;
                     }
                     bool connect = false;
@@ -1410,66 +1420,28 @@ namespace TrafficManager.UI.SubTools {
             return laneEnds;
         }
 
-        private static bool CanConnect(LaneEnd source, LaneEnd target) {
+        private static bool CanConnect(LaneEnd source, LaneEnd target, LaneEndTransitionGroup groups, out bool acute) {
             bool ret = source != target && source.IsSource && target.IsTarget;
             ret &= (target.VehicleType & source.VehicleType) != 0;
 
             bool IsRoad(LaneEnd laneEnd) =>
-                (laneEnd.LaneType & LaneArrowManager.LANE_TYPES) != 0 &&
-                (laneEnd.VehicleType & LaneArrowManager.VEHICLE_TYPES) != 0;
+                (laneEnd.LaneType & TrackUtils.ROAD_LANE_TYPES) != 0 &&
+                (laneEnd.VehicleType & TrackUtils.ROAD_VEHICLE_TYPES) != 0;
+            bool IsTrack(LaneEnd laneEnd) =>
+                (laneEnd.LaneType & TrackUtils.TRACK_LANE_TYPES) != 0 &&
+                (laneEnd.VehicleType & TrackUtils.TRACK_VEHICLE_TYPES) != 0;
 
             // turning angle does not apply to roads.
-            bool isRoad = IsRoad(source) && IsRoad(target);
+            bool isRoad = groups != LaneEndTransitionGroup.Track && IsRoad(source) && IsRoad(target);
 
             // check track turning angles are within bounds
-            ret &= isRoad || CheckSegmentsTurningAngle(
+            acute = !LaneConnectionManager.CheckSegmentsTurningAngle(
                     sourceSegmentId: source.SegmentId,
                     sourceStartNode: source.StartNode,
                     targetSegmentId: target.SegmentId,
                     targetStartNode: target.StartNode);
 
-            return ret;
-        }
-
-        /// <summary>
-        /// Checks if the turning angle between two segments at the given node is within bounds.
-        /// </summary>
-        /// <param name="sourceSegmentId"></param>
-        /// <param name="sourceSegment"></param>
-        /// <param name="sourceStartNode"></param>
-        /// <param name="targetSegmentId"></param>
-        /// <param name="targetSegment"></param>
-        /// <param name="targetStartNode"></param>
-        /// <returns></returns>
-        private static bool CheckSegmentsTurningAngle(ushort sourceSegmentId,
-                                                      bool sourceStartNode,
-                                                      ushort targetSegmentId,
-                                                      bool targetStartNode) {
-            if(sourceSegmentId == targetSegmentId) {
-                return false;
-            }
-
-            ref NetSegment sourceSegment = ref sourceSegmentId.ToSegment();
-            ref NetSegment targetSegment = ref targetSegmentId.ToSegment();
-            float turningAngle = 0.01f - Mathf.Min(
-                sourceSegment.Info.m_maxTurnAngleCos,
-                targetSegment.Info.m_maxTurnAngleCos);
-
-            if (turningAngle < 1f) {
-                Vector3 sourceDirection = sourceStartNode
-                                              ? sourceSegment.m_startDirection
-                                              : sourceSegment.m_endDirection;
-
-                Vector3 targetDirection = targetStartNode
-                                              ? targetSegment.m_startDirection
-                                              : targetSegment.m_endDirection;
-
-                float dirDotProd = (sourceDirection.x * targetDirection.x) +
-                                   (sourceDirection.z * targetDirection.z);
-                return dirDotProd < turningAngle;
-            }
-
-            return true;
+            return isRoad || !acute;
         }
 
         /// <summary>

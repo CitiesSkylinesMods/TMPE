@@ -359,6 +359,8 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
 
             var sourceLaneInfo = LaneUtil.GetLaneInfo(sourceLaneId);
             var targetLaneInfo = LaneUtil.GetLaneInfo(targetLaneId);
+            ref NetLane sourceNetLane = ref sourceLaneId.ToLane();
+            ref NetLane targetNetLane = ref targetLaneId.ToLane();
             bool canConnect = Supports(sourceLaneInfo) && Supports(targetLaneInfo);
             if (!canConnect) {
                 return false;
@@ -367,6 +369,16 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
             ushort sourceSegmentId = sourceLaneId.ToLane().m_segment;
             ushort targetSegmentId = targetLaneId.ToLane().m_segment;
             ushort nodeId = sourceSegmentId.ToSegment().GetNodeId(sourceStartNode);
+
+            if (Group == LaneEndTransitionGroup.Track) {
+                bool targetStartnode = targetSegmentId.ToSegment().IsStartNode(nodeId);
+                canConnect = LaneConnectionManager.CheckSegmentsTurningAngle(
+                    sourceSegmentId, sourceStartNode, targetSegmentId, targetStartnode);
+                if (!canConnect) {
+                    return false;
+                }
+            }
+
             connectionDataBase_.ConnectTo(sourceLaneId, targetLaneId, nodeId);
             Assert(AreLanesConnected(sourceLaneId, targetLaneId, sourceStartNode), $"AreLanesConnected({sourceLaneId}, {targetLaneId}, {sourceStartNode})");
 
@@ -423,93 +435,6 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
             if (TMPELifecycle.Instance.MayPublishSegmentChanges()) {
                 ExtSegmentManager.Instance.PublishSegmentChanges(segmentId);
             }
-        }
-
-        internal bool GetLaneEndPoint(ushort segmentId,
-                                      bool startNode,
-                                      byte laneIndex,
-                                      uint? laneId,
-                                      NetInfo.Lane laneInfo,
-                                      out bool outgoing,
-                                      out bool incoming,
-                                      out Vector3? pos) {
-            ref NetSegment netSegment = ref segmentId.ToSegment();
-
-            pos = null;
-            outgoing = false;
-            incoming = false;
-
-            if ((netSegment.m_flags & (NetSegment.Flags.Created | NetSegment.Flags.Deleted)) != NetSegment.Flags.Created) {
-                return false;
-            }
-
-            if (laneId == null) {
-                laneId = FindLaneId(segmentId, laneIndex);
-                if (laneId == null) {
-                    return false;
-                }
-            }
-
-            ref NetLane netLane = ref ((uint)laneId).ToLane();
-
-            if ((netLane.m_flags &
-                 ((ushort)NetLane.Flags.Created | (ushort)NetLane.Flags.Deleted)) !=
-                (ushort)NetLane.Flags.Created) {
-                return false;
-            }
-
-            if (laneInfo == null) {
-                if (laneIndex < netSegment.Info.m_lanes.Length) {
-                    laneInfo = netSegment.Info.m_lanes[laneIndex];
-                } else {
-                    return false;
-                }
-            }
-
-            NetInfo.Direction laneDir = ((netSegment.m_flags & NetSegment.Flags.Invert) == NetSegment.Flags.None)
-                    ? laneInfo.m_finalDirection
-                    : NetInfo.InvertDirection(laneInfo.m_finalDirection);
-
-            if (startNode) {
-                if ((laneDir & NetInfo.Direction.Backward) != NetInfo.Direction.None) {
-                    outgoing = true;
-                }
-
-                if ((laneDir & NetInfo.Direction.Forward) != NetInfo.Direction.None) {
-                    incoming = true;
-                }
-
-                pos = netLane.m_bezier.a;
-            } else {
-                if ((laneDir & NetInfo.Direction.Forward) != NetInfo.Direction.None) {
-                    outgoing = true;
-                }
-
-                if ((laneDir & NetInfo.Direction.Backward) != NetInfo.Direction.None) {
-                    incoming = true;
-                }
-
-                pos = netLane.m_bezier.d;
-            }
-
-            return true;
-        }
-
-        private uint? FindLaneId(ushort segmentId, byte laneIndex) {
-            ref NetSegment netSegment = ref segmentId.ToSegment();
-
-            NetInfo.Lane[] lanes = netSegment.Info.m_lanes;
-            uint laneId = netSegment.m_lanes;
-
-            for (byte i = 0; i < lanes.Length && laneId != 0; i++) {
-                if (i == laneIndex) {
-                    return laneId;
-                }
-
-                laneId = laneId.ToLane().m_nextLane;
-            }
-
-            return null;
         }
 
         /// <summary>

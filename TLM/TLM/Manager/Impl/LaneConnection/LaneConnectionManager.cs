@@ -146,6 +146,41 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
             Track.HandleInvalidSegmentImpl(seg.segmentId);
         }
 
+
+        /// <summary>
+        /// Checks if the turning angle between two segments at the given node is within bounds.
+        /// </summary>
+        public static bool CheckSegmentsTurningAngle(ushort sourceSegmentId,
+                                                      bool sourceStartNode,
+                                                      ushort targetSegmentId,
+                                                      bool targetStartNode) {
+            if (sourceSegmentId == targetSegmentId) {
+                return false;
+            }
+
+            ref NetSegment sourceSegment = ref sourceSegmentId.ToSegment();
+            ref NetSegment targetSegment = ref targetSegmentId.ToSegment();
+            float turningAngle = 0.01f - Mathf.Min(
+                sourceSegment.Info.m_maxTurnAngleCos,
+                targetSegment.Info.m_maxTurnAngleCos);
+
+            if (turningAngle < 1f) {
+                Vector3 sourceDirection = sourceStartNode
+                                              ? sourceSegment.m_startDirection
+                                              : sourceSegment.m_endDirection;
+
+                Vector3 targetDirection = targetStartNode
+                                              ? targetSegment.m_startDirection
+                                              : targetSegment.m_endDirection;
+
+                float dirDotProd = (sourceDirection.x * targetDirection.x) +
+                                   (sourceDirection.z * targetDirection.z);
+                return dirDotProd < turningAngle;
+            }
+
+            return true;
+        }
+
         internal bool GetLaneEndPoint(ushort segmentId,
                                       bool startNode,
                                       byte laneIndex,
