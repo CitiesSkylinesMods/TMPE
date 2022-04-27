@@ -259,7 +259,7 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
                 return false;
             }
 
-            if ((Group & LaneEndTransitionGroup.Road) != 0) {
+            if (Supports(LaneEndTransitionGroup.Road)) {
                 RecalculateLaneArrows(sourceLaneId, nodeId, sourceStartNode);
             }
 
@@ -393,7 +393,9 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
                            $"{targetLaneId}, {sourceStartNode})");
             }
 
-            RecalculateLaneArrows(sourceLaneId, nodeId, sourceStartNode);
+            if (Supports(LaneEndTransitionGroup.Road)) {
+                RecalculateLaneArrows(sourceLaneId, nodeId, sourceStartNode);
+            }
 
             if (sourceSegmentId == targetSegmentId) {
                 JunctionRestrictionsManager.Instance.SetUturnAllowed(
