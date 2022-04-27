@@ -106,12 +106,16 @@ namespace TrafficManager.Patch._CitizenAI._ResidentAI {
             bool useTaxi = !useCar && !useBike && randomizer.Int32(100u) < taxiProb;
             bool useElectricCar = false;
 
+            bool forceElectric = false;
             if (useCar) {
                 int electricProb = GetElectricCarProbability(__instance,
                                                              instanceID,
                                                              ref citizenData,
                                                              __instance.m_info.m_agePhase);
                 useElectricCar = randomizer.Int32(100u) < electricProb;
+                // NON-STOCK CODE START
+                forceElectric = useElectricCar && electricProb == 100;
+                // NON-STOCK CODE END
             }
 
             ItemClass.Service service = ItemClass.Service.Residential;
@@ -126,15 +130,38 @@ namespace TrafficManager.Patch._CitizenAI._ResidentAI {
             // NON-STOCK CODE START
             VehicleInfo carInfo = null;
             if (Options.parkingAI && useCar) {
-                ushort parkedVehicleId = citizenData.m_citizen.ToCitizen().m_parkedVehicle;
+                ref Citizen citizen = ref citizenData.m_citizen.ToCitizen();
+                ushort parkedVehicleId = citizen.m_parkedVehicle;
 
                 if (parkedVehicleId != 0) {
                     Log._DebugIf(
                         logParkingAi,
                         () => $"CustomResidentAI.CustomGetVehicleInfo({instanceID}): " +
-                        $"Citizen instance {instanceID} owns a parked vehicle {parkedVehicleId}. " +
-                        $"Reusing vehicle info.");
-                    carInfo = parkedVehicleId.ToParkedVehicle().Info;
+                        $"Citizen instance {instanceID} owns a parked vehicle {parkedVehicleId}.");
+
+                    ref VehicleParked parkedVehicle = ref parkedVehicleId.ToParkedVehicle();
+                    carInfo = parkedVehicle.Info;
+                    if (forceElectric && carInfo.m_class.m_subService != ItemClass.SubService.ResidentialLowEco) {
+                        Log._DebugIf(logParkingAi,
+                                     () => $"CustomResidentAI.CustomGetVehicleInfo({instanceID}): " +
+                                                         $"Force electric! Parked vehicle {parkedVehicleId} is not electric vehicle, wwap with electric one.");
+
+                        if (AdvancedParkingManager.SwapParkedVehicleWithElectric(
+                                logParkingAi: logParkingAi,
+                                citizenId: citizenData.m_citizen,
+                                citizen: ref citizen,
+                                position: parkedVehicle.m_position,
+                                rotation: parkedVehicle.m_rotation,
+                                electricVehicleInfo: out VehicleInfo electricVehicleInfo)) {
+                            carInfo = electricVehicleInfo;
+                        }
+                    } else {
+                        Log._DebugIf(
+                            logParkingAi,
+                            () => $"CustomResidentAI.CustomGetVehicleInfo({instanceID}): " +
+                                  "Reuse existing vehicle info");
+                        carInfo = parkedVehicle.Info;
+                    }
                 }
             }
 
