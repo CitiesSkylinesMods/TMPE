@@ -1,8 +1,7 @@
 namespace TrafficManager.UI.Helpers {
-    using UnityEngine;
     using System;
     using TrafficManager.Util;
-    using TrafficManager.UI.SubTools;
+    using UnityEngine;
 
     internal class NodeLaneMarker {
         [Flags]
@@ -25,7 +24,7 @@ namespace TrafficManager.UI.Helpers {
         /// <returns><c>true</c>if mouse ray intersects with marker <c>false</c> otherwise</returns>
         internal bool IntersectRay() {
             Ray mouseRay = InGameUtil.Instance.CachedMainCamera.ScreenPointToRay(Input.mousePosition);
-            Bounds bounds = new (Vector3.zero, Vector3.one * RADIUS) {
+            Bounds bounds = new(Vector3.zero, Vector3.one * RADIUS) {
                 center = Position,
             };
             return bounds.IntersectRay(mouseRay);
@@ -61,24 +60,22 @@ namespace TrafficManager.UI.Helpers {
             } else {
                 float magnification = enlarge ? 1.23f : 0.8f;
                 float size = RADIUS * magnification;
-                float size2 = size * 1.4f;
-                float shift = -0.2f; // to match exactly with lane end.
-                float shift2 = (size2 - size) * .5f;
+                float shift = enlarge ? -0.2f : 0; // to match exactly with lane end.
                 if ((shape & Shape.InOut) == Shape.InOut) {
                     if (!enlarge) {
-                        Highlight.DrawDiamondAt(
+                        Highlight.DrawDiamond(
                              cameraInfo,
                              center: Position + Direction * shift,
                              tangent: Direction,
                              texture: Highlight.SquareTexture,
                              color: Color.black, // outer black
-                             size: size2,
+                             size: size * 1.4f,
                              minY: Position.y - overdrawHeight,
                              maxY: Position.y + overdrawHeight,
                              renderLimits: renderLimits,
                              alphaBlend: true);
                     }
-                    Highlight.DrawDiamondAt(
+                    Highlight.DrawDiamond(
                         cameraInfo,
                         center: Position + Direction * shift,
                         tangent: Direction,
@@ -91,60 +88,72 @@ namespace TrafficManager.UI.Helpers {
                         alphaBlend: true);
 
                 } else if ((shape & Shape.In) != 0) {
-                    if (!enlarge) {
-                        Highlight.DrawTriangleAt(
-                            cameraInfo,
-                            center: Position + Direction * (shift - shift2),
-                            tangent: Direction,
-                            texture: Highlight.SquareTexture,
-                            color: Color.black,
-                            size: size2,
-                            minY: Position.y - overdrawHeight,
-                            maxY: Position.y + overdrawHeight,
-                            renderLimits: renderLimits,
-                            alphaBlend: true);
-                    }
-                    Highlight.DrawTriangleAt(
-                        cameraInfo,
-                        center: Position + Direction * shift,
-                        tangent: Direction,
-                        texture: Highlight.SquareTexture,
+                    DrawTriangleHead(
+                        cameraInfo: cameraInfo,
+                        drawOutline: !enlarge,
                         color: color,
+                        Position + Direction * shift,
+                        Direction,
                         size: size,
+                        outerSize: size * 1.5f,
                         minY: Position.y - overdrawHeight,
                         maxY: Position.y + overdrawHeight,
-                        renderLimits: renderLimits,
-                        alphaBlend: true);
-
+                        renderLimits: renderLimits);
                 } else if ((shape & Shape.Out) != 0) {
-                    shift += .1f;
-                    if (!enlarge) {
-                        Highlight.DrawTriangleAt(
-                            cameraInfo,
-                            center: Position - Direction * (shift-shift2),
-                            tangent: -Direction,
-                            texture: Highlight.SquareTexture,
-                            color: Color.black,
-                            size: size2,
-                            minY: Position.y - overdrawHeight,
-                            maxY: Position.y + overdrawHeight,
-                            renderLimits: renderLimits,
-                            alphaBlend: true);
-                    }
-                    Highlight.DrawTriangleAt(
-                        cameraInfo,
-                        center: Position - Direction * shift,
-                        tangent: -Direction,
-                        texture: Highlight.SquareTexture,
+                    if (!enlarge) shift = -0.30f; // to cover lane curve
+                    DrawTriangleHead(
+                        cameraInfo: cameraInfo,
+                        drawOutline: !enlarge,
                         color: color,
+                        pos: Position - Direction * shift,
+                        dir: -Direction,
                         size: size,
+                        outerSize: size * 1.5f,
                         minY: Position.y - overdrawHeight,
                         maxY: Position.y + overdrawHeight,
-                        renderLimits: renderLimits,
-                        alphaBlend: true);
-
+                        renderLimits: renderLimits);
                 }
             }
         }
+
+        private static void DrawTriangleHead(
+            RenderManager.CameraInfo cameraInfo,
+            bool drawOutline,
+            Color color,
+            Vector3 pos,
+            Vector3 dir,
+            float size,
+            float outerSize,
+            float minY,
+            float maxY,
+            bool renderLimits) {
+            if (drawOutline) {
+                outerSize *= 0.4f; // texture less triangles are bigger.
+                float shift2 = (outerSize - size) * 0.5f; // shift the outline to the center.
+                Highlight.DrawTriangle(
+                    cameraInfo,
+                    center: pos - dir * shift2,
+                    tangent: dir,
+                    //texture: Highlight.SquareTexture,
+                    color: Color.black,
+                    size: outerSize,
+                    minY: minY,
+                    maxY: maxY,
+                    renderLimits: renderLimits,
+                    alphaBlend: false);
+            }
+            Highlight.DrawTriangle(
+                cameraInfo,
+                center: pos,
+                tangent: dir,
+                texture: Highlight.SquareTexture,
+                color: color,
+                size: size,
+                minY: minY,
+                maxY: maxY,
+                renderLimits: renderLimits,
+                alphaBlend: true);
+        }
+
     }
 }
