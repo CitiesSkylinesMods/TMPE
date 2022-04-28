@@ -186,6 +186,9 @@
                 "PassengerTrain",
                 whiteTexture);
             LoadVehicleRestrictionSign(ExtVehicleType.CargoTrain, "CargoTrain", whiteTexture);
+            //TODO Airports-DLC-Support - add correct textures
+            LoadVehicleRestrictionSign(ExtVehicleType.PassengerPlane, "PassengerTrain", whiteTexture);
+            LoadVehicleRestrictionSign(ExtVehicleType.CargoPlane, "CargoTrain", whiteTexture);
 
             // Load other restrictions
             LoadOtherRestrictionSign(OtherRestriction.Crossing, "PedestrianCrossing", whiteTexture);

@@ -17,7 +17,7 @@ namespace TrafficManager.Util {
 
         internal const NetInfo.LaneType ROAD_LANE_TYPES = LaneArrowManager.LANE_TYPES;
 
-        internal const VehicleInfo.VehicleType ROAD_VEHICLE_TYPES = LaneArrowManager.VEHICLE_TYPES | VehicleInfo.VehicleType.Trolleybus;
+        internal const VehicleInfo.VehicleType ROAD_VEHICLE_TYPES = LaneArrowManager.VEHICLE_TYPES | VehicleInfo.VehicleType.Trolleybus | VehicleInfo.VehicleType.Plane;
 
         internal static bool IsTrackOnly(this NetInfo.Lane laneInfo) {
             return
