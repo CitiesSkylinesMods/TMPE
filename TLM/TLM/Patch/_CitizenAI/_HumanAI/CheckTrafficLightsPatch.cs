@@ -1,12 +1,12 @@
 namespace TrafficManager.Patch._CitizenAI._HumanAI {
     using System.Reflection;
-    using API.TrafficLight;
     using CSUtil.Commons;
     using HarmonyLib;
     using JetBrains.Annotations;
     using Manager.Impl;
     using State;
     using State.ConfigData;
+    using TrafficManager.TrafficLight.Impl;
     using TrafficManager.Util.Extensions;
     using Util;
 
@@ -38,7 +38,7 @@ namespace TrafficManager.Patch._CitizenAI._HumanAI {
             RoadBaseAI.TrafficLightState pedestrianLightState;
             bool startNode = netSegment.m_startNode == node;
 
-            ICustomSegmentLights lights = null;
+            CustomSegmentLights lights = null;
             if (customSim) {
                 lights = CustomSegmentLightsManager.Instance.GetSegmentLights(
                     segment,

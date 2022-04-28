@@ -7,6 +7,7 @@ namespace TrafficManager.State {
     using System;
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.Manager.Impl;
+    using TrafficManager.Manager.Impl.LaneConnection;
     using TrafficManager.Util.Extensions;
 
     // [Obsolete] // I commented this on out for now to prevent warning spam
@@ -318,7 +319,7 @@ namespace TrafficManager.State {
 #if DEBUGFLAGS
             Log._Debug($"Flags.resetLaneArrowFlags: Resetting lane arrows of lane {laneId}.");
 #endif
-            if (LaneConnectionManager.Instance.HasOutgoingConnections(laneId)) {
+            if (LaneConnectionManager.Instance.Sub.HasOutgoingConnections(laneId)) {
                 return false;
             }
 
@@ -395,7 +396,7 @@ namespace TrafficManager.State {
                 return false; // disallow custom lane arrows in highway rule mode
             }
 
-            if (LaneConnectionManager.Instance.HasOutgoingConnections(laneId, startNode)) {
+            if (LaneConnectionManager.Instance.Sub.HasOutgoingConnections(laneId, startNode)) {
                 // TODO refactor
                 res = SetLaneArrow_Result.LaneConnection;
                 return false; // custom lane connection present

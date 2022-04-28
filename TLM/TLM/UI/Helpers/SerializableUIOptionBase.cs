@@ -16,6 +16,25 @@ namespace TrafficManager.UI.Helpers {
         protected const string INGAME_ONLY_SETTING = "This setting can only be changed in-game.";
 
         /* Data: */
+        public delegate TVal ValidatorDelegate(TVal desired, out TVal result);
+
+        public delegate void OnChanged(TVal value);
+
+        public event OnChanged OnValueChanged;
+
+        public void InvokeOnValueChanged(TVal value) => OnValueChanged?.Invoke(value);
+
+        public OnChanged Handler {
+            set {
+                OnValueChanged -= value;
+                OnValueChanged += value;
+            }
+        }
+
+        /// <summary>
+        /// Optional custom validator which intercepts value changes and can inhibit event propagation.
+        /// </summary>
+        public ValidatorDelegate Validator { get; set; }
 
         protected Options.PersistTo _scope;
 
@@ -39,6 +58,8 @@ namespace TrafficManager.UI.Helpers {
                     throw new Exception($"SerializableUIOptionBase.ctor: `{fieldName}` does not exist");
                 }
             }
+
+            OnValueChanged = DefaultOnValueChanged;
         }
 
         /// <summary>Gets or sets the value of the field this option represents.</summary>
@@ -78,8 +99,6 @@ namespace TrafficManager.UI.Helpers {
         public abstract void Load(byte data);
         public abstract byte Save();
 
-        //private Options OptionInstance => Singleton<Options>.instance;
-
         /* UI: */
 
         public bool HasUI => _ui != null;
@@ -103,6 +122,38 @@ namespace TrafficManager.UI.Helpers {
         /// <summary>Terse shortcut for <c>Translator(key)</c>.</summary>
         /// <param name="key">The locale key to translate.</param>
         /// <returns>Returns localised string for <paramref name="key"/>.</returns>
-        protected string T(string key) => Translator(key);
+        protected string Translate(string key) => Translator(key);
+
+        protected abstract void UpdateTooltip();
+
+        protected abstract void UpdateReadOnly();
+
+        protected abstract void UpdateLabel();
+
+        public string Label {
+            get => _label ?? $"{GetType()}:{FieldName}";
+            set {
+                _label = value;
+                UpdateLabel();
+            }
+        }
+
+        public string Tooltip {
+            get => _tooltip;
+            set {
+                _tooltip = value;
+                UpdateTooltip();
+            }
+        }
+
+        public bool ReadOnly {
+            get => _readOnly;
+            set {
+                _readOnly = !IsInScope || value;
+                UpdateReadOnly();
+            }
+        }
+
+        public bool Indent { get; set; }
     }
 }

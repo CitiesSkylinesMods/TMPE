@@ -1,6 +1,7 @@
-﻿namespace TrafficManager.Patch._RoadBaseAI {
+namespace TrafficManager.Patch._RoadBaseAI {
     using HarmonyLib;
     using JetBrains.Annotations;
+    using TrafficManager.Manager.Impl;
     using TrafficManager.State;
     using static RoadBaseAI;
 
@@ -20,8 +21,8 @@
                                   bool vehicles,
                                   bool pedestrians) {
             return !Options.timedLightsEnabled
-                   || !Constants.ManagerFactory
-                                .TrafficLightSimulationManager
+                   || !TrafficLightSimulationManager
+                                .Instance
                                 .TrafficLightSimulations[nodeID]
                                 .IsSimulationRunning();
         }

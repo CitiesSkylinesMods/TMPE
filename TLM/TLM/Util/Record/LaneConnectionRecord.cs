@@ -4,6 +4,7 @@ namespace TrafficManager.Util.Record {
     using System.Collections.Generic;
     using System.Linq;
     using TrafficManager.Manager.Impl;
+    using TrafficManager.Manager.Impl.LaneConnection;
     using TrafficManager.State;
     using TrafficManager.Util.Extensions;
     using static TrafficManager.Util.Shortcuts;
@@ -18,7 +19,7 @@ namespace TrafficManager.Util.Record {
 
         private static LaneConnectionManager connMan => LaneConnectionManager.Instance;
 
-        private uint[] GetCurrentConnections() => connMan.GetLaneConnections(LaneId, StartNode);
+        private uint[] GetCurrentConnections() => connMan.Sub.GetLaneConnections(LaneId, StartNode);
 
         public void Record() {
             connections_ = GetCurrentConnections();
@@ -30,7 +31,7 @@ namespace TrafficManager.Util.Record {
 
         public void Restore() {
             if (connections_ == null) {
-                connMan.RemoveLaneConnections(LaneId, StartNode);
+                connMan.Sub.RemoveLaneConnections(LaneId, StartNode);
                 return;
             }
             var currentConnections = GetCurrentConnections();
@@ -39,12 +40,12 @@ namespace TrafficManager.Util.Record {
 
             foreach (uint targetLaneId in connections_) {
                 if (currentConnections == null || !currentConnections.Contains(targetLaneId)) {
-                    connMan.AddLaneConnection(LaneId, targetLaneId, StartNode);
+                    connMan.Sub.AddLaneConnection(LaneId, targetLaneId, StartNode);
                 }
             }
             foreach (uint targetLaneId in currentConnections ?? Enumerable.Empty<uint>()) {
                 if (!connections_.Contains(targetLaneId)) {
-                    connMan.RemoveLaneConnection(LaneId, targetLaneId, StartNode);
+                    connMan.Sub.RemoveLaneConnection(LaneId, targetLaneId, StartNode);
                 }
             }
         }
@@ -60,7 +61,7 @@ namespace TrafficManager.Util.Record {
             var mappedLaneId = MappedLaneId(LaneId);
 
             if (connections_ == null) {
-                connMan.RemoveLaneConnections(mappedLaneId, StartNode);
+                connMan.Sub.RemoveLaneConnections(mappedLaneId, StartNode);
                 return;
             }
 
@@ -73,7 +74,7 @@ namespace TrafficManager.Util.Record {
                 if (mappedTargetLaneId == 0)
                     continue;
                 //Log._Debug($"connecting lanes: {mappedLaneId}->{mappedTargetLaneId}");
-                connMan.AddLaneConnection(mappedLaneId, mappedTargetLaneId, StartNode);
+                connMan.Sub.AddLaneConnection(mappedLaneId, mappedTargetLaneId, StartNode);
             }
         }
 

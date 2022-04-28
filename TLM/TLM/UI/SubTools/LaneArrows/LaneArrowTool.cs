@@ -6,6 +6,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.Manager.Impl;
+    using TrafficManager.Manager.Impl.LaneConnection;
     using TrafficManager.State;
     using TrafficManager.State.Keybinds;
     using TrafficManager.U;
@@ -268,7 +269,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                 sort: false);
 
             foreach (var lane in lanes) {
-                if (!LaneConnectionManager.Instance.HasOutgoingConnections(lane.laneId))
+                if (!LaneConnectionManager.Instance.Sub.HasOutgoingConnections(lane.laneId))
                     return true;
             }
 

@@ -23,7 +23,7 @@ namespace TrafficManager.UI {
     using TrafficManager.UI.MainMenu.OSD;
     using TrafficManager.UI.SubTools.LaneArrows;
     using TrafficManager.UI.SubTools.PrioritySigns;
-    using TrafficManager.UI.SubTools.TimedTrafficLights;
+    using TrafficManager.UI.SubTools.TTL;
     using TrafficManager.Lifecycle;
     using UnifiedUI.Helpers;
 
@@ -33,6 +33,7 @@ namespace TrafficManager.UI {
     using TrafficManager.State.Keybinds;
     using TrafficManager.Util.Extensions;
     using static InfoManager;
+    using TrafficManager.UI.SubTools.RoutingDetector;
 
     [UsedImplicitly]
     public class TrafficManagerTool
@@ -239,6 +240,7 @@ namespace TrafficManager.UI {
             subTools_ = new Dictionary<ToolMode, TrafficManagerSubTool> {
                 [ToolMode.LaneArrows] = new LaneArrowTool(this),
                 [ToolMode.SpeedLimits] = new SpeedLimitsTool(this),
+                [ToolMode.RoutingDetector] = new RoutingDetectorTool(this),
             };
             legacySubTools_ = new Dictionary<ToolMode, LegacySubTool> {
                 [ToolMode.ToggleTrafficLight] = new ToggleTrafficLightsTool(this),
