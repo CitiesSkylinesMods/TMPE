@@ -6,6 +6,7 @@ using System.Xml.Linq;
 using TrafficManager.API.Traffic.Enums;
 using TrafficManager.Persistence;
 using TrafficManager.TrafficLight.Impl;
+using TrafficManager.TrafficLight.Model;
 using TrafficManager.Util;
 using TrafficManager.Util.Extensions;
 using static RoadBaseAI;
@@ -25,11 +26,10 @@ namespace TrafficManager.Manager.Impl {
 
             public override XName ElementName => "TimedTrafficLights";
 
-            private static readonly XName ttlNodeName = "TtlNode";
-            private static readonly XName stepName = "Step";
-            private static readonly XName segLightsName = "SegmentLights";
-            private static readonly XName lightName = "Light";
-            private static readonly XName vehicleTypeName = "VehicleType";
+            private static readonly XName ttlNodeElementName = "TtlNode";
+            private static readonly XName stepElementName = "Step";
+            private static readonly XName segLightsElementName = "SegmentLights";
+            private static readonly XName lightElementName = "Light";
 
             public override IEnumerable<Type> GetDependencies() => null;
 
@@ -46,9 +46,9 @@ namespace TrafficManager.Manager.Impl {
 
                 // Now we can load the traffic lights
 
-                foreach (var ttlElement in element.Elements(ttlNodeName)) {
+                foreach (var ttlElement in element.Elements(ttlNodeElementName)) {
                     try {
-                        var ttlNodeId = ttlElement.Attribute<ushort>(nameof(TimedTrafficLights.NodeId));
+                        var ttlNodeId = ttlElement.Attribute<ushort>(nameof(ITimedTrafficLightsModel.NodeId));
 
                         if (!masterNodeLookup.ContainsKey(ttlNodeId)) {
                             continue;
@@ -59,7 +59,7 @@ namespace TrafficManager.Manager.Impl {
 
                         Instance.SetUpTimedTrafficLight(ttlNodeId, nodeGroup);
 
-                        foreach (var stepElement in ttlElement.Elements(nameof(stepName))) {
+                        foreach (var stepElement in ttlElement.Elements(nameof(stepElementName))) {
                             LoadStep(stepElement, ttlNodeId);
                         }
                     }
@@ -73,17 +73,17 @@ namespace TrafficManager.Manager.Impl {
                 // Since grouped traffic lights are stored in pieces, we can't start
                 // any of the traffic lights until all of them have been loaded.
 
-                foreach (var ttlElement in element.Elements(ttlNodeName)) {
+                foreach (var ttlElement in element.Elements(ttlNodeElementName)) {
 
-                    var nodeId = ttlElement.Attribute<ushort>(nameof(TimedTrafficLights.NodeId));
+                    var nodeId = ttlElement.Attribute<ushort>(nameof(ITimedTrafficLightsModel.NodeId));
 
                     try {
                         TimedTrafficLights timedNode =
                             Instance.TrafficLightSimulations[nodeId].timedLight;
 
                         timedNode.Housekeeping();
-                        if (ttlElement.Attribute<bool>(nameof(TimedTrafficLights.IsStarted))) {
-                            timedNode.Start(ttlElement.Attribute<int>(nameof(TimedTrafficLights.CurrentStep)));
+                        if (ttlElement.Attribute<bool>(nameof(ITimedTrafficLightsModel.IsStarted))) {
+                            timedNode.Start(ttlElement.Attribute<int>(nameof(ITimedTrafficLightsModel.CurrentStep)));
                         }
                     }
                     catch (Exception e) {
@@ -99,28 +99,28 @@ namespace TrafficManager.Manager.Impl {
 
                 TimedTrafficLightsStep step =
                     Instance.TrafficLightSimulations[ttlNodeId].timedLight.AddStep(
-                        stepElement.Attribute<int>(nameof(TimedTrafficLightsStep.MinTime)),
-                        stepElement.Attribute<int>(nameof(TimedTrafficLightsStep.MaxTime)),
-                        stepElement.Attribute<StepChangeMetric>(nameof(TimedTrafficLightsStep.ChangeMetric)),
-                        stepElement.Attribute<float>(nameof(TimedTrafficLightsStep.WaitFlowBalance)));
+                        stepElement.Attribute<int>(nameof(ITimedTrafficLightsStepModel.MinTime)),
+                        stepElement.Attribute<int>(nameof(ITimedTrafficLightsStepModel.MaxTime)),
+                        stepElement.Attribute<StepChangeMetric>(nameof(ITimedTrafficLightsStepModel.ChangeMetric)),
+                        stepElement.Attribute<float>(nameof(ITimedTrafficLightsStepModel.WaitFlowBalance)));
 
-                foreach (var segLightsElement in stepElement.Elements(segLightsName)) {
+                foreach (var segLightsElement in stepElement.Elements(segLightsElementName)) {
                     LoadSegLights(segLightsElement, step);
                 }
             }
 
             private static void LoadSegLights(XElement segLightsElement, TimedTrafficLightsStep step) {
 
-                var segmentId = segLightsElement.Attribute<ushort>(nameof(CustomSegmentLights.SegmentId));
+                var segmentId = segLightsElement.Attribute<ushort>(nameof(ICustomSegmentLightsModel.SegmentId));
                 ref NetSegment netSegment = ref segmentId.ToSegment();
 
                 if (netSegment.IsValid() && step.CustomSegmentLights.TryGetValue(segmentId, out var lights)) {
 
-                    lights.ManualPedestrianMode = segLightsElement.Attribute<bool>(nameof(lights.ManualPedestrianMode));
-                    lights.PedestrianLightState = segLightsElement.NullableAttribute<TrafficLightState>(nameof(lights.PedestrianLightState));
+                    lights.ManualPedestrianMode = segLightsElement.Attribute<bool>(nameof(ICustomSegmentLightsModel.ManualPedestrianMode));
+                    lights.PedestrianLightState = segLightsElement.NullableAttribute<TrafficLightState>(nameof(ICustomSegmentLightsModel.PedestrianLightState));
 
                     bool first = true; // v1.10.2 transitional code (dark arts that no one understands)
-                    foreach (var lightElement in segLightsElement.Elements(lightName)) {
+                    foreach (var lightElement in segLightsElement.Elements(lightElementName)) {
                         LoadLight(lightElement, lights, ref first);
                     }
                 }
@@ -128,7 +128,7 @@ namespace TrafficManager.Manager.Impl {
 
             private static void LoadLight(XElement lightElement, CustomSegmentLights lights, ref bool first) {
 
-                var vehicleType = lightElement.Attribute<ExtVehicleType>(vehicleTypeName);
+                var vehicleType = lightElement.Attribute<ExtVehicleType>(nameof(CustomSegmentLightModel.VehicleType));
 
                 if (!lights.CustomLights.TryGetValue(
                         vehicleType,
@@ -166,11 +166,11 @@ namespace TrafficManager.Manager.Impl {
                     // END dark arts
                 }
 
-                light.InternalCurrentMode = lightElement.Attribute<LightMode>(nameof(light.CurrentMode)); // TODO improve & remove
+                light.InternalCurrentMode = lightElement.Attribute<LightMode>(nameof(CustomSegmentLightModel.CurrentMode)); // TODO improve & remove
                 light.SetStates(
-                    lightElement.Attribute<TrafficLightState>(nameof(light.LightMain)),
-                    lightElement.Attribute<TrafficLightState>(nameof(light.LightLeft)),
-                    lightElement.Attribute<TrafficLightState>(nameof(light.LightRight)),
+                    lightElement.Attribute<TrafficLightState>(nameof(CustomSegmentLightModel.LightMain)),
+                    lightElement.Attribute<TrafficLightState>(nameof(CustomSegmentLightModel.LightLeft)),
+                    lightElement.Attribute<TrafficLightState>(nameof(CustomSegmentLightModel.LightRight)),
                     false);
             }
 
@@ -180,13 +180,13 @@ namespace TrafficManager.Manager.Impl {
 
                 var nodesWithSimulation = new HashSet<ushort>();
 
-                foreach (var ttlElement in element.Elements(ttlNodeName)) {
+                foreach (var ttlElement in element.Elements(ttlNodeElementName)) {
                     nodesWithSimulation.Add(ttlElement.Attribute<ushort>(nameof(TimedTrafficLights.NodeId)));
                 }
 
                 masterNodeLookup = new Dictionary<ushort, ushort>();
                 ttlGroups = new Dictionary<ushort, List<ushort>>();
-                foreach (var ttlElement in element.Elements(ttlNodeName)) {
+                foreach (var ttlElement in element.Elements(ttlNodeElementName)) {
 
                     var ttlNodeId = ttlElement.Attribute<ushort>(nameof(TimedTrafficLights.NodeId));
 
@@ -266,35 +266,37 @@ namespace TrafficManager.Manager.Impl {
             protected override PersistenceResult OnSaveData(XElement element, ICollection<TtlFeature> featuresRequired, ICollection<TtlFeature> featuresForbidden, PersistenceContext context) {
                 var result = PersistenceResult.Success;
 
-                foreach (var timedNode in Instance.EnumerateTimedTrafficLights()) {
+                foreach (var timedNodeImpl in Instance.EnumerateTimedTrafficLights()) {
+
+                    ITimedTrafficLightsModel timedNode = timedNodeImpl;
 
                     try {
                         // prepare ttl for write
 
-                        timedNode.OnGeometryUpdate();
+                        timedNodeImpl.OnGeometryUpdate();
 
                         // we don't save transition states; instead, we save the next step
                         int currentStep = timedNode.CurrentStep;
-                        if (timedNode.IsStarted() &&
-                            timedNode.GetStep(timedNode.CurrentStep).IsInEndTransition()) {
-                            currentStep = (currentStep + 1) % timedNode.NumSteps();
+                        if (timedNode.IsStarted &&
+                            timedNodeImpl.GetStep(timedNode.CurrentStep).IsInEndTransition()) {
+                            currentStep = (currentStep + 1) % timedNodeImpl.NumSteps();
                         }
 
                         // build ttl element
 
-                        var ttlNodeElement = new XElement(ttlNodeName);
+                        var ttlNodeElement = new XElement(ttlNodeElementName);
 
                         ttlNodeElement.AddAttribute(nameof(timedNode.NodeId), timedNode.NodeId);
                         ttlNodeElement.AddElements(nameof(timedNode.NodeGroup), timedNode.NodeGroup);
-                        ttlNodeElement.AddAttribute(nameof(timedNode.IsStarted), timedNode.IsStarted());
+                        ttlNodeElement.AddAttribute(nameof(timedNode.IsStarted), timedNode.IsStarted);
                         ttlNodeElement.AddAttribute(nameof(timedNode.CurrentStep), currentStep);
 
                         element.Add(ttlNodeElement);
 
                         // add steps to the saved ttl
 
-                        for (var stepIndex = 0; stepIndex < timedNode.NumSteps(); stepIndex++) {
-                            SaveStep(ttlNodeElement, timedNode, stepIndex);
+                        for (var stepIndex = 0; stepIndex < timedNodeImpl.NumSteps(); stepIndex++) {
+                            SaveStep(ttlNodeElement, timedNodeImpl.GetStep(stepIndex));
                         }
                     }
                     catch (Exception e) {
@@ -307,11 +309,9 @@ namespace TrafficManager.Manager.Impl {
                 return result;
             }
 
-            private static void SaveStep(XElement ttlNodeElement, TimedTrafficLights timedNode, int stepIndex) {
+            private static void SaveStep(XElement ttlNodeElement, ITimedTrafficLightsStepModel timedStep) {
 
-                TimedTrafficLightsStep timedStep = timedNode.GetStep(stepIndex);
-
-                var stepElement = new XElement(stepName);
+                var stepElement = new XElement(stepElementName);
 
                 stepElement.AddAttribute(nameof(timedStep.MinTime), timedStep.MinTime);
                 stepElement.AddAttribute(nameof(timedStep.MaxTime), timedStep.MaxTime);
@@ -320,24 +320,14 @@ namespace TrafficManager.Manager.Impl {
 
                 ttlNodeElement.Add(stepElement);
 
-                foreach (var segLights in timedStep.CustomSegmentLights.Values) {
-                    SaveSegLights(stepElement, timedNode.NodeId, stepIndex, segLights);
+                foreach (var segLights in timedStep.EnumerateCustomSegmentLights()) {
+                    SaveSegLights(stepElement, segLights);
                 }
             }
 
-            private static void SaveSegLights(XElement stepElement, ushort ttlNodeId, int stepIndex, CustomSegmentLights segLights) {
+            private static void SaveSegLights(XElement stepElement, ICustomSegmentLightsModel segLights) {
 
-                var segLightsElement = new XElement(segLightsName);
-
-                // validation
-
-                if (segLights.NodeId == 0 || segLights.NodeId != ttlNodeId) {
-                    Log.Warning(
-                        "Inconsistency detected: Timed traffic light @ node " +
-                        $"{ttlNodeId} contains custom traffic lights for the invalid " +
-                        $"segment ({segLights.SegmentId}) at step {stepIndex}: nId={segLights.NodeId}");
-                    return;
-                }
+                var segLightsElement = new XElement(segLightsElementName);
 
                 // build segment lights element
 
@@ -350,21 +340,21 @@ namespace TrafficManager.Manager.Impl {
 
                 // add lights to the saved segment lights collection
 
-                foreach (var e2 in segLights.CustomLights) {
-                    SaveLight(segLightsElement, e2.Key, e2.Value);
+                foreach (var segLight in segLights) {
+                    SaveLight(segLightsElement, segLight);
                 }
             }
 
-            private static void SaveLight(XElement segLightsElement, ExtVehicleType vehicleType, CustomSegmentLight segLight) {
+            private static void SaveLight(XElement segLightsElement, CustomSegmentLightModel segLight) {
 
-                var lightElement = new XElement(lightName);
+                var lightElement = new XElement(lightElementName);
+
+                lightElement.AddAttribute(nameof(segLight.VehicleType), segLight.VehicleType);
 
                 lightElement.AddAttribute(nameof(segLight.CurrentMode), segLight.CurrentMode);
                 lightElement.AddAttribute(nameof(segLight.LightLeft), segLight.LightLeft);
                 lightElement.AddAttribute(nameof(segLight.LightMain), segLight.LightMain);
                 lightElement.AddAttribute(nameof(segLight.LightRight), segLight.LightRight);
-
-                lightElement.AddAttribute(vehicleTypeName, vehicleType);
 
                 segLightsElement.Add(lightElement);
             }

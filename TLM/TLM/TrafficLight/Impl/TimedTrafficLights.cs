@@ -14,9 +14,10 @@ namespace TrafficManager.TrafficLight.Impl {
     using TrafficManager.Util;
     using UnityEngine;
     using TrafficManager.Util.Extensions;
+    using TrafficManager.TrafficLight.Model;
 
     // TODO define TimedTrafficLights per node group, not per individual nodes
-    public class TimedTrafficLights {
+    public class TimedTrafficLights : ITimedTrafficLightsModel {
         public TimedTrafficLights(ushort nodeId, IEnumerable<ushort> nodeGroup) {
             NodeId = nodeId;
             NodeGroup = new List<ushort>(nodeGroup);
@@ -68,6 +69,8 @@ namespace TrafficManager.TrafficLight.Impl {
         public short RotationOffset { get; private set; }
 
         public IDictionary<ushort, IDictionary<ushort, ArrowDirection>> Directions { get; private set; }
+
+        bool ITimedTrafficLightsModel.IsStarted => IsStarted();
 
         /// <summary>
         /// Segment ends that were set up for this timed traffic light

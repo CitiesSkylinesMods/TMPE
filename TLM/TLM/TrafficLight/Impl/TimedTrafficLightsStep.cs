@@ -14,9 +14,10 @@ namespace TrafficManager.TrafficLight.Impl {
     using TrafficManager.Util;
     using ColossalFramework;
     using TrafficManager.Util.Extensions;
+    using TrafficManager.TrafficLight.Model;
 
     // TODO class should be completely reworked, approx. in version 1.10
-    public class TimedTrafficLightsStep : ITrafficLightContainer
+    public class TimedTrafficLightsStep : ITrafficLightContainer, ITimedTrafficLightsStepModel
     {
         public TimedTrafficLightsStep(TimedTrafficLights timedNode,
                                       int minTime,
@@ -1416,6 +1417,11 @@ namespace TrafficManager.TrafficLight.Impl {
         // TODO IMPROVE THIS! Liskov substitution principle must hold.
         public bool IsSegmentLight(ushort segmentId, bool startNode) {
             throw new NotImplementedException();
+        }
+
+        IEnumerable<ICustomSegmentLightsModel> ITimedTrafficLightsStepModel.EnumerateCustomSegmentLights() {
+            foreach (var segLights in CustomSegmentLights.Values)
+                yield return segLights;
         }
     }
 }

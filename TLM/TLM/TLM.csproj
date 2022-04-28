@@ -182,6 +182,10 @@
     <Compile Include="State\VersionInfo.cs" />
     <Compile Include="TrafficLight\Impl\ITrafficLightContainer.cs" />
     <Compile Include="TrafficLight\Impl\TrafficLightSimulation.cs" />
+    <Compile Include="TrafficLight\Model\CustomSegmentLightModel.cs" />
+    <Compile Include="TrafficLight\Model\ICustomSegmentLightsModel.cs" />
+    <Compile Include="TrafficLight\Model\ITimedTrafficLightsModel.cs" />
+    <Compile Include="TrafficLight\Model\ITimedTrafficLightsStepModel.cs" />
     <Compile Include="UI\AllowDespawn\AllowDespawnPanel.cs" />
     <Compile Include="UI\Helpers\ActionButton.cs" />
     <Compile Include="UI\Helpers\GlobalConfigObserver.cs" />
