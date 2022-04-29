@@ -7,6 +7,7 @@ namespace TrafficManager.Util {
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.Manager.Impl;
+    using TrafficManager.Manager.Impl.LaneConnection;
     using TrafficManager.State;
     using TrafficManager.Util.Extensions;
     using UnityEngine;
@@ -79,7 +80,7 @@ namespace TrafficManager.Util {
                 return;
             }
 
-            if (LaneConnectionManager.Instance.HasNodeConnections(nodeId)) {
+            if (LaneConnectionManager.Instance.Sub.HasNodeConnections(nodeId)) {
                 res = SetLaneArrow_Result.LaneConnection;
                 return;
             }
@@ -490,7 +491,7 @@ namespace TrafficManager.Util {
 
             int srcLaneCount = laneList.Count();
             for (int i = 0; i < srcLaneCount; ++i) {
-                if (LaneConnectionManager.Instance.HasOutgoingConnections(laneList[i].laneId, startNode)) {
+                if (LaneConnectionManager.Instance.Sub.HasOutgoingConnections(laneList[i].laneId, startNode)) {
                     return SetLaneArrow_Result.LaneConnection;
                 }
             }

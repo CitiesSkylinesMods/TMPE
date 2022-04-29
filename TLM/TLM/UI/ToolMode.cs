@@ -43,5 +43,7 @@ namespace TrafficManager.UI {
         /// This key is not an actual tool mode, it is used by MainMenu to key the UI button.
         /// </summary>
         ClearTrafficButton,
+
+        RoutingDetector,
     }
 }
