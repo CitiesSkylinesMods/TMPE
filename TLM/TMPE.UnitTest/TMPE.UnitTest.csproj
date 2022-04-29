@@ -96,6 +96,7 @@
     <Compile Include="Translation\CsvParser.cs" />
     <Compile Include="Util\DynamicKeybindReplaceTest.cs" />
     <Compile Include="Util\GetNodeSegmentIdsEnumerableTests.cs" />
+    <Compile Include="Util\SparseTaskListTests.cs" />
     <Compile Include="Util\SpiralTests.cs" />
     <Compile Include="Util\LoopUtilTests.cs" />
   </ItemGroup>

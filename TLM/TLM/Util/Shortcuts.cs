@@ -132,6 +132,15 @@ namespace TrafficManager.Util {
         }
 
         /// <summary>
+        /// Asserts that a number is a power of 2.
+        /// </summary>
+        /// <param name="num">The number to test.</param>
+        internal static void AssertPowerOf2(int num) {
+            if ((num == 0) || (num & (num - 1)) != 0)
+                throw new ArgumentOutOfRangeException($"Number {num} is not a Power of 2");
+        }
+
+        /// <summary>
         /// Designed for testing enum/flag parameter values in DEBUG builds.
         /// Logs error if <paramref name="value"/> is <c>None</c>, ie. <c>(int)value == 0</c>.
         /// </summary>
@@ -139,7 +148,7 @@ namespace TrafficManager.Util {
         /// <param name="value">Value to test.</param>
         /// <param name="m">Name of the value or other informative messsage.</param>
         /// <example>AssertNotZero((int)laneType);</example>
-        /// <remarks>Conditional("DEBUG") - no perforamnce impact on release builds.</remarks>
+        /// <remarks>DEBUG-only; excluded from TEST/RELEASE builds.</remarks>
         /// <exception cref="ArgumentException">
         /// Thrown if <typeparamref name="T"/> is not some kind of <see cref="Enum"/>.
         /// </exception>
