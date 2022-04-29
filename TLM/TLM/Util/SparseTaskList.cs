@@ -165,7 +165,7 @@ namespace TrafficManager.Util {
         /// <remarks>
         /// <i>Assumes that the index will be used</i>.
         /// </remarks>
-        internal int NextUsableTaskIndex => (numGaps > 0)
+        public int NextUsableTaskIndex => (numGaps > 0)
             ? gaps[--numGaps]
             : Size++;
 
