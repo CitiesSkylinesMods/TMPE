@@ -120,12 +120,12 @@ namespace Benchmarks {
                 testTaskListOptimised = new TaskList<TestStruct>();
 
                 // delegates
-                testTaskList.OnAfterAddTask = OnAddTL;
-                testTaskList.OnAfterRemoveTask = OnDelTL;
+                testTaskList.OnAddTask = OnAddTL;
+                testTaskList.OnRemoveTask = OnDelTL;
                 testTaskList.TaskIsActive = IsActiveTL;
 
-                testTaskListOptimised.OnAfterAddTask = OnAddTLO;
-                testTaskListOptimised.OnAfterRemoveTask = OnDelTLO;
+                testTaskListOptimised.OnAddTask = OnAddTLO;
+                testTaskListOptimised.OnRemoveTask = OnDelTLO;
                 testTaskListOptimised.TaskIsActive = IsActiveTLO;
 
                 // populate raw data with unique values

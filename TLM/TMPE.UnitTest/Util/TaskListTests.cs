@@ -65,8 +65,8 @@ namespace TMUnitTest.Util {
         public void TaskList02_AddingAnItem_Should_CreateValidTasksArray() {
             TaskList = new(BlockSize);
 
-            TaskList.OnAfterAddTask = OnAddItem;
-            TaskList.OnAfterRemoveTask = OnDelItem;
+            TaskList.OnAddTask = OnAddItem;
+            TaskList.OnRemoveTask = OnDelItem;
             TaskList.TaskIsActive = IsActive;
 
             TaskList.Add(new TaskStruct { ID = "0" });
@@ -91,8 +91,8 @@ namespace TMUnitTest.Util {
         public void TaskList03_FillingCurrentBlock_Should_NotChangeArrayCapacity() {
             TaskList = new(BlockSize);
 
-            TaskList.OnAfterAddTask = OnAddItem;
-            TaskList.OnAfterRemoveTask = OnDelItem;
+            TaskList.OnAddTask = OnAddItem;
+            TaskList.OnRemoveTask = OnDelItem;
             TaskList.TaskIsActive = IsActive;
 
             for (int i = 0; i < BlockSize; i++) {
@@ -107,8 +107,8 @@ namespace TMUnitTest.Util {
         public void TaskList04_WhenBlockIsFullAddingItem_Should_ExtendTheArray() {
             TaskList = new(BlockSize);
 
-            TaskList.OnAfterAddTask = OnAddItem;
-            TaskList.OnAfterRemoveTask = OnDelItem;
+            TaskList.OnAddTask = OnAddItem;
+            TaskList.OnRemoveTask = OnDelItem;
             TaskList.TaskIsActive = IsActive;
 
             for (int i = 0; i < BlockSize + 1; i++) {
@@ -131,8 +131,8 @@ namespace TMUnitTest.Util {
         public void TaskList05_RemovingEndItem_Should_MarkItInactive() {
             TaskList = new(BlockSize);
 
-            TaskList.OnAfterAddTask = OnAddItem;
-            TaskList.OnAfterRemoveTask = OnDelItem;
+            TaskList.OnAddTask = OnAddItem;
+            TaskList.OnRemoveTask = OnDelItem;
             TaskList.TaskIsActive = IsActive;
 
             for (int i = 0; i < BlockSize; i++) {
@@ -153,8 +153,8 @@ namespace TMUnitTest.Util {
         public void TaskList06_RemovingFirstItem_Should_ReplaceWithEndItemAndMarkEndItemInactive() {
             TaskList = new(BlockSize);
 
-            TaskList.OnAfterAddTask = OnAddItem;
-            TaskList.OnAfterRemoveTask = OnDelItem;
+            TaskList.OnAddTask = OnAddItem;
+            TaskList.OnRemoveTask = OnDelItem;
             TaskList.TaskIsActive = IsActive;
 
             for (int i = 0; i < BlockSize; i++) {
@@ -166,7 +166,6 @@ namespace TMUnitTest.Util {
             Assert.AreEqual(TaskList.Size, BlockSize - 1);
             Assert.AreEqual(TaskList.Tasks[0].ID, "3");
             Assert.AreEqual(TaskList.TasksCapacity, 1);
-            Assert.IsFalse(TaskList.Tasks[TaskList.Size].IsActive);
         }
     }
 }

@@ -16,8 +16,8 @@ namespace TrafficManager.Util {
         public const int BLOCK_SIZE = 64;
 
         /// <summary>
-        /// Delegate for mandatory <see cref="OnAfterAddTask"/> and
-        /// <see cref="OnAfterRemoveTask"/> event handlers.
+        /// Delegate for mandatory <see cref="OnAddTask"/> and
+        /// <see cref="OnRemoveTask"/> event handlers.
         /// </summary>
         /// <param name="index">
         /// The index of the item in the <see cref="Tasks"/> array.
@@ -72,13 +72,13 @@ namespace TrafficManager.Util {
         /// Mandatory. Called after an item is added to the <see cref="Tasks"/>
         /// array at specified <c>index</c>.
         /// </summary>
-        public TaskListEvent OnAfterAddTask;
+        public TaskListEvent OnAddTask;
 
         /// <summary>
         /// Mandatory. Called after an item is removed from the <see cref="Tasks"/>
         /// array at specified <c>index</c>.
         /// </summary>
-        public TaskListEvent OnAfterRemoveTask;
+        public TaskListEvent OnRemoveTask;
 
         /// <summary>
         /// Mandatory. Invoked when <see cref="TaskList{T}"/> needs to
@@ -147,7 +147,7 @@ namespace TrafficManager.Util {
 
         /// <summary>
         /// Adds an item to the <see cref="Tasks"/> array, which is then
-        /// initialised by <see cref="OnAfterAddTask"/>.
+        /// initialised by <see cref="OnAddTask"/>.
         /// </summary>
         /// <param name="item">
         /// The item to add.
@@ -162,7 +162,7 @@ namespace TrafficManager.Util {
             }
 
             Tasks[Size] = item;
-            OnAfterAddTask(Size);
+            OnAddTask(Size);
 
             ++Size;
         }
@@ -170,7 +170,7 @@ namespace TrafficManager.Util {
         /// <summary>
         /// Removes item at specific index by replacing it with last
         /// used element of the <see cref="Tasks"/> array, which is
-        /// then cleared via <see cref="OnAfterRemoveTask"/>.
+        /// then cleared via <see cref="OnRemoveTask"/>.
         /// </summary>
         /// <param name="index">The index of the item to remove</param>
         public void RemoveAt(int index) {
@@ -180,11 +180,12 @@ namespace TrafficManager.Util {
 
             --Size;
 
-            if (index != Size) {
+            if (index == Size) {
+                OnRemoveTask(Size);
+            } else {
+                OnRemoveTask(index);
                 Tasks[index] = Tasks[Size];
             }
-
-            OnAfterRemoveTask(Size);
         }
 
         /// <summary>
@@ -192,12 +193,12 @@ namespace TrafficManager.Util {
         /// </summary>
         /// <param name="skipEvents">
         /// If <c>true</c>, removal of any remaining active tasks will
-        /// not trigger the <see cref="OnAfterRemoveTask"/> event.
+        /// not trigger the <see cref="OnRemoveTask"/> event.
         /// </param>
         public void Clear(bool skipEvents = false) {
             if (!skipEvents) {
                 for (int index = 0; index < Size; index++) {
-                    OnAfterRemoveTask(index);
+                    OnRemoveTask(index);
                 }
             }
 
@@ -209,7 +210,7 @@ namespace TrafficManager.Util {
         /// </summary>
         /// <param name="skipEvents">
         /// If <c>true</c>, removal of any remaining active tasks will
-        /// not trigger the <see cref="OnAfterRemoveTask"/> event.
+        /// not trigger the <see cref="OnRemoveTask"/> event.
         /// </param>
         public void Release(bool skipEvents = false) {
             Clear(skipEvents);
