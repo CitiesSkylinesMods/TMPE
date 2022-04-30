@@ -1,27 +1,21 @@
 using BenchmarkDotNet.Attributes;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 using TrafficManager.Util;
 
 namespace Benchmarks {
-    public class SparseTaskListPerfTests {
+    public class TaskListPerfTests {
 
-        /*
         [GlobalSetup]
         public void Setup() {
             TestData.InitialiseLists();
             TestData.GenerateDeltas();
         }
-        */
 
         [Benchmark]
-        public void SparseTaskList_SimulatedCamMoves() {
-            TestData.InitialiseLists();
-            TestData.GenerateDeltas();
+        public void TaskList_SimulatedCamMoves() {
 
-            var list = TestData.testSparseTaskList;
+            var list = TestData.testTaskList;
 
             foreach (var delta in TestData.Deltas) {
 
@@ -43,22 +37,18 @@ namespace Benchmarks {
         }
 
         [Benchmark]
-        public void SparseTaskList_Manual_SimulatedCamMoves() {
-            TestData.InitialiseLists();
-            TestData.GenerateDeltas();
+        public void TaskList_Optimised_SimulatedCamMoves() {
 
-            var list = TestData.testSparseTaskListManual;
+            var list = TestData.testTaskListOptimised;
 
             foreach (var delta in TestData.Deltas) {
-
-                list.PrepareToRemove(list.Size - delta.Retained.Count);
 
                 // update & remove
                 for (int index = 0; index < list.Size; index++) {
                     if (delta.Retained.Contains(list.Tasks[index].ID)) {
                         // update code would be here
                     } else {
-                        list.RemoveAt(index, prePrepared: true);
+                        list.RemoveAt(index);
                     }
                 }
 
@@ -77,8 +67,6 @@ namespace Benchmarks {
 
         [Benchmark]
         public void FastList_SimulatedCamMoves() {
-            TestData.InitialiseLists();
-            TestData.GenerateDeltas();
 
             var list = TestData.testFastList;
 
@@ -114,13 +102,11 @@ namespace Benchmarks {
         internal static class TestData {
             private static int[] rawData;
 
-            internal static int[] randomisedData;
-
             internal static FastList<TestStruct> testFastList;
 
-            internal static SparseTaskList<TestStruct> testSparseTaskList;
+            internal static TaskList<TestStruct> testTaskList;
 
-            internal static SparseTaskList<TestStruct> testSparseTaskListManual;
+            internal static TaskList<TestStruct> testTaskListOptimised;
 
             internal static int Center;
             internal static int Zoom;
@@ -130,38 +116,34 @@ namespace Benchmarks {
             internal static void InitialiseLists() {
                 // create test lists
                 testFastList = new FastList<TestStruct>();
-                testSparseTaskList = new SparseTaskList<TestStruct>();
-                testSparseTaskListManual = new SparseTaskList<TestStruct>();
+                testTaskList = new TaskList<TestStruct>();
+                testTaskListOptimised = new TaskList<TestStruct>();
 
                 // delegates
-                testSparseTaskList.OnAfterAddTask = OnAddSTL;
-                testSparseTaskList.OnAfterRemoveTask = OnDelSTL;
-                testSparseTaskList.TaskIsActive = IsActiveSTL;
+                testTaskList.OnAfterAddTask = OnAddTL;
+                testTaskList.OnAfterRemoveTask = OnDelTL;
+                testTaskList.TaskIsActive = IsActiveTL;
 
-                testSparseTaskListManual.OnAfterAddTask = OnAddSTLM;
-                testSparseTaskListManual.OnAfterRemoveTask = OnDelSTLM;
-                testSparseTaskListManual.TaskIsActive = IsActiveSTLM;
+                testTaskListOptimised.OnAfterAddTask = OnAddTLO;
+                testTaskListOptimised.OnAfterRemoveTask = OnDelTLO;
+                testTaskListOptimised.TaskIsActive = IsActiveTLO;
 
                 // populate raw data with unique values
                 rawData = new int[36864u];
                 for (int i = 0; i < rawData.Length; i++) {
                     rawData[i] = i;
                 }
-
-                // randomise rawData -> randomisedData
-                Random rnd = new Random();
-                randomisedData = rawData.OrderBy(x => rnd.Next()).ToArray();
             }
 
             internal static void GenerateDeltas() {
-                Center = randomisedData.Length / 2;
+                Center = rawData.Length / 2;
                 Zoom = 500;
 
                 HashSet<int> previous;
 
                 Delta currentViewport = new Delta {
                     Retained = new HashSet<int>(0),
-                    Added = randomisedData.AsSpan(Center - Zoom, Zoom * 2).ToArray(),
+                    Added = rawData.AsSpan(Center - Zoom, Zoom * 2).ToArray(),
                 };
 
                 Deltas = new List<Delta>();
@@ -174,15 +156,15 @@ namespace Benchmarks {
                     { Center -= 250, Zoom }, // move left half screen
                     { Center -= 1, Zoom += 500 }, // zoom out
                     { Center -= 750, Zoom }, // move left full screen
-                    { Center += 1, Zoom -= 200 }, // zoom in
+                    { Center += 2, Zoom -= 200 }, // zoom in
                     { Center += 2000, Zoom += 1000 }, // move right, zoom out
                 };
 
-                var added = new FastList<int>();
-                var retained = new FastList<int>();
+                var added = new List<int>();
+                var retained = new List<int>();
 
                 foreach (var move in CameraMoves) {
-                    var viewport = randomisedData.AsSpan(move.Key - move.Value, move.Value * 2).ToArray();
+                    var viewport = rawData.AsSpan(move.Key - move.Value, move.Value * 2).ToArray();
 
                     retained.Clear();
                     added.Clear();
@@ -206,24 +188,24 @@ namespace Benchmarks {
                 }
             }
 
-            internal static void OnAddSTL(int index) {
-                testSparseTaskList.Tasks[index].IsActive = true;
+            internal static void OnAddTL(int index) {
+                testTaskList.Tasks[index].IsActive = true;
             }
-            internal static void OnDelSTL(int index) {
-                testSparseTaskList.Tasks[index].IsActive = false;
+            internal static void OnDelTL(int index) {
+                testTaskList.Tasks[index].IsActive = false;
             }
-            internal static bool IsActiveSTL(int index) {
-                return testSparseTaskList.Tasks[index].IsActive;
+            internal static bool IsActiveTL(int index) {
+                return testTaskList.Tasks[index].IsActive;
             }
 
-            private static void OnAddSTLM(int index) {
-                testSparseTaskListManual.Tasks[index].IsActive = true;
+            private static void OnAddTLO(int index) {
+                testTaskListOptimised.Tasks[index].IsActive = true;
             }
-            private static void OnDelSTLM(int index) {
-                testSparseTaskListManual.Tasks[index].IsActive = false;
+            private static void OnDelTLO(int index) {
+                testTaskListOptimised.Tasks[index].IsActive = false;
             }
-            private static bool IsActiveSTLM(int index) {
-                return testSparseTaskListManual.Tasks[index].IsActive;
+            private static bool IsActiveTLO(int index) {
+                return testTaskListOptimised.Tasks[index].IsActive;
             }
         }
     }

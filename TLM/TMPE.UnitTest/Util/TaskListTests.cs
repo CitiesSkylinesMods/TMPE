@@ -4,36 +4,36 @@ namespace TMUnitTest.Util {
     using TrafficManager.Util;
 
     [TestClass]
-    public class SparseTaskListTests {
+    public class TaskListTests {
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void Constructor01_InvalidBlockSize_Should_ThrowException() {
-            _ = new SparseTaskList<int>(3); // invalid: should be power of 2
+            _ = new TaskList<int>(3); // invalid: should be power of 2
         }
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void Constructor02_ZeroBlockSize_Should_ThrowException() {
-            _ = new SparseTaskList<int>(0); // invalid: should be non-zero
+            _ = new TaskList<int>(0); // invalid: should be non-zero
         }
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void Constructor03_NegativeBlockSize_Should_ThrowException() {
-            _ = new SparseTaskList<int>(-8); // invalid: should be positive
+            _ = new TaskList<int>(-8); // invalid: should be positive
         }
 
         [TestMethod]
         public void Constructor04_ValidBlockSize_Should_BeAccepted() {
-            var t = new SparseTaskList<int>(8);
+            var t = new TaskList<int>(8);
 
             Assert.AreEqual(t.BlockSize, 8);
         }
 
         [TestMethod]
-        public void SparseTaskList01_TasksArray_Should_InitiallyBeNull() {
-            var t = new SparseTaskList<int>(8);
+        public void TaskList01_TasksArray_Should_InitiallyBeNull() {
+            var t = new TaskList<int>(8);
 
             Assert.IsNull(t.Tasks);
         }
@@ -45,7 +45,7 @@ namespace TMUnitTest.Util {
             public string ID;
         }
 
-        internal SparseTaskList<TaskStruct> TaskList;
+        internal TaskList<TaskStruct> TaskList;
 
         internal void OnAddItem(int index) {
             TaskList.Tasks[index].IsActive = true;
@@ -62,7 +62,7 @@ namespace TMUnitTest.Util {
         #endregion stuff for testing
 
         [TestMethod]
-        public void SparseTaskList02_AddingAnItem_Should_CreateValidTasksArray() {
+        public void TaskList02_AddingAnItem_Should_CreateValidTasksArray() {
             TaskList = new(BlockSize);
 
             TaskList.OnAfterAddTask = OnAddItem;
@@ -88,7 +88,7 @@ namespace TMUnitTest.Util {
         }
 
         [TestMethod]
-        public void SparseTaskList03_FillingCurrentBlock_Should_NotChangeArrayCapacity() {
+        public void TaskList03_FillingCurrentBlock_Should_NotChangeArrayCapacity() {
             TaskList = new(BlockSize);
 
             TaskList.OnAfterAddTask = OnAddItem;
@@ -104,7 +104,7 @@ namespace TMUnitTest.Util {
         }
 
         [TestMethod]
-        public void SparseTaskList04_WhenBlockIsFullAddingItem_Should_ExtendTheArray() {
+        public void TaskList04_WhenBlockIsFullAddingItem_Should_ExtendTheArray() {
             TaskList = new(BlockSize);
 
             TaskList.OnAfterAddTask = OnAddItem;
@@ -128,7 +128,7 @@ namespace TMUnitTest.Util {
         }
 
         [TestMethod]
-        public void SparseTaskList05_RemovingEndItem_Should_NotAffectGapsArray() {
+        public void TaskList05_RemovingEndItem_Should_MarkItInactive() {
             TaskList = new(BlockSize);
 
             TaskList.OnAfterAddTask = OnAddItem;
@@ -141,64 +141,16 @@ namespace TMUnitTest.Util {
 
             Assert.AreEqual(TaskList.Size, BlockSize);
             Assert.AreEqual(TaskList.TasksCapacity, 0);
-            Assert.AreEqual(TaskList.GapsCapacity, 0);
 
             TaskList.RemoveAt(BlockSize - 1);
 
             Assert.AreEqual(TaskList.Size, BlockSize - 1);
             Assert.AreEqual(TaskList.TasksCapacity, 1);
-            Assert.AreEqual(TaskList.GapsCapacity, 0);
+            Assert.IsFalse(TaskList.Tasks[TaskList.Size].IsActive);
         }
 
         [TestMethod]
-        public void SparseTaskList06_RemovingOtherItem_Should_UpdateGapsArray() {
-            TaskList = new(BlockSize);
-
-            TaskList.OnAfterAddTask = OnAddItem;
-            TaskList.OnAfterRemoveTask = OnDelItem;
-            TaskList.TaskIsActive = IsActive;
-
-            for (int i = 0; i < BlockSize; i++) {
-                TaskList.Add(new TaskStruct { ID = $"{i}" });
-            }
-
-            Assert.AreEqual(TaskList.Size, BlockSize);
-            Assert.AreEqual(TaskList.TasksCapacity, 0);
-            Assert.AreEqual(TaskList.GapsCapacity, 0);
-
-            TaskList.RemoveAt(0);
-
-            Assert.AreEqual(TaskList.Size, BlockSize);
-            Assert.AreEqual(TaskList.TasksCapacity, 1);
-            Assert.AreEqual(TaskList.GapsCapacity, BlockSize - 1);
-        }
-
-        [TestMethod]
-        public void SparseTaskList07_RemovingAlreadyRemovedItem_Should_DoNothing() {
-            TaskList = new(BlockSize);
-
-            TaskList.OnAfterAddTask = OnAddItem;
-            TaskList.OnAfterRemoveTask = OnDelItem;
-            TaskList.TaskIsActive = IsActive;
-
-            for (int i = 0; i < BlockSize; i++) {
-                TaskList.Add(new TaskStruct { ID = $"{i}" });
-            }
-
-            Assert.AreEqual(TaskList.Size, BlockSize);
-            Assert.AreEqual(TaskList.TasksCapacity, 0);
-            Assert.AreEqual(TaskList.GapsCapacity, 0);
-
-            TaskList.RemoveAt(0);
-            TaskList.RemoveAt(0);
-
-            Assert.AreEqual(TaskList.Size, BlockSize);
-            Assert.AreEqual(TaskList.TasksCapacity, 1);
-            Assert.AreEqual(TaskList.GapsCapacity, BlockSize - 1);
-        }
-
-        [TestMethod]
-        public void SparseTaskList08_RemoveThenAddItem_Should_UseEmptyGap() {
+        public void TaskList06_RemovingFirstItem_Should_ReplaceWithEndItemAndMarkEndItemInactive() {
             TaskList = new(BlockSize);
 
             TaskList.OnAfterAddTask = OnAddItem;
@@ -211,16 +163,10 @@ namespace TMUnitTest.Util {
 
             TaskList.RemoveAt(0);
 
-            Assert.IsFalse(IsActive(0));
+            Assert.AreEqual(TaskList.Size, BlockSize - 1);
+            Assert.AreEqual(TaskList.Tasks[0].ID, "3");
             Assert.AreEqual(TaskList.TasksCapacity, 1);
-            Assert.AreEqual(TaskList.GapsCapacity, BlockSize - 1);
-
-            TaskList.Add(new TaskStruct { ID = "NEW" });
-
-            Assert.IsTrue(IsActive(0));
-            Assert.AreEqual(TaskList.Tasks[0].ID, "NEW");
-            Assert.AreEqual(TaskList.TasksCapacity, 0);
-            Assert.AreEqual(TaskList.GapsCapacity, BlockSize);
+            Assert.IsFalse(TaskList.Tasks[TaskList.Size].IsActive);
         }
     }
 }

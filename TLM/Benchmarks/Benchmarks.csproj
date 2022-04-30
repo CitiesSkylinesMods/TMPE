@@ -71,7 +71,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="LoopUtilPerfTests.cs" />
-    <Compile Include="SparseTaskListPerfTests.cs" />
+    <Compile Include="TaskListPerfTests.cs" />
     <Compile Include="SpiralPerfTests.cs" />
   </ItemGroup>
   <ItemGroup>

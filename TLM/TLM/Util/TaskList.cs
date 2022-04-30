@@ -1,21 +1,13 @@
 namespace TrafficManager.Util {
 
     /// <summary>
-    /// <para>
     /// This list is designed specifically for persistent render tasks with
     /// intermittent bulk additions/removals/updates due to camera move or
     /// tool state change.
-    /// </para>
-    /// <para>
-    /// It uses a sparse array to store tasks - any iterations must take that
-    /// in to account, eg. by checking elements with <see cref="TaskIsActive"/>
-    /// delegate. It is up to calling code to determine how tasks are marked
-    /// active/inactive via three mandatory delegates.
-    /// </para>
     /// </summary>
     /// <typeparam name="T">The type of render task to store.</typeparam>
     /// <remarks><i>Delegates must be assigned prior to use!</i></remarks>
-    public class SparseTaskList<T> {
+    public class TaskList<T> {
 
         /// <summary>
         /// When arrays are initialsied or their capacity needs increasing,
@@ -35,7 +27,7 @@ namespace TrafficManager.Util {
         /// The event handlers must at least mark items active or inactive,
         /// as applicable to the event.
         /// </remarks>
-        public delegate void SparseListEvent(int index);
+        public delegate void TaskListEvent(int index);
 
         /// <summary>
         /// Delegate for mandatory <see cref="TaskIsActive"/> method which is
@@ -44,15 +36,16 @@ namespace TrafficManager.Util {
         /// </summary>
         /// <param name="index">
         /// The index of the item in the <see cref="Tasks"/> array.
-        /// Guaranteed to exist when invoked by <see cref="SparseTaskList{T}"/>.
+        /// Guaranteed to exist when invoked by <see cref="TaskList{T}"/>.
         /// </param>
         /// <returns>
         /// Return <c>true</c> if the item is active, othewise <c>false</c>.
         /// </returns>
-        public delegate bool SparseListItemActive(int index);
+        public delegate bool TaskListItemActive(int index);
 
         /// <summary>
-        /// The block size by which arrays will be extended when neccessary.
+        /// The <see cref="Tasks"/> array will be increased in multiples
+        /// of this size when necessary.
         /// </summary>
         /// <remarks>
         /// Defaults to <see cref="BLOCK_SIZE"/> can be modified via ctor.
@@ -60,7 +53,7 @@ namespace TrafficManager.Util {
         public int BlockSize { get; private set; }
 
         /// <summary>
-        /// Sparse array for storing tasks.
+        /// Array for storing tasks.
         /// </summary>
         /// <remarks>
         /// Similar to <c>FastList.m_buffer</c>.
@@ -68,8 +61,7 @@ namespace TrafficManager.Util {
         public T[] Tasks { get; private set; }
 
         /// <summary>
-        /// Current number of used elements, <i>inclusive of gaps</i>, in
-        /// the sparse <see cref="Tasks"/> array.
+        /// Current number of used elements in <see cref="Tasks"/> array.
         /// </summary>
         /// <remarks>
         /// Similar to <c>FastList.m_size</c>.
@@ -77,59 +69,41 @@ namespace TrafficManager.Util {
         public int Size { get; private set; }
 
         /// <summary>
-        /// Contains indexes of empty gaps in the <see cref="Tasks"/> array.
-        /// </summary>
-        private int[] gaps;
-
-        /// <summary>
-        /// Number of gaps listed in the <see cref="gaps"/> array.
-        /// </summary>
-        private int numGaps;
-
-        /// <summary>
         /// Mandatory. Called after an item is added to the <see cref="Tasks"/>
         /// array at specified <c>index</c>.
         /// </summary>
-        public SparseListEvent OnAfterAddTask;
+        public TaskListEvent OnAfterAddTask;
 
         /// <summary>
         /// Mandatory. Called after an item is removed from the <see cref="Tasks"/>
         /// array at specified <c>index</c>.
         /// </summary>
-        public SparseListEvent OnAfterRemoveTask;
+        public TaskListEvent OnAfterRemoveTask;
 
         /// <summary>
-        /// Mandatory. Invoked when <see cref="SparseTaskList{T}"/> needs to
+        /// Mandatory. Invoked when <see cref="TaskList{T}"/> needs to
         /// check whether a task at specified <c>index</c> is active.
         /// </summary>
-        public SparseListItemActive TaskIsActive;
+        public TaskListItemActive TaskIsActive;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SparseTaskList{T}"/> class.
+        /// Initializes a new instance of the <see cref="TaskList{T}"/> class.
         /// </summary>
         /// <param name="blockSize">
         /// Optional: Specify custom block size. Defaults to <see cref="BLOCK_SIZE"/>.
         /// Must be Power of 2.
         /// </param>
-        public SparseTaskList(int blockSize = BLOCK_SIZE) {
+        public TaskList(int blockSize = BLOCK_SIZE) {
             Shortcuts.AssertPowerOf2(blockSize);
 
             BlockSize = blockSize;
         }
 
         /// <summary>
-        /// Returns the unused capacity of the <see cref="gaps"/> array.
-        /// </summary>
-        public int GapsCapacity => gaps != null
-            ? gaps.Length - numGaps
-            : 0;
-
-        /// <summary>
-        /// Returns the unused capacity of the <see cref="Tasks"/> array,
-        /// <i>inclusive of gaps</i>.
+        /// Returns the unused capacity of the <see cref="Tasks"/> array.
         /// </summary>
         public int TasksCapacity => Tasks != null
-            ? Tasks.Length - Size + numGaps
+            ? Tasks.Length - Size
             : 0;
 
         /// <summary>
@@ -149,7 +123,7 @@ namespace TrafficManager.Util {
                 return;
             }
 
-            int capacity = Tasks.Length + numItems - numGaps;
+            int capacity = Tasks.Length + numItems;
             T[] replacement = new T[SnapToBlock(capacity)];
 
             for (int i = 0; i < Size; i++) {
@@ -160,134 +134,74 @@ namespace TrafficManager.Util {
         }
 
         /// <summary>
-        /// Obtain index of next gap in the <see cref="Tasks"/> array.
+        /// Obtain next free index in <see cref="Tasks"/> array. Use this
+        /// when manually adding batches of items if you want to skip
+        /// overheads associated with <see cref="Add(T, bool)"/> but
+        /// make sure you <see cref="PrepareToAdd(int)"/> first to ensure
+        /// sufficient capacity.
         /// </summary>
         /// <remarks>
         /// <i>Assumes that the index will be used</i>.
         /// </remarks>
-        public int NextUsableTaskIndex => (numGaps > 0)
-            ? gaps[--numGaps]
-            : Size++;
+        public int NextUsableTaskIndex => Size++;
 
         /// <summary>
-        /// Adds an item to the <see cref="Tasks"/> array.
+        /// Adds an item to the <see cref="Tasks"/> array, which is then
+        /// initialised by <see cref="OnAfterAddTask"/>.
         /// </summary>
         /// <param name="item">
         /// The item to add.
         /// </param>
         /// <param name="prePrepared">
-        /// If you invoke <see cref="PrepareToAdd(int)"/> prior to
-        /// adding a batch of items, and you are certain you prepared
-        /// enough space for those items, set this <c>true</c> to bypass
-        /// a chunk of internal code and get maximal performance.
+        /// Set <c>true</c> only if you prepared enough space to add a
+        /// batch of items using <see cref="PrepareToAdd(int)"/>.
         /// </param>
-        /// <remarks>
-        /// It us up to external code to update the item at the specified
-        /// <paramref name="index"/> in such a way that it can be
-        /// identified as "active" element in subsequent iterations. To
-        /// achieve this, use the <see cref="OnAfterAddTask"/> event.
-        /// </remarks>
         public void Add(T item, bool prePrepared = false) {
             if (!prePrepared && TasksCapacity == 0) {
                 PrepareToAdd(1);
             }
 
-            int index = NextUsableTaskIndex;
-            Tasks[index] = item;
-            OnAfterAddTask(index);
+            Tasks[Size] = item;
+            OnAfterAddTask(Size);
+
+            ++Size;
         }
 
         /// <summary>
-        /// Call before removing multiple items to ensure there is
-        /// enough space in the <see cref="gaps"/> array.
-        /// </summary>
-        /// <param name="numItems">
-        /// The number of items that will be removed.
-        /// </param>
-        public void PrepareToRemove(int numItems) {
-            if (numItems <= 0 || GapsCapacity >= numItems) {
-                return;
-            }
-
-            if (gaps == null) {
-                gaps = new int[SnapToBlock(numItems)];
-                return;
-            }
-
-            int capacity = numGaps + numItems;
-            int[] replacement = new int[SnapToBlock(capacity)];
-
-            for (int i = 0; i < numGaps; i++) {
-                replacement[i] = gaps[i];
-            }
-
-            gaps = replacement;
-        }
-
-        /// <summary>
-        /// "Removes" item at specific index. The item is not actually
-        /// removed from the <see cref="Tasks"/> array; it's index is
-        /// added to the <see cref="gaps"/> array so it can be filled
-        /// later when adding new items.
+        /// Removes item at specific index by replacing it with last
+        /// used element of the <see cref="Tasks"/> array, which is
+        /// then cleared via <see cref="OnAfterRemoveTask"/>.
         /// </summary>
         /// <param name="index">The index of the item to remove</param>
-        /// <param name="prePrepared">
-        /// If you invoke <see cref="PrepareToRemove(int)"/> prior to
-        /// removing a batch of items, and you are certain you prepared
-        /// enough gaps for those items, set this <c>true</c> to bypass
-        /// a chunk of internal code and get maximal performance.
-        /// </param>
-        /// <remarks>
-        /// It us up to external code to update the item at the specified
-        /// <paramref name="index"/> in such a way that it can be
-        /// identified as "vacant" element in subsequent iterations. To
-        /// achieve this, use the <see cref="OnAfterRemoveTask"/> event.
-        /// </remarks>
-        public void RemoveAt(int index, bool prePrepared = false) {
-            if (index >= Size || !TaskIsActive(index)) {
+        public void RemoveAt(int index) {
+            if (index < 0 || index >= Size) {
                 return;
             }
 
-            if (!prePrepared) {
+            --Size;
 
-                // Edge-case: Removing item at end of used portion of Tasks array.
-                if (index == Size - 1) {
-                    --Size;
-                    OnAfterRemoveTask(index);
-                    return;
-                }
-
-                if (GapsCapacity == 0) {
-
-                    // Edge-case: Removing last remaining active item in Tasks array.
-                    if (numGaps == (Size - 1)) {
-                        Clear(skipEvents: true);
-                        OnAfterRemoveTask(index);
-                        return;
-                    }
-
-                    PrepareToRemove(1);
-                }
+            if (index != Size) {
+                Tasks[index] = Tasks[Size];
             }
 
-            gaps[numGaps++] = index;
-            OnAfterRemoveTask(index);
+            OnAfterRemoveTask(Size);
         }
 
         /// <summary>
         /// "Clear" the arrays but retain their capacity.
         /// </summary>
-        /// <param name="skipEvents">Internal use only.</param>
+        /// <param name="skipEvents">
+        /// If <c>true</c>, removal of any remaining active tasks will
+        /// not trigger the <see cref="OnAfterRemoveTask"/> event.
+        /// </param>
         public void Clear(bool skipEvents = false) {
             if (!skipEvents) {
                 for (int index = 0; index < Size; index++) {
-                    if (TaskIsActive(index)) {
-                        OnAfterRemoveTask(index);
-                    }
+                    OnAfterRemoveTask(index);
                 }
             }
+
             Size = 0;
-            numGaps = 0;
         }
 
         /// <summary>
@@ -300,7 +214,6 @@ namespace TrafficManager.Util {
         public void Release(bool skipEvents = false) {
             Clear(skipEvents);
             Tasks = null;
-            gaps = null;
         }
 
         /// <summary>
