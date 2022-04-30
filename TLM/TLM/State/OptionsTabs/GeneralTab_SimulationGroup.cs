@@ -8,44 +8,14 @@ namespace TrafficManager.State {
 
     public static class GeneralTab_SimulationGroup {
 
-        private static UIDropDown _simulationAccuracyDropdown;
-
-        public static void SetSimulationAccuracy(SimulationAccuracy value) {
-            Options.simulationAccuracy = value;
-            if (_simulationAccuracyDropdown != null) {
-                _simulationAccuracyDropdown.selectedIndex = (int)value;
-            }
-        }
+        public static DropDownOption<SimulationAccuracy> SimulationAccuracy =
+            new(nameof(Options.simulationAccuracy), Options.PersistTo.Global) {
+                Label = "General.Dropdown:Simulation accuracy",
+            };
 
         internal static void AddUI(UIHelperBase tab) {
-
-            var group = tab.AddGroup(T("General.Group:Simulation"));
-
-            AddSimulationAccuracyDropDown(group);
-        }
-
-        private static string T(string key) => Translation.Options.Get(key);
-
-        private static void AddSimulationAccuracyDropDown(UIHelperBase group) {
-            string[] simPrecisionOptions = new[] {
-                T("General.Dropdown.Option:Very low"),
-                T("General.Dropdown.Option:Low"),
-                T("General.Dropdown.Option:Medium"),
-                T("General.Dropdown.Option:High"),
-                T("General.Dropdown.Option:Very high"),
-            };
-            _simulationAccuracyDropdown = group.AddDropdown(
-                text: T("General.Dropdown:Simulation accuracy") + ":",
-                options: simPrecisionOptions,
-                defaultSelection: (int)Options.simulationAccuracy,
-                eventCallback: OnSimulationAccuracyChanged) as UIDropDown;
-        }
-
-        private static void OnSimulationAccuracyChanged(int value) {
-            if (!Options.IsGameLoaded()) return;
-
-            Log.Info($"Simulation accuracy changed to {value}");
-            Options.simulationAccuracy = (SimulationAccuracy)value;
+            var group = tab.AddGroup("General.Group:Simulation");
+            SimulationAccuracy.AddUI(group);
         }
     }
 }

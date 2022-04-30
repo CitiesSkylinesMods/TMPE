@@ -15,28 +15,9 @@ namespace TrafficManager.UI.Helpers {
         private List<CheckboxOption> _propagatesFalseTo;
 
         public CheckboxOption(string fieldName, Options.PersistTo scope = Options.PersistTo.Savegame)
-        : base(fieldName, scope) {
-            OnValueChanged = DefaultOnValueChanged;
-        }
+        : base(fieldName, scope) { }
 
         /* Data */
-
-        public delegate bool ValidatorDelegate(bool desired, out bool result);
-
-        public event OnCheckChanged OnValueChanged;
-
-        public OnCheckChanged Handler {
-            set {
-                OnValueChanged -= value;
-                OnValueChanged += value;
-            }
-        }
-
-        /// <summary>
-        /// Optional custom validator which intercepts value changes and can inhibit event propagation.
-        /// </summary>
-        public ValidatorDelegate Validator { get; set; }
-
         /// <summary>
         /// If this checkbox is set <c>true</c>, it will propagate that to the <paramref name="target"/>.
         /// Chainable.
@@ -68,25 +49,6 @@ namespace TrafficManager.UI.Helpers {
         public override byte Save() => (byte)(Value ? 1 : 0);
 
         /* UI */
-
-        public string Label {
-            get => _label ?? $"Checkbox:{FieldName}";
-            set {
-                _label = value;
-                UpdateLabel();
-            }
-        }
-
-        public string Tooltip {
-            get => _tooltip;
-            set {
-                _tooltip = value;
-                UpdateTooltip();
-            }
-        }
-
-        public bool Indent { get; set; }
-
         public override bool Value {
             get => base.Value;
             set {
@@ -116,16 +78,8 @@ namespace TrafficManager.UI.Helpers {
             }
         }
 
-        public bool ReadOnly {
-            get => _readOnly;
-            set {
-                _readOnly = !IsInScope || value;
-                UpdateReadOnly();
-            }
-        }
-
         public override CheckboxOption AddUI(UIHelperBase container) {
-            _ui = container.AddCheckbox(T(Label), Value, OnValueChanged) as UICheckBox;
+            _ui = container.AddCheckbox(Translate(Label), Value, InvokeOnValueChanged) as UICheckBox;
 
             if (Indent) ApplyIndent(_ui);
 
@@ -142,23 +96,23 @@ namespace TrafficManager.UI.Helpers {
                 target.Value = value;
         }
 
-        private void UpdateLabel() {
+        protected override void UpdateLabel() {
             if (!HasUI) return;
 
-            _ui.label.text = T(Label);
+            _ui.label.text = Translate(Label);
         }
 
-        private void UpdateTooltip() {
+        protected override void UpdateTooltip() {
             if (!HasUI) return;
 
             _ui.tooltip = IsInScope
                 ? string.IsNullOrEmpty(_tooltip)
                     ? string.Empty // avoid invalidating UI if already no tooltip
-                    : T(_tooltip)
-                : T(INGAME_ONLY_SETTING);
+                    : Translate(_tooltip)
+                : Translate(INGAME_ONLY_SETTING);
         }
 
-        private void UpdateReadOnly() {
+        protected override void UpdateReadOnly() {
             if (!HasUI) return;
 
             var readOnly = !IsInScope || _readOnly;
