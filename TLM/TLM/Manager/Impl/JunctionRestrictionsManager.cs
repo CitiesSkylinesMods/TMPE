@@ -366,7 +366,7 @@ namespace TrafficManager.Manager.Impl {
         }
 
         public bool IsUturnAllowed(ushort segmentId, bool startNode) {
-            return segmentRestrictions[segmentId].IsUturnAllowed(startNode);
+            return segmentRestrictions[segmentId].GetValueOrDefault(JunctionRestrictionFlags.AllowUTurn, startNode);
         }
 
         public bool IsNearTurnOnRedAllowedConfigurable(ushort segmentId,
@@ -449,11 +449,11 @@ namespace TrafficManager.Manager.Impl {
         }
 
         public bool IsNearTurnOnRedAllowed(ushort segmentId, bool startNode) {
-            return segmentRestrictions[segmentId].IsNearTurnOnRedAllowed(startNode);
+            return segmentRestrictions[segmentId].GetValueOrDefault(JunctionRestrictionFlags.AllowNearTurnOnRed, startNode);
         }
 
         public bool IsFarTurnOnRedAllowed(ushort segmentId, bool startNode) {
-            return segmentRestrictions[segmentId].IsFarTurnOnRedAllowed(startNode);
+            return segmentRestrictions[segmentId].GetValueOrDefault(JunctionRestrictionFlags.AllowFarTurnOnRed, startNode);
         }
 
         public bool IsLaneChangingAllowedWhenGoingStraightConfigurable(
@@ -527,7 +527,7 @@ namespace TrafficManager.Manager.Impl {
         }
 
         public bool IsLaneChangingAllowedWhenGoingStraight(ushort segmentId, bool startNode) {
-            return segmentRestrictions[segmentId].IsLaneChangingAllowedWhenGoingStraight(startNode);
+            return segmentRestrictions[segmentId].GetValueOrDefault(JunctionRestrictionFlags.AllowForwardLaneChange, startNode);
         }
 
         public bool IsEnteringBlockedJunctionAllowedConfigurable(
@@ -628,7 +628,7 @@ namespace TrafficManager.Manager.Impl {
         }
 
         public bool IsEnteringBlockedJunctionAllowed(ushort segmentId, bool startNode) {
-            return segmentRestrictions[segmentId].IsEnteringBlockedJunctionAllowed(startNode);
+            return segmentRestrictions[segmentId].GetValueOrDefault(JunctionRestrictionFlags.AllowEnterWhenBlocked, startNode);
         }
 
         public bool IsPedestrianCrossingAllowedConfigurable(ushort segmentId, bool startNode, ref NetNode node) {
@@ -716,19 +716,19 @@ namespace TrafficManager.Manager.Impl {
         }
 
         public bool IsPedestrianCrossingAllowed(ushort segmentId, bool startNode) {
-            return segmentRestrictions[segmentId].IsPedestrianCrossingAllowed(startNode);
+            return segmentRestrictions[segmentId].GetValueOrDefault(JunctionRestrictionFlags.AllowPedestrianCrossing, startNode);
         }
 
         public TernaryBool GetUturnAllowed(ushort segmentId, bool startNode) {
-            return segmentRestrictions[segmentId].GetUturnAllowed(startNode);
+            return segmentRestrictions[segmentId].GetTernaryBool(JunctionRestrictionFlags.AllowUTurn, startNode);
         }
 
         public TernaryBool GetNearTurnOnRedAllowed(ushort segmentId, bool startNode) {
-            return segmentRestrictions[segmentId].GetNearTurnOnRedAllowed(startNode);
+            return segmentRestrictions[segmentId].GetTernaryBool(JunctionRestrictionFlags.AllowNearTurnOnRed, startNode);
         }
 
         public TernaryBool GetFarTurnOnRedAllowed(ushort segmentId, bool startNode) {
-            return segmentRestrictions[segmentId].GetFarTurnOnRedAllowed(startNode);
+            return segmentRestrictions[segmentId].GetTernaryBool(JunctionRestrictionFlags.AllowFarTurnOnRed, startNode);
         }
 
         public TernaryBool GetTurnOnRedAllowed(bool near, ushort segmentId, bool startNode) {
@@ -738,15 +738,15 @@ namespace TrafficManager.Manager.Impl {
         }
 
         public TernaryBool GetLaneChangingAllowedWhenGoingStraight(ushort segmentId, bool startNode) {
-            return segmentRestrictions[segmentId].GetLaneChangingAllowedWhenGoingStraight(startNode);
+            return segmentRestrictions[segmentId].GetTernaryBool(JunctionRestrictionFlags.AllowForwardLaneChange, startNode);
         }
 
         public TernaryBool GetEnteringBlockedJunctionAllowed(ushort segmentId, bool startNode) {
-            return segmentRestrictions[segmentId].GetEnteringBlockedJunctionAllowed(startNode);
+            return segmentRestrictions[segmentId].GetTernaryBool(JunctionRestrictionFlags.AllowEnterWhenBlocked, startNode);
         }
 
         public TernaryBool GetPedestrianCrossingAllowed(ushort segmentId, bool startNode) {
-            return segmentRestrictions[segmentId].GetPedestrianCrossingAllowed(startNode);
+            return segmentRestrictions[segmentId].GetTernaryBool(JunctionRestrictionFlags.AllowPedestrianCrossing, startNode);
         }
 
         public bool ToggleUturnAllowed(ushort segmentId, bool startNode) {
@@ -893,7 +893,7 @@ namespace TrafficManager.Manager.Impl {
                 return false;
             }
 
-            segmentRestrictions[segmentId].SetUturnAllowed(startNode, value);
+            segmentRestrictions[segmentId].SetValue(JunctionRestrictionFlags.AllowUTurn, startNode, value);
             OnSegmentChange(
                 segmentId,
                 startNode,
@@ -930,9 +930,9 @@ namespace TrafficManager.Manager.Impl {
             }
 
             if (near) {
-                segmentRestrictions[segmentId].SetNearTurnOnRedAllowed(startNode, value);
+                segmentRestrictions[segmentId].SetValue(JunctionRestrictionFlags.AllowNearTurnOnRed, startNode, value);
             } else {
-                segmentRestrictions[segmentId].SetFarTurnOnRedAllowed(startNode, value);
+                segmentRestrictions[segmentId].SetValue(JunctionRestrictionFlags.AllowFarTurnOnRed, startNode, value);
             }
             OnSegmentChange(segmentId, startNode, ref Constants.ManagerFactory.ExtSegmentManager.ExtSegments[segmentId], true);
             return true;
@@ -954,7 +954,7 @@ namespace TrafficManager.Manager.Impl {
                 return false;
             }
 
-            segmentRestrictions[segmentId].SetLaneChangingAllowedWhenGoingStraight(startNode, value);
+            segmentRestrictions[segmentId].SetValue(JunctionRestrictionFlags.AllowForwardLaneChange, startNode, value);
             OnSegmentChange(
                 segmentId,
                 startNode,
@@ -976,7 +976,7 @@ namespace TrafficManager.Manager.Impl {
                 return false;
             }
 
-            segmentRestrictions[segmentId].SetEnteringBlockedJunctionAllowed(startNode, value);
+            segmentRestrictions[segmentId].SetValue(JunctionRestrictionFlags.AllowEnterWhenBlocked, startNode, value);
 
             // recalculation not needed here because this is a simulation-time feature
             OnSegmentChange(
@@ -1000,7 +1000,7 @@ namespace TrafficManager.Manager.Impl {
                 return false;
             }
 
-            segmentRestrictions[segmentId].SetPedestrianCrossingAllowed(startNode, value);
+            segmentRestrictions[segmentId].SetValue(JunctionRestrictionFlags.AllowPedestrianCrossing, startNode, value);
             OnSegmentChange(
                 segmentId,
                 startNode,
