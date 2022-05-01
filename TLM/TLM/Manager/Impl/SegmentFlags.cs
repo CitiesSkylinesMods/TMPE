@@ -1,4 +1,4 @@
-namespace TrafficManager.API.Traffic.Data {
+namespace TrafficManager.Manager.Impl {
     using System;
     using CSUtil.Commons;
 
