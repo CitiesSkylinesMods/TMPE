@@ -3,19 +3,156 @@ namespace TrafficManager.Manager.Impl {
     using CSUtil.Commons;
 
     public struct JunctionRestrictions {
-        public TernaryBool uturnAllowed;
-        public TernaryBool nearTurnOnRedAllowed;
-        public TernaryBool farTurnOnRedAllowed;
-        public TernaryBool straightLaneChangingAllowed;
-        public TernaryBool enterWhenBlockedAllowed;
-        public TernaryBool pedestrianCrossingAllowed;
+        private TernaryBool uturnAllowed;
+        private TernaryBool nearTurnOnRedAllowed;
+        private TernaryBool farTurnOnRedAllowed;
+        private TernaryBool straightLaneChangingAllowed;
+        private TernaryBool enterWhenBlockedAllowed;
+        private TernaryBool pedestrianCrossingAllowed;
 
-        public bool defaultUturnAllowed;
-        public bool defaultNearTurnOnRedAllowed;
-        public bool defaultFarTurnOnRedAllowed;
-        public bool defaultStraightLaneChangingAllowed;
-        public bool defaultEnterWhenBlockedAllowed;
-        public bool defaultPedestrianCrossingAllowed;
+        private bool defaultUturnAllowed;
+        private bool defaultNearTurnOnRedAllowed;
+        private bool defaultFarTurnOnRedAllowed;
+        private bool defaultStraightLaneChangingAllowed;
+        private bool defaultEnterWhenBlockedAllowed;
+        private bool defaultPedestrianCrossingAllowed;
+
+        public void ClearValue(JunctionRestrictionFlags flags) {
+            switch (flags) {
+                case JunctionRestrictionFlags.AllowUTurn:
+                    uturnAllowed = TernaryBool.Undefined;
+                    break;
+
+                case JunctionRestrictionFlags.AllowNearTurnOnRed:
+                    nearTurnOnRedAllowed = TernaryBool.Undefined;
+                    break;
+
+                case JunctionRestrictionFlags.AllowFarTurnOnRed:
+                    farTurnOnRedAllowed = TernaryBool.Undefined;
+                    break;
+
+                case JunctionRestrictionFlags.AllowForwardLaneChange:
+                    straightLaneChangingAllowed = TernaryBool.Undefined;
+                    break;
+
+                case JunctionRestrictionFlags.AllowEnterWhenBlocked:
+                    enterWhenBlockedAllowed = TernaryBool.Undefined;
+                    break;
+
+                case JunctionRestrictionFlags.AllowPedestrianCrossing:
+                    pedestrianCrossingAllowed = TernaryBool.Undefined;
+                    break;
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(flags));
+            }
+        }
+
+        public void SetDefault(JunctionRestrictionFlags flags, bool value) {
+            switch (flags) {
+                case JunctionRestrictionFlags.AllowUTurn:
+                    defaultUturnAllowed = value;
+                    break;
+
+                case JunctionRestrictionFlags.AllowNearTurnOnRed:
+                    defaultNearTurnOnRedAllowed = value;
+                    break;
+
+                case JunctionRestrictionFlags.AllowFarTurnOnRed:
+                    defaultFarTurnOnRedAllowed = value;
+                    break;
+
+                case JunctionRestrictionFlags.AllowForwardLaneChange:
+                    defaultStraightLaneChangingAllowed = value;
+                    break;
+
+                case JunctionRestrictionFlags.AllowEnterWhenBlocked:
+                    defaultEnterWhenBlockedAllowed = value;
+                    break;
+
+                case JunctionRestrictionFlags.AllowPedestrianCrossing:
+                    defaultPedestrianCrossingAllowed = value;
+                    break;
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(flags));
+            }
+        }
+
+        public bool GetDefault(JunctionRestrictionFlags flags) {
+            switch (flags) {
+                case JunctionRestrictionFlags.AllowUTurn:
+                    return defaultUturnAllowed;
+
+                case JunctionRestrictionFlags.AllowNearTurnOnRed:
+                    return defaultNearTurnOnRedAllowed;
+
+                case JunctionRestrictionFlags.AllowFarTurnOnRed:
+                    return defaultFarTurnOnRedAllowed;
+
+                case JunctionRestrictionFlags.AllowForwardLaneChange:
+                    return defaultStraightLaneChangingAllowed;
+
+                case JunctionRestrictionFlags.AllowEnterWhenBlocked:
+                    return defaultEnterWhenBlockedAllowed;
+
+                case JunctionRestrictionFlags.AllowPedestrianCrossing:
+                    return defaultPedestrianCrossingAllowed;
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(flags));
+            }
+        }
+
+        public bool HasValue(JunctionRestrictionFlags flags) {
+            switch (flags) {
+                case JunctionRestrictionFlags.AllowUTurn:
+                    return uturnAllowed != TernaryBool.Undefined;
+
+                case JunctionRestrictionFlags.AllowNearTurnOnRed:
+                    return nearTurnOnRedAllowed != TernaryBool.Undefined;
+
+                case JunctionRestrictionFlags.AllowFarTurnOnRed:
+                    return farTurnOnRedAllowed != TernaryBool.Undefined;
+
+                case JunctionRestrictionFlags.AllowForwardLaneChange:
+                    return straightLaneChangingAllowed != TernaryBool.Undefined;
+
+                case JunctionRestrictionFlags.AllowEnterWhenBlocked:
+                    return enterWhenBlockedAllowed != TernaryBool.Undefined;
+
+                case JunctionRestrictionFlags.AllowPedestrianCrossing:
+                    return pedestrianCrossingAllowed != TernaryBool.Undefined;
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(flags));
+            }
+        }
+
+        public TernaryBool GetTernaryBool(JunctionRestrictionFlags flags) {
+            switch (flags) {
+                case JunctionRestrictionFlags.AllowUTurn:
+                    return uturnAllowed;
+
+                case JunctionRestrictionFlags.AllowNearTurnOnRed:
+                    return nearTurnOnRedAllowed;
+
+                case JunctionRestrictionFlags.AllowFarTurnOnRed:
+                    return farTurnOnRedAllowed;
+
+                case JunctionRestrictionFlags.AllowForwardLaneChange:
+                    return straightLaneChangingAllowed;
+
+                case JunctionRestrictionFlags.AllowEnterWhenBlocked:
+                    return enterWhenBlockedAllowed;
+
+                case JunctionRestrictionFlags.AllowPedestrianCrossing:
+                    return pedestrianCrossingAllowed;
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(flags));
+            }
+        }
 
         public bool IsUturnAllowed() {
             return uturnAllowed == TernaryBool.Undefined

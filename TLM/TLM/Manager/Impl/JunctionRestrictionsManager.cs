@@ -219,63 +219,63 @@ namespace TrafficManager.Manager.Impl {
                                     ref JunctionRestrictions restrictions,
                                     ref NetNode node) {
             if (!IsUturnAllowedConfigurable(segEnd.segmentId, segEnd.startNode, ref node)) {
-                restrictions.uturnAllowed = TernaryBool.Undefined;
+                restrictions.ClearValue(JunctionRestrictionFlags.AllowUTurn);
             }
 
             if (!IsNearTurnOnRedAllowedConfigurable(segEnd.segmentId, segEnd.startNode, ref node)) {
-                restrictions.nearTurnOnRedAllowed = TernaryBool.Undefined;
+                restrictions.ClearValue(JunctionRestrictionFlags.AllowNearTurnOnRed);
             }
 
             if (!IsFarTurnOnRedAllowedConfigurable(segEnd.segmentId, segEnd.startNode, ref node)) {
-                restrictions.farTurnOnRedAllowed = TernaryBool.Undefined;
+                restrictions.ClearValue(JunctionRestrictionFlags.AllowFarTurnOnRed);
             }
 
             if (!IsLaneChangingAllowedWhenGoingStraightConfigurable(
                     segEnd.segmentId,
                     segEnd.startNode,
                     ref node)) {
-                restrictions.straightLaneChangingAllowed = TernaryBool.Undefined;
+                restrictions.ClearValue(JunctionRestrictionFlags.AllowForwardLaneChange);
             }
 
             if (!IsEnteringBlockedJunctionAllowedConfigurable(
                     segEnd.segmentId,
                     segEnd.startNode,
                     ref node)) {
-                restrictions.enterWhenBlockedAllowed = TernaryBool.Undefined;
+                restrictions.ClearValue(JunctionRestrictionFlags.AllowEnterWhenBlocked);
             }
 
             if (!IsPedestrianCrossingAllowedConfigurable(
                     segEnd.segmentId,
                     segEnd.startNode,
                     ref node)) {
-                restrictions.pedestrianCrossingAllowed = TernaryBool.Undefined;
+                restrictions.ClearValue(JunctionRestrictionFlags.AllowPedestrianCrossing);
             }
 
-            restrictions.defaultUturnAllowed = GetDefaultUturnAllowed(
+            restrictions.SetDefault(JunctionRestrictionFlags.AllowUTurn, GetDefaultUturnAllowed(
                 segEnd.segmentId,
                 segEnd.startNode,
-                ref node);
-            restrictions.defaultNearTurnOnRedAllowed = GetDefaultNearTurnOnRedAllowed(
+                ref node));
+            restrictions.SetDefault(JunctionRestrictionFlags.AllowNearTurnOnRed, GetDefaultNearTurnOnRedAllowed(
                 segEnd.segmentId,
                 segEnd.startNode,
-                ref node);
-            restrictions.defaultFarTurnOnRedAllowed = GetDefaultFarTurnOnRedAllowed(
+                ref node));
+            restrictions.SetDefault(JunctionRestrictionFlags.AllowFarTurnOnRed, GetDefaultFarTurnOnRedAllowed(
                 segEnd.segmentId,
                 segEnd.startNode,
-                ref node);
-            restrictions.defaultStraightLaneChangingAllowed =
+                ref node));
+            restrictions.SetDefault(JunctionRestrictionFlags.AllowForwardLaneChange, 
                 GetDefaultLaneChangingAllowedWhenGoingStraight(
                     segEnd.segmentId,
                     segEnd.startNode,
-                    ref node);
-            restrictions.defaultEnterWhenBlockedAllowed = GetDefaultEnteringBlockedJunctionAllowed(
+                    ref node));
+            restrictions.SetDefault(JunctionRestrictionFlags.AllowEnterWhenBlocked, GetDefaultEnteringBlockedJunctionAllowed(
                 segEnd.segmentId,
                 segEnd.startNode,
-                ref node);
-            restrictions.defaultPedestrianCrossingAllowed = GetDefaultPedestrianCrossingAllowed(
+                ref node));
+            restrictions.SetDefault(JunctionRestrictionFlags.AllowPedestrianCrossing, GetDefaultPedestrianCrossingAllowed(
                 segEnd.segmentId,
                 segEnd.startNode,
-                ref node);
+                ref node));
 
 #if DEBUG
             if (DebugSwitch.JunctionRestrictions.Get()) {
@@ -286,12 +286,12 @@ namespace TrafficManager.Manager.Impl {
                     "defaultEnterWhenBlockedAllowed={6}, defaultPedestrianCrossingAllowed={7}",
                     segEnd.segmentId,
                     segEnd.startNode,
-                    restrictions.defaultUturnAllowed,
-                    restrictions.defaultNearTurnOnRedAllowed,
-                    restrictions.defaultFarTurnOnRedAllowed,
-                    restrictions.defaultStraightLaneChangingAllowed,
-                    restrictions.defaultEnterWhenBlockedAllowed,
-                    restrictions.defaultPedestrianCrossingAllowed);
+                    restrictions.GetDefault(JunctionRestrictionFlags.AllowUTurn),
+                    restrictions.GetDefault(JunctionRestrictionFlags.AllowNearTurnOnRed),
+                    restrictions.GetDefault(JunctionRestrictionFlags.AllowFarTurnOnRed),
+                    restrictions.GetDefault(JunctionRestrictionFlags.AllowForwardLaneChange),
+                    restrictions.GetDefault(JunctionRestrictionFlags.AllowEnterWhenBlocked),
+                    restrictions.GetDefault(JunctionRestrictionFlags.AllowPedestrianCrossing));
             }
 #endif
             Notifier.Instance.OnNodeModified(segEnd.nodeId, this);
@@ -835,33 +835,33 @@ namespace TrafficManager.Manager.Impl {
         }
 
         private void SetSegmentJunctionRestrictions(ushort segmentId, bool startNode, JunctionRestrictions restrictions) {
-            if (restrictions.uturnAllowed != TernaryBool.Undefined) {
+            if (restrictions.HasValue(JunctionRestrictionFlags.AllowUTurn)) {
                 SetUturnAllowed(segmentId, startNode, restrictions.IsUturnAllowed());
             }
 
-            if (restrictions.nearTurnOnRedAllowed != TernaryBool.Undefined) {
+            if (restrictions.HasValue(JunctionRestrictionFlags.AllowNearTurnOnRed)) {
                 SetNearTurnOnRedAllowed(segmentId, startNode, restrictions.IsNearTurnOnRedAllowed());
             }
 
-            if (restrictions.nearTurnOnRedAllowed != TernaryBool.Undefined) {
-                SetFarTurnOnRedAllowed(segmentId, startNode, restrictions.IsNearTurnOnRedAllowed());
+            if (restrictions.HasValue(JunctionRestrictionFlags.AllowFarTurnOnRed)) {
+                SetFarTurnOnRedAllowed(segmentId, startNode, restrictions.IsFarTurnOnRedAllowed());
             }
 
-            if (restrictions.straightLaneChangingAllowed != TernaryBool.Undefined) {
+            if (restrictions.HasValue(JunctionRestrictionFlags.AllowForwardLaneChange)) {
                 SetLaneChangingAllowedWhenGoingStraight(
                     segmentId,
                     startNode,
                     restrictions.IsLaneChangingAllowedWhenGoingStraight());
             }
 
-            if (restrictions.enterWhenBlockedAllowed != TernaryBool.Undefined) {
+            if (restrictions.HasValue(JunctionRestrictionFlags.AllowEnterWhenBlocked)) {
                 SetEnteringBlockedJunctionAllowed(
                     segmentId,
                     startNode,
                     restrictions.IsEnteringBlockedJunctionAllowed());
             }
 
-            if (restrictions.pedestrianCrossingAllowed != TernaryBool.Undefined) {
+            if (restrictions.HasValue(JunctionRestrictionFlags.AllowPedestrianCrossing)) {
                 SetPedestrianCrossingAllowed(
                     segmentId,
                     startNode,

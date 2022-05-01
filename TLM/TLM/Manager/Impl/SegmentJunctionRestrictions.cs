@@ -43,37 +43,27 @@ namespace TrafficManager.Manager.Impl {
         }
 
         public TernaryBool GetUturnAllowed(bool startNode) {
-            return startNode ? startNodeRestrictions.uturnAllowed : endNodeRestrictions.uturnAllowed;
+            return (startNode ? startNodeRestrictions : endNodeRestrictions).GetTernaryBool(JunctionRestrictionFlags.AllowUTurn);
         }
 
         public TernaryBool GetNearTurnOnRedAllowed(bool startNode) {
-            return startNode
-                       ? startNodeRestrictions.nearTurnOnRedAllowed
-                       : endNodeRestrictions.nearTurnOnRedAllowed;
+            return (startNode ? startNodeRestrictions : endNodeRestrictions).GetTernaryBool(JunctionRestrictionFlags.AllowNearTurnOnRed);
         }
 
         public TernaryBool GetFarTurnOnRedAllowed(bool startNode) {
-            return startNode
-                       ? startNodeRestrictions.farTurnOnRedAllowed
-                       : endNodeRestrictions.farTurnOnRedAllowed;
+            return (startNode ? startNodeRestrictions : endNodeRestrictions).GetTernaryBool(JunctionRestrictionFlags.AllowFarTurnOnRed);
         }
 
         public TernaryBool GetLaneChangingAllowedWhenGoingStraight(bool startNode) {
-            return startNode
-                       ? startNodeRestrictions.straightLaneChangingAllowed
-                       : endNodeRestrictions.straightLaneChangingAllowed;
+            return (startNode ? startNodeRestrictions : endNodeRestrictions).GetTernaryBool(JunctionRestrictionFlags.AllowForwardLaneChange);
         }
 
         public TernaryBool GetEnteringBlockedJunctionAllowed(bool startNode) {
-            return startNode
-                       ? startNodeRestrictions.enterWhenBlockedAllowed
-                       : endNodeRestrictions.enterWhenBlockedAllowed;
+            return (startNode ? startNodeRestrictions : endNodeRestrictions).GetTernaryBool(JunctionRestrictionFlags.AllowEnterWhenBlocked);
         }
 
         public TernaryBool GetPedestrianCrossingAllowed(bool startNode) {
-            return startNode
-                       ? startNodeRestrictions.pedestrianCrossingAllowed
-                       : endNodeRestrictions.pedestrianCrossingAllowed;
+            return (startNode ? startNodeRestrictions : endNodeRestrictions).GetTernaryBool(JunctionRestrictionFlags.AllowPedestrianCrossing);
         }
 
         public void SetUturnAllowed(bool startNode, TernaryBool value) {
