@@ -6,112 +6,91 @@ namespace TrafficManager.Manager.Impl {
         public JunctionRestrictions startNodeRestrictions;
         public JunctionRestrictions endNodeRestrictions;
 
+        public bool GetValueOrDefault(JunctionRestrictionFlags flags, bool startNode) {
+            return (startNode ? startNodeRestrictions : endNodeRestrictions).GetValueOrDefault(flags);
+        }
+
         public bool IsUturnAllowed(bool startNode) {
-            return startNode
-                       ? startNodeRestrictions.IsUturnAllowed()
-                       : endNodeRestrictions.IsUturnAllowed();
+            return GetValueOrDefault(JunctionRestrictionFlags.AllowUTurn, startNode);
         }
 
         public bool IsNearTurnOnRedAllowed(bool startNode) {
-            return startNode
-                       ? startNodeRestrictions.IsNearTurnOnRedAllowed()
-                       : endNodeRestrictions.IsNearTurnOnRedAllowed();
+            return GetValueOrDefault(JunctionRestrictionFlags.AllowNearTurnOnRed, startNode);
         }
 
         public bool IsFarTurnOnRedAllowed(bool startNode) {
-            return startNode
-                       ? startNodeRestrictions.IsFarTurnOnRedAllowed()
-                       : endNodeRestrictions.IsFarTurnOnRedAllowed();
+            return GetValueOrDefault(JunctionRestrictionFlags.AllowFarTurnOnRed, startNode);
         }
 
         public bool IsLaneChangingAllowedWhenGoingStraight(bool startNode) {
-            return startNode
-                       ? startNodeRestrictions.IsLaneChangingAllowedWhenGoingStraight()
-                       : endNodeRestrictions.IsLaneChangingAllowedWhenGoingStraight();
+            return GetValueOrDefault(JunctionRestrictionFlags.AllowForwardLaneChange, startNode);
         }
 
         public bool IsEnteringBlockedJunctionAllowed(bool startNode) {
-            return startNode
-                       ? startNodeRestrictions.IsEnteringBlockedJunctionAllowed()
-                       : endNodeRestrictions.IsEnteringBlockedJunctionAllowed();
+            return GetValueOrDefault(JunctionRestrictionFlags.AllowEnterWhenBlocked, startNode);
         }
 
         public bool IsPedestrianCrossingAllowed(bool startNode) {
-            return startNode
-                       ? startNodeRestrictions.IsPedestrianCrossingAllowed()
-                       : endNodeRestrictions.IsPedestrianCrossingAllowed();
+            return GetValueOrDefault(JunctionRestrictionFlags.AllowPedestrianCrossing, startNode);
+        }
+
+        public TernaryBool GetTernaryBool(JunctionRestrictionFlags flags, bool startNode) {
+            return (startNode ? startNodeRestrictions : endNodeRestrictions).GetTernaryBool(flags);
         }
 
         public TernaryBool GetUturnAllowed(bool startNode) {
-            return (startNode ? startNodeRestrictions : endNodeRestrictions).GetTernaryBool(JunctionRestrictionFlags.AllowUTurn);
+            return GetTernaryBool(JunctionRestrictionFlags.AllowUTurn, startNode);
         }
 
         public TernaryBool GetNearTurnOnRedAllowed(bool startNode) {
-            return (startNode ? startNodeRestrictions : endNodeRestrictions).GetTernaryBool(JunctionRestrictionFlags.AllowNearTurnOnRed);
+            return GetTernaryBool(JunctionRestrictionFlags.AllowNearTurnOnRed, startNode);
         }
 
         public TernaryBool GetFarTurnOnRedAllowed(bool startNode) {
-            return (startNode ? startNodeRestrictions : endNodeRestrictions).GetTernaryBool(JunctionRestrictionFlags.AllowFarTurnOnRed);
+            return GetTernaryBool(JunctionRestrictionFlags.AllowFarTurnOnRed, startNode);
         }
 
         public TernaryBool GetLaneChangingAllowedWhenGoingStraight(bool startNode) {
-            return (startNode ? startNodeRestrictions : endNodeRestrictions).GetTernaryBool(JunctionRestrictionFlags.AllowForwardLaneChange);
+            return GetTernaryBool(JunctionRestrictionFlags.AllowForwardLaneChange, startNode);
         }
 
         public TernaryBool GetEnteringBlockedJunctionAllowed(bool startNode) {
-            return (startNode ? startNodeRestrictions : endNodeRestrictions).GetTernaryBool(JunctionRestrictionFlags.AllowEnterWhenBlocked);
+            return GetTernaryBool(JunctionRestrictionFlags.AllowEnterWhenBlocked, startNode);
         }
 
         public TernaryBool GetPedestrianCrossingAllowed(bool startNode) {
-            return (startNode ? startNodeRestrictions : endNodeRestrictions).GetTernaryBool(JunctionRestrictionFlags.AllowPedestrianCrossing);
+            return GetTernaryBool(JunctionRestrictionFlags.AllowPedestrianCrossing, startNode);
+        }
+
+        public void SetValue(JunctionRestrictionFlags flags, bool startNode, TernaryBool value) {
+            if (startNode)
+                startNodeRestrictions.SetValue(flags, value);
+            else
+                endNodeRestrictions.SetValue(flags, value);
         }
 
         public void SetUturnAllowed(bool startNode, TernaryBool value) {
-            if (startNode) {
-                startNodeRestrictions.SetUturnAllowed(value);
-            } else {
-                endNodeRestrictions.SetUturnAllowed(value);
-            }
+            SetValue(JunctionRestrictionFlags.AllowUTurn, startNode, value);
         }
 
         public void SetNearTurnOnRedAllowed(bool startNode, TernaryBool value) {
-            if (startNode) {
-                startNodeRestrictions.SetNearTurnOnRedAllowed(value);
-            } else {
-                endNodeRestrictions.SetNearTurnOnRedAllowed(value);
-            }
+            SetValue(JunctionRestrictionFlags.AllowNearTurnOnRed, startNode, value);
         }
 
         public void SetFarTurnOnRedAllowed(bool startNode, TernaryBool value) {
-            if (startNode) {
-                startNodeRestrictions.SetFarTurnOnRedAllowed(value);
-            } else {
-                endNodeRestrictions.SetFarTurnOnRedAllowed(value);
-            }
+            SetValue(JunctionRestrictionFlags.AllowFarTurnOnRed, startNode, value);
         }
 
         public void SetLaneChangingAllowedWhenGoingStraight(bool startNode, TernaryBool value) {
-            if (startNode) {
-                startNodeRestrictions.SetLaneChangingAllowedWhenGoingStraight(value);
-            } else {
-                endNodeRestrictions.SetLaneChangingAllowedWhenGoingStraight(value);
-            }
+            SetValue(JunctionRestrictionFlags.AllowForwardLaneChange, startNode, value);
         }
 
         public void SetEnteringBlockedJunctionAllowed(bool startNode, TernaryBool value) {
-            if (startNode) {
-                startNodeRestrictions.SetEnteringBlockedJunctionAllowed(value);
-            } else {
-                endNodeRestrictions.SetEnteringBlockedJunctionAllowed(value);
-            }
+            SetValue(JunctionRestrictionFlags.AllowEnterWhenBlocked, startNode, value);
         }
 
         public void SetPedestrianCrossingAllowed(bool startNode, TernaryBool value) {
-            if (startNode) {
-                startNodeRestrictions.SetPedestrianCrossingAllowed(value);
-            } else {
-                endNodeRestrictions.SetPedestrianCrossingAllowed(value);
-            }
+            SetValue(JunctionRestrictionFlags.AllowPedestrianCrossing, startNode, value);
         }
 
         public bool IsDefault() {

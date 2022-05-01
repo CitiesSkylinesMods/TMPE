@@ -836,36 +836,36 @@ namespace TrafficManager.Manager.Impl {
 
         private void SetSegmentJunctionRestrictions(ushort segmentId, bool startNode, JunctionRestrictions restrictions) {
             if (restrictions.HasValue(JunctionRestrictionFlags.AllowUTurn)) {
-                SetUturnAllowed(segmentId, startNode, restrictions.IsUturnAllowed());
+                SetUturnAllowed(segmentId, startNode, restrictions.GetValueOrDefault(JunctionRestrictionFlags.AllowUTurn));
             }
 
             if (restrictions.HasValue(JunctionRestrictionFlags.AllowNearTurnOnRed)) {
-                SetNearTurnOnRedAllowed(segmentId, startNode, restrictions.IsNearTurnOnRedAllowed());
+                SetNearTurnOnRedAllowed(segmentId, startNode, restrictions.GetValueOrDefault(JunctionRestrictionFlags.AllowNearTurnOnRed));
             }
 
             if (restrictions.HasValue(JunctionRestrictionFlags.AllowFarTurnOnRed)) {
-                SetFarTurnOnRedAllowed(segmentId, startNode, restrictions.IsFarTurnOnRedAllowed());
+                SetFarTurnOnRedAllowed(segmentId, startNode, restrictions.GetValueOrDefault(JunctionRestrictionFlags.AllowFarTurnOnRed));
             }
 
             if (restrictions.HasValue(JunctionRestrictionFlags.AllowForwardLaneChange)) {
                 SetLaneChangingAllowedWhenGoingStraight(
                     segmentId,
                     startNode,
-                    restrictions.IsLaneChangingAllowedWhenGoingStraight());
+                    restrictions.GetValueOrDefault(JunctionRestrictionFlags.AllowForwardLaneChange));
             }
 
             if (restrictions.HasValue(JunctionRestrictionFlags.AllowEnterWhenBlocked)) {
                 SetEnteringBlockedJunctionAllowed(
                     segmentId,
                     startNode,
-                    restrictions.IsEnteringBlockedJunctionAllowed());
+                    restrictions.GetValueOrDefault(JunctionRestrictionFlags.AllowEnterWhenBlocked));
             }
 
             if (restrictions.HasValue(JunctionRestrictionFlags.AllowPedestrianCrossing)) {
                 SetPedestrianCrossingAllowed(
                     segmentId,
                     startNode,
-                    restrictions.IsPedestrianCrossingAllowed());
+                    restrictions.GetValueOrDefault(JunctionRestrictionFlags.AllowPedestrianCrossing));
             }
         }
 

@@ -43,18 +43,6 @@ namespace TrafficManager.Manager.Impl {
             return ((values & flags & mask) | (defaults & flags & ~mask)) == flags;
         }
 
-        public bool IsUturnAllowed() => GetValueOrDefault(JunctionRestrictionFlags.AllowUTurn);
-
-        public bool IsNearTurnOnRedAllowed() => GetValueOrDefault(JunctionRestrictionFlags.AllowNearTurnOnRed);
-
-        public bool IsFarTurnOnRedAllowed() => GetValueOrDefault(JunctionRestrictionFlags.AllowFarTurnOnRed);
-
-        public bool IsLaneChangingAllowedWhenGoingStraight() => GetValueOrDefault(JunctionRestrictionFlags.AllowForwardLaneChange);
-
-        public bool IsEnteringBlockedJunctionAllowed() => GetValueOrDefault(JunctionRestrictionFlags.AllowEnterWhenBlocked);
-
-        public bool IsPedestrianCrossingAllowed() => GetValueOrDefault(JunctionRestrictionFlags.AllowPedestrianCrossing);
-
         public void SetValue(JunctionRestrictionFlags flags, TernaryBool value) {
             switch (value) {
                 case TernaryBool.True:
@@ -76,18 +64,6 @@ namespace TrafficManager.Manager.Impl {
                     throw new ArgumentOutOfRangeException(nameof(value));
             }
         }
-
-        public void SetUturnAllowed(TernaryBool value) => SetValue(JunctionRestrictionFlags.AllowUTurn, value);
-
-        public void SetNearTurnOnRedAllowed(TernaryBool value) => SetValue(JunctionRestrictionFlags.AllowNearTurnOnRed, value);
-
-        public void SetFarTurnOnRedAllowed(TernaryBool value) => SetValue(JunctionRestrictionFlags.AllowFarTurnOnRed, value);
-
-        public void SetLaneChangingAllowedWhenGoingStraight(TernaryBool value) => SetValue(JunctionRestrictionFlags.AllowForwardLaneChange, value);
-
-        public void SetEnteringBlockedJunctionAllowed(TernaryBool value) => SetValue(JunctionRestrictionFlags.AllowEnterWhenBlocked, value);
-
-        public void SetPedestrianCrossingAllowed(TernaryBool value) => SetValue(JunctionRestrictionFlags.AllowPedestrianCrossing, value);
 
         public bool IsDefault() {
             return ((values & mask) | (defaults & ~mask)) == defaults;
