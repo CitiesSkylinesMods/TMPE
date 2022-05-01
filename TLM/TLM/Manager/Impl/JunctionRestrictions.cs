@@ -2,10 +2,7 @@ namespace TrafficManager.Manager.Impl {
     using System;
     using CSUtil.Commons;
 
-    /// <summary>
-    /// Segment end flags store junction restrictions
-    /// </summary>
-    public struct SegmentEndFlags {
+    public struct JunctionRestrictions {
         public TernaryBool uturnAllowed;
         public TernaryBool nearTurnOnRedAllowed;
         public TernaryBool farTurnOnRedAllowed;
@@ -123,10 +120,10 @@ namespace TrafficManager.Manager.Impl {
 
         public override string ToString() {
             return string.Format(
-                "[SegmentEndFlags\n\tuturnAllowed = {0}\n\tnearTurnOnRedAllowed = {1}\n" +
+                "[JunctionRestrictions\n\tuturnAllowed = {0}\n\tnearTurnOnRedAllowed = {1}\n" +
                 "\tfarTurnOnRedAllowed = {2}\n\tstraightLaneChangingAllowed = {3}\n\t" +
                 "enterWhenBlockedAllowed = {4}\n\tpedestrianCrossingAllowed = {5}\n" +
-                "SegmentEndFlags]",
+                "JunctionRestrictions]",
                 uturnAllowed,
                 nearTurnOnRedAllowed,
                 farTurnOnRedAllowed,

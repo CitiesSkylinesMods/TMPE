@@ -152,8 +152,8 @@
     <Compile Include="Manager\Impl\LaneConnection\LaneConnectionSubManager.cs" />
     <Compile Include="Manager\Impl\LaneConnection\LaneConnectionManager.cs" />
     <Compile Include="Manager\Impl\LaneConnection\LaneEnd.cs" />
-    <Compile Include="Manager\Impl\SegmentEndFlags.cs" />
-    <Compile Include="Manager\Impl\SegmentFlags.cs" />
+    <Compile Include="Manager\Impl\JunctionRestrictions.cs" />
+    <Compile Include="Manager\Impl\SegmentJunctionRestrictions.cs" />
     <Compile Include="Patch\_External\RTramAIModPatch.cs" />
     <Compile Include="State\OptionsTabs\GameplayTab_AIGroups.cs" />
     <Compile Include="State\OptionsTabs\GeneralTab_CompatibilityGroup.cs" />
