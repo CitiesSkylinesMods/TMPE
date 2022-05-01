@@ -1317,5 +1317,138 @@ namespace TrafficManager.Manager.Impl {
 
             return ret;
         }
+
+        private enum JunctionRestrictionFlags {
+            AllowUTurn = 1 << 0,
+            AllowNearTurnOnRed = 1 << 1,
+            AllowFarTurnOnRed = 1 << 2,
+            AllowForwardLaneChange = 1 << 3,
+            AllowEnterWhenBlocked = 1 << 4,
+            AllowPedestrianCrossing = 1 << 5,
+        }
+
+        private struct SegmentJunctionRestrictions {
+            public JunctionRestrictions startNodeRestrictions;
+            public JunctionRestrictions endNodeRestrictions;
+
+            public bool GetValueOrDefault(JunctionRestrictionFlags flags, bool startNode) {
+                return (startNode ? startNodeRestrictions : endNodeRestrictions).GetValueOrDefault(flags);
+            }
+
+            public TernaryBool GetTernaryBool(JunctionRestrictionFlags flags, bool startNode) {
+                return (startNode ? startNodeRestrictions : endNodeRestrictions).GetTernaryBool(flags);
+            }
+
+            public void SetValue(JunctionRestrictionFlags flags, bool startNode, TernaryBool value) {
+                if (startNode)
+                    startNodeRestrictions.SetValue(flags, value);
+                else
+                    endNodeRestrictions.SetValue(flags, value);
+            }
+
+            public bool IsDefault() {
+                return startNodeRestrictions.IsDefault() && endNodeRestrictions.IsDefault();
+            }
+
+            public void Reset(bool? startNode = null, bool resetDefaults = true) {
+                if (startNode == null || (bool)startNode) {
+                    startNodeRestrictions.Reset(resetDefaults);
+                }
+
+                if (startNode == null || !(bool)startNode) {
+                    endNodeRestrictions.Reset(resetDefaults);
+                }
+            }
+
+            public override string ToString() {
+                return "[SegmentJunctionRestrictions\n" +
+                        $"\tstartNodeRestrictions = {startNodeRestrictions}\n" +
+                        $"\tendNodeRestrictions = {endNodeRestrictions}\n" +
+                        "SegmentJunctionRestrictions]";
+            }
+        }
+
+        private struct JunctionRestrictions {
+
+            private JunctionRestrictionFlags values;
+
+            private JunctionRestrictionFlags mask;
+
+            private JunctionRestrictionFlags defaults;
+
+
+            public void ClearValue(JunctionRestrictionFlags flags) {
+                values &= ~flags;
+                mask &= ~flags;
+            }
+
+            public void SetDefault(JunctionRestrictionFlags flags, bool value) {
+                if (value)
+                    defaults |= flags;
+                else
+                    defaults &= ~flags;
+            }
+
+            public bool GetDefault(JunctionRestrictionFlags flags) {
+                return (defaults & flags) == flags;
+            }
+
+            public bool HasValue(JunctionRestrictionFlags flags) {
+                return (mask & flags) == flags;
+            }
+
+            public TernaryBool GetTernaryBool(JunctionRestrictionFlags flags) {
+                return (mask & flags) == flags
+                        ? (values & flags) == flags
+                            ? TernaryBool.True
+                            : TernaryBool.False
+                        : TernaryBool.Undefined;
+            }
+
+            public bool GetValueOrDefault(JunctionRestrictionFlags flags) {
+                return ((values & flags & mask) | (defaults & flags & ~mask)) == flags;
+            }
+
+            public void SetValue(JunctionRestrictionFlags flags, TernaryBool value) {
+                switch (value) {
+                    case TernaryBool.True:
+                        values |= flags;
+                        mask |= flags;
+                        break;
+
+                    case TernaryBool.False:
+                        values &= ~flags;
+                        mask |= flags;
+                        break;
+
+                    case TernaryBool.Undefined:
+                        values &= ~flags;
+                        mask &= ~flags;
+                        break;
+
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(value));
+                }
+            }
+
+            public bool IsDefault() {
+                return ((values & mask) | (defaults & ~mask)) == defaults;
+            }
+
+            public void Reset(bool resetDefaults = true) {
+                values = mask = default;
+
+                if (resetDefaults) {
+                    defaults = default;
+                }
+            }
+
+            public override string ToString() {
+                return string.Format(
+                    $"[JunctionRestrictions\n\tvalues = {values}\n\tmask = {mask}\n" +
+                    $"defaults = {defaults}\n" +
+                    "JunctionRestrictions]");
+            }
+        }
     }
 }
