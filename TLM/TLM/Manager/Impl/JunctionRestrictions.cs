@@ -3,270 +3,109 @@ namespace TrafficManager.Manager.Impl {
     using CSUtil.Commons;
 
     public struct JunctionRestrictions {
-        private TernaryBool uturnAllowed;
-        private TernaryBool nearTurnOnRedAllowed;
-        private TernaryBool farTurnOnRedAllowed;
-        private TernaryBool straightLaneChangingAllowed;
-        private TernaryBool enterWhenBlockedAllowed;
-        private TernaryBool pedestrianCrossingAllowed;
 
-        private bool defaultUturnAllowed;
-        private bool defaultNearTurnOnRedAllowed;
-        private bool defaultFarTurnOnRedAllowed;
-        private bool defaultStraightLaneChangingAllowed;
-        private bool defaultEnterWhenBlockedAllowed;
-        private bool defaultPedestrianCrossingAllowed;
+        private JunctionRestrictionFlags values;
+
+        private JunctionRestrictionFlags mask;
+
+        private JunctionRestrictionFlags defaults;
+
 
         public void ClearValue(JunctionRestrictionFlags flags) {
-            switch (flags) {
-                case JunctionRestrictionFlags.AllowUTurn:
-                    uturnAllowed = TernaryBool.Undefined;
-                    break;
-
-                case JunctionRestrictionFlags.AllowNearTurnOnRed:
-                    nearTurnOnRedAllowed = TernaryBool.Undefined;
-                    break;
-
-                case JunctionRestrictionFlags.AllowFarTurnOnRed:
-                    farTurnOnRedAllowed = TernaryBool.Undefined;
-                    break;
-
-                case JunctionRestrictionFlags.AllowForwardLaneChange:
-                    straightLaneChangingAllowed = TernaryBool.Undefined;
-                    break;
-
-                case JunctionRestrictionFlags.AllowEnterWhenBlocked:
-                    enterWhenBlockedAllowed = TernaryBool.Undefined;
-                    break;
-
-                case JunctionRestrictionFlags.AllowPedestrianCrossing:
-                    pedestrianCrossingAllowed = TernaryBool.Undefined;
-                    break;
-
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(flags));
-            }
+            values &= ~flags;
+            mask &= ~flags;
         }
 
         public void SetDefault(JunctionRestrictionFlags flags, bool value) {
-            switch (flags) {
-                case JunctionRestrictionFlags.AllowUTurn:
-                    defaultUturnAllowed = value;
-                    break;
-
-                case JunctionRestrictionFlags.AllowNearTurnOnRed:
-                    defaultNearTurnOnRedAllowed = value;
-                    break;
-
-                case JunctionRestrictionFlags.AllowFarTurnOnRed:
-                    defaultFarTurnOnRedAllowed = value;
-                    break;
-
-                case JunctionRestrictionFlags.AllowForwardLaneChange:
-                    defaultStraightLaneChangingAllowed = value;
-                    break;
-
-                case JunctionRestrictionFlags.AllowEnterWhenBlocked:
-                    defaultEnterWhenBlockedAllowed = value;
-                    break;
-
-                case JunctionRestrictionFlags.AllowPedestrianCrossing:
-                    defaultPedestrianCrossingAllowed = value;
-                    break;
-
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(flags));
-            }
+            if (value)
+                defaults |= flags;
+            else
+                defaults &= ~flags;
         }
 
         public bool GetDefault(JunctionRestrictionFlags flags) {
-            switch (flags) {
-                case JunctionRestrictionFlags.AllowUTurn:
-                    return defaultUturnAllowed;
-
-                case JunctionRestrictionFlags.AllowNearTurnOnRed:
-                    return defaultNearTurnOnRedAllowed;
-
-                case JunctionRestrictionFlags.AllowFarTurnOnRed:
-                    return defaultFarTurnOnRedAllowed;
-
-                case JunctionRestrictionFlags.AllowForwardLaneChange:
-                    return defaultStraightLaneChangingAllowed;
-
-                case JunctionRestrictionFlags.AllowEnterWhenBlocked:
-                    return defaultEnterWhenBlockedAllowed;
-
-                case JunctionRestrictionFlags.AllowPedestrianCrossing:
-                    return defaultPedestrianCrossingAllowed;
-
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(flags));
-            }
+            return (defaults & flags) == flags;
         }
 
         public bool HasValue(JunctionRestrictionFlags flags) {
-            switch (flags) {
-                case JunctionRestrictionFlags.AllowUTurn:
-                    return uturnAllowed != TernaryBool.Undefined;
-
-                case JunctionRestrictionFlags.AllowNearTurnOnRed:
-                    return nearTurnOnRedAllowed != TernaryBool.Undefined;
-
-                case JunctionRestrictionFlags.AllowFarTurnOnRed:
-                    return farTurnOnRedAllowed != TernaryBool.Undefined;
-
-                case JunctionRestrictionFlags.AllowForwardLaneChange:
-                    return straightLaneChangingAllowed != TernaryBool.Undefined;
-
-                case JunctionRestrictionFlags.AllowEnterWhenBlocked:
-                    return enterWhenBlockedAllowed != TernaryBool.Undefined;
-
-                case JunctionRestrictionFlags.AllowPedestrianCrossing:
-                    return pedestrianCrossingAllowed != TernaryBool.Undefined;
-
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(flags));
-            }
+            return (mask & flags) == flags;
         }
 
         public TernaryBool GetTernaryBool(JunctionRestrictionFlags flags) {
-            switch (flags) {
-                case JunctionRestrictionFlags.AllowUTurn:
-                    return uturnAllowed;
+            return (mask & flags) == flags
+                    ? (values & flags) == flags
+                        ? TernaryBool.True
+                        : TernaryBool.False
+                    : TernaryBool.Undefined;
+        }
 
-                case JunctionRestrictionFlags.AllowNearTurnOnRed:
-                    return nearTurnOnRedAllowed;
+        public bool GetValueOrDefault(JunctionRestrictionFlags flags) {
+            return ((values & flags & mask) | (defaults & flags & ~mask)) == flags;
+        }
 
-                case JunctionRestrictionFlags.AllowFarTurnOnRed:
-                    return farTurnOnRedAllowed;
+        public bool IsUturnAllowed() => GetValueOrDefault(JunctionRestrictionFlags.AllowUTurn);
 
-                case JunctionRestrictionFlags.AllowForwardLaneChange:
-                    return straightLaneChangingAllowed;
+        public bool IsNearTurnOnRedAllowed() => GetValueOrDefault(JunctionRestrictionFlags.AllowNearTurnOnRed);
 
-                case JunctionRestrictionFlags.AllowEnterWhenBlocked:
-                    return enterWhenBlockedAllowed;
+        public bool IsFarTurnOnRedAllowed() => GetValueOrDefault(JunctionRestrictionFlags.AllowFarTurnOnRed);
 
-                case JunctionRestrictionFlags.AllowPedestrianCrossing:
-                    return pedestrianCrossingAllowed;
+        public bool IsLaneChangingAllowedWhenGoingStraight() => GetValueOrDefault(JunctionRestrictionFlags.AllowForwardLaneChange);
+
+        public bool IsEnteringBlockedJunctionAllowed() => GetValueOrDefault(JunctionRestrictionFlags.AllowEnterWhenBlocked);
+
+        public bool IsPedestrianCrossingAllowed() => GetValueOrDefault(JunctionRestrictionFlags.AllowPedestrianCrossing);
+
+        public void SetValue(JunctionRestrictionFlags flags, TernaryBool value) {
+            switch (value) {
+                case TernaryBool.True:
+                    values |= flags;
+                    mask |= flags;
+                    break;
+
+                case TernaryBool.False:
+                    values &= ~flags;
+                    mask |= flags;
+                    break;
+
+                case TernaryBool.Undefined:
+                    values &= ~flags;
+                    mask &= ~flags;
+                    break;
 
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(flags));
+                    throw new ArgumentOutOfRangeException(nameof(value));
             }
         }
 
-        public bool IsUturnAllowed() {
-            return uturnAllowed == TernaryBool.Undefined
-                       ? defaultUturnAllowed
-                       : TernaryBoolUtil.ToBool(uturnAllowed);
-        }
+        public void SetUturnAllowed(TernaryBool value) => SetValue(JunctionRestrictionFlags.AllowUTurn, value);
 
-        public bool IsNearTurnOnRedAllowed() {
-            return nearTurnOnRedAllowed == TernaryBool.Undefined
-                       ? defaultNearTurnOnRedAllowed
-                       : TernaryBoolUtil.ToBool(nearTurnOnRedAllowed);
-        }
+        public void SetNearTurnOnRedAllowed(TernaryBool value) => SetValue(JunctionRestrictionFlags.AllowNearTurnOnRed, value);
 
-        public bool IsFarTurnOnRedAllowed() {
-            return farTurnOnRedAllowed == TernaryBool.Undefined
-                       ? defaultFarTurnOnRedAllowed
-                       : TernaryBoolUtil.ToBool(farTurnOnRedAllowed);
-        }
+        public void SetFarTurnOnRedAllowed(TernaryBool value) => SetValue(JunctionRestrictionFlags.AllowFarTurnOnRed, value);
 
-        public bool IsLaneChangingAllowedWhenGoingStraight() {
-            return straightLaneChangingAllowed == TernaryBool.Undefined
-                       ? defaultStraightLaneChangingAllowed
-                       : TernaryBoolUtil.ToBool(straightLaneChangingAllowed);
-        }
+        public void SetLaneChangingAllowedWhenGoingStraight(TernaryBool value) => SetValue(JunctionRestrictionFlags.AllowForwardLaneChange, value);
 
-        public bool IsEnteringBlockedJunctionAllowed() {
-            return enterWhenBlockedAllowed == TernaryBool.Undefined
-                       ? defaultEnterWhenBlockedAllowed
-                       : TernaryBoolUtil.ToBool(enterWhenBlockedAllowed);
-        }
+        public void SetEnteringBlockedJunctionAllowed(TernaryBool value) => SetValue(JunctionRestrictionFlags.AllowEnterWhenBlocked, value);
 
-        public bool IsPedestrianCrossingAllowed() {
-            return pedestrianCrossingAllowed == TernaryBool.Undefined
-                       ? defaultPedestrianCrossingAllowed
-                       : TernaryBoolUtil.ToBool(pedestrianCrossingAllowed);
-        }
-
-        public void SetUturnAllowed(TernaryBool value) {
-            uturnAllowed = value;
-        }
-
-        public void SetNearTurnOnRedAllowed(TernaryBool value) {
-            nearTurnOnRedAllowed = value;
-        }
-
-        public void SetFarTurnOnRedAllowed(TernaryBool value) {
-            farTurnOnRedAllowed = value;
-        }
-
-        public void SetLaneChangingAllowedWhenGoingStraight(TernaryBool value) {
-            straightLaneChangingAllowed = value;
-        }
-
-        public void SetEnteringBlockedJunctionAllowed(TernaryBool value) {
-            enterWhenBlockedAllowed = value;
-        }
-
-        public void SetPedestrianCrossingAllowed(TernaryBool value) {
-            pedestrianCrossingAllowed = value;
-        }
+        public void SetPedestrianCrossingAllowed(TernaryBool value) => SetValue(JunctionRestrictionFlags.AllowPedestrianCrossing, value);
 
         public bool IsDefault() {
-            bool uturnIsDefault = uturnAllowed == TernaryBool.Undefined ||
-                                  TernaryBoolUtil.ToBool(uturnAllowed) == defaultUturnAllowed;
-            bool nearTurnOnRedIsDefault = nearTurnOnRedAllowed == TernaryBool.Undefined ||
-                                          TernaryBoolUtil.ToBool(nearTurnOnRedAllowed) ==
-                                          defaultNearTurnOnRedAllowed;
-            bool farTurnOnRedIsDefault = farTurnOnRedAllowed == TernaryBool.Undefined ||
-                                         TernaryBoolUtil.ToBool(farTurnOnRedAllowed) ==
-                                         defaultFarTurnOnRedAllowed;
-            bool straightChangeIsDefault = straightLaneChangingAllowed == TernaryBool.Undefined ||
-                                           TernaryBoolUtil.ToBool(straightLaneChangingAllowed) ==
-                                           defaultStraightLaneChangingAllowed;
-            bool enterWhenBlockedIsDefault = enterWhenBlockedAllowed == TernaryBool.Undefined ||
-                                             TernaryBoolUtil.ToBool(enterWhenBlockedAllowed) ==
-                                             defaultEnterWhenBlockedAllowed;
-            bool pedCrossingIsDefault = pedestrianCrossingAllowed == TernaryBool.Undefined ||
-                                        TernaryBoolUtil.ToBool(pedestrianCrossingAllowed) ==
-                                        defaultPedestrianCrossingAllowed;
-
-            return uturnIsDefault && nearTurnOnRedIsDefault && farTurnOnRedIsDefault &&
-                   straightChangeIsDefault && enterWhenBlockedIsDefault && pedCrossingIsDefault;
+            return ((values & mask) | (defaults & ~mask)) == defaults;
         }
 
         public void Reset(bool resetDefaults = true) {
-            uturnAllowed = TernaryBool.Undefined;
-            nearTurnOnRedAllowed = TernaryBool.Undefined;
-            farTurnOnRedAllowed = TernaryBool.Undefined;
-            straightLaneChangingAllowed = TernaryBool.Undefined;
-            enterWhenBlockedAllowed = TernaryBool.Undefined;
-            pedestrianCrossingAllowed = TernaryBool.Undefined;
+            values = mask = default;
 
             if (resetDefaults) {
-                defaultUturnAllowed = false;
-                defaultNearTurnOnRedAllowed = false;
-                defaultFarTurnOnRedAllowed = false;
-                defaultStraightLaneChangingAllowed = false;
-                defaultEnterWhenBlockedAllowed = false;
-                defaultPedestrianCrossingAllowed = false;
+                defaults = default;
             }
         }
 
         public override string ToString() {
             return string.Format(
-                "[JunctionRestrictions\n\tuturnAllowed = {0}\n\tnearTurnOnRedAllowed = {1}\n" +
-                "\tfarTurnOnRedAllowed = {2}\n\tstraightLaneChangingAllowed = {3}\n\t" +
-                "enterWhenBlockedAllowed = {4}\n\tpedestrianCrossingAllowed = {5}\n" +
-                "JunctionRestrictions]",
-                uturnAllowed,
-                nearTurnOnRedAllowed,
-                farTurnOnRedAllowed,
-                straightLaneChangingAllowed,
-                enterWhenBlockedAllowed,
-                pedestrianCrossingAllowed);
+                $"[JunctionRestrictions\n\tvalues = {values}\n\tmask = {mask}\n" +
+                $"defaults = {defaults}\n" +
+                "JunctionRestrictions]");
         }
     }
 }
