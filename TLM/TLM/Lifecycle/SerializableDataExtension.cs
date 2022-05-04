@@ -490,6 +490,7 @@ namespace TrafficManager.Lifecycle {
 
             try {
                 _dom = new XDocument();
+                _dom.Add(new XElement("TmpSaveData"));
                 foreach (var o in GlobalPersistence.PersistentObjects.OrderBy(o => o)) {
                     var result = o.SaveData(_dom.Root, new PersistenceContext { Version = Version });
                     result.LogMessage($"SaveData for DOM element {o.ElementName} reported {result}.");
@@ -497,13 +498,14 @@ namespace TrafficManager.Lifecycle {
 
                 using (var memoryStream = new MemoryStream()) {
                     using (var streamWriter = new StreamWriter(memoryStream, Encoding.UTF8)) {
+
                         _dom.Save(streamWriter);
+
+                        memoryStream.Position = 0;
+                        Log.Info($"Save DOM byte length {memoryStream.Length}");
+
+                        SerializableData.SaveData(DOM_ID, memoryStream.ToArray());
                     }
-
-                    memoryStream.Position = 0;
-                    Log.Info($"Save DOM byte length {memoryStream.Length}");
-
-                    SerializableData.SaveData(DOM_ID, memoryStream.ToArray());
                 }
             }
             catch (Exception ex) {

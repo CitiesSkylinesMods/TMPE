@@ -15,6 +15,12 @@ namespace TrafficManager.Persistence {
             }
         }
 
+        public static void AddElement(this XElement element, XName name, object value) {
+            if (value != null) {
+                element.Add(new XElement(name, ConvertToXml(value)));
+            }
+        }
+
         public static void AddElement<T>(this XElement element, XName name, T value) {
             if (!(typeof(T).IsClass && ReferenceEquals(value, default(T)))) {
                 element.Add(new XElement(name, ConvertToXml(value)));
@@ -27,7 +33,16 @@ namespace TrafficManager.Persistence {
             }
         }
 
-        public static void AddElements<T>(this XElement element, XName name, params T[] values) {
+        public static void AddElements(this XElement element, XName name, params object[] values) {
+            foreach (var value in values) {
+                element.AddElement(name, value);
+            }
+        }
+
+        public static void AddElements<T>(this XElement element, XName name, params T[] values)
+                where T : struct
+                {
+
             foreach (var value in values) {
                 element.AddElement(name, value);
             }
