@@ -15,6 +15,7 @@ namespace TrafficManager.Lifecycle {
     using System.Text;
     using System.Xml.Linq;
     using TrafficManager.Persistence;
+    using System.Xml;
 
     [UsedImplicitly]
     public class SerializableDataExtension
@@ -186,7 +187,13 @@ namespace TrafficManager.Lifecycle {
                 if (data?.Length > 0) {
                     using (var memoryStream = new MemoryStream(data)) {
                         using (var streamReader = new StreamReader(memoryStream, Encoding.UTF8)) {
-                            _dom = XDocument.Load(streamReader);
+
+                            XmlReaderSettings xmlReaderSettings = new XmlReaderSettings {
+                                ProhibitDtd = false,
+                                XmlResolver = null,
+                            };
+                            using (var xmlReader = XmlReader.Create(streamReader, xmlReaderSettings))
+                                _dom = XDocument.Load(xmlReader);
 
                             _persistenceMigration = GlobalPersistence.PersistentObjects
                                                     .Where(o => _dom.Root.Elements(o.ElementName)?.Any(e => o.CanLoad(e)) == true)
