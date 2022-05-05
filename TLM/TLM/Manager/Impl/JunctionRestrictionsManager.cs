@@ -17,6 +17,7 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.Util;
     using TrafficManager.Util.Extensions;
     using TrafficManager.Lifecycle;
+    using TrafficManager.API.Traffic.Enums;
 
     public class JunctionRestrictionsManager
         : AbstractGeometryObservingManager,
@@ -37,6 +38,8 @@ namespace TrafficManager.Manager.Impl {
             segmentRestrictions = new SegmentJunctionRestrictions[NetManager.MAX_SEGMENT_COUNT];
             invalidSegmentRestrictions = new SegmentJunctionRestrictions[NetManager.MAX_SEGMENT_COUNT];
         }
+
+        public event Action<IJunctionRestrictionsManager.FlagsChangedEventArgs> FlagsChanged;
 
         private void AddInvalidSegmentJunctionRestrictions(ushort segmentId,
                                                            bool startNode,
@@ -1316,15 +1319,6 @@ namespace TrafficManager.Manager.Impl {
             }
 
             return ret;
-        }
-
-        private enum JunctionRestrictionFlags {
-            AllowUTurn = 1 << 0,
-            AllowNearTurnOnRed = 1 << 1,
-            AllowFarTurnOnRed = 1 << 2,
-            AllowForwardLaneChange = 1 << 3,
-            AllowEnterWhenBlocked = 1 << 4,
-            AllowPedestrianCrossing = 1 << 5,
         }
 
         private struct SegmentJunctionRestrictions {

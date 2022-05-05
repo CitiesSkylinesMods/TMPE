@@ -1,5 +1,7 @@
 namespace TrafficManager.API.Manager {
     using CSUtil.Commons;
+    using System;
+    using TrafficManager.API.Traffic.Enums;
 
     public interface IJunctionRestrictionsManager {
         #region Is<Traffic Rule>Configurable
@@ -574,5 +576,17 @@ namespace TrafficManager.API.Manager {
         /// Updates the default values for all junction restrictions and segments.
         /// </summary>
         void UpdateAllDefaults();
+
+        event Action<FlagsChangedEventArgs> FlagsChanged;
+
+        public class FlagsChangedEventArgs {
+
+            public JunctionRestrictionFlags Flags { get; private set; }
+
+            public FlagsChangedEventArgs(JunctionRestrictionFlags flags) {
+                Flags = flags;
+            }
+        }
+
     }
 }
