@@ -41,11 +41,14 @@ namespace TrafficManager.Manager.Impl {
             return JunctionHasOnlyHighwayRoads(nodeId) && !LaneConnection.LaneConnectionManager.Instance.Sub.HasNodeConnections(nodeId);
         }
 
-        public GetNodeSegmentIdsEnumerable GetNodeSegmentIds(ushort nodeId, ClockDirection clockDirection) {
+        public GetNodeSegmentIdsEnumerable GetNodeSegmentIds(ushort nodeId, ClockDirection clockDirection)
+            => GetNodeSegmentIds(nodeId, clockDirection, null);
+
+        internal GetNodeSegmentIdsEnumerable GetNodeSegmentIds(ushort nodeId, ClockDirection clockDirection, ushort? initialSegmentId) {
             ref NetNode netNode = ref nodeId.ToNode();
-            var initialSegmentId = GetInitialSegment(ref netNode);
+            initialSegmentId ??= GetInitialSegment(ref netNode);
             var segmentBuffer = Singleton<NetManager>.instance.m_segments.m_buffer;
-            return new GetNodeSegmentIdsEnumerable(nodeId, initialSegmentId, clockDirection, segmentBuffer);
+            return new GetNodeSegmentIdsEnumerable(nodeId, initialSegmentId.Value, clockDirection, segmentBuffer);
         }
 
         /// <summary>

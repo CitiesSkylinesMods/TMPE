@@ -17,6 +17,7 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.Util;
     using TrafficManager.Util.Extensions;
     using TrafficManager.Lifecycle;
+    using TrafficManager.Util.Iterators;
 
     public class JunctionRestrictionsManager
         : AbstractGeometryObservingManager,
@@ -633,7 +634,8 @@ namespace TrafficManager.Manager.Impl {
 
         public bool IsPedestrianCrossingAllowedConfigurable(ushort segmentId, bool startNode, ref NetNode node) {
             bool ret = (node.m_flags & (NetNode.Flags.Junction | NetNode.Flags.Bend)) != NetNode.Flags.None
-                       && node.Info?.m_class?.m_service != ItemClass.Service.Beautification;
+                       && node.Info?.m_class?.m_service != ItemClass.Service.Beautification
+                       && IsLikelyPedestrianRoute(segmentId, startNode, true);
 #if DEBUG
             if (DebugSwitch.JunctionRestrictions.Get()) {
                 Log._Debug(
@@ -703,8 +705,8 @@ namespace TrafficManager.Manager.Impl {
 
             // crossing is allowed at junctions and at untouchable nodes (for example: spiral
             // underground parking)
-            bool ret = (node.m_flags & (NetNode.Flags.Junction | NetNode.Flags.Untouchable)) !=
-                       NetNode.Flags.None;
+            bool ret = (node.m_flags & (NetNode.Flags.Junction | NetNode.Flags.Untouchable)) != NetNode.Flags.None
+                        && IsLikelyPedestrianRoute(segmentId, startNode, false);
 
             if (logLogic) {
                 Log._Debug(
@@ -713,6 +715,102 @@ namespace TrafficManager.Manager.Impl {
             }
 
             return ret;
+        }
+
+        private static bool IsLikelyPedestrianRoute(ushort segmentId, bool startNode, bool includeAllPossible) {
+#if DEBUG
+            bool logLogic = DebugSwitch.JunctionRestrictions.Get();
+#else
+            const bool logLogic = false;
+#endif
+
+            NetSegment segment = segmentId.ToSegment();
+
+            if (segment.Info.m_hasPedestrianLanes) {
+
+                if (logLogic) {
+                    Log._Debug($"HasAnyPedestrianAccess(segmentId: {segmentId}, startNode: {startNode}, includeAllPossible: {includeAllPossible})\r\t"
+                                + $"segment {segmentId} has pedestrian lanes"
+                                + $"returning true");
+                }
+
+                return true;
+            }
+
+            ushort nodeId = startNode ? segment.m_startNode : segment.m_endNode;
+
+            ushort nearestClockwiseSegId = 0;
+            int clockwiseDistance = 0;
+            foreach (var otherSegmentId in ExtNodeManager.Instance.GetNodeSegmentIds(nodeId, ClockDirection.Clockwise, segmentId)) {
+                if (otherSegmentId.ToSegment().Info.m_hasPedestrianLanes) {
+                    nearestClockwiseSegId = otherSegmentId;
+                    break;
+                }
+                ++clockwiseDistance;
+            }
+
+            if (nearestClockwiseSegId == 0) {
+
+                if (logLogic) {
+                    Log._Debug($"HasAnyPedestrianAccess(segmentId: {segmentId}, startNode: {startNode}, includeAllPossible: {includeAllPossible})\r\t"
+                                + $"no pedestrian lanes on node {nodeId}"
+                                + $"returning false");
+                }
+
+                return false;
+            }
+
+            if (includeAllPossible) {
+
+                if (logLogic) {
+                    Log._Debug($"HasAnyPedestrianAccess(segmentId: {segmentId}, startNode: {startNode}, includeAllPossible: {includeAllPossible})\r\t"
+                                + $"pedestrian lanes found on segment {nearestClockwiseSegId}"
+                                + $"returning true");
+                }
+
+                return true;
+            }
+
+            ushort nearestCounterClockwiseSegId = 0;
+            int counterClockwiseDistance = 0;
+            foreach (var otherSegmentId in ExtNodeManager.Instance.GetNodeSegmentIds(nodeId, ClockDirection.CounterClockwise, segmentId)) {
+                if (otherSegmentId.ToSegment().Info.m_hasPedestrianLanes) {
+                    nearestCounterClockwiseSegId = otherSegmentId;
+                    break;
+                }
+                ++counterClockwiseDistance;
+            }
+
+            if (nearestCounterClockwiseSegId == 0 || nearestClockwiseSegId == nearestCounterClockwiseSegId) {
+
+                if (logLogic) {
+                    Log._Debug($"HasAnyPedestrianAccess(segmentId: {segmentId}, startNode: {startNode}, includeAllPossible: {includeAllPossible})\r\t"
+                                + $"no pedestrian lanes on segment {segmentId}"
+                                + $"only one segment on node {nodeId} has pedestrian lanes"
+                                + $"returning false");
+                }
+
+                return false;
+            }
+
+            int distanceThisSide = clockwiseDistance + counterClockwiseDistance - 1;
+            int distanceOtherSide = 0;
+            foreach (var otherSegmentId in ExtNodeManager.Instance.GetNodeSegmentIds(nodeId, ClockDirection.Clockwise, nearestClockwiseSegId)) {
+                ++distanceOtherSide;
+                if (otherSegmentId == nearestCounterClockwiseSegId)
+                    break;
+            }
+
+            bool result = distanceThisSide < distanceOtherSide;
+
+            if (logLogic) {
+                Log._Debug($"HasAnyPedestrianAccess(segmentId: {segmentId}, startNode: {startNode}, includeAllPossible: {includeAllPossible})\r\t"
+                            + $"segments with pedestrian lanes - clockwise: {nearestClockwiseSegId}, counter-clockwise: {nearestCounterClockwiseSegId}\r\t"
+                            + $"distanceThisSide: {distanceThisSide}, distanceOtherSide: {distanceOtherSide}\r\t"
+                            + $"returning {result}");
+            }
+
+            return result;
         }
 
         public bool IsPedestrianCrossingAllowed(ushort segmentId, bool startNode) {
