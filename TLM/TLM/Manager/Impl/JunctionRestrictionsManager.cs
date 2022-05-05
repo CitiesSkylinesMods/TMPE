@@ -729,7 +729,7 @@ namespace TrafficManager.Manager.Impl {
             if (segment.Info.m_hasPedestrianLanes) {
 
                 if (logLogic) {
-                    Log._Debug($"HasAnyPedestrianAccess(segmentId: {segmentId}, startNode: {startNode}, includeAllPossible: {includeAllPossible})\r\t"
+                    Log._Debug($"IsLikelyPedestrianRoute(segmentId: {segmentId}, startNode: {startNode}, includeAllPossible: {includeAllPossible})\r\t"
                                 + $"segment {segmentId} has pedestrian lanes"
                                 + $"returning true");
                 }
@@ -752,7 +752,7 @@ namespace TrafficManager.Manager.Impl {
             if (nearestClockwiseSegId == 0) {
 
                 if (logLogic) {
-                    Log._Debug($"HasAnyPedestrianAccess(segmentId: {segmentId}, startNode: {startNode}, includeAllPossible: {includeAllPossible})\r\t"
+                    Log._Debug($"IsLikelyPedestrianRoute(segmentId: {segmentId}, startNode: {startNode}, includeAllPossible: {includeAllPossible})\r\t"
                                 + $"no pedestrian lanes on node {nodeId}"
                                 + $"returning false");
                 }
@@ -763,7 +763,7 @@ namespace TrafficManager.Manager.Impl {
             if (includeAllPossible) {
 
                 if (logLogic) {
-                    Log._Debug($"HasAnyPedestrianAccess(segmentId: {segmentId}, startNode: {startNode}, includeAllPossible: {includeAllPossible})\r\t"
+                    Log._Debug($"IsLikelyPedestrianRoute(segmentId: {segmentId}, startNode: {startNode}, includeAllPossible: {includeAllPossible})\r\t"
                                 + $"pedestrian lanes found on segment {nearestClockwiseSegId}"
                                 + $"returning true");
                 }
@@ -784,7 +784,7 @@ namespace TrafficManager.Manager.Impl {
             if (nearestCounterClockwiseSegId == 0 || nearestClockwiseSegId == nearestCounterClockwiseSegId) {
 
                 if (logLogic) {
-                    Log._Debug($"HasAnyPedestrianAccess(segmentId: {segmentId}, startNode: {startNode}, includeAllPossible: {includeAllPossible})\r\t"
+                    Log._Debug($"IsLikelyPedestrianRoute(segmentId: {segmentId}, startNode: {startNode}, includeAllPossible: {includeAllPossible})\r\t"
                                 + $"no pedestrian lanes on segment {segmentId}"
                                 + $"only one segment on node {nodeId} has pedestrian lanes"
                                 + $"returning false");
@@ -804,7 +804,7 @@ namespace TrafficManager.Manager.Impl {
             bool result = distanceThisSide < distanceOtherSide;
 
             if (logLogic) {
-                Log._Debug($"HasAnyPedestrianAccess(segmentId: {segmentId}, startNode: {startNode}, includeAllPossible: {includeAllPossible})\r\t"
+                Log._Debug($"HasAnyPedestIsLikelyPedestrianRouterianAccess(segmentId: {segmentId}, startNode: {startNode}, includeAllPossible: {includeAllPossible})\r\t"
                             + $"segments with pedestrian lanes - clockwise: {nearestClockwiseSegId}, counter-clockwise: {nearestCounterClockwiseSegId}\r\t"
                             + $"distanceThisSide: {distanceThisSide}, distanceOtherSide: {distanceOtherSide}\r\t"
                             + $"returning {result}");
