@@ -10,203 +10,254 @@ namespace Benchmarks {
         public void Setup() {
             TestData.InitialiseLists();
             TestData.GenerateDeltas();
+
+            TestData.testTaskList.EnsureCapacityFor(1);
+            TestData.testFastList.EnsureCapacity(1);
+        }
+
+        [IterationCleanup]
+        public void ClearLists() {
+            //TestData.testTaskList.Clear();
+            //TestData.testFastList.Clear();
         }
 
         [Benchmark]
-        public void TaskList_SimulatedCamMoves() {
-
+        public void TaskList_01_Add6kItems_To_UnpreparedEmptyList() {
             var list = TestData.testTaskList;
 
-            foreach (var delta in TestData.Deltas) {
-
-                // update & remove
-                for (int index = 0; index < list.Size; index++) {
-                    if (delta.Retained.Contains(list.Tasks[index].ID)) {
-                        // update code would be here
-                    } else {
-                        list.RemoveAt(index);
-                    }
+            if (TestData.Deltas.TryGetValue("add6k", out var delta)) {
+                var added = delta.Added;
+                for (int i = 0; i < added.Length; i++) {
+                    list.Add(new TestStruct { ID = added[i], IsActive = true });
                 }
-
-                // add new tasks
-                for (int i = 0; i < delta.Added.Length; i++) {
-                    list.Add(new TestStruct { ID = delta.Added[i] });
-                }
-
             }
         }
 
         [Benchmark]
-        public void TaskList_Optimised_SimulatedCamMoves() {
-
-            var list = TestData.testTaskListOptimised;
-
-            foreach (var delta in TestData.Deltas) {
-
-                // update & remove
-                for (int index = 0; index < list.Size; index++) {
-                    if (delta.Retained.Contains(list.Tasks[index].ID)) {
-                        // update code would be here
-                    } else {
-                        list.RemoveAt(index);
-                    }
-                }
-
-                list.PrepareToAdd(delta.Added.Length);
-
-                // add new tasks
-                for (int i = 0; i < delta.Added.Length; i++) {
-                    ref var task = ref list.Tasks[list.NextUsableTaskIndex];
-
-                    task.ID = delta.Added[i];
-                    task.IsActive = true;
-                }
-
-            }
-        }
-
-        [Benchmark]
-        public void FastList_SimulatedCamMoves() {
-
+        public void FastList_01_Add6kItems_To_UnpreparedEmptyList() {
             var list = TestData.testFastList;
 
-            foreach (var delta in TestData.Deltas) {
+            if (TestData.Deltas.TryGetValue("add6k", out var delta)) {
+                var added = delta.Added;
+                for (int i = 0; i < added.Length; i++) {
+                    list.Add(new TestStruct { ID = added[i], IsActive = true });
+                }
+            }
+        }
 
-                // update & remove
-                for (int index = list.m_size; index-- > 0;) {
-                    if (delta.Retained.Contains(list.m_buffer[index].ID)) {
-                        // update code would be here
-                    } else {
-                        list.RemoveAt(index);
+        [Benchmark]
+        public void TaskList_02_Add6kItems_To_PreparedEmptyList() {
+            var list = TestData.testTaskList;
+
+            if (TestData.Deltas.TryGetValue("add6k", out var delta)) {
+                var added = delta.Added;
+                list.EnsureCapacityFor(added.Length);
+
+                for (int i = 0; i < added.Length; i++) {
+                    list.Add(new TestStruct { ID = added[i], IsActive = true });
+                }
+            }
+        }
+
+        [Benchmark]
+        public void FastList_02_Add6kItems_To_PreparedEmptyList() {
+            var list = TestData.testFastList;
+
+            if (TestData.Deltas.TryGetValue("add6k", out var delta)) {
+                var added = delta.Added;
+                list.EnsureCapacity(added.Length);
+
+                for (int i = 0; i < added.Length; i++) {
+                    list.Add(new TestStruct { ID = added[i], IsActive = true });
+                }
+            }
+        }
+
+        [Benchmark]
+        public void TaskList_03_ManuallyAdd6kItems_To_PreparedEmptyList() {
+            var list = TestData.testTaskList;
+
+            if (TestData.Deltas.TryGetValue("add6k", out var delta)) {
+                var added = delta.Added;
+                list.EnsureCapacityFor(added.Length);
+
+                for (int i = 0; i < added.Length; i++) {
+                    ref var task = ref list.Tasks[list.Size++];
+
+                    task.ID = added[i];
+                    task.IsActive = true;
+                }
+            }
+        }
+
+        [Benchmark]
+        public void FastList_03_ManuallyAdd6kItems_To_PreparedEmptyList() {
+            var list = TestData.testFastList;
+
+            if (TestData.Deltas.TryGetValue("add6k", out var delta)) {
+                var added = delta.Added;
+                list.EnsureCapacity(list.m_size + added.Length);
+
+                for (int i = 0; i < added.Length; i++) {
+                    ref var task = ref list.m_buffer[list.m_size++];
+
+                    task.ID = added[i];
+                    task.IsActive = true;
+                }
+            }
+        }
+
+        [Benchmark]
+        public void TaskList_04_AltManuallyAdd6kItems_To_PreparedEmptyList() {
+            var list = TestData.testTaskList;
+
+            if (TestData.Deltas.TryGetValue("add6k", out var delta)) {
+                var added = delta.Added;
+                list.EnsureCapacityFor(added.Length);
+
+                for (int i = 0; i < added.Length; i++) {
+                    int idx = list.Size++;
+                    list.Tasks[idx].ID = added[i];
+                    list.Tasks[idx].IsActive = true;
+                }
+            }
+        }
+
+        /*
+        [GlobalSetup(Targets = new[] {
+            nameof(TaskList_04_Del3kItems_From_ExistingList),
+        })]
+        public void Setup6k() {
+            TestData.InitialiseLists();
+            TestData.GenerateDeltas();
+
+            var list = TestData.testTaskList;
+            list.Clear(skipEvents: true);
+
+            if (TestData.Deltas.TryGetValue("add6k", out var delta)) {
+                var added = delta.Added;
+                list.EnsureCapacityFor(added.Length);
+
+                for (int i = 0; i < added.Length; i++) {
+                    int idx = list.Size++;
+                    list.Tasks[idx].ID = added[i];
+                    list.Tasks[idx].IsActive = true;
+                }
+            }
+        }
+
+
+        [Benchmark]
+        public void TaskList_04_Del3kItems_From_ExistingList() {
+            var list = TestData.testTaskList;
+
+            if (TestData.Deltas.TryGetValue("del3kadd3k", out var delta)) {
+                var retained = delta.Retained;
+                for (int i = list.Size; i-- > 0;) {
+                    if (!retained.Contains(list.Tasks[i].ID)) {
+                        list.RemoveAt(i);
                     }
                 }
-
-                // add new tasks
-                for (int i = 0; i < delta.Added.Length; i++) {
-                    list.Add(new TestStruct { ID = delta.Added[i], IsActive = true, });
-                }
-
             }
         }
+        */
+    }
 
-        internal struct TestStruct {
-            public int ID;
-            public bool IsActive;
-        }
+    /* --------------------- test data ---------------------  */
 
-        internal struct Delta {
-            public HashSet<int> Retained;
-            public int[] Added;
-        }
+    internal struct TestStruct {
+        public int ID;
+        public bool IsActive;
+    }
 
-        internal static class TestData {
-            private static int[] rawData;
+    internal struct Delta {
+        public HashSet<int> Retained;
+        public int[] Added;
+    }
 
-            internal static FastList<TestStruct> testFastList;
+    internal static class TestData {
+        internal static TaskList<TestStruct> testTaskList;
+        internal static FastList<TestStruct> testFastList;
 
-            internal static TaskList<TestStruct> testTaskList;
+        internal static Dictionary<string, Delta> Deltas;
 
-            internal static TaskList<TestStruct> testTaskListOptimised;
+        private static int[] rawData;
+        private static HashSet<int> previous;
+        private static List<int> added;
+        private static List<int> retained;
 
-            internal static int Center;
-            internal static int Zoom;
+        internal static void InitialiseLists() {
+            Console.WriteLine("// InitialiseLists()");
 
-            internal static List<Delta> Deltas;
+            // create test lists
+            testTaskList = new TaskList<TestStruct>(32);
+            testFastList = new FastList<TestStruct>();
 
-            internal static void InitialiseLists() {
-                // create test lists
-                testFastList = new FastList<TestStruct>();
-                testTaskList = new TaskList<TestStruct>();
-                testTaskListOptimised = new TaskList<TestStruct>();
+            // delegates
+            //testTaskList.OnAddTask = OnAddTL;
+            testTaskList.OnRemoveTask = OnDelTL;
+            testTaskList.TaskIsActive = IsActiveTL;
 
-                // delegates
-                testTaskList.OnAddTask = OnAddTL;
-                testTaskList.OnRemoveTask = OnDelTL;
-                testTaskList.TaskIsActive = IsActiveTL;
-
-                testTaskListOptimised.OnAddTask = OnAddTLO;
-                testTaskListOptimised.OnRemoveTask = OnDelTLO;
-                testTaskListOptimised.TaskIsActive = IsActiveTLO;
-
-                // populate raw data with unique values
-                rawData = new int[36864u];
-                for (int i = 0; i < rawData.Length; i++) {
-                    rawData[i] = i;
-                }
+            // populate raw data with unique values
+            rawData = new int[36864u];
+            for (int i = 0; i < rawData.Length; i++) {
+                rawData[i] = i;
             }
 
-            internal static void GenerateDeltas() {
-                Center = rawData.Length / 2;
-                Zoom = 500;
+            previous = new HashSet<int>(0);
+            added = new List<int>(4001);
+            retained = new List<int>(2001);
 
-                HashSet<int> previous;
+            Deltas = new Dictionary<string, Delta>();
+        }
 
-                Delta currentViewport = new Delta {
-                    Retained = new HashSet<int>(0),
-                    Added = rawData.AsSpan(Center - Zoom, Zoom * 2).ToArray(),
-                };
+        internal static void GenerateDeltas() {
+            Console.WriteLine("// GenerateDeltas()");
 
-                Deltas = new List<Delta>();
+            Deltas.Add("removeAll", new Delta { Retained = previous, Added = new int[0] });
 
-                Deltas.Add(currentViewport);
+            var center = rawData.Length / 2;
+            var zoom = 3000;
 
-                previous = new HashSet<int>(currentViewport.Added);
+            Deltas.Add("add6k", GenerateDelta(center, zoom));
 
-                var CameraMoves = new Dictionary<int, int> {
-                    { Center -= 250, Zoom }, // move left half screen
-                    { Center -= 1, Zoom += 500 }, // zoom out
-                    { Center -= 750, Zoom }, // move left full screen
-                    { Center += 2, Zoom -= 200 }, // zoom in
-                    { Center += 2000, Zoom += 1000 }, // move right, zoom out
-                };
+            center -= zoom;
 
-                var added = new List<int>();
-                var retained = new List<int>();
+            Deltas.Add("del3kadd3k", GenerateDelta(center, zoom));
+        }
 
-                foreach (var move in CameraMoves) {
-                    var viewport = rawData.AsSpan(move.Key - move.Value, move.Value * 2).ToArray();
+        internal static Delta GenerateDelta(int center, int zoom) {
+            Console.WriteLine($"// GenerateDeltas({center}, {zoom})");
 
-                    retained.Clear();
-                    added.Clear();
+            var viewport = rawData.AsSpan(center - zoom, zoom * 2).ToArray();
 
-                    foreach (var item in viewport) {
-                        if (previous.Contains(item)) {
-                            retained.Add(item);
-                        } else {
-                            added.Add(item);
-                        }
-                    }
+            added.Clear();
+            retained.Clear();
 
-                    previous = new HashSet<int>(viewport);
-
-                    currentViewport = new Delta {
-                        Retained = new HashSet<int>(retained.ToArray()),
-                        Added = added.ToArray(),
-                    };
-
-                    Deltas.Add(currentViewport);
+            foreach (int item in viewport) {
+                if (previous.Contains(item)) {
+                    retained.Add(item);
+                } else {
+                    added.Add(item);
                 }
             }
 
-            internal static void OnAddTL(int index) {
-                testTaskList.Tasks[index].IsActive = true;
-            }
-            internal static void OnDelTL(int index) {
-                testTaskList.Tasks[index].IsActive = false;
-            }
-            internal static bool IsActiveTL(int index) {
-                return testTaskList.Tasks[index].IsActive;
-            }
+            previous = new HashSet<int>(viewport);
 
-            private static void OnAddTLO(int index) {
-                testTaskListOptimised.Tasks[index].IsActive = true;
-            }
-            private static void OnDelTLO(int index) {
-                testTaskListOptimised.Tasks[index].IsActive = false;
-            }
-            private static bool IsActiveTLO(int index) {
-                return testTaskListOptimised.Tasks[index].IsActive;
-            }
+            return new Delta {
+                Retained = new HashSet<int>(retained),
+                Added = added.ToArray(),
+            };
+        }
+
+        internal static void OnAddTL(int index) {
+            testTaskList.Tasks[index].IsActive = true;
+        }
+        internal static void OnDelTL(int index) {
+            testTaskList.Tasks[index].IsActive = false;
+        }
+        internal static bool IsActiveTL(int index) {
+            return testTaskList.Tasks[index].IsActive;
         }
     }
 }

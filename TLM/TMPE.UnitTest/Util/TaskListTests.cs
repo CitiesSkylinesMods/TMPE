@@ -140,12 +140,12 @@ namespace TMUnitTest.Util {
             }
 
             Assert.AreEqual(TaskList.Size, BlockSize);
-            Assert.AreEqual(TaskList.TasksCapacity, 0);
+            Assert.AreEqual(TaskList.UnusedCapacity, 0);
 
             TaskList.RemoveAt(BlockSize - 1);
 
             Assert.AreEqual(TaskList.Size, BlockSize - 1);
-            Assert.AreEqual(TaskList.TasksCapacity, 1);
+            Assert.AreEqual(TaskList.UnusedCapacity, 1);
             Assert.IsFalse(TaskList.Tasks[TaskList.Size].IsActive);
         }
 
@@ -165,7 +165,7 @@ namespace TMUnitTest.Util {
 
             Assert.AreEqual(TaskList.Size, BlockSize - 1);
             Assert.AreEqual(TaskList.Tasks[0].ID, "3");
-            Assert.AreEqual(TaskList.TasksCapacity, 1);
+            Assert.AreEqual(TaskList.UnusedCapacity, 1);
         }
     }
 }

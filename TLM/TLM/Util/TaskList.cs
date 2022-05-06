@@ -1,3 +1,5 @@
+using System.Collections;
+
 namespace TrafficManager.Util {
 
     /// <summary>
@@ -66,7 +68,7 @@ namespace TrafficManager.Util {
         /// <remarks>
         /// Similar to <c>FastList.m_size</c>.
         /// </remarks>
-        public int Size { get; private set; }
+        public int Size; // { get; private set; }
 
         /// <summary>
         /// Mandatory. Called after an item is added to the <see cref="Tasks"/>
@@ -102,9 +104,7 @@ namespace TrafficManager.Util {
         /// <summary>
         /// Returns the unused capacity of the <see cref="Tasks"/> array.
         /// </summary>
-        public int TasksCapacity => Tasks != null
-            ? Tasks.Length - Size
-            : 0;
+        public int UnusedCapacity => Tasks != null ? Tasks.Length - Size : 0;
 
         /// <summary>
         /// Call before adding multiple items to ensure there is enough
@@ -113,32 +113,36 @@ namespace TrafficManager.Util {
         /// <param name="numItems">
         /// The number of items that will be added.
         /// </param>
-        public void PrepareToAdd(int numItems) {
-            if (numItems <= 0 || TasksCapacity >= numItems) {
-                return;
-            }
-
+        public void EnsureCapacityFor(int numItems) {
             if (Tasks == null) {
-                Tasks = new T[SnapToBlock(numItems)];
+                Tasks = new T[Quantize(numItems)];
                 return;
             }
 
-            int capacity = Tasks.Length + numItems;
-            T[] replacement = new T[SnapToBlock(capacity)];
+            int unused = Tasks.Length - Size;
 
-            for (int i = 0; i < Size; i++) {
-                replacement[i] = Tasks[i];
+            if (numItems > unused) {
+                T[] replacement = new T[Quantize(Tasks.Length + (numItems - unused))];
+
+                for (int i = 0; i < Size; i++) {
+                    replacement[i] = Tasks[i];
+                }
+
+                Tasks = replacement;
             }
-
-            Tasks = replacement;
         }
+
+        public void EnsureCapacityFor(FastList<T> list) =>
+            EnsureCapacityFor(list.m_size);
+
+        public void EnsureCapacityFor(IList list) =>
+            EnsureCapacityFor(list.Count);
 
         /// <summary>
         /// Obtain next free index in <see cref="Tasks"/> array. Use this
         /// when manually adding batches of items if you want to skip
         /// overheads associated with <see cref="Add(T, bool)"/> but
-        /// make sure you <see cref="PrepareToAdd(int)"/> first to ensure
-        /// sufficient capacity.
+        /// make sure you <see cref="EnsureCapacityFor(int)"/> beforehand.
         /// </summary>
         /// <remarks>
         /// <i>Assumes that the index will be used</i>.
@@ -152,19 +156,18 @@ namespace TrafficManager.Util {
         /// <param name="item">
         /// The item to add.
         /// </param>
-        /// <param name="prePrepared">
-        /// Set <c>true</c> only if you prepared enough space to add a
-        /// batch of items using <see cref="PrepareToAdd(int)"/>.
-        /// </param>
-        public void Add(T item, bool prePrepared = false) {
-            if (!prePrepared && TasksCapacity == 0) {
-                PrepareToAdd(1);
+        public void Add(T item) {
+            if (Tasks == null || Size == Tasks.Length) {
+                EnsureCapacityFor(1);
             }
 
-            Tasks[Size] = item;
-            OnAddTask(Size);
-
-            ++Size;
+            if (OnAddTask == null) {
+                Tasks[Size++] = item;
+            } else {
+                Tasks[Size] = item;
+                OnAddTask(Size);
+                ++Size;
+            }
         }
 
         /// <summary>
@@ -180,10 +183,9 @@ namespace TrafficManager.Util {
 
             --Size;
 
-            if (index == Size) {
-                OnRemoveTask(Size);
-            } else {
-                OnRemoveTask(index);
+            OnRemoveTask(index);
+
+            if (index != Size) {
                 Tasks[index] = Tasks[Size];
             }
         }
@@ -191,14 +193,14 @@ namespace TrafficManager.Util {
         /// <summary>
         /// "Clear" the arrays but retain their capacity.
         /// </summary>
-        /// <param name="skipEvents">
+        /// <param name="useEvents">
         /// If <c>true</c>, removal of any remaining active tasks will
-        /// not trigger the <see cref="OnRemoveTask"/> event.
+        /// trigger the <see cref="OnRemoveTask"/> event.
         /// </param>
-        public void Clear(bool skipEvents = false) {
-            if (!skipEvents) {
+        public void Clear(bool useEvents = false) {
+            if (useEvents) {
                 for (int index = 0; index < Size; index++) {
-                    OnRemoveTask(index);
+                     OnRemoveTask(index);
                 }
             }
 
@@ -208,13 +210,18 @@ namespace TrafficManager.Util {
         /// <summary>
         /// Releases the arrays to free memory.
         /// </summary>
-        /// <param name="skipEvents">
+        /// <param name="useEvents">
         /// If <c>true</c>, removal of any remaining active tasks will
-        /// not trigger the <see cref="OnRemoveTask"/> event.
+        /// trigger the <see cref="OnRemoveTask"/> event.
         /// </param>
-        public void Release(bool skipEvents = false) {
-            Clear(skipEvents);
-            Tasks = null;
+        public void Release(bool useEvents = false) {
+            if (useEvents) {
+                Clear(useEvents);
+                Tasks = null;
+            } else {
+                Size = 0;
+                Tasks = null;
+            }
         }
 
         /// <summary>
@@ -236,6 +243,6 @@ namespace TrafficManager.Util {
         /// return <c>2*BlockSize</c>, etc.
         /// </para>
         /// </remarks>
-        private int SnapToBlock(int num) => (num + BlockSize - 1) & -BlockSize;
+        internal int Quantize(int num) => (num + BlockSize - 1) & -BlockSize;
     }
 }
