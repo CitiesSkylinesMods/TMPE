@@ -195,6 +195,10 @@ namespace TrafficManager.Lifecycle {
                             using (var xmlReader = XmlReader.Create(streamReader, xmlReaderSettings))
                                 _dom = XDocument.Load(xmlReader);
 
+#if DEBUG//NEVER
+                            Log._Debug("Loaded DOM:\r" + _dom.ToString());
+#endif
+
                             _persistenceMigration = GlobalPersistence.PersistentObjects
                                                     .Where(o => _dom.Root.Elements(o.ElementName)?.Any(e => o.CanLoad(e)) == true)
                                                     .Select(o => o.DependencyTarget)
@@ -505,6 +509,10 @@ namespace TrafficManager.Lifecycle {
 
                 using (var memoryStream = new MemoryStream()) {
                     using (var streamWriter = new StreamWriter(memoryStream, Encoding.UTF8)) {
+
+#if DEBUG//NEVER
+                        Log._Debug("Saving DOM:\r" + _dom.ToString());
+#endif
 
                         _dom.Save(streamWriter);
 

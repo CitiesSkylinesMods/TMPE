@@ -67,7 +67,7 @@ namespace TrafficManager.Persistence {
                 {
 
             if (value.HasValue) {
-                element.Add(name, value.Value);
+                element.AddAttribute(name, value.Value);
             }
         }
 
