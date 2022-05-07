@@ -10,8 +10,6 @@ using TrafficManager.TrafficLight.Model;
 using TrafficManager.Util;
 using TrafficManager.Util.Extensions;
 using static RoadBaseAI;
-using DebugSwitch = TrafficManager.State.ConfigData.DebugSwitch;
-using static TrafficManager.State.ConfigData.DebugSwitchExtensions;
 
 namespace TrafficManager.Manager.Impl {
 
