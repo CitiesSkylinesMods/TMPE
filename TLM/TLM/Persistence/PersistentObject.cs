@@ -6,9 +6,9 @@ using System.Xml.Linq;
 
 namespace TrafficManager.Persistence {
 
-    internal abstract class GlobalPersistentObject<TFeature>
-            : IGlobalPersistentObject,
-                IComparable<GlobalPersistentObject<TFeature>>
+    internal abstract class PersistentObject<TFeature>
+            : IPersistentObject,
+                IComparable<PersistentObject<TFeature>>
             where TFeature : struct {
 
         public abstract XName ElementName { get; }
@@ -81,9 +81,9 @@ namespace TrafficManager.Persistence {
 
         public abstract Type DependencyTarget { get; }
 
-        int IComparable.CompareTo(object obj) => CompareTo((GlobalPersistentObject<TFeature>)obj);
+        int IComparable.CompareTo(object obj) => CompareTo((PersistentObject<TFeature>)obj);
 
-        public int CompareTo(GlobalPersistentObject<TFeature> other) {
+        public int CompareTo(PersistentObject<TFeature> other) {
 
             bool thisDependsOnOther = GetDependencies()?.Contains(other.DependencyTarget) == true;
             bool otherDependsOnThis = other.GetDependencies()?.Contains(DependencyTarget) == true;

@@ -17,7 +17,7 @@ namespace TrafficManager.Manager.Impl {
 
     partial class TrafficLightSimulationManager {
 
-        internal class Persistence : GlobalPersistentObject<Persistence.TtlFeature> {
+        internal class Persistence : PersistentObject<Persistence.TtlFeature> {
 
             public enum TtlFeature {
 
