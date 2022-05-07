@@ -42,13 +42,11 @@ namespace TrafficManager.Manager.Impl {
         }
 
         public GetNodeSegmentIdsEnumerable GetNodeSegmentIds(ushort nodeId, ClockDirection clockDirection)
-            => GetNodeSegmentIds(nodeId, clockDirection, null);
+            => GetNodeSegmentIds(nodeId, clockDirection, GetInitialSegment(ref nodeId.ToNode()));
 
-        internal GetNodeSegmentIdsEnumerable GetNodeSegmentIds(ushort nodeId, ClockDirection clockDirection, ushort? initialSegmentId) {
-            ref NetNode netNode = ref nodeId.ToNode();
-            initialSegmentId ??= GetInitialSegment(ref netNode);
+        internal GetNodeSegmentIdsEnumerable GetNodeSegmentIds(ushort nodeId, ClockDirection clockDirection, ushort initialSegmentId) {
             var segmentBuffer = Singleton<NetManager>.instance.m_segments.m_buffer;
-            return new GetNodeSegmentIdsEnumerable(nodeId, initialSegmentId.Value, clockDirection, segmentBuffer);
+            return new GetNodeSegmentIdsEnumerable(nodeId, initialSegmentId, clockDirection, segmentBuffer);
         }
 
         /// <summary>
