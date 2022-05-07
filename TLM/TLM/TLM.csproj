@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -155,13 +155,11 @@
     <Compile Include="Manager\Impl\LaneConnection\LaneEnd.cs" />
     <Compile Include="Manager\Impl\TrafficLightSimulationManager.Persistence.cs" />
     <Compile Include="Patch\_External\RTramAIModPatch.cs" />
-    <Compile Include="Persistence\AbstractPersistentObject.cs" />
     <Compile Include="Persistence\FeatureFilter.cs" />
     <Compile Include="Persistence\GlobalPersistentObject.cs" />
     <Compile Include="Persistence\IGlobalPersistentObject.cs" />
     <Compile Include="Persistence\GlobalPersistence.cs" />
     <Compile Include="Persistence\PersistenceContext.cs" />
-    <Compile Include="Persistence\PersistentObject.cs" />
     <Compile Include="Persistence\XmlLinqExtensions.cs" />
     <Compile Include="State\OptionsTabs\GameplayTab_AIGroups.cs" />
     <Compile Include="State\OptionsTabs\GeneralTab_CompatibilityGroup.cs" />
