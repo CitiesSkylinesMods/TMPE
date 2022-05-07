@@ -1,5 +1,3 @@
-#define DEBUGLOAD
-
 using CSUtil.Commons;
 using System;
 using System.Collections.Generic;
