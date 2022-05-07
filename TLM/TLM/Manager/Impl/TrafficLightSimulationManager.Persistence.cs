@@ -1,3 +1,5 @@
+#define DEBUGLOAD
+
 using CSUtil.Commons;
 using System;
 using System.Collections.Generic;
@@ -10,6 +12,8 @@ using TrafficManager.TrafficLight.Model;
 using TrafficManager.Util;
 using TrafficManager.Util.Extensions;
 using static RoadBaseAI;
+using DebugSwitch = TrafficManager.State.ConfigData.DebugSwitch;
+using static TrafficManager.State.ConfigData.DebugSwitchExtensions;
 
 namespace TrafficManager.Manager.Impl {
 
@@ -57,10 +61,20 @@ namespace TrafficManager.Manager.Impl {
                         ushort masterNodeId = masterNodeLookup[ttlNodeId];
                         List<ushort> nodeGroup = ttlGroups[masterNodeId];
 
+#if DEBUGLOAD
+                        Log._Debug($"Adding timed light at node {ttlNodeId}. NodeGroup: "
+                                    + $"{string.Join(", ", nodeGroup.Select(x => x.ToString()).ToArray())}");
+#endif
+
                         Instance.SetUpTimedTrafficLight(ttlNodeId, nodeGroup);
 
-                        foreach (var stepElement in ttlElement.Elements(nameof(stepElementName))) {
+                        int step = 0;
+                        foreach (var stepElement in ttlElement.Elements(stepElementName)) {
+#if DEBUGLOAD
+                            Log._Debug($"Loading timed step {step} at node {ttlNodeId}");
+#endif
                             LoadStep(stepElement, ttlNodeId);
+                            ++step;
                         }
                     }
                     catch (Exception e) {
@@ -114,21 +128,49 @@ namespace TrafficManager.Manager.Impl {
                 var segmentId = segLightsElement.Attribute<ushort>(nameof(ICustomSegmentLightsModel.SegmentId));
                 ref NetSegment netSegment = ref segmentId.ToSegment();
 
-                if (netSegment.IsValid() && step.CustomSegmentLights.TryGetValue(segmentId, out var lights)) {
+                if (netSegment.IsValid()) {
 
-                    lights.ManualPedestrianMode = segLightsElement.Attribute<bool>(nameof(ICustomSegmentLightsModel.ManualPedestrianMode));
-                    lights.PedestrianLightState = segLightsElement.NullableAttribute<TrafficLightState>(nameof(ICustomSegmentLightsModel.PedestrianLightState));
+#if DEBUGLOAD
+                    Log._Debug($"Loading segment {segmentId} of for ttl step");
+#endif
 
-                    bool first = true; // v1.10.2 transitional code (dark arts that no one understands)
-                    foreach (var lightElement in segLightsElement.Elements(lightElementName)) {
-                        LoadLight(lightElement, lights, ref first);
+                    if (step.CustomSegmentLights.TryGetValue(segmentId, out var lights)) {
+
+                        var manualPedestrianMode = segLightsElement.Attribute<bool>(nameof(ICustomSegmentLightsModel.ManualPedestrianMode));
+                        var pedestrianLightState = segLightsElement.NullableAttribute<TrafficLightState>(nameof(ICustomSegmentLightsModel.PedestrianLightState));
+
+#if DEBUGLOAD
+                        Log._Debug($"Loading pedestrian light at segment {segmentId}: " +
+                        $"{pedestrianLightState} {manualPedestrianMode}");
+#endif
+
+                        lights.ManualPedestrianMode = manualPedestrianMode;
+                        lights.PedestrianLightState = pedestrianLightState;
+
+                        bool first = true; // v1.10.2 transitional code (dark arts that no one understands)
+                        foreach (var lightElement in segLightsElement.Elements(lightElementName)) {
+                            LoadLight(lightElement, lights, ref first);
+                        }
+                    } else {
+#if DEBUGLOAD
+                        Log._Debug($"No segment lights found for segment {segmentId}");
+#endif
+
                     }
+                } else {
+#if DEBUGLOAD
+                    Log._Debug($"Invalid segment {segmentId} for ttl step");
+#endif
                 }
             }
 
             private static void LoadLight(XElement lightElement, CustomSegmentLights lights, ref bool first) {
 
                 var vehicleType = lightElement.Attribute<ExtVehicleType>(nameof(CustomSegmentLightModel.VehicleType));
+
+#if DEBUGLOAD
+                Log._Debug($"Loading light: vehicleType={vehicleType}");
+#endif
 
                 if (!lights.CustomLights.TryGetValue(
                         vehicleType,
@@ -137,8 +179,7 @@ namespace TrafficManager.Manager.Impl {
                     // BEGIN dark arts that no one understands
                     // TODO learn the dark arts
 #if DEBUGLOAD
-                                    Log._Debug($"No segment light found for timed step {j}, segment "+
-                                    $"{e.Key}, vehicleType {e2.Key} at node {cnfTimedLights.nodeId}");
+                    Log._Debug($"No segment light found for vehicleType {vehicleType}");
 #endif
                     // v1.10.2 transitional code START
                     if (first) {
@@ -148,9 +189,7 @@ namespace TrafficManager.Manager.Impl {
                                     .DEFAULT_MAIN_VEHICLETYPE,
                                 out light)) {
 #if DEBUGLOAD
-                                            Log._Debug($"No segment light found for timed step {j}, "+
-                    $"segment {e.Key}, DEFAULT vehicleType {CustomSegmentLights.DEFAULT_MAIN_VEHICLETYPE} "+
-                    $"at node {cnfTimedLights.nodeId}");
+                            Log._Debug($"No segment light found for DEFAULT vehicleType {CustomSegmentLights.DEFAULT_MAIN_VEHICLETYPE} ");
 #endif
                             return;
                         }
@@ -184,6 +223,11 @@ namespace TrafficManager.Manager.Impl {
                     nodesWithSimulation.Add(ttlElement.Attribute<ushort>(nameof(TimedTrafficLights.NodeId)));
                 }
 
+#if DEBUGLOAD
+                Log._Debug($"TrafficLightSimulationManager.Persistence.BuildTtlGroups: "
+                            + $"nodesWithSimulation=[{string.Join(",", nodesWithSimulation.Select(n => n.ToString()).ToArray())}]");
+#endif
+
                 masterNodeLookup = new Dictionary<ushort, ushort>();
                 ttlGroups = new Dictionary<ushort, List<ushort>>();
                 foreach (var ttlElement in element.Elements(ttlNodeElementName)) {
@@ -193,7 +237,7 @@ namespace TrafficManager.Manager.Impl {
                     try {
                         // TODO most of this should not be necessary at all if the classes around TimedTrafficLights class were properly designed
                         // enforce uniqueness of node ids
-                        List<ushort> currentNodeGroup = ttlElement.Elements<ushort>(nameof(TimedTrafficLights.NodeId))
+                        List<ushort> currentNodeGroup = ttlElement.Elements<ushort>(nameof(TimedTrafficLights.NodeGroup))
                                                             .Distinct().ToList();
 
                         if (!currentNodeGroup.Contains(ttlNodeId)) {
@@ -249,6 +293,11 @@ namespace TrafficManager.Manager.Impl {
                         foreach (ushort nodeId in currentNodeGroup) {
                             masterNodeLookup[nodeId] = masterNodeId;
                         }
+
+#if DEBUGLOAD
+                        Log._Debug($"Node {ttlNodeId}: masterNodeId={masterNodeId}, "
+                                    + $"currentNodeGroup=[{string.Join(",", currentNodeGroup.Select(n => n.ToString()).ToArray())}]");
+#endif
                     }
                     catch (Exception e) {
                         Log.WarningFormat(
