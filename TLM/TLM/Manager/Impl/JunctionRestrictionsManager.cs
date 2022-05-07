@@ -633,8 +633,7 @@ namespace TrafficManager.Manager.Impl {
         }
 
         public bool IsPedestrianCrossingAllowedConfigurable(ushort segmentId, bool startNode, ref NetNode node) {
-            bool ret = (node.m_flags & (NetNode.Flags.Junction | NetNode.Flags.Bend)) != NetNode.Flags.None
-                       && node.Info?.m_class?.m_service != ItemClass.Service.Beautification
+            bool ret = IsNodePedestrianCrossingConfigurable(ref node)
                        && IsLikelyPedestrianRoute(segmentId, startNode, true);
 #if DEBUG
             if (DebugSwitch.JunctionRestrictions.Get()) {
@@ -647,6 +646,11 @@ namespace TrafficManager.Manager.Impl {
             return ret;
         }
 
+        private static bool IsNodePedestrianCrossingConfigurable(ref NetNode node) {
+            return (node.m_flags & (NetNode.Flags.Junction | NetNode.Flags.Bend)) != NetNode.Flags.None
+                                   && node.Info?.m_class?.m_service != ItemClass.Service.Beautification;
+        }
+
         public bool GetDefaultPedestrianCrossingAllowed(ushort segmentId, bool startNode, ref NetNode node) {
 #if DEBUG
             bool logLogic = DebugSwitch.JunctionRestrictions.Get();
@@ -654,11 +658,11 @@ namespace TrafficManager.Manager.Impl {
             const bool logLogic = false;
 #endif
 
-            if (!IsPedestrianCrossingAllowedConfigurable(segmentId, startNode, ref node)) {
+            if (!IsNodePedestrianCrossingConfigurable(ref node)) {
                 if (logLogic) {
                     Log._Debug(
                         "JunctionRestrictionsManager.GetDefaultPedestrianCrossingAllowed" +
-                        $"({segmentId}, {startNode}): Setting is not configurable. res=true");
+                        $"({segmentId}, {startNode}): Setting is not configurable for this node type. res=true");
                 }
 
                 return true;
@@ -705,7 +709,8 @@ namespace TrafficManager.Manager.Impl {
 
             // crossing is allowed at junctions and at untouchable nodes (for example: spiral
             // underground parking)
-            bool ret = (node.m_flags & (NetNode.Flags.Junction | NetNode.Flags.Untouchable)) != NetNode.Flags.None
+            bool ret = ((node.m_flags & (NetNode.Flags.Junction | NetNode.Flags.Untouchable)) != NetNode.Flags.None
+                            || !IsNodePedestrianCrossingConfigurable(ref node))
                         && IsLikelyPedestrianRoute(segmentId, startNode, false);
 
             if (logLogic) {
