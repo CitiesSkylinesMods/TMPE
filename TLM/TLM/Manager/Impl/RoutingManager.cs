@@ -482,15 +482,22 @@ namespace TrafficManager.Manager.Impl {
 
             bool applyHighwayMergingRules = false;
             bool nodeHasConnections = LaneConnectionManager.Instance.HasNodeConnections(nodeId);
+
+            bool nextAreOnlyOneWayHighways =
+                ExtSegmentEndManager.Instance.CalculateOnlyHighways(
+                    prevEnd.segmentId,
+                    prevEnd.startNode);
+
+            bool onOnewayHighway = nextAreOnlyOneWayHighways && prevEnd.outgoing && prevExtSegment.oneWay && prevExtSegment.highway;
+
             if (extendedLogRouting) {
-                Log._Debug($"Options.highwayMergingRules={Options.highwayMergingRules}, nodeHasTrafficLights={nodeHasTrafficLights} nodeHasPrioritySigns={nodeHasPrioritySigns}, nodeHasConnections={nodeHasConnections}");
+                Log._Debug($"Options.highwayMergingRules={Options.highwayMergingRules}, nodeHasTrafficLights={nodeHasTrafficLights} nodeHasPrioritySigns={nodeHasPrioritySigns}, nodeHasConnections={nodeHasConnections}, onOnewayHighway={onOnewayHighway}");
             }
-            if (Options.highwayMergingRules && !nodeHasTrafficLights && !nodeHasPrioritySigns && !nodeHasConnections) {
+            if (Options.highwayMergingRules && onOnewayHighway && !nodeHasTrafficLights && !nodeHasPrioritySigns && !nodeHasConnections) {
                 // determine if junction is a simple junction (highway rules only apply to simple junctions)
                 int numIncomingSegents = 0;
                 int numOutgoingSegments = 0;
                 bool laneSwitching = false;
-                bool highwayOnly = true;
 
                 for (int segIndex = 0; segIndex < 8; ++segIndex) {
                     ushort segmentId = netNode.GetSegment(segIndex);
@@ -500,7 +507,6 @@ namespace TrafficManager.Manager.Impl {
 
                     ref NetSegment netSegment = ref segmentId.ToSegment();
                     bool startNode = netSegment.IsStartNode(nodeId);
-                    highwayOnly &= netSegment.Info?.m_netAI is RoadBaseAI ai && ai.m_highwayRules; 
 
                     ExtSegmentEnd segEnd = segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segmentId, startNode)];
                     if (segEnd.incoming) {
@@ -513,7 +519,7 @@ namespace TrafficManager.Manager.Impl {
                     }
                 }
 
-                if (numOutgoingSegments == 1 && numIncomingSegents == 2 && !laneSwitching && highwayOnly) {
+                if (numOutgoingSegments == 1 && numIncomingSegents == 2 && !laneSwitching) {
                     // merging
                     int numIncomingLanes = 0; // toward the node
                     int numOutgoingLanes = 0; // from the node
@@ -537,20 +543,15 @@ namespace TrafficManager.Manager.Impl {
                 if (extendedLogRouting) {
                     Log._Debug(
                         $"applyHighwayMergingRules data: numIncomingSegents={numIncomingSegents} numOutgoingSegments={numOutgoingSegments} " +
-                        $"laneSwitching={laneSwitching} highwayOnly={highwayOnly} applyHighwayMergingRules={applyHighwayMergingRules}");
+                        $"laneSwitching={laneSwitching} applyHighwayMergingRules={applyHighwayMergingRules}");
                 }
             }
 
             bool prevIsRoadLane = prevLaneInfo.CheckType(ROUTED_LANE_TYPES, ROAD_VEHICLE_TYPES);
 
-            bool nextAreOnlyOneWayHighways =
-                ExtSegmentEndManager.Instance.CalculateOnlyHighways(
-                    prevEnd.segmentId,
-                    prevEnd.startNode);
 
             // determine if highway rules should be applied
-            bool onHighway = Options.highwayRules && nextAreOnlyOneWayHighways &&
-                             prevEnd.outgoing && prevExtSegment.oneWay && prevExtSegment.highway;
+            bool onHighway = Options.highwayRules && onOnewayHighway;
             bool applyHighwayRules = onHighway && nodeIsSimpleJunction;
             bool applyHighwayRulesAtJunction = applyHighwayRules && nodeIsRealJunction;
             bool iterateViaGeometry = (applyHighwayRulesAtJunction || applyHighwayMergingRules) && prevIsRoadLane;
