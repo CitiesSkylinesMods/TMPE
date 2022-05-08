@@ -1,3 +1,9 @@
+[Version] 11.6.5.2-hotfix-1
+[Released] May 8th 2022
+[Link] tmpe-v11652-hotfix-1-test-08052022
+[Fixed] Simulation Accuracy setting regression #1560 (krzychu124)
+[/Version]
+
 [Version] 11.6.5.2
 [Released] April 27th 2022
 [Link] tmpe-v11652-test-27042022
