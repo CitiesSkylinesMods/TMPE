@@ -156,6 +156,8 @@
     <Compile Include="Manager\Impl\LaneConnection\LaneConnectionManager.cs" />
     <Compile Include="Manager\Impl\LaneConnection\LaneEnd.cs" />
     <Compile Include="Manager\Impl\TrafficLightSimulationManager.Persistence.cs" />
+    <Compile Include="Manager\Model\JunctionRestrictionFlags.cs" />
+    <Compile Include="Manager\Model\JunctionRestrictionsModel.cs" />
     <Compile Include="Patch\_External\RTramAIModPatch.cs" />
     <Compile Include="Persistence\FeatureFilter.cs" />
     <Compile Include="Persistence\PersistentObject.cs" />

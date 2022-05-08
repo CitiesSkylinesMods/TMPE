@@ -17,6 +17,7 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.Util;
     using TrafficManager.Util.Extensions;
     using TrafficManager.Lifecycle;
+    using TrafficManager.Manager.Model;
 
     public class JunctionRestrictionsManager
         : AbstractGeometryObservingManager,
@@ -1318,15 +1319,6 @@ namespace TrafficManager.Manager.Impl {
             return ret;
         }
 
-        private enum JunctionRestrictionFlags {
-            AllowUTurn = 1 << 0,
-            AllowNearTurnOnRed = 1 << 1,
-            AllowFarTurnOnRed = 1 << 2,
-            AllowForwardLaneChange = 1 << 3,
-            AllowEnterWhenBlocked = 1 << 4,
-            AllowPedestrianCrossing = 1 << 5,
-        }
-
         private struct SegmentJunctionRestrictions {
             public JunctionRestrictions startNodeRestrictions;
             public JunctionRestrictions endNodeRestrictions;
@@ -1370,16 +1362,14 @@ namespace TrafficManager.Manager.Impl {
 
         private struct JunctionRestrictions {
 
-            private JunctionRestrictionFlags values;
-
-            private JunctionRestrictionFlags mask;
+            private JunctionRestrictionsModel model;
 
             private JunctionRestrictionFlags defaults;
 
 
             public void ClearValue(JunctionRestrictionFlags flags) {
-                values &= ~flags;
-                mask &= ~flags;
+                model.values &= ~flags;
+                model.mask &= ~flags;
             }
 
             public void SetDefault(JunctionRestrictionFlags flags, bool value) {
@@ -1394,36 +1384,36 @@ namespace TrafficManager.Manager.Impl {
             }
 
             public bool HasValue(JunctionRestrictionFlags flags) {
-                return (mask & flags) == flags;
+                return (model.mask & flags) == flags;
             }
 
             public TernaryBool GetTernaryBool(JunctionRestrictionFlags flags) {
-                return (mask & flags) == flags
-                        ? (values & flags) == flags
+                return (model.mask & flags) == flags
+                        ? (model.values & flags) == flags
                             ? TernaryBool.True
                             : TernaryBool.False
                         : TernaryBool.Undefined;
             }
 
             public bool GetValueOrDefault(JunctionRestrictionFlags flags) {
-                return ((values & flags & mask) | (defaults & flags & ~mask)) == flags;
+                return ((model.values & flags & model.mask) | (defaults & flags & ~model.mask)) == flags;
             }
 
             public void SetValue(JunctionRestrictionFlags flags, TernaryBool value) {
                 switch (value) {
                     case TernaryBool.True:
-                        values |= flags;
-                        mask |= flags;
+                        model.values |= flags;
+                        model.mask |= flags;
                         break;
 
                     case TernaryBool.False:
-                        values &= ~flags;
-                        mask |= flags;
+                        model.values &= ~flags;
+                        model.mask |= flags;
                         break;
 
                     case TernaryBool.Undefined:
-                        values &= ~flags;
-                        mask &= ~flags;
+                        model.values &= ~flags;
+                        model.mask &= ~flags;
                         break;
 
                     default:
@@ -1432,11 +1422,11 @@ namespace TrafficManager.Manager.Impl {
             }
 
             public bool IsDefault() {
-                return ((values & mask) | (defaults & ~mask)) == defaults;
+                return ((model.values & model.mask) | (defaults & ~model.mask)) == defaults;
             }
 
             public void Reset(bool resetDefaults = true) {
-                values = mask = default;
+                model.values = model.mask = default;
 
                 if (resetDefaults) {
                     defaults = default;
@@ -1445,7 +1435,7 @@ namespace TrafficManager.Manager.Impl {
 
             public override string ToString() {
                 return string.Format(
-                    $"[JunctionRestrictions\n\tvalues = {values}\n\tmask = {mask}\n" +
+                    $"[JunctionRestrictions\n\tvalues = {model.values}\n\tmask = {model.mask}\n" +
                     $"defaults = {defaults}\n" +
                     "JunctionRestrictions]");
             }
