@@ -6,6 +6,7 @@ namespace TrafficManager.UI.SubTools {
     using System.Linq;
     using ColossalFramework.UI;
     using TrafficManager.Manager.Impl;
+    using TrafficManager.Manager.Impl.LaneConnection;
     using TrafficManager.State.ConfigData;
     using TrafficManager.State.Keybinds;
     using TrafficManager.State;
@@ -387,7 +388,7 @@ namespace TrafficManager.UI.SubTools {
                     } else {
                         // snap to hovered, render accurate connection bezier
                         Bezier3 bezier = CalculateBezierConnection(selectedLaneEnd, hoveredLaneEnd);
-                        bool connected = LaneConnectionManager.Instance.AreLanesConnected(
+                        bool connected = LaneConnectionManager.Instance.Sub.AreLanesConnected(
                             selectedLaneEnd.LaneId, hoveredLaneEnd.LaneId, selectedLaneEnd.StartNode);
 
                         Color fillColor = connected ?
@@ -406,7 +407,7 @@ namespace TrafficManager.UI.SubTools {
                         if(!connected && MultiMode && selectedLaneEnd.IsBidirectional && hoveredLaneEnd.IsBidirectional) {
                             Bezier3 bezier2 = CalculateBezierConnection(hoveredLaneEnd, selectedLaneEnd);
                             // draw backward arrow only:
-                            bool connected2 = LaneConnectionManager.Instance.AreLanesConnected(
+                            bool connected2 = LaneConnectionManager.Instance.Sub.AreLanesConnected(
                             hoveredLaneEnd.LaneId, selectedLaneEnd.LaneId, selectedLaneEnd.StartNode);
                             DrawLaneCurve(
                                 cameraInfo: cameraInfo,
@@ -857,7 +858,7 @@ namespace TrafficManager.UI.SubTools {
                     }
 
                     if (connect) {
-                        LaneConnectionManager.Instance.AddLaneConnection(
+                        LaneConnectionManager.Instance.Sub.AddLaneConnection(
                             sourceLaneEnd.LaneId,
                             targetLaneEnd.LaneId,
                             sourceLaneEnd.StartNode);
@@ -982,7 +983,7 @@ namespace TrafficManager.UI.SubTools {
             } else if (GetSelectionMode() == SelectionMode.SelectTarget) {
                 // toggle lane connection
                 bool canBeBidirectional = selectedLaneEnd.IsBidirectional && hoveredLaneEnd.IsBidirectional;
-                if (LaneConnectionManager.Instance.AreLanesConnected(
+                if (LaneConnectionManager.Instance.Sub.AreLanesConnected(
                     selectedLaneEnd.LaneId,
                     hoveredLaneEnd.LaneId,
                     selectedLaneEnd.StartNode)) {
@@ -1002,7 +1003,7 @@ namespace TrafficManager.UI.SubTools {
         }
 
         private void RemoveLaneConnection(LaneEnd source, LaneEnd target) {
-            if (LaneConnectionManager.Instance.RemoveLaneConnection(
+            if (LaneConnectionManager.Instance.Sub.RemoveLaneConnection(
                 source.LaneId,
                 target.LaneId,
                 source.StartNode)) {
@@ -1018,7 +1019,7 @@ namespace TrafficManager.UI.SubTools {
         }
 
         private void AddLaneConnection(LaneEnd source, LaneEnd target) {
-            if (LaneConnectionManager.Instance.AddLaneConnection(
+            if (LaneConnectionManager.Instance.Sub.AddLaneConnection(
             source.LaneId,
             target.LaneId,
             source.StartNode)) {
@@ -1114,7 +1115,7 @@ namespace TrafficManager.UI.SubTools {
                 }
 
                 if (nodeId != SelectedNodeId &&
-                    !LaneConnectionManager.Instance.HasNodeConnections(nodeId)) {
+                    !LaneConnectionManager.Instance.Sub.HasNodeConnections(nodeId)) {
                     continue;
                 }
 
@@ -1279,7 +1280,7 @@ namespace TrafficManager.UI.SubTools {
                 }
 
                 uint[] connections =
-                    LaneConnectionManager.Instance.GetLaneConnections(
+                    LaneConnectionManager.Instance.Sub.GetLaneConnections(
                         laneEnd1.LaneId,
                         laneEnd1.StartNode);
 

@@ -8,8 +8,8 @@ namespace TrafficManager.Lifecycle {
     using System;
     using TrafficManager.API.Manager;
     using TrafficManager.Manager.Impl;
+    using TrafficManager.Manager.Impl.LaneConnection;
     using TrafficManager.State;
-    using UI.WhatsNew;
     using Util;
 
     [UsedImplicitly]
