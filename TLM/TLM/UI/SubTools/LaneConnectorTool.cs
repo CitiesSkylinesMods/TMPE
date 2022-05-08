@@ -36,8 +36,6 @@ namespace TrafficManager.UI.SubTools {
             addCursor_ = CursorUtil.LoadCursorFromResource("LaneConnectionManager.add_cursor.png");
             removeCursor_ = CursorUtil.LoadCursorFromResource("LaneConnectionManager.remove_cursor.png");
             directionArrow_ = TextureResources.LoadDllResource("LaneConnectionManager.direction_arrow.png", new IntVector2(256, 256));
-            square_ = TextureResources.LoadDllResource("LaneConnectionManager.square.png", new IntVector2(256, 256));
-            Highlight.SquareTexture = square_;
             Highlight.TriangleTexture = directionArrow_;
         }
 
@@ -172,22 +170,21 @@ namespace TrafficManager.UI.SubTools {
                 LaneEndTransitionGroup groupFilter = LaneEndTransitionGroup.All) {
 
                 var groups = TransitionGroup & groupFilter;
-                NodeLaneMarker.Shape shape = 0;
-                if ((groups & LaneEndTransitionGroup.Track) != 0) {
-                    if (this.IsBidirectional) {
-                        shape = NodeLaneMarker.Shape.InOut;
-                    } else if (this.IsSource) {
-                        shape = NodeLaneMarker.Shape.Out;
-                    } else {
-                        shape = NodeLaneMarker.Shape.In;
-                    }
-                }
-                if ((groups & LaneEndTransitionGroup.Road) != 0) {
-                    shape |= NodeLaneMarker.Shape.Circle;
+
+                Highlight.Shape shape;
+                bool cutEnd;
+                if (this.IsBidirectional) {
+                    shape = Highlight.Shape.Diamond;
+                    cutEnd = true;
+                } else if((groups & LaneEndTransitionGroup.Track) != 0) {
+                    shape = Highlight.Shape.Square;
+                    cutEnd = true;
+                } else {
+                    shape = Highlight.Shape.Circle;
+                    cutEnd = false;
                 }
 
                 if (highlight) {
-                    bool cutEnd = shape != NodeLaneMarker.Shape.Circle;
                     SegmentMarker.RenderOverlay(cameraInfo, color, cutEnd: cutEnd, enlarge: true, renderLimits: renderLimits);
                 }
 
