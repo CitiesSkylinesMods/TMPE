@@ -38,6 +38,7 @@ namespace TrafficManager.UI.Helpers {
 
         protected Options.PersistTo _scope;
 
+        [CanBeNull]
         private FieldInfo _fieldInfo;
 
         private string _fieldName;
@@ -52,21 +53,18 @@ namespace TrafficManager.UI.Helpers {
 
             if (scope.IsFlagSet(Options.PersistTo.Savegame)) {
                 _fieldInfo = typeof(Options).GetField(fieldName, BindingFlags.Static | BindingFlags.Public);
-                getValue_ = _fieldInfo != null ? GetFieldValue : GetBuiltInValue;
-            } else {
-                getValue_ = GetBuiltInValue;
+
+                if (_fieldInfo == null) {
+                    throw new Exception($"SerializableUIOptionBase.ctor: `{fieldName}` does not exist");
+                }
             }
 
             OnValueChanged = DefaultOnValueChanged;
         }
 
-        private TVal GetFieldValue() => (TVal)_fieldInfo.GetValue(null);
-        private TVal GetBuiltInValue() => _value; // faster.
-        private Func<TVal> getValue_;
-
         /// <summary>Gets or sets the value of the field this option represents.</summary>
         public virtual TVal Value {
-            get => getValue_();
+            get => _fieldInfo != null ? (TVal)_fieldInfo.GetValue(null) : _value;
             set {
                 if (_fieldInfo != null) {
                     _fieldInfo.SetValue(null, value);
