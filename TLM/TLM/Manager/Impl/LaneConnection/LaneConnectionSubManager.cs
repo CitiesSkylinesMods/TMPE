@@ -365,6 +365,9 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
                 return false;
             }
 
+            ushort sourceSegmentId = sourceLaneId.ToLane().m_segment;
+            ushort targetSegmentId = targetLaneId.ToLane().m_segment;
+            ushort nodeId = sourceSegmentId.ToSegment().GetNodeId(sourceStartNode);
 
             // check if source lane goes toward the node
             // and target lane goes away from the node.
@@ -383,10 +386,6 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
             if (!canConnect) {
                 return false;
             }
-
-            ushort sourceSegmentId = sourceLaneId.ToLane().m_segment;
-            ushort targetSegmentId = targetLaneId.ToLane().m_segment;
-            ushort nodeId = sourceSegmentId.ToSegment().GetNodeId(sourceStartNode);
 
             if (Group == LaneEndTransitionGroup.Track) {
                 bool targetStartnode = targetSegmentId.ToSegment().IsStartNode(nodeId);
