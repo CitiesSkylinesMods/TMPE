@@ -35,7 +35,7 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
                 laneTypes_ |= TrackUtils.ROAD_LANE_TYPES;
                 vehicleTypes_ |= TrackUtils.ROAD_VEHICLE_TYPES;
             }
-            if(Group == LaneEndTransitionGroup.Track) {
+            if (Group == LaneEndTransitionGroup.Track) {
                 laneTypes_ |= TrackUtils.TRACK_LANE_TYPES;
                 vehicleTypes_ |= TrackUtils.TRACK_VEHICLE_TYPES;
             }
@@ -361,6 +361,25 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
             ref NetLane sourceNetLane = ref sourceLaneId.ToLane();
             ref NetLane targetNetLane = ref targetLaneId.ToLane();
             bool canConnect = Supports(sourceLaneInfo) && Supports(targetLaneInfo);
+            if (!canConnect) {
+                return false;
+            }
+
+
+            // check if source lane goes toward the node
+            // and target lane goes away from the node.
+            static bool IsDirectionValid(ref NetLane lane, NetInfo.Lane laneInfo, ushort nodeId, bool source) {
+                bool invert = lane.m_segment.ToSegment().m_flags.IsFlagSet(NetSegment.Flags.Invert);
+                bool startNode = lane.IsStartNode(nodeId);
+                if (source ^ startNode ^ invert) {
+                    return laneInfo.IsGoingForward();
+                } else {
+                    return laneInfo.IsGoingBackward();
+                }
+            }
+            canConnect =
+                IsDirectionValid(ref sourceNetLane, sourceLaneInfo, nodeId, true) &&
+                IsDirectionValid(ref targetNetLane, targetLaneInfo, nodeId, false);
             if (!canConnect) {
                 return false;
             }
