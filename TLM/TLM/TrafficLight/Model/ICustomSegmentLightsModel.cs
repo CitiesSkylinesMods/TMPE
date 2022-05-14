@@ -10,8 +10,8 @@ namespace TrafficManager.TrafficLight.Model {
 
         ushort SegmentId { get; }
 
-        RoadBaseAI.TrafficLightState? PedestrianLightState { get; set; }
+        RoadBaseAI.TrafficLightState? PedestrianLightState { get; }
 
-        bool ManualPedestrianMode { get; set; }
+        bool ManualPedestrianMode { get; }
     }
 }

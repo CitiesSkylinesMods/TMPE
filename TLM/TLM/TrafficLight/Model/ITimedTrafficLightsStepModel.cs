@@ -7,13 +7,13 @@ using TrafficManager.API.Traffic.Enums;
 namespace TrafficManager.TrafficLight.Model {
     internal interface ITimedTrafficLightsStepModel {
 
-        int MinTime { get; set; }
+        int MinTime { get; }
 
-        int MaxTime { get; set; }
+        int MaxTime { get; }
 
-        StepChangeMetric ChangeMetric { get; set; }
+        StepChangeMetric ChangeMetric { get; }
 
-        float WaitFlowBalance { get; set; }
+        float WaitFlowBalance { get; }
 
         IEnumerable<ICustomSegmentLightsModel> EnumerateCustomSegmentLights();
     }
