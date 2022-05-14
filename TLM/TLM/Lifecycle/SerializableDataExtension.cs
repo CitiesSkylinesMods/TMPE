@@ -1,3 +1,6 @@
+#define DEBUGLOAD
+#define DEBUGSAVE
+
 namespace TrafficManager.Lifecycle {
     using CSUtil.Commons;
     using ICities;

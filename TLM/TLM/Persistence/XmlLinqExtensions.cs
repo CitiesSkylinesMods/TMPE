@@ -1,7 +1,9 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Xml;
 using System.Xml.Linq;
@@ -9,8 +11,20 @@ using System.Xml.Linq;
 namespace TrafficManager.Persistence {
     internal static class XmlLinqExtensions {
 
+        public static XElement NewElement(this XElement element, XName name) {
+            var result = new XElement(name);
+            element.Add(result);
+            return result;
+        }
+
         public static void AddAttribute<T>(this XElement element, XName name, T value) {
             if (!(typeof(T).IsClass && ReferenceEquals(value, default(T)))) {
+                element.Add(new XAttribute(name, ConvertToXml(value)));
+            }
+        }
+
+        public static void AddAttribute(this XElement element, XName name, object value) {
+            if (value != null) {
                 element.Add(new XAttribute(name, ConvertToXml(value)));
             }
         }
@@ -74,46 +88,59 @@ namespace TrafficManager.Persistence {
         public static T Attribute<T>(this XElement element, XName name) {
 
             var value = element.Attribute(name)?.Value;
-            return value == null ? (T)(object)value : ConvertFromXml<T>(value);
+            return value == null ? default : ConvertFromXml<T>(value);
         }
 
-        public static T? NullableAttribute<T>(this XElement element, XName name)
-                where T : struct
-                {
-
+        public static object Attribute(this XElement element, Type type, XName name) {
             var value = element.Attribute(name)?.Value;
-            return value == null ? default : ConvertFromXml<T>(value);
+            return value == null
+                    ? type.IsValueType
+                        ? Activator.CreateInstance(type)
+                        : null
+                    : ConvertFromXml(value, type);
         }
 
         public static T Element<T>(this XElement element, XName name) {
 
             var value = element.Element(name)?.Value;
-            return value == null ? (T)(object)value : ConvertFromXml<T>(value);
+            return value == null ? default : ConvertFromXml<T>(value);
+        }
+
+        public static object Element(this XElement element, Type type, XName name) {
+
+            var value = element.Element(name)?.Value;
+            return value == null
+                    ? type.IsValueType
+                        ? Activator.CreateInstance(type)
+                        : null
+                    : ConvertFromXml(value, type);
         }
 
         public static IEnumerable<T> Elements<T>(this XElement element, XName name)
             => element.Elements(name).Select(e => ConvertFromXml<T>(e.Value));
 
-        public static T? NullableElement<T>(this XElement element, XName name)
-                where T : struct {
-
-            var value = element.Element(name)?.Value;
-            return value == null ? default : ConvertFromXml<T>(value);
-        }
-
         public static T Value<T>(this XElement element) => ConvertFromXml<T>(element.Value);
 
-        private static T ConvertFromXml<T>(string value) {
-            switch (Type.GetTypeCode(typeof(T))) {
+        public static object Value(this XElement element, Type type) => ConvertFromXml(element.Value, type);
+
+        private static T ConvertFromXml<T>(string value) => (T)ConvertFromXml(value, typeof(T));
+
+        private static object ConvertFromXml(string value, Type type) {
+
+            if (type.IsValueType) {
+                type = Nullable.GetUnderlyingType(type) ?? type;
+            }
+
+            switch (Type.GetTypeCode(type)) {
 
                 case TypeCode.DateTime:
-                    return (T)(object)DateTime.ParseExact(value, "O", CultureInfo.InvariantCulture);
+                    return DateTime.ParseExact(value, "O", CultureInfo.InvariantCulture);
 
                 default:
-                    if (typeof(T).IsEnum) {
-                        return (T)Enum.Parse(typeof(T), value);
+                    if (type.IsEnum) {
+                        return Enum.Parse(type, value);
                     } else {
-                        return (T)Convert.ChangeType(value, typeof(T), CultureInfo.InvariantCulture);
+                        return Convert.ChangeType(value, type, CultureInfo.InvariantCulture);
                     }
             }
         }

@@ -7,8 +7,7 @@ using System.Xml.Linq;
 namespace TrafficManager.Persistence {
 
     internal abstract class PersistentObject<TFeature>
-            : IPersistentObject,
-                IComparable<PersistentObject<TFeature>>
+            : IPersistentObject
             where TFeature : struct {
 
         public abstract XName ElementName { get; }
@@ -81,9 +80,9 @@ namespace TrafficManager.Persistence {
 
         public abstract Type DependencyTarget { get; }
 
-        int IComparable.CompareTo(object obj) => CompareTo((PersistentObject<TFeature>)obj);
+        int IComparable.CompareTo(object obj) => CompareTo((IPersistentObject)obj);
 
-        public int CompareTo(PersistentObject<TFeature> other) {
+        public int CompareTo(IPersistentObject other) {
 
             bool thisDependsOnOther = GetDependencies()?.Contains(other.DependencyTarget) == true;
             bool otherDependsOnThis = other.GetDependencies()?.Contains(DependencyTarget) == true;

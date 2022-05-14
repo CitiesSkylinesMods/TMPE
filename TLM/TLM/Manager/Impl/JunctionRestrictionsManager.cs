@@ -18,8 +18,9 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.Util.Extensions;
     using TrafficManager.Lifecycle;
     using TrafficManager.Manager.Model;
+    using TrafficManager.Persistence;
 
-    public class JunctionRestrictionsManager
+    public partial class JunctionRestrictionsManager
         : AbstractGeometryObservingManager,
           ICustomDataManager<List<Configuration.SegmentNodeConf>>,
           IJunctionRestrictionsManager
@@ -37,7 +38,57 @@ namespace TrafficManager.Manager.Impl {
         private JunctionRestrictionsManager() {
             segmentRestrictions = new SegmentJunctionRestrictions[NetManager.MAX_SEGMENT_COUNT];
             invalidSegmentRestrictions = new SegmentJunctionRestrictions[NetManager.MAX_SEGMENT_COUNT];
+
+            GlobalPersistence.PersistentObjects.Add(new Persistence());
         }
+
+        private IEnumerable<SegmentEndPair<JunctionRestrictionsModel>> EnumerateSegmentModels() {
+
+            for (ushort segmentId = 1; segmentId < NetManager.MAX_SEGMENT_COUNT; segmentId++) {
+
+                var netSegment = segmentId.ToSegment();
+
+                if (netSegment.IsValid()
+                        && netSegment.m_startNode.ToNode().IsValid()
+                        && netSegment.m_endNode.ToNode().IsValid()
+                        && !segmentRestrictions[segmentId].IsDefault()) {
+
+                    yield return new SegmentEndPair<JunctionRestrictionsModel> {
+                        segmentId = segmentId,
+                        start = segmentRestrictions[segmentId].startNodeRestrictions.Model,
+                        end = segmentRestrictions[segmentId].endNodeRestrictions.Model,
+                    };
+                }
+            }
+        }
+
+        private void AddSegmentModel(SegmentEndPair<JunctionRestrictionsModel> model) {
+
+            AddSegmentModel(model.start, model.segmentId, true);
+            AddSegmentModel(model.end, model.segmentId, false);
+        }
+
+        private void AddSegmentModel(JunctionRestrictionsModel model, ushort segmentId, bool startNode) {
+
+            ref var segment = ref segmentId.ToSegment();
+            ref var node = ref (startNode ? ref segment.m_startNode.ToNode() : ref segment.m_endNode.ToNode());
+
+            SetFlag(JunctionRestrictionFlags.AllowUTurn, IsUturnAllowedConfigurable, SetUturnAllowed, ref node);
+            SetFlag(JunctionRestrictionFlags.AllowNearTurnOnRed, IsNearTurnOnRedAllowedConfigurable, SetNearTurnOnRedAllowed, ref node);
+            SetFlag(JunctionRestrictionFlags.AllowFarTurnOnRed, IsFarTurnOnRedAllowedConfigurable, SetFarTurnOnRedAllowed, ref node);
+            SetFlag(JunctionRestrictionFlags.AllowForwardLaneChange, IsLaneChangingAllowedWhenGoingStraightConfigurable, SetLaneChangingAllowedWhenGoingStraight, ref node);
+            SetFlag(JunctionRestrictionFlags.AllowEnterWhenBlocked, IsEnteringBlockedJunctionAllowedConfigurable, SetEnteringBlockedJunctionAllowed, ref node);
+            SetFlag(JunctionRestrictionFlags.AllowPedestrianCrossing, IsPedestrianCrossingAllowedConfigurable, SetPedestrianCrossingAllowed, ref node);
+
+            void SetFlag(JunctionRestrictionFlags property, InternalGet isConfigurable, Func<ushort, bool, bool, bool> set, ref NetNode node) {
+
+                if ((model.mask & property) != 0 && isConfigurable(segmentId, startNode, ref node)) {
+                    set(segmentId, startNode, (model.values & property) != 0);
+                }
+            }
+        }
+
+        private delegate bool InternalGet(ushort segmentId, bool startNode, ref NetNode node);
 
         private void AddInvalidSegmentJunctionRestrictions(ushort segmentId,
                                                            bool startNode,
@@ -1366,6 +1417,7 @@ namespace TrafficManager.Manager.Impl {
 
             private JunctionRestrictionFlags defaults;
 
+            public JunctionRestrictionsModel Model => model;
 
             public void ClearValue(JunctionRestrictionFlags flags) {
                 model.values &= ~flags;

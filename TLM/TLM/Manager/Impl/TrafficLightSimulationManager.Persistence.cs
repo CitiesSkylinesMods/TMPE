@@ -133,7 +133,7 @@ namespace TrafficManager.Manager.Impl {
                     if (step.CustomSegmentLights.TryGetValue(segmentId, out var lights)) {
 
                         var manualPedestrianMode = segLightsElement.Attribute<bool>(nameof(ICustomSegmentLightsModel.ManualPedestrianMode));
-                        var pedestrianLightState = segLightsElement.NullableAttribute<TrafficLightState>(nameof(ICustomSegmentLightsModel.PedestrianLightState));
+                        var pedestrianLightState = segLightsElement.Attribute<TrafficLightState?>(nameof(ICustomSegmentLightsModel.PedestrianLightState));
 
 #if DEBUGLOAD
                         Log._Debug($"Loading pedestrian light at segment {segmentId}: " +
