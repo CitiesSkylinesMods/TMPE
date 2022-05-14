@@ -16,6 +16,7 @@ namespace TrafficManager.Lifecycle {
     using System.Xml.Linq;
     using TrafficManager.Persistence;
     using System.Xml;
+    using System.IO.Compression;
 
     [UsedImplicitly]
     public class SerializableDataExtension
@@ -185,27 +186,50 @@ namespace TrafficManager.Lifecycle {
         private static void LoadDom(byte[] data) {
             try {
                 if (data?.Length > 0) {
-                    using (var memoryStream = new MemoryStream(data)) {
-                        using (var streamReader = new StreamReader(memoryStream, Encoding.UTF8)) {
 
-                            XmlReaderSettings xmlReaderSettings = new XmlReaderSettings {
-                                ProhibitDtd = false,
-                                XmlResolver = null,
-                            };
-                            using (var xmlReader = XmlReader.Create(streamReader, xmlReaderSettings))
-                                _dom = XDocument.Load(xmlReader);
+                    try {
+                        using (var memoryStream = new MemoryStream(data)) {
+                            using (var compressionStream = new GZipStream(memoryStream, CompressionMode.Decompress)) {
+                                using (var streamReader = new StreamReader(compressionStream, Encoding.UTF8)) {
 
-#if DEBUGLOAD
-                            Log._Debug("Loaded DOM:\r" + _dom.ToString());
-#endif
-
-                            _persistenceMigration = GlobalPersistence.PersistentObjects
-                                                    .Where(o => _dom.Root.Elements(o.ElementName)?.Any(e => o.CanLoad(e)) == true)
-                                                    .Select(o => o.DependencyTarget)
-                                                    .Distinct()
-                                                    .ToArray();
+                                    XmlReaderSettings xmlReaderSettings = new XmlReaderSettings {
+                                        ProhibitDtd = false,
+                                        XmlResolver = null,
+                                    };
+                                    using (var xmlReader = XmlReader.Create(streamReader, xmlReaderSettings))
+                                        _dom = XDocument.Load(xmlReader);
+                                }
+                            }
                         }
                     }
+                    catch (Exception ex) {
+
+                        Log.Error("Load DOM failed, attempting without compression. " + ex);
+
+                        using (var memoryStream = new MemoryStream(data)) {
+                            using (var streamReader = new StreamReader(memoryStream, Encoding.UTF8)) {
+
+                                XmlReaderSettings xmlReaderSettings = new XmlReaderSettings {
+                                    ProhibitDtd = false,
+                                    XmlResolver = null,
+                                };
+                                using (var xmlReader = XmlReader.Create(streamReader, xmlReaderSettings))
+                                    _dom = XDocument.Load(xmlReader);
+                            }
+                        }
+
+                        Log.Info("Load DOM without compression succeeded.");
+
+                    }
+#if DEBUGLOAD
+                    Log._Debug("Loaded DOM:\r" + _dom.ToString());
+#endif
+
+                    _persistenceMigration = GlobalPersistence.PersistentObjects
+                                            .Where(o => _dom.Root.Elements(o.ElementName)?.Any(e => o.CanLoad(e)) == true)
+                                            .Select(o => o.DependencyTarget)
+                                            .Distinct()
+                                            .ToArray();
                 } else {
                     Log.Info("No DOM to load!");
                 }
@@ -507,20 +531,51 @@ namespace TrafficManager.Lifecycle {
                     result.LogMessage($"SaveData for DOM element {o.ElementName} reported {result}.");
                 }
 
-                using (var memoryStream = new MemoryStream()) {
-                    using (var streamWriter = new StreamWriter(memoryStream, Encoding.UTF8)) {
-
 #if DEBUGSAVE
-                        Log._Debug("Saving DOM:\r" + _dom.ToString());
+                Log._Debug("Saving DOM:\r" + _dom.ToString());
 #endif
 
-                        _dom.Save(streamWriter);
+                try {
+                    using (var memoryStream = new MemoryStream()) {
+
+                        using (var compressionStream = new GZipStream(memoryStream, CompressionMode.Compress, true)) {
+
+                            using (var streamWriter = new StreamWriter(compressionStream, Encoding.UTF8)) {
+
+                                _dom.Save(streamWriter);
+                            }
+                        }
 
                         memoryStream.Position = 0;
                         Log.Info($"Save DOM byte length {memoryStream.Length}");
 
                         SerializableData.SaveData(DOM_ID, memoryStream.ToArray());
                     }
+                }
+                catch (Exception ex) {
+
+                    Log.Error("Save DOM failed, attempting without compression. " + ex);
+
+                    try {
+                        SerializableData.EraseData(DOM_ID);
+                    }
+                    catch {
+                    }
+
+                    using (var memoryStream = new MemoryStream()) {
+                        using (var streamWriter = new StreamWriter(memoryStream, Encoding.UTF8)) {
+
+                            _dom.Save(streamWriter);
+
+                            memoryStream.Position = 0;
+                            Log.Info($"Save DOM byte length {memoryStream.Length}");
+
+                            SerializableData.SaveData(DOM_ID, memoryStream.ToArray());
+                        }
+                    }
+
+                    Log.Info("Save DOM without compression succeeded.");
+
                 }
             }
             catch (Exception ex) {
