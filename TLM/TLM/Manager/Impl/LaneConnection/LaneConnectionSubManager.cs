@@ -368,6 +368,7 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
             ushort sourceSegmentId = sourceLaneId.ToLane().m_segment;
             ushort targetSegmentId = targetLaneId.ToLane().m_segment;
             ushort nodeId = sourceSegmentId.ToSegment().GetNodeId(sourceStartNode);
+            ref NetNode netNode = ref nodeId.ToNode();
 
             // check if source lane goes toward the node
             // and target lane goes away from the node.
@@ -422,8 +423,7 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
                     true);
             }
 
-            RoutingManager.Instance.RequestRecalculation(sourceSegmentId, false);
-            RoutingManager.Instance.RequestRecalculation(targetSegmentId, false);
+            RoutingManager.Instance.RequestNodeRecalculation(ref netNode);
 
             if (TMPELifecycle.Instance.MayPublishSegmentChanges()) {
                 ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
