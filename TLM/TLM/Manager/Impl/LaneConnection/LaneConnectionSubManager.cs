@@ -374,10 +374,11 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
             static bool IsDirectionValid(ref NetLane lane, NetInfo.Lane laneInfo, ushort nodeId, bool source) {
                 bool invert = lane.m_segment.ToSegment().m_flags.IsFlagSet(NetSegment.Flags.Invert);
                 bool startNode = lane.IsStartNode(nodeId);
+                var dir = laneInfo.m_finalDirection;
                 if (source ^ startNode ^ invert) {
-                    return laneInfo.IsGoingForward();
+                    return dir.IsFlagSet(NetInfo.Direction.Forward);
                 } else {
-                    return laneInfo.IsGoingBackward();
+                    return dir.IsFlagSet(NetInfo.Direction.Backward);
                 }
             }
             canConnect =
