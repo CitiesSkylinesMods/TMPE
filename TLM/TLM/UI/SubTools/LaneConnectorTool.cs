@@ -1413,7 +1413,7 @@ namespace TrafficManager.UI.SubTools {
 
         private static bool CanConnect(LaneEnd source, LaneEnd target, LaneEndTransitionGroup groups, out bool acute) {
             acute = true;
-            bool canConnect = target.LaneInfo.CheckType(source.LaneInfo.m_laneType, source.LaneInfo.m_vehicleType);
+            bool canConnect = (source.LaneInfo.m_vehicleType & target.LaneInfo.m_vehicleType) != 0;
             if (!canConnect) {
                 return false;
             }
