@@ -102,7 +102,8 @@ namespace TrafficManager.UI.WhatsNew {
                     && lineKeyword == MarkupKeyword.VersionStart) {
 
                     var changelog = new Changelog() {
-                        Version = new Version(text),
+                        // version text can be 1.2.3.4 or 1.2.3.4-hotfix-<number>
+                        Version = new Version(text.Split('-')[0]),
                     };
                     var items = new List<Changelog.Item>();
 
