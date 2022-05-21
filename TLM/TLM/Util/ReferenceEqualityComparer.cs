@@ -8,6 +8,10 @@ using System.Text;
 namespace TrafficManager.Util {
     internal sealed class ReferenceEqualityComparer<T> : IEqualityComparer<T>, IEqualityComparer {
 
+        public static ReferenceEqualityComparer<T> Instance { get; } = new ReferenceEqualityComparer<T>();
+
+        private ReferenceEqualityComparer() { }
+
         public bool Equals(T x, T y) => ReferenceEquals(x, y);
 
         public int GetHashCode(T obj) => RuntimeHelpers.GetHashCode(obj);

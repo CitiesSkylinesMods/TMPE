@@ -28,8 +28,8 @@ namespace TrafficManager.Lifecycle {
         private const string VERSION_INFO_DATA_ID = "TrafficManager_VersionInfo_v1.0";
 
         private static ISerializableData SerializableData => SimulationManager.instance.m_SerializableDataWrapper;
-        private static Dictionary<IPersistentObject, XDocument> _domCollection = new Dictionary<IPersistentObject, XDocument>(new ReferenceEqualityComparer<IPersistentObject>());
-        private static HashSet<Type> _persistenceMigration = new HashSet<Type>(new ReferenceEqualityComparer<Type>());
+        private static Dictionary<IPersistentObject, XDocument> _domCollection = new Dictionary<IPersistentObject, XDocument>(ReferenceEqualityComparer<IPersistentObject>.Instance);
+        private static HashSet<Type> _persistenceMigration = new HashSet<Type>(ReferenceEqualityComparer<Type>.Instance);
         private static Configuration _configuration;
         private static VersionInfoConfiguration _versionInfoConfiguration;
 
