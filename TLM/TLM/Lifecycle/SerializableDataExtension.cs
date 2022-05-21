@@ -26,11 +26,10 @@ namespace TrafficManager.Lifecycle {
 
         private const string DATA_ID = "TrafficManager_v1.0";
         private const string VERSION_INFO_DATA_ID = "TrafficManager_VersionInfo_v1.0";
-        private const string DOM_ID = "TrafficManager_Document_v1.0";
 
         private static ISerializableData SerializableData => SimulationManager.instance.m_SerializableDataWrapper;
-        private static XDocument _dom;
-        private static Type[] _persistenceMigration;
+        private static Dictionary<IPersistentObject, XDocument> _domCollection = new Dictionary<IPersistentObject, XDocument>(new ReferenceEqualityComparer<IPersistentObject>());
+        private static HashSet<Type> _persistenceMigration = new HashSet<Type>(new ReferenceEqualityComparer<Type>());
         private static Configuration _configuration;
         private static VersionInfoConfiguration _versionInfoConfiguration;
 
@@ -74,11 +73,10 @@ namespace TrafficManager.Lifecycle {
             }
 
             try {
-                byte[] data = SerializableData.LoadData(DOM_ID);
-                LoadDom(data);
+                LoadDomCollection();
             }
             catch (Exception e) {
-                Log.Error($"OnLoadData: Error while deserializing container collection (old savegame?): {e}");
+                Log.Error($"OnLoadData: Error while loading DOM collection: {e}");
             }
 
             bool loadedData = false;
@@ -183,85 +181,97 @@ namespace TrafficManager.Lifecycle {
             }
         }
 
-        private static void LoadDom(byte[] data) {
-            try {
-                if (data?.Length > 0) {
+        private static void LoadDomCollection() {
 
-                    try {
-                        using (var memoryStream = new MemoryStream(data)) {
-                            using (var compressionStream = new GZipStream(memoryStream, CompressionMode.Decompress)) {
-                                using (var streamReader = new StreamReader(compressionStream, Encoding.UTF8)) {
+            _domCollection.Clear();
+            _persistenceMigration.Clear();
+
+            foreach (var po in GlobalPersistence.PersistentObjects) {
+
+                byte[] data;
+                try {
+                    data = SerializableData.LoadData(po.DependencyTarget.FullName);
+                }
+                catch {
+                    Log.Info($"No DOM found for {po.DependencyTarget.Name}");
+                    data = null;
+                }
+
+                try {
+                    if (data?.Length > 0) {
+
+                        Log.Info($"Attempting to load DOM for {po.DependencyTarget.Name}");
+
+                        try {
+                            using (var memoryStream = new MemoryStream(data)) {
+                                using (var compressionStream = new GZipStream(memoryStream, CompressionMode.Decompress)) {
+                                    using (var streamReader = new StreamReader(compressionStream, Encoding.UTF8)) {
+
+                                        XmlReaderSettings xmlReaderSettings = new XmlReaderSettings {
+                                            ProhibitDtd = false,
+                                            XmlResolver = null,
+                                        };
+                                        using (var xmlReader = XmlReader.Create(streamReader, xmlReaderSettings))
+                                            _domCollection[po] = XDocument.Load(xmlReader);
+                                    }
+                                }
+                            }
+                        }
+                        catch (Exception ex) {
+
+                            Log.Error("Load DOM failed, attempting without compression. " + ex);
+
+                            using (var memoryStream = new MemoryStream(data)) {
+                                using (var streamReader = new StreamReader(memoryStream, Encoding.UTF8)) {
 
                                     XmlReaderSettings xmlReaderSettings = new XmlReaderSettings {
                                         ProhibitDtd = false,
                                         XmlResolver = null,
                                     };
                                     using (var xmlReader = XmlReader.Create(streamReader, xmlReaderSettings))
-                                        _dom = XDocument.Load(xmlReader);
+                                        _domCollection[po] = XDocument.Load(xmlReader);
                                 }
                             }
-                        }
-                    }
-                    catch (Exception ex) {
 
-                        Log.Error("Load DOM failed, attempting without compression. " + ex);
+                            Log.Info("Load DOM without compression succeeded.");
 
-                        using (var memoryStream = new MemoryStream(data)) {
-                            using (var streamReader = new StreamReader(memoryStream, Encoding.UTF8)) {
-
-                                XmlReaderSettings xmlReaderSettings = new XmlReaderSettings {
-                                    ProhibitDtd = false,
-                                    XmlResolver = null,
-                                };
-                                using (var xmlReader = XmlReader.Create(streamReader, xmlReaderSettings))
-                                    _dom = XDocument.Load(xmlReader);
-                            }
                         }
 
-                        Log.Info("Load DOM without compression succeeded.");
-
-                    }
+                        if (_domCollection[po]?.Root?.Elements(po.ElementName)?.Any(e => po.CanLoad(e)) == true)
+                            _persistenceMigration.Add(po.DependencyTarget);
 #if DEBUGLOAD
-                    Log._Debug("Loaded DOM:\r" + _dom.ToString());
+                        Log._Debug($"Loaded DOM for {po.DependencyTarget.Name}: {_domCollection[po]}\r");
 #endif
-
-                    _persistenceMigration = GlobalPersistence.PersistentObjects
-                                            .Where(o => _dom.Root.Elements(o.ElementName)?.Any(e => o.CanLoad(e)) == true)
-                                            .Select(o => o.DependencyTarget)
-                                            .Distinct()
-                                            .ToArray();
-                } else {
-                    Log.Info("No DOM to load!");
+                    }
                 }
-            }
-            catch (Exception ex) {
-                Log.Error($"Error loading DOM: {ex}");
-                Log.Info(ex.StackTrace);
-                throw new ApplicationException("An error occurred while loading");
+                catch (Exception ex) {
+                    Log.Error($"Error loading DOM for {po.DependencyTarget.Name}: {ex}");
+                    Log.Info(ex.StackTrace);
+                }
             }
         }
 
         private static void LoadDomElements() {
+
             try {
-                if (_dom?.Root.HasElements == true && GlobalPersistence.PersistentObjects.Count > 0) {
-                    foreach (var o in GlobalPersistence.PersistentObjects.OrderBy(o => o)) {
-                        var elements = _dom.Root.Elements(o.ElementName)?.Where(c => o.CanLoad(c));
-                        if (elements?.Any() == true) {
-                            if (elements.Count() > 1) {
-                                Log.Error($"More than one compatible element {o.ElementName} was found. Using the first one.");
-                            }
-                            try {
-                                var result = o.LoadData(elements.First(), new PersistenceContext { Version = Version });
-                                result.LogMessage($"LoadData for DOM element {o.ElementName} reported {result}.");
-                            }
-                            catch (Exception ex) {
-                                Log.Error($"Error loading DOM element {o.ElementName}: {ex}");
-                                Log.Info(ex.StackTrace);
-                            }
+                foreach (var e in _domCollection.OrderBy(e => e.Key)) {
+                    var po = e.Key;
+                    var dom = e.Value;
+
+                    var elements = dom.Root.Elements(po.ElementName)?.Where(c => po.CanLoad(c));
+                    if (elements?.Any() == true) {
+                        if (elements.Count() > 1) {
+                            Log.Error($"More than one compatible element {po.ElementName} was found for {po.DependencyTarget.Name}. Using the first one.");
+                        }
+                        try {
+                            var result = po.LoadData(elements.First(), new PersistenceContext { Version = Version });
+                            result.LogMessage($"LoadData of DOM element {po.ElementName} for {po.DependencyTarget.Name} reported {result}.");
+                        }
+                        catch (Exception ex) {
+                            Log.Error($"Error loading DOM element {po.ElementName} for {po.DependencyTarget.Name}: {ex}");
+                            Log.Info(ex.StackTrace);
                         }
                     }
-                } else {
-                    Log.Info("No DOM elements to load!");
                 }
             }
             catch (Exception ex) {
@@ -523,64 +533,68 @@ namespace TrafficManager.Lifecycle {
 
         private static void SaveDom(ref bool success) {
 
-            try {
-                _dom = new XDocument();
-                _dom.Add(new XElement("TmpSaveData"));
-                foreach (var o in GlobalPersistence.PersistentObjects.OrderBy(o => o)) {
-                    var result = o.SaveData(_dom.Root, new PersistenceContext { Version = Version });
-                    result.LogMessage($"SaveData for DOM element {o.ElementName} reported {result}.");
-                }
-
-#if DEBUGSAVE
-                Log._Debug("Saving DOM:\r" + _dom.ToString());
-#endif
+            foreach (var po in GlobalPersistence.PersistentObjects.OrderBy(o => o)) {
 
                 try {
-                    using (var memoryStream = new MemoryStream()) {
+                    var dom = new XDocument();
+                    dom.Add(new XElement(po.DependencyTarget.Name));
 
-                        using (var compressionStream = new GZipStream(memoryStream, CompressionMode.Compress, true)) {
+                    var result = po.SaveData(dom.Root, new PersistenceContext { Version = Version });
 
-                            using (var streamWriter = new StreamWriter(compressionStream, Encoding.UTF8)) {
+                    result.LogMessage($"SaveData of DOM element {po.ElementName} for {po.DependencyTarget.Name} reported {result}.");
 
-                                _dom.Save(streamWriter);
+#if DEBUGSAVE
+                    Log._Debug($"Saving DOM for {po.DependencyTarget.Name}: {dom}");
+#endif
+
+                    try {
+                        using (var memoryStream = new MemoryStream()) {
+
+                            using (var compressionStream = new GZipStream(memoryStream, CompressionMode.Compress, true)) {
+
+                                using (var streamWriter = new StreamWriter(compressionStream, Encoding.UTF8)) {
+
+                                    dom.Save(streamWriter);
+                                }
+                            }
+
+                            memoryStream.Position = 0;
+                            Log.Info($"Save DOM for {po.DependencyTarget.Name} byte length {memoryStream.Length}");
+
+                            SerializableData.SaveData(po.DependencyTarget.FullName, memoryStream.ToArray());
+                        }
+                    }
+                    catch (Exception ex) {
+
+                        Log.Error("Save DOM failed, attempting without compression. " + ex);
+
+                        try {
+                            SerializableData.EraseData(po.DependencyTarget.FullName);
+                        }
+                        catch {
+                        }
+
+                        using (var memoryStream = new MemoryStream()) {
+                            using (var streamWriter = new StreamWriter(memoryStream, Encoding.UTF8)) {
+
+                                dom.Save(streamWriter);
+
+                                memoryStream.Position = 0;
+                                Log.Info($"Save DOM for {po.DependencyTarget.Name} byte length {memoryStream.Length}");
+
+                                SerializableData.SaveData(po.DependencyTarget.FullName, memoryStream.ToArray());
                             }
                         }
 
-                        memoryStream.Position = 0;
-                        Log.Info($"Save DOM byte length {memoryStream.Length}");
+                        Log.Info("Save DOM without compression succeeded.");
 
-                        SerializableData.SaveData(DOM_ID, memoryStream.ToArray());
                     }
                 }
                 catch (Exception ex) {
 
-                    Log.Error("Save DOM failed, attempting without compression. " + ex);
-
-                    try {
-                        SerializableData.EraseData(DOM_ID);
-                    }
-                    catch {
-                    }
-
-                    using (var memoryStream = new MemoryStream()) {
-                        using (var streamWriter = new StreamWriter(memoryStream, Encoding.UTF8)) {
-
-                            _dom.Save(streamWriter);
-
-                            memoryStream.Position = 0;
-                            Log.Info($"Save DOM byte length {memoryStream.Length}");
-
-                            SerializableData.SaveData(DOM_ID, memoryStream.ToArray());
-                        }
-                    }
-
-                    Log.Info("Save DOM without compression succeeded.");
-
+                    Log.Error($"Unexpected error while saving DOM for {po.DependencyTarget.Name}: {ex}");
+                    success = false;
                 }
-            }
-            catch (Exception ex) {
-                Log.Error("Unexpected error while saving DOM: " + ex);
-                success = false;
             }
         }
     }
