@@ -29,6 +29,17 @@ This changelog includes all versions and major variants of the mod going all the
 
 > Date format: dd/mm/yyyy
 
+#### TM:PE V11.6.6.0 TEST, 22/05/2022
+
+- [Meta] This release adds a new language, updates translations, and improves lane routing
+- [New] Veitnamese translation #1551 (DucAnhLam)
+- [Updated] Separate road and track lane routing #1550 #1546 #1545 #354 (kianzarrin)
+- [Updated] Translations for multiple languages #1551 #1344 (Nguyễn Tài Đức, OldEj, AduitSSH, Chamëleon, 문주원, krzychu124, shg166, John Lok Ho, Márcio Saeger, DucAnhLam, DNSE, Arne Peirs, Neoone, Fatih YILDIRIM, Zeldslayer, GiorgioHerbie, krzychu124)
+
+#### TM:PE V11.6.5.2-hotfix-1 TEST, 08/05/2022
+
+- [Fixed] Simulation Accuracy setting regression #1560 (krzychu124)
+
 #### TM:PE V11.6.5.2 TEST, 27/04/2022
 
 - [Meta] This release improves Lane Routing (UI, trams, trains, etc.), Parking AI (electric cars), and icon themes.
