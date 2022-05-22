@@ -3,14 +3,17 @@ namespace TrafficManager.API {
     using TrafficManager.API.Manager;
     using TrafficManager.API.Notifier;
     using System.Linq;
+    using TrafficManager.API.UI;
 
     public static class Implementations {
         private static Type constantsType_;
         private static IManagerFactory managerFactory_;
         private static INotifier notifier_;
+        private static IRoadSignTheme activeTheme_;
 
         public static IManagerFactory ManagerFactory => managerFactory_ ??= GetImplementation<IManagerFactory>();
         public static INotifier Notifier => notifier_ ??= GetImplementation<INotifier>();
+        public static IRoadSignTheme ActiveTheme => activeTheme_ ??= GetImplementation<IRoadSignTheme>();
 
         private static T GetImplementation<T>()
             where T : class {

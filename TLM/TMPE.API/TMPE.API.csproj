@@ -165,6 +165,7 @@
     <Compile Include="Traffic\Enums\VehicleRestrictionsMode.cs" />
     <Compile Include="Traffic\ISegmentEnd.cs" />
     <Compile Include="Traffic\ISegmentEndId.cs" />
+    <Compile Include="UI\IRoadSignTheme.cs" />
     <Compile Include="Util\IObservable.cs" />
     <Compile Include="Util\IObserver.cs" />
   </ItemGroup>

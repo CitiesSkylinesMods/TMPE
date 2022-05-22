@@ -1,10 +1,11 @@
-﻿namespace TrafficManager.UI.Textures {
+namespace TrafficManager.UI.Textures {
     using System;
     using System.Collections.Generic;
     using CSUtil.Commons;
     using JetBrains.Annotations;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.API.Traffic.Enums;
+    using TrafficManager.API.UI;
     using TrafficManager.State;
     using TrafficManager.UI.SubTools;
     using TrafficManager.Util;
@@ -15,7 +16,7 @@
     /// Defines one theme for road signs. All themes are accessible via, and stored in
     /// <see cref="RoadSignThemeManager"/>.
     /// </summary>
-    public class RoadSignTheme {
+    public class RoadSignTheme : IRoadSignTheme {
         public enum OtherRestriction {
             Crossing,
             EnterBlockedJunction,
@@ -147,6 +148,17 @@
                        ? this.otherRestrictions_[type].restrict
                        : this.ParentTheme.GetOtherRestriction(type, allow: false);
         }
+
+        public Texture2D Crossing(bool allow) => GetOtherRestriction(OtherRestriction.Crossing, allow);
+        public Texture2D EnterBlockedJunction(bool allow) => GetOtherRestriction(OtherRestriction.EnterBlockedJunction, allow);
+        public Texture2D LaneChange(bool allow) => GetOtherRestriction(OtherRestriction.LaneChange, allow);
+        public Texture2D LeftOnRed(bool allow) => GetOtherRestriction(OtherRestriction.LeftOnRed, allow);
+        public Texture2D RightOnRed(bool allow) => GetOtherRestriction(OtherRestriction.RightOnRed, allow);
+        public Texture2D UTurn(bool allow) => GetOtherRestriction(OtherRestriction.UTurn, allow);
+        public Texture2D TrafficLights(bool enabled) =>
+            enabled ? TrafficLightTextures.Instance.TrafficLightEnabled : TrafficLightTextures.Instance.TrafficLightDisabled;
+        public Texture2D TimedTrafficLights(bool paused) =>
+            paused ? TrafficLightTextures.Instance.ClockPause : TrafficLightTextures.Instance.TrafficLightEnabledTimed;
 
         public RoadSignTheme Load(bool whiteTexture = false) {
             if (this.AttemptedToLoad) {
