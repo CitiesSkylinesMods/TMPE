@@ -28,6 +28,8 @@ namespace TrafficManager.Manager.Impl {
             Log.NotImpl("InternalPrintDebugInfo for TrafficLightManager");
         }
 
+        public bool SetTrafficLight(ushort nodeId, bool enabled) => SetTrafficLight(nodeId, enabled, ref nodeId.ToNode());
+
         // TODO: Consider replacing out error code with Result<> or VoidResult<>
         public bool SetTrafficLight(ushort nodeId, bool flag, ref NetNode node) {
             return SetTrafficLight(nodeId, flag, ref node, out ToggleTrafficLightError _);
@@ -125,6 +127,14 @@ namespace TrafficManager.Manager.Impl {
 
         public bool ToggleTrafficLight(ushort nodeId, ref NetNode node, out ToggleTrafficLightError reason) {
             return SetTrafficLight(nodeId, !HasTrafficLight(nodeId, ref node), ref node, out reason);
+        }
+
+        public bool CanSetTrafficLight(ushort nodeId, bool enabled) {
+            return CanToggleTrafficLight(
+                nodeId,
+                enabled,
+                ref nodeId.ToNode(),
+                out _);
         }
 
         public bool CanToggleTrafficLight(ushort nodeId,
@@ -241,6 +251,8 @@ namespace TrafficManager.Manager.Impl {
 
             return ret;
         }
+
+        public bool HasTrafficLight(ushort nodeId) => HasTrafficLight(nodeId, ref nodeId.ToNode());
 
         public bool HasTrafficLight(ushort nodeId, ref NetNode node) {
             return node.IsValid()
