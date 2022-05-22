@@ -1,3 +1,36 @@
+[Version] 11.6.5.3
+[Released] May 22nd 2022
+[Link] tmpe-v11653-test-22052022
+[Mod] Stable version released
+[New] Vietnamese Translation (DucAnhLam)
+[Updated] Translations update #1551 (aubergine18)
+[Fixed] Regression with version naming #1568 (krzychu124)
+[/Version]
+
+[Version] 11.6.5.3
+[Released] May 22nd 2022
+[Stable]
+[Link] tmpe-v11653-stable-22052022
+[New] Chinese road sign theme #1523 (kvakvs, lokpro, TianQiBuTian)
+[New] Overlays mod option to show default speed when overriding segment/lane speeds #1404 (aubergine18)
+[New] Directional lane connectors #1492 #1214 #1211 (kianzarrin, Chamëleon)
+[New] `Disable Despawn` feature now has vehicle-type filters #1465 #1441 #1434 (Marconius6, lokpro, krzychu124)
+[New] Timed Traffic Lights now available in Map and Scenario editors #1425 #959 (aubergine18)
+[New] Vietnamese Translation (DucAnhLam)
+[Mod] API: Mods can now use TMPE.API.dll alone, without referencing TrafficManager.dll #1448 (kianzarrin)
+[Mod] Compatible: `Reversible Tram AI` full compatibility #1386 #1353 (sway2020)
+[Mod] Compatible: `Supply Chain Coloring` workshop version only #1390 (aubergine18)
+[Mod] Compatible: `Transfer Broker BETA` workshop version only #1390 (aubergine18)
+[Fixed] Parking AI: Residents ignoring `Electric Cars` district policy #1543 #1527 (krzychu124)
+[Fixed] Asset Editor crash when saving asset with no segments #1505 #1313 (krzychu124, kianzarrin)
+[Fixed] Trams unable to turn due to lane arrows #1501 #1053 (WildQuoll, RLemonache, kianzarrin)
+[Fixed] UI windows/overlays not consuming mouse events #1443 #934 #749 (somethingstarted, MacSergey, krzychu124)
+[Updated] Speed Limits: Always use themed icons in segment/lane modes #1404 (aubergine18)
+[Updated] Use game-defined elevation keymapping to select under/over-ground views #1454 #1326 (krzychu124)
+[Updated] Multiple icons updated, fallback theme, etc. #1523 (kvakvs)
+[Updated] Translations update #1551 (aubergine18)
+[/Version]
+
 [Version] 11.6.5.2-hotfix-1
 [Released] May 8th 2022
 [Link] tmpe-v11652-hotfix-1-test-08052022
