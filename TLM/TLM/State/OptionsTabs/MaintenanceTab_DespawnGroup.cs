@@ -65,6 +65,11 @@ namespace TrafficManager.State {
                 Handler = OnDespawnerChange,
             };
 
+        public static ActionButton DespawnButton = new () {
+            Label = "Despawn.Button:Despawn",
+            Handler = OnDespawnButtonClick,
+        };
+
         private static readonly Dictionary<CheckboxOption, ExtVehicleType> Despawners = new ()
         {
             { DespawnerRoad,
@@ -107,7 +112,7 @@ namespace TrafficManager.State {
         internal static void AddUI(UIHelperBase tab) {
             if (!TMPELifecycle.PlayMode) return;
 
-            var group = tab.AddGroup(T("Maintenance.Group:Despawn"));
+            var group = tab.AddGroup(T("Group:Despawn"));
 
             DespawnerAll.AddUI(group);
 
@@ -116,7 +121,7 @@ namespace TrafficManager.State {
                 despawner.Key.AddUI(group);
             }
 
-            group.AddButton(T("Maintenance.Despawn.Button:Despawn"), OnDespawnButtonClick);
+            DespawnButton.AddUI(group);
         }
 
         private static string T(string text) {
