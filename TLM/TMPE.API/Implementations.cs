@@ -9,11 +9,11 @@ namespace TrafficManager.API {
         private static Type constantsType_;
         private static IManagerFactory managerFactory_;
         private static INotifier notifier_;
-        private static IRoadSignTheme activeTheme_;
+        private static IUIFactory uiFactory_;
 
         public static IManagerFactory ManagerFactory => managerFactory_ ??= GetImplementation<IManagerFactory>();
         public static INotifier Notifier => notifier_ ??= GetImplementation<INotifier>();
-        public static IRoadSignTheme ActiveTheme => activeTheme_ ??= GetImplementation<IRoadSignTheme>();
+        public static IUIFactory ActiveTheme => uiFactory_ ??= GetImplementation<IUIFactory>();
 
         private static T GetImplementation<T>()
             where T : class {

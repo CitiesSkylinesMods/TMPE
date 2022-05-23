@@ -5,17 +5,17 @@ namespace TrafficManager.API.UI {
     /// <summary>
     /// gets the texture for overlay sprite for each traffic rule according to the current theme.
     /// </summary>
-    public interface IRoadSignTheme {
-        Texture2D Crossing(bool allowewd);
-        Texture2D EnterBlockedJunction(bool allowewd);
-        Texture2D LaneChange(bool allowewd);
-        Texture2D LeftOnRed(bool allowewd);
-        Texture2D RightOnRed(bool allowewd);
-        Texture2D UTurn(bool allowewd);
+    public interface ITheme {
+        Texture2D JunctionRestriction(JunctionRestrictionRules rule, bool allowed);
+
+        Texture2D Parking(bool allowed);
+
         Texture2D Priority(PriorityType p);
-        Texture2D Parking(bool p);
+
         Texture2D VehicleRestriction(ExtVehicleType type, bool allow);
+
         Texture2D TrafficLights(bool enabled);
+
         Texture2D TimedTrafficLights(bool paused);
     }
 }

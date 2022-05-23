@@ -37,8 +37,9 @@ namespace TrafficManager {
 
         public static IManagerFactory ManagerFactory => Manager.Impl.ManagerFactory.Instance;
 
+        public static IUIFactory UIFactory => UI.UIFactory.Instance;
+
         public static INotifier Notifier => TrafficManager.Notifier.Instance;
 
-        public static IRoadSignTheme ActiveTheme => RoadSignThemeManager.ActiveTheme;
     }
 }

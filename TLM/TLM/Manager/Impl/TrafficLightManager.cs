@@ -28,8 +28,6 @@ namespace TrafficManager.Manager.Impl {
             Log.NotImpl("InternalPrintDebugInfo for TrafficLightManager");
         }
 
-        public bool SetTrafficLight(ushort nodeId, bool enabled) => SetTrafficLight(nodeId, enabled, ref nodeId.ToNode());
-
         // TODO: Consider replacing out error code with Result<> or VoidResult<>
         public bool SetTrafficLight(ushort nodeId, bool flag, ref NetNode node) {
             return SetTrafficLight(nodeId, flag, ref node, out ToggleTrafficLightError _);
@@ -121,6 +119,8 @@ namespace TrafficManager.Manager.Impl {
             }
         }
 
+        public bool ToggleTrafficLight(ushort nodeId) => ToggleTrafficLight(nodeId, ref nodeId.ToNode());
+
         public bool ToggleTrafficLight(ushort nodeId, ref NetNode node) {
             return SetTrafficLight(nodeId, !HasTrafficLight(nodeId, ref node), ref node);
         }
@@ -129,11 +129,13 @@ namespace TrafficManager.Manager.Impl {
             return SetTrafficLight(nodeId, !HasTrafficLight(nodeId, ref node), ref node, out reason);
         }
 
-        public bool CanSetTrafficLight(ushort nodeId, bool enabled) {
-            return CanToggleTrafficLight(
+        public bool CanToggleTL(ushort nodeId) {
+            ref NetNode netNode = ref nodeId.ToNode();
+            return netNode.IsValid() &&
+                CanToggleTrafficLight(
                 nodeId,
-                enabled,
-                ref nodeId.ToNode(),
+                HasTrafficLight(nodeId, ref netNode),
+                ref netNode,
                 out _);
         }
 
@@ -252,7 +254,19 @@ namespace TrafficManager.Manager.Impl {
             return ret;
         }
 
-        public bool HasTrafficLight(ushort nodeId) => HasTrafficLight(nodeId, ref nodeId.ToNode());
+        public TrafficLightType GetTrafficLight(ushort nodeId) {
+            if (!HasTrafficLight(nodeId, ref nodeId.ToNode())) {
+                return TrafficLightType.None;
+            } else if (TrafficLightSimulationManager.Instance.HasManualSimulation(nodeId)) {
+                return TrafficLightType.Manual;
+            } else if (TrafficLightSimulationManager.Instance.HasActiveTimedSimulation(nodeId)) {
+                return TrafficLightType.TimedScript;
+            } else if (TrafficLightSimulationManager.Instance.HasTimedSimulation(nodeId)) {
+                return TrafficLightType.Paused;
+            } else {
+                return TrafficLightType.Vanilla;
+            }
+        }
 
         public bool HasTrafficLight(ushort nodeId, ref NetNode node) {
             return node.IsValid()
