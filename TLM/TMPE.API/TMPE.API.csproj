@@ -134,6 +134,7 @@
     <Compile Include="Traffic\Data\SpeedValue.cs" />
     <Compile Include="Traffic\Data\TurnOnRedSegments.cs" />
     <Compile Include="Traffic\Enums\CarUsagePolicy.cs" />
+    <Compile Include="Traffic\Enums\TrafficLightType.cs" />
     <Compile Include="Traffic\Enums\ExtParkingSpaceLocation.cs" />
     <Compile Include="Traffic\Enums\ExtPathMode.cs" />
     <Compile Include="Traffic\Enums\ExtPathState.cs" />

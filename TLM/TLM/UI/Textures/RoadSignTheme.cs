@@ -150,24 +150,37 @@ namespace TrafficManager.UI.Textures {
         }
 
         public Texture2D JunctionRestriction(JunctionRestrictionRules rule, bool allowed) {
+            bool rht = Shortcuts.RHT;
             switch (rule) {
                 case JunctionRestrictionRules.AllowPedestrianCrossing:
                     return GetOtherRestriction(OtherRestriction.Crossing, allowed);
                 case JunctionRestrictionRules.Uturn:
-                    return GetOtherRestriction(OtherRestriction.Crossing, allowed);
-                case JunctionRestrictionRules.AllowPedestrianCrossing:
-                    return GetOtherRestriction(OtherRestriction.Crossing, allowed);
-                case JunctionRestrictionRules.AllowPedestrianCrossing:
-                    return GetOtherRestriction(OtherRestriction.Crossing, allowed);
-                case JunctionRestrictionRules.AllowPedestrianCrossing:
-                    return GetOtherRestriction(OtherRestriction.Crossing, allowed);
+                    return GetOtherRestriction(OtherRestriction.UTurn, allowed);
+                case JunctionRestrictionRules.EnterWhenBlocked:
+                    return GetOtherRestriction(OtherRestriction.EnterBlockedJunction, allowed);
+                case JunctionRestrictionRules.ForwardLaneChange:
+                    return GetOtherRestriction(OtherRestriction.LaneChange, allowed);
+                case JunctionRestrictionRules.FarTurnOnRed when rht:
+                case JunctionRestrictionRules.NearTurnOnRed when !rht:
+                    return GetOtherRestriction(OtherRestriction.LeftOnRed, allowed);
+                case JunctionRestrictionRules.NearTurnOnRed when rht:
+                case JunctionRestrictionRules.FarTurnOnRed when !rht:
+                    return GetOtherRestriction(OtherRestriction.RightOnRed, allowed);
+                default:
+                    Log.Error($"could not get texture for {rule}.");
+                    return null;
             }
         }
 
-        public Texture2D TrafficLights(bool enabled) =>
-            enabled ? TrafficLightTextures.Instance.TrafficLightEnabled : TrafficLightTextures.Instance.TrafficLightDisabled;
-        public Texture2D TimedTrafficLights(bool paused) =>
-            paused ? TrafficLightTextures.Instance.ClockPause : TrafficLightTextures.Instance.TrafficLightEnabledTimed;
+        public Texture2D TrafficLights(TrafficLightType type) {
+            return type switch {
+                TrafficLightType.None => TrafficLightTextures.Instance.TrafficLightDisabled,
+                TrafficLightType.Vanilla => TrafficLightTextures.Instance.TrafficLightEnabled,
+                TrafficLightType.Manual => TrafficLightTextures.Instance.TrafficLightEnabled,
+                TrafficLightType.Paused => TrafficLightTextures.Instance.TrafficLightEnabledTimed,
+                TrafficLightType.TimedScript => TrafficLightTextures.Instance.TrafficLightEnabledTimed,
+            };
+        }
 
         public RoadSignTheme Load(bool whiteTexture = false) {
             if (this.AttemptedToLoad) {

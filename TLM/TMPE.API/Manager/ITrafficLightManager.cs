@@ -18,12 +18,4 @@ namespace TrafficManager.API.Manager {
         /// </summary>
         bool ToggleTrafficLight(ushort nodeId);
     }
-
-    public enum TrafficLightType {
-        None,
-        Vanilla,
-        Manual,
-        Paused,
-        TimedScript,
-    }
 }

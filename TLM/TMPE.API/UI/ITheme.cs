@@ -14,8 +14,6 @@ namespace TrafficManager.API.UI {
 
         Texture2D VehicleRestriction(ExtVehicleType type, bool allow);
 
-        Texture2D TrafficLights(bool enabled);
-
-        Texture2D TimedTrafficLights(bool paused);
+        Texture2D TrafficLights(TrafficLightType type);
     }
 }
