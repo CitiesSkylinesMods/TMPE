@@ -22,6 +22,7 @@ namespace TrafficManager.Lifecycle {
     using System.Diagnostics.CodeAnalysis;
     using TrafficManager.UI.Helpers;
     using TrafficManager.API.Traffic.Enums;
+    using System.Text;
 
     /// <summary>
     /// Do not use Singleton<TMPELifecycle>.instance to prevent memory leak.
@@ -310,11 +311,11 @@ namespace TrafficManager.Lifecycle {
 
                     if (despawned != ExtVehicleType.None) {
                         Prompt.Info(
-                            "TM:PE Pathfinder Updated",
-                            $"Some vehicles ({despawned}) had broken paths due to a bug "
-                            + "in an earlier version of the pathfinder. We've despawned "
-                            + "them to prevent further issues. New vehicles will "
-                            + "automatically spawn to replace them.");
+                            T("Popup.Title:TM:PE Pathfinder Updated"),
+                            T("Popup.Message:Some vehicles had broken routes:") +
+                            $"\n\n{despawned}\n\n" +
+                            T("Popup.Message:We've despawned them to prevent further issues. " +
+                              "New vehicles will automatically spawn to replace them."));
                     }
                 }
 
@@ -323,6 +324,8 @@ namespace TrafficManager.Lifecycle {
                 ex.LogException(true);
             }
         }
+
+        private static string T(string key) => Translation.Options.Get(key);
 
         internal void Unload() {
             try {
