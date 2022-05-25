@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.API.Traffic.Data {
+namespace TrafficManager.API.Traffic.Data {
     using System;
 
     public struct ExtSegment : IEquatable<ExtSegment> {
@@ -27,12 +27,18 @@
         /// </summary>
         public bool buslane;
 
+        /// <summary>
+        /// The Lane IDs as an array for fast lookup by index.
+        /// </summary>
+        public uint[] lanes;
+
         public ExtSegment(ushort segmentId) {
             this.segmentId = segmentId;
             valid = false;
             oneWay = false;
             highway = false;
             buslane = false;
+            lanes = null;
         }
 
         public override string ToString() {
@@ -51,6 +57,7 @@
             oneWay = false;
             highway = false;
             buslane = false;
+            lanes = null;
         }
 
         public bool Equals(ExtSegment otherSeg) {
