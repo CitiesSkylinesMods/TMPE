@@ -13,7 +13,7 @@ namespace TrafficManager.API {
 
         public static IManagerFactory ManagerFactory => managerFactory_ ??= GetImplementation<IManagerFactory>();
         public static INotifier Notifier => notifier_ ??= GetImplementation<INotifier>();
-        public static IUIFactory ActiveTheme => uiFactory_ ??= GetImplementation<IUIFactory>();
+        public static IUIFactory UIFactory => uiFactory_ ??= GetImplementation<IUIFactory>();
 
         private static T GetImplementation<T>()
             where T : class {
