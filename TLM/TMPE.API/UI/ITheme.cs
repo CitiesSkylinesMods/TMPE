@@ -6,7 +6,7 @@ namespace TrafficManager.API.UI {
     /// gets the texture for overlay sprite for each traffic rule according to the current theme.
     /// </summary>
     public interface ITheme {
-        Texture2D JunctionRestriction(JunctionRestrictionRules rule, bool allowed);
+        Texture2D JunctionRestriction(JunctionRestrictionFlags rule, bool allowed);
 
         Texture2D Parking(bool allowed);
 
