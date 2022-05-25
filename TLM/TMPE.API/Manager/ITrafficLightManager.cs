@@ -9,7 +9,7 @@ namespace TrafficManager.API.Manager {
         /// Use <see cref="ITrafficLightSimulationManager"/> to do that.
         /// Also certain node types cannot have traffic light.
         /// </summary>
-        bool CanToggleTL(ushort nodeId);
+        bool CanToggleTrafficLight(ushort nodeId);
 
         /// <summary>
         /// if node has no traffic light, vanilla traffic light is set (if possible).

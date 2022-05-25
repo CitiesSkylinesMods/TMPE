@@ -129,7 +129,7 @@ namespace TrafficManager.Manager.Impl {
             return SetTrafficLight(nodeId, !HasTrafficLight(nodeId, ref node), ref node, out reason);
         }
 
-        public bool CanToggleTL(ushort nodeId) {
+        bool ITrafficLightManager.CanToggleTrafficLight(ushort nodeId) {
             ref NetNode netNode = ref nodeId.ToNode();
             return netNode.IsValid() &&
                 CanToggleTrafficLight(
