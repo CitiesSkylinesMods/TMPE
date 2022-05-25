@@ -154,7 +154,7 @@ namespace TrafficManager.UI.Textures {
             switch (rule) {
                 case JunctionRestrictionFlags.AllowPedestrianCrossing:
                     return GetOtherRestriction(OtherRestriction.Crossing, allowed);
-                case JunctionRestrictionFlags.AllowUturn:
+                case JunctionRestrictionFlags.AllowUTurn:
                     return GetOtherRestriction(OtherRestriction.UTurn, allowed);
                 case JunctionRestrictionFlags.AllowEnterWhenBlocked:
                     return GetOtherRestriction(OtherRestriction.EnterBlockedJunction, allowed);
