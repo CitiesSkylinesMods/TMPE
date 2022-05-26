@@ -39,8 +39,6 @@ namespace TrafficManager.Manager.Impl {
             invalidSegmentRestrictions = new SegmentJunctionRestrictions[NetManager.MAX_SEGMENT_COUNT];
         }
 
-        public event Action<IJunctionRestrictionsManager.FlagsChangedEventArgs> FlagsChanged;
-
         private void AddInvalidSegmentJunctionRestrictions(ushort segmentId,
                                                            bool startNode,
                                                            ref JunctionRestrictions restrictions) {

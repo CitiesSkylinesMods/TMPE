@@ -577,16 +577,5 @@ namespace TrafficManager.API.Manager {
         /// </summary>
         void UpdateAllDefaults();
 
-        event Action<FlagsChangedEventArgs> FlagsChanged;
-
-        public class FlagsChangedEventArgs {
-
-            public JunctionRestrictionFlags Flags { get; private set; }
-
-            public FlagsChangedEventArgs(JunctionRestrictionFlags flags) {
-                Flags = flags;
-            }
-        }
-
     }
 }
