@@ -258,13 +258,15 @@ namespace TrafficManager.Lifecycle {
                     var po = e.Key;
                     var dom = e.Value;
 
-                    var elements = dom.Root.Elements(po.ElementName)?.Where(c => po.CanLoad(c));
+                    var elements = dom.Root.Elements(po.ElementName)?.Where(po.CanLoad);
                     if (elements?.Any() == true) {
                         if (elements.Count() > 1) {
                             Log.Error($"More than one compatible element {po.ElementName} was found for {po.DependencyTarget.Name}. Using the first one.");
                         }
                         try {
-                            var result = po.LoadData(elements.First(), new PersistenceContext { Version = Version });
+                            XElement element = elements.First();
+                            Log.Info($"Calling LoadData of DOM element {po.ElementName} for {po.DependencyTarget.Name}, {element.Attribute("featuresRequired")} {element.Attribute("featuresForbidden")}");
+                            var result = po.LoadData(element, new PersistenceContext { Version = Version });
                             result.LogMessage($"LoadData of DOM element {po.ElementName} for {po.DependencyTarget.Name} reported {result}.");
                         }
                         catch (Exception ex) {
