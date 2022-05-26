@@ -1,10 +1,10 @@
 namespace TrafficManager.UI.WhatsNew {
-    using System;
     using System.Collections.Generic;
     using ColossalFramework;
     using ColossalFramework.UI;
     using CSUtil.Commons;
     using Lifecycle;
+    using TrafficManager.State;
     using U;
     using UnityEngine;
 
@@ -26,6 +26,8 @@ namespace TrafficManager.UI.WhatsNew {
 
         // Used in AddKeywordLabel()
         private readonly Vector2 _minKeywordLabelSize = new(90, 20);
+
+        private static string T(string key) => Translation.Options.Get(key);
 
         public override void Awake() {
             base.Awake();
@@ -262,7 +264,7 @@ namespace TrafficManager.UI.WhatsNew {
             title.anchor = UIAnchorStyle.Top;
             title.textAlignment = UIHorizontalAlignment.Center;
             title.eventTextChanged += (_, _) => title.CenterToParent();
-            title.text = $"What's New - {TrafficManagerMod.ModName}";
+            title.text = $"{T(GeneralTab.WhatsNewButton.Label)} {TrafficManagerMod.ModName}";
             title.MakePixelPerfect();
 
             var cancel = _header.AddUIComponent<UIButton>();
