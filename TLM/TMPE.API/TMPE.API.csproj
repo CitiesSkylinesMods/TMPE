@@ -83,6 +83,7 @@
     <Compile Include="Manager\ICustomDataManager.cs" />
     <Compile Include="Manager\ICustomManager.cs" />
     <Compile Include="Manager\ICustomSegmentLightsManager.cs" />
+    <Compile Include="Manager\IExtLaneManager.cs" />
     <Compile Include="Manager\IExtSegmentEndManager.cs" />
     <Compile Include="Manager\IExtNodeManager.cs" />
     <Compile Include="Manager\IExtSegmentManager.cs" />
