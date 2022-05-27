@@ -6,6 +6,7 @@ namespace TrafficManager.UI.Textures {
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.API.UI;
+    using TrafficManager.Manager.Impl;
     using TrafficManager.State;
     using TrafficManager.UI.SubTools;
     using TrafficManager.Util;
@@ -172,14 +173,14 @@ namespace TrafficManager.UI.Textures {
             }
         }
 
-        public Texture2D TrafficLights(TrafficLightType type) {
-            return type switch {
-                TrafficLightType.None => TrafficLightTextures.Instance.TrafficLightDisabled,
-                TrafficLightType.Vanilla => TrafficLightTextures.Instance.TrafficLightEnabled,
-                TrafficLightType.Manual => TrafficLightTextures.Instance.TrafficLightEnabled,
-                TrafficLightType.Paused => TrafficLightTextures.Instance.TrafficLightEnabledTimed,
-                TrafficLightType.TimedScript => TrafficLightTextures.Instance.TrafficLightEnabledTimed,
-            };
+        public Texture2D GetTrafficLightIcon(ushort nodeId) {
+            if (!TrafficLightManager.Instance.HasTrafficLight(nodeId)) {
+                return TrafficLightTextures.Instance.TrafficLightDisabled;
+            } else if (TrafficLightSimulationManager.Instance.HasSimulation(nodeId)) {
+                return TrafficLightTextures.Instance.TrafficLightEnabledTimed;
+            } else {
+                return TrafficLightTextures.Instance.TrafficLightEnabled;
+            }
         }
 
         public RoadSignTheme Load(bool whiteTexture = false) {

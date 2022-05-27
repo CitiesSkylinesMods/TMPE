@@ -2,7 +2,10 @@ namespace TrafficManager.API.Manager {
     using TrafficManager.API.Traffic.Enums;
 
     public interface ITrafficLightManager {
-        TrafficLightType GetTrafficLight(ushort nodeId);
+        /// <summary>
+        /// returns if the node as any kind of traffic light (vanilla, manual, timed).
+        /// </summary>
+        public bool HasTrafficLight(ushort nodeId);
 
         /// <summary>
         /// Manual/timed traffic light cannot be toggled using <see cref="ITrafficLightManager"/>.

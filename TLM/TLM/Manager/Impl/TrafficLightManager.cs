@@ -254,19 +254,7 @@ namespace TrafficManager.Manager.Impl {
             return ret;
         }
 
-        public TrafficLightType GetTrafficLight(ushort nodeId) {
-            if (!HasTrafficLight(nodeId, ref nodeId.ToNode())) {
-                return TrafficLightType.None;
-            } else if (TrafficLightSimulationManager.Instance.HasManualSimulation(nodeId)) {
-                return TrafficLightType.Manual;
-            } else if (TrafficLightSimulationManager.Instance.HasActiveTimedSimulation(nodeId)) {
-                return TrafficLightType.TimedScript;
-            } else if (TrafficLightSimulationManager.Instance.HasTimedSimulation(nodeId)) {
-                return TrafficLightType.Paused;
-            } else {
-                return TrafficLightType.Vanilla;
-            }
-        }
+        public bool HasTrafficLight(ushort nodeId) => HasTrafficLight(nodeId, ref nodeId.ToNode());
 
         public bool HasTrafficLight(ushort nodeId, ref NetNode node) {
             return node.IsValid()
