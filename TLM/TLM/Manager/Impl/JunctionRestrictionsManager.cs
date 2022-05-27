@@ -27,7 +27,7 @@ namespace TrafficManager.Manager.Impl {
         public static JunctionRestrictionsManager Instance { get; } =
             new JunctionRestrictionsManager();
 
-        private readonly SegmentJunctionRestrictions[] invalidSegmentRestrictions;
+        private readonly SegmentJunctionRestrictions[] orphanedRestrictions;
 
         /// <summary>
         /// Holds junction restrictions for each segment end
@@ -36,16 +36,16 @@ namespace TrafficManager.Manager.Impl {
 
         private JunctionRestrictionsManager() {
             segmentRestrictions = new SegmentJunctionRestrictions[NetManager.MAX_SEGMENT_COUNT];
-            invalidSegmentRestrictions = new SegmentJunctionRestrictions[NetManager.MAX_SEGMENT_COUNT];
+            orphanedRestrictions = new SegmentJunctionRestrictions[NetManager.MAX_SEGMENT_COUNT];
         }
 
-        private void AddInvalidSegmentJunctionRestrictions(ushort segmentId,
+        private void AddOrphanedSegmentJunctionRestrictions(ushort segmentId,
                                                            bool startNode,
-                                                           ref JunctionRestrictions restrictions) {
+                                                           JunctionRestrictions restrictions) {
             if (startNode) {
-                invalidSegmentRestrictions[segmentId].startNodeRestrictions = restrictions;
+                orphanedRestrictions[segmentId].startNodeRestrictions = restrictions;
             } else {
-                invalidSegmentRestrictions[segmentId].endNodeRestrictions = restrictions;
+                orphanedRestrictions[segmentId].endNodeRestrictions = restrictions;
             }
         }
 
@@ -57,11 +57,11 @@ namespace TrafficManager.Manager.Impl {
 
             JunctionRestrictions restrictions;
             if (oldSegmentEndId.StartNode) {
-                restrictions = invalidSegmentRestrictions[oldSegmentEndId.SegmentId].startNodeRestrictions;
-                invalidSegmentRestrictions[oldSegmentEndId.SegmentId].startNodeRestrictions.Reset();
+                restrictions = orphanedRestrictions[oldSegmentEndId.SegmentId].startNodeRestrictions;
+                orphanedRestrictions[oldSegmentEndId.SegmentId].startNodeRestrictions.Reset();
             } else {
-                restrictions = invalidSegmentRestrictions[oldSegmentEndId.SegmentId].endNodeRestrictions;
-                invalidSegmentRestrictions[oldSegmentEndId.SegmentId].endNodeRestrictions.Reset();
+                restrictions = orphanedRestrictions[oldSegmentEndId.SegmentId].endNodeRestrictions;
+                orphanedRestrictions[oldSegmentEndId.SegmentId].endNodeRestrictions.Reset();
             }
 
             UpdateDefaults(
@@ -173,7 +173,7 @@ namespace TrafficManager.Manager.Impl {
                                                 : segmentRestrictions[seg.segmentId].endNodeRestrictions;
 
             if (!restrictions.IsDefault()) {
-                AddInvalidSegmentJunctionRestrictions(seg.segmentId, startNode, ref restrictions);
+                AddOrphanedSegmentJunctionRestrictions(seg.segmentId, startNode, restrictions);
             }
 
             segmentRestrictions[seg.segmentId].Reset(startNode, true);
@@ -1035,8 +1035,8 @@ namespace TrafficManager.Manager.Impl {
                 segmentRestrictions[i].Reset(startNode: null, resetDefaults: true);
             }
 
-            for (int i = 0; i < invalidSegmentRestrictions.Length; ++i) {
-                invalidSegmentRestrictions[i].Reset(startNode: null, resetDefaults: true);
+            for (int i = 0; i < orphanedRestrictions.Length; ++i) {
+                orphanedRestrictions[i].Reset(startNode: null, resetDefaults: true);
             }
         }
 
