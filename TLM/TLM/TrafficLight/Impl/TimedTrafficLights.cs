@@ -1297,7 +1297,7 @@ namespace TrafficManager.TrafficLight.Impl {
                 }
 
                 var startNode = segmentId.ToSegment().IsStartNode(NodeId);
-                ISegmentEndId endId = new SegmentEndId(segmentId, startNode);
+                ISegmentEndId endId = new SegmentEndIdApi(segmentId, startNode);
 
                 if (segmentEndIds.Contains(endId)) {
                     Log._DebugIf(

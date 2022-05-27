@@ -20,7 +20,7 @@ namespace TrafficManager.Traffic.Impl {
     /// (having custom traffic lights or priority signs).
     /// </summary>
     [Obsolete("should be removed when implementing issue #240")]
-    public class SegmentEnd : SegmentEndId, ISegmentEnd {
+    public class SegmentEnd : SegmentEndIdApi, ISegmentEnd {
         public SegmentEnd(ushort segmentId, bool startNode)
             : base(segmentId, startNode) {
             Update();

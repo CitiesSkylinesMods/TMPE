@@ -19,7 +19,7 @@ namespace TrafficManager.TrafficLight.Impl {
     /// Represents the set of custom traffic lights located at a node
     /// </summary>
     public class CustomSegmentLights
-        : SegmentEndId
+        : SegmentEndIdApi
     {
         // private static readonly ExtVehicleType[] SINGLE_LANE_VEHICLETYPES
         // = new ExtVehicleType[] { ExtVehicleType.Tram, ExtVehicleType.Service,
