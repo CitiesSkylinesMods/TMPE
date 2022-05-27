@@ -116,9 +116,10 @@ namespace TrafficManager.UI.SubTools {
                     }
 
                     bool showPedLight = segmentLights.PedestrianLightState != null &&
-                                        junctionRestrictionsManager.IsPedestrianCrossingAllowed(
+                                        junctionRestrictionsManager.GetValueOrDefault(
                                             segmentLights.SegmentId,
-                                            segmentLights.StartNode);
+                                            segmentLights.StartNode,
+                                            JunctionRestrictionFlags.AllowPedestrianCrossing);
                     bool visible = GeometryUtil.WorldToScreenPoint(position, out Vector3 screenPos);
 
                     if (!visible) {

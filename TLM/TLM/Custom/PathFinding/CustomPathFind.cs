@@ -1084,10 +1084,11 @@ namespace TrafficManager.Custom.PathFinding {
 #if JUNCTIONRESTRICTIONS
                                 // next segment does not have pedestrian lanes but cims need to
                                 // cross it to reach the next segment
-                                if (!junctionManager.IsPedestrianCrossingAllowed(
+                                if (!junctionManager.GetValueOrDefault(
                                         leftSegmentId,
                                         leftSegment.m_startNode ==
-                                        nextNodeId)) {
+                                        nextNodeId,
+                                        JunctionRestrictionFlags.AllowPedestrianCrossing)) {
                                     break;
                                 }
 #endif
@@ -1122,10 +1123,11 @@ namespace TrafficManager.Custom.PathFinding {
 #if JUNCTIONRESTRICTIONS
                                 // next segment does not have pedestrian lanes but cims need to
                                 // cross it to reach the next segment
-                                if (!junctionManager.IsPedestrianCrossingAllowed(
+                                if (!junctionManager.GetValueOrDefault(
                                         rightSegmentId,
                                         rightSegment.m_startNode ==
-                                        nextNodeId)) {
+                                        nextNodeId,
+                                        JunctionRestrictionFlags.AllowPedestrianCrossing)) {
                                     break;
                                 }
 #endif
@@ -3167,9 +3169,10 @@ namespace TrafficManager.Custom.PathFinding {
                     if (Options.junctionRestrictionsEnabled &&
                         item.Position.m_segment == nextSegmentId) {
                         // check if pedestrians are not allowed to cross here
-                        if (!junctionManager.IsPedestrianCrossingAllowed(
+                        if (!junctionManager.GetValueOrDefault(
                                 nextSegmentId,
-                                nextIsStartNode)) {
+                                nextIsStartNode,
+                                JunctionRestrictionFlags.AllowPedestrianCrossing)) {
                             if (isLogEnabled) {
                                 DebugLog(
                                     unitId,
@@ -3587,7 +3590,7 @@ namespace TrafficManager.Custom.PathFinding {
                         prevIsCarLane && // u-turns for road vehicles only
                         (!isHeavyVehicle_ || isStockUturnPoint) && // only small vehicles may perform u-turns OR everyone at stock u-turn points
                         !prevIsOutgoingOneWay && // do not u-turn on one-ways
-                        junctionManager.IsUturnAllowed(prevSegmentId, nextIsStartNode);
+                        junctionManager.GetValueOrDefault(prevSegmentId, nextIsStartNode, JunctionRestrictionFlags.AllowUTurn);
 
                     if (isLogEnabled) {
                         DebugLog(
@@ -3600,7 +3603,7 @@ namespace TrafficManager.Custom.PathFinding {
                             $"\tisStockUturnPoint={isStockUturnPoint}\n" +
                             $"\tprevIsOutgoingOneWay={prevIsOutgoingOneWay}\n" +
                             $"\tjManager.IsUturnAllowed(prevSegmentId, " +
-                            $"nextIsStartNode)={junctionManager.IsUturnAllowed(prevSegmentId, nextIsStartNode)}\n" +
+                            $"nextIsStartNode)={junctionManager.GetValueOrDefault(prevSegmentId, nextIsStartNode, JunctionRestrictionFlags.AllowUTurn)}\n" +
                             $"\tm_queueItem.vehicleId={queueItem_.vehicleId}\n" +
                             $"\tm_queueItem.spawned={queueItem_.spawned}\n" +
                             $"\tprevSegmentId={prevSegmentId}\n" +

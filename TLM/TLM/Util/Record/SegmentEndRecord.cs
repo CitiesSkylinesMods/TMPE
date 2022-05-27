@@ -40,12 +40,12 @@ namespace TrafficManager.Util.Record {
         private static JunctionRestrictionsManager JRMan => JunctionRestrictionsManager.Instance;
 
         public void Record() {
-            uturnAllowed_ = ToTernaryBool(JRMan.GetUturnAllowed(SegmentId, StartNode));
-            nearTurnOnRedAllowed_ = ToTernaryBool(JRMan.GetNearTurnOnRedAllowed(SegmentId, StartNode));
-            farTurnOnRedAllowed_ = ToTernaryBool(JRMan.GetFarTurnOnRedAllowed(SegmentId, StartNode));
-            laneChangingAllowedWhenGoingStraight_ = ToTernaryBool(JRMan.GetLaneChangingAllowedWhenGoingStraight(SegmentId, StartNode));
-            enteringBlockedJunctionAllowed_ = ToTernaryBool(JRMan.GetEnteringBlockedJunctionAllowed(SegmentId, StartNode));
-            pedestrianCrossingAllowed_ = ToTernaryBool(JRMan.GetPedestrianCrossingAllowed(SegmentId, StartNode));
+            uturnAllowed_ = ToTernaryBool(JRMan.GetValueOrDefault(SegmentId, StartNode, JunctionRestrictionFlags.AllowUTurn));
+            nearTurnOnRedAllowed_ = ToTernaryBool(JRMan.GetValueOrDefault(SegmentId, StartNode, JunctionRestrictionFlags.AllowNearTurnOnRed));
+            farTurnOnRedAllowed_ = ToTernaryBool(JRMan.GetValueOrDefault(SegmentId, StartNode, JunctionRestrictionFlags.AllowFarTurnOnRed));
+            laneChangingAllowedWhenGoingStraight_ = ToTernaryBool(JRMan.GetValueOrDefault(SegmentId, StartNode, JunctionRestrictionFlags.AllowForwardLaneChange));
+            enteringBlockedJunctionAllowed_ = ToTernaryBool(JRMan.GetValueOrDefault(SegmentId, StartNode, JunctionRestrictionFlags.AllowEnterWhenBlocked));
+            pedestrianCrossingAllowed_ = ToTernaryBool(JRMan.GetValueOrDefault(SegmentId, StartNode, JunctionRestrictionFlags.AllowPedestrianCrossing));
 
             prioirtySign_ = priorityMan.GetPrioritySign(SegmentId, StartNode);
 

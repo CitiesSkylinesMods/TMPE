@@ -988,9 +988,10 @@ namespace TrafficManager.Manager.Impl {
                                                 hasRightArrow);
                                         }
 
-                                        bool hasUTurnRule = JunctionRestrictionsManager.Instance.IsUturnAllowed(
+                                        bool hasUTurnRule = JunctionRestrictionsManager.Instance.GetValueOrDefault(
                                             nextSegmentId,
-                                            isNodeStartNodeOfNextSegment);
+                                            isNodeStartNodeOfNextSegment,
+                                            JunctionRestrictionFlags.AllowUTurn);
                                         bool hasFarTurnArrow = (Shortcuts.LHT && hasRightArrow) || (Shortcuts.RHT && hasLeftArrow);
                                         bool canTurn = !nodeIsRealJunction || nodeIsEndOrOneWayOut || hasFarTurnArrow || hasUTurnRule;
 
@@ -1159,8 +1160,8 @@ namespace TrafficManager.Manager.Impl {
 
                     bool laneChangesAllowed
                         = Options.junctionRestrictionsEnabled
-                          && JunctionRestrictionsManager.Instance.IsLaneChangingAllowedWhenGoingStraight(
-                                 nextSegmentId, isNodeStartNodeOfNextSegment);
+                          && JunctionRestrictionsManager.Instance.GetValueOrDefault(
+                                 nextSegmentId, isNodeStartNodeOfNextSegment, JunctionRestrictionFlags.AllowForwardLaneChange);
                     int nextCompatibleLaneCount = numNextCompatibleTransitionDatas;
 
                     if (nextCompatibleLaneCount > 0) {

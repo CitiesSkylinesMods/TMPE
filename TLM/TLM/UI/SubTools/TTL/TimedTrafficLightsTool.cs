@@ -1495,9 +1495,10 @@ namespace TrafficManager.UI.SubTools.TTL {
                     }
 
                     bool showPedLight = liveSegmentLights.PedestrianLightState != null &&
-                                        junctionRestrictionsManager.IsPedestrianCrossingAllowed(
+                                        junctionRestrictionsManager.GetValueOrDefault(
                                             liveSegmentLights.SegmentId,
-                                            liveSegmentLights.StartNode);
+                                            liveSegmentLights.StartNode,
+                                            JunctionRestrictionFlags.AllowPedestrianCrossing);
 
                     bool timedActive = timedNode.IsStarted();
                     if (!timedActive) {
