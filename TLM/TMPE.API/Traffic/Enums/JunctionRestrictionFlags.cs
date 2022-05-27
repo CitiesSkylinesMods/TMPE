@@ -10,5 +10,7 @@ namespace TrafficManager.API.Traffic.Enums {
         AllowForwardLaneChange = 1 << 3,
         AllowEnterWhenBlocked = 1 << 4,
         AllowPedestrianCrossing = 1 << 5,
+
+        All = (1 << 6) - 1,
     }
 }
