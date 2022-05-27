@@ -148,6 +148,7 @@
     <Compile Include="Manager\Impl\ExtSegmentEndManager.cs" />
     <Compile Include="Manager\Impl\ExtSegmentManager.cs" />
     <Compile Include="Manager\Impl\GeometryNotifier.cs" />
+    <Compile Include="Network\Data\SegmentEndId.cs" />
     <Compile Include="Patch\NetManagerEvents.cs" />
     <Compile Include="Manager\Impl\LaneConnection\ConnectionDataBase.cs" />
     <Compile Include="Manager\Impl\LaneConnection\LaneConnectionData.cs" />
@@ -190,6 +191,7 @@
     <Compile Include="UI\WhatsNew\WhatsNewMarkup.cs" />
     <Compile Include="Util\Extensions\CitizenUnitExtensions.cs" />
     <Compile Include="Util\Extensions\ParkedVehicleExtensions.cs" />
+    <Compile Include="Util\Extensions\SegmentEndIdExtensions.cs" />
     <Compile Include="Util\Extensions\VersionExtension.cs" />
     <Compile Include="Util\Iterators\GetNodeSegmentIdsEnumerable.cs" />
     <Compile Include="Util\Iterators\GetNodeSegmentIdsEnumerator.cs" />

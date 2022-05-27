@@ -3,6 +3,7 @@ namespace TrafficManager.Geometry.Impl {
     using TrafficManager.API.Traffic;
     using TrafficManager.Util.Extensions;
 
+    [Obsolete("New code should use TrafficManager.Network.Data.SegmentId unless it needs to implement ISegmentEndId. ISegmentEndId should be deprecated in the future, and should be avoided in new APIs.")]
     public class SegmentEndIdApi : ISegmentEndId {
         public SegmentEndIdApi(ushort segmentId, ushort nodeId) {
             SegmentId = segmentId;
