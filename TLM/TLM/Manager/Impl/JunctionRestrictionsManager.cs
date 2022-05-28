@@ -5,6 +5,7 @@ namespace TrafficManager.Manager.Impl {
     using System.Collections.Generic;
     using System;
     using TrafficManager.API.Geometry;
+    using TrafficManager.API.Hook;
     using TrafficManager.API.Manager;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.API.Traffic;
@@ -20,11 +21,13 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.Lifecycle;
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.Manager.Impl.LaneConnection;
+    using static TrafficManager.API.Hook.IJunctionRestrictionsHook;
 
     public class JunctionRestrictionsManager
         : AbstractGeometryObservingManager,
           ICustomDataManager<List<Configuration.SegmentNodeConf>>,
-          IJunctionRestrictionsManager
+          IJunctionRestrictionsManager,
+          IJunctionRestrictionsHook
     {
         public static JunctionRestrictionsManager Instance { get; } =
             new JunctionRestrictionsManager();
@@ -36,9 +39,29 @@ namespace TrafficManager.Manager.Impl {
         /// </summary>
         private readonly SegmentJunctionRestrictions[] segmentRestrictions;
 
+        public event Action<FlagsHookArgs> GetDefaultsHook;
+        public event Action<FlagsHookArgs> GetConfigurableHook;
+
         private JunctionRestrictionsManager() {
             segmentRestrictions = new SegmentJunctionRestrictions[NetManager.MAX_SEGMENT_COUNT];
             orphanedRestrictions = new SegmentJunctionRestrictions[NetManager.MAX_SEGMENT_COUNT];
+        }
+
+        public void InvalidateFlags(ushort segmentId, bool startNode, JunctionRestrictionFlags flags) {
+
+            if (segmentId.ToSegment().IsValid()) {
+                SegmentEndId segmentEndId = segmentId.AtNode(startNode);
+                GetJunctionRestrictions(segmentEndId).Invalidate(segmentEndId);
+            }
+        }
+
+        public void InvalidateFlags(ushort nodeId, JunctionRestrictionFlags flags) {
+
+            if (nodeId.ToNode().IsValid()) {
+                foreach (var segmentId in ExtNodeManager.Instance.GetNodeSegmentIds(nodeId, ClockDirection.Clockwise)) {
+                    InvalidateFlags(segmentId, segmentId.ToSegment().IsStartNode(nodeId), flags);
+                }
+            }
         }
 
         private ref JunctionRestrictions GetJunctionRestrictions(SegmentEndId segmentEndId) {
@@ -196,7 +219,8 @@ namespace TrafficManager.Manager.Impl {
             }
         }
 
-        private bool IsUturnAllowedConfigurable(ushort segmentId, bool startNode, ref NetNode node) {
+        [Obsolete("If you must call this method, please go through IJunctionRestrictionsManager.", true)]
+        public bool IsUturnAllowedConfigurable(ushort segmentId, bool startNode, ref NetNode node) {
             ref NetSegment netSegment = ref segmentId.ToSegment();
 
             if (!netSegment.IsValid()) {
@@ -225,13 +249,35 @@ namespace TrafficManager.Manager.Impl {
             return ret;
         }
 
-        private bool GetDefaultUturnAllowed(ushort segmentId, bool startNode, ref NetNode node, bool isConfigurable) {
+        /// <summary>
+        /// This is necessary because we can't change the signature of methods known to be patched.
+        /// It will go away once the Node Controller mods are updated.
+        /// </summary>
+        private static class CalculationContext {
+
+            [ThreadStatic]
+            private static bool? _isConfigurable;
+
+            public static bool? IsConfigurable {
+                get => _isConfigurable;
+                set {
+                    if (value.HasValue && _isConfigurable.HasValue)
+                        throw new InvalidOperationException("JunctionRestrictionsManager.CalculationContext used recursively");
+
+                    _isConfigurable = value;
+                }
+            }
+        }
+
+        [Obsolete("If you must call this method, please go through IJunctionRestrictionsManager.", true)]
+        public bool GetDefaultUturnAllowed(ushort segmentId, bool startNode, ref NetNode node) {
 #if DEBUG
             bool logLogic = DebugSwitch.JunctionRestrictions.Get();
 #else
             const bool logLogic = false;
 #endif
 
+            var isConfigurable = CalculationContext.IsConfigurable ?? IsUturnAllowedConfigurable(segmentId, startNode, ref node);
             if (!isConfigurable) {
                 bool res = (node.m_flags & (NetNode.Flags.End | NetNode.Flags.OneWayOut)) !=
                            NetNode.Flags.None;
@@ -261,19 +307,22 @@ namespace TrafficManager.Manager.Impl {
             return ret;
         }
 
-        private bool IsNearTurnOnRedAllowedConfigurable(ushort segmentId,
+        [Obsolete("If you must call this method, please go through IJunctionRestrictionsManager.", true)]
+        public bool IsNearTurnOnRedAllowedConfigurable(ushort segmentId,
                                                        bool startNode,
                                                        ref NetNode node) {
             return IsTurnOnRedAllowedConfigurable(true, segmentId, startNode, ref node);
         }
 
-        private bool IsFarTurnOnRedAllowedConfigurable(ushort segmentId,
+        [Obsolete("If you must call this method, please go through IJunctionRestrictionsManager.", true)]
+        public bool IsFarTurnOnRedAllowedConfigurable(ushort segmentId,
                                                       bool startNode,
                                                       ref NetNode node) {
             return IsTurnOnRedAllowedConfigurable(false, segmentId, startNode, ref node);
         }
 
-        private bool IsTurnOnRedAllowedConfigurable(bool near,
+        [Obsolete("If you must call this method, please go through IJunctionRestrictionsManager.", true)]
+        public bool IsTurnOnRedAllowedConfigurable(bool near,
                                                    ushort segmentId,
                                                    bool startNode,
                                                    ref NetNode node) {
@@ -295,27 +344,29 @@ namespace TrafficManager.Manager.Impl {
             return ret;
         }
 
-        private bool GetDefaultNearTurnOnRedAllowed(ushort segmentId,
+        [Obsolete("If you must call this method, please go through IJunctionRestrictionsManager.", true)]
+        public bool GetDefaultNearTurnOnRedAllowed(ushort segmentId,
                                                    bool startNode,
-                                                   ref NetNode node,
-                                                   bool isConfigurable) {
-            return GetDefaultTurnOnRedAllowed(true, segmentId, startNode, ref node, isConfigurable);
+                                                   ref NetNode node) {
+            return GetDefaultTurnOnRedAllowed(true, segmentId, startNode, ref node);
         }
 
-        private bool GetDefaultFarTurnOnRedAllowed(ushort segmentId,
+        [Obsolete("If you must call this method, please go through IJunctionRestrictionsManager.", true)]
+        public bool GetDefaultFarTurnOnRedAllowed(ushort segmentId,
                                                   bool startNode,
-                                                  ref NetNode node,
-                                                  bool isConfigurable) {
-            return GetDefaultTurnOnRedAllowed(false, segmentId, startNode, ref node, isConfigurable);
+                                                  ref NetNode node) {
+            return GetDefaultTurnOnRedAllowed(false, segmentId, startNode, ref node);
         }
 
-        private bool GetDefaultTurnOnRedAllowed(bool near, ushort segmentId, bool startNode, ref NetNode node, bool isConfigurable) {
+        [Obsolete("If you must call this method, please go through IJunctionRestrictionsManager.", true)]
+        public bool GetDefaultTurnOnRedAllowed(bool near, ushort segmentId, bool startNode, ref NetNode node) {
 #if DEBUG
             bool logLogic = DebugSwitch.JunctionRestrictions.Get();
 #else
             const bool logLogic = false;
 #endif
 
+            var isConfigurable = CalculationContext.IsConfigurable ?? IsTurnOnRedAllowedConfigurable(near, segmentId, startNode, ref node);
             if (!isConfigurable) {
                 if (logLogic) {
                     Log._Debug(
@@ -336,7 +387,8 @@ namespace TrafficManager.Manager.Impl {
             return ret;
         }
 
-        private bool IsLaneChangingAllowedWhenGoingStraightConfigurable(
+        [Obsolete("If you must call this method, please go through IJunctionRestrictionsManager.", true)]
+        public bool IsLaneChangingAllowedWhenGoingStraightConfigurable(
             ushort segmentId,
             bool startNode,
             ref NetNode node) {
@@ -374,13 +426,15 @@ namespace TrafficManager.Manager.Impl {
             return ret;
         }
 
-        private bool GetDefaultLaneChangingAllowedWhenGoingStraight(ushort segmentId, bool startNode, ref NetNode node, bool isConfigurable) {
+        [Obsolete("If you must call this method, please go through IJunctionRestrictionsManager.", true)]
+        public bool GetDefaultLaneChangingAllowedWhenGoingStraight(ushort segmentId, bool startNode, ref NetNode node) {
 #if DEBUG
             bool logLogic = DebugSwitch.JunctionRestrictions.Get();
 #else
             const bool logLogic = false;
 #endif
 
+            var isConfigurable = CalculationContext.IsConfigurable ?? IsLaneChangingAllowedWhenGoingStraightConfigurable(segmentId, startNode, ref node);
             if (!isConfigurable) {
                 if (logLogic) {
                     Log._Debug(
@@ -402,7 +456,8 @@ namespace TrafficManager.Manager.Impl {
             return ret;
         }
 
-        private bool IsEnteringBlockedJunctionAllowedConfigurable(
+        [Obsolete("If you must call this method, please go through IJunctionRestrictionsManager.", true)]
+        public bool IsEnteringBlockedJunctionAllowedConfigurable(
             ushort segmentId,
             bool startNode,
             ref NetNode node) {
@@ -437,11 +492,11 @@ namespace TrafficManager.Manager.Impl {
             return ret;
         }
 
-        private bool GetDefaultEnteringBlockedJunctionAllowed(
+        [Obsolete("If you must call this method, please go through IJunctionRestrictionsManager.", true)]
+        public bool GetDefaultEnteringBlockedJunctionAllowed(
             ushort segmentId,
             bool startNode,
-            ref NetNode node,
-            bool isConfigurable) {
+            ref NetNode node) {
 #if DEBUG
             bool logLogic = DebugSwitch.JunctionRestrictions.Get();
 #else
@@ -453,6 +508,7 @@ namespace TrafficManager.Manager.Impl {
                 return false;
             }
 
+            var isConfigurable = CalculationContext.IsConfigurable ?? IsEnteringBlockedJunctionAllowedConfigurable(segmentId, startNode, ref node);
             if (!isConfigurable) {
                 bool res =
                     (node.m_flags & (NetNode.Flags.Junction | NetNode.Flags.OneWayOut |
@@ -500,7 +556,8 @@ namespace TrafficManager.Manager.Impl {
             return ret;
         }
 
-        private bool IsPedestrianCrossingAllowedConfigurable(ushort segmentId, bool startNode, ref NetNode node) {
+        [Obsolete("If you must call this method, please go through IJunctionRestrictionsManager.", true)]
+        public bool IsPedestrianCrossingAllowedConfigurable(ushort segmentId, bool startNode, ref NetNode node) {
             bool ret = (node.m_flags & (NetNode.Flags.Junction | NetNode.Flags.Bend)) != NetNode.Flags.None
                        && node.Info?.m_class?.m_service != ItemClass.Service.Beautification;
 #if DEBUG
@@ -514,13 +571,15 @@ namespace TrafficManager.Manager.Impl {
             return ret;
         }
 
-        private bool GetDefaultPedestrianCrossingAllowed(ushort segmentId, bool startNode, ref NetNode node, bool isConfigurable) {
+        [Obsolete("If you must call this method, please go through IJunctionRestrictionsManager.", true)]
+        public bool GetDefaultPedestrianCrossingAllowed(ushort segmentId, bool startNode, ref NetNode node) {
 #if DEBUG
             bool logLogic = DebugSwitch.JunctionRestrictions.Get();
 #else
             const bool logLogic = false;
 #endif
 
+            var isConfigurable = CalculationContext.IsConfigurable ?? IsPedestrianCrossingAllowedConfigurable(segmentId, startNode, ref node);
             if (!isConfigurable) {
                 if (logLogic) {
                     Log._Debug(
@@ -1024,30 +1083,85 @@ namespace TrafficManager.Manager.Impl {
                 return ((values & mask) | (defaults & ~mask)) == defaults;
             }
 
-            private delegate bool CalculateConfigurable(ushort segmentId, bool startNode, ref NetNode node);
-            private delegate bool CalculateDefault(ushort segmentId, bool startNode, ref NetNode node, bool isConfigurable);
+            private delegate bool Calculator(ushort segmentId, bool startNode, ref NetNode node);
 
-            private void Recalculate(SegmentEndId segmentEndId, JunctionRestrictionFlags flags, CalculateConfigurable calculateConfigurable, CalculateDefault calculateDefault) {
-                if ((valid & flags) != flags) {
-                    bool isConfigurable = calculateConfigurable(segmentEndId.SegmentId, segmentEndId.StartNode, ref segmentEndId.GetNode());
-                    SetConfigurable(segmentEndId, flags, isConfigurable);
-                    SetDefault(segmentEndId, flags, calculateDefault(segmentEndId.SegmentId, segmentEndId.StartNode, ref segmentEndId.GetNode(), isConfigurable));
-                    valid |= flags;
-                }
+            /// <summary>
+            /// This is needed because the methods are annoted to produce a compiler error if referenced directly.
+            /// </summary>
+            /// <param name="methodName"></param>
+            /// <returns></returns>
+            private static Calculator DelegateTo(string methodName) {
+                return (Calculator)Delegate.CreateDelegate(typeof(Calculator), Instance, methodName);
             }
+
+            private static Dictionary<JunctionRestrictionFlags, Calculator> configurableCalculators = new Dictionary<JunctionRestrictionFlags, Calculator>() {
+                { JunctionRestrictionFlags.AllowUTurn, DelegateTo(nameof(IsUturnAllowedConfigurable)) },
+                { JunctionRestrictionFlags.AllowNearTurnOnRed, DelegateTo(nameof(IsNearTurnOnRedAllowedConfigurable)) },
+                { JunctionRestrictionFlags.AllowFarTurnOnRed, DelegateTo(nameof(IsFarTurnOnRedAllowedConfigurable)) },
+                { JunctionRestrictionFlags.AllowForwardLaneChange, DelegateTo(nameof(IsLaneChangingAllowedWhenGoingStraightConfigurable)) },
+                { JunctionRestrictionFlags.AllowEnterWhenBlocked, DelegateTo(nameof(IsEnteringBlockedJunctionAllowedConfigurable)) },
+                { JunctionRestrictionFlags.AllowPedestrianCrossing, DelegateTo(nameof(IsPedestrianCrossingAllowedConfigurable)) },
+            };
+
+            private static Dictionary<JunctionRestrictionFlags, Calculator> defaultCalculators = new Dictionary<JunctionRestrictionFlags, Calculator>() {
+                { JunctionRestrictionFlags.AllowUTurn, DelegateTo(nameof(GetDefaultUturnAllowed)) },
+                { JunctionRestrictionFlags.AllowNearTurnOnRed, DelegateTo(nameof(GetDefaultNearTurnOnRedAllowed)) },
+                { JunctionRestrictionFlags.AllowFarTurnOnRed, DelegateTo(nameof(GetDefaultFarTurnOnRedAllowed)) },
+                { JunctionRestrictionFlags.AllowForwardLaneChange, DelegateTo(nameof(GetDefaultLaneChangingAllowedWhenGoingStraight)) },
+                { JunctionRestrictionFlags.AllowEnterWhenBlocked, DelegateTo(nameof(GetDefaultEnteringBlockedJunctionAllowed)) },
+                { JunctionRestrictionFlags.AllowPedestrianCrossing, DelegateTo(nameof(GetDefaultPedestrianCrossingAllowed)) },
+            };
 
             private void Recalculate(SegmentEndId segmentEndId) {
 
                 var recalculateFlags = JunctionRestrictionFlags.All & ~valid;
-
                 if (recalculateFlags != default) {
+                    ref var node = ref segmentEndId.GetNodeId().ToNode();
 
-                    Recalculate(segmentEndId, JunctionRestrictionFlags.AllowUTurn, Instance.IsUturnAllowedConfigurable, Instance.GetDefaultUturnAllowed);
-                    Recalculate(segmentEndId, JunctionRestrictionFlags.AllowNearTurnOnRed, Instance.IsNearTurnOnRedAllowedConfigurable, Instance.GetDefaultNearTurnOnRedAllowed);
-                    Recalculate(segmentEndId, JunctionRestrictionFlags.AllowFarTurnOnRed, Instance.IsFarTurnOnRedAllowedConfigurable, Instance.GetDefaultFarTurnOnRedAllowed);
-                    Recalculate(segmentEndId, JunctionRestrictionFlags.AllowForwardLaneChange, Instance.IsLaneChangingAllowedWhenGoingStraightConfigurable, Instance.GetDefaultLaneChangingAllowedWhenGoingStraight);
-                    Recalculate(segmentEndId, JunctionRestrictionFlags.AllowEnterWhenBlocked, Instance.IsEnteringBlockedJunctionAllowedConfigurable, Instance.GetDefaultEnteringBlockedJunctionAllowed);
-                    Recalculate(segmentEndId, JunctionRestrictionFlags.AllowPedestrianCrossing, Instance.IsPedestrianCrossingAllowedConfigurable, Instance.GetDefaultPedestrianCrossingAllowed);
+                    JunctionRestrictionFlags newConfigurables = default;
+
+                    foreach (var c in configurableCalculators) {
+                        if ((recalculateFlags & c.Key) != 0) {
+                            var result = c.Value(segmentEndId.SegmentId, segmentEndId.StartNode, ref node);
+                            if (result)
+                                newConfigurables |= c.Key;
+                            else
+                                newConfigurables &= ~c.Key;
+                        }
+                    }
+
+                    if (Instance.GetConfigurableHook != null) {
+                        var args = new FlagsHookArgs(segmentEndId.SegmentId, segmentEndId.StartNode, mask, newConfigurables);
+                        Instance.GetConfigurableHook(args);
+                        newConfigurables = args.Result;
+                    }
+
+                    JunctionRestrictionFlags newDefaults = default;
+
+                    foreach (var c in defaultCalculators) {
+                        if ((recalculateFlags & c.Key) != 0) {
+                            try {
+                                CalculationContext.IsConfigurable = (newConfigurables & c.Key) != 0;
+                                var result = c.Value(segmentEndId.SegmentId, segmentEndId.StartNode, ref node);
+                                if (result)
+                                    newDefaults |= c.Key;
+                                else
+                                    newDefaults &= ~c.Key;
+                            }
+                            finally {
+                                CalculationContext.IsConfigurable = null;
+                            }
+                        }
+                    }
+
+                    if (Instance.GetDefaultsHook != null) {
+                        var args = new FlagsHookArgs(segmentEndId.SegmentId, segmentEndId.StartNode, mask, newDefaults);
+                        Instance.GetDefaultsHook(args);
+                        newDefaults = args.Result;
+                    }
+
+                    configurables = (configurables & ~recalculateFlags) | (newConfigurables & recalculateFlags);
+                    defaults = (defaults & ~recalculateFlags) | (newDefaults & recalculateFlags);
 
                     var clearFlags = mask & ~configurables;
                     if (clearFlags != default) {
@@ -1068,8 +1182,10 @@ namespace TrafficManager.Manager.Impl {
             }
 
             public void Invalidate(SegmentEndId segmentEndId) {
-                valid = default;
-                Notifier.Instance.OnNodeModified(segmentEndId.GetNodeId(), Instance);
+                if (valid != default) {
+                    valid = default;
+                    Notifier.Instance.OnNodeModified(segmentEndId.GetNodeId(), Instance);
+                }
             }
 
             public override string ToString() {

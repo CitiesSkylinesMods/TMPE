@@ -1,4 +1,5 @@
 namespace TrafficManager {
+    using TrafficManager.API.Hook;
     using TrafficManager.API.Manager;
     using TrafficManager.API.Notifier;
     using TrafficManager.U;
@@ -34,6 +35,8 @@ namespace TrafficManager {
         }
 
         public static IManagerFactory ManagerFactory => Manager.Impl.ManagerFactory.Instance;
+
+        public static IHookFactory HookFactory => Hook.Impl.HookFactory.Instance;
 
         public static INotifier Notifier => TrafficManager.Notifier.Instance;
     }
