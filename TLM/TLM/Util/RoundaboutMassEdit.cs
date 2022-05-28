@@ -122,14 +122,16 @@ namespace TrafficManager.Util {
             }
 
             if (Options.RoundAboutQuickFix_NoCrossMainR) {
-                JunctionRestrictionsManager.Instance.SetPedestrianCrossingAllowed(
+                JunctionRestrictionsManager.Instance.SetValue(
                     segmentId,
                     startNode,
+                    JunctionRestrictionFlags.AllowPedestrianCrossing,
                     false);
             }
-            JunctionRestrictionsManager.Instance.SetEnteringBlockedJunctionAllowed(
+            JunctionRestrictionsManager.Instance.SetValue(
                 segmentId,
                 startNode,
+                JunctionRestrictionFlags.AllowEnterWhenBlocked,
                 true);
         }
 
@@ -138,9 +140,10 @@ namespace TrafficManager.Util {
             bool isHighway = ExtNodeManager.JunctionHasOnlyHighwayRoads(nodeId);
 
             if (Options.RoundAboutQuickFix_NoCrossYieldR) {
-                JunctionRestrictionsManager.Instance.SetPedestrianCrossingAllowed(
+                JunctionRestrictionsManager.Instance.SetValue(
                     segmentId,
                     startNode,
+                    JunctionRestrictionFlags.AllowPedestrianCrossing,
                     false);
             }
             if (Options.RoundAboutQuickFix_PrioritySigns) {
@@ -152,13 +155,14 @@ namespace TrafficManager.Util {
 
             if (isHighway) {
                 //ignore highway rules: //TODO remove as part of issue #569
-                JunctionRestrictionsManager.Instance.SetLaneChangingAllowedWhenGoingStraight(segmentId, startNode, true);
+                JunctionRestrictionsManager.Instance.SetValue(segmentId, startNode, JunctionRestrictionFlags.AllowForwardLaneChange, true);
             } // endif
 
             if (Options.RoundAboutQuickFix_KeepClearYieldR) {
-                JunctionRestrictionsManager.Instance.SetEnteringBlockedJunctionAllowed(
+                JunctionRestrictionsManager.Instance.SetValue(
                     segmentId,
                     startNode,
+                    JunctionRestrictionFlags.AllowEnterWhenBlocked,
                     false);
             }
         }

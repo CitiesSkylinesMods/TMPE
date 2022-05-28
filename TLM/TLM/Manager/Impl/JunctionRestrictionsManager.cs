@@ -19,6 +19,7 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.Util.Extensions;
     using TrafficManager.Lifecycle;
     using TrafficManager.API.Traffic.Enums;
+    using TrafficManager.Manager.Impl.LaneConnection;
 
     public class JunctionRestrictionsManager
         : AbstractGeometryObservingManager,
@@ -584,188 +585,20 @@ namespace TrafficManager.Manager.Impl {
         }
 
         public bool ClearSegmentEnd(ushort segmentId, bool startNode) {
-            bool ret = true;
-            ret |= SetPedestrianCrossingAllowed(segmentId, startNode, null);
-            ret |= SetEnteringBlockedJunctionAllowed(segmentId, startNode, null);
-            ret |= SetLaneChangingAllowedWhenGoingStraight(segmentId, startNode, null);
-            ret |= SetFarTurnOnRedAllowed(segmentId, startNode, null);
-            ret |= SetNearTurnOnRedAllowed(segmentId, startNode, null);
-            ret |= SetUturnAllowed(segmentId, startNode, null);
-            return ret;
+
+            if (!segmentId.ToSegment().IsValid())
+                return false;
+
+            var segmentEndId = segmentId.AtNode(startNode);
+            return GetJunctionRestrictions(segmentEndId).ClearValue(segmentEndId, JunctionRestrictionFlags.All);
         }
 
         private void SetSegmentJunctionRestrictions(SegmentEndId segmentEndId, JunctionRestrictions restrictions) {
-            if (restrictions.HasValue(segmentEndId, JunctionRestrictionFlags.AllowUTurn)) {
-                SetUturnAllowed(segmentEndId.SegmentId, segmentEndId.StartNode, restrictions.GetValueOrDefault(segmentEndId, JunctionRestrictionFlags.AllowUTurn));
-            }
-
-            if (restrictions.HasValue(segmentEndId, JunctionRestrictionFlags.AllowNearTurnOnRed)) {
-                SetNearTurnOnRedAllowed(segmentEndId.SegmentId, segmentEndId.StartNode, restrictions.GetValueOrDefault(segmentEndId, JunctionRestrictionFlags.AllowNearTurnOnRed));
-            }
-
-            if (restrictions.HasValue(segmentEndId, JunctionRestrictionFlags.AllowFarTurnOnRed)) {
-                SetFarTurnOnRedAllowed(segmentEndId.SegmentId, segmentEndId.StartNode, restrictions.GetValueOrDefault(segmentEndId, JunctionRestrictionFlags.AllowFarTurnOnRed));
-            }
-
-            if (restrictions.HasValue(segmentEndId, JunctionRestrictionFlags.AllowForwardLaneChange)) {
-                SetLaneChangingAllowedWhenGoingStraight(
-                    segmentEndId.SegmentId,
-                    segmentEndId.StartNode,
-                    restrictions.GetValueOrDefault(segmentEndId, JunctionRestrictionFlags.AllowForwardLaneChange));
-            }
-
-            if (restrictions.HasValue(segmentEndId, JunctionRestrictionFlags.AllowEnterWhenBlocked)) {
-                SetEnteringBlockedJunctionAllowed(
-                    segmentEndId.SegmentId,
-                    segmentEndId.StartNode,
-                    restrictions.GetValueOrDefault(segmentEndId, JunctionRestrictionFlags.AllowEnterWhenBlocked));
-            }
-
-            if (restrictions.HasValue(segmentEndId, JunctionRestrictionFlags.AllowPedestrianCrossing)) {
-                SetPedestrianCrossingAllowed(
-                    segmentEndId.SegmentId,
-                    segmentEndId.StartNode,
-                    restrictions.GetValueOrDefault(segmentEndId, JunctionRestrictionFlags.AllowPedestrianCrossing));
-            }
+            GetJunctionRestrictions(segmentEndId).Copy(segmentEndId, restrictions);
         }
 
         private static ref NetNode GetNode(ushort segmentId, bool startNode) =>
             ref segmentId.ToSegment().GetNodeId(startNode).ToNode();
-
-        public bool SetUturnAllowed(ushort segmentId, bool startNode, bool? value) {
-            ref NetSegment netSegment = ref segmentId.ToSegment();
-
-            if (!netSegment.IsValid()) {
-                return false;
-            }
-            if(GetValue(segmentId, startNode, JunctionRestrictionFlags.AllowUTurn) == value) {
-                return true;
-            }
-            if(!IsUturnAllowedConfigurable(segmentId, startNode, ref GetNode(segmentId, startNode))) {
-                return false;
-            }
-
-            if (value == false && Constants.ManagerFactory.LaneConnectionManager.HasUturnConnections(
-                    segmentId,
-                    startNode)) {
-                return false;
-            }
-
-            segmentRestrictions[segmentId].SetValue(segmentId.AtNode(startNode), JunctionRestrictionFlags.AllowUTurn, value);
-            OnSegmentChange(
-                segmentId,
-                startNode,
-                ref Constants.ManagerFactory.ExtSegmentManager.ExtSegments[segmentId],
-                true);
-            return true;
-        }
-
-        public bool SetNearTurnOnRedAllowed(ushort segmentId, bool startNode, bool? value) {
-            return SetTurnOnRedAllowed(true, segmentId, startNode, value);
-        }
-
-        public bool SetFarTurnOnRedAllowed(ushort segmentId, bool startNode, bool? value) {
-            return SetTurnOnRedAllowed(false, segmentId, startNode, value);
-        }
-
-        public bool SetTurnOnRedAllowed(bool near, ushort segmentId, bool startNode, bool? value) {
-            ref NetSegment netSegment = ref segmentId.ToSegment();
-
-            if (!netSegment.IsValid()) {
-                return false;
-            }
-            if (GetValue(segmentId, startNode, near ? JunctionRestrictionFlags.AllowNearTurnOnRed : JunctionRestrictionFlags.AllowFarTurnOnRed) == value) {
-                return true;
-            }
-            if (!IsTurnOnRedAllowedConfigurable(near, segmentId, startNode, ref GetNode(segmentId, startNode))) {
-                return false;
-            }
-
-            if (value == false && Constants.ManagerFactory.LaneConnectionManager.HasUturnConnections(
-                    segmentId,
-                    startNode)) {
-                return false;
-            }
-
-            if (near) {
-                segmentRestrictions[segmentId].SetValue(segmentId.AtNode(startNode), JunctionRestrictionFlags.AllowNearTurnOnRed, value);
-            } else {
-                segmentRestrictions[segmentId].SetValue(segmentId.AtNode(startNode), JunctionRestrictionFlags.AllowFarTurnOnRed, value);
-            }
-            OnSegmentChange(segmentId, startNode, ref Constants.ManagerFactory.ExtSegmentManager.ExtSegments[segmentId], true);
-            return true;
-        }
-
-        public bool SetLaneChangingAllowedWhenGoingStraight(
-            ushort segmentId,
-            bool startNode,
-            bool? value) {
-            ref NetSegment netSegment = ref segmentId.ToSegment();
-
-            if (!netSegment.IsValid()) {
-                return false;
-            }
-            if (GetValue(segmentId, startNode, JunctionRestrictionFlags.AllowForwardLaneChange) == value) {
-                return true;
-            }
-            if (!IsLaneChangingAllowedWhenGoingStraightConfigurable(segmentId, startNode, ref GetNode(segmentId, startNode))) {
-                return false;
-            }
-
-            segmentRestrictions[segmentId].SetValue(segmentId.AtNode(startNode), JunctionRestrictionFlags.AllowForwardLaneChange, value);
-            OnSegmentChange(
-                segmentId,
-                startNode,
-                ref Constants.ManagerFactory.ExtSegmentManager.ExtSegments[segmentId],
-                true);
-            return true;
-        }
-
-        public bool SetEnteringBlockedJunctionAllowed(ushort segmentId, bool startNode, bool? value) {
-            ref NetSegment netSegment = ref segmentId.ToSegment();
-
-            if (!netSegment.IsValid()) {
-                return false;
-            }
-            if (GetValue(segmentId, startNode, JunctionRestrictionFlags.AllowEnterWhenBlocked) == value) {
-                return true;
-            }
-            if (!IsEnteringBlockedJunctionAllowedConfigurable(segmentId, startNode, ref GetNode(segmentId, startNode))) {
-                return false;
-            }
-
-            segmentRestrictions[segmentId].SetValue(segmentId.AtNode(startNode), JunctionRestrictionFlags.AllowEnterWhenBlocked, value);
-
-            // recalculation not needed here because this is a simulation-time feature
-            OnSegmentChange(
-                segmentId,
-                startNode,
-                ref Constants.ManagerFactory.ExtSegmentManager.ExtSegments[segmentId],
-                false);
-            return true;
-        }
-
-        public bool SetPedestrianCrossingAllowed(ushort segmentId, bool startNode, bool? value) {
-            ref NetSegment netSegment = ref segmentId.ToSegment();
-
-            if (!netSegment.IsValid()) {
-                return false;
-            }
-            if(GetValue(segmentId, startNode, JunctionRestrictionFlags.AllowPedestrianCrossing) == value) {
-                return true;
-            }
-            if(!IsPedestrianCrossingAllowedConfigurable(segmentId, startNode, ref GetNode(segmentId, startNode))) {
-                return false;
-            }
-
-            segmentRestrictions[segmentId].SetValue(segmentId.AtNode(startNode), JunctionRestrictionFlags.AllowPedestrianCrossing, value);
-            OnSegmentChange(
-                segmentId,
-                startNode,
-                ref Constants.ManagerFactory.ExtSegmentManager.ExtSegments[segmentId],
-                true);
-            return true;
-        }
 
         private void OnSegmentChange(ushort segmentId,
                                      bool startNode,
@@ -818,71 +651,12 @@ namespace TrafficManager.Manager.Impl {
                             Configuration.SegmentNodeFlags flags = segNodeConf.startNodeFlags;
                             ref NetNode startNode = ref startNodeId.ToNode();
 
-                            if (flags.uturnAllowed != null &&
-                                        IsUturnAllowedConfigurable(
-                                            segNodeConf.segmentId,
-                                            true,
-                                            ref startNode)) {
-                                SetUturnAllowed(
-                                    segNodeConf.segmentId,
-                                    true,
-                                    (bool)flags.uturnAllowed);
-                            }
-
-                            if (flags.turnOnRedAllowed != null &&
-                                IsNearTurnOnRedAllowedConfigurable(
-                                    segNodeConf.segmentId,
-                                    true,
-                                    ref startNode)) {
-                                SetNearTurnOnRedAllowed(
-                                    segNodeConf.segmentId,
-                                    true,
-                                    (bool)flags.turnOnRedAllowed);
-                            }
-
-                            if (flags.farTurnOnRedAllowed != null &&
-                                IsFarTurnOnRedAllowedConfigurable(
-                                    segNodeConf.segmentId,
-                                    true,
-                                    ref startNode)) {
-                                SetFarTurnOnRedAllowed(
-                                    segNodeConf.segmentId,
-                                    true,
-                                    (bool)flags.farTurnOnRedAllowed);
-                            }
-
-                            if (flags.straightLaneChangingAllowed != null &&
-                                IsLaneChangingAllowedWhenGoingStraightConfigurable(
-                                    segNodeConf.segmentId,
-                                    true,
-                                    ref startNode)) {
-                                SetLaneChangingAllowedWhenGoingStraight(
-                                    segNodeConf.segmentId,
-                                    true,
-                                    (bool)flags.straightLaneChangingAllowed);
-                            }
-
-                            if (flags.enterWhenBlockedAllowed != null &&
-                                IsEnteringBlockedJunctionAllowedConfigurable(
-                                    segNodeConf.segmentId,
-                                    true,
-                                    ref startNode)) {
-                                SetEnteringBlockedJunctionAllowed(
-                                    segNodeConf.segmentId,
-                                    true,
-                                    (bool)flags.enterWhenBlockedAllowed);
-                            }
-
-                            if (flags.pedestrianCrossingAllowed != null &&
-                                IsPedestrianCrossingAllowedConfigurable(
-                                    segNodeConf.segmentId,
-                                    true,
-                                    ref startNode)) {
-                                SetPedestrianCrossingAllowed(
-                                    segNodeConf.segmentId,
-                                    true,
-                                    (bool)flags.pedestrianCrossingAllowed);
-                            }
+                            SetValue(segNodeConf.segmentId, true, JunctionRestrictionFlags.AllowUTurn, flags.uturnAllowed);
+                            SetValue(segNodeConf.segmentId, true, JunctionRestrictionFlags.AllowNearTurnOnRed, flags.turnOnRedAllowed);
+                            SetValue(segNodeConf.segmentId, true, JunctionRestrictionFlags.AllowFarTurnOnRed, flags.farTurnOnRedAllowed);
+                            SetValue(segNodeConf.segmentId, true, JunctionRestrictionFlags.AllowForwardLaneChange, flags.straightLaneChangingAllowed);
+                            SetValue(segNodeConf.segmentId, true, JunctionRestrictionFlags.AllowEnterWhenBlocked, flags.enterWhenBlockedAllowed);
+                            SetValue(segNodeConf.segmentId, true, JunctionRestrictionFlags.AllowPedestrianCrossing, flags.pedestrianCrossingAllowed);
                         } else {
                             Log.Warning(
                                 "JunctionRestrictionsManager.LoadData(): Could not get segment " +
@@ -893,74 +667,15 @@ namespace TrafficManager.Manager.Impl {
                     if (segNodeConf.endNodeFlags != null) {
                         ushort endNodeId = netSegment.m_endNode;
                         if (endNodeId != 0) {
-                            Configuration.SegmentNodeFlags flags1 = segNodeConf.endNodeFlags;
+                            Configuration.SegmentNodeFlags flags = segNodeConf.endNodeFlags;
                             ref NetNode node = ref endNodeId.ToNode();
 
-                            if (flags1.uturnAllowed != null &&
-                                IsUturnAllowedConfigurable(
-                                    segNodeConf.segmentId,
-                                    false,
-                                    ref node)) {
-                                SetUturnAllowed(
-                                    segNodeConf.segmentId,
-                                    false,
-                                    (bool)flags1.uturnAllowed);
-                            }
-
-                            if (flags1.straightLaneChangingAllowed != null &&
-                                IsLaneChangingAllowedWhenGoingStraightConfigurable(
-                                    segNodeConf.segmentId,
-                                    false,
-                                    ref node)) {
-                                SetLaneChangingAllowedWhenGoingStraight(
-                                    segNodeConf.segmentId,
-                                    false,
-                                    (bool)flags1.straightLaneChangingAllowed);
-                            }
-
-                            if (flags1.enterWhenBlockedAllowed != null &&
-                                IsEnteringBlockedJunctionAllowedConfigurable(
-                                    segNodeConf.segmentId,
-                                    false,
-                                    ref node)) {
-                                SetEnteringBlockedJunctionAllowed(
-                                    segNodeConf.segmentId,
-                                    false,
-                                    (bool)flags1.enterWhenBlockedAllowed);
-                            }
-
-                            if (flags1.pedestrianCrossingAllowed != null &&
-                                IsPedestrianCrossingAllowedConfigurable(
-                                    segNodeConf.segmentId,
-                                    false,
-                                    ref node)) {
-                                SetPedestrianCrossingAllowed(
-                                    segNodeConf.segmentId,
-                                    false,
-                                    (bool)flags1.pedestrianCrossingAllowed);
-                            }
-
-                            if (flags1.turnOnRedAllowed != null &&
-                                IsNearTurnOnRedAllowedConfigurable(
-                                    segNodeConf.segmentId,
-                                    false,
-                                    ref node)) {
-                                SetNearTurnOnRedAllowed(
-                                    segNodeConf.segmentId,
-                                    false,
-                                    (bool)flags1.turnOnRedAllowed);
-                            }
-
-                            if (flags1.farTurnOnRedAllowed != null &&
-                                IsFarTurnOnRedAllowedConfigurable(
-                                    segNodeConf.segmentId,
-                                    false,
-                                    ref node)) {
-                                SetFarTurnOnRedAllowed(
-                                    segNodeConf.segmentId,
-                                    false,
-                                    (bool)flags1.farTurnOnRedAllowed);
-                            }
+                            SetValue(segNodeConf.segmentId, false, JunctionRestrictionFlags.AllowUTurn, flags.uturnAllowed);
+                            SetValue(segNodeConf.segmentId, false, JunctionRestrictionFlags.AllowNearTurnOnRed, flags.turnOnRedAllowed);
+                            SetValue(segNodeConf.segmentId, false, JunctionRestrictionFlags.AllowFarTurnOnRed, flags.farTurnOnRedAllowed);
+                            SetValue(segNodeConf.segmentId, false, JunctionRestrictionFlags.AllowForwardLaneChange, flags.straightLaneChangingAllowed);
+                            SetValue(segNodeConf.segmentId, false, JunctionRestrictionFlags.AllowEnterWhenBlocked, flags.enterWhenBlockedAllowed);
+                            SetValue(segNodeConf.segmentId, false, JunctionRestrictionFlags.AllowPedestrianCrossing, flags.pedestrianCrossingAllowed);
                         } else {
                             Log.Warning(
                                 "JunctionRestrictionsManager.LoadData(): Could not get segment " +
@@ -1138,31 +853,8 @@ namespace TrafficManager.Manager.Impl {
         bool IJunctionRestrictionsManager.TogglePedestrianCrossingAllowed(ushort segmentId, bool startNode)
             => ToggleValue(segmentId, startNode, JunctionRestrictionFlags.AllowPedestrianCrossing);
 
-        public bool SetValue(ushort segmentId, bool startNode, JunctionRestrictionFlags flags, bool? value) {
-
-            if (flags == default)
-                return false;
-
-            if (flags.IsFlagSet(JunctionRestrictionFlags.AllowUTurn) && !SetUturnAllowed(segmentId, startNode, value))
-                return false;
-
-            if (flags.IsFlagSet(JunctionRestrictionFlags.AllowNearTurnOnRed) && !SetNearTurnOnRedAllowed(segmentId, startNode, value))
-                return false;
-
-            if (flags.IsFlagSet(JunctionRestrictionFlags.AllowFarTurnOnRed) && !SetFarTurnOnRedAllowed(segmentId, startNode, value))
-                return false;
-
-            if (flags.IsFlagSet(JunctionRestrictionFlags.AllowForwardLaneChange) && !SetLaneChangingAllowedWhenGoingStraight(segmentId, startNode, value))
-                return false;
-
-            if (flags.IsFlagSet(JunctionRestrictionFlags.AllowEnterWhenBlocked) && !SetEnteringBlockedJunctionAllowed(segmentId, startNode, value))
-                return false;
-
-            if (flags.IsFlagSet(JunctionRestrictionFlags.AllowPedestrianCrossing) && !SetPedestrianCrossingAllowed(segmentId, startNode, value))
-                return false;
-
-            return true;
-        }
+        public bool SetValue(ushort segmentId, bool startNode, JunctionRestrictionFlags flags, bool? value)
+            => segmentId.ToSegment().IsValid() && flags != default && segmentRestrictions[segmentId].SetValue(segmentId.AtNode(startNode), flags, value);
 
         bool IJunctionRestrictionsManager.SetUturnAllowed(ushort segmentId, bool startNode, bool value)
             => SetValue(segmentId, startNode, JunctionRestrictionFlags.AllowUTurn, value);
@@ -1274,11 +966,11 @@ namespace TrafficManager.Manager.Impl {
                 return (segmentEndId.StartNode ? startNodeRestrictions : endNodeRestrictions).IsConfigurable(segmentEndId, flags);
             }
 
-            public void SetValue(SegmentEndId segmentEndId, JunctionRestrictionFlags flags, bool? value) {
+            public bool SetValue(SegmentEndId segmentEndId, JunctionRestrictionFlags flags, bool? value) {
                 if (segmentEndId.StartNode)
-                    startNodeRestrictions.SetValue(segmentEndId, flags, value);
+                    return startNodeRestrictions.SetValue(segmentEndId, flags, value);
                 else
-                    endNodeRestrictions.SetValue(segmentEndId, flags, value);
+                    return endNodeRestrictions.SetValue(segmentEndId, flags, value);
             }
 
             public bool IsDefault(ushort segmentId) {
@@ -1323,10 +1015,7 @@ namespace TrafficManager.Manager.Impl {
 
             private JunctionRestrictionFlags valid;
 
-            public void ClearValue(SegmentEndId segmentEndId, JunctionRestrictionFlags flags) {
-                values &= ~flags;
-                mask &= ~flags;
-            }
+            public bool ClearValue(SegmentEndId segmentEndId, JunctionRestrictionFlags flags) => SetValue(segmentEndId, flags, null);
 
             private void SetDefault(SegmentEndId segmentEndId, JunctionRestrictionFlags flags, bool value) {
                 if (value)
@@ -1369,17 +1058,66 @@ namespace TrafficManager.Manager.Impl {
                 return ((values & flags & mask) | (defaults & flags & ~mask)) == flags;
             }
 
-            public void SetValue(SegmentEndId segmentEndId, JunctionRestrictionFlags flags, bool? value) {
-                if (value == true) {
-                    values |= flags;
-                    mask |= flags;
-                } else if (value == false) {
-                    values &= ~flags;
-                    mask |= flags;
-                } else {
-                    values &= ~flags;
-                    mask &= ~flags;
-                }
+            public JunctionRestrictionFlags GetFlagsWithDefaults(SegmentEndId segmentEndId) {
+                return (values & mask) | (defaults & ~mask);
+            }
+
+            private const JunctionRestrictionFlags routingRecalculationFlags = JunctionRestrictionFlags.All & ~JunctionRestrictionFlags.AllowEnterWhenBlocked;
+
+            private bool ValidateSet(SegmentEndId segmentEndId, JunctionRestrictionFlags flags, JunctionRestrictionFlags newValues, JunctionRestrictionFlags newMask) {
+
+                const JunctionRestrictionFlags uTurnCheckFlags
+                            = JunctionRestrictionFlags.AllowNearTurnOnRed
+                                | JunctionRestrictionFlags.AllowFarTurnOnRed
+                                | JunctionRestrictionFlags.AllowUTurn;
+
+                if ((newMask & flags & uTurnCheckFlags) != 0
+                        && (newValues & newMask & flags & uTurnCheckFlags) == 0
+                        && LaneConnectionManager.Instance.HasUturnConnections(segmentEndId.SegmentId, segmentEndId.StartNode))
+                    return false;
+
+                return true;
+            }
+
+            public bool SetValue(SegmentEndId segmentEndId, JunctionRestrictionFlags flags, bool? value) {
+
+                Recalculate(segmentEndId);
+
+                var newValues = value == true ? (values | flags) : (values & ~flags);
+                var newMask = value.HasValue ? (mask | flags) : (mask & ~flags);
+
+                return Set(segmentEndId, flags, newValues, newMask);
+            }
+
+            private bool Set(SegmentEndId segmentEndId, JunctionRestrictionFlags flags, JunctionRestrictionFlags newValues, JunctionRestrictionFlags newMask) {
+
+                Recalculate(segmentEndId);
+
+                var changingValues = newValues ^ values;
+                var changingMask = newMask ^ mask;
+
+                if (changingValues == 0 && changingMask == 0)
+                    return true;
+
+                if ((configurables & changingValues) != changingValues || (configurables & changingMask) != changingMask)
+                    return false;
+
+                if (!ValidateSet(segmentEndId, flags, newValues, newMask))
+                    return false;
+
+                values = newValues & flags;
+                mask = newMask & flags;
+
+                Instance.OnSegmentChange(segmentEndId.SegmentId,
+                                            segmentEndId.StartNode,
+                                            ref ExtSegmentManager.Instance.ExtSegments[segmentEndId.SegmentId],
+                                            (flags & routingRecalculationFlags) != 0);
+                return true;
+            }
+
+            public void Copy(SegmentEndId segmentEndId, JunctionRestrictions other) {
+                Recalculate(segmentEndId);
+                Set(segmentEndId, other.mask & configurables, other.values, other.mask);
             }
 
             public bool IsDefault(SegmentEndId segmentEndId) {
@@ -1401,7 +1139,9 @@ namespace TrafficManager.Manager.Impl {
 
             private void Recalculate(SegmentEndId segmentEndId) {
 
-                if ((valid & JunctionRestrictionFlags.All) != JunctionRestrictionFlags.All) {
+                var recalculateFlags = JunctionRestrictionFlags.All & ~valid;
+
+                if (recalculateFlags != default) {
 
                     Recalculate(segmentEndId, JunctionRestrictionFlags.AllowUTurn, Instance.IsUturnAllowedConfigurable, Instance.GetDefaultUturnAllowed);
                     Recalculate(segmentEndId, JunctionRestrictionFlags.AllowNearTurnOnRed, Instance.IsNearTurnOnRedAllowedConfigurable, Instance.GetDefaultNearTurnOnRedAllowed);
@@ -1409,6 +1149,17 @@ namespace TrafficManager.Manager.Impl {
                     Recalculate(segmentEndId, JunctionRestrictionFlags.AllowForwardLaneChange, Instance.IsLaneChangingAllowedWhenGoingStraightConfigurable, Instance.GetDefaultLaneChangingAllowedWhenGoingStraight);
                     Recalculate(segmentEndId, JunctionRestrictionFlags.AllowEnterWhenBlocked, Instance.IsEnteringBlockedJunctionAllowedConfigurable, Instance.GetDefaultEnteringBlockedJunctionAllowed);
                     Recalculate(segmentEndId, JunctionRestrictionFlags.AllowPedestrianCrossing, Instance.IsPedestrianCrossingAllowedConfigurable, Instance.GetDefaultPedestrianCrossingAllowed);
+
+                    var clearFlags = mask & ~configurables;
+                    if (clearFlags != default) {
+                        values &= configurables;
+                        mask &= configurables;
+                    }
+
+                    Instance.OnSegmentChange(segmentEndId.SegmentId,
+                        segmentEndId.StartNode,
+                        ref ExtSegmentManager.Instance.ExtSegments[segmentEndId.SegmentId],
+                        ((recalculateFlags | clearFlags) & routingRecalculationFlags) != 0);
                 }
             }
 

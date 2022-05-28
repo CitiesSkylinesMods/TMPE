@@ -362,9 +362,10 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
             RecalculateLaneArrows(sourceLaneId, nodeId, sourceStartNode);
 
             if (sourceSegmentId == targetSegmentId) {
-                JunctionRestrictionsManager.Instance.SetUturnAllowed(
+                JunctionRestrictionsManager.Instance.SetValue(
                     sourceSegmentId,
                     sourceStartNode,
+                    JunctionRestrictionFlags.AllowUTurn,
                     true);
             }
 
