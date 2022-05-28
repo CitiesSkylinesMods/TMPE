@@ -600,20 +600,21 @@ namespace TrafficManager.Manager.Impl {
         private static ref NetNode GetNode(ushort segmentId, bool startNode) =>
             ref segmentId.ToSegment().GetNodeId(startNode).ToNode();
 
-        private void OnSegmentChange(ushort segmentId,
-                                     bool startNode,
-                                     ref ExtSegment seg,
+        private void OnSegmentChange(SegmentEndId segmentEndId,
                                      bool requireRecalc) {
+
+            ref var seg = ref ExtSegmentManager.Instance.ExtSegments[segmentEndId.SegmentId];
+
             HandleValidSegment(ref seg);
 
             if (requireRecalc) {
-                RoutingManager.Instance.RequestRecalculation(segmentId);
+                RoutingManager.Instance.RequestRecalculation(segmentEndId.SegmentId);
                 if (TMPELifecycle.Instance.MayPublishSegmentChanges()) {
-                    ExtSegmentManager.Instance.PublishSegmentChanges(segmentId);
+                    ExtSegmentManager.Instance.PublishSegmentChanges(segmentEndId.SegmentId);
                 }
             }
 
-            Notifier.Instance.OnNodeModified(segmentId.ToSegment().GetNodeId(startNode), this);
+            Notifier.Instance.OnNodeModified(segmentEndId.GetNodeId(), this);
         }
 
         public override void OnLevelUnloading() {
@@ -893,8 +894,8 @@ namespace TrafficManager.Manager.Impl {
             }
 
             public void Invalidate(ushort segmentId) {
-                startNodeRestrictions.Invalidate(segmentId.AtStartNode());
-                endNodeRestrictions.Invalidate(segmentId.AtEndNode());
+                startNodeRestrictions.Invalidate(segmentId.AtStartNode(), false);
+                endNodeRestrictions.Invalidate(segmentId.AtEndNode(), false);
                 Notifier.Instance.OnNodeModified(segmentId, Instance);
             }
 
@@ -1011,10 +1012,6 @@ namespace TrafficManager.Manager.Impl {
                 values = newValues & flags;
                 mask = newMask & flags;
 
-                Instance.OnSegmentChange(segmentEndId.SegmentId,
-                                            segmentEndId.StartNode,
-                                            ref ExtSegmentManager.Instance.ExtSegments[segmentEndId.SegmentId],
-                                            (flags & routingRecalculationFlags) != 0);
                 return true;
             }
 
@@ -1059,10 +1056,7 @@ namespace TrafficManager.Manager.Impl {
                         mask &= configurables;
                     }
 
-                    Instance.OnSegmentChange(segmentEndId.SegmentId,
-                        segmentEndId.StartNode,
-                        ref ExtSegmentManager.Instance.ExtSegments[segmentEndId.SegmentId],
-                        ((recalculateFlags | clearFlags) & routingRecalculationFlags) != 0);
+                    Instance.OnSegmentChange(segmentEndId, ((recalculateFlags | clearFlags) & routingRecalculationFlags) != 0);
                 }
             }
 
@@ -1074,9 +1068,10 @@ namespace TrafficManager.Manager.Impl {
                 }
             }
 
-            public void Invalidate(SegmentEndId segmentEndId) {
+            public void Invalidate(SegmentEndId segmentEndId, bool notify = true) {
                 valid = default;
-                Notifier.Instance.OnNodeModified(segmentEndId.GetNodeId(), Instance);
+                if (notify)
+                    Notifier.Instance.OnNodeModified(segmentEndId.GetNodeId(), Instance);
             }
 
             public override string ToString() {
