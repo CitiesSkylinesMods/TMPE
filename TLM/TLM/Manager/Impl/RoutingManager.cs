@@ -548,14 +548,11 @@ namespace TrafficManager.Manager.Impl {
                 }
             }
 
-            bool prevIsRoadLane = prevLaneInfo.CheckType(ROUTED_LANE_TYPES, ROAD_VEHICLE_TYPES);
-
-
             // determine if highway rules should be applied
             bool onHighway = Options.highwayRules && onOnewayHighway;
             bool applyHighwayRules = onHighway && nodeIsSimpleJunction;
             bool applyHighwayRulesAtJunction = applyHighwayRules && nodeIsRealJunction;
-            bool iterateViaGeometry = (applyHighwayRulesAtJunction || applyHighwayMergingRules) && prevIsRoadLane;
+            bool iterateViaGeometry = (applyHighwayRulesAtJunction || applyHighwayMergingRules) && prevLaneInfo.MatchesRoad();
             // start with u-turns at highway junctions
             ushort nextSegmentId = iterateViaGeometry ? prevSegmentId : (ushort)0;
 
