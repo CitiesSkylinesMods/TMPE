@@ -11,6 +11,10 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
     using TrafficManager.Util.Extensions;
     using UnityEngine;
     using static TrafficManager.Util.Shortcuts;
+    using TrafficManager.Util;
+    using TrafficManager.Util.Extensions;
+    using TrafficManager.Lifecycle;
+    using TrafficManager.Patch;
 #if DEBUG
     using TrafficManager.State.ConfigData;
 #endif
@@ -27,6 +31,10 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
 
         public NetInfo.LaneType LaneTypes => LaneConnectionManager.LANE_TYPES;
         public VehicleInfo.VehicleType VehicleTypes => LaneConnectionManager.VEHICLE_TYPES;
+
+        private LaneConnectionSubManager() {
+            NetManagerEvents.Instance.ReleasingSegment += ReleasingSegment;
+        }
 
         public override void OnBeforeLoadData() {
             base.OnBeforeLoadData();
@@ -373,19 +381,18 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
             return true;
         }
 
-        public void HandleInvalidSegmentImpl(ushort segmentId) {
+        private void ReleasingSegment(ushort segmentId, ref NetSegment segment) {
 #if DEBUG
             bool logLaneConnections = DebugSwitch.LaneConnections.Get();
 #else
             const bool logLaneConnections = false;
 #endif
             if (logLaneConnections) {
-                Log._Debug($"LaneConnectionSubManager({Group}).HandleInvalidSegment({segmentId}): " +
-                           "Segment has become invalid. Removing lane connections.");
+                Log._Debug($"LaneConnectionManager.ReleasingSegment({segmentId}, isValid={segment.IsValid()}): " +
+                           "Segment is about to become invalid. Removing lane connections.");
             }
 
-            ref NetSegment netSegment = ref segmentId.ToSegment();
-            foreach (LaneIdAndIndex laneIdAndIndex in netSegment.GetSegmentLaneIdsAndLaneIndexes()) {
+            foreach (LaneIdAndIndex laneIdAndIndex in segment.GetSegmentLaneIdsAndLaneIndexes()) {
                 connectionDataBase_.RemoveConnections(laneIdAndIndex.laneId);
             }
 
@@ -414,8 +421,8 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
             }
 
             if (laneId == null) {
-                laneId = FindLaneId(segmentId, laneIndex);
-                if (laneId == null) {
+                laneId = ExtSegmentManager.Instance.GetLaneId(segmentId, laneIndex);
+                if (laneId == 0) {
                     return false;
                 }
             }
@@ -463,23 +470,6 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
             }
 
             return true;
-        }
-
-        private uint? FindLaneId(ushort segmentId, byte laneIndex) {
-            ref NetSegment netSegment = ref segmentId.ToSegment();
-
-            NetInfo.Lane[] lanes = netSegment.Info.m_lanes;
-            uint laneId = netSegment.m_lanes;
-
-            for (byte i = 0; i < lanes.Length && laneId != 0; i++) {
-                if (i == laneIndex) {
-                    return laneId;
-                }
-
-                laneId = laneId.ToLane().m_nextLane;
-            }
-
-            return null;
         }
 
         /// <summary>
