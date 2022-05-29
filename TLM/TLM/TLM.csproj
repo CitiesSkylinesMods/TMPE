@@ -182,6 +182,7 @@
     <Compile Include="UI\SubTools\RoutingDetector\Connection.cs" />
     <Compile Include="UI\SubTools\RoutingDetector\LaneEnd.cs" />
     <Compile Include="UI\SubTools\RoutingDetector\RoutingDetectorTool.cs" />
+    <Compile Include="UI\UIFactory.cs" />
     <Compile Include="UI\WhatsNew\MarkupKeyword.cs" />
     <Compile Include="UI\WhatsNew\WhatsNewMarkup.cs" />
     <Compile Include="Util\Extensions\CitizenUnitExtensions.cs" />
