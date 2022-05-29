@@ -14,6 +14,6 @@ namespace TrafficManager.API.UI {
 
         Texture2D VehicleRestriction(ExtVehicleType type, bool allow);
 
-        Texture2D GetTrafficLightIcon(ushort nodeId);
+        Texture2D TrafficLightIcon(ushort nodeId);
     }
 }

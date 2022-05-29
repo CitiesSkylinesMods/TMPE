@@ -173,7 +173,7 @@ namespace TrafficManager.UI.Textures {
             }
         }
 
-        public Texture2D GetTrafficLightIcon(ushort nodeId) {
+        public Texture2D TrafficLightIcon(ushort nodeId) {
             if (!TrafficLightManager.Instance.HasTrafficLight(nodeId)) {
                 return TrafficLightTextures.Instance.TrafficLightDisabled;
             } else if (TrafficLightSimulationManager.Instance.HasSimulation(nodeId)) {
