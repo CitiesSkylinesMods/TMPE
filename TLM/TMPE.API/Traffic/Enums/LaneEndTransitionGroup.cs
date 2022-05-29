@@ -6,6 +6,8 @@ namespace TrafficManager.API.Traffic.Enums {
         None = 0,
         Road = 1,
         Track = 2,
-        All = Road | Track,
+        Vehicle = Road | Track,
+        Bicycle = 4,
+        Pedestrian = 8,
     }
 }

@@ -187,7 +187,7 @@ namespace TrafficManager {
 
             public bool sourceStartNode;
 
-            public LaneEndTransitionGroup group = LaneEndTransitionGroup.All;
+            public LaneEndTransitionGroup group = LaneEndTransitionGroup.Vehicle;
 
             public bool LegacyBidirectional => SerializableDataExtension.Version < 2;
 

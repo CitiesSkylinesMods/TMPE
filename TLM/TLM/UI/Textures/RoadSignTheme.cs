@@ -1,10 +1,12 @@
-﻿namespace TrafficManager.UI.Textures {
+namespace TrafficManager.UI.Textures {
     using System;
     using System.Collections.Generic;
     using CSUtil.Commons;
     using JetBrains.Annotations;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.API.Traffic.Enums;
+    using TrafficManager.API.UI;
+    using TrafficManager.Manager.Impl;
     using TrafficManager.State;
     using TrafficManager.UI.SubTools;
     using TrafficManager.Util;
@@ -15,7 +17,7 @@
     /// Defines one theme for road signs. All themes are accessible via, and stored in
     /// <see cref="RoadSignThemeManager"/>.
     /// </summary>
-    public class RoadSignTheme {
+    public class RoadSignTheme : ITheme {
         public enum OtherRestriction {
             Crossing,
             EnterBlockedJunction,
@@ -146,6 +148,39 @@
             return this.otherRestrictions_.ContainsKey(type)
                        ? this.otherRestrictions_[type].restrict
                        : this.ParentTheme.GetOtherRestriction(type, allow: false);
+        }
+
+        public Texture2D JunctionRestriction(JunctionRestrictionFlags rule, bool allowed) {
+            bool rht = Shortcuts.RHT;
+            switch (rule) {
+                case JunctionRestrictionFlags.AllowPedestrianCrossing:
+                    return GetOtherRestriction(OtherRestriction.Crossing, allowed);
+                case JunctionRestrictionFlags.AllowUTurn:
+                    return GetOtherRestriction(OtherRestriction.UTurn, allowed);
+                case JunctionRestrictionFlags.AllowEnterWhenBlocked:
+                    return GetOtherRestriction(OtherRestriction.EnterBlockedJunction, allowed);
+                case JunctionRestrictionFlags.AllowForwardLaneChange:
+                    return GetOtherRestriction(OtherRestriction.LaneChange, allowed);
+                case JunctionRestrictionFlags.AllowFarTurnOnRed when rht:
+                case JunctionRestrictionFlags.AllowNearTurnOnRed when !rht:
+                    return GetOtherRestriction(OtherRestriction.LeftOnRed, allowed);
+                case JunctionRestrictionFlags.AllowNearTurnOnRed when rht:
+                case JunctionRestrictionFlags.AllowFarTurnOnRed when !rht:
+                    return GetOtherRestriction(OtherRestriction.RightOnRed, allowed);
+                default:
+                    Log.Error($"could not get texture for {rule}.");
+                    return null;
+            }
+        }
+
+        public Texture2D TrafficLightIcon(ushort nodeId) {
+            if (!TrafficLightManager.Instance.HasTrafficLight(nodeId)) {
+                return TrafficLightTextures.Instance.TrafficLightDisabled;
+            } else if (TrafficLightSimulationManager.Instance.HasSimulation(nodeId)) {
+                return TrafficLightTextures.Instance.TrafficLightEnabledTimed;
+            } else {
+                return TrafficLightTextures.Instance.TrafficLightEnabled;
+            }
         }
 
         public RoadSignTheme Load(bool whiteTexture = false) {

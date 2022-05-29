@@ -116,10 +116,10 @@ namespace TrafficManager.UI.SubTools {
         private void UpdateGroup() {
             if (selectedLaneTransitionGroup_ != LaneEndTransitionGroup.None) {
                 group_ = selectedLaneTransitionGroup_;
-            } else if (selectedNodeTransitionGroups_ == LaneEndTransitionGroup.All) {
+            } else if (selectedNodeTransitionGroups_ == LaneEndTransitionGroup.Vehicle) {
                 // No node is selected or selected node has road+track
                 if (MultiMode) {
-                    group_ = LaneEndTransitionGroup.All;
+                    group_ = LaneEndTransitionGroup.Vehicle;
                 } else if (AltIsPressed) {
                     group_ = LaneEndTransitionGroup.Track;
                 } else {
@@ -167,7 +167,7 @@ namespace TrafficManager.UI.SubTools {
                 Color color,
                 bool highlight = false,
                 bool renderLimits = false,
-                LaneEndTransitionGroup groupFilter = LaneEndTransitionGroup.All) {
+                LaneEndTransitionGroup groupFilter = LaneEndTransitionGroup.Vehicle) {
 
                 var groups = TransitionGroup & groupFilter;
 
@@ -307,7 +307,7 @@ namespace TrafficManager.UI.SubTools {
                     if (AltIsPressed) {
                         groupAtNode = LaneEndTransitionGroup.Track;
                     } else {
-                        groupAtNode = LaneEndTransitionGroup.All;
+                        groupAtNode = LaneEndTransitionGroup.Vehicle;
                     }
                 }
 
@@ -908,7 +908,7 @@ namespace TrafficManager.UI.SubTools {
                     if (!targetLaneEnd.IsTarget ||
                         targetLaneEnd.SegmentId == sourceLaneEnd.SegmentId ||
                         targetLaneEnd.SegmentId == mainSegmentSourceId ||
-                        !CanConnect(sourceLaneEnd, targetLaneEnd, LaneEndTransitionGroup.All, out _)) {
+                        !CanConnect(sourceLaneEnd, targetLaneEnd, LaneEndTransitionGroup.Vehicle, out _)) {
                         continue;
                     }
                     bool connect = false;
@@ -952,7 +952,7 @@ namespace TrafficManager.UI.SubTools {
                             sourceLaneEnd.LaneId,
                             targetLaneEnd.LaneId,
                             sourceLaneEnd.StartNode,
-                            LaneEndTransitionGroup.All);
+                            LaneEndTransitionGroup.Vehicle);
                     }
                 } // foreach
             } // foreach
@@ -1693,7 +1693,7 @@ namespace TrafficManager.UI.SubTools {
                             string key = "UI.Key:Shift bidirectional";
                             items.Add(new HoldModifier(shift: true, localizedText: T(key)));
                         }
-                    } else if(selectedNodeTransitionGroups_ == LaneEndTransitionGroup.All) {
+                    } else if(selectedNodeTransitionGroups_ == LaneEndTransitionGroup.Vehicle) {
                         items.Add(new HoldModifier(shift: true, localizedText: T("UI.Key:alt track mode")));
                         items.Add(new HoldModifier(shift: true, localizedText: T("UI.Key:Shift car+track mode")));
                     }
