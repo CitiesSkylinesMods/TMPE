@@ -17,6 +17,8 @@ namespace TrafficManager.Manager.Impl {
 
         public IExtCitizenManager ExtCitizenManager => Impl.ExtCitizenManager.Instance;
 
+        public IExtLaneManager ExtLaneManager => Impl.ExtLaneManager.Instance;
+
         public IExtNodeManager ExtNodeManager => Impl.ExtNodeManager.Instance;
 
         public IExtPathManager ExtPathManager => Impl.ExtPathManager.Instance;

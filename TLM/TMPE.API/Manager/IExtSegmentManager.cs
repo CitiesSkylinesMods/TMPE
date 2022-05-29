@@ -32,5 +32,13 @@ namespace TrafficManager.API.Manager {
         /// <param name="segmentId"></param>
         /// <returns></returns>
         bool CalculateIsHighway(ushort segmentId);
+
+        /// <summary>
+        /// Returns the Lane ID of the specified lane.
+        /// </summary>
+        /// <param name="segmentId">a Segment ID</param>
+        /// <param name="laneIndex">a lane index on segment <paramref name="segmentId"/></param>
+        /// <returns>a Lane ID, or 0 if <paramref name="segmentId"/> and <paramref name="laneIndex"/> do not represent a valid lane</returns>
+        public uint GetLaneId(ushort segmentId, int laneIndex);
     }
 }

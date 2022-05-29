@@ -26,10 +26,10 @@ namespace TrafficManager.State.Keybinds {
         private void CreateUI_Global() {
             AddReadOnlyKeybind(Translation.Options.Get("Keybind:Generic exit subtool key"),
                                Esc);
-            AddReadOnlyKeybind(Translation.Options.Get("Keybind:Elevation up key"),
+            AddReadOnlyKeybind(Translation.Options.Get("Keybind:Overground view"),
                                ElevationUp,
                                autoUpdateText: true);
-            AddReadOnlyKeybind(Translation.Options.Get("Keybind:Elevation down key"),
+            AddReadOnlyKeybind(Translation.Options.Get("Keybind:Underground view"),
                                ElevationDown,
                                autoUpdateText: true);
 
