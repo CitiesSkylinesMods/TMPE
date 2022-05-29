@@ -11,7 +11,7 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
 #endif
 
     public class LaneConnectionManager
-        : AbstractGeometryObservingManager,
+        : AbstractCustomManager,
           ICustomDataManager<List<Configuration.LaneConnection>>,
           ILaneConnectionManager {
         public const NetInfo.LaneType LANE_TYPES =
@@ -96,8 +96,8 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
 
         public bool RemoveLaneConnection(uint sourceLaneId, uint targetLaneId, bool sourceStartNode, LaneEndTransitionGroup group) {
             bool success = true;
-            var sourceLaneInfo = LaneUtil.GetLaneInfo(sourceLaneId);
-            var targetLaneInfo = LaneUtil.GetLaneInfo(targetLaneId);
+            var sourceLaneInfo = ExtLaneManager.Instance.GetLaneInfo(sourceLaneId);
+            var targetLaneInfo = ExtLaneManager.Instance.GetLaneInfo(targetLaneId);
             if (Road.Supports(group)) {
                 success = Road.RemoveLaneConnection(sourceLaneId, targetLaneId, sourceStartNode);
             } else {
@@ -139,11 +139,6 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
         internal void RemoveLaneConnectionsFromNode(ushort nodeId) {
             Road.RemoveLaneConnectionsFromNode(nodeId);
             Track.RemoveLaneConnectionsFromNode(nodeId);
-        }
-
-        protected override void HandleInvalidSegment(ref ExtSegment seg) {
-            Road.HandleInvalidSegmentImpl(seg.segmentId);
-            Track.HandleInvalidSegmentImpl(seg.segmentId);
         }
 
 

@@ -9,9 +9,9 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
     using TrafficManager.Lifecycle;
     using TrafficManager.State;
     using TrafficManager.Util.Extensions;
-    using UnityEngine;
     using static TrafficManager.Util.Shortcuts;
     using TrafficManager.Util;
+    using TrafficManager.Patch;
 #if DEBUG
     using TrafficManager.State.ConfigData;
 #endif
@@ -51,6 +51,10 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
         public bool Supports(LaneEndTransitionGroup group) => (group & Group) != 0;
 
         public bool Supports(NetInfo.Lane laneInfo) => laneInfo.Matches(laneTypes_, vehicleTypes_);
+
+        private LaneConnectionSubManager() {
+            NetManagerEvents.Instance.ReleasingSegment += ReleasingSegment;
+        }
 
         public override void OnBeforeLoadData() {
             base.OnBeforeLoadData();
@@ -356,8 +360,8 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
                 return false;
             }
 
-            var sourceLaneInfo = LaneUtil.GetLaneInfo(sourceLaneId);
-            var targetLaneInfo = LaneUtil.GetLaneInfo(targetLaneId);
+            var sourceLaneInfo = ExtLaneManager.Instance.GetLaneInfo(sourceLaneId);
+            var targetLaneInfo = ExtLaneManager.Instance.GetLaneInfo(targetLaneId);
             ref NetLane sourceNetLane = ref sourceLaneId.ToLane();
             ref NetLane targetNetLane = ref targetLaneId.ToLane();
             bool canConnect = Supports(sourceLaneInfo) && Supports(targetLaneInfo);
@@ -435,19 +439,18 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
             return true;
         }
 
-        public void HandleInvalidSegmentImpl(ushort segmentId) {
+        private void ReleasingSegment(ushort segmentId, ref NetSegment segment) {
 #if DEBUG
             bool logLaneConnections = DebugSwitch.LaneConnections.Get();
 #else
             const bool logLaneConnections = false;
 #endif
             if (logLaneConnections) {
-                Log._Debug($"LaneConnectionSubManager({Group}).HandleInvalidSegment({segmentId}): " +
-                           "Segment has become invalid. Removing lane connections.");
+                Log._Debug($"LaneConnectionSubManager({Group}).ReleasingSegment({segmentId}, isValid={segment.IsValid()}): " +
+                           "Segment is about to become invalid. Removing lane connections.");
             }
 
-            ref NetSegment netSegment = ref segmentId.ToSegment();
-            foreach (LaneIdAndIndex laneIdAndIndex in netSegment.GetSegmentLaneIdsAndLaneIndexes()) {
+            foreach (LaneIdAndIndex laneIdAndIndex in segment.GetSegmentLaneIdsAndLaneIndexes()) {
                 connectionDataBase_.RemoveConnections(laneIdAndIndex.laneId);
             }
 
