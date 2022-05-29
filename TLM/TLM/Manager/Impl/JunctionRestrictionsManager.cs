@@ -1131,7 +1131,7 @@ namespace TrafficManager.Manager.Impl {
                     }
 
                     if (Instance.GetConfigurableHook != null) {
-                        var args = new FlagsHookArgs(segmentEndId.SegmentId, segmentEndId.StartNode, mask, newConfigurables);
+                        var args = new FlagsHookArgs(segmentEndId.SegmentId, segmentEndId.StartNode, recalculateFlags, newConfigurables);
                         Instance.GetConfigurableHook(args);
                         newConfigurables = args.Result;
                     }
@@ -1155,13 +1155,14 @@ namespace TrafficManager.Manager.Impl {
                     }
 
                     if (Instance.GetDefaultsHook != null) {
-                        var args = new FlagsHookArgs(segmentEndId.SegmentId, segmentEndId.StartNode, mask, newDefaults);
+                        var args = new FlagsHookArgs(segmentEndId.SegmentId, segmentEndId.StartNode, recalculateFlags, newDefaults);
                         Instance.GetDefaultsHook(args);
                         newDefaults = args.Result;
                     }
 
                     configurables = (configurables & ~recalculateFlags) | (newConfigurables & recalculateFlags);
                     defaults = (defaults & ~recalculateFlags) | (newDefaults & recalculateFlags);
+                    valid |= recalculateFlags;
 
                     var clearFlags = mask & ~configurables;
                     if (clearFlags != default) {
