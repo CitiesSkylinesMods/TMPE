@@ -3,7 +3,7 @@ using System;
 namespace TrafficManager.API.Traffic.Enums {
 
     [Flags]
-    public enum JunctionRestrictionFlags {
+    public enum JunctionRestrictionsFlags {
         AllowUTurn = 1 << 0,
         AllowNearTurnOnRed = 1 << 1,
         AllowFarTurnOnRed = 1 << 2,

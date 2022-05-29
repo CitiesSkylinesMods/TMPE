@@ -991,7 +991,7 @@ namespace TrafficManager.Manager.Impl {
                                         bool hasUTurnRule = JunctionRestrictionsManager.Instance.GetValueOrDefault(
                                             nextSegmentId,
                                             isNodeStartNodeOfNextSegment,
-                                            JunctionRestrictionFlags.AllowUTurn);
+                                            JunctionRestrictionsFlags.AllowUTurn);
                                         bool hasFarTurnArrow = (Shortcuts.LHT && hasRightArrow) || (Shortcuts.RHT && hasLeftArrow);
                                         bool canTurn = !nodeIsRealJunction || nodeIsEndOrOneWayOut || hasFarTurnArrow || hasUTurnRule;
 
@@ -1161,7 +1161,7 @@ namespace TrafficManager.Manager.Impl {
                     bool laneChangesAllowed
                         = Options.junctionRestrictionsEnabled
                           && JunctionRestrictionsManager.Instance.GetValueOrDefault(
-                                 nextSegmentId, isNodeStartNodeOfNextSegment, JunctionRestrictionFlags.AllowForwardLaneChange);
+                                 nextSegmentId, isNodeStartNodeOfNextSegment, JunctionRestrictionsFlags.AllowForwardLaneChange);
                     int nextCompatibleLaneCount = numNextCompatibleTransitionDatas;
 
                     if (nextCompatibleLaneCount > 0) {

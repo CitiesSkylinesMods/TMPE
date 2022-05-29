@@ -125,13 +125,13 @@ namespace TrafficManager.Util {
                 JunctionRestrictionsManager.Instance.SetValue(
                     segmentId,
                     startNode,
-                    JunctionRestrictionFlags.AllowPedestrianCrossing,
+                    JunctionRestrictionsFlags.AllowPedestrianCrossing,
                     false);
             }
             JunctionRestrictionsManager.Instance.SetValue(
                 segmentId,
                 startNode,
-                JunctionRestrictionFlags.AllowEnterWhenBlocked,
+                JunctionRestrictionsFlags.AllowEnterWhenBlocked,
                 true);
         }
 
@@ -143,7 +143,7 @@ namespace TrafficManager.Util {
                 JunctionRestrictionsManager.Instance.SetValue(
                     segmentId,
                     startNode,
-                    JunctionRestrictionFlags.AllowPedestrianCrossing,
+                    JunctionRestrictionsFlags.AllowPedestrianCrossing,
                     false);
             }
             if (Options.RoundAboutQuickFix_PrioritySigns) {
@@ -155,14 +155,14 @@ namespace TrafficManager.Util {
 
             if (isHighway) {
                 //ignore highway rules: //TODO remove as part of issue #569
-                JunctionRestrictionsManager.Instance.SetValue(segmentId, startNode, JunctionRestrictionFlags.AllowForwardLaneChange, true);
+                JunctionRestrictionsManager.Instance.SetValue(segmentId, startNode, JunctionRestrictionsFlags.AllowForwardLaneChange, true);
             } // endif
 
             if (Options.RoundAboutQuickFix_KeepClearYieldR) {
                 JunctionRestrictionsManager.Instance.SetValue(
                     segmentId,
                     startNode,
-                    JunctionRestrictionFlags.AllowEnterWhenBlocked,
+                    JunctionRestrictionsFlags.AllowEnterWhenBlocked,
                     false);
             }
         }

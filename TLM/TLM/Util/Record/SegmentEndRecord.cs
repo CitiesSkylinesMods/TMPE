@@ -40,12 +40,12 @@ namespace TrafficManager.Util.Record {
         private static JunctionRestrictionsManager JRMan => JunctionRestrictionsManager.Instance;
 
         public void Record() {
-            uturnAllowed_ = ToTernaryBool(JRMan.GetValueOrDefault(SegmentId, StartNode, JunctionRestrictionFlags.AllowUTurn));
-            nearTurnOnRedAllowed_ = ToTernaryBool(JRMan.GetValueOrDefault(SegmentId, StartNode, JunctionRestrictionFlags.AllowNearTurnOnRed));
-            farTurnOnRedAllowed_ = ToTernaryBool(JRMan.GetValueOrDefault(SegmentId, StartNode, JunctionRestrictionFlags.AllowFarTurnOnRed));
-            laneChangingAllowedWhenGoingStraight_ = ToTernaryBool(JRMan.GetValueOrDefault(SegmentId, StartNode, JunctionRestrictionFlags.AllowForwardLaneChange));
-            enteringBlockedJunctionAllowed_ = ToTernaryBool(JRMan.GetValueOrDefault(SegmentId, StartNode, JunctionRestrictionFlags.AllowEnterWhenBlocked));
-            pedestrianCrossingAllowed_ = ToTernaryBool(JRMan.GetValueOrDefault(SegmentId, StartNode, JunctionRestrictionFlags.AllowPedestrianCrossing));
+            uturnAllowed_ = ToTernaryBool(JRMan.GetValueOrDefault(SegmentId, StartNode, JunctionRestrictionsFlags.AllowUTurn));
+            nearTurnOnRedAllowed_ = ToTernaryBool(JRMan.GetValueOrDefault(SegmentId, StartNode, JunctionRestrictionsFlags.AllowNearTurnOnRed));
+            farTurnOnRedAllowed_ = ToTernaryBool(JRMan.GetValueOrDefault(SegmentId, StartNode, JunctionRestrictionsFlags.AllowFarTurnOnRed));
+            laneChangingAllowedWhenGoingStraight_ = ToTernaryBool(JRMan.GetValueOrDefault(SegmentId, StartNode, JunctionRestrictionsFlags.AllowForwardLaneChange));
+            enteringBlockedJunctionAllowed_ = ToTernaryBool(JRMan.GetValueOrDefault(SegmentId, StartNode, JunctionRestrictionsFlags.AllowEnterWhenBlocked));
+            pedestrianCrossingAllowed_ = ToTernaryBool(JRMan.GetValueOrDefault(SegmentId, StartNode, JunctionRestrictionsFlags.AllowPedestrianCrossing));
 
             prioirtySign_ = priorityMan.GetPrioritySign(SegmentId, StartNode);
 
@@ -65,12 +65,12 @@ namespace TrafficManager.Util.Record {
             }
 
             // all necessary checks are performed internally.
-            JRMan.SetValue(SegmentId, StartNode, JunctionRestrictionFlags.AllowUTurn, ToOptBool(uturnAllowed_));
-            JRMan.SetValue(SegmentId, StartNode, JunctionRestrictionFlags.AllowNearTurnOnRed, ToOptBool(nearTurnOnRedAllowed_));
-            JRMan.SetValue(SegmentId, StartNode, JunctionRestrictionFlags.AllowFarTurnOnRed, ToOptBool(farTurnOnRedAllowed_));
-            JRMan.SetValue(SegmentId, StartNode, JunctionRestrictionFlags.AllowForwardLaneChange, ToOptBool(laneChangingAllowedWhenGoingStraight_));
-            JRMan.SetValue(SegmentId, StartNode, JunctionRestrictionFlags.AllowEnterWhenBlocked, ToOptBool(enteringBlockedJunctionAllowed_));
-            JRMan.SetValue(SegmentId, StartNode, JunctionRestrictionFlags.AllowPedestrianCrossing, ToOptBool(pedestrianCrossingAllowed_));
+            JRMan.SetValue(SegmentId, StartNode, JunctionRestrictionsFlags.AllowUTurn, ToOptBool(uturnAllowed_));
+            JRMan.SetValue(SegmentId, StartNode, JunctionRestrictionsFlags.AllowNearTurnOnRed, ToOptBool(nearTurnOnRedAllowed_));
+            JRMan.SetValue(SegmentId, StartNode, JunctionRestrictionsFlags.AllowFarTurnOnRed, ToOptBool(farTurnOnRedAllowed_));
+            JRMan.SetValue(SegmentId, StartNode, JunctionRestrictionsFlags.AllowForwardLaneChange, ToOptBool(laneChangingAllowedWhenGoingStraight_));
+            JRMan.SetValue(SegmentId, StartNode, JunctionRestrictionsFlags.AllowEnterWhenBlocked, ToOptBool(enteringBlockedJunctionAllowed_));
+            JRMan.SetValue(SegmentId, StartNode, JunctionRestrictionsFlags.AllowPedestrianCrossing, ToOptBool(pedestrianCrossingAllowed_));
         }
 
         public void Transfer(Dictionary<InstanceID, InstanceID> map) {
@@ -84,12 +84,12 @@ namespace TrafficManager.Util.Record {
             }
 
             // all necessary checks are performed internally.
-            JRMan.SetValue(segmentId, StartNode, JunctionRestrictionFlags.AllowUTurn, ToOptBool(uturnAllowed_));
-            JRMan.SetValue(segmentId, StartNode, JunctionRestrictionFlags.AllowNearTurnOnRed, ToOptBool(nearTurnOnRedAllowed_));
-            JRMan.SetValue(segmentId, StartNode, JunctionRestrictionFlags.AllowFarTurnOnRed, ToOptBool(farTurnOnRedAllowed_));
-            JRMan.SetValue(segmentId, StartNode, JunctionRestrictionFlags.AllowForwardLaneChange, ToOptBool(laneChangingAllowedWhenGoingStraight_));
-            JRMan.SetValue(segmentId, StartNode, JunctionRestrictionFlags.AllowEnterWhenBlocked, ToOptBool(enteringBlockedJunctionAllowed_));
-            JRMan.SetValue(segmentId, StartNode, JunctionRestrictionFlags.AllowPedestrianCrossing, ToOptBool(pedestrianCrossingAllowed_));
+            JRMan.SetValue(segmentId, StartNode, JunctionRestrictionsFlags.AllowUTurn, ToOptBool(uturnAllowed_));
+            JRMan.SetValue(segmentId, StartNode, JunctionRestrictionsFlags.AllowNearTurnOnRed, ToOptBool(nearTurnOnRedAllowed_));
+            JRMan.SetValue(segmentId, StartNode, JunctionRestrictionsFlags.AllowFarTurnOnRed, ToOptBool(farTurnOnRedAllowed_));
+            JRMan.SetValue(segmentId, StartNode, JunctionRestrictionsFlags.AllowForwardLaneChange, ToOptBool(laneChangingAllowedWhenGoingStraight_));
+            JRMan.SetValue(segmentId, StartNode, JunctionRestrictionsFlags.AllowEnterWhenBlocked, ToOptBool(enteringBlockedJunctionAllowed_));
+            JRMan.SetValue(segmentId, StartNode, JunctionRestrictionsFlags.AllowPedestrianCrossing, ToOptBool(pedestrianCrossingAllowed_));
         }
 
         public void Transfer(uint mappedId) {

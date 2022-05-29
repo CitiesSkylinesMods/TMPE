@@ -1088,7 +1088,7 @@ namespace TrafficManager.Custom.PathFinding {
                                         leftSegmentId,
                                         leftSegment.m_startNode ==
                                         nextNodeId,
-                                        JunctionRestrictionFlags.AllowPedestrianCrossing)) {
+                                        JunctionRestrictionsFlags.AllowPedestrianCrossing)) {
                                     break;
                                 }
 #endif
@@ -1127,7 +1127,7 @@ namespace TrafficManager.Custom.PathFinding {
                                         rightSegmentId,
                                         rightSegment.m_startNode ==
                                         nextNodeId,
-                                        JunctionRestrictionFlags.AllowPedestrianCrossing)) {
+                                        JunctionRestrictionsFlags.AllowPedestrianCrossing)) {
                                     break;
                                 }
 #endif
@@ -3172,7 +3172,7 @@ namespace TrafficManager.Custom.PathFinding {
                         if (!junctionManager.GetValueOrDefault(
                                 nextSegmentId,
                                 nextIsStartNode,
-                                JunctionRestrictionFlags.AllowPedestrianCrossing)) {
+                                JunctionRestrictionsFlags.AllowPedestrianCrossing)) {
                             if (isLogEnabled) {
                                 DebugLog(
                                     unitId,
@@ -3590,7 +3590,7 @@ namespace TrafficManager.Custom.PathFinding {
                         prevIsCarLane && // u-turns for road vehicles only
                         (!isHeavyVehicle_ || isStockUturnPoint) && // only small vehicles may perform u-turns OR everyone at stock u-turn points
                         !prevIsOutgoingOneWay && // do not u-turn on one-ways
-                        junctionManager.GetValueOrDefault(prevSegmentId, nextIsStartNode, JunctionRestrictionFlags.AllowUTurn);
+                        junctionManager.GetValueOrDefault(prevSegmentId, nextIsStartNode, JunctionRestrictionsFlags.AllowUTurn);
 
                     if (isLogEnabled) {
                         DebugLog(
@@ -3603,7 +3603,7 @@ namespace TrafficManager.Custom.PathFinding {
                             $"\tisStockUturnPoint={isStockUturnPoint}\n" +
                             $"\tprevIsOutgoingOneWay={prevIsOutgoingOneWay}\n" +
                             $"\tjManager.IsUturnAllowed(prevSegmentId, " +
-                            $"nextIsStartNode)={junctionManager.GetValueOrDefault(prevSegmentId, nextIsStartNode, JunctionRestrictionFlags.AllowUTurn)}\n" +
+                            $"nextIsStartNode)={junctionManager.GetValueOrDefault(prevSegmentId, nextIsStartNode, JunctionRestrictionsFlags.AllowUTurn)}\n" +
                             $"\tm_queueItem.vehicleId={queueItem_.vehicleId}\n" +
                             $"\tm_queueItem.spawned={queueItem_.spawned}\n" +
                             $"\tprevSegmentId={prevSegmentId}\n" +

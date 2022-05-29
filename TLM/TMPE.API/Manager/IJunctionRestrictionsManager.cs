@@ -13,7 +13,7 @@ namespace TrafficManager.API.Manager {
         /// <param name="startNode"></param>
         /// <param name="flags"></param>
         /// <returns></returns>
-        bool IsConfigurable(ushort segmentId, bool startNode, JunctionRestrictionFlags flags);
+        bool IsConfigurable(ushort segmentId, bool startNode, JunctionRestrictionsFlags flags);
 
         /// <summary>
         /// Returns the set value (not the default) for the specified flag, or <c>null</c> if no value has been set.
@@ -23,7 +23,7 @@ namespace TrafficManager.API.Manager {
         /// <param name="startNode"></param>
         /// <param name="flags"></param>
         /// <returns></returns>
-        bool? GetValue(ushort segmentId, bool startNode, JunctionRestrictionFlags flags);
+        bool? GetValue(ushort segmentId, bool startNode, JunctionRestrictionsFlags flags);
 
         /// <summary>
         /// Returns the set value of the specified flag, or the default value if no value is set.
@@ -33,7 +33,7 @@ namespace TrafficManager.API.Manager {
         /// <param name="startNode"></param>
         /// <param name="flags"></param>
         /// <returns></returns>
-        bool GetValueOrDefault(ushort segmentId, bool startNode, JunctionRestrictionFlags flags);
+        bool GetValueOrDefault(ushort segmentId, bool startNode, JunctionRestrictionsFlags flags);
 
         /// <summary>
         /// Returns the default value for the specified flag.
@@ -43,7 +43,7 @@ namespace TrafficManager.API.Manager {
         /// <param name="startNode"></param>
         /// <param name="flags"></param>
         /// <returns></returns>
-        bool GetDefaultValue(ushort segmentId, bool startNode, JunctionRestrictionFlags flags);
+        bool GetDefaultValue(ushort segmentId, bool startNode, JunctionRestrictionsFlags flags);
 
         /// <summary>
         /// Sets the value of the specified flag(s). If null, clears the set value so that the default will be used.
@@ -53,7 +53,7 @@ namespace TrafficManager.API.Manager {
         /// <param name="flags"></param>
         /// <param name="value"></param>
         /// <returns>true if the operation was successful, false if not configurable</returns>
-        bool SetValue(ushort segmentId, bool startNode, JunctionRestrictionFlags flags, bool? value);
+        bool SetValue(ushort segmentId, bool startNode, JunctionRestrictionsFlags flags, bool? value);
 
         /// <summary>
         /// Toggles the value of the specified flag. This method fails if more than one flag is specified.
@@ -62,12 +62,12 @@ namespace TrafficManager.API.Manager {
         /// <param name="startNode"></param>
         /// <param name="flags"></param>
         /// <returns>true if the operation was successful, false if not configurable or if more than one flag was specified</returns>
-        bool ToggleValue(ushort segmentId, bool startNode, JunctionRestrictionFlags flags);
+        bool ToggleValue(ushort segmentId, bool startNode, JunctionRestrictionsFlags flags);
 
         #region Is<Traffic Rule>Configurable
 
         /// <summary>
-        /// This API is dprecated. Please use <see cref="IsConfigurable(ushort, bool, JunctionRestrictionFlags)"/>.<br/>
+        /// This API is dprecated. Please use <see cref="IsConfigurable(ushort, bool, JunctionRestrictionsFlags)"/>.<br/>
         /// Determines if u-turn behavior may be controlled at the given segment end.
         /// </summary>
         /// <param name="segmentId">segment id</param>
@@ -78,7 +78,7 @@ namespace TrafficManager.API.Manager {
         bool IsUturnAllowedConfigurable(ushort segmentId, bool startNode, ref NetNode node);
 
         /// <summary>
-        /// This API is dprecated. Please use <see cref="IsConfigurable(ushort, bool, JunctionRestrictionFlags)"/>.<br/>
+        /// This API is dprecated. Please use <see cref="IsConfigurable(ushort, bool, JunctionRestrictionsFlags)"/>.<br/>
         /// Determines if turn-on-red behavior is enabled for near turns and may be controlled at
         ///     the given segment end.
         /// </summary>
@@ -91,7 +91,7 @@ namespace TrafficManager.API.Manager {
         bool IsNearTurnOnRedAllowedConfigurable(ushort segmentId, bool startNode, ref NetNode node);
 
         /// <summary>
-        /// This API is dprecated. Please use <see cref="IsConfigurable(ushort, bool, JunctionRestrictionFlags)"/>.<br/>
+        /// This API is dprecated. Please use <see cref="IsConfigurable(ushort, bool, JunctionRestrictionsFlags)"/>.<br/>
         /// Determines if turn-on-red behavior is enabled for far turns and may be controlled at
         ///     the given segment end.
         /// </summary>
@@ -104,7 +104,7 @@ namespace TrafficManager.API.Manager {
         bool IsFarTurnOnRedAllowedConfigurable(ushort segmentId, bool startNode, ref NetNode node);
 
         /// <summary>
-        /// This API is dprecated. Please use <see cref="IsConfigurable(ushort, bool, JunctionRestrictionFlags)"/>.<br/>
+        /// This API is dprecated. Please use <see cref="IsConfigurable(ushort, bool, JunctionRestrictionsFlags)"/>.<br/>
         /// Determines if turn-on-red behavior is enabled for the given turn type and that it may
         ///     be controlled at the given segment end.
         /// </summary>
@@ -120,7 +120,7 @@ namespace TrafficManager.API.Manager {
                                             ref NetNode node);
 
         /// <summary>
-        /// This API is dprecated. Please use <see cref="IsConfigurable(ushort, bool, JunctionRestrictionFlags)"/>.<br/>
+        /// This API is dprecated. Please use <see cref="IsConfigurable(ushort, bool, JunctionRestrictionsFlags)"/>.<br/>
         /// Determines if lane changing behavior may be controlled at the given segment end.
         /// </summary>
         /// <param name="segmentId">segment id</param>
@@ -134,7 +134,7 @@ namespace TrafficManager.API.Manager {
             ref NetNode node);
 
         /// <summary>
-        /// This API is dprecated. Please use <see cref="IsConfigurable(ushort, bool, JunctionRestrictionFlags)"/>.<br/>
+        /// This API is dprecated. Please use <see cref="IsConfigurable(ushort, bool, JunctionRestrictionsFlags)"/>.<br/>
         /// Determines if entering blocked junctions may be controlled at the given segment end.
         /// </summary>
         /// <param name="segmentId">segment id</param>
@@ -148,7 +148,7 @@ namespace TrafficManager.API.Manager {
                                                           ref NetNode node);
 
         /// <summary>
-        /// This API is dprecated. Please use <see cref="IsConfigurable(ushort, bool, JunctionRestrictionFlags)"/>.<br/>
+        /// This API is dprecated. Please use <see cref="IsConfigurable(ushort, bool, JunctionRestrictionsFlags)"/>.<br/>
         /// Determines if pedestrian crossings may be controlled at the given segment end.
         /// </summary>
         /// <param name="segmentId">segment id</param>
@@ -165,7 +165,7 @@ namespace TrafficManager.API.Manager {
         #region GetDefault<Traffic Rule>
 
         /// <summary>
-        /// This API is dprecated. Please use <see cref="GetDefaultValue(ushort, bool, JunctionRestrictionFlags)"/>.<br/>
+        /// This API is dprecated. Please use <see cref="GetDefaultValue(ushort, bool, JunctionRestrictionsFlags)"/>.<br/>
         /// Determines the default setting for u-turns at the given segment end.
         /// </summary>
         /// <param name="segmentId">segment id</param>
@@ -177,7 +177,7 @@ namespace TrafficManager.API.Manager {
         bool GetDefaultUturnAllowed(ushort segmentId, bool startNode, ref NetNode node);
 
         /// <summary>
-        /// This API is dprecated. Please use <see cref="GetDefaultValue(ushort, bool, JunctionRestrictionFlags)"/>.<br/>
+        /// This API is dprecated. Please use <see cref="GetDefaultValue(ushort, bool, JunctionRestrictionsFlags)"/>.<br/>
         /// Determines the default setting for near turn-on-red at the given segment end.
         /// </summary>
         /// <param name="segmentId">segment id</param>
@@ -189,7 +189,7 @@ namespace TrafficManager.API.Manager {
         bool GetDefaultNearTurnOnRedAllowed(ushort segmentId, bool startNode, ref NetNode node);
 
         /// <summary>
-        /// This API is dprecated. Please use <see cref="GetDefaultValue(ushort, bool, JunctionRestrictionFlags)"/>.<br/>
+        /// This API is dprecated. Please use <see cref="GetDefaultValue(ushort, bool, JunctionRestrictionsFlags)"/>.<br/>
         /// Determines the default setting for far turn-on-red at the given segment end.
         /// </summary>
         /// <param name="segmentId">segment id</param>
@@ -201,7 +201,7 @@ namespace TrafficManager.API.Manager {
         bool GetDefaultFarTurnOnRedAllowed(ushort segmentId, bool startNode, ref NetNode node);
 
         /// <summary>
-        /// This API is dprecated. Please use <see cref="GetDefaultValue(ushort, bool, JunctionRestrictionFlags)"/>.<br/>
+        /// This API is dprecated. Please use <see cref="GetDefaultValue(ushort, bool, JunctionRestrictionsFlags)"/>.<br/>
         /// Determines the default turn-on-red setting for the given turn type at the given segment end.
         /// </summary>
         /// <param name="near">for near turns?</param>
@@ -217,7 +217,7 @@ namespace TrafficManager.API.Manager {
                                         ref NetNode node);
 
         /// <summary>
-        /// This API is dprecated. Please use <see cref="GetDefaultValue(ushort, bool, JunctionRestrictionFlags)"/>.<br/>
+        /// This API is dprecated. Please use <see cref="GetDefaultValue(ushort, bool, JunctionRestrictionsFlags)"/>.<br/>
         /// Determines the default setting for straight lane changes at the given segment end.
         /// </summary>
         /// <param name="segmentId">segment id</param>
@@ -232,7 +232,7 @@ namespace TrafficManager.API.Manager {
             ref NetNode node);
 
         /// <summary>
-        /// This API is dprecated. Please use <see cref="GetDefaultValue(ushort, bool, JunctionRestrictionFlags)"/>.<br/>
+        /// This API is dprecated. Please use <see cref="GetDefaultValue(ushort, bool, JunctionRestrictionsFlags)"/>.<br/>
         /// Determines the default setting for entering a blocked junction at the given segment end.
         /// </summary>
         /// <param name="segmentId">segment id</param>
@@ -246,7 +246,7 @@ namespace TrafficManager.API.Manager {
                                                       ref NetNode node);
 
         /// <summary>
-        /// This API is dprecated. Please use <see cref="GetDefaultValue(ushort, bool, JunctionRestrictionFlags)"/>.<br/>
+        /// This API is dprecated. Please use <see cref="GetDefaultValue(ushort, bool, JunctionRestrictionsFlags)"/>.<br/>
         /// Determines the default setting for pedestrian crossings at the given segment end.
         /// </summary>
         /// <param name="segmentId">segment id</param>
@@ -264,7 +264,7 @@ namespace TrafficManager.API.Manager {
         #region Is<Traffic Rule>Allowed
 
         /// <summary>
-        /// This API is dprecated. Please use <see cref="GetValueOrDefault(ushort, bool, JunctionRestrictionFlags)"/>.<br/>
+        /// This API is dprecated. Please use <see cref="GetValueOrDefault(ushort, bool, JunctionRestrictionsFlags)"/>.<br/>
         /// Determines whether u-turns are allowed at the given segment end.
         /// </summary>
         /// <param name="segmentId">segment id</param>
@@ -275,7 +275,7 @@ namespace TrafficManager.API.Manager {
         bool IsUturnAllowed(ushort segmentId, bool startNode);
 
         /// <summary>
-        /// This API is dprecated. Please use <see cref="GetValueOrDefault(ushort, bool, JunctionRestrictionFlags)"/>.<br/>
+        /// This API is dprecated. Please use <see cref="GetValueOrDefault(ushort, bool, JunctionRestrictionsFlags)"/>.<br/>
         /// Determines whether turn-on-red is allowed for near turns at the given segment end.
         /// </summary>
         /// <param name="segmentId">segment id</param>
@@ -286,7 +286,7 @@ namespace TrafficManager.API.Manager {
         bool IsNearTurnOnRedAllowed(ushort segmentId, bool startNode);
 
         /// <summary>
-        /// This API is dprecated. Please use <see cref="GetValueOrDefault(ushort, bool, JunctionRestrictionFlags)"/>.<br/>
+        /// This API is dprecated. Please use <see cref="GetValueOrDefault(ushort, bool, JunctionRestrictionsFlags)"/>.<br/>
         /// Determines whether turn-on-red is allowed for far turns at the given segment end.
         /// </summary>
         /// <param name="segmentId">segment id</param>
@@ -297,7 +297,7 @@ namespace TrafficManager.API.Manager {
         bool IsFarTurnOnRedAllowed(ushort segmentId, bool startNode);
 
         /// <summary>
-        /// This API is dprecated. Please use <see cref="GetValueOrDefault(ushort, bool, JunctionRestrictionFlags)"/>.<br/>
+        /// This API is dprecated. Please use <see cref="GetValueOrDefault(ushort, bool, JunctionRestrictionsFlags)"/>.<br/>
         /// Determines whether turn-on-red is allowed for the given turn type at the given segment end.
         /// </summary>
         /// <param name="near">for near turns?</param>
@@ -309,7 +309,7 @@ namespace TrafficManager.API.Manager {
         bool IsTurnOnRedAllowed(bool near, ushort segmentId, bool startNode);
 
         /// <summary>
-        /// This API is dprecated. Please use <see cref="GetValueOrDefault(ushort, bool, JunctionRestrictionFlags)"/>.<br/>
+        /// This API is dprecated. Please use <see cref="GetValueOrDefault(ushort, bool, JunctionRestrictionsFlags)"/>.<br/>
         /// Determines whether lane changing when going straight is allowed at the given segment end.
         /// </summary>
         /// <param name="segmentId">segment id</param>
@@ -320,7 +320,7 @@ namespace TrafficManager.API.Manager {
         bool IsLaneChangingAllowedWhenGoingStraight(ushort segmentId, bool startNode);
 
         /// <summary>
-        /// This API is dprecated. Please use <see cref="GetValueOrDefault(ushort, bool, JunctionRestrictionFlags)"/>.<br/>
+        /// This API is dprecated. Please use <see cref="GetValueOrDefault(ushort, bool, JunctionRestrictionsFlags)"/>.<br/>
         /// Determines whether entering a blocked junction is allowed at the given segment end.
         /// </summary>
         /// <param name="segmentId">segment id</param>
@@ -331,7 +331,7 @@ namespace TrafficManager.API.Manager {
         bool IsEnteringBlockedJunctionAllowed(ushort segmentId, bool startNode);
 
         /// <summary>
-        /// This API is dprecated. Please use <see cref="GetValueOrDefault(ushort, bool, JunctionRestrictionFlags)"/>.<br/>
+        /// This API is dprecated. Please use <see cref="GetValueOrDefault(ushort, bool, JunctionRestrictionsFlags)"/>.<br/>
         /// Determines whether crossing the road is allowed at the given segment end.
         /// </summary>
         /// <param name="segmentId">segment id</param>
@@ -345,7 +345,7 @@ namespace TrafficManager.API.Manager {
         #region Get<Traffic Rule>
 
         /// <summary>
-        /// This API is dprecated. Please use <see cref="GetValue(ushort, bool, JunctionRestrictionFlags)"/>.<br/>
+        /// This API is dprecated. Please use <see cref="GetValue(ushort, bool, JunctionRestrictionsFlags)"/>.<br/>
         /// Retrieves the u-turn setting for the given segment end.
         /// </summary>
         /// <param name="segmentId">segment id</param>
@@ -356,7 +356,7 @@ namespace TrafficManager.API.Manager {
         TernaryBool GetUturnAllowed(ushort segmentId, bool startNode);
 
         /// <summary>
-        /// This API is dprecated. Please use <see cref="GetValue(ushort, bool, JunctionRestrictionFlags)"/>.<br/>
+        /// This API is dprecated. Please use <see cref="GetValue(ushort, bool, JunctionRestrictionsFlags)"/>.<br/>
         /// Retrieves the turn-on-red setting for near turns and the given segment end.
         /// </summary>
         /// <param name="segmentId">segment id</param>
@@ -367,7 +367,7 @@ namespace TrafficManager.API.Manager {
         TernaryBool GetNearTurnOnRedAllowed(ushort segmentId, bool startNode);
 
         /// <summary>
-        /// This API is dprecated. Please use <see cref="GetValue(ushort, bool, JunctionRestrictionFlags)"/>.<br/>
+        /// This API is dprecated. Please use <see cref="GetValue(ushort, bool, JunctionRestrictionsFlags)"/>.<br/>
         /// Retrieves the turn-on-red setting for far turns and the given segment end.
         /// </summary>
         /// <param name="segmentId">segment id</param>
@@ -378,7 +378,7 @@ namespace TrafficManager.API.Manager {
         TernaryBool GetFarTurnOnRedAllowed(ushort segmentId, bool startNode);
 
         /// <summary>
-        /// This API is dprecated. Please use <see cref="GetValue(ushort, bool, JunctionRestrictionFlags)"/>.<br/>
+        /// This API is dprecated. Please use <see cref="GetValue(ushort, bool, JunctionRestrictionsFlags)"/>.<br/>
         /// Retrieves the turn-on-red setting for the given turn type and segment end.
         /// </summary>
         /// <param name="near">for near turns?</param>
@@ -390,7 +390,7 @@ namespace TrafficManager.API.Manager {
         TernaryBool GetTurnOnRedAllowed(bool near, ushort segmentId, bool startNode);
 
         /// <summary>
-        /// This API is dprecated. Please use <see cref="GetValue(ushort, bool, JunctionRestrictionFlags)"/>.<br/>
+        /// This API is dprecated. Please use <see cref="GetValue(ushort, bool, JunctionRestrictionsFlags)"/>.<br/>
         /// Retrieves the lane changing setting for the given segment end.
         /// </summary>
         /// <param name="segmentId">segment id</param>
@@ -401,7 +401,7 @@ namespace TrafficManager.API.Manager {
         TernaryBool GetLaneChangingAllowedWhenGoingStraight(ushort segmentId, bool startNode);
 
         /// <summary>
-        /// This API is dprecated. Please use <see cref="GetValue(ushort, bool, JunctionRestrictionFlags)"/>.<br/>
+        /// This API is dprecated. Please use <see cref="GetValue(ushort, bool, JunctionRestrictionsFlags)"/>.<br/>
         /// Retrieves the "enter blocked junction" setting for the given segment end.
         /// </summary>
         /// <param name="segmentId">segment id</param>
@@ -412,7 +412,7 @@ namespace TrafficManager.API.Manager {
         TernaryBool GetEnteringBlockedJunctionAllowed(ushort segmentId, bool startNode);
 
         /// <summary>
-        /// This API is dprecated. Please use <see cref="GetValue(ushort, bool, JunctionRestrictionFlags)"/>.<br/>
+        /// This API is dprecated. Please use <see cref="GetValue(ushort, bool, JunctionRestrictionsFlags)"/>.<br/>
         /// Retrieves the pedestrian crossing setting for the given segment end.
         /// </summary>
         /// <param name="segmentId">segment id</param>
@@ -426,7 +426,7 @@ namespace TrafficManager.API.Manager {
         #region Toggle<Traffic Rule>
 
         /// <summary>
-        /// This API is dprecated. Please use <see cref="ToggleValue(ushort, bool, JunctionRestrictionFlags)"/>.<br/>
+        /// This API is dprecated. Please use <see cref="ToggleValue(ushort, bool, JunctionRestrictionsFlags)"/>.<br/>
         /// Switches the u-turn flag for the given segment end.
         /// </summary>
         /// <param name="segmentId">segment id</param>
@@ -439,7 +439,7 @@ namespace TrafficManager.API.Manager {
         bool ToggleUturnAllowed(ushort segmentId, bool startNode);
 
         /// <summary>
-        /// This API is dprecated. Please use <see cref="ToggleValue(ushort, bool, JunctionRestrictionFlags)"/>.<br/>
+        /// This API is dprecated. Please use <see cref="ToggleValue(ushort, bool, JunctionRestrictionsFlags)"/>.<br/>
         /// Switches the turn-on-red flag for near turns and given segment end.
         /// </summary>
         /// <param name="segmentId">segment id</param>
@@ -452,7 +452,7 @@ namespace TrafficManager.API.Manager {
         bool ToggleNearTurnOnRedAllowed(ushort segmentId, bool startNode);
 
         /// <summary>
-        /// This API is dprecated. Please use <see cref="ToggleValue(ushort, bool, JunctionRestrictionFlags)"/>.<br/>
+        /// This API is dprecated. Please use <see cref="ToggleValue(ushort, bool, JunctionRestrictionsFlags)"/>.<br/>
         /// Switches the turn-on-red flag for far turns and given segment end.
         /// </summary>
         /// <param name="segmentId">segment id</param>
@@ -465,7 +465,7 @@ namespace TrafficManager.API.Manager {
         bool ToggleFarTurnOnRedAllowed(ushort segmentId, bool startNode);
 
         /// <summary>
-        /// This API is dprecated. Please use <see cref="ToggleValue(ushort, bool, JunctionRestrictionFlags)"/>.<br/>
+        /// This API is dprecated. Please use <see cref="ToggleValue(ushort, bool, JunctionRestrictionsFlags)"/>.<br/>
         /// Switches the turn-on-red flag for the given turn type and segment end.
         /// </summary>
         /// <param name="near">for near turns?</param>
@@ -479,7 +479,7 @@ namespace TrafficManager.API.Manager {
         bool ToggleTurnOnRedAllowed(bool near, ushort segmentId, bool startNode);
 
         /// <summary>
-        /// This API is dprecated. Please use <see cref="ToggleValue(ushort, bool, JunctionRestrictionFlags)"/>.<br/>
+        /// This API is dprecated. Please use <see cref="ToggleValue(ushort, bool, JunctionRestrictionsFlags)"/>.<br/>
         /// Switches the lane changing flag for the given segment end.
         /// </summary>
         /// <param name="segmentId">segment id</param>
@@ -492,7 +492,7 @@ namespace TrafficManager.API.Manager {
         bool ToggleLaneChangingAllowedWhenGoingStraight(ushort segmentId, bool startNode);
 
         /// <summary>
-        /// This API is dprecated. Please use <see cref="ToggleValue(ushort, bool, JunctionRestrictionFlags)"/>.<br/>
+        /// This API is dprecated. Please use <see cref="ToggleValue(ushort, bool, JunctionRestrictionsFlags)"/>.<br/>
         /// Switches the "enter blocked junction" flag for the given segment end.
         /// </summary>
         /// <param name="segmentId">segment id</param>
@@ -505,7 +505,7 @@ namespace TrafficManager.API.Manager {
         bool ToggleEnteringBlockedJunctionAllowed(ushort segmentId, bool startNode);
 
         /// <summary>
-        /// This API is dprecated. Please use <see cref="ToggleValue(ushort, bool, JunctionRestrictionFlags)"/>.<br/>
+        /// This API is dprecated. Please use <see cref="ToggleValue(ushort, bool, JunctionRestrictionsFlags)"/>.<br/>
         /// Switches the pedestrian crossing flag for the given segment end.
         /// </summary>
         /// <param name="segmentId">segment id</param>
@@ -521,7 +521,7 @@ namespace TrafficManager.API.Manager {
         #region Set<Traffic Rule> : bool
 
         /// <summary>
-        /// This API is dprecated. Please use <see cref="SetValue(ushort, bool, JunctionRestrictionFlags, bool?)"/>.<br/>
+        /// This API is dprecated. Please use <see cref="SetValue(ushort, bool, JunctionRestrictionsFlags, bool?)"/>.<br/>
         /// Sets the u-turn flag for the given segment end to the given value.
         /// </summary>
         /// <param name="segmentId">segment id</param>
@@ -535,7 +535,7 @@ namespace TrafficManager.API.Manager {
         bool SetUturnAllowed(ushort segmentId, bool startNode, bool value);
 
         /// <summary>
-        /// This API is dprecated. Please use <see cref="SetValue(ushort, bool, JunctionRestrictionFlags, bool?)"/>.<br/>
+        /// This API is dprecated. Please use <see cref="SetValue(ushort, bool, JunctionRestrictionsFlags, bool?)"/>.<br/>
         /// Sets the turn-on-red flag for near turns at the given segment end to the given value.
         /// </summary>
         /// <param name="segmentId">segment id</param>
@@ -549,7 +549,7 @@ namespace TrafficManager.API.Manager {
         bool SetNearTurnOnRedAllowed(ushort segmentId, bool startNode, bool value);
 
         /// <summary>
-        /// This API is dprecated. Please use <see cref="SetValue(ushort, bool, JunctionRestrictionFlags, bool?)"/>.<br/>
+        /// This API is dprecated. Please use <see cref="SetValue(ushort, bool, JunctionRestrictionsFlags, bool?)"/>.<br/>
         /// Sets the turn-on-red flag for far turns at the given segment end to the given value.
         /// </summary>
         /// <param name="segmentId">segment id</param>
@@ -563,7 +563,7 @@ namespace TrafficManager.API.Manager {
         bool SetFarTurnOnRedAllowed(ushort segmentId, bool startNode, bool value);
 
         /// <summary>
-        /// This API is dprecated. Please use <see cref="SetValue(ushort, bool, JunctionRestrictionFlags, bool?)"/>.<br/>
+        /// This API is dprecated. Please use <see cref="SetValue(ushort, bool, JunctionRestrictionsFlags, bool?)"/>.<br/>
         /// Sets the turn-on-red flag for the given turn type and segment end to the given value.
         /// </summary>
         /// <param name="near">for near turns?</param>
@@ -578,7 +578,7 @@ namespace TrafficManager.API.Manager {
         bool SetTurnOnRedAllowed(bool near, ushort segmentId, bool startNode, bool value);
 
         /// <summary>
-        /// This API is dprecated. Please use <see cref="SetValue(ushort, bool, JunctionRestrictionFlags, bool?)"/>.<br/>
+        /// This API is dprecated. Please use <see cref="SetValue(ushort, bool, JunctionRestrictionsFlags, bool?)"/>.<br/>
         /// Sets the lane changing flag for the given segment end to the given value.
         /// </summary>
         /// <param name="segmentId">segment id</param>
@@ -592,7 +592,7 @@ namespace TrafficManager.API.Manager {
         bool SetLaneChangingAllowedWhenGoingStraight(ushort segmentId, bool startNode, bool value);
 
         /// <summary>
-        /// This API is dprecated. Please use <see cref="SetValue(ushort, bool, JunctionRestrictionFlags, bool?)"/>.<br/>
+        /// This API is dprecated. Please use <see cref="SetValue(ushort, bool, JunctionRestrictionsFlags, bool?)"/>.<br/>
         /// Sets the "enter blocked junction" flag for the given segment end to the given value.
         /// </summary>
         /// <param name="segmentId">segment id</param>
@@ -606,7 +606,7 @@ namespace TrafficManager.API.Manager {
         bool SetEnteringBlockedJunctionAllowed(ushort segmentId, bool startNode, bool value);
 
         /// <summary>
-        /// This API is dprecated. Please use <see cref="SetValue(ushort, bool, JunctionRestrictionFlags, bool?)"/>.<br/>
+        /// This API is dprecated. Please use <see cref="SetValue(ushort, bool, JunctionRestrictionsFlags, bool?)"/>.<br/>
         /// Sets the pedestrian crossing flag for the given segment end to the given value.
         /// </summary>
         /// <param name="segmentId">segment id</param>
@@ -623,7 +623,7 @@ namespace TrafficManager.API.Manager {
         #region Set<Traffic Rule> : TernaryBool
 
         /// <summary>
-        /// This API is dprecated. Please use <see cref="SetValue(ushort, bool, JunctionRestrictionFlags, bool?)"/>.<br/>
+        /// This API is dprecated. Please use <see cref="SetValue(ushort, bool, JunctionRestrictionsFlags, bool?)"/>.<br/>
         /// Sets the u-turn flag for the given segment end to the given value.
         /// </summary>
         /// <param name="segmentId">segment id</param>
@@ -637,7 +637,7 @@ namespace TrafficManager.API.Manager {
         bool SetUturnAllowed(ushort segmentId, bool startNode, TernaryBool value);
 
         /// <summary>
-        /// This API is dprecated. Please use <see cref="SetValue(ushort, bool, JunctionRestrictionFlags, bool?)"/>.<br/>
+        /// This API is dprecated. Please use <see cref="SetValue(ushort, bool, JunctionRestrictionsFlags, bool?)"/>.<br/>
         /// Sets the turn-on-red flag for near turns at the given segment end to the given value.
         /// </summary>
         /// <param name="segmentId">segment id</param>
@@ -651,7 +651,7 @@ namespace TrafficManager.API.Manager {
         bool SetNearTurnOnRedAllowed(ushort segmentId, bool startNode, TernaryBool value);
 
         /// <summary>
-        /// This API is dprecated. Please use <see cref="SetValue(ushort, bool, JunctionRestrictionFlags, bool?)"/>.<br/>
+        /// This API is dprecated. Please use <see cref="SetValue(ushort, bool, JunctionRestrictionsFlags, bool?)"/>.<br/>
         /// Sets the turn-on-red flag for far turns at the given segment end to the given value.
         /// </summary>
         /// <param name="segmentId">segment id</param>
@@ -665,7 +665,7 @@ namespace TrafficManager.API.Manager {
         bool SetFarTurnOnRedAllowed(ushort segmentId, bool startNode, TernaryBool value);
 
         /// <summary>
-        /// This API is dprecated. Please use <see cref="SetValue(ushort, bool, JunctionRestrictionFlags, bool?)"/>.<br/>
+        /// This API is dprecated. Please use <see cref="SetValue(ushort, bool, JunctionRestrictionsFlags, bool?)"/>.<br/>
         /// Sets the turn-on-red flag for the given turn type and segment end to the given value.
         /// </summary>
         /// <param name="near">for near turns?</param>
@@ -680,7 +680,7 @@ namespace TrafficManager.API.Manager {
         bool SetTurnOnRedAllowed(bool near, ushort segmentId, bool startNode, TernaryBool value);
 
         /// <summary>
-        /// This API is dprecated. Please use <see cref="SetValue(ushort, bool, JunctionRestrictionFlags, bool?)"/>.<br/>
+        /// This API is dprecated. Please use <see cref="SetValue(ushort, bool, JunctionRestrictionsFlags, bool?)"/>.<br/>
         /// Sets the lane changing flag for the given segment end to the given value.
         /// </summary>
         /// <param name="segmentId">segment id</param>
@@ -694,7 +694,7 @@ namespace TrafficManager.API.Manager {
         bool SetLaneChangingAllowedWhenGoingStraight(ushort segmentId, bool startNode, TernaryBool value);
 
         /// <summary>
-        /// This API is dprecated. Please use <see cref="SetValue(ushort, bool, JunctionRestrictionFlags, bool?)"/>.<br/>
+        /// This API is dprecated. Please use <see cref="SetValue(ushort, bool, JunctionRestrictionsFlags, bool?)"/>.<br/>
         /// Sets the "enter blocked junction" flag for the given segment end to the given value.
         /// </summary>
         /// <param name="segmentId">segment id</param>
@@ -708,7 +708,7 @@ namespace TrafficManager.API.Manager {
         bool SetEnteringBlockedJunctionAllowed(ushort segmentId, bool startNode, TernaryBool value);
 
         /// <summary>
-        /// This API is dprecated. Please use <see cref="SetValue(ushort, bool, JunctionRestrictionFlags, bool?)"/>.<br/>
+        /// This API is dprecated. Please use <see cref="SetValue(ushort, bool, JunctionRestrictionsFlags, bool?)"/>.<br/>
         /// Sets the pedestrian crossing flag for the given segment end to the given value.
         /// </summary>
         /// <param name="segmentId">segment id</param>

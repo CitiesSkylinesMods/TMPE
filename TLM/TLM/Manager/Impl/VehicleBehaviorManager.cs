@@ -1702,7 +1702,7 @@ namespace TrafficManager.Manager.Impl {
                         !JunctionRestrictionsManager.Instance.GetValueOrDefault(
                             segmentId,
                             startNode,
-                            JunctionRestrictionFlags.AllowEnterWhenBlocked);
+                            JunctionRestrictionsFlags.AllowEnterWhenBlocked);
                 } else {
                     checkSpace =
                         (node.m_flags & (NetNode.Flags.Junction

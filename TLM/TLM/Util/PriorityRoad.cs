@@ -412,9 +412,9 @@ namespace TrafficManager.Util {
         private static void FixMajorSegmentRules(ushort segmentId, ushort nodeId) {
             Log._Debug($"FixMajorSegmentRules({segmentId}, {nodeId}) was called");
             bool startNode = segmentId.ToSegment().IsStartNode(nodeId);
-            JunctionRestrictionsManager.Instance.SetValue(segmentId, startNode, JunctionRestrictionFlags.AllowEnterWhenBlocked, true);
+            JunctionRestrictionsManager.Instance.SetValue(segmentId, startNode, JunctionRestrictionsFlags.AllowEnterWhenBlocked, true);
             if (!Options.PriorityRoad_CrossMainR) {
-                JunctionRestrictionsManager.Instance.SetValue(segmentId, startNode, JunctionRestrictionFlags.AllowPedestrianCrossing, false);
+                JunctionRestrictionsManager.Instance.SetValue(segmentId, startNode, JunctionRestrictionsFlags.AllowPedestrianCrossing, false);
             }
             TrafficPriorityManager.Instance.SetPrioritySign(segmentId, startNode, PriorityType.Main);
         }
@@ -423,10 +423,10 @@ namespace TrafficManager.Util {
             Log._Debug($"FixMinorSegmentRules({segmentId}, {nodeId}, segmentList) was called");
             bool startNode = segmentId.ToSegment().IsStartNode(nodeId);
             if (Options.PriorityRoad_EnterBlockedYeild) {
-                JunctionRestrictionsManager.Instance.SetValue(segmentId, startNode, JunctionRestrictionFlags.AllowEnterWhenBlocked, true);
+                JunctionRestrictionsManager.Instance.SetValue(segmentId, startNode, JunctionRestrictionsFlags.AllowEnterWhenBlocked, true);
             }
             if (HasAccelerationLane(segmentList, segmentId, nodeId)) {
-                JunctionRestrictionsManager.Instance.SetValue(segmentId, startNode, JunctionRestrictionFlags.AllowEnterWhenBlocked, true);
+                JunctionRestrictionsManager.Instance.SetValue(segmentId, startNode, JunctionRestrictionsFlags.AllowEnterWhenBlocked, true);
             } else if (Options.PriorityRoad_StopAtEntry) {
                 TrafficPriorityManager.Instance.SetPrioritySign(segmentId, startNode, PriorityType.Stop);
             } else {

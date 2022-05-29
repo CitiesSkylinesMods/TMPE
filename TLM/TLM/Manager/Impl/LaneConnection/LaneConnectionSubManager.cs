@@ -365,7 +365,7 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
                 JunctionRestrictionsManager.Instance.SetValue(
                     sourceSegmentId,
                     sourceStartNode,
-                    JunctionRestrictionFlags.AllowUTurn,
+                    JunctionRestrictionsFlags.AllowUTurn,
                     true);
             }
 
