@@ -75,6 +75,7 @@ namespace TrafficManager.State {
         public static bool realisticPublicTransport;
         public static byte altLaneSelectionRatio;
         public static bool highwayRules;
+        public static bool highwayMergingRules;
         public static bool automaticallyAddTrafficLightsIfApplicable;
         public static bool NoDoubleCrossings;
         public static bool DedicatedTurningLanes;
