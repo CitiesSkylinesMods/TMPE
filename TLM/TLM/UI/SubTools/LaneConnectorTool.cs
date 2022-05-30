@@ -1690,11 +1690,10 @@ namespace TrafficManager.UI.SubTools {
                     if(selectedLaneEnd != null) {
                         bool bidirectional = selectedLaneEnd.IsBidirectional;
                         if (bidirectional) {
-                            string key = "UI.Key:Shift bidirectional";
-                            items.Add(new HoldModifier(shift: true, localizedText: T(key)));
+                            items.Add(new HoldModifier(shift: true, localizedText: T("UI.Key:Shift bidirectional")));
                         }
                     } else if(selectedNodeTransitionGroups_ == LaneEndTransitionGroup.Vehicle) {
-                        items.Add(new HoldModifier(shift: true, localizedText: T("UI.Key:alt track mode")));
+                        items.Add(new HoldModifier(alt: true, localizedText: T("UI.Key:alt track mode")));
                         items.Add(new HoldModifier(shift: true, localizedText: T("UI.Key:Shift car+track mode")));
                     }
 
