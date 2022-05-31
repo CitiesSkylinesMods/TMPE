@@ -24,7 +24,7 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
                                                              | VehicleInfo.VehicleType.Trolleybus;
 
         public LaneConnectionSubManager Sub = // TODO #354 divide into Road/Track
-            new LaneConnectionSubManager(LaneEndTransitionGroup.All);
+            new LaneConnectionSubManager(LaneEndTransitionGroup.Vehicle);
 
         public NetInfo.LaneType LaneTypes => LANE_TYPES;
 

@@ -163,7 +163,6 @@
     <Compile Include="Manager\Impl\LaneConnection\LaneConnectionManager.cs" />
     <Compile Include="Manager\Impl\LaneConnection\LaneEnd.cs" />
     <Compile Include="Manager\Impl\TrafficLightSimulationManager.Persistence.cs" />
-    <Compile Include="Manager\Model\JunctionRestrictionFlags.cs" />
     <Compile Include="Manager\Model\JunctionRestrictionsModel.cs" />
     <Compile Include="Manager\Model\SegmentEndPair.cs" />
     <Compile Include="Patch\_External\RTramAIModPatch.cs" />
@@ -211,6 +210,7 @@
     <Compile Include="UI\SubTools\RoutingDetector\Connection.cs" />
     <Compile Include="UI\SubTools\RoutingDetector\LaneEnd.cs" />
     <Compile Include="UI\SubTools\RoutingDetector\RoutingDetectorTool.cs" />
+    <Compile Include="UI\UIFactory.cs" />
     <Compile Include="UI\WhatsNew\MarkupKeyword.cs" />
     <Compile Include="UI\WhatsNew\WhatsNewMarkup.cs" />
     <Compile Include="Util\AnonymousDisposable.cs" />
