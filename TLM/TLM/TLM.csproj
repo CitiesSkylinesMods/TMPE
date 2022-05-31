@@ -104,6 +104,10 @@
       <HintPath>$(MangedDLLPath)\ICities.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="ICSharpCode.SharpZipLib, Version=0.86.0.518, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Cities_Skylines\Cities_Data\Managed\ICSharpCode.SharpZipLib.dll</HintPath>
+    </Reference>
     <Reference Include="MoveItIntegration">
       <HintPath>..\libs\MoveItIntegration.dll</HintPath>
     </Reference>

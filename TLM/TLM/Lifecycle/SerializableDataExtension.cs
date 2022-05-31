@@ -16,7 +16,7 @@ namespace TrafficManager.Lifecycle {
     using System.Xml.Linq;
     using TrafficManager.Persistence;
     using System.Xml;
-    using System.IO.Compression;
+    using ICSharpCode.SharpZipLib.GZip;
 
     [UsedImplicitly]
     public class SerializableDataExtension
@@ -204,7 +204,7 @@ namespace TrafficManager.Lifecycle {
 
                         try {
                             using (var memoryStream = new MemoryStream(data)) {
-                                using (var compressionStream = new GZipStream(memoryStream, CompressionMode.Decompress)) {
+                                using (var compressionStream = new GZipInputStream(memoryStream)) {
                                     using (var streamReader = new StreamReader(compressionStream, Encoding.UTF8)) {
 
                                         XmlReaderSettings xmlReaderSettings = new XmlReaderSettings {
@@ -552,18 +552,21 @@ namespace TrafficManager.Lifecycle {
                     try {
                         using (var memoryStream = new MemoryStream()) {
 
-                            using (var compressionStream = new GZipStream(memoryStream, CompressionMode.Compress, true)) {
+                            using (var compressionStream = new GZipOutputStream(memoryStream)) {
 
                                 using (var streamWriter = new StreamWriter(compressionStream, Encoding.UTF8)) {
 
                                     dom.Save(streamWriter);
+
+                                    streamWriter.Flush();
+                                    compressionStream.Finish();
+
+                                    memoryStream.Position = 0;
+                                    Log.Info($"Save DOM for {po.DependencyTarget.Name} byte length {memoryStream.Length}");
+
+                                    SerializableData.SaveData(po.DependencyTarget.FullName, memoryStream.ToArray());
                                 }
                             }
-
-                            memoryStream.Position = 0;
-                            Log.Info($"Save DOM for {po.DependencyTarget.Name} byte length {memoryStream.Length}");
-
-                            SerializableData.SaveData(po.DependencyTarget.FullName, memoryStream.ToArray());
                         }
                     }
                     catch (Exception ex) {
