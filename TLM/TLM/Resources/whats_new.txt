@@ -1,16 +1,7 @@
 [Version] 11.6.5.3
-[Released] May 22nd 2022
-[Link] tmpe-v11653-test-22052022
-[Mod] Stable version released
-[New] Vietnamese Translation (DucAnhLam)
-[Updated] Translations update #1551 (aubergine18)
-[Fixed] Regression with version naming #1568 (krzychu124)
-[/Version]
-
-[Version] 11.6.5.3
-[Released] May 22nd 2022
+[Released] Jun 1st 2022
 [Stable]
-[Link] tmpe-v11653-stable-22052022
+[Link] tmpe-v11653-stable-01062022
 [New] Chinese road sign theme #1523 (kvakvs, lokpro, TianQiBuTian)
 [New] Overlays mod option to show default speed when overriding segment/lane speeds #1404 (aubergine18)
 [New] Directional lane connectors #1492 #1214 #1211 (kianzarrin, Chamëleon)
@@ -18,6 +9,7 @@
 [New] Timed Traffic Lights now available in Map and Scenario editors #1425 #959 (aubergine18)
 [New] Vietnamese Translation (DucAnhLam)
 [Mod] API: Mods can now use TMPE.API.dll alone, without referencing TrafficManager.dll #1448 (kianzarrin)
+[Mod] API: Api update: TrafficLights/JunctionRestrictions, Road sign theme, extended LaneEndTransitionGroup #1577 (kianzarrin)
 [Mod] Compatible: `Reversible Tram AI` full compatibility #1386 #1353 (sway2020)
 [Mod] Compatible: `Supply Chain Coloring` workshop version only #1390 (aubergine18)
 [Mod] Compatible: `Transfer Broker BETA` workshop version only #1390 (aubergine18)
