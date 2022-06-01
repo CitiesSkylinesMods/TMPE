@@ -42,7 +42,7 @@ namespace TrafficManager.Util {
                             .Append('=');
                     }
                     var v = p.GetValue(o, null);
-                    if (v.GetType().GetCustomAttributes(typeof(CompilerGeneratedAttribute), false)?.Length > 0) {
+                    if (v.GetType().IsDefined(typeof(CompilerGeneratedAttribute), false)) {
                         entry.Append('[');
                         BuildBLock(v);
                         entry.Append(']');
