@@ -240,7 +240,7 @@ namespace TrafficManager.Manager.Impl {
         public float GetGameSpeedLimit(uint laneId) {
             return GetGameSpeedLimit(
                 laneId: laneId,
-                laneInfo: LaneUtil.GetLaneInfo(laneId));
+                laneInfo: ExtLaneManager.Instance.GetLaneInfo(laneId));
         }
 
         [Obsolete]

@@ -10,7 +10,7 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
 #endif
 
     public class LaneConnectionManager
-        : AbstractGeometryObservingManager,
+        : AbstractCustomManager,
           ICustomDataManager<List<Configuration.LaneConnection>>,
           ILaneConnectionManager {
         public const NetInfo.LaneType LANE_TYPES =
@@ -24,7 +24,7 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
                                                              | VehicleInfo.VehicleType.Trolleybus;
 
         public LaneConnectionSubManager Sub = // TODO #354 divide into Road/Track
-            new LaneConnectionSubManager(LaneEndTransitionGroup.All);
+            new LaneConnectionSubManager(LaneEndTransitionGroup.Vehicle);
 
         public NetInfo.LaneType LaneTypes => LANE_TYPES;
 
@@ -80,10 +80,6 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
         /// <param name="nodeId">Affected node</param>
         internal void RemoveLaneConnectionsFromNode(ushort nodeId) {
             Sub.RemoveLaneConnectionsFromNode(nodeId);
-        }
-
-        protected override void HandleInvalidSegment(ref ExtSegment seg) {
-            Sub.HandleInvalidSegmentImpl(seg.segmentId);
         }
 
         internal bool GetLaneEndPoint(ushort segmentId,
