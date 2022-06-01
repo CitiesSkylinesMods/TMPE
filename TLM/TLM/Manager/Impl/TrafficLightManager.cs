@@ -119,12 +119,24 @@ namespace TrafficManager.Manager.Impl {
             }
         }
 
+        public bool ToggleTrafficLight(ushort nodeId) => ToggleTrafficLight(nodeId, ref nodeId.ToNode());
+
         public bool ToggleTrafficLight(ushort nodeId, ref NetNode node) {
             return SetTrafficLight(nodeId, !HasTrafficLight(nodeId, ref node), ref node);
         }
 
         public bool ToggleTrafficLight(ushort nodeId, ref NetNode node, out ToggleTrafficLightError reason) {
             return SetTrafficLight(nodeId, !HasTrafficLight(nodeId, ref node), ref node, out reason);
+        }
+
+        bool ITrafficLightManager.CanToggleTrafficLight(ushort nodeId) {
+            ref NetNode netNode = ref nodeId.ToNode();
+            return netNode.IsValid() &&
+                CanToggleTrafficLight(
+                nodeId,
+                HasTrafficLight(nodeId, ref netNode),
+                ref netNode,
+                out _);
         }
 
         public bool CanToggleTrafficLight(ushort nodeId,
@@ -241,6 +253,8 @@ namespace TrafficManager.Manager.Impl {
 
             return ret;
         }
+
+        public bool HasTrafficLight(ushort nodeId) => HasTrafficLight(nodeId, ref nodeId.ToNode());
 
         public bool HasTrafficLight(ushort nodeId, ref NetNode node) {
             return node.IsValid()
