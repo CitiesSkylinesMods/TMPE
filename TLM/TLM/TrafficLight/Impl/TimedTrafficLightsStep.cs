@@ -931,6 +931,8 @@ namespace TrafficManager.TrafficLight.Impl {
                                 $"{numMovingVehicles} (all: {numVehicles})");
 
                             bool addToFlow = false;
+                            bool ignore = false;
+                            const bool ignoreRight = true; // TODO: make optional
 
                             switch (dir) {
                                 case ArrowDirection.Turn: {
@@ -946,7 +948,11 @@ namespace TrafficManager.TrafficLight.Impl {
                                 }
 
                                 case ArrowDirection.Right: {
-                                    addToFlow = segLight.IsRightGreen();
+                                    if (ignoreRight) {
+                                        ignore = true;
+                                    } else {
+                                        addToFlow = segLight.IsRightGreen();
+                                    }
                                     break;
                                 }
 
@@ -965,7 +971,7 @@ namespace TrafficManager.TrafficLight.Impl {
                                     () => "TimedTrafficLightsStep.calcWaitFlow: ## Vehicles @ " +
                                     $"lane {laneIndex}, seg. {sourceSegmentId} going to seg. " +
                                     $"{targetSegmentId}: COUTING as FLOWING -- numMovingVehicles={numMovingVehicles}");
-                            } else {
+                            } else if (!ignore) {
                                 curTotalLaneWait += numVehicles;
                                 ++numLaneWaits;
                                 Log._DebugIf(
