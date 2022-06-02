@@ -154,9 +154,21 @@ namespace TrafficManager.State {
             if (!Options.IsGameLoaded(false)) {
                 // update global config only, skip reloading theme
                 var selectedTheme = RoadSignThemeManager.Instance.ThemeNames[newThemeIndex];
-                Main config = GlobalConfig.Instance.Main;
-                config.RoadSignTheme = selectedTheme;
-                GlobalConfig.WriteConfig();
+                // TODO: Should be simplified / ChangeTheme support change in main menu (without reloading)
+                if (RoadSignThemeManager.Instance.Themes.TryGetValue(selectedTheme, out RoadSignTheme theme)) {
+                    Main config = GlobalConfig.Instance.Main;
+                    if (config.DisplaySpeedLimitsMph && !theme.SupportsMph) {
+                        // Theme requires KM/H display to be on
+                        config.DisplaySpeedLimitsMph = false;
+                        DisplaySpeedLimitsMph.Value = false;
+                    } else if (!config.DisplaySpeedLimitsMph && !theme.SupportsKmph) {
+                        // Theme requires MPH display to be on
+                        config.DisplaySpeedLimitsMph = true;
+                        DisplaySpeedLimitsMph.Value = true;
+                    }
+                    config.RoadSignTheme = selectedTheme;
+                    GlobalConfig.WriteConfig();
+                }
                 return;
             }
 
