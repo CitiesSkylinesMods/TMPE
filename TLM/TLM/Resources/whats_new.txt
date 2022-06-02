@@ -1,7 +1,7 @@
 [Version] 11.6.5.3
-[Released] Jun 1st 2022
+[Released] Jun 2nd 2022
 [Stable]
-[Link] tmpe-v11653-stable-01062022
+[Link] tmpe-v11653-stable-02062022
 [New] Chinese road sign theme #1523 (kvakvs, lokpro, TianQiBuTian)
 [New] Overlays mod option to show default speed when overriding segment/lane speeds #1404 (aubergine18)
 [New] Directional lane connectors #1492 #1214 #1211 (kianzarrin, Chamëleon)

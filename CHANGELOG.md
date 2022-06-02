@@ -29,7 +29,7 @@ This changelog includes all versions and major variants of the mod going all the
 
 > Date format: dd/mm/yyyy
 
-#### TM:PE V11.6.5.3 STABLE, 01/06/2022
+#### TM:PE V11.6.5.3 STABLE, 02/06/2022
 
 - [Meta] TM:PE 11.6.5.3 branch released as STABLE - huge thanks to our beta testers!
 - [New] Vietnamese translation Locale key updates #1551 (DucAnhLam)
