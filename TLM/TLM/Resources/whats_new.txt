@@ -17,6 +17,7 @@
 [Fixed] Asset Editor crash when saving asset with no segments #1505 #1313 (krzychu124, kianzarrin)
 [Fixed] Trams unable to turn due to lane arrows #1501 #1053 (WildQuoll, RLemonache, kianzarrin)
 [Fixed] UI windows/overlays not consuming mouse events #1443 #934 #749 (somethingstarted, MacSergey, krzychu124)
+[Fixed] DLS slider value incorrectly saved/loaded under certain conditions (krzychu124)
 [Updated] Speed Limits: Always use themed icons in segment/lane modes #1404 (aubergine18)
 [Updated] Use game-defined elevation keymapping to select under/over-ground views #1454 #1326 (krzychu124)
 [Updated] Multiple icons updated, fallback theme, etc. #1523 (kvakvs)
