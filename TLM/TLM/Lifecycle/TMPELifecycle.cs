@@ -10,6 +10,7 @@ namespace TrafficManager.Lifecycle {
     using TrafficManager.API.Manager;
     using TrafficManager.Custom.PathFinding;
     using TrafficManager.Manager.Impl;
+    using TrafficManager.Manager.Impl.LaneConnection;
     using TrafficManager.State;
     using TrafficManager.UI;
     using TrafficManager.Util;
@@ -182,6 +183,7 @@ namespace TrafficManager.Lifecycle {
             RegisteredManagers.Add(UtilityManager.Instance);
             RegisteredManagers.Add(VehicleRestrictionsManager.Instance);
             RegisteredManagers.Add(ExtVehicleManager.Instance);
+            RegisteredManagers.Add(ExtLaneManager.Instance);
 
             // Texture managers
             RegisteredManagers.Add(UI.Textures.RoadSignThemeManager.Instance);

@@ -1,4 +1,5 @@
 namespace TrafficManager.Manager.Impl {
+    using TrafficManager.Manager.Impl.LaneConnection;
     using ColossalFramework;
     using CSUtil.Commons;
     using JetBrains.Annotations;
@@ -746,11 +747,11 @@ namespace TrafficManager.Manager.Impl {
                                     // routing tracked vehicles (trains, trams, metros, monorails)
                                     // lane may be mixed car+tram
                                     bool nextHasConnections =
-                                        LaneConnectionManager.Instance.HasConnections(
+                                        LaneConnectionManager.Instance.Sub.HasConnections(
                                             nextLaneId,
                                             isNodeStartNodeOfNextSegment);
                                     if (nextHasConnections) {
-                                        bool connected = LaneConnectionManager.Instance.AreLanesConnected(
+                                        bool connected = LaneConnectionManager.Instance.Sub.AreLanesConnected(
                                                 nextLaneId,
                                                 prevLaneId,
                                                 isNodeStartNodeOfNextSegment);
@@ -862,11 +863,11 @@ namespace TrafficManager.Manager.Impl {
 
                                     bool connected = true;
                                     bool nextHasConnections =
-                                        LaneConnectionManager.Instance.HasConnections(
+                                        LaneConnectionManager.Instance.Sub.HasConnections(
                                             nextLaneId,
                                             isNodeStartNodeOfNextSegment);
                                     if (nextHasConnections) {
-                                        connected = LaneConnectionManager.Instance.AreLanesConnected(
+                                        connected = LaneConnectionManager.Instance.Sub.AreLanesConnected(
                                                 nextLaneId,
                                                 prevLaneId,
                                                 isNodeStartNodeOfNextSegment);
@@ -1368,7 +1369,7 @@ namespace TrafficManager.Manager.Impl {
 
                                     // skip lanes having lane connections
                                     // in highway-rules HasConnections() gives the same result as HasOutgoingConnections but faster.
-                                    if (LaneConnectionManager.Instance.HasConnections(
+                                    if (LaneConnectionManager.Instance.Sub.HasConnections(
                                         nextCompatibleTransitionDatas[nextTransitionIndex].laneId,
                                         isNodeStartNodeOfNextSegment)) {
                                         int laneConnectionTransIndex =
@@ -1974,7 +1975,7 @@ namespace TrafficManager.Manager.Impl {
                                 }
 
                                 // skip lanes having lane connections
-                                if (LaneConnectionManager.Instance.HasOutgoingConnections(
+                                if (LaneConnectionManager.Instance.Sub.HasOutgoingConnections(
                                     nextCompatibleTransitionDatas[nextTransitionIndex].laneId,
                                     isNodeStartNodeOfNextSegment)) {
                                     int laneConnectionTransIndex =

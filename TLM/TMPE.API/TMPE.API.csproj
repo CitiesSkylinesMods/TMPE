@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -82,6 +82,7 @@
     <Compile Include="Manager\ICustomDataManager.cs" />
     <Compile Include="Manager\ICustomManager.cs" />
     <Compile Include="Manager\ICustomSegmentLightsManager.cs" />
+    <Compile Include="Manager\IExtLaneManager.cs" />
     <Compile Include="Manager\IExtSegmentEndManager.cs" />
     <Compile Include="Manager\IExtNodeManager.cs" />
     <Compile Include="Manager\IExtSegmentManager.cs" />
@@ -130,8 +131,6 @@
     <Compile Include="Traffic\Data\PathUnitQueueItem.cs" />
     <Compile Include="Traffic\Data\PrioritySegment.cs" />
     <Compile Include="Traffic\Data\SegmentDirTrafficData.cs" />
-    <Compile Include="Traffic\Data\SegmentEndFlags.cs" />
-    <Compile Include="Traffic\Data\SegmentFlags.cs" />
     <Compile Include="Traffic\Data\ExtVehicle.cs" />
     <Compile Include="Traffic\Data\SpeedValue.cs" />
     <Compile Include="Traffic\Data\TurnOnRedSegments.cs" />
