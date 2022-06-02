@@ -9,6 +9,7 @@ namespace TrafficManager.UI.Helpers {
 
     public class DropDownOption<TEnum> : SerializableUIOptionBase<TEnum, UIDropDown, DropDownOption<TEnum>>
         where TEnum : struct, Enum, IConvertible {
+        private UILabel _dropdownLabel;
 
         public DropDownOption(string fieldName, Options.PersistTo scope = Options.PersistTo.Savegame)
         : base(fieldName, scope) { }
@@ -66,6 +67,7 @@ namespace TrafficManager.UI.Helpers {
                 eventCallback: InvokeOnValueChanged) as UIDropDown;
 
             _ui.width = 350;
+            _dropdownLabel = _ui.parent.Find<UILabel>("Label");
 
             UpdateTooltip();
             UpdateReadOnly();
@@ -97,7 +99,7 @@ namespace TrafficManager.UI.Helpers {
             _ui.isInteractive = !readOnly;
             _ui.opacity = readOnly ? 0.3f : 1f;
             // parent is UIPanel containing text label and dropdown
-            _ui.parent.Find<UILabel>("Label").opacity = readOnly ? 0.3f : 1f;
+            _dropdownLabel.opacity = readOnly ? 0.3f : 1f;
         }
     }
 }

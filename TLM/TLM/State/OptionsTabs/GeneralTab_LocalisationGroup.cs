@@ -151,7 +151,12 @@ namespace TrafficManager.State {
         }
 
         private static void OnRoadSignsThemeChanged(int newThemeIndex) {
-            if (!Options.IsGameLoaded()) {
+            if (!Options.IsGameLoaded(false)) {
+                // update global config only, skip reloading theme
+                var selectedTheme = RoadSignThemeManager.Instance.ThemeNames[newThemeIndex];
+                Main config = GlobalConfig.Instance.Main;
+                config.RoadSignTheme = selectedTheme;
+                GlobalConfig.WriteConfig();
                 return;
             }
 

@@ -124,7 +124,7 @@ namespace TrafficManager.UI.Helpers {
             _ui.thumbObject.isInteractive = !readOnly;
             _ui.thumbObject.opacity = readOnly ? 0.3f : 1f;
             // parent is UIPanel containing text label and slider
-            _ui.parent.Find<UILabel>("Label").opacity = readOnly ? 0.3f : 1f;
+            _sliderLabel.opacity = readOnly ? 0.3f : 1f;
         }
     }
 }
