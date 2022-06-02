@@ -1,6 +1,7 @@
 namespace TrafficManager.State {
     using ICities;
     using TrafficManager.API.Traffic.Enums;
+    using TrafficManager.UI;
     using TrafficManager.UI.Helpers;
 
     public static class GeneralTab_SimulationGroup {
