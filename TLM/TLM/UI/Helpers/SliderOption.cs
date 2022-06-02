@@ -120,8 +120,11 @@ namespace TrafficManager.UI.Helpers {
 
             Log._Debug($"SliderOption.UpdateReadOnly() - `{FieldName}` is {(readOnly ? "read-only" : "writeable")}");
 
+            _ui.isInteractive = !readOnly;
             _ui.thumbObject.isInteractive = !readOnly;
             _ui.thumbObject.opacity = readOnly ? 0.3f : 1f;
+            // parent is UIPanel containing text label and slider
+            _ui.parent.Find<UILabel>("Label").opacity = readOnly ? 0.3f : 1f;
         }
     }
 }

@@ -94,7 +94,10 @@ namespace TrafficManager.UI.Helpers {
 
             Log._Debug($"DropDownOption.UpdateReadOnly() - `{FieldName}` is {(readOnly ? "read-only" : "writeable")}");
 
-            _ui.isEnabled = !readOnly;
+            _ui.isInteractive = !readOnly;
+            _ui.opacity = readOnly ? 0.3f : 1f;
+            // parent is UIPanel containing text label and dropdown
+            _ui.parent.Find<UILabel>("Label").opacity = readOnly ? 0.3f : 1f;
         }
     }
 }
