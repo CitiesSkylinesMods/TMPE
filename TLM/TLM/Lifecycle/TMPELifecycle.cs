@@ -71,7 +71,18 @@ namespace TrafficManager.Lifecycle {
         public bool MayPublishSegmentChanges()
             => InGameOrEditor() && !Instance.Deserializing;
 
-        public static AppMode? AppMode => SimulationManager.instance.m_ManagersWrapper.loading?.currentMode;
+        public static AppMode? AppMode {
+            get {
+                try {
+                    return SimulationManager.instance.m_ManagersWrapper.loading?.currentMode;
+                }
+                catch {
+                    // ignore, currentMode may throw NullReferenceException on return to main menu
+                }
+
+                return null;
+            }
+        }
 
         // throws null ref if used from main menu
         public static SimulationManager.UpdateMode UpdateMode => SimulationManager.instance.m_metaData.m_updateMode;
