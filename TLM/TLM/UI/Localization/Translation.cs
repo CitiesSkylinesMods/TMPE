@@ -132,6 +132,7 @@ namespace TrafficManager.UI {
                     { "Thai", "th"},
                     { "Turkish", "tr"},
                     { "Ukrainian", "uk"},
+                    { "Vietnamese", "vi" },
                 };
             AvailableLanguageCodes = CsvColumnsToLocales.Values.ToList();
             AvailableLanguageCodes.Sort();

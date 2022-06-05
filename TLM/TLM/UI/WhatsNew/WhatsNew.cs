@@ -11,7 +11,7 @@ namespace TrafficManager.UI.WhatsNew {
 
     public class WhatsNew {
         // bump and update what's new changelogs when new features added
-        public static readonly Version CurrentVersion = new Version(11,6,5,2);
+        public static readonly Version CurrentVersion = new Version(11,6,5,3);
 
         private const string WHATS_NEW_FILE = "whats_new.txt";
         private const string RESOURCES_PREFIX = "TrafficManager.Resources.";
@@ -102,7 +102,8 @@ namespace TrafficManager.UI.WhatsNew {
                     && lineKeyword == MarkupKeyword.VersionStart) {
 
                     var changelog = new Changelog() {
-                        Version = new Version(text),
+                        // version text can be 1.2.3.4 or 1.2.3.4-hotfix-<number>
+                        Version = new Version(text.Split('-')[0]),
                     };
                     var items = new List<Changelog.Item>();
 

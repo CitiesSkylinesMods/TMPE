@@ -22,6 +22,7 @@ namespace TrafficManager.Lifecycle {
     using System.Diagnostics.CodeAnalysis;
     using TrafficManager.UI.Helpers;
     using TrafficManager.API.Traffic.Enums;
+    using System.Text;
 
     /// <summary>
     /// Do not use Singleton<TMPELifecycle>.instance to prevent memory leak.
@@ -70,7 +71,18 @@ namespace TrafficManager.Lifecycle {
         public bool MayPublishSegmentChanges()
             => InGameOrEditor() && !Instance.Deserializing;
 
-        public static AppMode? AppMode => SimulationManager.instance.m_ManagersWrapper.loading?.currentMode;
+        public static AppMode? AppMode {
+            get {
+                try {
+                    return SimulationManager.instance.m_ManagersWrapper.loading?.currentMode;
+                }
+                catch {
+                    // ignore, currentMode may throw NullReferenceException on return to main menu
+                }
+
+                return null;
+            }
+        }
 
         // throws null ref if used from main menu
         public static SimulationManager.UpdateMode UpdateMode => SimulationManager.instance.m_metaData.m_updateMode;
@@ -171,6 +183,7 @@ namespace TrafficManager.Lifecycle {
             RegisteredManagers.Add(UtilityManager.Instance);
             RegisteredManagers.Add(VehicleRestrictionsManager.Instance);
             RegisteredManagers.Add(ExtVehicleManager.Instance);
+            RegisteredManagers.Add(ExtLaneManager.Instance);
 
             // Texture managers
             RegisteredManagers.Add(UI.Textures.RoadSignThemeManager.Instance);
@@ -309,11 +322,11 @@ namespace TrafficManager.Lifecycle {
 
                     if (despawned != ExtVehicleType.None) {
                         Prompt.Info(
-                            "TM:PE Pathfinder Updated",
-                            $"Some vehicles ({despawned}) had broken paths due to a bug "
-                            + "in an earlier version of the pathfinder. We've despawned "
-                            + "them to prevent further issues. New vehicles will "
-                            + "automatically spawn to replace them.");
+                            T("Popup.Title:TM:PE Pathfinder Updated"),
+                            T("Popup.Message:Some vehicles had broken routes:") +
+                            $"\n\n{despawned}\n\n" +
+                            T("Popup.Message:We've despawned them to prevent further issues. " +
+                              "New vehicles will automatically spawn to replace them."));
                     }
                 }
 
@@ -322,6 +335,8 @@ namespace TrafficManager.Lifecycle {
                 ex.LogException(true);
             }
         }
+
+        private static string T(string key) => Translation.Options.Get(key);
 
         internal void Unload() {
             try {

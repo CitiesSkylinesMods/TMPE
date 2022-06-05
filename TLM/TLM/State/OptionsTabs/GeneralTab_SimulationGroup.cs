@@ -1,6 +1,4 @@
 namespace TrafficManager.State {
-    using ColossalFramework.UI;
-    using CSUtil.Commons;
     using ICities;
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.UI;
@@ -9,13 +7,15 @@ namespace TrafficManager.State {
     public static class GeneralTab_SimulationGroup {
 
         public static DropDownOption<SimulationAccuracy> SimulationAccuracy =
-            new(nameof(Options.simulationAccuracy), Options.PersistTo.Global) {
+            new(nameof(Options.simulationAccuracy), Options.PersistTo.Savegame) {
                 Label = "General.Dropdown:Simulation accuracy",
             };
 
         internal static void AddUI(UIHelperBase tab) {
-            var group = tab.AddGroup("General.Group:Simulation");
+            var group = tab.AddGroup(T("General.Group:Simulation"));
             SimulationAccuracy.AddUI(group);
         }
+
+        private static string T(string key) => Translation.Options.Get(key);
     }
 }

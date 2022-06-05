@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -140,6 +140,7 @@
     <Compile Include="Lifecycle\Patcher.cs" />
     <Compile Include="Lifecycle\TMPELifecycle.cs" />
     <Compile Include="Manager\Impl\ClockDirection.cs" />
+    <Compile Include="Manager\Impl\ExtLaneManager.cs" />
     <Compile Include="Manager\Impl\GameConnectionManager.cs" />
     <Compile Include="Manager\AbstractCustomManager.cs" />
     <Compile Include="Manager\AbstractFeatureManager.cs" />
@@ -148,6 +149,7 @@
     <Compile Include="Manager\Impl\ExtSegmentEndManager.cs" />
     <Compile Include="Manager\Impl\ExtSegmentManager.cs" />
     <Compile Include="Manager\Impl\GeometryNotifier.cs" />
+    <Compile Include="Patch\NetManagerEvents.cs" />
     <Compile Include="Manager\Impl\LaneConnection\ConnectionDataBase.cs" />
     <Compile Include="Manager\Impl\LaneConnection\LaneConnectionData.cs" />
     <Compile Include="Manager\Impl\LaneConnection\LaneConnectionSubManager.cs" />
@@ -193,6 +195,7 @@
     <Compile Include="UI\SubTools\RoutingDetector\Connection.cs" />
     <Compile Include="UI\SubTools\RoutingDetector\LaneEnd.cs" />
     <Compile Include="UI\SubTools\RoutingDetector\RoutingDetectorTool.cs" />
+    <Compile Include="UI\UIFactory.cs" />
     <Compile Include="UI\WhatsNew\MarkupKeyword.cs" />
     <Compile Include="UI\WhatsNew\WhatsNewMarkup.cs" />
     <Compile Include="Util\Extensions\CitizenUnitExtensions.cs" />
@@ -478,7 +481,6 @@
     <Compile Include="Util\Extensions\VehicleExtensions.cs" />
     <Compile Include="Util\InGameUtil.cs" />
     <Compile Include="Util\IntVector2.cs" />
-    <Compile Include="Util\LaneUtil.cs" />
     <Compile Include="Util\TMPEVectorUtil.cs" />
     <Compile Include="Util\RoadFamilyUtil.cs" />
     <Compile Include="Util\Spiral.cs" />
