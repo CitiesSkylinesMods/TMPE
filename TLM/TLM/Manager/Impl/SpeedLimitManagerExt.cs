@@ -27,7 +27,9 @@ namespace TrafficManager.Manager.Impl {
                            is ItemClass.SubService.PublicTransportTrain
                            or ItemClass.SubService.PublicTransportTram
                            or ItemClass.SubService.PublicTransportMetro
-                           or ItemClass.SubService.PublicTransportMonorail);
+                           or ItemClass.SubService.PublicTransportMonorail
+                       || subService is ItemClass.SubService.PublicTransportPlane
+                           && segment.Info.m_netAI is TaxiwayAI);
         }
 
         /// <summary>

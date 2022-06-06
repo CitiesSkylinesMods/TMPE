@@ -1,6 +1,7 @@
 namespace TrafficManager.API.Traffic.Data {
     using System;
     using TrafficManager.API.Traffic.Enums;
+    using UnityEngine;
 
     public struct ExtVehicle {
         public ushort vehicleId;
@@ -32,6 +33,10 @@ namespace TrafficManager.API.Traffic.Data {
         public float maxUnsafeSpeedDiff;
         public float minSafeSpeedImprovement;
         public float minSafeTrafficImprovement;
+        // Airplane
+        public bool requiresCargoPathRecalculation;
+        public Quaternion? airplaneRotation;
+        public ExtVehicleSize? passengerPlaneSize;
 
         public ExtVehicle(ushort vehicleId) {
             this.vehicleId = vehicleId;
@@ -62,6 +67,9 @@ namespace TrafficManager.API.Traffic.Data {
             maxUnsafeSpeedDiff = 0;
             minSafeSpeedImprovement = 0;
             minSafeTrafficImprovement = 0;
+            requiresCargoPathRecalculation = false;
+            airplaneRotation = null;
+            passengerPlaneSize = null;
         }
 
         public override string ToString() {

@@ -2,6 +2,7 @@ namespace TrafficManager.Manager.Impl {
     using Patch._CitizenAI._HumanAI.Connection;
     using Patch._CitizenAI._ResidentAI.Connection;
     using Patch._CitizenAI._TouristAI.Connection;
+    using Patch._VehicleAI._AircraftAI.Connection;
     using Patch._VehicleAI.Connection;
     using Patch._VehicleAI._PassengerCarAI.Connection;
     using Patch._VehicleAI._TrainAI.Connection;
@@ -14,6 +15,7 @@ namespace TrafficManager.Manager.Impl {
         }
 
         GameConnectionManager() {
+            AircraftAIConnection = AircraftAIHook.GetConnection();
             PassengerCarAIConnection = PassengerCarAIHook.GetConnection();
             VehicleAIConnection = VehicleAIHook.GetConnection();
             TrainAIConnection = TrainAIHook.GetConnection();
@@ -22,6 +24,7 @@ namespace TrafficManager.Manager.Impl {
             TouristAIConnection = TouristAIHook.GetConnection();
         }
 
+        public AircraftAIConnection AircraftAIConnection { get; }
         public PassengerCarAIConnection PassengerCarAIConnection { get; }
         public VehicleAIConnection VehicleAIConnection { get; }
         public TrainAIConnection TrainAIConnection { get; }

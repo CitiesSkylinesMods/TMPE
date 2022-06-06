@@ -83,6 +83,15 @@ namespace TrafficManager.Manager.Impl {
                 return false;
             }
 
+            if (VehicleRestrictionsManager.Instance.IsRunwayNetInfo(netNode.Info)) {
+                reason = SetPrioritySignError.NotSupported;
+                Log._DebugIf(
+                    logPriority,
+                    () => $"TrafficPriorityManager.MayNodeHavePrioritySigns: nodeId={nodeId}, " +
+                          "result=false, reason=NotSupported");
+                return false;
+            }
+
             if (TrafficLightSimulationManager.Instance.HasTimedSimulation(nodeId)) {
                 reason = SetPrioritySignError.HasTimedLight;
 
@@ -431,7 +440,8 @@ namespace TrafficManager.Manager.Impl {
                 return true;
             }
 
-            if ((vehicle.m_flags & Vehicle.Flags.Emergency2) != 0) {
+            if ((vehicle.m_flags & Vehicle.Flags.Emergency2) != 0 &&
+                vehicle.Info.m_vehicleType.IsFlagSet(VehicleInfo.VehicleType.Car)) {
                 // target vehicle is on emergency
                 Log._DebugIf(
                     logPriority,
@@ -543,6 +553,7 @@ namespace TrafficManager.Manager.Impl {
                         () => $"\nTrafficPriorityManager.HasPriority({vehicleId}): checking other " +
                         $"vehicle {incomingVehicleId} @ seg. {otherSegmentId}");
 
+                    // todo separate for plane <-> road vehicle check? (they assigned to different grid)
                     if (IsConflictingVehicle(
                         logPriority,
                         transitNode.m_position,
@@ -713,6 +724,9 @@ namespace TrafficManager.Manager.Impl {
 
                     // incoming vehicle is (1) entering the junction or (2) leaving
                     Vector3 incomingPos = incomingVehicle.GetLastFramePosition();
+                    if (vehicle.Info.m_vehicleType.IsFlagSet(VehicleInfo.VehicleType.Plane)) {
+                        incomingPos -= Vector3.one * (vehicle.Info.m_generatedInfo.m_size.z * 0.5f);
+                    }
                     Vector3 incomingToNode = transitNodePos - incomingPos;
 
                     // check if incoming vehicle moves towards node
@@ -723,7 +737,7 @@ namespace TrafficManager.Manager.Impl {
                             logPriority,
                             () => $"TrafficPriorityManager.IsConflictingVehicle({vehicleId}, " +
                             $"{incomingVehicleId}): Incoming {incomingVehicleId} is moving away from " +
-                            $"the transit node ({dot}). *IGNORING*");
+                            $"the transit node ({dot}). ({incomingPos}, {incomingToNode}) *IGNORING*");
                         return false;
                     }
 

@@ -799,12 +799,6 @@ namespace TrafficManager.UI {
                     m_ignoreNodeFlags = NetNode.Flags.None,
                 };
 
-                // nodeInput.m_netService2.m_itemLayers = ItemClass.Layer.Default
-                //     | ItemClass.Layer.PublicTransport | ItemClass.Layer.MetroTunnels;
-                // nodeInput.m_netService2.m_service = ItemClass.Service.PublicTransport;
-                // nodeInput.m_netService2.m_subService = ItemClass.SubService.PublicTransportTrain;
-                // nodeInput.m_ignoreNodeFlags = NetNode.Flags.Untouchable;
-
                 if (RayCast(nodeInput, out RaycastOutput nodeOutput)) {
                     HoveredNodeId = nodeOutput.m_netNode;
                 } else {
@@ -830,6 +824,16 @@ namespace TrafficManager.UI {
 
                         if (RayCast(nodeInput, out nodeOutput)) {
                             HoveredNodeId = nodeOutput.m_netNode;
+                        } else {
+                            // find aircraft taxiway nodes
+                            nodeInput.m_netService.m_itemLayers = ItemClass.Layer.Default;
+                            nodeInput.m_netService.m_service = ItemClass.Service.PublicTransport;
+                            nodeInput.m_netService.m_subService = ItemClass.SubService.PublicTransportPlane;
+                            nodeInput.m_ignoreNodeFlags = NetNode.Flags.Untouchable;
+
+                            if (RayCast(nodeInput, out nodeOutput)) {
+                                HoveredNodeId = nodeOutput.m_netNode;
+                            }
                         }
                     }
                 }
@@ -874,6 +878,16 @@ namespace TrafficManager.UI {
 
                         if (RayCast(segmentInput, out segmentOutput)) {
                             segmentId = segmentOutput.m_netSegment;
+                        } else {
+                            // find aircraft taxiway segments
+                            segmentInput.m_netService.m_itemLayers = ItemClass.Layer.Default;
+                            segmentInput.m_netService.m_service = ItemClass.Service.PublicTransport;
+                            segmentInput.m_netService.m_subService = ItemClass.SubService.PublicTransportPlane;
+                            segmentInput.m_ignoreSegmentFlags = NetSegment.Flags.Untouchable;
+
+                            if (RayCast(segmentInput, out segmentOutput)) {
+                                segmentId = segmentOutput.m_netSegment;
+                            }
                         }
                     }
                 }
@@ -963,6 +977,10 @@ namespace TrafficManager.UI {
                                           ref NetSegment segment,
                                           ref NetInfo segmentInfo)
         {
+            // ignore pedestrian lanes
+            if (!segment.Info.m_hasBackwardVehicleLanes && !segment.Info.m_hasForwardVehicleLanes)
+                return;
+
             var _counterStyle = new GUIStyle();
             Vector3 centerPos = segment.m_bounds.center;
             bool visible = GeometryUtil.WorldToScreenPoint(centerPos, out Vector3 screenPos);
@@ -971,7 +989,7 @@ namespace TrafficManager.UI {
                 return;
             }
 
-            screenPos.y -= 200;
+            screenPos.y -= 120;
 
             if (screenPos.z < 0) {
                 return;
@@ -1004,6 +1022,11 @@ namespace TrafficManager.UI {
                     break;
                 }
 
+                NetInfo.Lane laneInfo = segmentInfo.m_lanes[i];
+                if (laneInfo.m_vehicleType == VehicleInfo.VehicleType.None) {
+                    continue;
+                }
+
                 ref NetLane netLane = ref curLaneId.ToLane();
 
                 bool laneTrafficDataLoaded =
@@ -1011,9 +1034,6 @@ namespace TrafficManager.UI {
                         segmentId,
                         (byte)i,
                         out LaneTrafficData laneTrafficData);
-
-                NetInfo.Lane laneInfo = segmentInfo.m_lanes[i];
-
 #if PFTRAFFICSTATS
                 uint pfTrafficBuf =
                     TrafficMeasurementManager
@@ -1156,6 +1176,10 @@ namespace TrafficManager.UI {
                     continue;
                 }
 #endif
+                if (service == ItemClass.Service.Water || service == ItemClass.Service.Electricity) {
+                    continue;
+                }
+
                 Vector3 centerPos = netSegment.m_bounds.center;
                 bool visible = GeometryUtil.WorldToScreenPoint(centerPos, out Vector3 screenPos);
                 if (!visible) {
@@ -1285,6 +1309,11 @@ namespace TrafficManager.UI {
                     continue;
                 }
 
+                if (netNode.Info.GetService() == ItemClass.Service.Water ||
+                    netNode.Info.GetService() == ItemClass.Service.Electricity) {
+                    continue;
+                }
+
                 Vector3 pos = netNode.m_position;
                 bool visible = GeometryUtil.WorldToScreenPoint(pos, out Vector3 screenPos);
                 if (!visible) {
@@ -1360,7 +1389,7 @@ namespace TrafficManager.UI {
                 _counterStyle.normal.textColor = new Color(1f, 1f, 1f);
                 // _counterStyle.normal.background = MakeTex(1, 1, new Color(0f, 0f, 0f, 0.4f));
 
-                ExtVehicle vState = vehStateManager.ExtVehicles[(ushort)i];
+                ref ExtVehicle vState = ref vehStateManager.ExtVehicles[(ushort)i];
                 ExtCitizenInstance driverInst =
                     ExtCitizenInstanceManager.Instance.ExtInstances[
                         Constants.ManagerFactory.ExtVehicleManager
@@ -1379,7 +1408,7 @@ namespace TrafficManager.UI {
                 }
 #endif
                 string labelStr = string.Format(
-                    "V #{0} is a {1}{2} {3} @ ~{4} (len: {5:0.0}, {6} @ {7} ({8}), l. {9} " +
+                    "V #{0} is a {1}{2}|{3} @ ~{4} (len: {5:0.0}, {6} @ {7} ({8}), l. {9} " +
                     "-> {10}, l. {11}), w: {12}\n" +
                     "di: {13} dc: {14} m: {15} f: {16} l: {17} lid: {18} ltsu: {19} lpu: {20} " +
                     "als: {21} srnd: {22} trnd: {23}",

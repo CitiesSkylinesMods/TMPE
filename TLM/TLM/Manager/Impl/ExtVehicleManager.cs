@@ -43,7 +43,8 @@ namespace TrafficManager.Manager.Impl {
         public const VehicleInfo.VehicleType VEHICLE_TYPES =
             VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train |
             VehicleInfo.VehicleType.Tram | VehicleInfo.VehicleType.Metro |
-            VehicleInfo.VehicleType.Monorail | VehicleInfo.VehicleType.Trolleybus;
+            VehicleInfo.VehicleType.Monorail | VehicleInfo.VehicleType.Trolleybus |
+            VehicleInfo.VehicleType.Plane;
 
         /// <summary>
         /// Known vehicles and their current known positions. Index: vehicle id
@@ -491,6 +492,9 @@ namespace TrafficManager.Manager.Impl {
             DetermineVehicleType(ref extVehicle, ref vehicleData);
             extVehicle.recklessDriver = false;
             extVehicle.flags = ExtVehicleFlags.Created;
+            if (extVehicle.vehicleType.IsFlagSet(ExtVehicleType.CargoPlane)) {
+                UpdateCargoAirplaneFlags(ref extVehicle, ref vehicleData);
+            }
 
             if (logVehicleLinking) {
                 Log._Debug(
@@ -540,6 +544,11 @@ namespace TrafficManager.Manager.Impl {
 
             StepRand(ref extVehicle, true);
             UpdateDynamicLaneSelectionParameters(ref extVehicle);
+            if (extVehicle.vehicleType.IsFlagSet(ExtVehicleType.CargoPlane)) {
+                UpdateCargoAirplaneFlags(ref extVehicle, ref vehicleData);
+            } else if (extVehicle.vehicleType.IsFlagSet(ExtVehicleType.PassengerPlane)) {
+                UpdatePassengerPlaneSize(ref extVehicle, ref vehicleData);
+            }
 
             return extVehicle.vehicleType;
         }
@@ -784,6 +793,44 @@ namespace TrafficManager.Manager.Impl {
             }
         }
 
+        public void UpdateCargoAirplaneFlags(ref ExtVehicle extVehicle, ref Vehicle vehicleData) {
+            bool goingToSource = vehicleData.m_flags.IsFlagSet(Vehicle.Flags.GoingBack);
+            extVehicle.flags &= ~(ExtVehicleFlags.GoingToOutside | ExtVehicleFlags.GoingFromOutside);
+            extVehicle.flags |= goingToSource
+                                    ? vehicleData.m_sourceBuilding.ToBuilding().m_flags
+                                                 .IsFlagSet(Building.Flags.IncomingOutgoing)
+                                          ? ExtVehicleFlags.GoingToOutside
+                                          : ExtVehicleFlags.GoingFromOutside
+                                    : vehicleData.m_targetBuilding.ToBuilding().m_flags
+                                                 .IsFlagSet(Building.Flags.IncomingOutgoing)
+                                        ? ExtVehicleFlags.GoingToOutside
+                                        : ExtVehicleFlags.GoingFromOutside;
+            // Log.Info($"Updated CargoPlane {extVehicle.vehicleId} flags: {extVehicle.flags} | s: {vehicleData.m_sourceBuilding} t: {vehicleData.m_targetBuilding} f: {vehicleData.m_flags}");
+        }
+
+        private void UpdatePassengerPlaneSize(ref ExtVehicle extVehicle, ref Vehicle vehicleData) {
+            //todo read configuration from asset data
+            ExtVehicleSize extSize = ExtVehicleSize.All;
+            if ((vehicleData.Info.m_dlcRequired & SteamHelper.DLC_BitMask.AirportDLC) != 0) {
+                switch (vehicleData.Info.m_class.m_level) {
+                    case ItemClass.Level.Level1:
+                        extSize = ExtVehicleSize.Medium;
+                        break;
+                    case ItemClass.Level.Level2:
+                        extSize = ExtVehicleSize.Large;
+                        break;
+                    case ItemClass.Level.Level3:
+                        extSize = ExtVehicleSize.Small;
+                        break;
+                    default:
+                        extSize = ExtVehicleSize.All;
+                        break;
+                }
+            }
+
+            extVehicle.passengerPlaneSize = extSize;
+        }
+
         public void UpdateDynamicLaneSelectionParameters(ref ExtVehicle extVehicle) {
 #if DEBUG
             if (DebugSwitch.VehicleLinkingToSegmentEnd.Get()) {
@@ -885,15 +932,16 @@ namespace TrafficManager.Manager.Impl {
         private void DetermineVehicleType(ref ExtVehicle extVehicle, ref Vehicle vehicleData) {
             VehicleAI ai = vehicleData.Info.m_vehicleAI;
 
-            if ((vehicleData.m_flags & Vehicle.Flags.Emergency2) != 0) {
+            if ((vehicleData.m_flags & Vehicle.Flags.Emergency2) != 0 &&
+                vehicleData.Info.m_vehicleType.IsFlagSet(VehicleInfo.VehicleType.Car)) {
                 extVehicle.vehicleType = ExtVehicleType.Emergency;
             } else {
                 ExtVehicleType? type = DetermineVehicleTypeFromAIType(
                     extVehicle.vehicleId,
                     ai,
                     false);
-                if (type != null) {
-                    extVehicle.vehicleType = (ExtVehicleType)type;
+                if (type.HasValue) {
+                    extVehicle.vehicleType = type.Value;
                 } else {
                     extVehicle.vehicleType = ExtVehicleType.None;
                 }
@@ -982,6 +1030,8 @@ namespace TrafficManager.Manager.Impl {
                             return ExtVehicleType.PassengerPlane;
                         case CargoPlaneAI _:
                             return ExtVehicleType.CargoPlane;
+                        case AircraftAI _:
+                            return ExtVehicleType.Plane;
                     }
 
                     break;
@@ -1034,7 +1084,8 @@ namespace TrafficManager.Manager.Impl {
 
                 OnCreateVehicle(vId, ref vehicle);
 
-                if ((vehicle.m_flags & Vehicle.Flags.Emergency2) != 0) {
+                if ((vehicle.m_flags & Vehicle.Flags.Emergency2) != 0 &&
+                    vehicle.Info.m_vehicleType.IsFlagSet(VehicleInfo.VehicleType.Car)) {
                     OnStartPathFind(vId, ref vehicle, ExtVehicleType.Emergency);
                 }
 

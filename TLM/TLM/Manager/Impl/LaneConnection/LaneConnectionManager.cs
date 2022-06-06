@@ -21,7 +21,8 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
                                                              | VehicleInfo.VehicleType.Tram
                                                              | VehicleInfo.VehicleType.Metro
                                                              | VehicleInfo.VehicleType.Monorail
-                                                             | VehicleInfo.VehicleType.Trolleybus;
+                                                             | VehicleInfo.VehicleType.Trolleybus
+                                                             | VehicleInfo.VehicleType.Plane;
 
         public LaneConnectionSubManager Sub = // TODO #354 divide into Road/Track
             new LaneConnectionSubManager(LaneEndTransitionGroup.Vehicle);

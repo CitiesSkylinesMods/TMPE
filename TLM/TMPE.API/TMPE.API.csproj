@@ -142,6 +142,7 @@
     <Compile Include="Traffic\Enums\ExtSoftPathState.cs" />
     <Compile Include="Traffic\Enums\ExtTransportMode.cs" />
     <Compile Include="Traffic\Enums\ExtVehicleFlags.cs" />
+    <Compile Include="Traffic\Enums\ExtVehicleSize.cs" />
     <Compile Include="Traffic\Enums\ExtVehicleType.cs" />
     <Compile Include="Traffic\Enums\FlowWaitCalcMode.cs" />
     <Compile Include="Traffic\Enums\GeometryCalculationMode.cs" />
@@ -186,7 +187,7 @@
     <Analyzer Include="..\packages\StyleCop.Analyzers.1.1.118\analyzers\dotnet\cs\StyleCop.Analyzers.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
   </Target>

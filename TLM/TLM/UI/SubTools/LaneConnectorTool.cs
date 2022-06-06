@@ -207,7 +207,14 @@ namespace TrafficManager.UI.SubTools {
                           ((connectionClass.m_service == ItemClass.Service.PublicTransport) &&
                            ((connectionClass.m_subService == ItemClass.SubService.PublicTransportTrain) ||
                             (connectionClass.m_subService == ItemClass.SubService.PublicTransportMetro) ||
-                            (connectionClass.m_subService == ItemClass.SubService.PublicTransportMonorail))))) {
+                            (connectionClass.m_subService == ItemClass.SubService.PublicTransportMonorail) ||
+                            (connectionClass.m_subService == ItemClass.SubService.PublicTransportPlane)
+                            )))) {
+                        continue;
+                    }
+
+                    if (VehicleRestrictionsManager.Instance.IsRunwayNetInfo(netNode.Info) ||
+                        (VehicleRestrictionsManager.Instance.IsPlaneNetInfo(netNode.Info) && netNode.CountSegments() <= 2)) {
                         continue;
                     }
 
@@ -484,6 +491,12 @@ namespace TrafficManager.UI.SubTools {
             } // end if selected node
 
             if ((GetSelectionMode() == SelectionMode.None) && (HoveredNodeId != 0) && MainTool.IsNodeVisible(HoveredNodeId)) {
+                ref NetNode hoveredNode = ref HoveredNodeId.ToNode();
+                if (VehicleRestrictionsManager.Instance.IsPlaneNetInfo(hoveredNode.Info)
+                    && hoveredNode.CountSegments() <= 2) {
+                    return;
+                }
+
                 // draw hovered node
                 Highlight.DrawNodeCircle(
                     cameraInfo: cameraInfo,

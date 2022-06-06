@@ -5,5 +5,6 @@ namespace TrafficManager.API.Traffic.Enums {
         HasTimedLight,
         InvalidSegment,
         NotIncoming,
+        NotSupported,
     }
 }

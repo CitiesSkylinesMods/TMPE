@@ -11,7 +11,7 @@ namespace TrafficManager.Manager.Impl {
     using UnityEngine;
 
     public class TrafficMeasurementManager : AbstractCustomManager, ITrafficMeasurementManager {
-        private const VehicleInfo.VehicleType VEHICLE_TYPES = VehicleInfo.VehicleType.Car;
+        private const VehicleInfo.VehicleType VEHICLE_TYPES = VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Plane;
 
         private const NetInfo.LaneType LANE_TYPES =
             NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle;

@@ -18,7 +18,7 @@ namespace TrafficManager.Util {
 
         internal const NetInfo.LaneType ROAD_LANE_TYPES = LaneArrowManager.LANE_TYPES;
 
-        internal const VehicleInfo.VehicleType ROAD_VEHICLE_TYPES = LaneArrowManager.VEHICLE_TYPES | VehicleInfo.VehicleType.Trolleybus;
+        internal const VehicleInfo.VehicleType ROAD_VEHICLE_TYPES = LaneArrowManager.VEHICLE_TYPES | VehicleInfo.VehicleType.Trolleybus | VehicleInfo.VehicleType.Plane;
 
         internal static bool MatchesTrack([NotNull] this NetInfo.Lane laneInfo) =>
             laneInfo.Matches(TRACK_LANE_TYPES, TRACK_VEHICLE_TYPES);

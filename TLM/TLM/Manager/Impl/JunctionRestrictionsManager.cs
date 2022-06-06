@@ -103,8 +103,8 @@ namespace TrafficManager.Manager.Impl {
         private bool MayHaveJunctionRestrictions(ushort nodeId) {
             ref NetNode netNode = ref nodeId.ToNode();
 
-            Log._Debug($"JunctionRestrictionsManager.MayHaveJunctionRestrictions({nodeId}): " +
-                       $"flags={netNode.m_flags}");
+            // Log._Debug($"JunctionRestrictionsManager.MayHaveJunctionRestrictions({nodeId}): " +
+            //            $"flags={netNode.m_flags}");
 
             return netNode.m_flags.IsFlagSet(NetNode.Flags.Junction | NetNode.Flags.Bend)
                 && netNode.IsValid();
@@ -873,7 +873,7 @@ namespace TrafficManager.Manager.Impl {
         private static ref NetNode GetNode(ushort segmentId, bool startNode) =>
             ref segmentId.ToSegment().GetNodeId(startNode).ToNode();
 
-        #region Set<Traffic Rule>Allowed: TernaryBool 
+        #region Set<Traffic Rule>Allowed: TernaryBool
 
         public bool SetUturnAllowed(ushort segmentId, bool startNode, TernaryBool value) {
             ref NetSegment netSegment = ref segmentId.ToSegment();

@@ -30,7 +30,8 @@ namespace TrafficManager.Manager.Impl {
         public const VehicleInfo.VehicleType ROUTED_VEHICLE_TYPES =
             VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Metro |
             VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Tram |
-            VehicleInfo.VehicleType.Monorail | VehicleInfo.VehicleType.Trolleybus;
+            VehicleInfo.VehicleType.Monorail | VehicleInfo.VehicleType.Trolleybus |
+            VehicleInfo.VehicleType.Plane;
 
         public static bool IsSupported(NetInfo.Lane laneInfo) =>
             laneInfo.Matches(ROUTED_LANE_TYPES, ROUTED_VEHICLE_TYPES);
