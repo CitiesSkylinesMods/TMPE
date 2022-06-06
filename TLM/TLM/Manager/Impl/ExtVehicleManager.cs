@@ -546,6 +546,8 @@ namespace TrafficManager.Manager.Impl {
             UpdateDynamicLaneSelectionParameters(ref extVehicle);
             if (extVehicle.vehicleType.IsFlagSet(ExtVehicleType.CargoPlane)) {
                 UpdateCargoAirplaneFlags(ref extVehicle, ref vehicleData);
+            } else if (extVehicle.vehicleType.IsFlagSet(ExtVehicleType.PassengerPlane)) {
+                UpdatePassengerPlaneSize(ref extVehicle, ref vehicleData);
             }
 
             return extVehicle.vehicleType;
@@ -806,6 +808,29 @@ namespace TrafficManager.Manager.Impl {
             // Log.Info($"Updated CargoPlane {extVehicle.vehicleId} flags: {extVehicle.flags} | s: {vehicleData.m_sourceBuilding} t: {vehicleData.m_targetBuilding} f: {vehicleData.m_flags}");
         }
 
+        private void UpdatePassengerPlaneSize(ref ExtVehicle extVehicle, ref Vehicle vehicleData) {
+            //todo read configuration from asset data
+            ExtVehicleSize extSize = ExtVehicleSize.All;
+            if ((vehicleData.Info.m_dlcRequired & SteamHelper.DLC_BitMask.AirportDLC) != 0) {
+                switch (vehicleData.Info.m_class.m_level) {
+                    case ItemClass.Level.Level1:
+                        extSize = ExtVehicleSize.Medium;
+                        break;
+                    case ItemClass.Level.Level2:
+                        extSize = ExtVehicleSize.Large;
+                        break;
+                    case ItemClass.Level.Level3:
+                        extSize = ExtVehicleSize.Small;
+                        break;
+                    default:
+                        extSize = ExtVehicleSize.All;
+                        break;
+                }
+            }
+
+            extVehicle.passengerPlaneSize = extSize;
+        }
+
         public void UpdateDynamicLaneSelectionParameters(ref ExtVehicle extVehicle) {
 #if DEBUG
             if (DebugSwitch.VehicleLinkingToSegmentEnd.Get()) {
@@ -1005,6 +1030,8 @@ namespace TrafficManager.Manager.Impl {
                             return ExtVehicleType.PassengerPlane;
                         case CargoPlaneAI _:
                             return ExtVehicleType.CargoPlane;
+                        case AircraftAI _:
+                            return ExtVehicleType.Plane;
                     }
 
                     break;

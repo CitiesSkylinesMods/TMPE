@@ -202,9 +202,8 @@ namespace TrafficManager.Patch._VehicleAI._AircraftAI {
 
                 float magnitude = vector.magnitude;
                 // adjust position to do 15deg turn? on flat plane
-                targetPos0 += targetBeforePos1 * (magnitude * 0.9659258f); // 0.9659258f == ~cos(15 deg)
-                // then adjust height, 0.258819044f is some kind of **Magic Value**, maybe related with other magic limits or
-                // maybe it if just hardcoded gradual descend rate?
+                targetPos0 += targetBeforePos1 * (magnitude * 0.9659258f); // move target pos backwards / 0.9659258f == ~cos(15 deg)
+                // some kind of **Magic Value** related gradual ascend rate during the flight
                 targetPos0.y = Mathf.Min(targetPos0.y + (magnitude * 0.258819044f), Mathf.Max(targetPos0.y, 700f/*STOCK VALUE 1500f*/));
                 // calc new diff
                 vector = targetPos0 - frameData.m_position;
@@ -212,7 +211,7 @@ namespace TrafficManager.Patch._VehicleAI._AircraftAI {
                 if (vector.sqrMagnitude < 40000f) {
                     // a = vehicleData.m_targetPos0;
                     vector = (Vector3)vehicleData.m_targetPos0 - frameData.m_position;
-                    // check target pos, if segment has slow speed (e.g: start pos of the runway)
+                    // check target pos, if segment has slow speed (e.g: located at start pos of the runway)
                     // and closer than X switch to Landing mode (in-game it will show aircraft wheels)
                     if (vehicleData.m_targetPos0.w < 40f && lengthToTargetPos0 < 500f) {
                         flags |= Vehicle.Flags.Landing;

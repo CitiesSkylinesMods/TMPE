@@ -37,7 +37,9 @@ namespace TrafficManager.Manager.Impl {
 
         public static readonly VehicleRestrictionsManager Instance = new VehicleRestrictionsManager();
 
-        private VehicleRestrictionsManager() { }
+        private VehicleRestrictionsManager() {
+            laneAllowedVehicleSizesArray = new ExtVehicleSize?[NetManager.MAX_SEGMENT_COUNT][];
+        }
 
         protected override void InternalPrintDebugInfo() {
             base.InternalPrintDebugInfo();
@@ -48,6 +50,18 @@ namespace TrafficManager.Manager.Impl {
         /// For each segment id and lane index: Holds the default set of vehicle types allowed for the lane
         /// </summary>
         private ExtVehicleType?[][][] defaultVehicleTypeCache;
+
+        /// <summary>
+        /// For each segment id and lane index: Holds the default set of vehicle sizes allowed for the lane
+        /// </summary>
+        private ExtVehicleSize?[][] defaultVehicleSizeCache;
+
+        //---------------------
+
+        /// <summary>
+        /// For each lane: Defines the allowed vehicle sizes
+        /// </summary>
+        internal static ExtVehicleSize?[][] laneAllowedVehicleSizesArray; // for faster, lock-free access, 1st index: segment id, 2nd index: lane index
 
         /// <summary>
         /// Determines the allowed vehicle types that may approach the given node from the given segment.
@@ -187,8 +201,36 @@ namespace TrafficManager.Manager.Impl {
                 busLaneMode);
         }
 
+        /// <summary>
+        /// Determines the allowed vehicle sizes for the given segment and lane.
+        /// </summary>
+        /// <param name="segmentId"></param>
+        /// <param name="laneIndex"></param>
+        /// <param name="segmentInfo"></param>
+        /// <param name="laneInfo"></param>
+        /// <returns></returns>
+        public ExtVehicleSize GetAllowedVehicleSizes(ushort segmentId,
+                                                     NetInfo segmentInfo,
+                                                     uint laneIndex,
+                                                     NetInfo.Lane laneInfo) {
+            ExtVehicleSize?[] fastArray = laneAllowedVehicleSizesArray[segmentId];
+            if (fastArray != null && fastArray.Length > laneIndex && fastArray[laneIndex] != null) {
+                return (ExtVehicleSize)fastArray[laneIndex];
+            }
+
+            return GetDefaultAllowedVehicleSizes(
+                segmentId,
+                segmentInfo,
+                laneIndex,
+                laneInfo);
+        }
+
         public ExtVehicleType? GetAllowedVehicleTypesRaw(ushort segmentId, uint laneIndex) {
             return Flags.laneAllowedVehicleTypesArray?[segmentId]?[laneIndex];
+        }
+
+        public ExtVehicleSize? GetAllowedVehicleSizesRaw(ushort segmentId, uint laneIndex) {
+            return laneAllowedVehicleSizesArray?[segmentId]?[laneIndex];
         }
 
         /// <summary>
@@ -236,6 +278,49 @@ namespace TrafficManager.Manager.Impl {
             }
 
             return (ExtVehicleType)defaultVehicleType;
+        }
+
+        /// <summary>
+        /// Determines the default set of allowed vehicle sizes for a given segment and lane.
+        /// </summary>
+        /// <param name="segmentId"></param>
+        /// <param name="segmentInfo"></param>
+        /// <param name="laneIndex"></param>
+        /// <param name="laneInfo"></param>
+        /// <returns></returns>
+        public ExtVehicleSize GetDefaultAllowedVehicleSizes(
+            ushort segmentId,
+            NetInfo segmentInfo,
+            uint laneIndex,
+            NetInfo.Lane laneInfo) {
+            // manage cached default vehicle types
+            if (defaultVehicleSizeCache == null) {
+                defaultVehicleSizeCache = new ExtVehicleSize?[NetManager.MAX_SEGMENT_COUNT][];
+            }
+
+            ExtVehicleSize?[] cachedDefaultType = null;
+            // int cacheIndex = (int)busLaneMode;
+
+            if (defaultVehicleSizeCache[segmentId] != null) {
+                cachedDefaultType = defaultVehicleSizeCache[segmentId];
+            }
+
+            if (cachedDefaultType == null ||
+                cachedDefaultType.Length != segmentInfo.m_lanes.Length)
+            {
+                ExtVehicleSize?[] segmentCache = new ExtVehicleSize?[segmentInfo.m_lanes.Length];
+                defaultVehicleSizeCache[segmentId] = segmentCache;
+                cachedDefaultType = segmentCache;
+            }
+
+            ExtVehicleSize? defaultVehicleType = cachedDefaultType[laneIndex];
+
+            if (defaultVehicleType == null) {
+                defaultVehicleType = GetDefaultAllowedVehicleSizes(laneInfo);
+                cachedDefaultType[laneIndex] = defaultVehicleType;
+            }
+
+            return (ExtVehicleSize)defaultVehicleType;
         }
 
         public ExtVehicleType GetDefaultAllowedVehicleTypes(NetInfo.Lane laneInfo,
@@ -313,6 +398,11 @@ namespace TrafficManager.Manager.Impl {
             }
 
             return ret;
+        }
+
+        public ExtVehicleSize GetDefaultAllowedVehicleSizes(NetInfo.Lane laneInfo) {
+            //TODO Airports DLC save/read from asset data
+            return laneInfo.m_vehicleType.IsFlagSet(VehicleInfo.VehicleType.Plane) ? ExtVehicleSize.All : ExtVehicleSize.None;
         }
 
         /// <summary>
@@ -498,6 +588,132 @@ namespace TrafficManager.Manager.Impl {
             }
         }
 
+        public static void SetLaneAllowedVehicleSizes(uint laneId, ExtVehicleSize vehicleSizes) {
+            if (laneId <= 0) {
+                return;
+            }
+
+            ref NetLane netLane = ref laneId.ToLane();
+
+            if (((NetLane.Flags)netLane.m_flags & (NetLane.Flags.Created | NetLane.Flags.Deleted)) != NetLane.Flags.Created) {
+                return;
+            }
+
+            ushort segmentId = netLane.m_segment;
+
+            if (segmentId <= 0) {
+                return;
+            }
+
+            ref NetSegment netSegment = ref segmentId.ToSegment();
+
+            if ((netSegment.m_flags & (NetSegment.Flags.Created | NetSegment.Flags.Deleted)) != NetSegment.Flags.Created) {
+                return;
+            }
+
+            NetInfo segmentInfo = netSegment.Info;
+            uint curLaneId = netSegment.m_lanes;
+            uint laneIndex = 0;
+
+            while (laneIndex < segmentInfo.m_lanes.Length && curLaneId != 0u) {
+                if (curLaneId == laneId) {
+                    SetLaneAllowedVehicleSizes(segmentId, laneIndex, laneId, vehicleSizes);
+                    return;
+                }
+
+                laneIndex++;
+                curLaneId = curLaneId.ToLane().m_nextLane;
+            }
+        }
+
+        public static void SetLaneAllowedVehicleSizes(ushort segmentId,
+                                                      uint laneIndex,
+                                                      uint laneId,
+                                                      ExtVehicleSize vehicleSizes)
+        {
+            if (segmentId <= 0 || laneId <= 0) {
+                return;
+            }
+
+            ref NetSegment netSegment = ref segmentId.ToSegment();
+
+            if ((netSegment.m_flags & (NetSegment.Flags.Created | NetSegment.Flags.Deleted)) != NetSegment.Flags.Created) {
+                return;
+            }
+
+            ref NetLane netLane = ref laneId.ToLane();
+
+            if (((NetLane.Flags)netLane.m_flags & (NetLane.Flags.Created | NetLane.Flags.Deleted)) != NetLane.Flags.Created) {
+                return;
+            }
+
+            NetInfo segmentInfo = netSegment.Info;
+
+            if (laneIndex >= segmentInfo.m_lanes.Length) {
+                return;
+            }
+
+#if DEBUGFLAGS
+            Log._Debug("Flags.setLaneAllowedVehicleSizes: setting allowed vehicles of lane index " +
+                       $"{laneIndex} @ seg. {segmentId} to {vehicleTypes.ToString()}");
+#endif
+
+            // save allowed vehicle sizes into the fast-access array.
+            // (1) ensure that the array is defined and large enough
+            if (laneAllowedVehicleSizesArray[segmentId] == null) {
+                laneAllowedVehicleSizesArray[segmentId] = new ExtVehicleSize?[segmentInfo.m_lanes.Length];
+            } else if (laneAllowedVehicleSizesArray[segmentId].Length <
+                       segmentInfo.m_lanes.Length) {
+                ExtVehicleSize?[] oldArray = laneAllowedVehicleSizesArray[segmentId];
+                laneAllowedVehicleSizesArray[segmentId] = new ExtVehicleSize?[segmentInfo.m_lanes.Length];
+                Array.Copy(oldArray, laneAllowedVehicleSizesArray[segmentId], oldArray.Length);
+            }
+
+            laneAllowedVehicleSizesArray[segmentId][laneIndex] = vehicleSizes;
+        }
+
+        /// <summary>
+        /// Adds the given vehicle type to the set of allowed vehicles at the specified lane
+        /// </summary>
+        /// <param name="segmentId"></param>
+        /// <param name="laneIndex"></param>
+        /// <param name="laneId"></param>
+        /// <param name="laneInfo"></param>
+        /// <param name="road"></param>
+        /// <param name="vehicleType"></param>
+        public void AddAllowedSize(ushort segmentId,
+                                   NetInfo segmentInfo,
+                                   uint laneIndex,
+                                   uint laneId,
+                                   NetInfo.Lane laneInfo,
+                                   ExtVehicleSize vehicleSize) {
+            ref NetLane netLane = ref laneId.ToLane();
+            if (!netLane.IsValidWithSegment()) {
+                return;
+            }
+
+            ref NetSegment netSegment = ref segmentId.ToSegment();
+            if (!netSegment.IsValid()) {
+                // TODO we do not need the segmentId given here. Lane is enough
+                return;
+            }
+
+            ExtVehicleSize allowedSizes = GetAllowedVehicleSizes(
+                segmentId,
+                segmentInfo,
+                laneIndex,
+                laneInfo);
+
+            allowedSizes |= vehicleSize;
+            allowedSizes &= GetBaseMask(segmentInfo.m_lanes[laneIndex]); // ensure default base mask
+            SetLaneAllowedVehicleSizes(segmentId, laneIndex, laneId, allowedSizes);
+            NotifyStartEndNode(segmentId);
+
+            if (OptionsManager.Instance.MayPublishSegmentChanges()) {
+                ExtSegmentManager.Instance.PublishSegmentChanges(segmentId);
+            }
+        }
+
         /// <summary>
         /// Removes the given vehicle type from the set of allowed vehicles at the specified lane
         /// </summary>
@@ -543,6 +759,51 @@ namespace TrafficManager.Manager.Impl {
             }
         }
 
+
+        /// <summary>
+        /// Removes the given vehicle type from the set of allowed vehicle sizes at the specified lane
+        /// </summary>
+        /// <param name="segmentId"></param>
+        /// <param name="segmentInfo"></param>
+        /// <param name="laneIndex"></param>
+        /// <param name="laneId"></param>
+        /// <param name="laneInfo"></param>
+        /// <param name="road"></param>
+        /// <param name="vehicleSize"></param>
+        public void RemoveAllowedSize(ushort segmentId,
+                                      NetInfo segmentInfo,
+                                      uint laneIndex,
+                                      uint laneId,
+                                      NetInfo.Lane laneInfo,
+                                      ExtVehicleSize vehicleSize) {
+            ref NetLane netLane = ref laneId.ToLane();
+            if (!netLane.IsValidWithSegment()) {
+                return;
+            }
+
+            ref NetSegment netSegment = ref segmentId.ToSegment();
+            if (!netSegment.IsValid()) {
+                // TODO we do not need the segmentId given here. Lane is enough
+                return;
+            }
+
+            ExtVehicleSize allowedSizes = GetAllowedVehicleSizes(
+                segmentId,
+                segmentInfo,
+                laneIndex,
+                laneInfo);
+
+            allowedSizes &= ~vehicleSize;
+            allowedSizes &= GetBaseMask(
+                segmentInfo.m_lanes[laneIndex]); // ensure default base mask
+            SetLaneAllowedVehicleSizes(segmentId, laneIndex, laneId, allowedSizes);
+            NotifyStartEndNode(segmentId);
+
+            if (OptionsManager.Instance.MayPublishSegmentChanges()) {
+                ExtSegmentManager.Instance.PublishSegmentChanges(segmentId);
+            }
+        }
+
         public void ToggleAllowedType(ushort segmentId,
                                       NetInfo segmentInfo,
                                       uint laneIndex,
@@ -554,6 +815,20 @@ namespace TrafficManager.Manager.Impl {
                 AddAllowedType(segmentId, segmentInfo, laneIndex, laneId, laneInfo, vehicleType);
             } else {
                 RemoveAllowedType(segmentId, segmentInfo, laneIndex, laneId, laneInfo, vehicleType);
+            }
+        }
+
+        public void ToggleAllowedSize(ushort segmentId,
+                                      NetInfo segmentInfo,
+                                      uint laneIndex,
+                                      uint laneId,
+                                      NetInfo.Lane laneInfo,
+                                      ExtVehicleSize vehicleSize,
+                                      bool add) {
+            if (add) {
+                AddAllowedSize(segmentId, segmentInfo, laneIndex, laneId, laneInfo, vehicleSize);
+            } else {
+                RemoveAllowedSize(segmentId, segmentInfo, laneIndex, laneId, laneInfo, vehicleSize);
             }
         }
 
@@ -579,8 +854,19 @@ namespace TrafficManager.Manager.Impl {
                     (uint)laneIdAndIndex.laneIndex,
                     laneInfo,
                     VehicleRestrictionsMode.Configured);
+                bool hasAirplaneRestrictions = false;
+                if (netInfo.m_vehicleTypes.IsFlagSet(VehicleInfo.VehicleType.Plane)) {
+                    ExtVehicleSize defaultSizeMask = GetDefaultAllowedVehicleSizes(laneInfo);
 
-                if (defaultMask != currentMask) {
+                    ExtVehicleSize currentSizeMask = GetAllowedVehicleSizes(
+                        segmentId,
+                        netSegment.Info,
+                        (uint)laneIdAndIndex.laneIndex,
+                        laneInfo);
+                    hasAirplaneRestrictions = defaultSizeMask != currentSizeMask;
+                }
+
+                if (defaultMask != currentMask || hasAirplaneRestrictions) {
                     return true;
                 }
             }
@@ -643,6 +929,15 @@ namespace TrafficManager.Manager.Impl {
         public ExtVehicleType GetBaseMask(NetInfo.Lane laneInfo,
                                           VehicleRestrictionsMode includeBusLanes) {
             return GetDefaultAllowedVehicleTypes(laneInfo, includeBusLanes);
+        }
+
+        /// <summary>
+        /// Determines the maximum allowed set of vehicle sizes (the base mask) for a given lane
+        /// </summary>
+        /// <param name="laneInfo"></param>
+        /// <returns></returns>
+        public ExtVehicleSize GetBaseMask(NetInfo.Lane laneInfo) {
+            return GetDefaultAllowedVehicleSizes(laneInfo);
         }
 
         /// <summary>
@@ -740,6 +1035,14 @@ namespace TrafficManager.Manager.Impl {
             return IsAllowed(allowedTypes, ExtVehicleType.Ferry);
         }
 
+        public bool IsPlaneAllowed(ExtVehicleType? allowedTypes, ExtVehicleSize? allowedSizes, ExtVehicleSize? vehicleSize) {
+            return IsAllowed(allowedTypes, ExtVehicleType.Plane) && IsVehicleSizeAllowed(allowedSizes, vehicleSize);
+        }
+
+        public bool IsVehicleSizeAllowed(ExtVehicleSize? allowedSizes, ExtVehicleSize? vehicleSize) {
+            return !allowedSizes.HasValue || (allowedSizes & vehicleSize) != ExtVehicleSize.None;
+        }
+
         public bool IsRailVehicleAllowed(ExtVehicleType? allowedTypes) {
             return IsAllowed(allowedTypes, ExtVehicleType.RailVehicle);
         }
@@ -801,10 +1104,15 @@ namespace TrafficManager.Manager.Impl {
             if (defaultVehicleTypeCache != null) {
                 defaultVehicleTypeCache[segmentId] = null;
             }
+
+            if (defaultVehicleSizeCache != null) {
+                defaultVehicleSizeCache[segmentId] = null;
+            }
         }
 
         internal void ClearCache() {
             defaultVehicleTypeCache = null;
+            defaultVehicleSizeCache = null;
         }
 
         public void NotifyStartEndNode(ushort segmentId) {
@@ -828,6 +1136,7 @@ namespace TrafficManager.Manager.Impl {
 
         protected override void HandleInvalidSegment(ref ExtSegment seg) {
             Flags.ResetSegmentVehicleRestrictions(seg.segmentId);
+            laneAllowedVehicleSizesArray[seg.segmentId] = null;
             ClearCache(seg.segmentId);
         }
 

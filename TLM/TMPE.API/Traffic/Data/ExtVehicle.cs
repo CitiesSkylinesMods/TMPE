@@ -36,6 +36,7 @@ namespace TrafficManager.API.Traffic.Data {
         // Airplane
         public bool requiresCargoPathRecalculation;
         public Quaternion? airplaneRotation;
+        public ExtVehicleSize? passengerPlaneSize;
 
         public ExtVehicle(ushort vehicleId) {
             this.vehicleId = vehicleId;
@@ -68,6 +69,7 @@ namespace TrafficManager.API.Traffic.Data {
             minSafeTrafficImprovement = 0;
             requiresCargoPathRecalculation = false;
             airplaneRotation = null;
+            passengerPlaneSize = null;
         }
 
         public override string ToString() {

@@ -8,6 +8,9 @@ namespace TrafficManager.Patch._TaxiwayAI {
     [HarmonyPatch]
     [UsedImplicitly]
     public class SegmentSimulationStepPatch {
+        private static ushort lastSimulatedSegmentId = 0;
+        private static byte trafficMeasurementMod = 0;
+
         [UsedImplicitly]
         public static MethodBase TargetMethod()
         {
@@ -17,9 +20,6 @@ namespace TrafficManager.Patch._TaxiwayAI {
                 new[] { typeof(ushort), typeof(NetSegment).MakeByRefType() }) ??
                 throw new System.Exception("SegmentSimulationStepPatch failed to find TargetMethod");
         }
-
-        private static ushort lastSimulatedSegmentId = 0;
-        private static byte trafficMeasurementMod = 0;
 
         /// <summary>
         /// Updates lane arrows and performs traffic measurement on segment.

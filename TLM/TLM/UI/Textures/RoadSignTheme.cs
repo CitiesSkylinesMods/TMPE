@@ -8,6 +8,7 @@ namespace TrafficManager.UI.Textures {
     using TrafficManager.API.UI;
     using TrafficManager.Manager.Impl;
     using TrafficManager.State;
+    using TrafficManager.U;
     using TrafficManager.UI.SubTools;
     using TrafficManager.Util;
     using UnityEngine;
@@ -73,6 +74,14 @@ namespace TrafficManager.UI.Textures {
         /// and <see cref="VehicleRestrictionsTool.RailVehicleTypes"/>.
         /// </summary>
         private Dictionary<ExtVehicleType, AllowDisallowTexture> vehicleRestrictions_ = new();
+
+        /// <summary>
+        /// Road signs for restrictions per vehicle types. Not all vehicle types have an icon,
+        /// only those supported in <see cref="VehicleRestrictionsTool.RoadVehicleTypes"/>
+        /// and <see cref="VehicleRestrictionsTool.RailVehicleTypes"/>.
+        /// </summary>
+        private Dictionary<ExtVehicleSize, AllowDisallowTexture> airplaneSizeRestrictions_ = new();
+        private Dictionary<ExtVehicleSize, AllowDisallowTexture> airplaneSizeRestrictionsDisabled_ = new();
 
         public RoadSignTheme(string name,
                              bool supportsMph,
@@ -183,6 +192,19 @@ namespace TrafficManager.UI.Textures {
             }
         }
 
+        public Texture2D AirplaneSizeRestriction(ExtVehicleSize size, bool allow, bool disabled = false) {
+            if (allow) {
+                // no need to check dict for disabled - it's generated based on 'airplaneSizeRestrictions_'
+                return this.airplaneSizeRestrictions_.ContainsKey(size)
+                           ? (!disabled ? this.airplaneSizeRestrictions_ : this.airplaneSizeRestrictionsDisabled_)[size].allow
+                           : this.ParentTheme.AirplaneSizeRestriction(size, allow: true, disabled);
+            }
+
+            return this.airplaneSizeRestrictions_.ContainsKey(size)
+                       ? (!disabled ? this.airplaneSizeRestrictions_ : this.airplaneSizeRestrictionsDisabled_)[size].restrict
+                       : this.ParentTheme.AirplaneSizeRestriction(size, allow: false, disabled);
+        }
+
         public RoadSignTheme Load(bool whiteTexture = false) {
             if (this.AttemptedToLoad) {
                 return this;
@@ -235,6 +257,16 @@ namespace TrafficManager.UI.Textures {
             LoadOtherRestrictionSign(OtherRestriction.LeftOnRed, "LeftOnRed", whiteTexture);
             LoadOtherRestrictionSign(OtherRestriction.RightOnRed, "RightOnRed", whiteTexture);
             LoadOtherRestrictionSign(OtherRestriction.UTurn, "UTurn", whiteTexture);
+
+            LoadAirplaneSizeRestrictionSign(ExtVehicleSize.Small, "Small", false);
+            LoadAirplaneSizeRestrictionSign(ExtVehicleSize.Medium, "Medium", false);
+            LoadAirplaneSizeRestrictionSign(ExtVehicleSize.Large, "Large", false);
+
+            if (airplaneSizeRestrictions_.ContainsKey(ExtVehicleSize.Small)) {
+                LoadAirplaneSizeRestrictionDisabledSign(ExtVehicleSize.Small, whiteTexture);
+                LoadAirplaneSizeRestrictionDisabledSign(ExtVehicleSize.Medium, whiteTexture);
+                LoadAirplaneSizeRestrictionDisabledSign(ExtVehicleSize.Large, whiteTexture);
+            }
 
             // Setup parent theme to be `Fallback` theme if ParentTheme is null
             // For Fallback theme itself, keep it null.
@@ -319,6 +351,39 @@ namespace TrafficManager.UI.Textures {
             }
         }
 
+        /// <summary>
+        /// Generic function to generate grayscale Allow-X and Restrict-X textures from source textures
+        /// <see cref="airplaneSizeRestrictions_"/> or <see cref="airplaneSizeRestrictionsDisabled_"/>
+        /// </summary>
+        /// <param name="index">The key to store as.</param>
+        /// <param name="sourceDict">The reference dictionary.</param>
+        /// <param name="dict">The destination dictionary.</param>
+        /// <param name="name">Name to append to either Allow- or Restrict-.</param>
+        /// <param name="whiteTexture">Create record even if resource is missing, using white texture.</param>
+        /// <typeparam name="TIndex">Type of the key.</typeparam>
+        private void GenerateDisabledSignGeneric<TIndex>(
+            TIndex index,
+            Dictionary<TIndex, AllowDisallowTexture> sourceDict,
+            Dictionary<TIndex, AllowDisallowTexture> dict,
+            bool whiteTexture) {
+
+            Texture2D allowTex = TextureUtil.ToGrayscale(sourceDict[index].allow);
+            Texture2D restrictTex = TextureUtil.ToGrayscale(sourceDict[index].restrict);
+            if (allowTex && restrictTex) {
+                var pairOfSigns = new AllowDisallowTexture {
+                    allow = allowTex,
+                    restrict = restrictTex,
+                };
+                dict[index] = pairOfSigns;
+            } else if (whiteTexture) {
+                var whiteBox = new AllowDisallowTexture {
+                    allow = Texture2D.whiteTexture,
+                    restrict = Texture2D.whiteTexture,
+                };
+                dict[index] = whiteBox;
+            }
+        }
+
         private void LoadVehicleRestrictionSign(ExtVehicleType index,
                                                 string name,
                                                 bool whiteTexture) {
@@ -329,6 +394,17 @@ namespace TrafficManager.UI.Textures {
                                               string name,
                                               bool whiteTexture) {
             LoadRestrictionSignGeneric(index, this.otherRestrictions_, name, whiteTexture, 256);
+        }
+
+        private void LoadAirplaneSizeRestrictionSign(ExtVehicleSize index,
+                                                string name,
+                                                bool whiteTexture) {
+            LoadRestrictionSignGeneric(index, this.airplaneSizeRestrictions_, name, whiteTexture, 200);
+        }
+
+        private void LoadAirplaneSizeRestrictionDisabledSign(ExtVehicleSize index,
+                                                bool whiteTexture) {
+            GenerateDisabledSignGeneric(index, this.airplaneSizeRestrictions_, this.airplaneSizeRestrictionsDisabled_, whiteTexture);
         }
 
         private void DestroyTexture(Texture2D t) {
@@ -364,6 +440,18 @@ namespace TrafficManager.UI.Textures {
 
             // Vehicle Restriction signs
             foreach (var rs in this.vehicleRestrictions_) {
+                DestroyTexture(rs.Value.allow);
+                DestroyTexture(rs.Value.restrict);
+            }
+
+            // Airplane Size Restriction signs
+            foreach (var rs in this.airplaneSizeRestrictions_) {
+                DestroyTexture(rs.Value.allow);
+                DestroyTexture(rs.Value.restrict);
+            }
+
+            // Airplane Size Restriction Disabled signs
+            foreach (var rs in this.airplaneSizeRestrictionsDisabled_) {
                 DestroyTexture(rs.Value.allow);
                 DestroyTexture(rs.Value.restrict);
             }

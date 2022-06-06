@@ -582,6 +582,12 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\RoadUI\taxi_infosign.png" />
     <EmbeddedResource Include="Resources\RoadUI\tram_infosign.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Fallback\Allow-Large.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Fallback\Restrict-Large.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Fallback\Allow-Medium.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Fallback\Restrict-Medium.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Fallback\Allow-Small.png" />
+    <EmbeddedResource Include="Resources\SignThemes\Fallback\Restrict-Small.png" />
     <EmbeddedResource Include="Resources\SignThemes\Kmph_Brazil\0.png" />
     <EmbeddedResource Include="Resources\SignThemes\Kmph_Brazil\10.png" />
     <EmbeddedResource Include="Resources\SignThemes\Kmph_Brazil\100.png" />

@@ -4015,7 +4015,21 @@ namespace TrafficManager.Custom.PathFinding {
                 laneInfo,
                 VehicleRestrictionsMode.Configured);
 
-            return (allowedTypes & queueItem_.vehicleType) != ExtVehicleType.None;
+            bool allowed = (allowedTypes & queueItem_.vehicleType) != ExtVehicleType.None;
+
+            if (allowed && queueItem_.vehicleType == ExtVehicleType.PassengerPlane && queueItem_.vehicleId != 0) {
+                ref ExtVehicle veh = ref ExtVehicleManager.Instance.ExtVehicles[queueItem_.vehicleId];
+                if (veh.passengerPlaneSize.HasValue) {
+                    // allowed size is at least as big as the vehicle size
+                    allowed &= vehicleRestrictionsManager.GetAllowedVehicleSizes(
+                                   segmentId,
+                                   segmentInfo,
+                                   (uint)laneIndex,
+                                   laneInfo).IsFlagSet(veh.passengerPlaneSize.Value);
+                }
+            }
+
+            return allowed;
         }
 #endif
 

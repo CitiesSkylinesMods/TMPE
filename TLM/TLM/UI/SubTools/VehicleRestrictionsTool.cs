@@ -37,6 +37,12 @@ namespace TrafficManager.UI.SubTools {
             ExtVehicleType.CargoTrain,
         };
 
+        private static readonly ExtVehicleSize[] PlaneVehicleSizes = {
+            ExtVehicleSize.Small,
+            ExtVehicleSize.Medium,
+            ExtVehicleSize.Large,
+        };
+
         private readonly GUI.WindowFunction _guiVehicleRestrictionsWindowDelegate;
 
         private readonly float vehicleRestrictionsSignSize = 80f;
@@ -512,7 +518,7 @@ namespace TrafficManager.UI.SubTools {
             } else if (VehicleRestrictionsManager.Instance.IsRailSegment(segmentInfo)) {
                 maxNumSigns = RailVehicleTypes.Length;
             } else if (VehicleRestrictionsManager.Instance.IsPlaneNetInfo(segmentInfo)) {
-                maxNumSigns = PlaneVehicleTypes.Length;
+                maxNumSigns = PlaneVehicleTypes.Length + PlaneVehicleSizes.Length;
             }
 
             // Vector3 zero = center - 0.5f * (float)(numLanes + numDirections - 1) * f * (xu + yu); // "bottom left"
@@ -551,6 +557,7 @@ namespace TrafficManager.UI.SubTools {
                 }
 
                 ExtVehicleType[] possibleVehicleTypes;
+                ExtVehicleSize[] possibleVehicleSizes = null;
 
                 if (VehicleRestrictionsManager.Instance.IsRoadLane(laneInfo)) {
                     possibleVehicleTypes = RoadVehicleTypes;
@@ -560,6 +567,7 @@ namespace TrafficManager.UI.SubTools {
                     // assumption we don't support shared lanes
                     // (plane + other vehicles - will create a lot of issues starting from collision detection)
                     possibleVehicleTypes = PlaneVehicleTypes;
+                    possibleVehicleSizes = PlaneVehicleSizes;
                 } else {
                     ++x;
                     continue;
@@ -572,6 +580,15 @@ namespace TrafficManager.UI.SubTools {
                         laneIndex,
                         laneInfo,
                         VehicleRestrictionsMode.Configured);
+
+                ExtVehicleSize? allowedSizes = null;
+                if (segmentInfo.m_vehicleTypes.IsFlagSet(VehicleInfo.VehicleType.Plane)) {
+                    allowedSizes = VehicleRestrictionsManager.Instance.GetAllowedVehicleSizes(
+                        segmentId,
+                        segmentInfo,
+                        laneIndex,
+                        laneInfo);
+                }
 
                 uint y = 0;
                 Color guiColor2 = GUI.color; // TODO: Use OverlayHandleColorController
@@ -638,6 +655,55 @@ namespace TrafficManager.UI.SubTools {
                     }
 
                     ++y;
+                }
+
+                if (possibleVehicleSizes != null && allowedSizes.HasValue) {
+                    ++y;
+                    bool passengerPlaneAllowed = VehicleRestrictionsManager.Instance.IsAllowed(allowedTypes, ExtVehicleType.PassengerPlane);
+
+                    foreach (ExtVehicleSize vehicleSize in possibleVehicleSizes) {
+                        bool allowed = VehicleRestrictionsManager.Instance.IsVehicleSizeAllowed(
+                            allowedSizes,
+                            vehicleSize);
+
+                        if (allowed && viewOnly) {
+                            continue; // do not draw allowed vehicles in view-only mode
+                        }
+
+                        bool hoveredHandle = gridRenderer.DrawGenericOverlayGridTexture(
+                            texture: theme.AirplaneSizeRestriction(vehicleSize, allowed, !passengerPlaneAllowed),
+                            camPos: camPos,
+                            x: x,
+                            y: y,
+                            width: this.vehicleRestrictionsSignSize,
+                            height: this.vehicleRestrictionsSignSize,
+                            canHover: !viewOnly && passengerPlaneAllowed,
+                            screenRect: out _);
+
+                        if (hoveredHandle) {
+                            hovered = true;
+                            renderData_.segmentId = segmentId;
+                            renderData_.laneId = laneId;
+                            renderData_.laneIndex = laneIndex;
+                            renderData_.laneInfo = laneInfo;
+                            renderData_.SortedLaneIndex = sortedLaneIndex;
+                        }
+
+                        if (hoveredHandle && MainTool.CheckClicked()) {
+                            VehicleRestrictionsManager.Instance.ToggleAllowedSize(
+                                segmentId,
+                                segmentInfo,
+                                laneIndex,
+                                laneId,
+                                laneInfo,
+                                vehicleSize,
+                                !allowed);
+                            stateUpdated = true;
+                            RefreshCurrentRestrictedSegmentIds(segmentId);
+                        }
+
+                        ++y;
+                    }
                 }
 
                 GUI.color = guiColor2; // TODO: Use OverlayHandleColorController

@@ -69,6 +69,10 @@ namespace TrafficManager.Util.Extensions {
         public static ExtVehicleType ToExtVehicleType(this uint vehicleId)
             => _extVehicles[vehicleId].vehicleType;
 
+        public static bool IsEmergencyRespondingCar(this ref Vehicle vehicle) =>
+            (vehicle.m_flags & Vehicle.Flags.Emergency2) != 0 &&
+            vehicle.Info.m_vehicleType == VehicleInfo.VehicleType.Car;
+
         /// <summary>
         /// Inspects the AI of the <paramref name="vehicle"/> to determine its type.
         /// </summary>
