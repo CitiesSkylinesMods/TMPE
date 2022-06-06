@@ -10,6 +10,7 @@ namespace TrafficManager.TrafficLight.Impl {
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.Manager.Impl;
     using TrafficManager.State.ConfigData;
+    using TrafficManager.TrafficLight.Model;
     using TrafficManager.Util;
     using TrafficManager.Util.Extensions;
 

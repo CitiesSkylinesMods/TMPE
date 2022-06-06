@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -104,6 +104,10 @@
       <HintPath>$(MangedDLLPath)\ICities.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="ICSharpCode.SharpZipLib, Version=0.86.0.518, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>$(MangedDLLPath)\ICSharpCode.SharpZipLib.dll</HintPath>
+    </Reference>
     <Reference Include="MoveItIntegration">
       <HintPath>..\libs\MoveItIntegration.dll</HintPath>
     </Reference>
@@ -113,6 +117,9 @@
     </Reference>
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq">
+      <Private>True</Private>
+    </Reference>
     <Reference Include="UnifiedUILib, Version=2.2.1.1037, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\UnifiedUILib.2.2.1\lib\net35\UnifiedUILib.dll</HintPath>
     </Reference>
@@ -148,13 +155,24 @@
     <Compile Include="Manager\Impl\ExtSegmentEndManager.cs" />
     <Compile Include="Manager\Impl\ExtSegmentManager.cs" />
     <Compile Include="Manager\Impl\GeometryNotifier.cs" />
+    <Compile Include="Manager\Impl\JunctionRestrictionsManager.Persistence.cs" />
     <Compile Include="Patch\NetManagerEvents.cs" />
     <Compile Include="Manager\Impl\LaneConnection\ConnectionDataBase.cs" />
     <Compile Include="Manager\Impl\LaneConnection\LaneConnectionData.cs" />
     <Compile Include="Manager\Impl\LaneConnection\LaneConnectionSubManager.cs" />
     <Compile Include="Manager\Impl\LaneConnection\LaneConnectionManager.cs" />
     <Compile Include="Manager\Impl\LaneConnection\LaneEnd.cs" />
+    <Compile Include="Manager\Impl\TrafficLightSimulationManager.Persistence.cs" />
+    <Compile Include="Manager\Model\JunctionRestrictionsModel.cs" />
+    <Compile Include="Manager\Model\SegmentEndPair.cs" />
     <Compile Include="Patch\_External\RTramAIModPatch.cs" />
+    <Compile Include="Persistence\FeatureFilter.cs" />
+    <Compile Include="Persistence\PersistentObject.cs" />
+    <Compile Include="Persistence\IPersistentObject.cs" />
+    <Compile Include="Persistence\GlobalPersistence.cs" />
+    <Compile Include="Persistence\PersistenceContext.cs" />
+    <Compile Include="Persistence\XmlLinqExtensions.cs" />
+    <Compile Include="Persistence\XSerializer.cs" />
     <Compile Include="State\OptionsTabs\GameplayTab_AIGroups.cs" />
     <Compile Include="State\OptionsTabs\GeneralTab_CompatibilityGroup.cs" />
     <Compile Include="State\OptionsTabs\GeneralTab_LocalisationGroup.cs" />
@@ -171,9 +189,15 @@
     <Compile Include="State\OptionsTabs\MaintenanceTab_ConfigGroup.cs" />
     <Compile Include="State\OptionsTabs\MaintenanceTab_DespawnGroup.cs" />
     <Compile Include="State\OptionsTabs\MaintenanceTab_ToolsGroup.cs" />
+    <Compile Include="Persistence\PersistenceResult.cs" />
+    <Compile Include="Persistence\PersistenceException.cs" />
     <Compile Include="State\VersionInfo.cs" />
     <Compile Include="TrafficLight\Impl\ITrafficLightContainer.cs" />
     <Compile Include="TrafficLight\Impl\TrafficLightSimulation.cs" />
+    <Compile Include="TrafficLight\Model\CustomSegmentLightModel.cs" />
+    <Compile Include="TrafficLight\Model\ICustomSegmentLightsModel.cs" />
+    <Compile Include="TrafficLight\Model\ITimedTrafficLightsModel.cs" />
+    <Compile Include="TrafficLight\Model\ITimedTrafficLightsStepModel.cs" />
     <Compile Include="UI\AllowDespawn\AllowDespawnPanel.cs" />
     <Compile Include="UI\Helpers\ActionButton.cs" />
     <Compile Include="UI\Helpers\GlobalConfigObserver.cs" />
@@ -189,6 +213,7 @@
     <Compile Include="UI\UIFactory.cs" />
     <Compile Include="UI\WhatsNew\MarkupKeyword.cs" />
     <Compile Include="UI\WhatsNew\WhatsNewMarkup.cs" />
+    <Compile Include="Util\AnonymousDisposable.cs" />
     <Compile Include="Util\Extensions\CitizenUnitExtensions.cs" />
     <Compile Include="Util\Extensions\ParkedVehicleExtensions.cs" />
     <Compile Include="Util\Extensions\VersionExtension.cs" />
@@ -471,6 +496,7 @@
     <Compile Include="Util\Extensions\VehicleExtensions.cs" />
     <Compile Include="Util\InGameUtil.cs" />
     <Compile Include="Util\IntVector2.cs" />
+    <Compile Include="Util\ReferenceEqualityComparer.cs" />
     <Compile Include="Util\TMPEVectorUtil.cs" />
     <Compile Include="Util\RoadFamilyUtil.cs" />
     <Compile Include="Util\Spiral.cs" />
@@ -1268,6 +1294,7 @@ xcopy /y "$(TargetDir)CSUtil.Commons.dll" "%25DEPLOYDIR%25"
 xcopy /y "$(TargetDir)CitiesHarmony.API.dll" "%25DEPLOYDIR%25"
 xcopy /y "$(TargetDir)MoveItIntegration.dll" "%25DEPLOYDIR%25"
 xcopy /y "$(TargetDir)UnifiedUILib.dll" "%25DEPLOYDIR%25"
+xcopy /y "$(TargetDir)System.Xml.Linq.dll" "%25DEPLOYDIR%25"
 
 rem To avoid double hot reload, TrafficManager.dll must be replaced last and fast.
 rem Once TrafficManager.dll is re-loaded, all other dlls will be reloaded as well

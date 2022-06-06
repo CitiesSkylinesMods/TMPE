@@ -150,22 +150,22 @@ namespace TrafficManager.UI.Textures {
                        : this.ParentTheme.GetOtherRestriction(type, allow: false);
         }
 
-        public Texture2D JunctionRestriction(JunctionRestrictionFlags rule, bool allowed) {
+        public Texture2D JunctionRestriction(JunctionRestrictionsFlags rule, bool allowed) {
             bool rht = Shortcuts.RHT;
             switch (rule) {
-                case JunctionRestrictionFlags.AllowPedestrianCrossing:
+                case JunctionRestrictionsFlags.AllowPedestrianCrossing:
                     return GetOtherRestriction(OtherRestriction.Crossing, allowed);
-                case JunctionRestrictionFlags.AllowUTurn:
+                case JunctionRestrictionsFlags.AllowUTurn:
                     return GetOtherRestriction(OtherRestriction.UTurn, allowed);
-                case JunctionRestrictionFlags.AllowEnterWhenBlocked:
+                case JunctionRestrictionsFlags.AllowEnterWhenBlocked:
                     return GetOtherRestriction(OtherRestriction.EnterBlockedJunction, allowed);
-                case JunctionRestrictionFlags.AllowForwardLaneChange:
+                case JunctionRestrictionsFlags.AllowForwardLaneChange:
                     return GetOtherRestriction(OtherRestriction.LaneChange, allowed);
-                case JunctionRestrictionFlags.AllowFarTurnOnRed when rht:
-                case JunctionRestrictionFlags.AllowNearTurnOnRed when !rht:
+                case JunctionRestrictionsFlags.AllowFarTurnOnRed when rht:
+                case JunctionRestrictionsFlags.AllowNearTurnOnRed when !rht:
                     return GetOtherRestriction(OtherRestriction.LeftOnRed, allowed);
-                case JunctionRestrictionFlags.AllowNearTurnOnRed when rht:
-                case JunctionRestrictionFlags.AllowFarTurnOnRed when !rht:
+                case JunctionRestrictionsFlags.AllowNearTurnOnRed when rht:
+                case JunctionRestrictionsFlags.AllowFarTurnOnRed when !rht:
                     return GetOtherRestriction(OtherRestriction.RightOnRed, allowed);
                 default:
                     Log.Error($"could not get texture for {rule}.");

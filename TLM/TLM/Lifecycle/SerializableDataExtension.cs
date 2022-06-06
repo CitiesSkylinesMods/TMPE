@@ -11,6 +11,12 @@ namespace TrafficManager.Lifecycle {
     using TrafficManager.Manager.Impl.LaneConnection;
     using TrafficManager.State;
     using Util;
+    using System.Linq;
+    using System.Text;
+    using System.Xml.Linq;
+    using TrafficManager.Persistence;
+    using System.Xml;
+    using ICSharpCode.SharpZipLib.GZip;
 
     [UsedImplicitly]
     public class SerializableDataExtension
@@ -22,6 +28,8 @@ namespace TrafficManager.Lifecycle {
         private const string VERSION_INFO_DATA_ID = "TrafficManager_VersionInfo_v1.0";
 
         private static ISerializableData SerializableData => SimulationManager.instance.m_SerializableDataWrapper;
+        private static Dictionary<IPersistentObject, XDocument> _domCollection = new Dictionary<IPersistentObject, XDocument>(ReferenceEqualityComparer<IPersistentObject>.Instance);
+        private static HashSet<Type> _persistenceMigration = new HashSet<Type>(ReferenceEqualityComparer<Type>.Instance);
         private static Configuration _configuration;
         private static VersionInfoConfiguration _versionInfoConfiguration;
 
@@ -65,13 +73,33 @@ namespace TrafficManager.Lifecycle {
             }
 
             try {
+                LoadDomCollection();
+            }
+            catch (Exception e) {
+                Log.Error($"OnLoadData: Error while loading DOM collection: {e}");
+            }
+
+            bool loadedData = false;
+            try {
                 byte[] data = SerializableData.LoadData(DATA_ID);
                 DeserializeData(data);
+                loadedData = true;
             }
             catch (Exception e) {
                 Log.Error($"OnLoadData: Error while deserializing data: {e}");
+            }
+
+            bool loadedContainers = false;
+            try {
+                LoadDomElements();
+                loadedContainers = true;
+            }
+            catch (Exception e) {
+                Log.Error($"OnLoadData: Error while deserializing containers: {e}");
                 loadingSucceeded = false;
             }
+
+            loadingSucceeded &= loadedData || loadedContainers;
 
             // load options (empty byte array causes default options to be applied)
             try {
@@ -153,11 +181,113 @@ namespace TrafficManager.Lifecycle {
             }
         }
 
+        private static void LoadDomCollection() {
+
+            _domCollection.Clear();
+            _persistenceMigration.Clear();
+
+            foreach (var po in GlobalPersistence.PersistentObjects) {
+
+                byte[] data;
+                try {
+                    data = SerializableData.LoadData(po.DependencyTarget.FullName);
+                }
+                catch {
+                    Log.Info($"No DOM found for {po.DependencyTarget.Name}");
+                    data = null;
+                }
+
+                try {
+                    if (data?.Length > 0) {
+
+                        Log.Info($"Attempting to load DOM for {po.DependencyTarget.Name}");
+
+                        try {
+                            using (var memoryStream = new MemoryStream(data)) {
+                                using (var compressionStream = new GZipInputStream(memoryStream)) {
+                                    using (var streamReader = new StreamReader(compressionStream, Encoding.UTF8)) {
+
+                                        XmlReaderSettings xmlReaderSettings = new XmlReaderSettings {
+                                            ProhibitDtd = false,
+                                            XmlResolver = null,
+                                        };
+                                        using (var xmlReader = XmlReader.Create(streamReader, xmlReaderSettings))
+                                            _domCollection[po] = XDocument.Load(xmlReader);
+                                    }
+                                }
+                            }
+                        }
+                        catch (Exception ex) {
+
+                            Log.Error("Load DOM failed, attempting without compression. " + ex);
+
+                            using (var memoryStream = new MemoryStream(data)) {
+                                using (var streamReader = new StreamReader(memoryStream, Encoding.UTF8)) {
+
+                                    XmlReaderSettings xmlReaderSettings = new XmlReaderSettings {
+                                        ProhibitDtd = false,
+                                        XmlResolver = null,
+                                    };
+                                    using (var xmlReader = XmlReader.Create(streamReader, xmlReaderSettings))
+                                        _domCollection[po] = XDocument.Load(xmlReader);
+                                }
+                            }
+
+                            Log.Info("Load DOM without compression succeeded.");
+
+                        }
+
+                        if (_domCollection[po]?.Root?.Elements(po.ElementName)?.Any(e => po.CanLoad(e)) == true)
+                            _persistenceMigration.Add(po.DependencyTarget);
+#if DEBUGLOAD
+                        Log._Debug($"Loaded DOM for {po.DependencyTarget.Name}: {_domCollection[po]}\r");
+#endif
+                    }
+                }
+                catch (Exception ex) {
+                    Log.Error($"Error loading DOM for {po.DependencyTarget.Name}: {ex}");
+                    Log.Info(ex.StackTrace);
+                }
+            }
+        }
+
+        private static void LoadDomElements() {
+
+            try {
+                foreach (var e in _domCollection.OrderBy(e => e.Key)) {
+                    var po = e.Key;
+                    var dom = e.Value;
+
+                    var elements = dom.Root.Elements(po.ElementName)?.Where(po.CanLoad);
+                    if (elements?.Any() == true) {
+                        if (elements.Count() > 1) {
+                            Log.Error($"More than one compatible element {po.ElementName} was found for {po.DependencyTarget.Name}. Using the first one.");
+                        }
+                        try {
+                            XElement element = elements.First();
+                            Log.Info($"Calling LoadData of DOM element {po.ElementName} for {po.DependencyTarget.Name}, {element.Attribute("featuresRequired")} {element.Attribute("featuresForbidden")}");
+                            var result = po.LoadData(element, new PersistenceContext { Version = Version });
+                            result.LogMessage($"LoadData of DOM element {po.ElementName} for {po.DependencyTarget.Name} reported {result}.");
+                        }
+                        catch (Exception ex) {
+                            Log.Error($"Error loading DOM element {po.ElementName} for {po.DependencyTarget.Name}: {ex}");
+                            Log.Info(ex.StackTrace);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex) {
+                Log.Error($"Error loading DOM elements: {ex}");
+                Log.Info(ex.StackTrace);
+                throw new ApplicationException("An error occurred while loading");
+            }
+        }
+
         private static void DeserializeData(byte[] data) {
             bool error = false;
             try {
                 if (data != null && data.Length != 0) {
-                    Log.Info($"Loading Data from New Load Routine! Length={data.Length}");
+                    Log.Info($"Loading Data from Old 'New' Load Routine! Length={data.Length}");
                     var memoryStream = new MemoryStream();
                     memoryStream.Write(data, 0, data.Length);
                     memoryStream.Position = 0;
@@ -202,6 +332,24 @@ namespace TrafficManager.Lifecycle {
             }
         }
 
+        private static void LoadDataState<T>(ICustomDataManager<T> manager, T data, string description, ref bool error) {
+            if (_persistenceMigration?.Contains(manager.GetType()) == true) {
+                if (data != null) {
+                    Log.Info($"{manager.GetType().FullName} is in migration to DOM. {description} data structure ignored.");
+                }
+            }
+            else if (data != null) {
+                if (GlobalPersistence.PersistentObjects.Any(o => o.DependencyTarget == manager.GetType())) {
+                    Log.Info($"Reading legacy {description} data structure (no DOM element was found).");
+                }
+                if (!manager.LoadData(data)) {
+                    error = true;
+                }
+            } else if (description != null) {
+                Log.Info($"{description} data structure undefined!");
+            }
+        }
+
         private static void LoadDataState(out bool error) {
             error = false;
 
@@ -211,136 +359,21 @@ namespace TrafficManager.Lifecycle {
                 return;
             }
 
-            // load ext. citizens
-            if (_configuration.ExtCitizens != null) {
-                if (!ExtCitizenManager.Instance.LoadData(_configuration.ExtCitizens)) {
-                    error = true;
-                }
-            } else {
-                Log.Info("Ext. citizen data structure undefined!");
-            }
-
-            // load ext. citizen instances
-            if (_configuration.ExtCitizenInstances != null) {
-                if (!ExtCitizenInstanceManager.Instance.LoadData(_configuration.ExtCitizenInstances)) {
-                    error = true;
-                }
-            } else {
-                Log.Info("Ext. citizen instance data structure undefined!");
-            }
-
-            // load priority segments
-            if (_configuration.PrioritySegments != null) {
-                if (!TrafficPriorityManager.Instance.LoadData(_configuration.PrioritySegments)) {
-                    error = true;
-                }
-            } else {
-                Log.Info("Priority segments data structure (old) undefined!");
-            }
-
-            if (_configuration.CustomPrioritySegments != null) {
-                if (!TrafficPriorityManager.Instance.LoadData(_configuration.CustomPrioritySegments)) {
-                    error = true;
-                }
-            } else {
-                Log.Info("Priority segments data structure (new) undefined!");
-            }
-
-            // load parking restrictions
-            if (_configuration.ParkingRestrictions != null) {
-                if (!ParkingRestrictionsManager.Instance.LoadData(_configuration.ParkingRestrictions)) {
-                    error = true;
-                }
-            } else {
-                Log.Info("Parking restrctions structure undefined!");
-            }
-
-            // load vehicle restrictions (warning: has to be done before loading timed lights!)
-            if (_configuration.LaneAllowedVehicleTypes != null) {
-                if (!VehicleRestrictionsManager.Instance.LoadData(_configuration.LaneAllowedVehicleTypes)) {
-                    error = true;
-                }
-            } else {
-                Log.Info("Vehicle restrctions structure undefined!");
-            }
-
-            if (_configuration.TimedLights != null) {
-                if (!TrafficLightSimulationManager.Instance.LoadData(_configuration.TimedLights)) {
-                    error = true;
-                }
-            } else {
-                Log.Info("Timed traffic lights data structure undefined!");
-            }
-
-            // load toggled traffic lights (old method)
-            if (_configuration.NodeTrafficLights != null) {
-                if (!TrafficLightManager.Instance.LoadData(_configuration.NodeTrafficLights)) {
-                    error = true;
-                }
-            } else {
-                Log.Info("Junction traffic lights data structure (old) undefined!");
-            }
-
-            // load toggled traffic lights (new method)
-            if (_configuration.ToggledTrafficLights != null) {
-                if (!TrafficLightManager.Instance.LoadData(_configuration.ToggledTrafficLights)) {
-                    error = true;
-                }
-            } else {
-                Log.Info("Junction traffic lights data structure (new) undefined!");
-            }
-
-            // load lane arrrows (old method)
-            if (_configuration.LaneFlags != null) {
-                if (!LaneArrowManager.Instance.LoadData(_configuration.LaneFlags)) {
-                    error = true;
-                }
-            } else {
-                Log.Info("Lane arrow data structure (old) undefined!");
-            }
-
-            // load lane arrows (new method)
-            if (_configuration.LaneArrows != null) {
-                if (!LaneArrowManager.Instance.LoadData(_configuration.LaneArrows)) {
-                    error = true;
-                }
-            } else {
-                Log.Info("Lane arrow data structure (new) undefined!");
-            }
-
-            // load lane connections
-            if (_configuration.LaneConnections != null) {
-                if (!LaneConnectionManager.Instance.LoadData(_configuration.LaneConnections)) {
-                    error = true;
-                }
-            } else {
-                Log.Info("Lane connection data structure undefined!");
-            }
-
-            // Load custom default speed limits
-            if (_configuration.CustomDefaultSpeedLimits != null) {
-                if (!SpeedLimitManager.Instance.LoadData(_configuration.CustomDefaultSpeedLimits)) {
-                    error = true;
-                }
-            }
-
-            // load speed limits
-            if (_configuration.LaneSpeedLimits != null) {
-                if (!SpeedLimitManager.Instance.LoadData(_configuration.LaneSpeedLimits)) {
-                    error = true;
-                }
-            } else {
-                Log.Info("Lane speed limit structure undefined!");
-            }
-
-            // Load segment-at-node flags
-            if (_configuration.SegmentNodeConfs != null) {
-                if (!JunctionRestrictionsManager.Instance.LoadData(_configuration.SegmentNodeConfs)) {
-                    error = true;
-                }
-            } else {
-                Log.Info("Segment-at-node structure undefined!");
-            }
+            LoadDataState(ExtCitizenManager.Instance, _configuration.ExtCitizens, "Ext. citizen", ref error);
+            LoadDataState(ExtCitizenInstanceManager.Instance, _configuration.ExtCitizenInstances, "Ext. citizen instance", ref error);
+            LoadDataState(TrafficPriorityManager.Instance, _configuration.PrioritySegments, "Priority segments (old)", ref error);
+            LoadDataState(TrafficPriorityManager.Instance, _configuration.CustomPrioritySegments, "Priority segments (new)", ref error);
+            LoadDataState(ParkingRestrictionsManager.Instance, _configuration.ParkingRestrictions, "Parking restrctions", ref error);
+            LoadDataState(VehicleRestrictionsManager.Instance, _configuration.LaneAllowedVehicleTypes, "Vehicle restrctions", ref error);
+            LoadDataState(TrafficLightSimulationManager.Instance, _configuration.TimedLights, "Timed traffic lights", ref error);
+            LoadDataState(TrafficLightManager.Instance, _configuration.NodeTrafficLights, "Junction traffic lights (old)", ref error);
+            LoadDataState(TrafficLightManager.Instance, _configuration.ToggledTrafficLights, "Junction traffic lights (new)", ref error);
+            LoadDataState(LaneArrowManager.Instance, _configuration.LaneFlags, "Lane arrow (old)", ref error);
+            LoadDataState(LaneArrowManager.Instance, _configuration.LaneArrows, "Lane arrow (new)", ref error);
+            LoadDataState(LaneConnectionManager.Instance, _configuration.LaneConnections, "Lane connection", ref error);
+            LoadDataState(SpeedLimitManager.Instance, _configuration.CustomDefaultSpeedLimits, "Default speed limit", ref error);
+            LoadDataState(SpeedLimitManager.Instance, _configuration.LaneSpeedLimits, "Lane speed limit", ref error);
+            LoadDataState(JunctionRestrictionsManager.Instance, _configuration.SegmentNodeConfs, "Segment-at-node", ref error);
         }
 
         public static void Save() {
@@ -436,10 +469,12 @@ namespace TrafficManager.Lifecycle {
                     memoryStreamVersion.Position = 0;
                     Log.Info($"Version data byte length {memoryStreamVersion.Length}");
                     SerializableData.SaveData(VERSION_INFO_DATA_ID, memoryStreamVersion.ToArray());
-                } catch (Exception ex) {
+                }
+                catch (Exception ex) {
                     Log.Error("Unexpected error while saving version data: " + ex);
                     success = false;
-                } finally {
+                }
+                finally {
                     memoryStreamVersion.Close();
                 }
 
@@ -447,7 +482,8 @@ namespace TrafficManager.Lifecycle {
                     if (TMPELifecycle.PlayMode) {
                         SerializableData.SaveData("TMPE_Options", OptionsManager.Instance.SaveData(ref success));
                     }
-                } catch (Exception ex) {
+                }
+                catch (Exception ex) {
                     Log.Error("Unexpected error while saving options: " + ex.Message);
                     success = false;
                 }
@@ -460,12 +496,16 @@ namespace TrafficManager.Lifecycle {
                     memoryStream.Position = 0;
                     Log.Info($"Save data byte length {memoryStream.Length}");
                     SerializableData.SaveData(DATA_ID, memoryStream.ToArray());
-                } catch (Exception ex) {
+                }
+                catch (Exception ex) {
                     Log.Error("Unexpected error while saving data: " + ex);
                     success = false;
-                } finally {
+                }
+                finally {
                     memoryStream.Close();
                 }
+
+                SaveDom(ref success);
 
                 var reverseManagers = new List<ICustomManager>(TMPELifecycle.Instance.RegisteredManagers);
                 reverseManagers.Reverse();
@@ -480,7 +520,8 @@ namespace TrafficManager.Lifecycle {
                         success = false;
                     }
                 }
-            } catch (Exception e) {
+            }
+            catch (Exception e) {
                 success = false;
                 Log.Error($"Error occurred while saving data: {e}");
 
@@ -489,6 +530,76 @@ namespace TrafficManager.Lifecycle {
                 // detected an error while saving. To help preventing future errors, please navigate
                 // to http://steamcommunity.com/sharedfiles/filedetails/?id=583429740 and follow
                 // the steps under 'In case problems arise'.", true);
+            }
+        }
+
+        private static void SaveDom(ref bool success) {
+
+            foreach (var po in GlobalPersistence.PersistentObjects.OrderBy(o => o)) {
+
+                try {
+                    var dom = new XDocument();
+                    dom.Add(new XElement(po.DependencyTarget.Name));
+
+                    var result = po.SaveData(dom.Root, new PersistenceContext { Version = Version });
+
+                    result.LogMessage($"SaveData of DOM element {po.ElementName} for {po.DependencyTarget.Name} reported {result}.");
+
+#if DEBUGSAVE
+                    Log._Debug($"Saving DOM for {po.DependencyTarget.Name}: {dom}");
+#endif
+
+                    try {
+                        using (var memoryStream = new MemoryStream()) {
+
+                            using (var compressionStream = new GZipOutputStream(memoryStream)) {
+
+                                using (var streamWriter = new StreamWriter(compressionStream, Encoding.UTF8)) {
+
+                                    dom.Save(streamWriter);
+
+                                    streamWriter.Flush();
+                                    compressionStream.Finish();
+
+                                    memoryStream.Position = 0;
+                                    Log.Info($"Save DOM for {po.DependencyTarget.Name} byte length {memoryStream.Length}");
+
+                                    SerializableData.SaveData(po.DependencyTarget.FullName, memoryStream.ToArray());
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception ex) {
+
+                        Log.Error("Save DOM failed, attempting without compression. " + ex);
+
+                        try {
+                            SerializableData.EraseData(po.DependencyTarget.FullName);
+                        }
+                        catch {
+                        }
+
+                        using (var memoryStream = new MemoryStream()) {
+                            using (var streamWriter = new StreamWriter(memoryStream, Encoding.UTF8)) {
+
+                                dom.Save(streamWriter);
+
+                                memoryStream.Position = 0;
+                                Log.Info($"Save DOM for {po.DependencyTarget.Name} byte length {memoryStream.Length}");
+
+                                SerializableData.SaveData(po.DependencyTarget.FullName, memoryStream.ToArray());
+                            }
+                        }
+
+                        Log.Info("Save DOM without compression succeeded.");
+
+                    }
+                }
+                catch (Exception ex) {
+
+                    Log.Error($"Unexpected error while saving DOM for {po.DependencyTarget.Name}: {ex}");
+                    success = false;
+                }
             }
         }
     }

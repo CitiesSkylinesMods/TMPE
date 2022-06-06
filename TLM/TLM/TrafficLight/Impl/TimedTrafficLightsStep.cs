@@ -14,27 +14,46 @@ namespace TrafficManager.TrafficLight.Impl {
     using TrafficManager.Util;
     using ColossalFramework;
     using TrafficManager.Util.Extensions;
+    using TrafficManager.TrafficLight.Model;
 
     // TODO class should be completely reworked, approx. in version 1.10
-    public class TimedTrafficLightsStep : ITrafficLightContainer
+    public class TimedTrafficLightsStep : ITrafficLightContainer, ITimedTrafficLightsStepModel
     {
         public TimedTrafficLightsStep(TimedTrafficLights timedNode,
                                       int minTime,
                                       int maxTime,
                                       StepChangeMetric stepChangeMode,
                                       float waitFlowBalance,
-                                      bool makeRed = false) {
+                                      bool makeRed = false)
+                : this()
+                {
+
             MinTime = minTime;
             MaxTime = maxTime;
             ChangeMetric = stepChangeMode;
             WaitFlowBalance = waitFlowBalance;
-            this.timedNode = timedNode;
 
             CurrentFlow = Single.NaN;
             CurrentWait = Single.NaN;
 
+            Initialize(timedNode, makeRed);
+        }
+
+        private TimedTrafficLightsStep() {
+
             endTransitionStart = null;
             stepDone = false;
+        }
+
+        internal static TimedTrafficLightsStep CreateLoadingInstance() => new TimedTrafficLightsStep();
+
+        internal void Initialize(TimedTrafficLights timedNode, bool makeRed = false) {
+
+            if (this.timedNode != null) {
+                throw new InvalidOperationException($"TimedTrafficLightsStep instance is already initialized for node {this.timedNode.NodeId}.");
+            }
+
+            this.timedNode = timedNode;
 
             ref NetNode node = ref timedNode.NodeId.ToNode();
 
@@ -1294,6 +1313,12 @@ namespace TrafficManager.TrafficLight.Impl {
             return customSegLightsMan.ApplyLightModes(segmentId, startNode, clonedLights);
         }
 
+        internal void AddLoadingSegmentLights(CustomSegmentLights segLights) {
+            // TODO PERSISTENCE set this up for hot swapping ttl at load time
+
+            CustomSegmentLights.Add(segLights.SegmentId, segLights);
+        }
+
         public bool SetSegmentLights(ushort nodeId, ushort segmentId, CustomSegmentLights lights) {
 #if DEBUG
             if (DebugSwitch.TimedTrafficLights.Get() && DebugSettings.NodeId == timedNode.NodeId) {
@@ -1392,6 +1417,11 @@ namespace TrafficManager.TrafficLight.Impl {
         // TODO IMPROVE THIS! Liskov substitution principle must hold.
         public bool IsSegmentLight(ushort segmentId, bool startNode) {
             throw new NotImplementedException();
+        }
+
+        IEnumerable<ICustomSegmentLightsModel> ITimedTrafficLightsStepModel.EnumerateCustomSegmentLights() {
+            foreach (var segLights in CustomSegmentLights.Values)
+                yield return segLights;
         }
     }
 }

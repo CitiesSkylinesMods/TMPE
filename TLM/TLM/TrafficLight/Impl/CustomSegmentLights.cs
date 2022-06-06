@@ -14,12 +14,14 @@ namespace TrafficManager.TrafficLight.Impl {
     using TrafficManager.Util;
     using TrafficManager.Manager.Impl;
     using TrafficManager.Util.Extensions;
+    using TrafficManager.TrafficLight.Model;
+    using System.Collections;
 
     /// <summary>
     /// Represents the set of custom traffic lights located at a node
     /// </summary>
     public class CustomSegmentLights
-        : SegmentEndId
+        : SegmentEndId, ICustomSegmentLightsModel
     {
         // private static readonly ExtVehicleType[] SINGLE_LANE_VEHICLETYPES
         // = new ExtVehicleType[] { ExtVehicleType.Tram, ExtVehicleType.Service,
@@ -855,5 +857,19 @@ namespace TrafficManager.TrafficLight.Impl {
                     CustomLights.DictionaryToString());
             }
         } // end Housekeeping()
+
+        IEnumerator<CustomSegmentLightModel> IEnumerable<CustomSegmentLightModel>.GetEnumerator() {
+            foreach (var light in CustomLights) {
+                yield return new CustomSegmentLightModel() {
+                    VehicleType = light.Key,
+                    CurrentMode = light.Value.CurrentMode,
+                    LightLeft = light.Value.LightLeft,
+                    LightMain = light.Value.LightMain,
+                    LightRight = light.Value.LightRight,
+                };
+            }
+        }
+
+        IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable<CustomSegmentLightModel>)this).GetEnumerator();
     } // end class
 }

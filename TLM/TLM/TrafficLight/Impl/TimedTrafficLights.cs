@@ -14,9 +14,10 @@ namespace TrafficManager.TrafficLight.Impl {
     using TrafficManager.Util;
     using UnityEngine;
     using TrafficManager.Util.Extensions;
+    using TrafficManager.TrafficLight.Model;
 
     // TODO define TimedTrafficLights per node group, not per individual nodes
-    public class TimedTrafficLights {
+    public class TimedTrafficLights : ITimedTrafficLightsModel {
         public TimedTrafficLights(ushort nodeId, IEnumerable<ushort> nodeGroup) {
             NodeId = nodeId;
             NodeGroup = new List<ushort>(nodeGroup);
@@ -28,6 +29,16 @@ namespace TrafficManager.TrafficLight.Impl {
 
             started = false;
         }
+
+        private TimedTrafficLights(ushort nodeId, IEnumerable<ushort> nodeGroup, bool started)
+                : this(nodeId, nodeGroup)
+                {
+
+            this.started = started;
+        }
+
+        internal static TimedTrafficLights CreateLoadingInstance(ushort nodeId, IEnumerable<ushort> nodeGroup, bool started)
+            => new TimedTrafficLights(nodeId, nodeGroup, started);
 
         public ushort NodeId {
             get;
@@ -58,6 +69,8 @@ namespace TrafficManager.TrafficLight.Impl {
         public short RotationOffset { get; private set; }
 
         public IDictionary<ushort, IDictionary<ushort, ArrowDirection>> Directions { get; private set; }
+
+        bool ITimedTrafficLightsModel.IsStarted => IsStarted();
 
         /// <summary>
         /// Segment ends that were set up for this timed traffic light
@@ -322,6 +335,13 @@ namespace TrafficManager.TrafficLight.Impl {
 
             Steps.Add(step);
             return step;
+        }
+
+        internal void AddLoadingStep(TimedTrafficLightsStep step) {
+            // TODO PERSISTENCE set this up for hot swapping ttl at load time
+
+            step.Initialize(this);
+            Steps.Add(step);
         }
 
         public void Start() {
