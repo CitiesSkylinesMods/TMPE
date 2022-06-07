@@ -16,7 +16,7 @@ namespace TrafficManager.State {
             };
 
         public static SliderOption AltLaneSelectionRatio =
-            new(nameof(Options.altLaneSelectionRatio), Options.PersistTo.None) {
+            new(nameof(Options.altLaneSelectionRatio), Options.PersistTo.Savegame) {
                 Label = "Gameplay.Slider:Dynamic lane selection",
                 Tooltip = "%",
                 Min = 0,

@@ -32,8 +32,8 @@ namespace TrafficManager.Manager.Impl {
             VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Tram |
             VehicleInfo.VehicleType.Monorail | VehicleInfo.VehicleType.Trolleybus;
 
-        private const VehicleInfo.VehicleType ROAD_VEHICLE_TYPES = TrackUtils.ROAD_VEHICLE_TYPES;
-        private const VehicleInfo.VehicleType TRACK_VEHICLE_TYPES = TrackUtils.TRACK_VEHICLE_TYPES;
+        public static bool IsSupported(NetInfo.Lane laneInfo) =>
+            laneInfo.Matches(ROUTED_LANE_TYPES, ROUTED_VEHICLE_TYPES);
 
         private const byte MAX_NUM_TRANSITIONS = 64;
 
@@ -413,7 +413,7 @@ namespace TrafficManager.Manager.Impl {
             ushort nodeId = prevEnd.nodeId; // common node
 
             NetInfo.Lane prevLaneInfo = prevSegmentInfo.m_lanes[prevLaneIndex];
-            if (!prevLaneInfo.CheckType(ROUTED_LANE_TYPES, ROUTED_VEHICLE_TYPES)) {
+            if (!IsSupported(prevLaneInfo)) {
                 return;
             }
 
@@ -548,14 +548,12 @@ namespace TrafficManager.Manager.Impl {
                 }
             }
 
-            bool prevIsRoadLane = prevLaneInfo.CheckType(ROUTED_LANE_TYPES, ROAD_VEHICLE_TYPES);
-
-
             // determine if highway rules should be applied
             bool onHighway = Options.highwayRules && onOnewayHighway;
             bool applyHighwayRules = onHighway && nodeIsSimpleJunction;
             bool applyHighwayRulesAtJunction = applyHighwayRules && nodeIsRealJunction;
-            bool iterateViaGeometry = (applyHighwayRulesAtJunction || applyHighwayMergingRules) && prevIsRoadLane;
+            bool iterateViaGeometry = (applyHighwayRulesAtJunction || applyHighwayMergingRules) && prevLaneInfo.MatchesRoad();
+
             // start with u-turns at highway junctions
             ushort nextSegmentId = iterateViaGeometry ? prevSegmentId : (ushort)0;
 
@@ -750,9 +748,7 @@ namespace TrafficManager.Manager.Impl {
                         }
 
                         // next is compatible lane
-                        if (nextLaneInfo.CheckType(ROUTED_LANE_TYPES, ROUTED_VEHICLE_TYPES) &&
-                            (prevLaneInfo.m_vehicleType & nextLaneInfo.m_vehicleType) != VehicleInfo.VehicleType.None) {
-
+                        if (IsSupported(nextLaneInfo) && (prevLaneInfo.m_vehicleType & nextLaneInfo.m_vehicleType) != 0) {
                             if (extendedLogRouting) {
                                 Log._Debug(
                                     $"RoutingManager.RecalculateLaneEndRoutingData({prevSegmentId}, " +
@@ -804,7 +800,7 @@ namespace TrafficManager.Manager.Impl {
 
                                 int currentLaneConnectionTransIndex = -1;
 
-                                if (nextLaneInfo.CheckType(ROUTED_LANE_TYPES, TRACK_VEHICLE_TYPES)) {
+                                if (nextLaneInfo.MatchesTrack() && prevLaneInfo.MatchesTrack()) {
                                     // routing tracked vehicles (trains, trams, metros, monorails)
                                     // lane may be mixed car+tram
                                     bool nextHasConnections =
@@ -917,7 +913,7 @@ namespace TrafficManager.Manager.Impl {
                                     }
                                 }
 
-                                if (nextLaneInfo.CheckType(ROUTED_LANE_TYPES, ROAD_VEHICLE_TYPES)) {
+                                if (nextLaneInfo.MatchesRoad() && prevLaneInfo.MatchesRoad()) {
                                     // routing road vehicles (car, SOS, bus, trolleybus, ...)
                                     // lane may be mixed car+tram
                                     ++incomingCarLanes;
@@ -1165,7 +1161,7 @@ namespace TrafficManager.Manager.Impl {
                                 }
 
                                 bool outgoing = (nextLaneInfo.m_finalDirection & NetInfo.InvertDirection(nextExpectedDirection)) != NetInfo.Direction.None;
-                                if (outgoing && nextLaneInfo.CheckType(ROUTED_LANE_TYPES, ROAD_VEHICLE_TYPES)) {
+                                if (outgoing && nextLaneInfo.MatchesRoad()) {
                                     ++outgoingCarLanes;
                                     if (extendedLogRouting) {
                                         Log._DebugFormat(

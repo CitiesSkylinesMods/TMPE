@@ -10,7 +10,9 @@ namespace TrafficManager.UI.Helpers {
     using TrafficManager.Lifecycle;
 
     public abstract class SerializableUIOptionBase<TVal, TUI, TComponent> : ILegacySerializableOption
-        where TUI : UIComponent {
+        where TUI : UIComponent
+        where TVal : IConvertible
+    {
 
         /// <summary>Use as tooltip for readonly UI components.</summary>
         protected const string INGAME_ONLY_SETTING = "This setting can only be changed in-game.";
@@ -64,10 +66,11 @@ namespace TrafficManager.UI.Helpers {
 
         /// <summary>Gets or sets the value of the field this option represents.</summary>
         public virtual TVal Value {
-            get => _fieldInfo != null ? (TVal)_fieldInfo.GetValue(null) : _value;
+            get => _fieldInfo != null ? (TVal)Convert.ChangeType(_fieldInfo.GetValue(null), typeof(TVal)) : _value;
             set {
                 if (_fieldInfo != null) {
-                    _fieldInfo.SetValue(null, value);
+                    object val = Convert.ChangeType(value, _fieldInfo.FieldType);
+                    _fieldInfo.SetValue(null, val);
                 } else {
                     _value = value;
                 }
