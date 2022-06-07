@@ -2408,5 +2408,31 @@ namespace TrafficManager.Manager.Impl {
 
             return reverse;
         }
+
+        static LaneTransitionData[] Empty = new LaneTransitionData[0];
+
+        /// <param name="startNode">is the node start node of the segment</param>
+        /// <returns>forward transitions if any, empty array otherwise</returns>
+        public LaneTransitionData[] GetForwardTransitions(uint laneId, bool startNode) {
+            uint index = this.GetLaneEndRoutingIndex(laneId, startNode);
+            var routing = LaneEndForwardRoutings[index];
+            if (!routing.routed || routing.transitions == null) {
+                return Empty;
+            } else {
+                return routing.transitions;
+            }
+        }
+
+        /// <param name="startNode">is the node start node of the segment</param>
+        /// <returns>backward transitions if any, empty array otherwise</returns>
+        public LaneTransitionData[] GetBackwardTransitions(uint laneId, bool startNode) {
+            uint index = this.GetLaneEndRoutingIndex(laneId, startNode);
+            var routing = LaneEndBackwardRoutings[index];
+            if (!routing.routed || routing.transitions == null) {
+                return Empty;
+            } else {
+                return routing.transitions;
+            }
+        }
     }
 }

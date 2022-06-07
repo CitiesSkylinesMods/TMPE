@@ -27,10 +27,12 @@ namespace TrafficManager.API.Manager {
         /// </summary>
         LaneEndRoutingData[] LaneEndForwardRoutings { get; }
 
-        void SimulationStep();
+        public LaneTransitionData[] GetForwardTransitions(uint laneId, bool startNode);
+        public LaneTransitionData[] GetBackwardTransitions(uint laneId, bool startNode);
+
         void RequestFullRecalculation();
         void RequestRecalculation(ushort segmentId, bool propagate = true);
-        uint GetLaneEndRoutingIndex(uint laneId, bool startNode);
+        [Obsolete] uint GetLaneEndRoutingIndex(uint laneId, bool startNode);
         int CalcInnerSimilarLaneIndex(ushort segmentId, int laneIndex);
         int CalcInnerSimilarLaneIndex(NetInfo.Lane laneInfo);
         int CalcOuterSimilarLaneIndex(ushort segmentId, int laneIndex);
