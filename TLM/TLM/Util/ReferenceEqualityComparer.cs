@@ -9,7 +9,7 @@ namespace TrafficManager.Util {
     internal sealed class ReferenceEqualityComparer<T> : IEqualityComparer<T>, IEqualityComparer {
 
         public static ReferenceEqualityComparer<T> Instance { get; } = new ReferenceEqualityComparer<T>();
-        NetAI
+
         private ReferenceEqualityComparer() { }
 
         public bool Equals(T x, T y) => ReferenceEquals(x, y);
