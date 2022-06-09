@@ -310,7 +310,7 @@ namespace TrafficManager.ExtPrefabs {
 
                 // scan for forward median
 
-                for (sortedIndex = firstOuterLane; sortedIndex > lastDisplacedOuterForward; sortedIndex--) {
+                for (sortedIndex = firstOuterLane - 1; sortedIndex > lastDisplacedOuterForward; sortedIndex--) {
                     var laneIndex = m_sortedLanes[sortedIndex];
                     var extLane = m_extLanes[laneIndex];
                     var lane = lanes[laneIndex];
@@ -386,7 +386,7 @@ namespace TrafficManager.ExtPrefabs {
 
                 // scan for backward raised median
 
-                for (sortedIndex = firstOuterLane; sortedIndex < lastDisplacedOuterBackward; sortedIndex++) {
+                for (sortedIndex = firstOuterLane + 1; sortedIndex < lastDisplacedOuterBackward; sortedIndex++) {
                     var laneIndex = m_sortedLanes[sortedIndex];
                     var extLane = m_extLanes[laneIndex];
                     var lane = lanes[laneIndex];
