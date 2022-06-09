@@ -80,17 +80,19 @@ namespace TrafficManager.Manager.Impl {
         /// <returns>CitizenInstanceId of the driver.</returns>
         public ushort GetDriverInstanceId(ushort vehicleId, ref Vehicle data) {
             CitizenManager citizenManager = Singleton<CitizenManager>.instance;
+            CitizenUnit[] citizenUnitsBuf = citizenManager.m_units.m_buffer;
+            Citizen[] citizensBuf = citizenManager.m_citizens.m_buffer;
             uint citizenUnitId = data.m_citizenUnits;
             uint maxUnitCount = citizenManager.m_units.m_size;
             int numIter = 0;
 
             while (citizenUnitId != 0) {
-                ref CitizenUnit citizenUnit = ref citizenUnitId.ToCitizenUnit();
+                ref CitizenUnit citizenUnit = ref citizenUnitsBuf[citizenUnitId];
                 for (int i = 0; i < 5; i++) {
                     uint citizenId = citizenUnit.GetCitizen(i);
 
                     if (citizenId != 0) {
-                        ushort citizenInstanceId = citizenId.ToCitizen().m_instance;
+                        ushort citizenInstanceId = citizensBuf[citizenId].m_instance;
                         if (citizenInstanceId != 0) {
                             return citizenInstanceId;
                         }

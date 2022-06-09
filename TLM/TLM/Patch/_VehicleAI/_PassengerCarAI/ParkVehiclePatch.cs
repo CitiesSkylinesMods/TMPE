@@ -18,9 +18,13 @@ namespace TrafficManager.Patch._VehicleAI._PassengerCarAI {
                                   PathUnit.Position pathPos,
                                   uint nextPath,
                                   int nextPositionIndex,
-                                  out byte segmentOffset) {
-             CitizenManager citizenManager = Singleton<CitizenManager>.instance;
+                                  out byte segmentOffset)
+        {
+            CitizenManager citizenManager = Singleton<CitizenManager>.instance;
             uint maxUnitCount = citizenManager.m_units.m_size;
+            CitizenInstance[] citizenInstancesBuf = citizenManager.m_instances.m_buffer;
+            CitizenUnit[] citizenUnitsBuf = citizenManager.m_units.m_buffer;
+            Citizen[] citizensBuf = citizenManager.m_citizens.m_buffer;
 
             uint driverCitizenId = 0u;
             ushort driverCitizenInstanceId = 0;
@@ -29,20 +33,20 @@ namespace TrafficManager.Patch._VehicleAI._PassengerCarAI {
             int numIterations = 0;
 
             while (curCitizenUnitId != 0u && driverCitizenId == 0u) {
-                ref CitizenUnit currentCitizenUnit = ref curCitizenUnitId.ToCitizenUnit();
+                ref CitizenUnit currentCitizenUnit = ref citizenUnitsBuf[curCitizenUnitId];
                 for (int i = 0; i < 5; i++) {
                     uint citizenId = currentCitizenUnit.GetCitizen(i);
                     if (citizenId == 0u) {
                         continue;
                     }
 
-                    driverCitizenInstanceId = citizenId.ToCitizen().m_instance;
+                    driverCitizenInstanceId = citizensBuf[citizenId].m_instance;
                     if (driverCitizenInstanceId == 0) {
                         continue;
                     }
 
                     // NON-STOCK CODE START
-                    ref CitizenInstance driverCitizenInstance = ref driverCitizenInstanceId.ToCitizenInstance();
+                    ref CitizenInstance driverCitizenInstance = ref citizenInstancesBuf[driverCitizenInstanceId];
                     driverCitizenId = driverCitizenInstance.m_citizen;
                     targetBuildingId = driverCitizenInstance.m_targetBuilding;
                     // NON-STOCK CODE END
@@ -52,20 +56,21 @@ namespace TrafficManager.Patch._VehicleAI._PassengerCarAI {
 
                 curCitizenUnitId = currentCitizenUnit.m_nextUnit;
                 if (++numIterations > maxUnitCount) {
-                    CODebugBase<LogChannel>.Error(LogChannel.Core,
-                                                  $"Invalid list detected!\n{Environment.StackTrace}");
+                    CODebugBase<LogChannel>.Error(
+                        LogChannel.Core,
+                        $"Invalid list detected!\n{Environment.StackTrace}");
                     break;
                 }
             }
 
-            __result =  Constants.ManagerFactory.VehicleBehaviorManager.ParkPassengerCar(
+            __result = Constants.ManagerFactory.VehicleBehaviorManager.ParkPassengerCar(
                 vehicleID,
                 ref vehicleData,
                 vehicleData.Info,
                 driverCitizenId,
-                ref driverCitizenId.ToCitizen(),
+                ref citizensBuf[driverCitizenId],
                 driverCitizenInstanceId,
-                ref driverCitizenInstanceId.ToCitizenInstance(),
+                ref citizenInstancesBuf[driverCitizenInstanceId],
                 ref ExtCitizenInstanceManager.Instance.ExtInstances[driverCitizenInstanceId],
                 targetBuildingId,
                 pathPos,
