@@ -204,9 +204,9 @@ namespace TrafficManager.ExtPrefabs {
                     if ((direction & ExtLaneFlags.ForwardGroup) != 0) {
                         extLane.m_extFlags |= ExtLaneFlags.DisplacedOuter;
                         lastDisplacedOuterForward = sortedIndex;
-                    }
-                    if (direction != 0)
+                    } else if (direction != 0) {
                         break;
+                    }
                 }
 
                 // scan for DisplacedOuter|BackwardGroup
@@ -216,9 +216,9 @@ namespace TrafficManager.ExtPrefabs {
                     if ((direction & ExtLaneFlags.BackwardGroup) != 0) {
                         extLane.m_extFlags |= ExtLaneFlags.DisplacedOuter;
                         lastDisplacedOuterBackward = sortedIndex;
-                    }
-                    if (direction != 0)
+                    } else if (direction != 0) {
                         break;
+                    }
                 }
 
                 // scan for Outer|ForwardGroup (may convert some to Inner later)
@@ -384,7 +384,7 @@ namespace TrafficManager.ExtPrefabs {
                     }
                 }
 
-                // scan for backward raised median
+                // scan for backward median
 
                 for (sortedIndex = firstOuterLane + 1; sortedIndex < lastDisplacedOuterBackward; sortedIndex++) {
                     var laneIndex = m_sortedLanes[sortedIndex];

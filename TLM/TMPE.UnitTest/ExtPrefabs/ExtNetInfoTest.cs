@@ -318,6 +318,46 @@ namespace TMUnitTest.ExtPrefabs {
             VerifyLane(extNetInfo, 5, ExtLaneFlags.DisplacedOuterBackward);
         }
 
+
+        [TestMethod]
+        public void TestDoubleDualTurnaround() {
+
+            var lanes = new[] {
+                CarLane(0f, false),
+                CarLane(3f, false),
+                CarLane(6f, true),
+                CarLane(9f, true),
+                CarLane(12f, false),
+                CarLane(15f, false),
+                CarLane(18f, true),
+                CarLane(21f, true),
+            };
+
+            var extNetInfo = new ExtNetInfo(lanes);
+
+            Assert.AreEqual(lanes.Length, extNetInfo.m_extLanes.Length);
+            VerifySequence(extNetInfo.m_sortedLanes, 0, 1, 2, 3, 4, 5, 6, 7);
+
+            Assert.AreEqual(ExtLaneFlags.OuterForward | ExtLaneFlags.DisplacedOuterForward, extNetInfo.m_forwardExtLaneFlags);
+            Assert.AreEqual(ExtLaneFlags.OuterBackward | ExtLaneFlags.DisplacedOuterBackward, extNetInfo.m_backwardExtLaneFlags);
+            Assert.AreEqual(ExtLaneFlags.OuterForward | ExtLaneFlags.DisplacedOuterForward | ExtLaneFlags.OuterBackward | ExtLaneFlags.DisplacedOuterBackward, extNetInfo.m_extLaneFlags);
+
+            Assert.AreEqual(4, extNetInfo.m_laneGroups.Length);
+            VerifyGroup(extNetInfo, 0, ExtLaneFlags.DisplacedOuterForward, 0, 1);
+            VerifyGroup(extNetInfo, 1, ExtLaneFlags.OuterBackward, 2, 3);
+            VerifyGroup(extNetInfo, 2, ExtLaneFlags.OuterForward, 4, 5);
+            VerifyGroup(extNetInfo, 3, ExtLaneFlags.DisplacedOuterBackward, 6, 7);
+
+            VerifyLane(extNetInfo, 0, ExtLaneFlags.DisplacedOuterForward);
+            VerifyLane(extNetInfo, 1, ExtLaneFlags.DisplacedOuterForward);
+            VerifyLane(extNetInfo, 2, ExtLaneFlags.OuterBackward);
+            VerifyLane(extNetInfo, 3, ExtLaneFlags.OuterBackward);
+            VerifyLane(extNetInfo, 4, ExtLaneFlags.OuterForward);
+            VerifyLane(extNetInfo, 5, ExtLaneFlags.OuterForward);
+            VerifyLane(extNetInfo, 6, ExtLaneFlags.DisplacedOuterBackward);
+            VerifyLane(extNetInfo, 7, ExtLaneFlags.DisplacedOuterBackward);
+        }
+
         [TestMethod]
         public void TestInnerDisplacedBusLanes() {
 
