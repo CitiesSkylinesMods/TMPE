@@ -63,36 +63,49 @@ namespace TrafficManager.ExtPrefabs {
             /// </summary>
             ForbidControlledLanes = 1 << 9,
 
-            /// <summary>
-            /// Mask to obtain the lane grouping key.
-            /// </summary>
-            LaneGroupingKey = Outer | Inner | DisplacedInner | DisplacedOuter | ForwardGroup | BackwardGroup,
+            OuterForward = Outer | ForwardGroup,
+            InnerForward = Inner | ForwardGroup,
+            DisplacedInnerForward = DisplacedInner | ForwardGroup,
+            DisplacedOuterForward = DisplacedOuter | ForwardGroup,
 
-            /// <summary>
-            /// Mask to test a segment for the presence of service lanes.
-            /// </summary>
-            ServiceLaneRule = AllowServiceLane | ForbidControlledLanes,
-
-            /// <summary>
-            /// Mask to test a segment for the presence of express lanes.
-            /// </summary>
-            ExpressLaneRule = AllowExpressLane | ForbidControlledLanes,
-
-            /// <summary>
-            /// Mask to test a segment for the presence of displaced far turn lanes.
-            /// </summary>
-            CFIRule = AllowCFI | ForbidControlledLanes,
-
-            /// <summary>
-            /// Mask to test the prevailing direction of a lane group.
-            /// </summary>
-            GroupDirection = ForwardGroup | BackwardGroup,
-
-            /// <summary>
-            /// Mask to test a segment for the presence of any displaced lanes.
-            /// </summary>
-            Displaced = DisplacedInner | DisplacedOuter,
+            OuterBackward = Outer | BackwardGroup,
+            InnerBackward = Inner | BackwardGroup,
+            DisplacedInnerBackward = DisplacedInner | BackwardGroup,
+            DisplacedOuterBackward = DisplacedOuter | BackwardGroup,
         }
+
+        /// <summary>
+        /// Mask to obtain the lane grouping key.
+        /// </summary>
+        public const ExtLaneFlags LaneGroupingKey =
+                ExtLaneFlags.Outer | ExtLaneFlags.Inner
+                | ExtLaneFlags.DisplacedInner | ExtLaneFlags.DisplacedOuter
+                | ExtLaneFlags.ForwardGroup | ExtLaneFlags.BackwardGroup;
+
+        /// <summary>
+        /// Mask to test a segment for the presence of service lanes.
+        /// </summary>
+        public const ExtLaneFlags ServiceLaneRule = ExtLaneFlags.AllowServiceLane | ExtLaneFlags.ForbidControlledLanes;
+
+        /// <summary>
+        /// Mask to test a segment for the presence of express lanes.
+        /// </summary>
+        public const ExtLaneFlags ExpressLaneRule = ExtLaneFlags.AllowExpressLane | ExtLaneFlags.ForbidControlledLanes;
+
+        /// <summary>
+        /// Mask to test a segment for the presence of displaced far turn lanes.
+        /// </summary>
+        public const ExtLaneFlags CFIRule = ExtLaneFlags.AllowCFI | ExtLaneFlags.ForbidControlledLanes;
+
+        /// <summary>
+        /// Mask to test the prevailing direction of a lane group.
+        /// </summary>
+        public const ExtLaneFlags LaneGroupDirection = ExtLaneFlags.ForwardGroup | ExtLaneFlags.BackwardGroup;
+
+        /// <summary>
+        /// Mask to test a segment for the presence of any displaced lanes.
+        /// </summary>
+        public const ExtLaneFlags DisplacedLanes = ExtLaneFlags.DisplacedInner | ExtLaneFlags.DisplacedOuter;
 
         /// <summary>
         /// Extended lane prefab data, directly corresponding to <see cref="NetInfo.m_lanes"/>.
@@ -131,7 +144,7 @@ namespace TrafficManager.ExtPrefabs {
         public ExtNetInfo(NetInfo.Lane[] lanes) {
 
             int GetDirectionalSortKey(ExtLaneFlags flags) {
-                switch (flags & ExtLaneFlags.GroupDirection) {
+                switch (flags & LaneGroupDirection) {
                     case ExtLaneFlags.BackwardGroup:
                         return 1;
                     default:
@@ -171,6 +184,11 @@ namespace TrafficManager.ExtPrefabs {
             bool oneWay = minForward == float.MaxValue || minBackward == float.MaxValue;
             bool inverted = !oneWay && maxForward <= minBackward;
 
+            var lastDisplacedOuterBackward = lanes.Length;
+            var lastDisplacedOuterForward = -1;
+
+            int sortedIndex;
+
             // bypass displaced scans for conventional, inverted, and one-way roads
             if (oneWay || inverted || maxBackward <= minForward) {
                 for (int i = 0; i < m_extLanes.Length; i++) {
@@ -179,15 +197,10 @@ namespace TrafficManager.ExtPrefabs {
                 }
             } else {
 
-                var lastDisplacedOuterBackward = lanes.Length;
-                var lastDisplacedOuterForward = -1;
-
-                int sortedIndex;
-
                 // scan for DisplacedOuter|ForwardGroup
                 for (sortedIndex = 0; sortedIndex < lanes.Length; sortedIndex++) {
                     ExtLaneInfo extLane = m_extLanes[m_sortedLanes[sortedIndex]];
-                    var direction = extLane.m_extFlags & ExtLaneFlags.GroupDirection;
+                    var direction = extLane.m_extFlags & LaneGroupDirection;
                     if ((direction & ExtLaneFlags.ForwardGroup) != 0) {
                         extLane.m_extFlags |= ExtLaneFlags.DisplacedOuter;
                         lastDisplacedOuterForward = sortedIndex;
@@ -199,7 +212,7 @@ namespace TrafficManager.ExtPrefabs {
                 // scan for DisplacedOuter|BackwardGroup
                 for (sortedIndex = lanes.Length - 1; sortedIndex >= 0; sortedIndex--) {
                     ExtLaneInfo extLane = m_extLanes[m_sortedLanes[sortedIndex]];
-                    var direction = extLane.m_extFlags & ExtLaneFlags.GroupDirection;
+                    var direction = extLane.m_extFlags & LaneGroupDirection;
                     if ((direction & ExtLaneFlags.BackwardGroup) != 0) {
                         extLane.m_extFlags |= ExtLaneFlags.DisplacedOuter;
                         lastDisplacedOuterBackward = sortedIndex;
@@ -211,7 +224,7 @@ namespace TrafficManager.ExtPrefabs {
                 // scan for Outer|ForwardGroup (may convert some to Inner later)
                 for (sortedIndex = lastDisplacedOuterBackward - 1; sortedIndex > lastDisplacedOuterForward; sortedIndex--) {
                     var extLane = m_extLanes[m_sortedLanes[sortedIndex]];
-                    var direction = extLane.m_extFlags & ExtLaneFlags.GroupDirection;
+                    var direction = extLane.m_extFlags & LaneGroupDirection;
                     if ((direction & ExtLaneFlags.ForwardGroup) != 0)
                         extLane.m_extFlags |= ExtLaneFlags.Outer;
                     if ((direction & ExtLaneFlags.BackwardGroup) != 0)
@@ -241,7 +254,7 @@ namespace TrafficManager.ExtPrefabs {
                 // scan for Outer|BackwardGroup (may convert some to Inner later)
                 for (sortedIndex = lastDisplacedOuterForward + 1; sortedIndex < lastDisplacedOuterBackward; sortedIndex++) {
                     var extLane = m_extLanes[m_sortedLanes[sortedIndex]];
-                    var direction = extLane.m_extFlags & ExtLaneFlags.GroupDirection;
+                    var direction = extLane.m_extFlags & LaneGroupDirection;
                     if ((direction & ExtLaneFlags.BackwardGroup) != 0)
                         extLane.m_extFlags |= ExtLaneFlags.Outer;
                     if ((direction & ExtLaneFlags.ForwardGroup) != 0)
@@ -263,18 +276,174 @@ namespace TrafficManager.ExtPrefabs {
                         extLane.m_extFlags |= ExtLaneFlags.DisplacedInner;
                         if (lane.m_allowConnect)
                             extLane.m_extFlags |= ExtLaneFlags.ForbidControlledLanes;
-                        else if (lane.m_laneType == NetInfo.LaneType.Vehicle)
+                        else if (lane.IsCarLane())
                             extLane.m_extFlags |= ExtLaneFlags.AllowCFI;
                     }
                 }
 
             }
 
-            // TODO: Scan for medians and express lanes here
+            if (!(oneWay || inverted)) {
+
+                // advance to first Outer|ForwardGroup
+
+                float laneWidth = float.MaxValue;
+                float laneEdge = float.MinValue;
+                float laneElevation = float.MaxValue;
+                float medianEdge = float.MinValue;
+                float medianElevation = float.MinValue;
+
+                int firstOuterLane;
+                int firstInnerLane = -1;
+
+                for (firstOuterLane = lastDisplacedOuterBackward - 1; firstOuterLane > lastDisplacedOuterForward; firstOuterLane--) {
+
+                    var laneIndex = m_sortedLanes[firstOuterLane];
+                    if ((m_extLanes[laneIndex].m_extFlags & ExtLaneFlags.ForwardGroup) != 0) {
+                        var lane = lanes[laneIndex];
+                        laneWidth = lane.m_width;
+                        laneEdge = lane.m_position - laneWidth / 2;
+                        laneElevation = lane.m_verticalOffset;
+                        break;
+                    }
+                }
+
+                // scan for forward median
+
+                for (sortedIndex = firstOuterLane; sortedIndex > lastDisplacedOuterForward; sortedIndex--) {
+                    var laneIndex = m_sortedLanes[sortedIndex];
+                    var extLane = m_extLanes[laneIndex];
+                    var lane = lanes[laneIndex];
+                    if ((extLane.m_extFlags & ExtLaneFlags.ForwardGroup) != 0) {
+                        if (((lane.m_position + lane.m_width / 2) <= medianEdge && lane.m_verticalOffset < medianElevation)
+                                || (lane.m_position + lane.m_width / 2 + lane.m_width + laneWidth) <= laneEdge) {
+                            firstInnerLane = sortedIndex;
+                            break;
+                        }
+                        medianEdge = medianElevation = float.MinValue;
+                        laneWidth = lane.m_width;
+                        laneEdge = lane.m_position - laneWidth / 2;
+                        laneElevation = lane.m_verticalOffset;
+                    } else if ((extLane.m_extFlags & ExtLaneFlags.BackwardGroup) != 0) {
+                        break;
+                    } else {
+                        if (!lane.IsRoadLane() && lane.m_verticalOffset > laneElevation && (lane.m_position + lane.m_width / 2) <= laneEdge) {
+                            medianEdge = Math.Max(medianEdge, lane.m_position - lane.m_width / 2);
+                            medianElevation = Math.Max(medianElevation, lane.m_verticalOffset);
+                        }
+                    }
+                }
+
+                if (firstInnerLane >= 0) {
+                    // apply AllowServiceLane to forward lanes
+
+                    for (sortedIndex = lastDisplacedOuterBackward - 1; sortedIndex > firstInnerLane; sortedIndex--) {
+                        var laneIndex = m_sortedLanes[sortedIndex];
+                        var extLane = m_extLanes[laneIndex];
+                        if ((extLane.m_extFlags & ExtLaneFlags.OuterForward) == ExtLaneFlags.OuterForward && lanes[laneIndex].IsCarLane()) {
+                            extLane.m_extFlags |= ExtLaneFlags.AllowServiceLane;
+                        }
+                    }
+
+                    // apply Inner to forward lanes
+
+                    for (; sortedIndex > lastDisplacedOuterForward; sortedIndex--) {
+                        var laneIndex = m_sortedLanes[sortedIndex];
+                        var extLane = m_extLanes[laneIndex];
+                        if ((extLane.m_extFlags & ExtLaneFlags.OuterForward) == ExtLaneFlags.OuterForward) {
+                            extLane.m_extFlags &= ~ExtLaneFlags.Outer;
+                            extLane.m_extFlags |= ExtLaneFlags.Inner;
+                            var lane = lanes[laneIndex];
+                            if (lane.m_allowConnect)
+                                extLane.m_extFlags |= ExtLaneFlags.ForbidControlledLanes;
+                            else if (lane.IsCarLane())
+                                extLane.m_extFlags |= ExtLaneFlags.AllowExpressLane;
+                        }
+                    }
+                }
+
+                // advance to first Outer|BackwardGroup
+
+                laneWidth = float.MaxValue;
+                laneEdge = float.MaxValue;
+                laneElevation = float.MaxValue;
+                medianEdge = float.MaxValue;
+                medianElevation = float.MinValue;
+
+                firstInnerLane = -1;
+
+                for (firstOuterLane = lastDisplacedOuterForward + 1; firstOuterLane < lastDisplacedOuterBackward; firstOuterLane++) {
+
+                    var laneIndex = m_sortedLanes[firstOuterLane];
+                    if ((m_extLanes[laneIndex].m_extFlags & ExtLaneFlags.BackwardGroup) != 0) {
+                        var lane = lanes[laneIndex];
+                        laneWidth = lane.m_width;
+                        laneEdge = lane.m_position + laneWidth / 2;
+                        laneElevation = lane.m_verticalOffset;
+                        break;
+                    }
+                }
+
+                // scan for backward raised median
+
+                for (sortedIndex = firstOuterLane; sortedIndex < lastDisplacedOuterBackward; sortedIndex++) {
+                    var laneIndex = m_sortedLanes[sortedIndex];
+                    var extLane = m_extLanes[laneIndex];
+                    var lane = lanes[laneIndex];
+                    if ((extLane.m_extFlags & ExtLaneFlags.BackwardGroup) != 0) {
+                        if (((lane.m_position - lane.m_width / 2) >= medianEdge && lane.m_verticalOffset < medianElevation)
+                                || (lane.m_position - lane.m_width / 2 - lane.m_width - laneWidth) >= laneEdge) {
+                            firstInnerLane = sortedIndex;
+                            break;
+                        }
+                        medianEdge = float.MaxValue;
+                        medianElevation = float.MinValue;
+                        laneWidth = lane.m_width;
+                        laneEdge = lane.m_position + laneWidth / 2;
+                        laneElevation = lane.m_verticalOffset;
+                    } else if ((extLane.m_extFlags & ExtLaneFlags.ForwardGroup) != 0) {
+                        break;
+                    } else {
+                        if (!lane.IsRoadLane() && lane.m_verticalOffset > laneElevation && (lane.m_position - lane.m_width / 2) >= laneEdge) {
+                            medianEdge = Math.Min(medianEdge, lane.m_position + lane.m_width / 2);
+                            medianElevation = Math.Max(medianElevation, lane.m_verticalOffset);
+                        }
+                    }
+                }
+
+                if (firstInnerLane >= 0) {
+                    // apply AllowServiceLane to backward lanes
+
+                    for (sortedIndex = lastDisplacedOuterForward + 1; sortedIndex < firstInnerLane; sortedIndex++) {
+                        var laneIndex = m_sortedLanes[sortedIndex];
+                        var extLane = m_extLanes[laneIndex];
+                        if ((extLane.m_extFlags & ExtLaneFlags.OuterBackward) == ExtLaneFlags.OuterBackward
+                                && lanes[laneIndex].IsCarLane()) {
+                            extLane.m_extFlags |= ExtLaneFlags.AllowServiceLane;
+                        }
+                    }
+
+                    // apply Inner to backward lanes
+
+                    for (; sortedIndex < lastDisplacedOuterBackward; sortedIndex++) {
+                        var laneIndex = m_sortedLanes[sortedIndex];
+                        var extLane = m_extLanes[laneIndex];
+                        if ((extLane.m_extFlags & ExtLaneFlags.OuterBackward) == ExtLaneFlags.OuterBackward) {
+                            extLane.m_extFlags &= ~ExtLaneFlags.Outer;
+                            extLane.m_extFlags |= ExtLaneFlags.Inner;
+                            var lane = lanes[laneIndex];
+                            if (lane.m_allowConnect)
+                                extLane.m_extFlags |= ExtLaneFlags.ForbidControlledLanes;
+                            else if (lane.IsCarLane())
+                                extLane.m_extFlags |= ExtLaneFlags.AllowExpressLane;
+                        }
+                    }
+                }
+            }
 
             m_laneGroups = Enumerable.Range(0, lanes.Length)
                             .Select(index => new { index, lane = lanes[index], extLane = m_extLanes[index] })
-                            .GroupBy(l => l.extLane.m_extFlags & ExtLaneFlags.LaneGroupingKey)
+                            .GroupBy(l => l.extLane.m_extFlags & LaneGroupingKey)
                             .Where(g => g.Key != 0)
                             .Select(g => new LaneGroupInfo {
                                 m_extLaneFlags = g.Select(l => l.extLane.m_extFlags).Aggregate((ExtLaneFlags x, ExtLaneFlags y) => x | y),
