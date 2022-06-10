@@ -214,6 +214,8 @@ namespace TrafficManager.Manager.Impl {
 
                 ToCheckbox(data, idx: 59, OverlaysTab_OverlaysGroup.ShowDefaultSpeedSubIcon, false);
 
+                ToCheckbox(data, idx: 60, PoliciesTab_OnHighwaysGroup.HighwayMergingRules, false);
+
                 Options.Available = true;
                 return true;
             }
@@ -233,7 +235,7 @@ namespace TrafficManager.Manager.Impl {
         public byte[] SaveData(ref bool success) {
 
             // Remember to update this when adding new options (lastIdx + 1)
-            var save = new byte[60];
+            var save = new byte[61];
 
             try {
                 save[0] = GeneralTab_SimulationGroup.SimulationAccuracy.Save();
@@ -302,6 +304,8 @@ namespace TrafficManager.Manager.Impl {
                 save[58] = Options.SavegamePathfinderEdition;
 
                 save[59] = OverlaysTab_OverlaysGroup.ShowDefaultSpeedSubIcon.Save();
+
+                save[60] = PoliciesTab_OnHighwaysGroup.HighwayMergingRules.Save();
 
                 return save;
             }
