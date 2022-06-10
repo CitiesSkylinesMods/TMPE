@@ -190,6 +190,7 @@
     <Compile Include="UI\UIFactory.cs" />
     <Compile Include="UI\WhatsNew\MarkupKeyword.cs" />
     <Compile Include="UI\WhatsNew\WhatsNewMarkup.cs" />
+    <Compile Include="Util\DetailLogger.cs" />
     <Compile Include="Util\Extensions\CitizenUnitExtensions.cs" />
     <Compile Include="Util\Extensions\ParkedVehicleExtensions.cs" />
     <Compile Include="Util\Extensions\VersionExtension.cs" />
