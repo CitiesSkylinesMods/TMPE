@@ -5,7 +5,7 @@ using System.Text;
 using TrafficManager.Util.Extensions;
 
 namespace TrafficManager.ExtPrefabs {
-    internal class ExtNetInfo : ExtPrefabInfo<ExtNetInfo, NetInfo> {
+    internal partial class ExtNetInfo : ExtPrefabInfo<ExtNetInfo, NetInfo> {
 
         [Flags]
         public enum ExtLaneFlags {
@@ -141,138 +141,45 @@ namespace TrafficManager.ExtPrefabs {
             : this(info.m_lanes) {
         }
 
-        public ExtNetInfo(NetInfo.Lane[] lanes) {
+        private enum LaneConfiguration {
+            Simple = 1 << 0,
+            OneWay = 1 << 1,
+            Inverted = 1 << 2,
+            Complex = 1 << 3,
+        }
 
-            int GetDirectionalSortKey(ExtLaneFlags flags) {
-                switch (flags & LaneGroupDirection) {
-                    case ExtLaneFlags.BackwardGroup:
-                        return 1;
-                    default:
-                        return 2;
-                    case ExtLaneFlags.ForwardGroup:
-                        return 3;
-                }
-            }
+        private const LaneConfiguration StandardTwoWayConfiguration = LaneConfiguration.Simple | LaneConfiguration.Complex;
+
+        public ExtNetInfo(NetInfo.Lane[] lanes) {
 
             m_extLanes = lanes.Select(l => new ExtLaneInfo(l)).ToArray();
 
-            // TODO: Boundary conditions on sorting need work
-            m_sortedLanes = m_extLanes.Select((extInfo, index) => index)
-                                        .OrderBy(i => lanes[i].m_position)
-                                        .ThenBy(i => GetDirectionalSortKey(m_extLanes[i].m_extFlags))
-                                        .ToArray();
+            var evaluator = new LaneEvaluator(this, lanes);
 
-            var minForward = float.MaxValue;
-            var maxForward = float.MinValue;
-            var minBackward = float.MaxValue;
-            var maxBackward = float.MinValue;
+            evaluator.CalculateSortedLanes();
 
-            for (int i = 0; i < lanes.Length; i++) {
-                var flags = m_extLanes[i].m_extFlags;
-                if ((flags & ExtLaneFlags.ForwardGroup) != 0) {
-                    float position = lanes[i].m_position;
-                    minForward = Math.Min(minForward, (float)position);
-                    maxForward = Math.Max(maxForward, (float)position);
-
-                } else if ((flags & ExtLaneFlags.BackwardGroup) != 0) {
-                    float position = lanes[i].m_position;
-                    minBackward = Math.Min(minBackward, (float)position);
-                    maxBackward = Math.Max(maxBackward, (float)position);
-                }
-            }
-
-            bool oneWay = minForward == float.MaxValue || minBackward == float.MaxValue;
-            bool inverted = !oneWay && maxForward <= minBackward;
+            var configuration = evaluator.GetLaneConfiguration();
 
             var lastDisplacedOuterBackward = lanes.Length;
             var lastDisplacedOuterForward = -1;
 
             int sortedIndex;
 
-            // bypass displaced scans for conventional, inverted, and one-way roads
-            if (oneWay || inverted || maxBackward <= minForward) {
+            if (configuration != LaneConfiguration.Complex) {
                 for (int i = 0; i < m_extLanes.Length; i++) {
                     if (lanes[i].IsRoadLane())
                         m_extLanes[i].m_extFlags |= ExtLaneFlags.Outer;
                 }
             } else {
 
-                var workingDirection = ExtLaneFlags.ForwardGroup;
-                var scanStart = 0;
-                var scanEnd = lanes.Length;
-                var step = +1;
-                ref var target = ref lastDisplacedOuterForward;
+                evaluator.FindDisplacedOuter(ExtLaneFlags.ForwardGroup, ref lastDisplacedOuterForward);
+                evaluator.FindDisplacedOuter(ExtLaneFlags.BackwardGroup, ref lastDisplacedOuterBackward);
 
-                // First iteration is forward, second is backward.
-                // This lets us avoid repeating the exact same logic twice.
-
-                for (int iteration = 0; iteration < 2; iteration++) {
-                    // scan for DisplacedOuter
-                    for (sortedIndex = scanStart; sortedIndex != scanEnd; sortedIndex += step) {
-                        ExtLaneInfo extLane = m_extLanes[m_sortedLanes[sortedIndex]];
-                        var direction = extLane.m_extFlags & LaneGroupDirection;
-                        if ((direction & workingDirection) != 0) {
-                            extLane.m_extFlags |= ExtLaneFlags.DisplacedOuter;
-                            target = sortedIndex;
-                        } else if (direction != 0) {
-                            break;
-                        }
-                    }
-
-                    workingDirection = ExtLaneFlags.BackwardGroup;
-                    scanStart = lanes.Length - 1;
-                    scanEnd = -1;
-                    step = -1;
-                    target = ref lastDisplacedOuterBackward;
-                }
-
-                workingDirection = ExtLaneFlags.ForwardGroup;
-                var oppositeDirection = ExtLaneFlags.BackwardGroup;
-                scanStart = lastDisplacedOuterBackward - 1;
-                scanEnd = lastDisplacedOuterForward;
-                step = -1;
-
-                for (int iteration = 0; iteration < 2; iteration++) {
-
-                    // scan for Outer (may convert some to Inner later)
-                    for (sortedIndex = scanStart; sortedIndex != scanEnd; sortedIndex += step) {
-                        var extLane = m_extLanes[m_sortedLanes[sortedIndex]];
-                        var direction = extLane.m_extFlags & LaneGroupDirection;
-                        if ((direction & workingDirection) != 0)
-                            extLane.m_extFlags |= ExtLaneFlags.Outer;
-                        if ((direction & oppositeDirection) != 0)
-                            break;
-                    }
-
-                    // skip opposite direction
-                    for (; sortedIndex != scanEnd; sortedIndex += step) {
-                        if ((m_extLanes[m_sortedLanes[sortedIndex]].m_extFlags & workingDirection) != 0)
-                            break;
-                    }
-
-                    // scan for DisplacedInner|ForwardGroup
-                    for (; sortedIndex != scanEnd; sortedIndex += step) {
-                        int laneIndex = m_sortedLanes[sortedIndex];
-                        var extLane = m_extLanes[laneIndex];
-                        if ((extLane.m_extFlags & workingDirection) != 0) {
-                            var lane = lanes[laneIndex];
-                            extLane.m_extFlags |= ExtLaneFlags.DisplacedInner;
-                            if (lane.m_allowConnect)
-                                extLane.m_extFlags |= ExtLaneFlags.ForbidControlledLanes;
-                            else if (lane.m_laneType == NetInfo.LaneType.Vehicle)
-                                extLane.m_extFlags |= ExtLaneFlags.AllowCFI;
-                        }
-                    }
-
-                    workingDirection = ExtLaneFlags.BackwardGroup;
-                    oppositeDirection = ExtLaneFlags.ForwardGroup;
-                    scanStart = lastDisplacedOuterForward + 1;
-                    scanEnd = lastDisplacedOuterBackward;
-                    step = +1;
-                }
+                evaluator.FindOuterAndDisplacedInner(ExtLaneFlags.ForwardGroup);
+                evaluator.FindOuterAndDisplacedInner(ExtLaneFlags.BackwardGroup);
             }
 
-            if (!(oneWay || inverted)) {
+            if ((configuration & StandardTwoWayConfiguration) != 0) {
 
                 var workingDirection = ExtLaneFlags.ForwardGroup;
                 var oppositeDirection = ExtLaneFlags.BackwardGroup;

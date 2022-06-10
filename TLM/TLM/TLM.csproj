@@ -140,6 +140,7 @@
     <Compile Include="Custom\PathFinding\PathfinderUpdates.cs" />
     <Compile Include="ExtPrefabs\ExtNetInfo.cs" />
     <Compile Include="ExtPrefabs\ExtPrefabInfo.cs" />
+    <Compile Include="ExtPrefabs\ExtNetInfo.LaneEvaluator.cs" />
     <Compile Include="ExtPrefabs\NetInfoExtensions.cs" />
     <Compile Include="Geometry\Impl\SegmentEndId.cs" />
     <Compile Include="Lifecycle\Patcher.cs" />
