@@ -1,5 +1,6 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.Linq;
 using TrafficManager.ExtPrefabs;
 using static TrafficManager.ExtPrefabs.ExtNetInfo;
 
@@ -24,9 +25,7 @@ namespace TMUnitTest.ExtPrefabs {
             Assert.AreEqual(lanes.Length, extNetInfo.m_extLanes.Length);
             VerifySequence(extNetInfo.m_sortedLanes, 0, 2, 4, 5, 3, 1);
 
-            Assert.AreEqual(ExtLaneFlags.OuterForward, extNetInfo.m_forwardExtLaneFlags);
-            Assert.AreEqual(ExtLaneFlags.OuterBackward, extNetInfo.m_backwardExtLaneFlags);
-            Assert.AreEqual(ExtLaneFlags.OuterForward | ExtLaneFlags.OuterBackward, extNetInfo.m_extLaneFlags);
+            VerifyAggregations(extNetInfo);
 
             Assert.AreEqual(2, extNetInfo.m_laneGroups.Length);
             VerifyGroup(extNetInfo, 0, ExtLaneFlags.OuterBackward, 4);
@@ -57,8 +56,7 @@ namespace TMUnitTest.ExtPrefabs {
             Assert.AreEqual(lanes.Length, extNetInfo.m_extLanes.Length);
             VerifySequence(extNetInfo.m_sortedLanes, 0, 2, 4, 5, 3, 1);
 
-            Assert.AreEqual(ExtLaneFlags.OuterForward, extNetInfo.m_forwardExtLaneFlags);
-            Assert.AreEqual(ExtLaneFlags.OuterForward, extNetInfo.m_extLaneFlags);
+            VerifyAggregations(extNetInfo);
 
             Assert.AreEqual(1, extNetInfo.m_laneGroups.Length);
             VerifyGroup(extNetInfo, 0, ExtLaneFlags.OuterForward, 4, 5);
@@ -91,9 +89,7 @@ namespace TMUnitTest.ExtPrefabs {
             Assert.AreEqual(lanes.Length, extNetInfo.m_extLanes.Length);
             VerifySequence(extNetInfo.m_sortedLanes, 0, 2, 4, 6, 8, 7, 5, 3, 1);
 
-            Assert.AreEqual(ExtLaneFlags.OuterForward, extNetInfo.m_forwardExtLaneFlags);
-            Assert.AreEqual(ExtLaneFlags.OuterBackward, extNetInfo.m_backwardExtLaneFlags);
-            Assert.AreEqual(ExtLaneFlags.OuterForward | ExtLaneFlags.OuterBackward, extNetInfo.m_extLaneFlags);
+            VerifyAggregations(extNetInfo);
 
             Assert.AreEqual(2, extNetInfo.m_laneGroups.Length);
             VerifyGroup(extNetInfo, 0, ExtLaneFlags.OuterBackward, 4, 6);
@@ -130,9 +126,7 @@ namespace TMUnitTest.ExtPrefabs {
             Assert.AreEqual(lanes.Length, extNetInfo.m_extLanes.Length);
             VerifySequence(extNetInfo.m_sortedLanes, 0, 2, 4, 6, 8, 7, 5, 3, 1);
 
-            Assert.AreEqual(ExtLaneFlags.OuterForward, extNetInfo.m_forwardExtLaneFlags);
-            Assert.AreEqual(ExtLaneFlags.OuterBackward, extNetInfo.m_backwardExtLaneFlags);
-            Assert.AreEqual(ExtLaneFlags.OuterForward | ExtLaneFlags.OuterBackward, extNetInfo.m_extLaneFlags);
+            VerifyAggregations(extNetInfo);
 
             Assert.AreEqual(2, extNetInfo.m_laneGroups.Length);
             VerifyGroup(extNetInfo, 0, ExtLaneFlags.OuterForward, 4, 6);
@@ -168,9 +162,7 @@ namespace TMUnitTest.ExtPrefabs {
             Assert.AreEqual(lanes.Length, extNetInfo.m_extLanes.Length);
             VerifySequence(extNetInfo.m_sortedLanes, 0, 1, 2, 3, 4, 5, 6, 7);
 
-            Assert.AreEqual(ExtLaneFlags.OuterForward | ExtLaneFlags.DisplacedInnerForward | ExtLaneFlags.AllowCFI, extNetInfo.m_forwardExtLaneFlags);
-            Assert.AreEqual(ExtLaneFlags.OuterBackward | ExtLaneFlags.DisplacedInnerBackward | ExtLaneFlags.AllowCFI, extNetInfo.m_backwardExtLaneFlags);
-            Assert.AreEqual(ExtLaneFlags.Outer | ExtLaneFlags.DisplacedInner | ExtLaneFlags.AllowCFI | ExtLaneFlags.ForwardGroup | ExtLaneFlags.BackwardGroup, extNetInfo.m_extLaneFlags);
+            VerifyAggregations(extNetInfo);
 
             Assert.AreEqual(4, extNetInfo.m_laneGroups.Length);
             VerifyGroup(extNetInfo, 0, ExtLaneFlags.OuterBackward, 0);
@@ -203,9 +195,7 @@ namespace TMUnitTest.ExtPrefabs {
             Assert.AreEqual(lanes.Length, extNetInfo.m_extLanes.Length);
             VerifySequence(extNetInfo.m_sortedLanes, 0, 1, 2, 3);
 
-            Assert.AreEqual(ExtLaneFlags.OuterForward | ExtLaneFlags.DisplacedInnerForward | ExtLaneFlags.ForbidControlledLanes, extNetInfo.m_forwardExtLaneFlags);
-            Assert.AreEqual(ExtLaneFlags.OuterBackward | ExtLaneFlags.DisplacedInnerBackward | ExtLaneFlags.ForbidControlledLanes, extNetInfo.m_backwardExtLaneFlags);
-            Assert.AreEqual(ExtLaneFlags.Outer | ExtLaneFlags.DisplacedInner | ExtLaneFlags.ForbidControlledLanes | ExtLaneFlags.ForwardGroup | ExtLaneFlags.BackwardGroup, extNetInfo.m_extLaneFlags);
+            VerifyAggregations(extNetInfo);
 
             Assert.AreEqual(4, extNetInfo.m_laneGroups.Length);
             VerifyGroup(extNetInfo, 0, ExtLaneFlags.OuterBackward, 0);
@@ -235,9 +225,7 @@ namespace TMUnitTest.ExtPrefabs {
             Assert.AreEqual(lanes.Length, extNetInfo.m_extLanes.Length);
             VerifySequence(extNetInfo.m_sortedLanes, 0, 1, 2, 3, 4);
 
-            Assert.AreEqual(ExtLaneFlags.OuterForward | ExtLaneFlags.DisplacedOuterForward, extNetInfo.m_forwardExtLaneFlags);
-            Assert.AreEqual(ExtLaneFlags.OuterBackward, extNetInfo.m_backwardExtLaneFlags);
-            Assert.AreEqual(ExtLaneFlags.OuterForward | ExtLaneFlags.DisplacedOuterForward | ExtLaneFlags.OuterBackward | ExtLaneFlags.DisplacedOuterBackward, extNetInfo.m_extLaneFlags);
+            VerifyAggregations(extNetInfo);
 
             Assert.AreEqual(3, extNetInfo.m_laneGroups.Length);
             VerifyGroup(extNetInfo, 0, ExtLaneFlags.DisplacedOuterForward, 0);
@@ -267,9 +255,7 @@ namespace TMUnitTest.ExtPrefabs {
             Assert.AreEqual(lanes.Length, extNetInfo.m_extLanes.Length);
             VerifySequence(extNetInfo.m_sortedLanes, 0, 1, 2, 3, 4);
 
-            Assert.AreEqual(ExtLaneFlags.OuterForward, extNetInfo.m_forwardExtLaneFlags);
-            Assert.AreEqual(ExtLaneFlags.OuterBackward | ExtLaneFlags.DisplacedOuterBackward, extNetInfo.m_backwardExtLaneFlags);
-            Assert.AreEqual(ExtLaneFlags.OuterForward | ExtLaneFlags.DisplacedOuterForward | ExtLaneFlags.OuterBackward | ExtLaneFlags.DisplacedOuterBackward, extNetInfo.m_extLaneFlags);
+            VerifyAggregations(extNetInfo);
 
             Assert.AreEqual(3, extNetInfo.m_laneGroups.Length);
             VerifyGroup(extNetInfo, 0, ExtLaneFlags.OuterBackward, 0, 1);
@@ -300,9 +286,7 @@ namespace TMUnitTest.ExtPrefabs {
             Assert.AreEqual(lanes.Length, extNetInfo.m_extLanes.Length);
             VerifySequence(extNetInfo.m_sortedLanes, 0, 1, 2, 3, 4, 5);
 
-            Assert.AreEqual(ExtLaneFlags.OuterForward | ExtLaneFlags.DisplacedOuterForward, extNetInfo.m_forwardExtLaneFlags);
-            Assert.AreEqual(ExtLaneFlags.OuterBackward | ExtLaneFlags.DisplacedOuterBackward, extNetInfo.m_backwardExtLaneFlags);
-            Assert.AreEqual(ExtLaneFlags.OuterForward | ExtLaneFlags.DisplacedOuterForward | ExtLaneFlags.OuterBackward | ExtLaneFlags.DisplacedOuterBackward, extNetInfo.m_extLaneFlags);
+            VerifyAggregations(extNetInfo);
 
             Assert.AreEqual(4, extNetInfo.m_laneGroups.Length);
             VerifyGroup(extNetInfo, 0, ExtLaneFlags.DisplacedOuterForward, 0);
@@ -338,9 +322,7 @@ namespace TMUnitTest.ExtPrefabs {
             Assert.AreEqual(lanes.Length, extNetInfo.m_extLanes.Length);
             VerifySequence(extNetInfo.m_sortedLanes, 0, 1, 2, 3, 4, 5, 6, 7);
 
-            Assert.AreEqual(ExtLaneFlags.OuterForward | ExtLaneFlags.DisplacedOuterForward, extNetInfo.m_forwardExtLaneFlags);
-            Assert.AreEqual(ExtLaneFlags.OuterBackward | ExtLaneFlags.DisplacedOuterBackward, extNetInfo.m_backwardExtLaneFlags);
-            Assert.AreEqual(ExtLaneFlags.OuterForward | ExtLaneFlags.DisplacedOuterForward | ExtLaneFlags.OuterBackward | ExtLaneFlags.DisplacedOuterBackward, extNetInfo.m_extLaneFlags);
+            VerifyAggregations(extNetInfo);
 
             Assert.AreEqual(4, extNetInfo.m_laneGroups.Length);
             VerifyGroup(extNetInfo, 0, ExtLaneFlags.DisplacedOuterForward, 0, 1);
@@ -378,9 +360,7 @@ namespace TMUnitTest.ExtPrefabs {
             Assert.AreEqual(lanes.Length, extNetInfo.m_extLanes.Length);
             VerifySequence(extNetInfo.m_sortedLanes, 0, 1, 2, 3, 4, 5, 6, 7, 8);
 
-            Assert.AreEqual(ExtLaneFlags.OuterForward | ExtLaneFlags.DisplacedInnerForward, extNetInfo.m_forwardExtLaneFlags);
-            Assert.AreEqual(ExtLaneFlags.OuterBackward | ExtLaneFlags.DisplacedInnerBackward, extNetInfo.m_backwardExtLaneFlags);
-            Assert.AreEqual(ExtLaneFlags.OuterForward | ExtLaneFlags.DisplacedInnerForward | ExtLaneFlags.OuterBackward | ExtLaneFlags.DisplacedInnerBackward, extNetInfo.m_extLaneFlags);
+            VerifyAggregations(extNetInfo);
 
             Assert.AreEqual(4, extNetInfo.m_laneGroups.Length);
             VerifyGroup(extNetInfo, 0, ExtLaneFlags.OuterBackward, 0, 1);
@@ -423,9 +403,7 @@ namespace TMUnitTest.ExtPrefabs {
             Assert.AreEqual(lanes.Length, extNetInfo.m_extLanes.Length);
             VerifySequence(extNetInfo.m_sortedLanes, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12);
 
-            Assert.AreEqual(ExtLaneFlags.OuterForward | ExtLaneFlags.InnerForward | ExtLaneFlags.AllowServiceLane | ExtLaneFlags.AllowExpressLane, extNetInfo.m_forwardExtLaneFlags);
-            Assert.AreEqual(ExtLaneFlags.OuterBackward | ExtLaneFlags.InnerBackward | ExtLaneFlags.AllowServiceLane | ExtLaneFlags.AllowExpressLane, extNetInfo.m_backwardExtLaneFlags);
-            Assert.AreEqual(ExtLaneFlags.Outer | ExtLaneFlags.Inner | ExtLaneFlags.AllowServiceLane | ExtLaneFlags.AllowExpressLane | ExtLaneFlags.ForwardGroup | ExtLaneFlags.BackwardGroup, extNetInfo.m_extLaneFlags);
+            VerifyAggregations(extNetInfo);
 
             Assert.AreEqual(4, extNetInfo.m_laneGroups.Length);
             VerifyGroup(extNetInfo, 0, ExtLaneFlags.OuterBackward | ExtLaneFlags.AllowServiceLane, 2);
@@ -471,9 +449,7 @@ namespace TMUnitTest.ExtPrefabs {
             Assert.AreEqual(lanes.Length, extNetInfo.m_extLanes.Length);
             VerifySequence(extNetInfo.m_sortedLanes, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11);
 
-            Assert.AreEqual(ExtLaneFlags.OuterForward | ExtLaneFlags.InnerForward | ExtLaneFlags.AllowServiceLane | ExtLaneFlags.AllowExpressLane, extNetInfo.m_forwardExtLaneFlags);
-            Assert.AreEqual(ExtLaneFlags.OuterBackward | ExtLaneFlags.InnerBackward | ExtLaneFlags.AllowServiceLane | ExtLaneFlags.AllowExpressLane, extNetInfo.m_backwardExtLaneFlags);
-            Assert.AreEqual(ExtLaneFlags.Outer | ExtLaneFlags.Inner | ExtLaneFlags.AllowServiceLane | ExtLaneFlags.AllowExpressLane | ExtLaneFlags.ForwardGroup | ExtLaneFlags.BackwardGroup, extNetInfo.m_extLaneFlags);
+            VerifyAggregations(extNetInfo);
 
             Assert.AreEqual(4, extNetInfo.m_laneGroups.Length);
             VerifyGroup(extNetInfo, 0, ExtLaneFlags.OuterBackward | ExtLaneFlags.AllowServiceLane, 2);
@@ -521,9 +497,7 @@ namespace TMUnitTest.ExtPrefabs {
             Assert.AreEqual(lanes.Length, extNetInfo.m_extLanes.Length);
             VerifySequence(extNetInfo.m_sortedLanes, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14);
 
-            Assert.AreEqual(ExtLaneFlags.OuterForward | ExtLaneFlags.InnerForward | ExtLaneFlags.DisplacedInner | ExtLaneFlags.AllowServiceLane | ExtLaneFlags.AllowExpressLane, extNetInfo.m_forwardExtLaneFlags);
-            Assert.AreEqual(ExtLaneFlags.OuterBackward | ExtLaneFlags.InnerBackward | ExtLaneFlags.DisplacedInner | ExtLaneFlags.AllowServiceLane | ExtLaneFlags.AllowExpressLane, extNetInfo.m_backwardExtLaneFlags);
-            Assert.AreEqual(ExtLaneFlags.Outer | ExtLaneFlags.Inner | ExtLaneFlags.DisplacedInner | ExtLaneFlags.AllowServiceLane | ExtLaneFlags.AllowExpressLane | ExtLaneFlags.ForwardGroup | ExtLaneFlags.BackwardGroup, extNetInfo.m_extLaneFlags);
+            VerifyAggregations(extNetInfo);
 
             Assert.AreEqual(6, extNetInfo.m_laneGroups.Length);
             VerifyGroup(extNetInfo, 0, ExtLaneFlags.OuterBackward | ExtLaneFlags.AllowServiceLane, 0, 1);
@@ -573,9 +547,7 @@ namespace TMUnitTest.ExtPrefabs {
             Assert.AreEqual(lanes.Length, extNetInfo.m_extLanes.Length);
             VerifySequence(extNetInfo.m_sortedLanes, 3, 8, 0, 6, 11, 4, 2, 10, 7, 1, 9, 5);
 
-            Assert.AreEqual(ExtLaneFlags.OuterForward | ExtLaneFlags.InnerForward | ExtLaneFlags.DisplacedInner | ExtLaneFlags.AllowServiceLane | ExtLaneFlags.ForbidControlledLanes, extNetInfo.m_forwardExtLaneFlags);
-            Assert.AreEqual(ExtLaneFlags.OuterBackward | ExtLaneFlags.InnerBackward | ExtLaneFlags.DisplacedInner | ExtLaneFlags.AllowServiceLane | ExtLaneFlags.ForbidControlledLanes, extNetInfo.m_backwardExtLaneFlags);
-            Assert.AreEqual(ExtLaneFlags.Outer | ExtLaneFlags.Inner | ExtLaneFlags.DisplacedInner | ExtLaneFlags.AllowServiceLane | ExtLaneFlags.ForbidControlledLanes | ExtLaneFlags.ForwardGroup | ExtLaneFlags.BackwardGroup, extNetInfo.m_extLaneFlags);
+            VerifyAggregations(extNetInfo);
 
             Assert.AreEqual(6, extNetInfo.m_laneGroups.Length);
             VerifyGroup(extNetInfo, 0, ExtLaneFlags.OuterBackward | ExtLaneFlags.AllowServiceLane, 8);
@@ -597,6 +569,17 @@ namespace TMUnitTest.ExtPrefabs {
             VerifyLane(extNetInfo, 9, ExtLaneFlags.OuterForward | ExtLaneFlags.AllowServiceLane);
             VerifyLane(extNetInfo, 10, ExtLaneFlags.DisplacedInnerBackward | ExtLaneFlags.ForbidControlledLanes);
             VerifyLane(extNetInfo, 11, ExtLaneFlags.DisplacedInnerForward | ExtLaneFlags.ForbidControlledLanes);
+        }
+
+        private void VerifyAggregations(ExtNetInfo extNetInfo) {
+
+            var expectedForwardFlags = extNetInfo.m_extLanes.Select(l => l.m_extFlags).Where(f => (f & ExtLaneFlags.ForwardGroup) != 0).DefaultIfEmpty().Aggregate((x, y) => x | y);
+            var expectedBackwardFlags = extNetInfo.m_extLanes.Select(l => l.m_extFlags).Where(f => (f & ExtLaneFlags.BackwardGroup) != 0).DefaultIfEmpty().Aggregate((x, y) => x | y);
+            var expectedFlags = extNetInfo.m_extLanes.Select(l => l.m_extFlags).DefaultIfEmpty().Aggregate((x, y) => x | y);
+
+            Assert.AreEqual(expectedForwardFlags, extNetInfo.m_forwardExtLaneFlags);
+            Assert.AreEqual(expectedBackwardFlags, extNetInfo.m_backwardExtLaneFlags);
+            Assert.AreEqual(expectedFlags, extNetInfo.m_extLaneFlags);
         }
 
         private void VerifyGroup(ExtNetInfo extNetInfo, int groupIndex, ExtLaneFlags laneFlags, params int[] sortedLanes) {
