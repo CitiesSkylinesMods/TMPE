@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -1277,6 +1277,8 @@ xcopy /y "$(TargetDir)CSUtil.Commons.dll" "%25DEPLOYDIR%25"
 xcopy /y "$(TargetDir)CitiesHarmony.API.dll" "%25DEPLOYDIR%25"
 xcopy /y "$(TargetDir)MoveItIntegration.dll" "%25DEPLOYDIR%25"
 xcopy /y "$(TargetDir)UnifiedUILib.dll" "%25DEPLOYDIR%25"
+xcopy /y "$(TargetDir)CSModLib.dll" "%25DEPLOYDIR%25"
+xcopy /y "$(TargetDir)Portable.ConcurrentDictionary.dll" "%25DEPLOYDIR%25"
 
 rem To avoid double hot reload, TrafficManager.dll must be replaced last and fast.
 rem Once TrafficManager.dll is re-loaded, all other dlls will be reloaded as well
