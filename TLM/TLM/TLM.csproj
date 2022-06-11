@@ -885,6 +885,10 @@
     <EmbeddedResource Include="Resources\incompatible_mods.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\CSModLib\CSModLib.csproj">
+      <Project>{5d3b2f48-3f16-424d-8c87-d59cdf420ea9}</Project>
+      <Name>CSModLib</Name>
+    </ProjectReference>
     <ProjectReference Include="..\CSUtil.CameraControl\CSUtil.CameraControl\CSUtil.CameraControl\CSUtil.CameraControl.csproj">
       <Project>{f8759084-df5b-4a54-b73c-824640a8fa3f}</Project>
       <Name>CSUtil.CameraControl</Name>
