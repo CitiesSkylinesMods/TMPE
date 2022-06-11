@@ -22,6 +22,7 @@ namespace TMUnitTest.ExtPrefabs {
 
             var extNetInfo = new ExtNetInfo(lanes);
 
+            Assert.AreEqual(LaneConfiguration.TwoWay, extNetInfo.m_roadLaneConfiguration);
             Assert.AreEqual(lanes.Length, extNetInfo.m_extLanes.Length);
             VerifySequence(extNetInfo.m_sortedLanes, 0, 2, 4, 5, 3, 1);
 
@@ -53,6 +54,7 @@ namespace TMUnitTest.ExtPrefabs {
 
             var extNetInfo = new ExtNetInfo(lanes);
 
+            Assert.AreEqual(LaneConfiguration.OneWay, extNetInfo.m_roadLaneConfiguration);
             Assert.AreEqual(lanes.Length, extNetInfo.m_extLanes.Length);
             VerifySequence(extNetInfo.m_sortedLanes, 0, 2, 4, 5, 3, 1);
 
@@ -86,6 +88,7 @@ namespace TMUnitTest.ExtPrefabs {
 
             var extNetInfo = new ExtNetInfo(lanes);
 
+            Assert.AreEqual(LaneConfiguration.TwoWay, extNetInfo.m_roadLaneConfiguration);
             Assert.AreEqual(lanes.Length, extNetInfo.m_extLanes.Length);
             VerifySequence(extNetInfo.m_sortedLanes, 0, 2, 4, 6, 8, 7, 5, 3, 1);
 
@@ -123,6 +126,7 @@ namespace TMUnitTest.ExtPrefabs {
 
             var extNetInfo = new ExtNetInfo(lanes);
 
+            Assert.AreEqual(LaneConfiguration.Inverted, extNetInfo.m_roadLaneConfiguration);
             Assert.AreEqual(lanes.Length, extNetInfo.m_extLanes.Length);
             VerifySequence(extNetInfo.m_sortedLanes, 0, 2, 4, 6, 8, 7, 5, 3, 1);
 
@@ -159,6 +163,7 @@ namespace TMUnitTest.ExtPrefabs {
 
             var extNetInfo = new ExtNetInfo(lanes);
 
+            Assert.AreEqual(LaneConfiguration.Complex, extNetInfo.m_roadLaneConfiguration);
             Assert.AreEqual(lanes.Length, extNetInfo.m_extLanes.Length);
             VerifySequence(extNetInfo.m_sortedLanes, 0, 1, 2, 3, 4, 5, 6, 7);
 
@@ -192,6 +197,7 @@ namespace TMUnitTest.ExtPrefabs {
 
             var extNetInfo = new ExtNetInfo(lanes);
 
+            Assert.AreEqual(LaneConfiguration.Complex, extNetInfo.m_roadLaneConfiguration);
             Assert.AreEqual(lanes.Length, extNetInfo.m_extLanes.Length);
             VerifySequence(extNetInfo.m_sortedLanes, 0, 1, 2, 3);
 
@@ -222,6 +228,7 @@ namespace TMUnitTest.ExtPrefabs {
 
             var extNetInfo = new ExtNetInfo(lanes);
 
+            Assert.AreEqual(LaneConfiguration.Complex, extNetInfo.m_roadLaneConfiguration);
             Assert.AreEqual(lanes.Length, extNetInfo.m_extLanes.Length);
             VerifySequence(extNetInfo.m_sortedLanes, 0, 1, 2, 3, 4);
 
@@ -252,6 +259,7 @@ namespace TMUnitTest.ExtPrefabs {
 
             var extNetInfo = new ExtNetInfo(lanes);
 
+            Assert.AreEqual(LaneConfiguration.Complex, extNetInfo.m_roadLaneConfiguration);
             Assert.AreEqual(lanes.Length, extNetInfo.m_extLanes.Length);
             VerifySequence(extNetInfo.m_sortedLanes, 0, 1, 2, 3, 4);
 
@@ -283,6 +291,7 @@ namespace TMUnitTest.ExtPrefabs {
 
             var extNetInfo = new ExtNetInfo(lanes);
 
+            Assert.AreEqual(LaneConfiguration.Complex, extNetInfo.m_roadLaneConfiguration);
             Assert.AreEqual(lanes.Length, extNetInfo.m_extLanes.Length);
             VerifySequence(extNetInfo.m_sortedLanes, 0, 1, 2, 3, 4, 5);
 
@@ -319,6 +328,7 @@ namespace TMUnitTest.ExtPrefabs {
 
             var extNetInfo = new ExtNetInfo(lanes);
 
+            Assert.AreEqual(LaneConfiguration.Complex, extNetInfo.m_roadLaneConfiguration);
             Assert.AreEqual(lanes.Length, extNetInfo.m_extLanes.Length);
             VerifySequence(extNetInfo.m_sortedLanes, 0, 1, 2, 3, 4, 5, 6, 7);
 
@@ -357,6 +367,7 @@ namespace TMUnitTest.ExtPrefabs {
 
             var extNetInfo = new ExtNetInfo(lanes);
 
+            Assert.AreEqual(LaneConfiguration.Complex, extNetInfo.m_roadLaneConfiguration);
             Assert.AreEqual(lanes.Length, extNetInfo.m_extLanes.Length);
             VerifySequence(extNetInfo.m_sortedLanes, 0, 1, 2, 3, 4, 5, 6, 7, 8);
 
@@ -400,6 +411,7 @@ namespace TMUnitTest.ExtPrefabs {
 
             var extNetInfo = new ExtNetInfo(lanes);
 
+            Assert.AreEqual(LaneConfiguration.TwoWay, extNetInfo.m_roadLaneConfiguration);
             Assert.AreEqual(lanes.Length, extNetInfo.m_extLanes.Length);
             VerifySequence(extNetInfo.m_sortedLanes, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12);
 
@@ -446,6 +458,7 @@ namespace TMUnitTest.ExtPrefabs {
 
             var extNetInfo = new ExtNetInfo(lanes);
 
+            Assert.AreEqual(LaneConfiguration.TwoWay, extNetInfo.m_roadLaneConfiguration);
             Assert.AreEqual(lanes.Length, extNetInfo.m_extLanes.Length);
             VerifySequence(extNetInfo.m_sortedLanes, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11);
 
@@ -494,6 +507,7 @@ namespace TMUnitTest.ExtPrefabs {
 
             var extNetInfo = new ExtNetInfo(lanes);
 
+            Assert.AreEqual(LaneConfiguration.Complex, extNetInfo.m_roadLaneConfiguration);
             Assert.AreEqual(lanes.Length, extNetInfo.m_extLanes.Length);
             VerifySequence(extNetInfo.m_sortedLanes, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14);
 
@@ -544,6 +558,7 @@ namespace TMUnitTest.ExtPrefabs {
 
             var extNetInfo = new ExtNetInfo(lanes);
 
+            Assert.AreEqual(LaneConfiguration.Complex, extNetInfo.m_roadLaneConfiguration);
             Assert.AreEqual(lanes.Length, extNetInfo.m_extLanes.Length);
             VerifySequence(extNetInfo.m_sortedLanes, 3, 8, 0, 6, 11, 4, 2, 10, 7, 1, 9, 5);
 

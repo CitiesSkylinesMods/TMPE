@@ -6,12 +6,12 @@ using System.Text;
 namespace TrafficManager.ExtPrefabs {
     partial class ExtNetInfo {
 
-        private class LaneEvaluator {
+        private class LaneInspector {
 
             private readonly NetInfo.Lane[] lanes;
             private readonly ExtNetInfo extNetInfo;
 
-            public LaneEvaluator(ExtNetInfo extNetInfo, NetInfo.Lane[] lanes) {
+            public LaneInspector(ExtNetInfo extNetInfo, NetInfo.Lane[] lanes) {
                 this.lanes = lanes;
                 this.extNetInfo = extNetInfo;
             }
@@ -56,14 +56,16 @@ namespace TrafficManager.ExtPrefabs {
                     }
                 }
 
-                if (minForward == float.MaxValue || minBackward == float.MaxValue)
-                    return LaneConfiguration.OneWay;
+                if (minBackward == float.MaxValue)
+                    return minForward == float.MaxValue ? LaneConfiguration.Undefined : LaneConfiguration.OneWay;
+                else if (minForward == float.MaxValue)
+                    return LaneConfiguration.InvertedOneWay;
                 else if (maxForward < minBackward || (minForward < minBackward && maxForward == minBackward))
                     return LaneConfiguration.Inverted;
                 else if (minForward < maxBackward)
                     return LaneConfiguration.Complex;
                 else
-                    return LaneConfiguration.Simple;
+                    return LaneConfiguration.TwoWay;
             }
 
             public void FindDisplacedOuter(ExtLaneFlags workingDirection, ref int lastOuterDisplacedIndex) {

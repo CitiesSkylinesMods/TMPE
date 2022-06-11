@@ -137,35 +137,40 @@ namespace TrafficManager.ExtPrefabs {
         /// </summary>
         public ExtLaneFlags m_extLaneFlags;
 
+        public LaneConfiguration m_roadLaneConfiguration;
+
         public ExtNetInfo(NetInfo info)
             : this(info.m_lanes) {
         }
 
-        private enum LaneConfiguration {
-            Simple = 1 << 0,
+        public enum LaneConfiguration {
+            Undefined = 0,
+            TwoWay = 1 << 0,
             OneWay = 1 << 1,
             Inverted = 1 << 2,
             Complex = 1 << 3,
+
+            InvertedOneWay = OneWay | Inverted,
         }
 
-        private const LaneConfiguration StandardTwoWayConfiguration = LaneConfiguration.Simple | LaneConfiguration.Complex;
+        private const LaneConfiguration GeneralTwoWayConfiguration = LaneConfiguration.TwoWay | LaneConfiguration.Complex;
 
         public ExtNetInfo(NetInfo.Lane[] lanes) {
 
             m_extLanes = lanes.Select(l => new ExtLaneInfo(l)).ToArray();
 
-            var evaluator = new LaneEvaluator(this, lanes);
+            var evaluator = new LaneInspector(this, lanes);
 
             evaluator.CalculateSortedLanes();
 
-            var configuration = evaluator.GetLaneConfiguration();
+            m_roadLaneConfiguration = evaluator.GetLaneConfiguration();
 
             var lastDisplacedOuterBackward = lanes.Length;
             var lastDisplacedOuterForward = -1;
 
             int sortedIndex;
 
-            if (configuration != LaneConfiguration.Complex) {
+            if (m_roadLaneConfiguration != LaneConfiguration.Complex) {
                 for (int i = 0; i < m_extLanes.Length; i++) {
                     if (lanes[i].IsRoadLane())
                         m_extLanes[i].m_extFlags |= ExtLaneFlags.Outer;
@@ -179,7 +184,7 @@ namespace TrafficManager.ExtPrefabs {
                 evaluator.FindOuterAndDisplacedInner(ExtLaneFlags.BackwardGroup);
             }
 
-            if ((configuration & StandardTwoWayConfiguration) != 0) {
+            if ((m_roadLaneConfiguration & GeneralTwoWayConfiguration) != 0) {
 
                 var workingDirection = ExtLaneFlags.ForwardGroup;
                 var oppositeDirection = ExtLaneFlags.BackwardGroup;
