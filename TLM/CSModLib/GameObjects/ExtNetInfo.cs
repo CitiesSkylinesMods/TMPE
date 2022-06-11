@@ -2,10 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using TrafficManager.Util.Extensions;
 
-namespace TrafficManager.ExtPrefabs {
-    internal partial class ExtNetInfo : ExtPrefabInfo<ExtNetInfo, NetInfo> {
+namespace CSModLib.GameObjects {
+    public partial class ExtNetInfo : ExtPrefabInfo<ExtNetInfo, NetInfo> {
 
         [Flags]
         public enum ExtLaneFlags {
@@ -317,7 +316,7 @@ namespace TrafficManager.ExtPrefabs {
             m_extLaneFlags = m_forwardExtLaneFlags | m_backwardExtLaneFlags;
         }
 
-        internal class ExtLaneInfo {
+        public class ExtLaneInfo {
 
             public ExtLaneFlags m_extFlags;
 
@@ -344,7 +343,7 @@ namespace TrafficManager.ExtPrefabs {
             }
         }
 
-        internal class LaneGroupInfo {
+        public class LaneGroupInfo {
 
             /// <summary>
             /// Indices of the lanes in this group, sorted by position.

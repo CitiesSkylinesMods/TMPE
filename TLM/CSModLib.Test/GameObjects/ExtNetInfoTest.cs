@@ -1,10 +1,10 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Linq;
-using TrafficManager.ExtPrefabs;
-using static TrafficManager.ExtPrefabs.ExtNetInfo;
+using CSModLib.GameObjects;
+using static CSModLib.GameObjects.ExtNetInfo;
 
-namespace TMUnitTest.ExtPrefabs {
+namespace CSModLib.Test.GameObjects {
     [TestClass]
     public class ExtNetInfoTest {
 

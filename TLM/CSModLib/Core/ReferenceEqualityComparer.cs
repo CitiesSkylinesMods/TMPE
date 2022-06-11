@@ -5,7 +5,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 
-namespace TrafficManager.Util {
+namespace CSModLib.Core {
     internal sealed class ReferenceEqualityComparer<T> : IEqualityComparer<T>, IEqualityComparer {
 
         public static ReferenceEqualityComparer<T> Instance { get; } = new ReferenceEqualityComparer<T>();

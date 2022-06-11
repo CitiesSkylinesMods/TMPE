@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Concurrent;
-using TrafficManager.Util;
+using CSModLib.Core;
 
-namespace TrafficManager.ExtPrefabs {
-    internal abstract class ExtPrefabInfo<TExtInfo, TInfo>
+namespace CSModLib.GameObjects {
+    public abstract class ExtPrefabInfo<TExtInfo, TInfo>
             where TInfo : PrefabInfo
             where TExtInfo : ExtPrefabInfo<TExtInfo, TInfo>
             {
