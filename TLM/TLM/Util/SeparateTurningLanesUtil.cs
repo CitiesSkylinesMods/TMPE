@@ -80,7 +80,7 @@ namespace TrafficManager.Util {
                 return;
             }
 
-            if (LaneConnectionManager.Instance.Sub.HasNodeConnections(nodeId)) {
+            if (LaneConnectionManager.Instance.Road.HasNodeConnections(nodeId)) {
                 res = SetLaneArrow_Result.LaneConnection;
                 return;
             }
@@ -491,7 +491,7 @@ namespace TrafficManager.Util {
 
             int srcLaneCount = laneList.Count();
             for (int i = 0; i < srcLaneCount; ++i) {
-                if (LaneConnectionManager.Instance.Sub.HasOutgoingConnections(laneList[i].laneId, startNode)) {
+                if (LaneConnectionManager.Instance.Road.HasOutgoingConnections(laneList[i].laneId, startNode)) {
                     return SetLaneArrow_Result.LaneConnection;
                 }
             }
