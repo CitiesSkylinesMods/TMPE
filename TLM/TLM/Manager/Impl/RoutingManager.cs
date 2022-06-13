@@ -821,10 +821,11 @@ namespace TrafficManager.Manager.Impl {
                                             LaneArrowManager.Instance.GetFinalLaneArrows(nextLaneId);
                                         bool hasLeftArrow = (nextLaneArrows & LaneArrows.Left) != LaneArrows.None;
                                         bool hasRightArrow = (nextLaneArrows & LaneArrows.Right) != LaneArrows.None;
-                                        bool hasForwardArrow =
-                                            (nextLaneArrows & LaneArrows.Forward) != LaneArrows.None ||
-                                            (nextLaneArrows & LaneArrows.LeftForwardRight) ==
-                                            LaneArrows.None;
+                                        bool hasForwardArrow = (nextLaneArrows & LaneArrows.Forward) != LaneArrows.None;
+                                        if (!nodeIsJunction) {
+                                            // on junctions: no arrows means dead end
+                                            hasForwardArrow |= (nextLaneArrows & LaneArrows.LeftForwardRight) == LaneArrows.None;
+                                        }
 
                                         extendedLog?.Invoke(new { _ = "start lane arrow check for ",
                                             nextLaneId, nextLaneIndex, hasLeftArrow, hasForwardArrow, hasRightArrow });
