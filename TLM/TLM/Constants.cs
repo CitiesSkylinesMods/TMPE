@@ -2,7 +2,9 @@ namespace TrafficManager {
     using TrafficManager.API.Hook;
     using TrafficManager.API.Manager;
     using TrafficManager.API.Notifier;
+    using TrafficManager.API.UI;
     using TrafficManager.U;
+    using TrafficManager.UI.Textures;
 
     public static class Constants {
         /// <summary>
@@ -38,6 +40,9 @@ namespace TrafficManager {
 
         public static IHookFactory HookFactory => Hook.Impl.HookFactory.Instance;
 
+        public static IUIFactory UIFactory => UI.UIFactory.Instance;
+
         public static INotifier Notifier => TrafficManager.Notifier.Instance;
+
     }
 }

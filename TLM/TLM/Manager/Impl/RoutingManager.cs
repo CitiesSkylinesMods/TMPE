@@ -32,8 +32,8 @@ namespace TrafficManager.Manager.Impl {
             VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Tram |
             VehicleInfo.VehicleType.Monorail | VehicleInfo.VehicleType.Trolleybus;
 
-        private const VehicleInfo.VehicleType ROAD_VEHICLE_TYPES = TrackUtils.ROAD_VEHICLE_TYPES;
-        private const VehicleInfo.VehicleType TRACK_VEHICLE_TYPES = TrackUtils.TRACK_VEHICLE_TYPES;
+        public static bool IsSupported(NetInfo.Lane laneInfo) =>
+            laneInfo.Matches(ROUTED_LANE_TYPES, ROUTED_VEHICLE_TYPES);
 
         private const byte MAX_NUM_TRANSITIONS = 64;
 
@@ -413,7 +413,7 @@ namespace TrafficManager.Manager.Impl {
             ushort nodeId = prevEnd.nodeId; // common node
 
             NetInfo.Lane prevLaneInfo = prevSegmentInfo.m_lanes[prevLaneIndex];
-            if (!prevLaneInfo.CheckType(ROUTED_LANE_TYPES, ROUTED_VEHICLE_TYPES)) {
+            if (!IsSupported(prevLaneInfo)) {
                 return;
             }
 
@@ -481,21 +481,79 @@ namespace TrafficManager.Manager.Impl {
                 nodeIsSplitJunction = numOutgoing > 1;
             }
 
-            // bool isNextRealJunction = prevSegGeo.CountOtherSegments(startNode) > 1;
+            bool applyHighwayMergingRules = false;
+            bool nodeHasConnections = LaneConnectionManager.Instance.HasNodeConnections(nodeId);
+
             bool nextAreOnlyOneWayHighways =
-                Constants.ManagerFactory.ExtSegmentEndManager.CalculateOnlyHighways(
+                ExtSegmentEndManager.Instance.CalculateOnlyHighways(
                     prevEnd.segmentId,
                     prevEnd.startNode);
 
+            bool onOnewayHighway = nextAreOnlyOneWayHighways && prevEnd.outgoing && prevExtSegment.oneWay && prevExtSegment.highway;
+
+            if (extendedLogRouting) {
+                Log._Debug($"Options.highwayMergingRules={Options.highwayMergingRules}, nodeHasTrafficLights={nodeHasTrafficLights} nodeHasPrioritySigns={nodeHasPrioritySigns}, nodeHasConnections={nodeHasConnections}, onOnewayHighway={onOnewayHighway}");
+            }
+            if (Options.highwayMergingRules && onOnewayHighway && !nodeHasTrafficLights && !nodeHasPrioritySigns && !nodeHasConnections) {
+                // determine if junction is a simple junction (highway rules only apply to simple junctions)
+                int numIncomingSegents = 0;
+                int numOutgoingSegments = 0;
+                bool laneSwitching = false;
+
+                for (int segIndex = 0; segIndex < 8; ++segIndex) {
+                    ushort segmentId = netNode.GetSegment(segIndex);
+                    if (segmentId == 0) {
+                        continue;
+                    }
+
+                    ref NetSegment netSegment = ref segmentId.ToSegment();
+                    bool startNode = netSegment.IsStartNode(nodeId);
+
+                    ExtSegmentEnd segEnd = segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segmentId, startNode)];
+                    if (segEnd.incoming) {
+                        ++numIncomingSegents;
+                        laneSwitching |= JunctionRestrictionsManager.Instance.GetValueOrDefault(segmentId, startNode, JunctionRestrictionsFlags.AllowForwardLaneChange);
+                    }
+
+                    if (segEnd.outgoing) {
+                        ++numOutgoingSegments;
+                    }
+                }
+
+                if (numOutgoingSegments == 1 && numIncomingSegents == 2 && !laneSwitching) {
+                    // merging
+                    int numIncomingLanes = 0; // toward the node
+                    int numOutgoingLanes = 0; // from the node
+                    nodeId.ToNode().CountLanes(
+                        nodeID: nodeId,
+                        ignoreSegment: 0,
+                        laneTypes: LaneArrowManager.LANE_TYPES,
+                        vehicleTypes: LaneArrowManager.VEHICLE_TYPES,
+                        onePerSegment: false,
+                        forward: ref numIncomingLanes,
+                        backward: ref numOutgoingLanes);
+                    if (numIncomingLanes == numOutgoingLanes) {
+                        // lane arithmetic checks out.
+                        applyHighwayMergingRules = true;
+                    }
+                    if (extendedLogRouting) {
+                        Log._Debug($"applyHighwayMergingRules data: numIncomingLanes={numIncomingLanes} numOutgoingLanes={numOutgoingLanes} ");
+                    }
+                }
+
+                if (extendedLogRouting) {
+                    Log._Debug(
+                        $"applyHighwayMergingRules data: numIncomingSegents={numIncomingSegents} numOutgoingSegments={numOutgoingSegments} " +
+                        $"laneSwitching={laneSwitching} applyHighwayMergingRules={applyHighwayMergingRules}");
+                }
+            }
+
             // determine if highway rules should be applied
-            bool onHighway = Options.highwayRules && nextAreOnlyOneWayHighways &&
-                             prevEnd.outgoing && prevExtSegment.oneWay && prevExtSegment.highway;
+            bool onHighway = Options.highwayRules && onOnewayHighway;
             bool applyHighwayRules = onHighway && nodeIsSimpleJunction;
             bool applyHighwayRulesAtJunction = applyHighwayRules && nodeIsRealJunction;
-            bool iterateViaGeometry = applyHighwayRulesAtJunction &&
-                                      prevLaneInfo.CheckType(
-                                          ROUTED_LANE_TYPES,
-                                          ROAD_VEHICLE_TYPES);
+            bool iterateViaGeometry = (applyHighwayRulesAtJunction || applyHighwayMergingRules) && prevLaneInfo.MatchesRoad();
+
             // start with u-turns at highway junctions
             ushort nextSegmentId = iterateViaGeometry ? prevSegmentId : (ushort)0;
 
@@ -522,6 +580,7 @@ namespace TrafficManager.Manager.Impl {
                     prevEnd.outgoing && prevExtSegment.oneWay,
                     prevExtSegment.highway,
                     iterateViaGeometry);
+                Log._Debug($"Options.highwayMergingRules={Options.highwayMergingRules}, applyHighwayMergingRules={applyHighwayMergingRules}");
                 Log._DebugFormat(
                     "RoutingManager.RecalculateLaneEndRoutingData({0}, {1}, {2}, {3}): " +
                     "prevSegIsInverted={4} leftHandDrive={5}",
@@ -689,9 +748,7 @@ namespace TrafficManager.Manager.Impl {
                         }
 
                         // next is compatible lane
-                        if (nextLaneInfo.CheckType(ROUTED_LANE_TYPES, ROUTED_VEHICLE_TYPES) &&
-                            (prevLaneInfo.m_vehicleType & nextLaneInfo.m_vehicleType) != VehicleInfo.VehicleType.None) {
-
+                        if (IsSupported(nextLaneInfo) && (prevLaneInfo.m_vehicleType & nextLaneInfo.m_vehicleType) != 0) {
                             if (extendedLogRouting) {
                                 Log._Debug(
                                     $"RoutingManager.RecalculateLaneEndRoutingData({prevSegmentId}, " +
@@ -743,7 +800,7 @@ namespace TrafficManager.Manager.Impl {
 
                                 int currentLaneConnectionTransIndex = -1;
 
-                                if (nextLaneInfo.CheckType(ROUTED_LANE_TYPES, TRACK_VEHICLE_TYPES)) {
+                                if (nextLaneInfo.MatchesTrack() && prevLaneInfo.MatchesTrack()) {
                                     // routing tracked vehicles (trains, trams, metros, monorails)
                                     // lane may be mixed car+tram
                                     bool nextHasConnections =
@@ -856,7 +913,7 @@ namespace TrafficManager.Manager.Impl {
                                     }
                                 }
 
-                                if (nextLaneInfo.CheckType(ROUTED_LANE_TYPES, ROAD_VEHICLE_TYPES)) {
+                                if (nextLaneInfo.MatchesRoad() && prevLaneInfo.MatchesRoad()) {
                                     // routing road vehicles (car, SOS, bus, trolleybus, ...)
                                     // lane may be mixed car+tram
                                     ++incomingCarLanes;
@@ -1105,7 +1162,7 @@ namespace TrafficManager.Manager.Impl {
                                 }
 
                                 bool outgoing = (nextLaneInfo.m_finalDirection & NetInfo.InvertDirection(nextExpectedDirection)) != NetInfo.Direction.None;
-                                if (outgoing && nextLaneInfo.CheckType(ROUTED_LANE_TYPES, ROAD_VEHICLE_TYPES)) {
+                                if (outgoing && nextLaneInfo.MatchesRoad()) {
                                     ++outgoingCarLanes;
                                     if (extendedLogRouting) {
                                         Log._DebugFormat(
@@ -1200,7 +1257,7 @@ namespace TrafficManager.Manager.Impl {
                                 applyHighwayRulesAtSegment);
                         }
 
-                        if (applyHighwayRulesAtJunction) {
+                        if (applyHighwayRulesAtJunction || applyHighwayMergingRules) {
                             // we reached a highway junction where more than two segments are connected to each other
                             if (extendedLogRouting) {
                                 Log._Debug(
@@ -1410,11 +1467,12 @@ namespace TrafficManager.Manager.Impl {
                                             compatibleLaneDist);
                                     }
 #endif
-
-                                    UpdateHighwayLaneArrows(
-                                        nextCompatibleTransitionDatas[nextTransitionIndex].laneId,
-                                        isNodeStartNodeOfNextSegment,
-                                        nextIncomingDir);
+                                    if (Options.highwayRules) {
+                                        UpdateHighwayLaneArrows(
+                                            nextCompatibleTransitionDatas[nextTransitionIndex].laneId,
+                                            isNodeStartNodeOfNextSegment,
+                                            nextIncomingDir);
+                                    }
 
                                     if (numNextCompatibleTransitionDataIndices < MAX_NUM_TRANSITIONS) {
                                         nextCompatibleTransitionDataIndices[numNextCompatibleTransitionDataIndices++] =

@@ -821,7 +821,7 @@ namespace TrafficManager.Manager.Impl {
                     Mathf.Lerp(dls.MinMaxOptLaneChanges, dls.MaxMaxOptLaneChanges + 1, egoism));
                 extVehicle.maxUnsafeSpeedDiff = Mathf.Lerp(
                     dls.MinMaxUnsafeSpeedDiff,
-                    dls.MaxMaxOptLaneChanges,
+                    dls.MaxMaxUnsafeSpeedDiff,
                     egoism);
                 extVehicle.minSafeSpeedImprovement = Mathf.Lerp(
                     dls.MinMinSafeSpeedImprovement.GameUnits,
