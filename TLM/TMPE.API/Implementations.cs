@@ -4,12 +4,28 @@ namespace TrafficManager.API {
     using TrafficManager.API.Notifier;
     using System.Linq;
     using TrafficManager.API.UI;
+    using ColossalFramework.Plugins;
+    using System.Reflection;
 
     public static class Implementations {
         private static Type constantsType_;
         private static IManagerFactory managerFactory_;
         private static INotifier notifier_;
         private static IUIFactory uiFactory_;
+
+        static Implementations() {
+            // reset on hot reload or game reload.
+            PluginManager.instance.eventPluginsStateChanged += Reset;
+            PluginManager.instance.eventPluginsChanged += Reset;
+            LoadingManager.instance.m_levelPreLoaded += Reset;
+        }
+
+        private static void Reset() {
+            constantsType_ = null;
+            managerFactory_ = null;
+            notifier_ = null;
+            uiFactory_ = null;
+        }
 
         public static IManagerFactory ManagerFactory => managerFactory_ ??= GetImplementation<IManagerFactory>();
         public static INotifier Notifier => notifier_ ??= GetImplementation<INotifier>();
