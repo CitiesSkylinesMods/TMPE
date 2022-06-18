@@ -512,7 +512,7 @@ namespace TrafficManager.Manager.Impl {
                     ExtSegmentEnd segEnd = segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segmentId, startNode)];
                     if (segEnd.incoming) {
                         ++numIncomingSegents;
-                        laneSwitching |= JunctionRestrictionsManager.Instance.GetValueOrDefault(segmentId, startNode, JunctionRestrictionsFlags.AllowForwardLaneChange);
+                        laneSwitching |= JunctionRestrictionsManager.Instance.GetValueOrDefault(segmentId, startNode, JunctionRestrictionFlags.AllowForwardLaneChange);
                     }
 
                     if (segEnd.outgoing) {
@@ -1048,7 +1048,7 @@ namespace TrafficManager.Manager.Impl {
                                         bool hasUTurnRule = JunctionRestrictionsManager.Instance.GetValueOrDefault(
                                             nextSegmentId,
                                             isNodeStartNodeOfNextSegment,
-                                            JunctionRestrictionsFlags.AllowUTurn);
+                                            JunctionRestrictionFlags.AllowUTurn);
                                         bool hasFarTurnArrow = (Shortcuts.LHT && hasRightArrow) || (Shortcuts.RHT && hasLeftArrow);
                                         bool canTurn = !nodeIsRealJunction || nodeIsEndOrOneWayOut || hasFarTurnArrow || hasUTurnRule;
 
@@ -1218,7 +1218,7 @@ namespace TrafficManager.Manager.Impl {
                     bool laneChangesAllowed
                         = Options.junctionRestrictionsEnabled
                           && JunctionRestrictionsManager.Instance.GetValueOrDefault(
-                                 nextSegmentId, isNodeStartNodeOfNextSegment, JunctionRestrictionsFlags.AllowForwardLaneChange);
+                                 nextSegmentId, isNodeStartNodeOfNextSegment, JunctionRestrictionFlags.AllowForwardLaneChange);
                     int nextCompatibleLaneCount = numNextCompatibleTransitionDatas;
 
                     if (nextCompatibleLaneCount > 0) {

@@ -23,14 +23,14 @@ namespace TrafficManager.API.Hook {
         /// <param name="segmentId"></param>
         /// <param name="startNode"></param>
         /// <param name="flags">Specifies which flags to invalidate.</param>
-        public void InvalidateFlags(ushort segmentId, bool startNode, JunctionRestrictionsFlags flags);
+        public void InvalidateFlags(ushort segmentId, bool startNode, JunctionRestrictionFlags flags);
 
         /// <summary>
         /// Schedles the specified flags for recalculation for all segment ends on the specified node.
         /// </summary>
         /// <param name="nodeId"></param>
         /// <param name="flags">Specifies which flags to invalidate.</param>
-        public void InvalidateFlags(ushort nodeId, JunctionRestrictionsFlags flags);
+        public void InvalidateFlags(ushort nodeId, JunctionRestrictionFlags flags);
 
         public class FlagsHookArgs {
 
@@ -48,15 +48,15 @@ namespace TrafficManager.API.Hook {
             /// Identifies which flags are being returned. Unnecessary computation may be avoided
             /// by examining this mask to see which flags are being requested.
             /// </summary>
-            public JunctionRestrictionsFlags Mask { get; private set; }
+            public JunctionRestrictionFlags Mask { get; private set; }
 
             /// <summary>
             /// The flag return values. Changes to this property alter the outcome of the underlying operation.
             /// Any flags that not set in the <see cref="Mask"/> property are ignored.
             /// </summary>
-            public JunctionRestrictionsFlags Result { get; set; }
+            public JunctionRestrictionFlags Result { get; set; }
 
-            public FlagsHookArgs(ushort segmentId, bool startNode, JunctionRestrictionsFlags mask, JunctionRestrictionsFlags result) {
+            public FlagsHookArgs(ushort segmentId, bool startNode, JunctionRestrictionFlags mask, JunctionRestrictionFlags result) {
                 SegmentId = segmentId;
                 StartNode = startNode;
                 Mask = mask;

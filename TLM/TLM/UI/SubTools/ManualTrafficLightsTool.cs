@@ -119,7 +119,7 @@ namespace TrafficManager.UI.SubTools {
                                         junctionRestrictionsManager.GetValueOrDefault(
                                             segmentLights.SegmentId,
                                             segmentLights.StartNode,
-                                            JunctionRestrictionsFlags.AllowPedestrianCrossing);
+                                            JunctionRestrictionFlags.AllowPedestrianCrossing);
                     bool visible = GeometryUtil.WorldToScreenPoint(position, out Vector3 screenPos);
 
                     if (!visible) {
