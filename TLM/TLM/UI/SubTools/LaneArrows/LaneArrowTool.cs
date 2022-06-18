@@ -269,7 +269,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                 sort: false);
 
             foreach (var lane in lanes) {
-                if (!LaneConnectionManager.Instance.Sub.HasOutgoingConnections(lane.laneId))
+                if (!LaneConnectionManager.Instance.Road.HasOutgoingConnections(lane.laneId))
                     return true;
             }
 

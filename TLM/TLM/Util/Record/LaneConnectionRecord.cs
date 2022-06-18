@@ -15,42 +15,54 @@ namespace TrafficManager.Util.Record {
         public byte LaneIndex;
         public bool StartNode;
 
-        private uint[] connections_;
+        private uint[] connections_; // legacy
+        private uint[] roadConnections_;
+        private uint[] trackConnections_;
 
         private static LaneConnectionManager connMan => LaneConnectionManager.Instance;
 
-        private uint[] GetCurrentConnections() => connMan.Sub.GetLaneConnections(LaneId, StartNode);
-
         public void Record() {
-            connections_ = GetCurrentConnections();
-            //Log._Debug($"LaneConnectionRecord.Record: connections_=" + connections_.ToSTR());
+            connections_ = null;
+            roadConnections_ = connMan.Road.GetLaneConnections(LaneId, StartNode)?.Clone() as uint[];
+            trackConnections_ = connMan.Track.GetLaneConnections(LaneId, StartNode)?.Clone() as uint[];
+        }
 
-            if (connections_ != null)
-                connections_ = (uint[])connections_.Clone();
+        private void RestoreImpl(LaneConnectionSubManager man, uint[] connections) {
+            if (connections == null) {
+                man.RemoveLaneConnections(LaneId, StartNode);
+                return;
+            }
+            var currentConnections = man.GetLaneConnections(LaneId, StartNode) ?? new uint[0];
+            //Log._Debug($"currentConnections=" + currentConnections.ToSTR());
+            //Log._Debug($"connections=" + connections.ToSTR());
+
+            foreach (uint targetLaneId in connections) {
+                if (currentConnections == null || !currentConnections.Contains(targetLaneId)) {
+                    man.AddLaneConnection(LaneId, targetLaneId, StartNode);
+                }
+            }
+            foreach (uint targetLaneId in currentConnections) {
+                if (!connections.Contains(targetLaneId)) {
+                    man.RemoveLaneConnection(LaneId, targetLaneId, StartNode);
+                }
+            }
         }
 
         public void Restore() {
-            if (connections_ == null) {
-                connMan.Sub.RemoveLaneConnections(LaneId, StartNode);
-                return;
-            }
-            var currentConnections = GetCurrentConnections();
-            //Log._Debug($"currentConnections=" + currentConnections.ToSTR());
-            //Log._Debug($"connections_=" + connections_.ToSTR());
-
-            foreach (uint targetLaneId in connections_) {
-                if (currentConnections == null || !currentConnections.Contains(targetLaneId)) {
-                    connMan.Sub.AddLaneConnection(LaneId, targetLaneId, StartNode);
-                }
-            }
-            foreach (uint targetLaneId in currentConnections ?? Enumerable.Empty<uint>()) {
-                if (!connections_.Contains(targetLaneId)) {
-                    connMan.Sub.RemoveLaneConnection(LaneId, targetLaneId, StartNode);
-                }
+            if (connections_ != null) {
+                // legacy
+                RestoreImpl(connMan.Road, connections_);
+                RestoreImpl(connMan.Track, connections_);
+            } else {
+                RestoreImpl(connMan.Road, roadConnections_);
+                RestoreImpl(connMan.Track, trackConnections_);
             }
         }
 
-        public void Transfer(Dictionary<InstanceID, InstanceID> map) {
+        private void TransferImpl(
+            Dictionary<InstanceID, InstanceID> map,
+            LaneConnectionSubManager man,
+            uint[] connections) {
             uint MappedLaneId(uint originalLaneID) {
                 var originalLaneInstanceID = new InstanceID { NetLane = originalLaneID };
                 if (map.TryGetValue(originalLaneInstanceID, out var ret))
@@ -60,21 +72,32 @@ namespace TrafficManager.Util.Record {
             }
             var mappedLaneId = MappedLaneId(LaneId);
 
-            if (connections_ == null) {
-                connMan.Sub.RemoveLaneConnections(mappedLaneId, StartNode);
+            if (connections == null) {
+                man.RemoveLaneConnections(mappedLaneId, StartNode);
                 return;
             }
 
             if (mappedLaneId == 0)
                 return;
 
-            //Log._Debug($"connections_=" + connections_.ToSTR());
-            foreach (uint targetLaneId in connections_) {
+            //Log._Debug($"connections=" + connections.ToSTR());
+            foreach (uint targetLaneId in connections) {
                 var mappedTargetLaneId = MappedLaneId(targetLaneId);
                 if (mappedTargetLaneId == 0)
                     continue;
                 //Log._Debug($"connecting lanes: {mappedLaneId}->{mappedTargetLaneId}");
-                connMan.Sub.AddLaneConnection(mappedLaneId, mappedTargetLaneId, StartNode);
+                man.AddLaneConnection(mappedLaneId, mappedTargetLaneId, StartNode);
+            }
+        }
+
+        public void Transfer(Dictionary<InstanceID, InstanceID> map) {
+            if (connections_ != null) {
+                // legacy
+                TransferImpl(map, connMan.Road, connections_);
+                TransferImpl(map, connMan.Track, connections_);
+            } else {
+                TransferImpl(map, connMan.Road, roadConnections_);
+                TransferImpl(map, connMan.Track, trackConnections_);
             }
         }
 
@@ -93,7 +116,7 @@ namespace TrafficManager.Util.Record {
                     continue;
                 }
 
-                foreach (LaneIdAndIndex laneIdAndIndex in extSegmentManager.GetSegmentLaneIdsAndLaneIndexes(segmentId)) {
+                foreach (LaneIdAndIndex laneIdAndIndex in netSegment.GetSegmentLaneIdsAndLaneIndexes()) {
                     NetInfo.Lane laneInfo = netInfo.m_lanes[laneIdAndIndex.laneIndex];
                     bool match = (laneInfo.m_laneType & LaneConnectionManager.LANE_TYPES) != 0 &&
                                  (laneInfo.m_vehicleType & LaneConnectionManager.VEHICLE_TYPES) != 0;

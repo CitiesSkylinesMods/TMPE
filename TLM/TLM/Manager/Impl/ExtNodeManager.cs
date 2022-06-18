@@ -38,7 +38,7 @@ namespace TrafficManager.Manager.Impl {
         /// <param name="nodeId">NodeId of the node to test.</param>
         /// <returns></returns>
         public static bool JunctionHasHighwayRules(ushort nodeId) {
-            return JunctionHasOnlyHighwayRoads(nodeId) && !LaneConnection.LaneConnectionManager.Instance.Sub.HasNodeConnections(nodeId);
+            return JunctionHasOnlyHighwayRoads(nodeId) && !LaneConnection.LaneConnectionManager.Instance.Road.HasNodeConnections(nodeId);
         }
 
         public GetNodeSegmentIdsEnumerable GetNodeSegmentIds(ushort nodeId, ClockDirection clockDirection) {
