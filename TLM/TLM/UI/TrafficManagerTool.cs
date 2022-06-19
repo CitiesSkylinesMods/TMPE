@@ -472,7 +472,7 @@ namespace TrafficManager.UI {
                   }
                 }
             } catch(Exception ex) {
-                ex.LogException();                  
+                ex.LogException();
             }
         }
 
@@ -555,10 +555,10 @@ namespace TrafficManager.UI {
                         InfoManager.SubInfoMode.Default);
                 }
                 ToolCursor = null;
+                bool elementsHovered = DetermineHoveredElements(activeLegacySubTool_ is not LaneConnectorTool);
                 if (activeLegacySubTool_?.OverrideCursor != null) {
                     ToolCursor = activeLegacySubTool_.OverrideCursor;
                 } else {
-                    bool elementsHovered = DetermineHoveredElements(activeLegacySubTool_ is not LaneConnectorTool);
                     if (activeLegacySubTool_ != null && NetTool != null && elementsHovered) {
                         ToolCursor = NetTool.m_upgradeCursor;
                     }
