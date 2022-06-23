@@ -13,14 +13,7 @@ namespace TrafficManager.API {
         private static INotifier notifier_;
         private static IUIFactory uiFactory_;
 
-        static Implementations() {
-            // reset on hot reload or game reload.
-            PluginManager.instance.eventPluginsStateChanged += Reset;
-            PluginManager.instance.eventPluginsChanged += Reset;
-            LoadingManager.instance.m_levelPreLoaded += Reset;
-        }
-
-        private static void Reset() {
+        public static void Reset() {
             constantsType_ = null;
             managerFactory_ = null;
             notifier_ = null;
