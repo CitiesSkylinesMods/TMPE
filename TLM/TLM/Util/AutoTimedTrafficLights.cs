@@ -43,6 +43,8 @@ namespace TrafficManager.Util {
             AllRed,
             AllGreen,
             ShortOnly,
+            StraightShort,
+            FarOnly,
         }
 
         public enum ErrorResult {
@@ -54,12 +56,12 @@ namespace TrafficManager.Util {
         }
 
         /// <summary>
-        /// creats a sorted list of segmetns connected to nodeId.
+        /// creates a sorted list of segments connected to nodeId.
         /// roads without outgoing lanes are excluded as they do not need traffic lights
         /// the segments are arranged in a clockwise direction (Counter clock wise for LHT).
         /// </summary>
         /// <param name="nodeId">the junction</param>
-        /// <returns>a list of segments aranged in counter clockwise direction.</returns>
+        /// <returns>a list of segments arranged in counter clockwise direction.</returns>
         private static List<ushort> ArrangedSegments(ushort nodeId) {
             ClockDirection clockDirection = Shortcuts.LHT
                 ? ClockDirection.CounterClockwise
@@ -87,6 +89,97 @@ namespace TrafficManager.Util {
             List<ushort> nodeGroup = new List<ushort>(1);
             nodeGroup.Add(nodeId);
             return tlsMan.SetUpTimedTrafficLight(nodeId, nodeGroup);
+        }
+
+        /// <summary>
+        /// Creates and configures traffic light with dedicated far turn cycles on a cross intersection.
+        /// </summary>
+        public static ErrorResult SetupSingleFar(ushort nodeId) {
+            if (tlsMan.HasTimedSimulation(nodeId)) {
+                return ErrorResult.TTLExists;
+            }
+
+            // issue #575: Support level crossings.
+            ref NetNode netNode = ref nodeId.ToNode();
+            NetNode.Flags flags = netNode.m_flags;
+            if ((flags & NetNode.Flags.LevelCrossing) != 0) {
+                Log._Debug("not level crossing");
+                return ErrorResult.NotSupported;
+            }
+
+            var segList = ArrangedSegments(nodeId);
+            int n = segList.Count;
+
+            if (n != 4) {
+                Log._Debug("n=" + n);
+                return ErrorResult.NotSupported;
+            }
+
+            foreach(ushort segmentId in segList) {
+                if (ExtSegmentManager.Instance.CalculateIsOneWay(segmentId)) {
+                    Log._Debug("oneway");
+                    return ErrorResult.NotSupported;
+                }
+
+                ref ExtSegmentEnd segEnd = ref segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segmentId, nodeId)];
+                segEndMan.CalculateOutgoingLeftStraightRightSegments(ref segEnd, ref netNode, out bool bLeft, out bool bForward, out bool bRight);
+                bool all = bLeft & bForward & bRight;
+                if (!all) {
+                    // not a + shaped intersection.
+                    Log._Debug($"bLeft={bLeft} bForward={bForward} bRight={bRight}");
+                    return ErrorResult.NotSupported;
+                }
+            }
+
+            if (!Add(nodeId)) {
+                return ErrorResult.Other;
+            }
+
+            if (SeparateLanes) {
+                SeparateTurningLanesUtil.SeparateNode(nodeId, out _, false);
+            }
+
+            static TimedTrafficLightsStep AddStep(ushort nodeId) {
+                return TimedLight(nodeId).AddStep(
+                                    minTime: 3,
+                                    maxTime: 10,
+                                    changeMetric: StepChangeMetric.Default,
+                                    waitFlowBalance: 0.2f,
+                                    makeRed: true);
+            }
+
+            {
+                var step = AddStep(nodeId);
+                SetupHelper(step, nodeId, segList[0], GreenDir.StraightShort, LightMode.SingleLeft);
+                SetupHelper(step, nodeId, segList[2], GreenDir.StraightShort, LightMode.SingleLeft);
+                SetupHelper(step, nodeId, segList[1], GreenDir.AllRed, LightMode.SingleLeft);
+                SetupHelper(step, nodeId, segList[3], GreenDir.AllRed, LightMode.SingleLeft);
+            }
+            {
+                var step = AddStep(nodeId);
+                SetupHelper(step, nodeId, segList[0], GreenDir.StraightShort, LightMode.SingleLeft);
+                SetupHelper(step, nodeId, segList[2], GreenDir.StraightShort, LightMode.SingleLeft);
+                SetupHelper(step, nodeId, segList[1], GreenDir.AllRed, LightMode.SingleLeft);
+                SetupHelper(step, nodeId, segList[3], GreenDir.AllRed, LightMode.SingleLeft);
+            }
+            {
+                var step = AddStep(nodeId);
+                SetupHelper(step, nodeId, segList[1], GreenDir.StraightShort, LightMode.SingleLeft);
+                SetupHelper(step, nodeId, segList[3], GreenDir.StraightShort, LightMode.SingleLeft);
+                SetupHelper(step, nodeId, segList[0], GreenDir.AllRed, LightMode.SingleLeft);
+                SetupHelper(step, nodeId, segList[2], GreenDir.AllRed, LightMode.SingleLeft);
+            }
+            {
+                var step = AddStep(nodeId);
+                SetupHelper(step, nodeId, segList[1], GreenDir.FarOnly, LightMode.SingleLeft);
+                SetupHelper(step, nodeId, segList[3], GreenDir.FarOnly, LightMode.SingleLeft);
+                SetupHelper(step, nodeId, segList[0], GreenDir.ShortOnly, LightMode.SingleLeft);
+                SetupHelper(step, nodeId, segList[2], GreenDir.ShortOnly, LightMode.SingleLeft);
+            }
+
+            Sim(nodeId).Housekeeping();
+            TimedLight(nodeId).Start();
+            return ErrorResult.Success;
         }
 
         /// <summary>
@@ -153,13 +246,26 @@ namespace TrafficManager.Util {
                 }
             }
 
+            foreach(var segmentId in segList) {
+                // on T junctions one segment should not have crossing [issue #1255]
+                // if user wishes he can alternatively setup an extra cycle for crossing.
+                ushort nearestSegmentId = Shortcuts.GetFarSegment(ref segmentId.ToSegment(), nodeId);
+                ArrowDirection dir = ExtSegmentEndManager.Instance.GetDirection(nearestSegmentId, segmentId, nodeId);
+                if(dir != Shortcuts.ArrowDirection_Near) {
+                    Log._Debug($"GetDirection({nearestSegmentId}, {segmentId}, {nodeId})->{dir}");
+                    // if far segment does not have near turn, then we disable crossing
+                    bool startNode = segmentId.ToSegment().IsStartNode(nodeId);
+                    JunctionRestrictionsManager.Instance.SetPedestrianCrossingAllowed(segmentId, startNode, false);
+                }
+            }
+
             Sim(nodeId).Housekeeping();
             TimedLight(nodeId).Start();
             return ErrorResult.Success;
         }
 
         /// <summary>
-        /// speical case where:
+        /// special case where:
         /// multiple outgoing one way roads. only two 2way roads.
         ///  - each 1-way road gets a go
         ///  - then the two 2-way roads get a go.
@@ -213,11 +319,8 @@ namespace TrafficManager.Util {
         /// <summary>
         /// Configures traffic light for and for all lane types at input segmentId, nodeId, and step.
         /// </summary>
-        /// <param name="step"></param>
-        /// <param name="nodeId"></param>
-        /// <param name="segmentId"></param>
         /// <param name="m">Determines which directions are green</param>
-        private static void SetupHelper(TimedTrafficLightsStep step, ushort nodeId, ushort segmentId, GreenDir m) {
+        private static void SetupHelper(TimedTrafficLightsStep step, ushort nodeId, ushort segmentId, GreenDir m, LightMode lightMode = LightMode.All) {
             bool startNode = segmentId.ToSegment().IsStartNode(nodeId);
             ref NetNode netNode = ref nodeId.ToNode();
 
@@ -228,7 +331,7 @@ namespace TrafficManager.Util {
             foreach (ExtVehicleType vehicleType in liveSegmentLights.VehicleTypes) {
                 //set light mode
                 CustomSegmentLight liveSegmentLight = liveSegmentLights.GetCustomLight(vehicleType);
-                liveSegmentLight.CurrentMode = LightMode.All;
+                liveSegmentLight.CurrentMode = lightMode;
 
                 TimedLight(nodeId).ChangeLightMode(
                     segmentId,
@@ -266,6 +369,16 @@ namespace TrafficManager.Util {
                             }
                             break;
                         }
+
+                    case GreenDir.StraightShort:
+                        SetStates(liveSegmentLight, green, green, red);
+                        break;
+
+                    case GreenDir.FarOnly:
+                        // no need to check for existence of left/forward/right segments. because caller has already made sure of that.
+                        SetStates(liveSegmentLight, red, red, green);
+                        break;
+
                     default:
                         Debug.LogAssertion("Unreachable code.");
                         liveSegmentLight.SetStates(green, green, green);
@@ -276,7 +389,7 @@ namespace TrafficManager.Util {
         }
 
         /// <summary>
-        /// converst forward, short-turn and far-turn to mainLight, leftLigh, rightLight respectively according to
+        /// converts forward, short-turn and far-turn to mainLight, leftLigh, rightLight respectively according to
         /// whether the traffic is RHT or LHT
         /// </summary>
         private static void SetStates(
@@ -338,10 +451,10 @@ namespace TrafficManager.Util {
         }
 
         /// <summary>
-        /// wierd road connections where short turn is possible only  if:
+        /// weird road connections where short turn is possible only  if:
         ///  - timed traffic light gives more control over directions to turn to.
         ///  - lane connector is used.
-        ///  Note: for other more normal cases furthur chaking is performed in SetupHelper() to determine if a short turn is necessary.
+        ///  Note: for other more normal cases further checking is performed in SetupHelper() to determine if a short turn is necessary.
         /// </summary>
         /// <param name="segmentId"></param>
         /// <param name="nodeId"></param>

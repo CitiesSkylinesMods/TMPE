@@ -136,11 +136,16 @@ namespace TrafficManager.UI.SubTools.TTL {
             if (HoveredNodeId <= 0 || nodeSelectionLocked || !Flags.MayHaveTrafficLight(HoveredNodeId)) {
                 return;
             }
-            bool ctrlDown = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
-            if (ctrlDown) {
-                AutoTimedTrafficLights.ErrorResult res = AutoTimedTrafficLights.Setup(HoveredNodeId);
+            if (Shortcuts.ControlIsPressed) {
+                AutoTimedTrafficLights.ErrorResult res;
+                if (Shortcuts.AltIsPressed) {
+                    res = AutoTimedTrafficLights.SetupSingleFar(HoveredNodeId);
+                } else {
+                    res = AutoTimedTrafficLights.Setup(HoveredNodeId);
+                }
                 string message = null;
 
+                Log._Debug(res.ToString());
                 switch (res) {
                     case AutoTimedTrafficLights.ErrorResult.NotSupported:
                         MainTool.Guide.Activate("TimedTrafficLightsTool_Auto TL no need");
@@ -312,8 +317,7 @@ namespace TrafficManager.UI.SubTools.TTL {
 
             switch (ttlToolMode_) {
                 case TTLToolMode.SelectNode: {
-                        bool ctrlDown = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
-                        if (!ctrlDown) {
+                        if (!Shortcuts.ControlIsPressed) {
                             GuiTimedTrafficLightsNode();
                         }
                         break;
@@ -2559,6 +2563,13 @@ namespace TrafficManager.UI.SubTools.TTL {
                     ctrl: true,
                     alt: false,
                     localizedText: T("TimedTL.CtrlClick:Quick setup")));
+            items.Add(
+            new HardcodedMouseShortcut(
+                    button: UIMouseButton.Left,
+                    shift: false,
+                    ctrl: true,
+                    alt: true,
+                    localizedText: T("TimedTL.AltCtrlClick:Alternate Quick setup (dedicated far turn cycle)")));
             OnscreenDisplay.Display(items: items);
         }
     } // end class
