@@ -103,7 +103,7 @@ namespace TrafficManager.Util {
             ref NetNode netNode = ref nodeId.ToNode();
             NetNode.Flags flags = netNode.m_flags;
             if ((flags & NetNode.Flags.LevelCrossing) != 0) {
-                Log._Debug("not level crossing");
+                Log._Debug($"SetupSingleFar({nodeId}): TTL not created on level crossing");
                 return ErrorResult.NotSupported;
             }
 
@@ -111,13 +111,13 @@ namespace TrafficManager.Util {
             int n = segList.Count;
 
             if (n != 4) {
-                Log._Debug("n=" + n);
+                Log._Debug($"SetupSingleFar({nodeId}): TTL not created on node with {n} segments. expected 4 segments only.");
                 return ErrorResult.NotSupported;
             }
 
             foreach(ushort segmentId in segList) {
                 if (ExtSegmentManager.Instance.CalculateIsOneWay(segmentId)) {
-                    Log._Debug("oneway");
+                    Log._Debug($"SetupSingleFar({nodeId}): TTL not created on one way segment: {segmentId}");
                     return ErrorResult.NotSupported;
                 }
 
@@ -125,8 +125,8 @@ namespace TrafficManager.Util {
                 segEndMan.CalculateOutgoingLeftStraightRightSegments(ref segEnd, ref netNode, out bool bLeft, out bool bForward, out bool bRight);
                 bool all = bLeft & bForward & bRight;
                 if (!all) {
-                    // not a + shaped intersection.
-                    Log._Debug($"bLeft={bLeft} bForward={bForward} bRight={bRight}");
+                    Log._Debug($"SetupSingleFar({nodeId}): TTL not created because junction is not + shaped." +
+                        $" bLeft={bLeft} bForward={bForward} bRight={bRight}");
                     return ErrorResult.NotSupported;
                 }
             }
