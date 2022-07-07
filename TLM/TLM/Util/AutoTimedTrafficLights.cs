@@ -136,7 +136,8 @@ namespace TrafficManager.Util {
             }
 
             if (SeparateLanes) {
-                SeparateTurningLanesUtil.SeparateNode(nodeId, out _, false);
+                // alternativeMode should be true because we need dedicated far turn.
+                SeparateTurningLanesUtil.SeparateNode(nodeId, out _, true);
             }
 
             static TimedTrafficLightsStep AddStep(ushort nodeId) {
@@ -150,31 +151,31 @@ namespace TrafficManager.Util {
 
             {
                 var step = AddStep(nodeId);
-                SetupHelper(step, nodeId, segList[0], GreenDir.StraightShort, LightMode.SingleLeft);
-                SetupHelper(step, nodeId, segList[2], GreenDir.StraightShort, LightMode.SingleLeft);
-                SetupHelper(step, nodeId, segList[1], GreenDir.AllRed, LightMode.SingleLeft);
-                SetupHelper(step, nodeId, segList[3], GreenDir.AllRed, LightMode.SingleLeft);
+                SetupHelper(step, nodeId, segList[0], GreenDir.StraightShort);
+                SetupHelper(step, nodeId, segList[2], GreenDir.StraightShort);
+                SetupHelper(step, nodeId, segList[1], GreenDir.AllRed);
+                SetupHelper(step, nodeId, segList[3], GreenDir.AllRed);
             }
             {
                 var step = AddStep(nodeId);
-                SetupHelper(step, nodeId, segList[0], GreenDir.StraightShort, LightMode.SingleLeft);
-                SetupHelper(step, nodeId, segList[2], GreenDir.StraightShort, LightMode.SingleLeft);
-                SetupHelper(step, nodeId, segList[1], GreenDir.AllRed, LightMode.SingleLeft);
-                SetupHelper(step, nodeId, segList[3], GreenDir.AllRed, LightMode.SingleLeft);
+                SetupHelper(step, nodeId, segList[0], GreenDir.FarOnly);
+                SetupHelper(step, nodeId, segList[2], GreenDir.FarOnly);
+                SetupHelper(step, nodeId, segList[1], GreenDir.ShortOnly);
+                SetupHelper(step, nodeId, segList[3], GreenDir.ShortOnly);
             }
             {
                 var step = AddStep(nodeId);
-                SetupHelper(step, nodeId, segList[1], GreenDir.StraightShort, LightMode.SingleLeft);
-                SetupHelper(step, nodeId, segList[3], GreenDir.StraightShort, LightMode.SingleLeft);
-                SetupHelper(step, nodeId, segList[0], GreenDir.AllRed, LightMode.SingleLeft);
-                SetupHelper(step, nodeId, segList[2], GreenDir.AllRed, LightMode.SingleLeft);
+                SetupHelper(step, nodeId, segList[1], GreenDir.StraightShort);
+                SetupHelper(step, nodeId, segList[3], GreenDir.StraightShort);
+                SetupHelper(step, nodeId, segList[0], GreenDir.AllRed);
+                SetupHelper(step, nodeId, segList[2], GreenDir.AllRed);
             }
             {
                 var step = AddStep(nodeId);
-                SetupHelper(step, nodeId, segList[1], GreenDir.FarOnly, LightMode.SingleLeft);
-                SetupHelper(step, nodeId, segList[3], GreenDir.FarOnly, LightMode.SingleLeft);
-                SetupHelper(step, nodeId, segList[0], GreenDir.ShortOnly, LightMode.SingleLeft);
-                SetupHelper(step, nodeId, segList[2], GreenDir.ShortOnly, LightMode.SingleLeft);
+                SetupHelper(step, nodeId, segList[1], GreenDir.FarOnly);
+                SetupHelper(step, nodeId, segList[3], GreenDir.FarOnly);
+                SetupHelper(step, nodeId, segList[0], GreenDir.ShortOnly);
+                SetupHelper(step, nodeId, segList[2], GreenDir.ShortOnly);
             }
 
             Sim(nodeId).Housekeeping();
@@ -320,7 +321,7 @@ namespace TrafficManager.Util {
         /// Configures traffic light for and for all lane types at input segmentId, nodeId, and step.
         /// </summary>
         /// <param name="m">Determines which directions are green</param>
-        private static void SetupHelper(TimedTrafficLightsStep step, ushort nodeId, ushort segmentId, GreenDir m, LightMode lightMode = LightMode.All) {
+        private static void SetupHelper(TimedTrafficLightsStep step, ushort nodeId, ushort segmentId, GreenDir m) {
             bool startNode = segmentId.ToSegment().IsStartNode(nodeId);
             ref NetNode netNode = ref nodeId.ToNode();
 
@@ -331,7 +332,7 @@ namespace TrafficManager.Util {
             foreach (ExtVehicleType vehicleType in liveSegmentLights.VehicleTypes) {
                 //set light mode
                 CustomSegmentLight liveSegmentLight = liveSegmentLights.GetCustomLight(vehicleType);
-                liveSegmentLight.CurrentMode = lightMode;
+                liveSegmentLight.CurrentMode = LightMode.All;
 
                 TimedLight(nodeId).ChangeLightMode(
                     segmentId,
@@ -359,10 +360,10 @@ namespace TrafficManager.Util {
                             bool bLong = lht ? bRight : bLeft;
 
                             if (bShort) {
-                                SetStates(liveSegmentLight, red, red, green);
+                                SetStates(liveSegmentLight, sForard: red, sFar: red, sShort: green);
                             } else if (bLong) {
                                 // go forward instead of short
-                                SetStates(liveSegmentLight, green, red, red);
+                                SetStates(liveSegmentLight, sForard: green, sFar: red, sShort: red);
                             } else {
                                 Debug.LogAssertion("Unreachable code.");
                                 liveSegmentLight.SetStates(green, green, green);
@@ -371,12 +372,12 @@ namespace TrafficManager.Util {
                         }
 
                     case GreenDir.StraightShort:
-                        SetStates(liveSegmentLight, green, green, red);
+                        SetStates(liveSegmentLight, sForard: green, sFar: red, sShort: green);
                         break;
 
                     case GreenDir.FarOnly:
                         // no need to check for existence of left/forward/right segments. because caller has already made sure of that.
-                        SetStates(liveSegmentLight, red, red, green);
+                        SetStates(liveSegmentLight, sForard: red, sFar: green, sShort: red);
                         break;
 
                     default:
