@@ -2569,7 +2569,7 @@ namespace TrafficManager.UI.SubTools.TTL {
                     shift: false,
                     ctrl: true,
                     alt: true,
-                    localizedText: T("TimedTL.AltCtrlClick:Alternate Quick setup (dedicated far turn cycle)")));
+                    localizedText: T("TimedTL.AltCtrlClick:Alternate Quick setup"))); // dedicated far turn cycle. only works on + junctions.
             OnscreenDisplay.Display(items: items);
         }
     } // end class
