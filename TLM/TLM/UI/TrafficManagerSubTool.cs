@@ -3,7 +3,7 @@ namespace TrafficManager.UI {
     /// SubTool represents TM:PE operation modes, grouped under a single TrafficManagerTool
     /// (which is a CO.DefaultTool).
     /// </summary>
-    public abstract class TrafficManagerSubTool {
+    public abstract class TrafficManagerSubTool : LegacySubToolMixin {
         public TrafficManagerSubTool(TrafficManagerTool mainTool) {
             MainTool = mainTool;
         }

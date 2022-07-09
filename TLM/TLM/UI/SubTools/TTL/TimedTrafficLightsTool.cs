@@ -20,18 +20,18 @@ namespace TrafficManager.UI.SubTools.TTL {
     using UnityEngine;
 
     public class TimedTrafficLightsTool
-        : LegacySubTool,
+        : TrafficManagerSubTool,
           UI.MainMenu.IOnscreenDisplayProvider {
         private readonly GUI.WindowFunction _guiTimedControlPanelDelegate;
         private readonly GUI.WindowFunction _guiTimedTrafficLightsNodeWindowDelegate;
         private readonly GUI.WindowFunction _guiTimedTrafficLightsPasteWindowDelegate;
 
-        private TTLToolMode ttlToolMode_ = TTLToolMode.SelectNode;
+        private TtlToolMode ttlToolMode_ = TtlToolMode.SelectNode;
 
-        private readonly GUIStyle _counterStyle = new GUIStyle();
+        private readonly GUIStyle _counterStyle = new();
         private readonly int[] _hoveredButton = new int[2];
         private bool nodeSelectionLocked;
-        private List<ushort> selectedNodeIds = new List<ushort>();
+        private List<ushort> selectedNodeIds = new();
         private bool _cursorInSecondaryPanel;
         private Rect _windowRect = TrafficManagerTool.GetDefaultScreenPositionForRect(new Rect(0, 0, 480, 350));
         private Rect _windowRect2 = TrafficManagerTool.GetDefaultScreenPositionForRect(new Rect(0, 0, 300, 150));
@@ -53,10 +53,10 @@ namespace TrafficManager.UI.SubTools.TTL {
         private ushort nodeIdToCopy;
         private HashSet<ushort> currentTimedNodeIds;
 
-        private GUIStyle layout = new GUIStyle { normal = { textColor = new Color(1f, 1f, 1f) } };
-        private GUIStyle layoutRed = new GUIStyle { normal = { textColor = new Color(1f, 0f, 0f) } };
-        private GUIStyle layoutGreen = new GUIStyle { normal = { textColor = new Color(0f, .8f, 0f) } };
-        private GUIStyle layoutYellow = new GUIStyle { normal = { textColor = new Color(1f, .7f, 0f) } };
+        private GUIStyle layout = new() { normal = { textColor = new Color(1f, 1f, 1f) } };
+        private GUIStyle layoutRed = new() { normal = { textColor = new Color(1f, 0f, 0f) } };
+        private GUIStyle layoutGreen = new() { normal = { textColor = new Color(0f, .8f, 0f) } };
+        private GUIStyle layoutYellow = new() { normal = { textColor = new Color(1f, .7f, 0f) } };
 
         public TimedTrafficLightsTool(TrafficManagerTool mainTool)
             : base(mainTool) {
@@ -65,10 +65,20 @@ namespace TrafficManager.UI.SubTools.TTL {
             _guiTimedTrafficLightsPasteWindowDelegate = GuiTimedTrafficLightsPasteWindow;
 
             currentTimedNodeIds = new HashSet<ushort>();
+
+            // Construct and reset for the first time
+            Cleanup();
+
+            if (Options.timedLightsOverlay) {
+                RefreshCurrentTimedNodeIds();
+            } else {
+                currentTimedNodeIds.Clear();
+            }
         }
 
-        public override bool IsCursorInPanel() {
-            return base.IsCursorInPanel() || _cursorInSecondaryPanel;
+        [Obsolete("Member of legacy subtool")]
+        public bool IsCursorInPanel() {
+            return LegacySubTool.IsCursorInPanel_() || _cursorInSecondaryPanel;
         }
 
         private void RefreshCurrentTimedNodeIds(ushort forceNodeId = 0) {
@@ -95,10 +105,8 @@ namespace TrafficManager.UI.SubTools.TTL {
             }
         }
 
-        public override void OnActivate() {
-            base.OnActivate();
-
-            SetToolMode(TTLToolMode.SelectNode);
+        public override void OnActivateTool() {
+            SetToolMode(TtlToolMode.SelectNode);
             TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance;
 
             RefreshCurrentTimedNodeIds();
@@ -117,22 +125,28 @@ namespace TrafficManager.UI.SubTools.TTL {
             MainTool.RequestOnscreenDisplayUpdate();
         }
 
-        public override void OnSecondaryClickOverlay() {
-            if (!IsCursorInPanel()) {
-                if (ttlToolMode_ != TTLToolMode.SelectNode) {
-                    Cleanup();
-                    SetToolMode(TTLToolMode.SelectNode);
-                } else {
-                    MainTool.SetToolMode(ToolMode.None);
-                }
+        public override void OnToolRightClick() {
+            if (IsCursorInPanel()) {
+                return;
+            }
+
+            if (ttlToolMode_ != TtlToolMode.SelectNode) {
+                OnDeactivateTool();
+                SetToolMode(TtlToolMode.SelectNode);
+            } else {
+                MainTool.SetToolMode(ToolMode.None);
             }
         }
 
-        private void SetToolMode(TTLToolMode t) {
+        public override void UpdateEveryFrame() {
+            throw new NotImplementedException();
+        }
+
+        private void SetToolMode(TtlToolMode t) {
             ttlToolMode_ = t;
         }
 
-        public override void OnPrimaryClickOverlay() {
+        public override void OnToolLeftClick() {
             if (HoveredNodeId <= 0 || nodeSelectionLocked || !Flags.MayHaveTrafficLight(HoveredNodeId)) {
                 return;
             }
@@ -169,16 +183,16 @@ namespace TrafficManager.UI.SubTools.TTL {
                     return;
                 }
                 RefreshCurrentTimedNodeIds(HoveredNodeId);
-                SetToolMode(TTLToolMode.ShowLights);
+                SetToolMode(TtlToolMode.ShowLights);
             }
 
             TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance;
 
             switch (ttlToolMode_) {
-                case TTLToolMode.SelectNode:
-                case TTLToolMode.ShowLights: {
-                        if (ttlToolMode_ == TTLToolMode.ShowLights) {
-                            SetToolMode(TTLToolMode.SelectNode);
+                case TtlToolMode.SelectNode:
+                case TtlToolMode.ShowLights: {
+                        if (ttlToolMode_ == TtlToolMode.ShowLights) {
+                            SetToolMode(TtlToolMode.SelectNode);
                             ClearSelectedNodes();
                         }
 
@@ -196,7 +210,7 @@ namespace TrafficManager.UI.SubTools.TTL {
 
                                 if (timedLight != null) {
                                     selectedNodeIds = new List<ushort>(timedLight.NodeGroup);
-                                    SetToolMode(TTLToolMode.ShowLights);
+                                    SetToolMode(TtlToolMode.ShowLights);
                                 }
                             } else {
                                 MainTool.WarningPrompt(T("Dialog.Text:Node has timed TL script"));
@@ -206,9 +220,9 @@ namespace TrafficManager.UI.SubTools.TTL {
                         break;
                     }
 
-                case TTLToolMode.AddNode: {
+                case TtlToolMode.AddNode: {
                         if (selectedNodeIds.Count <= 0) {
-                            SetToolMode(TTLToolMode.SelectNode);
+                            SetToolMode(TtlToolMode.SelectNode);
                             return;
                         }
 
@@ -246,13 +260,13 @@ namespace TrafficManager.UI.SubTools.TTL {
                             AddSelectedNode(nodeId);
                         }
 
-                        SetToolMode(TTLToolMode.ShowLights);
+                        SetToolMode(TtlToolMode.ShowLights);
                         break;
                     }
 
-                case TTLToolMode.RemoveNode: {
+                case TtlToolMode.RemoveNode: {
                         if (selectedNodeIds.Count <= 0) {
-                            SetToolMode(TTLToolMode.SelectNode);
+                            SetToolMode(TtlToolMode.SelectNode);
                             return;
                         }
 
@@ -265,13 +279,13 @@ namespace TrafficManager.UI.SubTools.TTL {
                         }
 
                         RemoveSelectedNode(HoveredNodeId);
-                        SetToolMode(TTLToolMode.ShowLights);
+                        SetToolMode(TtlToolMode.ShowLights);
                         break;
                     }
 
-                case TTLToolMode.CopyLights: {
+                case TtlToolMode.CopyLights: {
                         if (nodeIdToCopy == 0 || !tlsMan.HasTimedSimulation(nodeIdToCopy)) {
-                            SetToolMode(TTLToolMode.SelectNode);
+                            SetToolMode(TtlToolMode.SelectNode);
                             return;
                         }
 
@@ -306,31 +320,29 @@ namespace TrafficManager.UI.SubTools.TTL {
 
                         Cleanup();
                         AddSelectedNode(HoveredNodeId);
-                        SetToolMode(TTLToolMode.ShowLights);
+                        SetToolMode(TtlToolMode.ShowLights);
                         break;
                     }
             }
         }
 
-        public override void OnToolGUI(Event e) {
-            base.OnToolGUI(e);
-
+        public override void RenderActiveToolOverlay_GUI() {
             switch (ttlToolMode_) {
-                case TTLToolMode.SelectNode: {
+                case TtlToolMode.SelectNode: {
                         if (!Shortcuts.ControlIsPressed) {
                             GuiTimedTrafficLightsNode();
                         }
                         break;
                     }
 
-                case TTLToolMode.ShowLights:
-                case TTLToolMode.AddNode:
-                case TTLToolMode.RemoveNode: {
+                case TtlToolMode.ShowLights:
+                case TtlToolMode.AddNode:
+                case TtlToolMode.RemoveNode: {
                         GuiTimedTrafficLights();
                         break;
                     }
 
-                case TTLToolMode.CopyLights: {
+                case TtlToolMode.CopyLights: {
                         GuiTimedTrafficLightsCopy();
                         break;
                     }
@@ -341,12 +353,12 @@ namespace TrafficManager.UI.SubTools.TTL {
             }
         }
 
-        public override void RenderOverlay(RenderManager.CameraInfo cameraInfo) {
-            bool onlySelected = ttlToolMode_ == TTLToolMode.RemoveNode;
+        public override void RenderGenericInfoOverlay(RenderManager.CameraInfo cameraInfo) {
+        }
 
-            // Log._Debug($"nodeSelLocked={nodeSelectionLocked} HoveredNodeId={HoveredNodeId}
-            //     IsNodeSelected={IsNodeSelected(HoveredNodeId)} onlySelected={onlySelected}
-            //     isinsideui={MainTool.GetToolController().IsInsideUI} cursorVis={Cursor.visible}");
+        public override void RenderActiveToolOverlay(RenderManager.CameraInfo cameraInfo) {
+            bool onlySelected = ttlToolMode_ == TtlToolMode.RemoveNode;
+
             if (!nodeSelectionLocked
                 && HoveredNodeId != 0
                 && !IsNodeSelected(HoveredNodeId) ^ onlySelected
@@ -366,25 +378,23 @@ namespace TrafficManager.UI.SubTools.TTL {
         }
 
         private void GuiTimedControlPanel(int num) {
-            // Log._Debug("guiTimedControlPanel");
             try {
                 TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance;
 
-                if (ttlToolMode_ == TTLToolMode.AddNode ||
-                    ttlToolMode_ == TTLToolMode.RemoveNode) {
-                    GUILayout.Label(T("TTL.Label:Select junction"), EmptyOptionsArray);
-                    if (GUILayout.Button(T("Button:Cancel"), EmptyOptionsArray)) {
-                        SetToolMode(TTLToolMode.ShowLights);
+                if (ttlToolMode_ == TtlToolMode.AddNode ||
+                    ttlToolMode_ == TtlToolMode.RemoveNode) {
+                    GUILayout.Label(T("TTL.Label:Select junction"), LegacyEmptyOptionsArray);
+                    if (GUILayout.Button(T("Button:Cancel"), LegacyEmptyOptionsArray)) {
+                        SetToolMode(TtlToolMode.ShowLights);
                     } else {
-                        DragWindow(ref _windowRect);
+                        LegacyDragWindow(ref _windowRect);
                         return;
                     }
                 }
 
                 if (!tlsMan.HasTimedSimulation(selectedNodeIds[0])) {
-                    SetToolMode(TTLToolMode.SelectNode);
-                    // Log._Debug("nodesim or timednodemain is null");
-                    DragWindow(ref _windowRect);
+                    SetToolMode(TtlToolMode.SelectNode);
+                    LegacyDragWindow(ref _windowRect);
                     return;
                 }
 
@@ -407,12 +417,12 @@ namespace TrafficManager.UI.SubTools.TTL {
                 }
 
                 for (var i = 0; i < timedNodeMain.NumSteps(); i++) {
-                    GUILayout.BeginHorizontal(EmptyOptionsArray);
+                    GUILayout.BeginHorizontal(LegacyEmptyOptionsArray);
 
                     if (_timedEditStep != i) {
                         if (timedLightActive) {
                             if (i == currentStep) {
-                                GUILayout.BeginVertical(EmptyOptionsArray);
+                                GUILayout.BeginVertical(LegacyEmptyOptionsArray);
                                 GUILayout.Space(5);
 
                                 string labelStr = string.Format(
@@ -468,7 +478,7 @@ namespace TrafficManager.UI.SubTools.TTL {
                                     labelLayout = inEndTransition ? layoutYellow : layoutGreen;
                                 }
 
-                                GUILayout.Label(labelStr, labelLayout, EmptyOptionsArray);
+                                GUILayout.Label(labelStr, labelLayout, LegacyEmptyOptionsArray);
                                 GUILayout.Space(5);
                                 GUILayout.EndVertical();
 
@@ -489,7 +499,7 @@ namespace TrafficManager.UI.SubTools.TTL {
                                         timedNodeMain.GetStep(i).MinTime,
                                         timedNodeMain.GetStep(i).MaxTime),
                                     layout,
-                                    EmptyOptionsArray);
+                                    LegacyEmptyOptionsArray);
                             }
                         } else {
                             GUIStyle labelLayout = layout;
@@ -505,7 +515,7 @@ namespace TrafficManager.UI.SubTools.TTL {
                                     timedNodeMain.GetStep(i).MinTime,
                                     timedNodeMain.GetStep(i).MaxTime),
                                 labelLayout,
-                                EmptyOptionsArray);
+                                LegacyEmptyOptionsArray);
 
                             if (_timedEditStep < 0) {
                                 GUILayout.BeginHorizontal(GUILayout.Width(100));
@@ -662,13 +672,13 @@ namespace TrafficManager.UI.SubTools.TTL {
 
                         BuildStepChangeMetricDisplay(true);
                         BuildFlowPolicyDisplay(true);
-                        GUILayout.BeginHorizontal(EmptyOptionsArray);
+                        GUILayout.BeginHorizontal(LegacyEmptyOptionsArray);
                     }
 
                     GUILayout.EndHorizontal();
                 } // foreach step
 
-                GUILayout.BeginHorizontal(EmptyOptionsArray);
+                GUILayout.BeginHorizontal(LegacyEmptyOptionsArray);
 
                 if (_timedEditStep < 0 && !timedLightActive) {
                     if (_timedPanelAdd) {
@@ -738,10 +748,10 @@ namespace TrafficManager.UI.SubTools.TTL {
 
                         BuildStepChangeMetricDisplay(true);
                         BuildFlowPolicyDisplay(true);
-                        GUILayout.BeginHorizontal(EmptyOptionsArray);
+                        GUILayout.BeginHorizontal(LegacyEmptyOptionsArray);
                     } else {
                         if (_timedEditStep < 0) {
-                            if (GUILayout.Button(T("TTL.Button:Add step"), EmptyOptionsArray)) {
+                            if (GUILayout.Button(T("TTL.Button:Add step"), LegacyEmptyOptionsArray)) {
                                 TrafficManagerTool.ShowAdvisor(GetType().Name + "_AddStep");
                                 _timedPanelAdd = true;
                                 nodeSelectionLocked = true;
@@ -763,11 +773,11 @@ namespace TrafficManager.UI.SubTools.TTL {
                             _timedShowNumbers
                                 ? T("TTL.Button:Hide counters")
                                 : T("TTL.Button:Show counters"),
-                            EmptyOptionsArray)) {
+                            LegacyEmptyOptionsArray)) {
                             _timedShowNumbers = !_timedShowNumbers;
                         }
 
-                        if (GUILayout.Button(T("TTL.Button:Stop"), EmptyOptionsArray)) {
+                        if (GUILayout.Button(T("TTL.Button:Stop"), LegacyEmptyOptionsArray)) {
                             foreach (ushort nodeId in selectedNodeIds) {
                                 tlsMan.TrafficLightSimulations[nodeId]
                                       .timedLight
@@ -809,14 +819,14 @@ namespace TrafficManager.UI.SubTools.TTL {
                         bool testMode = GUILayout.Toggle(
                             inTestMode,
                             T("TTL.Checkbox:Pause in this step"),
-                            EmptyOptionsArray);
+                            LegacyEmptyOptionsArray);
 
                         foreach (ushort nodeId in selectedNodeIds) {
                             tlsMan.TrafficLightSimulations[nodeId].timedLight?.SetTestMode(testMode);
                         }
                     } else {
                         if (_timedEditStep < 0 && !_timedPanelAdd) {
-                            if (GUILayout.Button(T("TTL.Button:Start"), EmptyOptionsArray)) {
+                            if (GUILayout.Button(T("TTL.Button:Start"), LegacyEmptyOptionsArray)) {
                                 _timedPanelAdd = false;
                                 nodeSelectionLocked = false;
 
@@ -831,27 +841,27 @@ namespace TrafficManager.UI.SubTools.TTL {
                 }
 
                 if (_timedEditStep >= 0) {
-                    DragWindow(ref _windowRect);
+                    LegacyDragWindow(ref _windowRect);
                     return;
                 }
 
                 GUILayout.Space(30);
 
                 if (selectedNodeIds.Count == 1 && timedNodeMain.NumSteps() > 0) {
-                    GUILayout.BeginHorizontal(EmptyOptionsArray);
+                    GUILayout.BeginHorizontal(LegacyEmptyOptionsArray);
 
-                    if (GUILayout.Button(T("TTL.Button:Rotate left"), EmptyOptionsArray)) {
+                    if (GUILayout.Button(T("TTL.Button:Rotate left"), LegacyEmptyOptionsArray)) {
                         timedNodeMain.RotateLeft();
                         _timedViewedStep = 0;
                     }
 
-                    if (GUILayout.Button(T("TTL.Button:Copy"), EmptyOptionsArray)) {
+                    if (GUILayout.Button(T("TTL.Button:Copy"), LegacyEmptyOptionsArray)) {
                         TrafficManagerTool.ShowAdvisor(GetType().Name + "_Copy");
                         nodeIdToCopy = selectedNodeIds[0];
-                        SetToolMode(TTLToolMode.CopyLights);
+                        SetToolMode(TtlToolMode.CopyLights);
                     }
 
-                    if (GUILayout.Button(T("TTL.Button:Rotate right"), EmptyOptionsArray)) {
+                    if (GUILayout.Button(T("TTL.Button:Rotate right"), LegacyEmptyOptionsArray)) {
                         timedNodeMain.RotateRight();
                         _timedViewedStep = 0;
                     }
@@ -864,30 +874,30 @@ namespace TrafficManager.UI.SubTools.TTL {
 
                     if (GUILayout.Button(
                         T("TTL.Button:Add junction to TTL"),
-                        EmptyOptionsArray)) {
+                        LegacyEmptyOptionsArray)) {
                         TrafficManagerTool.ShowAdvisor(GetType().Name + "_AddJunction");
-                        SetToolMode(TTLToolMode.AddNode);
+                        SetToolMode(TtlToolMode.AddNode);
                     }
 
                     if (selectedNodeIds.Count > 1) {
                         if (GUILayout.Button(
                             T("TTL.Button:Remove junction from TTL"),
-                            EmptyOptionsArray)) {
+                            LegacyEmptyOptionsArray)) {
                             TrafficManagerTool.ShowAdvisor(GetType().Name + "_RemoveJunction");
-                            SetToolMode(TTLToolMode.RemoveNode);
+                            SetToolMode(TtlToolMode.RemoveNode);
                         }
                     }
 
                     GUILayout.Space(30);
 
-                    if (GUILayout.Button(T("TTL.Button:Remove entire TTL"), EmptyOptionsArray)) {
+                    if (GUILayout.Button(T("TTL.Button:Remove entire TTL"), LegacyEmptyOptionsArray)) {
                         DisableTimed();
                         ClearSelectedNodes();
-                        SetToolMode(TTLToolMode.SelectNode);
+                        SetToolMode(TtlToolMode.SelectNode);
                     }
                 }
 
-                DragWindow(ref _windowRect);
+                LegacyDragWindow(ref _windowRect);
             }
             catch (Exception e) {
                 Log.Error($"TimedTrafficLightsTool._guiTimedControlPanel: {e}");
@@ -904,7 +914,11 @@ namespace TrafficManager.UI.SubTools.TTL {
             }
         }
 
-        public override void Cleanup() {
+        public override void OnDeactivateTool() {
+            Cleanup();
+        }
+
+        private void Cleanup() {
             SelectedNodeId = 0;
             ClearSelectedNodes();
 
@@ -918,64 +932,53 @@ namespace TrafficManager.UI.SubTools.TTL {
             nodeIdToCopy = 0;
         }
 
-        public override void Initialize() {
-            base.Initialize();
-            Cleanup();
-
-            if (Options.timedLightsOverlay) {
-                RefreshCurrentTimedNodeIds();
-            } else {
-                currentTimedNodeIds.Clear();
-            }
-        }
-
         private void BuildStepChangeMetricDisplay(bool editable) {
             GUILayout.BeginVertical();
 
             if (editable) {
                 GUILayout.Label(
                     T("TTL.Label:After min. time go to next step if") + ":",
-                    EmptyOptionsArray);
+                    LegacyEmptyOptionsArray);
 
                 if (GUILayout.Toggle(
                     _stepMetric == StepChangeMetric.Default,
                     GetStepChangeMetricDescription(StepChangeMetric.Default),
-                    EmptyOptionsArray)) {
+                    LegacyEmptyOptionsArray)) {
                     _stepMetric = StepChangeMetric.Default;
                 }
 
                 if (GUILayout.Toggle(
                     _stepMetric == StepChangeMetric.FirstFlow,
                     GetStepChangeMetricDescription(StepChangeMetric.FirstFlow),
-                    EmptyOptionsArray)) {
+                    LegacyEmptyOptionsArray)) {
                     _stepMetric = StepChangeMetric.FirstFlow;
                 }
 
                 if (GUILayout.Toggle(
                     _stepMetric == StepChangeMetric.FirstWait,
                     GetStepChangeMetricDescription(StepChangeMetric.FirstWait),
-                    EmptyOptionsArray)) {
+                    LegacyEmptyOptionsArray)) {
                     _stepMetric = StepChangeMetric.FirstWait;
                 }
 
                 if (GUILayout.Toggle(
                     _stepMetric == StepChangeMetric.NoFlow,
                     GetStepChangeMetricDescription(StepChangeMetric.NoFlow),
-                    EmptyOptionsArray)) {
+                    LegacyEmptyOptionsArray)) {
                     _stepMetric = StepChangeMetric.NoFlow;
                 }
 
                 if (GUILayout.Toggle(
                     _stepMetric == StepChangeMetric.NoWait,
                     GetStepChangeMetricDescription(StepChangeMetric.NoWait),
-                    EmptyOptionsArray)) {
+                    LegacyEmptyOptionsArray)) {
                     _stepMetric = StepChangeMetric.NoWait;
                 }
             } else {
                 GUILayout.Label(
                     T("TTL.Label:Adaptive step switching") + ": " +
                     GetStepChangeMetricDescription(_stepMetric),
-                    EmptyOptionsArray);
+                    LegacyEmptyOptionsArray);
             }
 
             GUILayout.EndVertical();
@@ -991,7 +994,7 @@ namespace TrafficManager.UI.SubTools.TTL {
                 formatStr = "{0:0.#}";
             }
 
-            GUILayout.BeginHorizontal(EmptyOptionsArray);
+            GUILayout.BeginHorizontal(LegacyEmptyOptionsArray);
             string sensText = T("TTL.Label:Flow sensitivity");
 
             // TODO: Clarify for the user what this means, more help text, simpler UI
@@ -999,27 +1002,27 @@ namespace TrafficManager.UI.SubTools.TTL {
                 string flowBalanceText = string.Format(formatStr, _waitFlowBalance);
                 GUILayout.Label(
                     $"{sensText} ({flowBalanceText}, {GetWaitFlowBalanceInfo()}):",
-                    EmptyOptionsArray);
+                    LegacyEmptyOptionsArray);
 
                 if (_waitFlowBalance <= 0.01f) {
                     if (_waitFlowBalance >= 0) {
-                        if (GUILayout.Button("-.001", EmptyOptionsArray)) {
+                        if (GUILayout.Button("-.001", LegacyEmptyOptionsArray)) {
                             _waitFlowBalance -= 0.001f;
                         }
                     }
 
                     if (_waitFlowBalance < 0.01f) {
-                        if (GUILayout.Button("+.001", EmptyOptionsArray)) {
+                        if (GUILayout.Button("+.001", LegacyEmptyOptionsArray)) {
                             _waitFlowBalance += 0.001f;
                         }
                     }
                 } else if (_waitFlowBalance <= 0.1f) {
-                    if (GUILayout.Button("-.01", EmptyOptionsArray)) {
+                    if (GUILayout.Button("-.01", LegacyEmptyOptionsArray)) {
                         _waitFlowBalance -= 0.01f;
                     }
 
                     if (_waitFlowBalance < 0.1f) {
-                        if (GUILayout.Button("+.01", EmptyOptionsArray)) {
+                        if (GUILayout.Button("+.01", LegacyEmptyOptionsArray)) {
                             _waitFlowBalance += 0.01f;
                         }
                     }
@@ -1035,7 +1038,11 @@ namespace TrafficManager.UI.SubTools.TTL {
 
                 GUILayout.EndHorizontal();
 
-                _waitFlowBalance = GUILayout.HorizontalSlider(_waitFlowBalance, 0.001f, 10f, EmptyOptionsArray);
+                _waitFlowBalance = GUILayout.HorizontalSlider(
+                    _waitFlowBalance,
+                    0.001f,
+                    10f,
+                    LegacyEmptyOptionsArray);
 
                 // step snapping
                 if (_waitFlowBalance < 0.001f) {
@@ -1050,7 +1057,7 @@ namespace TrafficManager.UI.SubTools.TTL {
                     _waitFlowBalance = 10f;
                 }
 
-                GUILayout.BeginHorizontal(EmptyOptionsArray);
+                GUILayout.BeginHorizontal(LegacyEmptyOptionsArray);
                 GUIStyle style = new GUIStyle {
                     normal = { textColor = Color.white },
                     alignment = TextAnchor.LowerLeft,
@@ -1066,7 +1073,7 @@ namespace TrafficManager.UI.SubTools.TTL {
                     GUILayout.Height(10));
             } else {
                 string flowBalanceText = string.Format(formatStr, _waitFlowBalance);
-                GUILayout.Label($"{sensText}: {flowBalanceText} ({GetWaitFlowBalanceInfo()})", EmptyOptionsArray);
+                GUILayout.Label($"{sensText}: {flowBalanceText} ({GetWaitFlowBalanceInfo()})", LegacyEmptyOptionsArray);
             }
 
             GUILayout.EndHorizontal();
@@ -1109,8 +1116,8 @@ namespace TrafficManager.UI.SubTools.TTL {
                 screenRect: _windowRect2,
                 func: _guiTimedTrafficLightsNodeWindowDelegate,
                 text: T("TTL.Window.Title:Select nodes"),
-                style: WindowStyle,
-                options: EmptyOptionsArray);
+                style: LegacyWindowStyle,
+                options: LegacyEmptyOptionsArray);
             GUI.matrix = oldMatrix;
 
             _cursorInSecondaryPanel = _windowRect2.Contains(Event.current.mousePosition);
@@ -1129,8 +1136,8 @@ namespace TrafficManager.UI.SubTools.TTL {
                 screenRect: _windowRect,
                 func: _guiTimedControlPanelDelegate,
                 text: T("Dialog.Title:Timed traffic lights manager"),
-                style: WindowStyle,
-                options: EmptyOptionsArray);
+                style: LegacyWindowStyle,
+                options: LegacyEmptyOptionsArray);
 
             _cursorInSecondaryPanel = _windowRect.Contains(Event.current.mousePosition);
             GUI.matrix = oldMatrix;
@@ -1151,15 +1158,15 @@ namespace TrafficManager.UI.SubTools.TTL {
                 screenRect: _windowRect2,
                 func: _guiTimedTrafficLightsPasteWindowDelegate,
                 text: T("TTL.Window.Title:Paste"),
-                style: WindowStyle,
-                options: EmptyOptionsArray);
+                style: LegacyWindowStyle,
+                options: LegacyEmptyOptionsArray);
 
             _cursorInSecondaryPanel = _windowRect2.Contains(Event.current.mousePosition);
             GUI.matrix = oldMatrix;
         }
 
         private void GuiTimedTrafficLightsPasteWindow(int num) {
-            GUILayout.Label(T("TTL.Label:Select junction"), EmptyOptionsArray);
+            GUILayout.Label(T("TTL.Label:Select junction"), LegacyEmptyOptionsArray);
         }
 
         /// <summary>
@@ -1170,7 +1177,7 @@ namespace TrafficManager.UI.SubTools.TTL {
             TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance;
 
             if (selectedNodeIds.Count < 1) {
-                GUILayout.Label(T("Label:Select nodes"), EmptyOptionsArray);
+                GUILayout.Label(T("Label:Select nodes"), LegacyEmptyOptionsArray);
             } else {
                 string txt = selectedNodeIds.Aggregate(
                     string.Empty,
@@ -1179,14 +1186,14 @@ namespace TrafficManager.UI.SubTools.TTL {
                         return current + string.Format(format, t.ToString());
                     });
 
-                GUILayout.Label(txt, EmptyOptionsArray);
+                GUILayout.Label(txt, LegacyEmptyOptionsArray);
 
                 if (selectedNodeIds.Count > 0 &&
-                    GUILayout.Button(T("TTL.Button:Deselect all nodes"), EmptyOptionsArray)) {
+                    GUILayout.Button(T("TTL.Button:Deselect all nodes"), LegacyEmptyOptionsArray)) {
                     ClearSelectedNodes();
                 }
 
-                if (GUILayout.Button(T("TTL.Button:Setup timed traffic light"), EmptyOptionsArray)) {
+                if (GUILayout.Button(T("TTL.Button:Setup timed traffic light"), LegacyEmptyOptionsArray)) {
                     _waitFlowBalance = GlobalConfig.Instance.TimedTrafficLights.FlowToWaitRatio;
 
                     foreach (ushort nodeId in selectedNodeIds) {
@@ -1194,13 +1201,13 @@ namespace TrafficManager.UI.SubTools.TTL {
                         RefreshCurrentTimedNodeIds(nodeId);
                     }
 
-                    SetToolMode(TTLToolMode.ShowLights);
+                    SetToolMode(TtlToolMode.ShowLights);
                 } else {
                     return;
                 }
             }
 
-            DragWindow(ref _windowRect2);
+            LegacyDragWindow(ref _windowRect2);
         }
 
         private string GetWaitFlowBalanceInfo() {
@@ -1410,12 +1417,8 @@ namespace TrafficManager.UI.SubTools.TTL {
             }
         }
 
-        public override void ShowGUIOverlay(ToolMode toolMode, bool viewOnly) {
-            if (!ToolMode.TimedTrafficLights.Equals(toolMode)) {
-                return;
-            }
-
-            if (viewOnly && !Options.timedLightsOverlay) {
+        public override void RenderGenericInfoOverlay_GUI() {
+            if (!Options.timedLightsOverlay) {
                 return;
             }
 

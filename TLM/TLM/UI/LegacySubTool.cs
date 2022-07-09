@@ -15,8 +15,8 @@ namespace TrafficManager.UI {
             uiTransparencyUnbsubscriber_ = ModUI.Instance.Events.UiOpacity.Subscribe(this);
         }
 
-        protected TrafficManagerTool MainTool { get; }
-        protected GUILayoutOption[] EmptyOptionsArray = new GUILayoutOption[0];
+        internal TrafficManagerTool MainTool { get; }
+        protected static GUILayoutOption[] EmptyOptionsArray = new GUILayoutOption[0];
 
         private Texture2D WindowTexture {
             get {
@@ -32,34 +32,33 @@ namespace TrafficManager.UI {
 
         private Texture2D windowTexture_;
 
-        protected GUIStyle WindowStyle =>
+        internal GUIStyle WindowStyle =>
             // ReSharper disable once ConvertToNullCoalescingCompoundAssignment
             windowStyle_ ??
-            (windowStyle_
-                 = new GUIStyle {
-                                    normal = {
-                                                 background = WindowTexture,
-                                                 textColor = Color.white,
-                                             },
-                                    alignment = TextAnchor.UpperCenter,
-                                    fontSize = 20,
-                                    border = {
-                                                 left = 4,
-                                                 top = 41,
-                                                 right = 4,
-                                                 bottom = 8,
-                                             },
-                                    overflow = {
-                                                   bottom = 0,
-                                                   top = 0,
-                                                   right = 12,
-                                                   left = 12,
-                                               },
-                                    contentOffset = new Vector2(0, -44),
-                                    padding = {
-                                                  top = 55,
-                                              },
-                                });
+            (windowStyle_ = new GUIStyle {
+                    normal = {
+                        background = WindowTexture,
+                        textColor = Color.white,
+                    },
+                    alignment = TextAnchor.UpperCenter,
+                    fontSize = 20,
+                    border = {
+                        left = 4,
+                        top = 41,
+                        right = 4,
+                        bottom = 8,
+                    },
+                    overflow = {
+                        bottom = 0,
+                        top = 0,
+                        right = 12,
+                        left = 12,
+                    },
+                    contentOffset = new Vector2(0, -44),
+                    padding = {
+                        top = 55,
+                    },
+                });
 
         private GUIStyle windowStyle_;
 
@@ -185,6 +184,11 @@ namespace TrafficManager.UI {
         public virtual void ShowGUIOverlay(ToolMode toolMode, bool viewOnly) { }
 
         public virtual bool IsCursorInPanel() {
+            return IsCursorInPanel_();
+        }
+
+        /// <summary>Check whether cursor is in the main menu or debug menu area.</summary>
+        internal static bool IsCursorInPanel_() {
             return ModUI.Instance.GetMenu().containsMouse
 #if DEBUG
                    || ModUI.Instance.GetDebugMenu().containsMouse
