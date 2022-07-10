@@ -77,8 +77,8 @@ namespace TrafficManager.UI.SubTools.TTL {
         }
 
         [Obsolete("Member of legacy subtool")]
-        public bool IsCursorInPanel() {
-            return LegacySubTool.IsCursorInPanel_() || _cursorInSecondaryPanel;
+        private protected bool IsCursorInPanel() {
+            return LegacyIsCursorInPanel() || _cursorInSecondaryPanel;
         }
 
         private void RefreshCurrentTimedNodeIds(ushort forceNodeId = 0) {

@@ -68,5 +68,16 @@
                         top = 55,
                     },
                 });
+
+
+        /// <summary>Check whether cursor is in the main menu or debug menu area.</summary>
+        [Obsolete("Member of legacy subtool")]
+        internal static bool LegacyIsCursorInPanel() {
+            return ModUI.Instance.GetMenu().containsMouse
+#if DEBUG
+                   || ModUI.Instance.GetDebugMenu().containsMouse
+#endif
+                ;
+        }
     }
 }
