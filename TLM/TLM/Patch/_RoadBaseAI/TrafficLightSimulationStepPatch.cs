@@ -10,7 +10,7 @@ namespace TrafficManager.Patch._RoadBaseAI {
         /// Decides whether the stock simulation step for traffic lights should run.
         /// </summary>
         [UsedImplicitly]
-        public static bool Prefix(RoadBaseAI __instance, ushort nodeID, ref NetNode data) {
+        public static bool Prefix(ushort nodeID) {
             return !Options.timedLightsEnabled
                    || !TrafficLightSimulationManager
                                 .Instance
