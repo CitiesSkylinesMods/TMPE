@@ -155,6 +155,7 @@ namespace TrafficManager.Lifecycle {
             CustomPathManager.Initialize();
             RegisteredManagers.Clear();
             RegisterCustomManagers();
+            API.Implementations.Reset();
         }
 
         internal void RegisterCustomManagers() {
@@ -275,6 +276,7 @@ namespace TrafficManager.Lifecycle {
         }
 
         internal static void EndMod() {
+            API.Implementations.Reset();
             DestroyImmediate(Instance?.gameObject);
         }
 
