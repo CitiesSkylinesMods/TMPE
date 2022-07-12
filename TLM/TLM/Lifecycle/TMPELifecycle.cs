@@ -71,7 +71,18 @@ namespace TrafficManager.Lifecycle {
         public bool MayPublishSegmentChanges()
             => InGameOrEditor() && !Instance.Deserializing;
 
-        public static AppMode? AppMode => SimulationManager.instance.m_ManagersWrapper.loading?.currentMode;
+        public static AppMode? AppMode {
+            get {
+                try {
+                    return SimulationManager.instance.m_ManagersWrapper.loading?.currentMode;
+                }
+                catch {
+                    // ignore, currentMode may throw NullReferenceException on return to main menu
+                }
+
+                return null;
+            }
+        }
 
         // throws null ref if used from main menu
         public static SimulationManager.UpdateMode UpdateMode => SimulationManager.instance.m_metaData.m_updateMode;
@@ -144,6 +155,7 @@ namespace TrafficManager.Lifecycle {
             CustomPathManager.Initialize();
             RegisteredManagers.Clear();
             RegisterCustomManagers();
+            API.Implementations.Reset();
         }
 
         internal void RegisterCustomManagers() {
@@ -172,6 +184,7 @@ namespace TrafficManager.Lifecycle {
             RegisteredManagers.Add(UtilityManager.Instance);
             RegisteredManagers.Add(VehicleRestrictionsManager.Instance);
             RegisteredManagers.Add(ExtVehicleManager.Instance);
+            RegisteredManagers.Add(ExtLaneManager.Instance);
 
             // Texture managers
             RegisteredManagers.Add(UI.Textures.RoadSignThemeManager.Instance);
@@ -263,6 +276,7 @@ namespace TrafficManager.Lifecycle {
         }
 
         internal static void EndMod() {
+            API.Implementations.Reset();
             DestroyImmediate(Instance?.gameObject);
         }
 

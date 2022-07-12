@@ -80,7 +80,7 @@ namespace TrafficManager.Util {
                 return;
             }
 
-            if (LaneConnectionManager.Instance.Sub.HasNodeConnections(nodeId)) {
+            if (LaneConnectionManager.Instance.Road.HasNodeConnections(nodeId)) {
                 res = SetLaneArrow_Result.LaneConnection;
                 return;
             }
@@ -135,9 +135,9 @@ namespace TrafficManager.Util {
         /// <summary>
         /// separates turning lanes for the input segment on the input node.
         /// </summary>
-        /// <paramref name="builtIn">determines whather to change default or forced lane arrows</paramref>
-        /// <param name="alt2">alternativ mode for two lanes(true => dedicated far turn)</param>
-        /// <param name="alt3">alternative mode for 3+ lanes(true => favour forward)</param>
+        /// <paramref name="builtIn">determines whether to change default or forced lane arrows</paramref>
+        /// <param name="alt2">alternative mode for two lanes(true => dedicated far turn)</param>
+        /// <param name="alt3">alternative mode for 3+ lanes(true => favor forward)</param>
         /// <param name="altBus">false => treat bus lanes differently</param>
         public static void SeparateSegmentLanes(
             ushort segmentId,
@@ -491,7 +491,7 @@ namespace TrafficManager.Util {
 
             int srcLaneCount = laneList.Count();
             for (int i = 0; i < srcLaneCount; ++i) {
-                if (LaneConnectionManager.Instance.Sub.HasOutgoingConnections(laneList[i].laneId, startNode)) {
+                if (LaneConnectionManager.Instance.Road.HasOutgoingConnections(laneList[i].laneId, startNode)) {
                     return SetLaneArrow_Result.LaneConnection;
                 }
             }

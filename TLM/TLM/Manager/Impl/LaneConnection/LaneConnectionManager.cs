@@ -4,13 +4,14 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
     using TrafficManager.API.Manager;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.API.Traffic.Enums;
+    using TrafficManager.Util;
     using TrafficManager.Util.Extensions;
     using UnityEngine;
 #if DEBUG
 #endif
 
     public class LaneConnectionManager
-        : AbstractGeometryObservingManager,
+        : AbstractCustomManager,
           ICustomDataManager<List<Configuration.LaneConnection>>,
           ILaneConnectionManager {
         public const NetInfo.LaneType LANE_TYPES =
@@ -23,8 +24,8 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
                                                              | VehicleInfo.VehicleType.Monorail
                                                              | VehicleInfo.VehicleType.Trolleybus;
 
-        public LaneConnectionSubManager Sub = // TODO #354 divide into Road/Track
-            new LaneConnectionSubManager(LaneEndTransitionGroup.All);
+        public LaneConnectionSubManager Road = new LaneConnectionSubManager(LaneEndTransitionGroup.Road);
+        public LaneConnectionSubManager Track = new LaneConnectionSubManager(LaneEndTransitionGroup.Track);
 
         public NetInfo.LaneType LaneTypes => LANE_TYPES;
 
@@ -38,16 +39,19 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
 
         public override void OnBeforeLoadData() {
             base.OnBeforeLoadData();
-            Sub.OnBeforeLoadData();
+            Road.OnBeforeLoadData();
+            Track.OnBeforeLoadData();
         }
         public override void OnLevelUnloading() {
             base.OnLevelUnloading();
-            Sub.OnLevelUnloading();
+            Road.OnLevelUnloading();
+            Track.OnLevelUnloading();
         }
 
         protected override void InternalPrintDebugInfo() {
             base.InternalPrintDebugInfo();
-            Sub.PrintDebugInfo();
+            Road.PrintDebugInfo();
+            Track.PrintDebugInfo();
         }
 
         /// <summary>
@@ -55,7 +59,60 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
         /// </summary>
         /// <param name="sourceStartNode">check at start node of source lane?</param>
         public bool AreLanesConnected(uint sourceLaneId, uint targetLaneId, bool sourceStartNode) {
-            return Sub.AreLanesConnected(sourceLaneId, targetLaneId, sourceStartNode);
+            return Road.AreLanesConnected(sourceLaneId, targetLaneId, sourceStartNode) ||
+                  Track.AreLanesConnected(sourceLaneId, targetLaneId, sourceStartNode);
+        }
+
+        public bool AreLanesConnected(uint sourceLaneId, uint targetLaneId, bool sourceStartNode, LaneEndTransitionGroup group) {
+            bool ret = Road.Supports(group) &&
+                Road.AreLanesConnected(sourceLaneId, targetLaneId, sourceStartNode);
+            if (!ret) {
+                ret = Track.Supports(group) &&
+                    Track.AreLanesConnected(sourceLaneId, targetLaneId, sourceStartNode);
+            }
+            return ret;
+        }
+
+
+        /// <summary>
+        /// Adds a lane connection between two lanes.
+        /// pass in <c>LaneEndTransitionGroup.All</c> to add lane connections in every sub manager that supports both lanes.
+        /// </summary>
+        /// <param name="sourceLaneId">From lane id</param>
+        /// <param name="targetLaneId">To lane id</param>
+        /// <param name="sourceStartNode">The affected node</param>
+        /// <param name="group">lane or track</param>
+        /// <returns><c>true</c> if any connection was added, <c>falsse</c> otherwise</returns>
+        public bool AddLaneConnection(uint sourceLaneId, uint targetLaneId, bool sourceStartNode, LaneEndTransitionGroup group) {
+            bool success = true;
+            if (Road.Supports(group)) {
+                success = Road.AddLaneConnection(sourceLaneId, targetLaneId, sourceStartNode);
+            }
+            if (Track.Supports(group)) {
+                success &= Track.AddLaneConnection(sourceLaneId, targetLaneId, sourceStartNode);
+            }
+            return success;
+        }
+
+        public bool RemoveLaneConnection(uint sourceLaneId, uint targetLaneId, bool sourceStartNode, LaneEndTransitionGroup group) {
+            bool success = true;
+            var sourceLaneInfo = ExtLaneManager.Instance.GetLaneInfo(sourceLaneId);
+            var targetLaneInfo = ExtLaneManager.Instance.GetLaneInfo(targetLaneId);
+            if (Road.Supports(group)) {
+                success = Road.RemoveLaneConnection(sourceLaneId, targetLaneId, sourceStartNode);
+            } else {
+                bool canConnect = Road.Supports(sourceLaneInfo) && Road.Supports(targetLaneInfo);
+                if (!canConnect)
+                    Road.RemoveLaneConnection(sourceLaneId, targetLaneId, sourceStartNode);
+            }
+            if (Track.Supports(group)) {
+                success |= Track.RemoveLaneConnection(sourceLaneId, targetLaneId, sourceStartNode);
+            } else {
+                bool canConnect = Track.Supports(sourceLaneInfo) && Track.Supports(targetLaneInfo);
+                if (!canConnect)
+                    Track.RemoveLaneConnection(sourceLaneId, targetLaneId, sourceStartNode);
+            }
+            return success;
         }
 
         /// <summary>
@@ -63,27 +120,60 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
         /// Performance note: This act as HasOutgoingConnections for uni-directional lanes but faster
         /// </summary>
         public bool HasConnections(uint laneId, bool startNode) =>
-            Sub.HasConnections(laneId, startNode);
+            Road.HasConnections(laneId, startNode) || Track.HasConnections(laneId, startNode);
 
         /// <summary>
         /// Determines if there exist custom lane connections at the specified node
         /// </summary>
-        public bool HasNodeConnections(ushort nodeId) => Sub.HasNodeConnections(nodeId);
+        public bool HasNodeConnections(ushort nodeId) =>
+            Road.HasNodeConnections(nodeId) || Track.HasNodeConnections(nodeId);
 
         // Note: Not performance critical
         public bool HasUturnConnections(ushort segmentId, bool startNode) =>
-            Sub.HasUturnConnections(segmentId, startNode);
+            Road.HasUturnConnections(segmentId, startNode);
 
         /// <summary>
         /// Removes all lane connections at the specified node
         /// </summary>
         /// <param name="nodeId">Affected node</param>
         internal void RemoveLaneConnectionsFromNode(ushort nodeId) {
-            Sub.RemoveLaneConnectionsFromNode(nodeId);
+            Road.RemoveLaneConnectionsFromNode(nodeId);
+            Track.RemoveLaneConnectionsFromNode(nodeId);
         }
 
-        protected override void HandleInvalidSegment(ref ExtSegment seg) {
-            Sub.HandleInvalidSegmentImpl(seg.segmentId);
+
+        /// <summary>
+        /// Checks if the turning angle between two segments at the given node is within bounds.
+        /// </summary>
+        public static bool CheckSegmentsTurningAngle(ushort sourceSegmentId,
+                                                      bool sourceStartNode,
+                                                      ushort targetSegmentId,
+                                                      bool targetStartNode) {
+            if (sourceSegmentId == targetSegmentId) {
+                return false;
+            }
+
+            ref NetSegment sourceSegment = ref sourceSegmentId.ToSegment();
+            ref NetSegment targetSegment = ref targetSegmentId.ToSegment();
+            float turningAngle = 0.01f - Mathf.Min(
+                sourceSegment.Info.m_maxTurnAngleCos,
+                targetSegment.Info.m_maxTurnAngleCos);
+
+            if (turningAngle < 1f) {
+                Vector3 sourceDirection = sourceStartNode
+                                              ? sourceSegment.m_startDirection
+                                              : sourceSegment.m_endDirection;
+
+                Vector3 targetDirection = targetStartNode
+                                              ? targetSegment.m_startDirection
+                                              : targetSegment.m_endDirection;
+
+                float dirDotProd = (sourceDirection.x * targetDirection.x) +
+                                   (sourceDirection.z * targetDirection.z);
+                return dirDotProd < turningAngle;
+            }
+
+            return true;
         }
 
         internal bool GetLaneEndPoint(ushort segmentId,
@@ -174,14 +264,17 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
         }
 
         public bool LoadData(List<Configuration.LaneConnection> data) {
-            bool success = true;
+            bool success;
             Log.Info($"Loading {data.Count} lane connections");
-            success = Sub.LoadData(data);
+            success = Road.LoadData(data);
+            success &= Track.LoadData(data);
             return success;
         }
 
         public List<Configuration.LaneConnection> SaveData(ref bool success) {
-            return Sub.SaveData(ref success);
+            var ret = Road.SaveData(ref success);
+            ret.AddRange(Track.SaveData(ref success));
+            return ret;
         }
     }
 }

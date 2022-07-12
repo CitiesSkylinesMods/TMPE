@@ -36,8 +36,26 @@ This changelog includes all versions and major variants of the mod going all the
 - [Updated] Separate road and track lane routing #1550 #1546 #1545 #354 (kianzarrin)
 - [Updated] Translations for multiple languages #1551 #1344 (Nguyễn Tài Đức, OldEj, AduitSSH, Chamëleon, 문주원, krzychu124, shg166, John Lok Ho, Márcio Saeger, DucAnhLam, DNSE, Arne Peirs, Neoone, Fatih YILDIRIM, Zeldslayer, GiorgioHerbie, krzychu124)
 
+#### TM:PE V11.6.5.3 STABLE, 02/06/2022
+
+- [Meta] TM:PE 11.6.5.3 branch released as STABLE - huge thanks to our beta testers!
+- [New] Vietnamese translation Locale key updates #1551 (DucAnhLam)
+- [Updated] Api update: TrafficLights/JunctionRestrictions, Road sign theme, extended LaneEndTransitionGroup #1577 (kianzarrin)
+- [Updated] Translations for multiple languages #1551 #1344
+- [Fixed] Simulation Accuracy setting regression #1560 #1554 (krzychu124)
+- [Fixed] Fix regression with version naming #1568 (krzychu124)
+
+#### TM:PE V11.6.5.3 TEST, 01/06/2022
+
+- [New] Vietnamese translation Locale key updates #1551 (DucAnhLam)
+- [Updated] Api update: TrafficLights/JunctionRestrictions, Road sign theme, extended LaneEndTransitionGroup #1577 (kianzarrin)
+- [Updated] Translations for multiple languages #1551 #1344
+- [Fixed] Simulation Accuracy setting regression #1560 #1554 (krzychu124)
+- [Fixed] Fix regression with version naming #1568 (krzychu124)
+
 #### TM:PE V11.6.5.2-hotfix-1 TEST, 08/05/2022
 
+- [Meta] TM:PE 11.6.5.2-hotfix-1
 - [Fixed] Simulation Accuracy setting regression #1560 (krzychu124)
 
 #### TM:PE V11.6.5.2 TEST, 27/04/2022
