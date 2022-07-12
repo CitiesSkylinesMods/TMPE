@@ -1,21 +1,21 @@
 namespace TrafficManager.Patch._CitizenAI {
-    using HarmonyLib;
     using System.Collections.Generic;
     using System.Reflection.Emit;
+    using HarmonyLib;
     using TrafficManager.Util.Extensions;
 
     [HarmonyPatch(typeof(CitizenAI), "GetPathTargetPosition")]
     public static class GetPathTargetPositionPatch {
         [HarmonyPriority(Priority.Low)]
         public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions) {
-            var mGetGap_ =
+            var mGetGap =
                 AccessTools.Method(typeof(GetPathTargetPositionPatch), nameof(GetPathTargetPositionPatch.GetGap));
             foreach (var instruction in instructions) {
                 yield return instruction;
                 if (instruction.opcode == OpCodes.Ldc_R4 && instruction.operand is float value && value == 64) {
                     // we don't replace LDC_R4 64 but rather pass it to GetGap. This way it would be more compatible with other mods in future should they try to modify the same line.
                     yield return new CodeInstruction(OpCodes.Ldloc, 4); // path position
-                    yield return new CodeInstruction(OpCodes.Call, mGetGap_);
+                    yield return new CodeInstruction(OpCodes.Call, mGetGap);
                 }
             }
         }
