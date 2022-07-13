@@ -8,8 +8,7 @@ namespace TrafficManager.Patch._CitizenAI {
     public static class GetPathTargetPositionPatch {
         [HarmonyPriority(Priority.Low)]
         public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions) {
-            var mGetGap =
-                AccessTools.Method(typeof(GetPathTargetPositionPatch), nameof(GetPathTargetPositionPatch.GetGap));
+            var mGetGap = AccessTools.Method(typeof(GetPathTargetPositionPatch), nameof(GetGap));
             foreach (var instruction in instructions) {
                 yield return instruction;
                 if (instruction.opcode == OpCodes.Ldc_R4 && instruction.operand is float value && value == 64) {
