@@ -27,8 +27,7 @@ namespace TrafficManager.Patch._CitizenAI {
 
         private static float Max(float a, float b, float c) {
             float max = a > b ? a : b;
-            max = max > c ? max : c;
-            return max;
+            return max > c ? max : c;
         }
     }
 }
