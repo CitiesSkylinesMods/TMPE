@@ -36,7 +36,7 @@ namespace TrafficManager.UI.SubTools {
             addCursor_ = CursorUtil.LoadCursorFromResource("LaneConnectionManager.add_cursor.png");
             removeCursor_ = CursorUtil.LoadCursorFromResource("LaneConnectionManager.remove_cursor.png");
             directionArrow_ = TextureResources.LoadDllResource("LaneConnectionManager.direction_arrow.png", new IntVector2(256, 256));
-            Highlight.TriangleTexture = directionArrow_;
+            deadEnd_ = TextureResources.LoadDllResource("LaneConnectionManager.dead_end.png", new IntVector2(512, 512));
         }
 
         /// <summary>State of the tool UI.</summary>
@@ -87,7 +87,7 @@ namespace TrafficManager.UI.SubTools {
 
         private Texture2D directionArrow_;
 
-        private Texture2D square_;
+        private Texture2D deadEnd_;
 
         private LaneEndTransitionGroup selectedNodeTransitionGroups_;
 
@@ -144,6 +144,7 @@ namespace TrafficManager.UI.SubTools {
             internal readonly HashSet<LaneEnd> ConnectedCarLaneEnds = new ();
             internal readonly HashSet<LaneEnd> ConnectedTrackLaneEnds = new ();
             internal HashSet<LaneEnd> ConnectedLaneEnds(bool track) => track ? ConnectedTrackLaneEnds : ConnectedCarLaneEnds;
+            internal bool IsDeadEnd(bool track) => ConnectedLaneEnds(track).Contains(this);
             internal Color Color;
 
             internal SegmentLaneMarker SegmentMarker;
@@ -164,6 +165,7 @@ namespace TrafficManager.UI.SubTools {
             /// </summary>
             internal void RenderOverlay(
                 RenderManager.CameraInfo cameraInfo,
+                Texture2D deadEndTexture,
                 Color color,
                 bool highlight = false,
                 bool renderLimits = false,
@@ -189,6 +191,32 @@ namespace TrafficManager.UI.SubTools {
                 }
 
                 NodeMarker.RenderOverlay(cameraInfo, color, shape: shape, enlarge: highlight, renderLimits: renderLimits);
+
+                foreach(var group in ALL_GROUPS) {
+                    if((group & groups) != 0) {
+                        bool track = group == LaneEndTransitionGroup.Track;
+                        bool deadEnd = IsDeadEnd(track);
+                        if (deadEnd) {
+                            RenderDeadEnd(cameraInfo, deadEndTexture, highlight);
+                        }
+                    }
+                }
+            }
+
+            internal void RenderDeadEnd(RenderManager.CameraInfo cameraInfo, Texture2D deadEnd, bool enlarge) {
+                Vector3 pos = NodeMarker.Position;
+                const float scale = 0.25f;
+                float maginification = enlarge ? 2 : 1;
+                Highlight.DrawTextureAt(
+                    cameraInfo: cameraInfo,
+                    pos: pos,
+                    dir: NodeMarker.Direction,
+                    color: Color,
+                    texture: deadEnd,
+                    size: scale * maginification,
+                    minY: pos.y - 5,
+                    maxY: pos.y + 5,
+                    renderLimits: false);
             }
         }
 
@@ -323,28 +351,30 @@ namespace TrafficManager.UI.SubTools {
                                 continue;
                             }
                             bool track = group == LaneEndTransitionGroup.Track;
-                            foreach (LaneEnd targetLaneEnd in laneEnd.ConnectedLaneEnds(track)) {
-                                ref NetLane targetLane = ref targetLaneEnd.LaneId.ToLane();
-                                if (!targetLane.IsValidWithSegment()) {
-                                    continue;
+                            if (!laneEnd.IsDeadEnd(track)) { 
+                                foreach (LaneEnd targetLaneEnd in laneEnd.ConnectedLaneEnds(track)) {
+                                    ref NetLane targetLane = ref targetLaneEnd.LaneId.ToLane();
+                                    if (!targetLane.IsValidWithSegment()) {
+                                        continue;
+                                    }
+
+                                    // render lane connection from laneEnd to targetLaneEnd
+                                    Bezier3 bezier = CalculateBezierConnection(laneEnd, targetLaneEnd);
+                                    Vector3 height = bezier.Max();
+                                    bool underground = (height.y + 1f) < intersectionY || laneEnd.NodeId == SelectedNodeId;
+
+                                    Color fillColor = laneEnd.Color.WithAlpha(TransparentAlpha);
+                                    Color outlineColor = Color.black.WithAlpha(TransparentAlpha);
+                                    bool showArrow = track && ShouldShowDirectionOfConnection(laneEnd, targetLaneEnd);
+                                    DrawLaneCurve(
+                                        cameraInfo: cameraInfo,
+                                        bezier: ref bezier,
+                                        color: fillColor,
+                                        outlineColor: outlineColor,
+                                        arrowColor: showArrow ? fillColor : default,
+                                        arrowOutlineColor: showArrow ? outlineColor : default,
+                                        underground: underground);
                                 }
-
-                                // render lane connection from laneEnd to targetLaneEnd
-                                Bezier3 bezier = CalculateBezierConnection(laneEnd, targetLaneEnd);
-                                Vector3 height = bezier.Max();
-                                bool underground = (height.y + 1f) < intersectionY || laneEnd.NodeId == SelectedNodeId;
-
-                                Color fillColor = laneEnd.Color.WithAlpha(TransparentAlpha);
-                                Color outlineColor = Color.black.WithAlpha(TransparentAlpha);
-                                bool showArrow = track && ShouldShowDirectionOfConnection(laneEnd, targetLaneEnd);
-                                DrawLaneCurve(
-                                    cameraInfo: cameraInfo,
-                                    bezier: ref bezier,
-                                    color: fillColor,
-                                    outlineColor: outlineColor,
-                                    arrowColor: showArrow ? fillColor : default,
-                                    arrowOutlineColor: showArrow ? outlineColor : default,
-                                    underground: underground);
                             }
                         }
                     }
@@ -359,7 +389,7 @@ namespace TrafficManager.UI.SubTools {
                     bool targetMode = GetSelectionMode() == SelectionMode.SelectTarget;
                     if ( sourceMode & laneEnd.IsSource) {
                         // draw source marker in source selection mode,
-                        // make exception for markers that have no target:
+                        // make exception for markers that can have no target:
                         foreach(var targetLaneEnd in laneEnds) {
                             if (CanConnect(laneEnd, targetLaneEnd, group_, out bool acute2)) {
                                 drawMarker = true;
@@ -383,10 +413,7 @@ namespace TrafficManager.UI.SubTools {
                     if (drawMarker) {
                         bool markerIsHovered = false;
                         if (hoveredLaneEnd == null) {
-                            float hitH = TrafficManagerTool.GetAccurateHitHeight();
-                            markerIsHovered =
-                                laneEnd.IntersectRay();
-
+                            markerIsHovered = laneEnd.IntersectRay();
                             if (markerIsHovered) {
                                 hoveredLaneEnd = laneEnd;
                             }
@@ -400,7 +427,7 @@ namespace TrafficManager.UI.SubTools {
                             bool isTarget = selectedLaneEnd != null && laneEnd != selectedLaneEnd;
                             var color = isTarget ? Color.white : laneEnd.Color;
                             bool highlightMarker = laneEnd == selectedLaneEnd || markerIsHovered;
-                            laneEnd.RenderOverlay(cameraInfo, color, highlightMarker, true, group);
+                            laneEnd.RenderOverlay(cameraInfo, deadEnd_, color, highlightMarker, true, group);
                         }
                     } // if drawMarker
                 } // end foreach lanemarker in node markers
@@ -414,24 +441,31 @@ namespace TrafficManager.UI.SubTools {
                         continue;
                     }
                     bool track = group == LaneEndTransitionGroup.Track;
-                    foreach (LaneEnd targetLaneEnd in this.selectedLaneEnd.ConnectedLaneEnds(track)) {
-                        ref NetLane targetLane = ref targetLaneEnd.LaneId.ToLane();
-                        if (!targetLane.IsValidWithSegment()) {
-                            continue;
-                        }
+                    bool deadEnd = selectedLaneEnd.IsDeadEnd(track);
+                    if (hoveredLaneEnd != null) {
+                        deadEnd ^= selectedLaneEnd == hoveredLaneEnd;
+                    }
 
-                        Bezier3 bezier = CalculateBezierConnection(selectedLaneEnd, targetLaneEnd);
-                        bool showArrow = track & ShouldShowDirectionOfConnection(selectedLaneEnd, targetLaneEnd);
-                        DrawLaneCurve(
-                            cameraInfo: cameraInfo,
-                            bezier: ref bezier,
-                            color: this.selectedLaneEnd.Color,
-                            outlineColor: Color.black,
-                            arrowColor: showArrow ? this.selectedLaneEnd.Color : default,
-                            arrowOutlineColor: showArrow ? Color.black : default,
-                            size: 0.18f, // Embolden
-                            underground: true);
-                    } // end foreach selectedMarker.ConnectedMarkers
+                    if (!deadEnd) {
+                        foreach (LaneEnd targetLaneEnd in this.selectedLaneEnd.ConnectedLaneEnds(track)) {
+                            ref NetLane targetLane = ref targetLaneEnd.LaneId.ToLane();
+                            if (!targetLane.IsValidWithSegment()) {
+                                continue;
+                            }
+
+                            Bezier3 bezier = CalculateBezierConnection(selectedLaneEnd, targetLaneEnd);
+                            bool showArrow = track & ShouldShowDirectionOfConnection(selectedLaneEnd, targetLaneEnd);
+                            DrawLaneCurve(
+                                cameraInfo: cameraInfo,
+                                bezier: ref bezier,
+                                color: this.selectedLaneEnd.Color,
+                                outlineColor: Color.black,
+                                arrowColor: showArrow ? this.selectedLaneEnd.Color : default,
+                                arrowOutlineColor: showArrow ? Color.black : default,
+                                size: 0.18f, // Embolden
+                                underground: true);
+                        } // end foreach selectedMarker.ConnectedMarkers
+                    }
                 }
             } // end if selectedMarker != null
         }
@@ -456,7 +490,7 @@ namespace TrafficManager.UI.SubTools {
                     Vector3 selNodePos = SelectedNodeId.ToNode().m_position;
 
                     // Draw a currently dragged curve
-                    if (hoveredLaneEnd == null || hoveredLaneEnd.LaneId == selectedLaneEnd.LaneId) {
+                    if (hoveredLaneEnd == null) {
                         // get accurate position on a plane positioned at node height
                         Plane plane = new Plane(Vector3.up, Vector3.zero.ChangeY(selNodePos.y));
                         Ray ray = InGameUtil.Instance.CachedMainCamera.ScreenPointToRay(Input.mousePosition);
@@ -475,41 +509,58 @@ namespace TrafficManager.UI.SubTools {
                             renderLimits: true);
                     } else {
                         // snap to hovered, render accurate connection bezier
-                        Bezier3 bezier = CalculateBezierConnection(selectedLaneEnd, hoveredLaneEnd);
                         bool connected = LaneConnectionManager.Instance.AreLanesConnected(
                             selectedLaneEnd.LaneId, hoveredLaneEnd.LaneId, selectedLaneEnd.StartNode, group_);
-
                         Color fillColor = connected ?
                             Color.Lerp(a: selectedLaneEnd.Color, b: Color.white, t: 0.33f) : // show underneath color if there is connection.
                             default; // hollow if there isn't connection
-                        bool track = (group_ & LaneEndTransitionGroup.Track) != 0;
-                        bool showArrow = !connected && track && ShouldShowDirectionOfConnection(selectedLaneEnd, hoveredLaneEnd);
-                        DrawLaneCurve(
-                            cameraInfo: cameraInfo,
-                            bezier: ref bezier,
-                            color: fillColor,
-                            outlineColor: Color.white,
-                            arrowColor: default, 
-                            arrowOutlineColor: showArrow ? Color.white : default,
-                            size: 0.18f, // Embolden
-                            underground: true);
-                        if(!connected && MultiMode && selectedLaneEnd.IsBidirectional && hoveredLaneEnd.IsBidirectional) {
-                            Bezier3 bezier2 = CalculateBezierConnection(hoveredLaneEnd, selectedLaneEnd);
-                            // draw backward arrow only:
-                            bool connected2 = LaneConnectionManager.Instance.AreLanesConnected(
-                            hoveredLaneEnd.LaneId, selectedLaneEnd.LaneId, selectedLaneEnd.StartNode, group_);
+                        if (selectedLaneEnd == hoveredLaneEnd) {
+                            Bezier3 bezier = CalculateDeadEndBezier(selectedLaneEnd);
+                            const float step = 1f / 2f;
+                            for (float cut = 0; cut < 1; cut += step) {
+                                Bezier3 b = bezier.Cut(cut, cut + step);
+                                DrawLaneCurve(
+                                    cameraInfo: cameraInfo,
+                                    bezier: ref b,
+                                    color: default,
+                                    outlineColor: Color.white,
+                                    arrowColor: default,
+                                    arrowOutlineColor: default,
+                                    size: 0.18f, // Embolden
+                                    underground: true);
+                            }
+                        } else {
+                            bool track = (group_ & LaneEndTransitionGroup.Track) != 0;
+                            bool showArrow = !connected && track && ShouldShowDirectionOfConnection(selectedLaneEnd, hoveredLaneEnd);
+                            Bezier3 bezier = CalculateBezierConnection(selectedLaneEnd, hoveredLaneEnd);
                             DrawLaneCurve(
                                 cameraInfo: cameraInfo,
-                                bezier: ref bezier2,
-                                color: default,
+                                bezier: ref bezier,
+                                color: fillColor,
                                 outlineColor: Color.white,
                                 arrowColor: default,
-                                arrowOutlineColor: connected2 ? default : Color.white,
+                                arrowOutlineColor: showArrow ? Color.white : default,
                                 size: 0.18f, // Embolden
                                 underground: true);
-                        }
 
-                        OverrideCursor = connected ? removeCursor_ : addCursor_; 
+                            if (!connected && MultiMode && selectedLaneEnd.IsBidirectional && hoveredLaneEnd.IsBidirectional) {
+                                Bezier3 bezier2 = CalculateBezierConnection(hoveredLaneEnd, selectedLaneEnd);
+                                // draw backward arrow only:
+                                bool connected2 = LaneConnectionManager.Instance.AreLanesConnected(
+                                hoveredLaneEnd.LaneId, selectedLaneEnd.LaneId, selectedLaneEnd.StartNode, group_);
+                                DrawLaneCurve(
+                                    cameraInfo: cameraInfo,
+                                    bezier: ref bezier2,
+                                    color: default,
+                                    outlineColor: Color.white,
+                                    arrowColor: default,
+                                    arrowOutlineColor: connected2 ? default : Color.white,
+                                    size: 0.18f, // Embolden
+                                    underground: true);
+                            }
+
+                            OverrideCursor = connected ? removeCursor_ : addCursor_;
+                        }
                     }
                 }
 
@@ -1079,15 +1130,16 @@ namespace TrafficManager.UI.SubTools {
             } else if (GetSelectionMode() == SelectionMode.SelectTarget) {
                 // toggle lane connection
                 bool canBeBidirectional = selectedLaneEnd.IsBidirectional && hoveredLaneEnd.IsBidirectional;
+                bool deadEnd = selectedLaneEnd == hoveredLaneEnd; // we are toggling dead end.
                 if (LaneConnectionManager.Instance.AreLanesConnected(
                     selectedLaneEnd.LaneId, hoveredLaneEnd.LaneId, selectedLaneEnd.StartNode, group_)) {
                     RemoveLaneConnection(selectedLaneEnd, hoveredLaneEnd, group_);
-                    if (canBeBidirectional && ShiftIsPressed) {
+                    if (!deadEnd && canBeBidirectional && ShiftIsPressed) {
                         RemoveLaneConnection(hoveredLaneEnd, selectedLaneEnd, group_);
                     }
                 } else {
                     AddLaneConnection(selectedLaneEnd, hoveredLaneEnd, group_);
-                    if (canBeBidirectional && ShiftIsPressed) {
+                    if (!deadEnd && canBeBidirectional && ShiftIsPressed) {
                         AddLaneConnection(hoveredLaneEnd, selectedLaneEnd, group_);
                     }
                 }
@@ -1097,13 +1149,26 @@ namespace TrafficManager.UI.SubTools {
                 MainTool.RequestOnscreenDisplayUpdate();
             }
         }
+
         private static void UpdateConnectionTwoway(LaneEnd laneEnd1, LaneEnd laneEnd2) {
             UpdateConnection(laneEnd1, laneEnd2);
-            UpdateConnection(laneEnd2, laneEnd1);
+            if (laneEnd1 != laneEnd2) {
+                UpdateConnection(laneEnd2, laneEnd1);
+            }
         }
 
         private static void UpdateConnection(LaneEnd source, LaneEnd target) {
             Log._Debug($"LaneConnectorTool.UpdateConnection({source.LaneId}, {target.LaneId}) called at node{source.NodeId})");
+            bool deadEnd = source == target;
+            if (deadEnd) {
+                // when dead end connection is made, remove all other connections.
+                source.ConnectedCarLaneEnds.Clear();
+                Log._Debug("cleared cached car connections");
+            } else {
+                // when new connection is made, remove previous dead end connection.
+                source.ConnectedCarLaneEnds.Remove(source);
+                Log._Debug("removed cached car dead end");
+            }
             if (LaneConnectionManager.Instance.Road.AreLanesConnected(
                 source.LaneId, target.LaneId, source.StartNode)) {
                 source.ConnectedCarLaneEnds.Add(target);
@@ -1113,6 +1178,15 @@ namespace TrafficManager.UI.SubTools {
                 Log._Debug("there is no car connection");
             }
 
+            if (deadEnd) {
+                // when dead end connection is made, remove all other connections.
+                source.ConnectedTrackLaneEnds.Clear();
+                Log._Debug("cleared cached track connections");
+            } else {
+                // when new connection is made, remove previous dead end connection.
+                source.ConnectedTrackLaneEnds.Remove(source);
+                Log._Debug("removed cached track dead end");
+            }
             if (LaneConnectionManager.Instance.Track.AreLanesConnected(
                 source.LaneId, target.LaneId, source.StartNode)) {
                 source.ConnectedTrackLaneEnds.Add(target);
@@ -1584,24 +1658,30 @@ namespace TrafficManager.UI.SubTools {
             Bezier3 bezier3 = default;
             bezier3.a = sourceLaneEnd.NodeMarker.Position;
             bezier3.d = targetLaneEnd.NodeMarker.Position;
+            Vector3 dira = -sourceLaneEnd.NodeMarker.Direction;
+            Vector3 dird = -targetLaneEnd.NodeMarker.Direction;
 
-            Vector3 sourceLaneDirection =
-                (sourceLaneEnd.LaneId.ToLane().m_bezier
-                           .Tangent(sourceLaneEnd.StartNode ? 0f : 1f) *
-                 (sourceLaneEnd.StartNode ? -1 : 1)).normalized;
-            Vector3 targetLaneDirection =
-                (targetLaneEnd.LaneId.ToLane().m_bezier
-                           .Tangent(targetLaneEnd.StartNode ? 0f : 1f) *
-                 (targetLaneEnd.StartNode ? -1 : 1)).normalized;
             NetSegment.CalculateMiddlePoints(
-                bezier3.a,
-                sourceLaneDirection,
-                bezier3.d,
-                targetLaneDirection,
-                false,
-                false,
-                out bezier3.b,
-                out bezier3.c);
+                    bezier3.a,
+                    dira,
+                    bezier3.d,
+                    dird,
+                    false,
+                    false,
+                    out bezier3.b,
+                    out bezier3.c);
+            return bezier3;
+        }
+
+        private Bezier3 CalculateDeadEndBezier(LaneEnd laneEnd) {
+            Bezier3 bezier3 = default;
+            Vector3 dir = -laneEnd.NodeMarker.Direction * 10;
+            bezier3.d = bezier3.a = laneEnd.NodeMarker.Position + dir * .1f;
+
+            const float angle = Mathf.PI / 4;
+            bezier3.b = bezier3.a + dir.RotateXZ(angle);
+            bezier3.c = bezier3.d + dir.RotateXZ(-angle);
+
             return bezier3;
         }
 

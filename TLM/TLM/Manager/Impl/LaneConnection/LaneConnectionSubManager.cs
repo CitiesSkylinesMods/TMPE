@@ -45,6 +45,12 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
 
         public VehicleInfo.VehicleType VehicleTypes => vehicleTypes_;
 
+#if DEBUG
+        private bool verbose_ => DebugSwitch.LaneConnections.Get();
+#else
+        private const bool verbose_ = false;
+#endif
+
         /// <summary>
         /// tests if the input group is supported by this sub-manager.
         /// </summary>
@@ -232,13 +238,7 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
         /// Removes the lane connection from source lane to target lane.
         /// </summary>
         internal bool RemoveLaneConnection(uint sourceLaneId, uint targetLaneId, bool sourceStartNode) {
-#if DEBUG
-            bool logLaneConnections = DebugSwitch.LaneConnections.Get();
-#else
-            const bool logLaneConnections = false;
-#endif
-
-            if (logLaneConnections) {
+            if (verbose_) {
                 Log._Debug($"LaneConnectionSubManager({Group}).RemoveLaneConnection({sourceLaneId}, {targetLaneId}, " +
                            $"{sourceStartNode}) called.");
             }
@@ -252,8 +252,9 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
             ushort targetSegmentId = targetLaneId.ToLane().m_segment;
             ushort nodeId = sourceSegmentId.ToSegment().GetNodeId(sourceStartNode);
             var result = connectionDataBase_.Disconnect(sourceLaneId, targetLaneId, nodeId);
+            AssertLane(sourceLaneId, sourceStartNode);
 
-            if (logLaneConnections) {
+            if (verbose_) {
                 Log._Debug($"LaneConnectionSubManager({Group}).RemoveLaneConnection({sourceLaneId}, {targetLaneId}, " +
                            $"{sourceStartNode}): ret={result}");
             }
@@ -284,11 +285,9 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
         /// </summary>
         /// <param name="nodeId">Affected node</param>
         internal void RemoveLaneConnectionsFromNode(ushort nodeId) {
-#if DEBUG
-            if (DebugSwitch.LaneConnections.Get()) {
+            if (verbose_) {
                 Log._Debug($"LaneConnectionSubManager({Group}).RemoveLaneConnectionsFromNode({nodeId}) called.");
             }
-#endif
 
             ref NetNode node = ref nodeId.ToNode();
             for (int i = 0; i < 8; ++i) {
@@ -320,12 +319,7 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
         internal void RemoveLaneConnections(uint laneId,
                                             bool startNode,
                                             bool recalcAndPublish = true) {
-#if DEBUG
-            bool logLaneConnections = DebugSwitch.LaneConnections.Get();
-#else
-            const bool logLaneConnections = false;
-#endif
-            if (logLaneConnections) {
+            if (verbose_) {
                 Log._Debug($"LaneConnectionSubManager({Group}).RemoveLaneConnections({laneId}, " +
                            $"{startNode}) called.");
             }
@@ -351,9 +345,7 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
         /// <param name="sourceStartNode">The affected node</param>
         /// <returns></returns>
         internal bool AddLaneConnection(uint sourceLaneId, uint targetLaneId, bool sourceStartNode) {
-            if (sourceLaneId == targetLaneId) {
-                return false;
-            }
+            bool deadEnd = sourceLaneId == targetLaneId;
 
             bool valid = ValidateLane(sourceLaneId) & ValidateLane(targetLaneId);
             if (!valid) {
@@ -386,14 +378,16 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
                     return dir.IsFlagSet(NetInfo.Direction.Backward);
                 }
             }
-            canConnect =
-                IsDirectionValid(ref sourceNetLane, sourceLaneInfo, nodeId, true) &&
-                IsDirectionValid(ref targetNetLane, targetLaneInfo, nodeId, false);
+            canConnect = IsDirectionValid(ref sourceNetLane, sourceLaneInfo, nodeId, true);
+            if (!deadEnd) {
+                canConnect &= IsDirectionValid(ref targetNetLane, targetLaneInfo, nodeId, false);
+            }
+
             if (!canConnect) {
                 return false;
             }
 
-            if (Group == LaneEndTransitionGroup.Track) {
+            if (!deadEnd && Group == LaneEndTransitionGroup.Track) {
                 bool targetStartnode = targetSegmentId.ToSegment().IsStartNode(nodeId);
                 canConnect = LaneConnectionManager.CheckSegmentsTurningAngle(
                     sourceSegmentId, sourceStartNode, targetSegmentId, targetStartnode);
@@ -402,16 +396,38 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
                 }
             }
 
+            var connections = GetLaneConnections(sourceLaneId, sourceStartNode);
+            if (verbose_) {
+                Log._Debug($"AddLaneConnection: {sourceLaneId}->{targetLaneId} at {nodeId} connections={connections.ToSTR()}");
+            }
+            if (connections != null) {
+                foreach (uint laneId in connections) {
+                    LaneEnd key = new(laneId, nodeId);
+                    if (deadEnd) {
+                        if (laneId != sourceLaneId) {
+                            // dead end lane connection cannot have other lane connections.
+                            if (verbose_) {
+                                Log._Debug($"making a dead end connection disconnecting {sourceLaneId}->{laneId} at {nodeId}");
+                            }
+                            connectionDataBase_.Disconnect(sourceLaneId, laneId, nodeId);
+                        }
+                    } else {
+                        if (laneId == sourceLaneId) {
+                            // if adding a new connection then remove the dead end connection.
+                            if (verbose_) {
+                                Log._Debug($"removing dead end connection for lane:{sourceLaneId} at node:{nodeId}");
+                            }
+                            connectionDataBase_.Disconnect(sourceLaneId, sourceLaneId, nodeId);
+                        }
+                    }
+                }
+            }
+
             connectionDataBase_.ConnectTo(sourceLaneId, targetLaneId, nodeId);
             Assert(AreLanesConnected(sourceLaneId, targetLaneId, sourceStartNode), $"AreLanesConnected({sourceLaneId}, {targetLaneId}, {sourceStartNode})");
+            AssertLane(sourceLaneId, sourceStartNode);
 
-#if DEBUG
-            bool logLaneConnections = DebugSwitch.LaneConnections.Get();
-#else
-            const bool logLaneConnections = false;
-#endif
-
-            if (logLaneConnections) {
+            if (verbose_) {
                 Log._Debug($"LaneConnectionSubManager({Group}).AddLaneConnection({sourceLaneId}, " +
                            $"{targetLaneId}, {sourceStartNode})");
             }
@@ -439,13 +455,17 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
             return true;
         }
 
+        private void AssertLane(uint laneId, bool startNode) {
+            var connections = GetLaneConnections(laneId, startNode);
+            if (connections != null && connections.Contains(laneId)) {
+                // dead end should only have one connection to itself.
+                ushort nodeId = laneId.ToLane().GetNodeId(startNode);
+                Assert(connections.Length == 1, $"connections for lane:{laneId} at node:{nodeId} = " + connections.ToSTR());
+            } 
+        }
+
         private void ReleasingSegment(ushort segmentId, ref NetSegment segment) {
-#if DEBUG
-            bool logLaneConnections = DebugSwitch.LaneConnections.Get();
-#else
-            const bool logLaneConnections = false;
-#endif
-            if (logLaneConnections) {
+            if (verbose_) {
                 Log._Debug($"LaneConnectionSubManager({Group}).ReleasingSegment({segmentId}, isValid={segment.IsValid()}): " +
                            "Segment is about to become invalid. Removing lane connections.");
             }
@@ -466,12 +486,7 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
         /// <param name="laneId">Affected lane</param>
         /// <param name="nodeId">Affected node</param>
         private void RecalculateLaneArrows(uint laneId, ushort nodeId, bool startNode) {
-#if DEBUG
-            bool logLaneConnections = DebugSwitch.LaneConnections.Get();
-#else
-            const bool logLaneConnections = false;
-#endif
-            if (logLaneConnections) {
+            if (verbose_) {
                 Log._Debug($"LaneConnectionSubManager({Group}).RecalculateLaneArrows({laneId}, {nodeId}) called");
             }
 
@@ -480,7 +495,7 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
             }
 
             if (!Flags.CanHaveLaneArrows(laneId, startNode)) {
-                if (logLaneConnections) {
+                if (verbose_) {
                     Log._Debug($"LaneConnectionSubManager({Group}).RecalculateLaneArrows({laneId}, {nodeId}): " +
                                $"lane {laneId}, startNode? {startNode} must not have lane arrows");
                 }
@@ -488,8 +503,10 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
                 return;
             }
 
-            if (!HasOutgoingConnections(laneId, startNode)) {
-                if (logLaneConnections) {
+            const bool RESET = false; // reset lane arrows when last lane connection is removed.
+
+            if (RESET && !HasOutgoingConnections(laneId, startNode)) {
+                if (verbose_) {
                     Log._Debug($"LaneConnectionSubManager({Group}).RecalculateLaneArrows({laneId}, {nodeId}): " +
                                $"lane {laneId} does not have outgoing connections");
                 }
@@ -498,7 +515,7 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
             }
 
             if (nodeId == 0) {
-                if (logLaneConnections) {
+                if (verbose_) {
                     Log._Debug($"LaneConnectionSubManager({Group}).RecalculateLaneArrows({laneId}, {nodeId}): " +
                                "invalid node");
                 }
@@ -506,11 +523,10 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
                 return;
             }
 
-            var arrows = LaneArrows.None;
             ushort segmentId = laneId.ToLane().m_segment;
 
             if (segmentId == 0) {
-                if (logLaneConnections) {
+                if (verbose_) {
                     Log._Debug($"LaneConnectionSubManager({Group}).RecalculateLaneArrows({laneId}, {nodeId}): " +
                                "invalid segment");
                 }
@@ -518,7 +534,7 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
                 return;
             }
 
-            if (logLaneConnections) {
+            if (verbose_) {
                 Log._Debug($"LaneConnectionSubManager({Group}).RecalculateLaneArrows({laneId}, {nodeId}): " +
                            $"startNode? {startNode}");
             }
@@ -526,7 +542,7 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
             ref NetNode netNode = ref nodeId.ToNode();
 
             if (!netNode.IsValid()) {
-                if (logLaneConnections) {
+                if (verbose_) {
                     Log._Debug($"LaneConnectionSubManager({Group}).RecalculateLaneArrows({laneId}, {nodeId}): " +
                                "Node is invalid");
                 }
@@ -534,153 +550,43 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
                 return;
             }
 
-            IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
-            ExtSegmentEnd segEnd = segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segmentId, startNode)];
+            var targetLaneIds = this.GetLaneConnections(laneId, startNode);
+            if (targetLaneIds.IsNullOrEmpty()) {
+                LaneArrowManager.Instance.ResetLaneArrows(laneId);
+                return;
+            }
 
-            for (int i = 0; i < 8; ++i) {
-                ushort otherSegmentId = netNode.GetSegment(i);
-                if (otherSegmentId != 0) {
-                    //TODO move the following into a function
-                    ArrowDirection dir = segEndMan.GetDirection(ref segEnd, otherSegmentId);
+            ref ExtSegmentEnd segEnd = ref ExtSegmentEndManager.Instance.ExtSegmentEnds[segEndMan.GetIndex(segmentId, startNode)];
 
-                    if (logLaneConnections) {
-                        Log._Debug(
-                            $"LaneConnectionSubManager({Group}).RecalculateLaneArrows({laneId}, {nodeId}): " +
-                            $"processing connected segment {otherSegmentId}. dir={dir}");
-                    }
-
-                    // check if arrow has already been set for this direction
-                    switch (dir) {
-                        case ArrowDirection.Turn: {
-                                if (LHT) {
-                                    if ((arrows & LaneArrows.Right) != LaneArrows.None) {
-                                        continue;
-                                    }
-                                } else {
-                                    if ((arrows & LaneArrows.Left) != LaneArrows.None) {
-                                        continue;
-                                    }
-                                }
-
-                                break;
-                            }
-
-                        case ArrowDirection.Forward: {
-                                if ((arrows & LaneArrows.Forward) != LaneArrows.None) {
-                                    continue;
-                                }
-
-                                break;
-                            }
-
-                        case ArrowDirection.Left: {
-                                if ((arrows & LaneArrows.Left) != LaneArrows.None) {
-                                    continue;
-                                }
-
-                                break;
-                            }
-
-                        case ArrowDirection.Right: {
-                                if ((arrows & LaneArrows.Right) != LaneArrows.None) {
-                                    continue;
-                                }
-
-                                break;
-                            }
-
-                        default: {
-                                continue;
-                            }
-                    }
-
-                    if (logLaneConnections) {
-                        Log._Debug(
-                            $"LaneConnectionSubManager({Group}).RecalculateLaneArrows({laneId}, {nodeId}): " +
-                            $"processing connected segment {otherSegmentId}: need to determine arrows");
-                    }
-
-                    bool addArrow = false;
-                    uint curLaneId = otherSegmentId.ToSegment().m_lanes;
-
-                    while (curLaneId != 0) {
-                        if (logLaneConnections) {
-                            Log._Debug(
-                                $"LaneConnectionSubManager({Group}).RecalculateLaneArrows({laneId}, {nodeId}): " +
-                                $"processing connected segment {otherSegmentId}: checking lane {curLaneId}");
-                        }
-
-                        if (AreLanesConnected(laneId, curLaneId, startNode)) {
-                            if (logLaneConnections) {
-                                Log._Debug(
-                                    $"LaneConnectionSubManager({Group}).RecalculateLaneArrows({laneId}, {nodeId}): " +
-                                    $"processing connected segment {otherSegmentId}: checking lane " +
-                                    $"{curLaneId}: lanes are connected");
-                            }
-
-                            addArrow = true;
-                            break;
-                        }
-
-                        curLaneId = curLaneId.ToLane().m_nextLane;
-                    }
-
-                    if (logLaneConnections) {
-                        Log._Debug(
-                            $"LaneConnectionSubManager({Group}).RecalculateLaneArrows({laneId}, {nodeId}): " +
-                            $"processing connected segment {otherSegmentId}: finished processing " +
-                            $"lanes. addArrow={addArrow} arrows (before)={arrows}");
-                    }
-
-                    if (!addArrow) {
-                        continue;
-                    }
-
-                    switch (dir) {
-                        case ArrowDirection.Turn: {
-                                if (LHT) {
-                                    arrows |= LaneArrows.Right;
-                                } else {
-                                    arrows |= LaneArrows.Left;
-                                }
-
-                                break;
-                            }
-
-                        case ArrowDirection.Forward: {
-                                arrows |= LaneArrows.Forward;
-                                break;
-                            }
-
-                        case ArrowDirection.Left: {
-                                arrows |= LaneArrows.Left;
-                                break;
-                            }
-
-                        case ArrowDirection.Right: {
-                                arrows |= LaneArrows.Right;
-                                break;
-                            }
-
-                        default: {
-                                continue;
-                            }
-                    }
-
-                    if (logLaneConnections) {
-                        Log._Debug(
-                            $"LaneConnectionSubManager({Group}).RecalculateLaneArrows({laneId}, {nodeId}): " +
-                            $"processing connected segment {otherSegmentId}: arrows={arrows}");
-                    }
+            var arrows = LaneArrows.None;
+            foreach (uint targetLaneId in targetLaneIds) {
+                if (targetLaneId != laneId) {
+                    ArrowDirection dir = segEndMan.GetDirection(ref segEnd, targetLaneId.ToLane().m_segment);
+                    arrows |= ToLaneArrows(dir);
                 }
             }
 
-            if (logLaneConnections) {
+            if (verbose_) {
                 Log._Debug($"LaneConnectionSubManager({Group}).RecalculateLaneArrows({laneId}, {nodeId}): " +
-                           $"setting lane arrows to {arrows}");
+                            $"setting lane arrows to {arrows}");
             }
 
             LaneArrowManager.Instance.SetLaneArrows(laneId, arrows, true);
+
+            static LaneArrows ToLaneArrows(ArrowDirection dir) {
+                switch (dir) {
+                    case ArrowDirection.Forward:
+                        return LaneArrows.Forward;
+                    case ArrowDirection.Left:
+                        return LaneArrows.Left;
+                    case ArrowDirection.Right:
+                        return LaneArrows.Right;
+                    case ArrowDirection.Turn:
+                        return LaneArrows_Far;
+                    default:
+                        return LaneArrows.None;
+                }
+            }
         }
 
         public bool LoadData(List<Configuration.LaneConnection> data) {

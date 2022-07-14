@@ -1097,9 +1097,8 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\LaneConnectionManager\add_cursor.png" />
     <EmbeddedResource Include="Resources\LaneConnectionManager\remove_cursor.png" />
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="Resources\LaneConnectionManager\direction_arrow.png" />
+    <EmbeddedResource Include="Resources\LaneConnectionManager\dead_end.png" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\SignThemes\Fallback\Allow-Bus.png" />
