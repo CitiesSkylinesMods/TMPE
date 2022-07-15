@@ -197,7 +197,7 @@ namespace TrafficManager.UI.SubTools {
                         bool track = group == LaneEndTransitionGroup.Track;
                         bool deadEnd = IsDeadEnd(track);
                         if (deadEnd) {
-                            RenderDeadEnd(cameraInfo, deadEndTexture, highlight);
+                            //RenderDeadEnd(cameraInfo, deadEndTexture, highlight);
                         }
                     }
                 }
@@ -205,15 +205,15 @@ namespace TrafficManager.UI.SubTools {
 
             internal void RenderDeadEnd(RenderManager.CameraInfo cameraInfo, Texture2D deadEnd, bool enlarge) {
                 Vector3 pos = NodeMarker.Position;
-                const float scale = 0.25f;
-                float maginification = enlarge ? 2 : 1;
+                pos -= NodeMarker.Direction * (enlarge ? 1.6f : 1.4f);
+                const float scale = .7f;
                 Highlight.DrawTextureAt(
                     cameraInfo: cameraInfo,
                     pos: pos,
                     dir: NodeMarker.Direction,
                     color: Color,
                     texture: deadEnd,
-                    size: scale * maginification,
+                    size: scale,
                     minY: pos.y - 5,
                     maxY: pos.y + 5,
                     renderLimits: false);
@@ -441,11 +441,7 @@ namespace TrafficManager.UI.SubTools {
                         continue;
                     }
                     bool track = group == LaneEndTransitionGroup.Track;
-                    bool deadEnd = selectedLaneEnd.IsDeadEnd(track);
-                    if (hoveredLaneEnd != null) {
-                        deadEnd ^= selectedLaneEnd == hoveredLaneEnd;
-                    }
-
+                    bool deadEnd = selectedLaneEnd.IsDeadEnd(track) || selectedLaneEnd == hoveredLaneEnd;
                     if (!deadEnd) {
                         foreach (LaneEnd targetLaneEnd in this.selectedLaneEnd.ConnectedLaneEnds(track)) {
                             ref NetLane targetLane = ref targetLaneEnd.LaneId.ToLane();
@@ -516,19 +512,16 @@ namespace TrafficManager.UI.SubTools {
                             default; // hollow if there isn't connection
                         if (selectedLaneEnd == hoveredLaneEnd) {
                             Bezier3 bezier = CalculateDeadEndBezier(selectedLaneEnd);
-                            const float step = 1f / 2f;
-                            for (float cut = 0; cut < 1; cut += step) {
-                                Bezier3 b = bezier.Cut(cut, cut + step);
-                                DrawLaneCurve(
-                                    cameraInfo: cameraInfo,
-                                    bezier: ref b,
-                                    color: default,
-                                    outlineColor: Color.white,
-                                    arrowColor: default,
-                                    arrowOutlineColor: default,
-                                    size: 0.18f, // Embolden
-                                    underground: true);
-                            }
+                            DrawLaneCurve(
+                                cameraInfo: cameraInfo,
+                                bezier: ref bezier,
+                                color: fillColor,
+                                outlineColor: Color.white,
+                                arrowColor: default,
+                                arrowOutlineColor: default,
+                                size: 0.18f, // Embolden
+                                underground: true,
+                                subDevide: true);
                         } else {
                             bool track = (group_ & LaneEndTransitionGroup.Track) != 0;
                             bool showArrow = !connected && track && ShouldShowDirectionOfConnection(selectedLaneEnd, hoveredLaneEnd);
@@ -1589,7 +1582,8 @@ namespace TrafficManager.UI.SubTools {
                                    Color arrowColor,
                                    Color arrowOutlineColor,
                                    float size = 0.08f,
-                                   bool underground = false) {
+                                   bool underground = false,
+                                   bool subDevide = false) {
             Bounds bounds = bezier.GetBounds();
             float minY = bounds.min.y - 0.5f;
             float maxY = bounds.max.y + 0.5f;
@@ -1605,8 +1599,9 @@ namespace TrafficManager.UI.SubTools {
                     alphaBlend: arrowColor.a == 0f, // avoid strange shape.
                     renderLimits: underground);
             }
+
             if (outlineColor.a != 0) {
-                RenderManager.instance.OverlayEffect.DrawBezier(
+                Highlight.RenderBezier(
                     cameraInfo: cameraInfo,
                     color: outlineColor,
                     bezier: bezier,
@@ -1616,12 +1611,13 @@ namespace TrafficManager.UI.SubTools {
                     minY: minY,
                     maxY: maxY,
                     renderLimits: underground,
-                    alphaBlend: false);
+                    alphaBlend: false,
+                    subDevide: subDevide);
             }
 
             if (color.a != 0) {
                 // Inside the outline draw colored bezier
-                RenderManager.instance.OverlayEffect.DrawBezier(
+                Highlight.RenderBezier(
                     cameraInfo: cameraInfo,
                     color: color,
                     bezier: bezier,
@@ -1631,7 +1627,8 @@ namespace TrafficManager.UI.SubTools {
                     minY: minY,
                     maxY: maxY,
                     renderLimits: underground,
-                    alphaBlend: true);
+                    alphaBlend: true,
+                    subDevide: subDevide);
             }
 
             if (arrowColor.a != 0) {
@@ -1676,7 +1673,7 @@ namespace TrafficManager.UI.SubTools {
         private Bezier3 CalculateDeadEndBezier(LaneEnd laneEnd) {
             Bezier3 bezier3 = default;
             Vector3 dir = -laneEnd.NodeMarker.Direction * 10;
-            bezier3.d = bezier3.a = laneEnd.NodeMarker.Position + dir * .1f;
+            bezier3.d = bezier3.a = laneEnd.NodeMarker.Position + dir * .1f; // move forward a bit to avoid rendering over the dead End Icon.
 
             const float angle = Mathf.PI / 4;
             bezier3.b = bezier3.a + dir.RotateXZ(angle);

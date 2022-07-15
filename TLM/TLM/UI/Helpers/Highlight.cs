@@ -158,6 +158,52 @@ namespace TrafficManager.UI.Helpers {
             return node.IsUndergroundNode() == IsUndergroundMode;
         }
 
+        /// <param name="subDevide">for sharp beziers subdivide should be set to work around CS inability to render sharp beziers.</param>
+        public static void RenderBezier(
+            RenderManager.CameraInfo cameraInfo,
+            Bezier3 bezier,
+            Color color,
+            float size,
+            float minY,
+            float maxY,
+            float cutStart = 0,
+            float cutEnd = 0,
+            bool renderLimits = true,
+            bool alphaBlend = true,
+            bool subDevide = false) {
+            if (!subDevide) {
+                Singleton<ToolManager>.instance.m_drawCallData.m_overlayCalls++;
+                RenderManager.instance.OverlayEffect.DrawBezier(
+                    cameraInfo: cameraInfo,
+                    color: color,
+                    bezier: bezier,
+                    size: size,
+                    cutStart: cutStart,
+                    cutEnd: cutEnd,
+                    minY: minY,
+                    maxY: maxY,
+                    renderLimits: renderLimits,
+                    alphaBlend: alphaBlend);
+            } else {
+                const float step = 0.5f;
+                for (float t0 = 0; t0 < 1; t0 += step) {
+                    float t1 = t0 + step;
+                    Singleton<ToolManager>.instance.m_drawCallData.m_overlayCalls++;
+                    RenderManager.instance.OverlayEffect.DrawBezier(
+                        cameraInfo: cameraInfo,
+                        color: color,
+                        bezier: bezier.Cut(t0, t1),
+                        size: size,
+                        cutStart: cutStart,
+                        cutEnd: cutEnd,
+                        minY: minY,
+                        maxY: maxY,
+                        renderLimits: renderLimits,
+                        alphaBlend: alphaBlend);
+                }
+            }
+        }
+
         /// <summary>Draws the given texture on the network</summary>
         public static void DrawTextureAt(
             RenderManager.CameraInfo cameraInfo,
