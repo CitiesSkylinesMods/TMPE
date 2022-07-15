@@ -197,7 +197,7 @@ namespace TrafficManager.UI.SubTools {
                         bool track = group == LaneEndTransitionGroup.Track;
                         bool deadEnd = IsDeadEnd(track);
                         if (deadEnd) {
-                            //RenderDeadEnd(cameraInfo, deadEndTexture, highlight);
+                            RenderDeadEnd(cameraInfo, deadEndTexture, highlight);
                         }
                     }
                 }
