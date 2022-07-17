@@ -10,13 +10,13 @@ namespace TrafficManager.UI.Helpers {
     /// </summary>
     internal class SegmentLaneMarker {
         internal SegmentLaneMarker(Bezier3 bezier) {
-            this.Bezier = bezier;
+            this.bezier_ = bezier;
             this.IsUnderground = InGameUtil.CheckIsUnderground(bezier.a) ||
                                  InGameUtil.CheckIsUnderground(bezier.d);
             CalculateBounds();
         }
 
-        private Bezier3 Bezier;
+        private Bezier3 bezier_;
 
         /// <summary>Bezier size when drawing (thickness).</summary>
         internal float Size = 1.1f;
@@ -43,7 +43,7 @@ namespace TrafficManager.UI.Helpers {
         /// </summary>
         /// <param name="height">New height</param>
         internal void ForceBezierHeight(float height) {
-            Bezier = Bezier.ForceHeight(height);
+            bezier_ = bezier_.ForceHeight(height);
         }
 
         /// <summary>
@@ -51,7 +51,7 @@ namespace TrafficManager.UI.Helpers {
         /// </summary>
         /// <param name="hitH">vertical raycast hit position.</param>
         private void CalculateBounds() {
-            Bezier3 bezier0 = Bezier;
+            Bezier3 bezier0 = bezier_;
 
             // split bezier in 10 parts to correctly raycast curves
             int n = 10;
@@ -70,26 +70,29 @@ namespace TrafficManager.UI.Helpers {
             RenderManager.CameraInfo cameraInfo,
             Color color,
             bool enlarge = false,
-            bool renderLimits = false,
+            bool overDraw = false,
             bool alphaBlend = false,
             bool cutStart = false,
             bool cutEnd = false) {
-            float minH = Mathf.Min(Bezier.a.y, Bezier.d.y);
-            float maxH = Mathf.Max(Bezier.a.y, Bezier.d.y);
-            float size = enlarge ? Size * 1.41f : Size;
 
-            float overdrawHeight = IsUnderground || renderLimits ? 0f : 5f;
+            overDraw |= IsUnderground;
+            float overdrawHeight = overDraw ? 0f : 2f;
+            Bounds bounds = bezier_.GetBounds();
+            float minY = bounds.min.y - overdrawHeight;
+            float maxY = bounds.max.y + overdrawHeight;
+
+            float size = enlarge ? Size * 1.41f : Size;
             ColossalFramework.Singleton<ToolManager>.instance.m_drawCallData.m_overlayCalls++;
             RenderManager.instance.OverlayEffect.DrawBezier(
                 cameraInfo: cameraInfo,
                 color: color,
-                bezier: Bezier,
+                bezier: bezier_,
                 size: size,
-                cutStart: cutStart ? size * 0.50f : 0,
-                cutEnd: cutEnd ? size * 0.50f : 0,
-                minY: minH - overdrawHeight,
-                maxY: maxH + overdrawHeight,
-                renderLimits: IsUnderground || renderLimits,
+                cutStart: cutStart ? size * 0.5f : 0,
+                cutEnd: cutEnd ? size * 0.5f : 0,
+                minY: minY,
+                maxY: maxY,
+                renderLimits: overDraw,
                 alphaBlend: alphaBlend);
         }
     }

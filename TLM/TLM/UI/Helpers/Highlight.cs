@@ -154,24 +154,24 @@ namespace TrafficManager.UI.Helpers {
         public static bool IsUndergroundMode =>
             InfoManager.instance.CurrentMode == InfoManager.InfoMode.Underground;
 
-        public static bool IsNodeVisible(ushort node) {
-            return node.IsUndergroundNode() == IsUndergroundMode;
+        public static bool IsNodeVisible(ushort nodeId) {
+            return nodeId.ToNode().IsUnderground() == IsUndergroundMode;
         }
 
-        /// <param name="subDevide">for sharp beziers subdivide should be set to work around CS inability to render sharp beziers.</param>
-        public static void RenderBezier(
+        /// <param name="subDivide">for sharp beziers subdivide should be set to work around CS inability to render sharp beziers.</param>
+        public static void DrawBezier(
             RenderManager.CameraInfo cameraInfo,
-            Bezier3 bezier,
+            ref Bezier3 bezier,
             Color color,
             float size,
+            float cutStart,
+            float cutEnd,
             float minY,
             float maxY,
-            float cutStart = 0,
-            float cutEnd = 0,
             bool renderLimits = true,
             bool alphaBlend = true,
-            bool subDevide = false) {
-            if (!subDevide) {
+            bool subDivide = false) {
+            if (!subDivide) {
                 Singleton<ToolManager>.instance.m_drawCallData.m_overlayCalls++;
                 RenderManager.instance.OverlayEffect.DrawBezier(
                     cameraInfo: cameraInfo,
@@ -381,7 +381,6 @@ namespace TrafficManager.UI.Helpers {
         /// <summary>
         /// Draws a half sausage at segment end.
         /// </summary>
-        /// <param name="segmentId"></param>
         /// <param name="cut">The lenght of the highlight [0~1] </param>
         /// <param name="bStartNode">Determines the direction of the half sausage.</param>
         public static void DrawCutSegmentEnd(RenderManager.CameraInfo cameraInfo,
@@ -390,7 +389,7 @@ namespace TrafficManager.UI.Helpers {
                                              bool bStartNode,
                                              Color color,
                                              bool alpha = false) {
-            if( segmentId == 0) {
+            if (segmentId == 0) {
                 return;
             }
 

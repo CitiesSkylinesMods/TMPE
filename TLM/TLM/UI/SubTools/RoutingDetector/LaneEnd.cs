@@ -25,7 +25,7 @@ namespace TrafficManager.UI.SubTools.RoutingDetector {
         /// </summary>
         internal void RenderOverlay(RenderManager.CameraInfo cameraInfo, Color color, bool highlight = false, bool renderLimits = false) {
             if (highlight) {
-                SegmentMarker.RenderOverlay(cameraInfo, color, enlarge: true, renderLimits: renderLimits);
+                SegmentMarker.RenderOverlay(cameraInfo, color, enlarge: true, overDraw: renderLimits);
             }
             NodeMarker.RenderOverlay(cameraInfo, color, enlarge: highlight, renderLimits: renderLimits);
         }

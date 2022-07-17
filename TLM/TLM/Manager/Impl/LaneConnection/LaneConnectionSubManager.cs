@@ -27,6 +27,12 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
         public readonly VehicleInfo.VehicleType vehicleTypes_;
 #pragma warning restore RAS0002 // Readonly field for a non-readonly struct
 
+#if DEBUG
+        private bool verbose_ => DebugSwitch.LaneConnections.Get();
+#else
+        private const bool verbose_ = false;
+#endif
+
         internal LaneConnectionSubManager(LaneEndTransitionGroup group) {
             Group = group;
             laneTypes_ = default;
@@ -44,12 +50,6 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
         public NetInfo.LaneType LaneTypes => laneTypes_;
 
         public VehicleInfo.VehicleType VehicleTypes => vehicleTypes_;
-
-#if DEBUG
-        private bool verbose_ => DebugSwitch.LaneConnections.Get();
-#else
-        private const bool verbose_ = false;
-#endif
 
         /// <summary>
         /// tests if the input group is supported by this sub-manager.
@@ -343,7 +343,7 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
         /// <param name="sourceLaneId">From lane id</param>
         /// <param name="targetLaneId">To lane id</param>
         /// <param name="sourceStartNode">The affected node</param>
-        /// <returns></returns>
+        /// <returns>true if any connection was added</returns>
         internal bool AddLaneConnection(uint sourceLaneId, uint targetLaneId, bool sourceStartNode) {
             bool deadEnd = sourceLaneId == targetLaneId;
 
