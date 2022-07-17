@@ -191,32 +191,28 @@ namespace TrafficManager.UI.SubTools {
                 }
 
                 NodeMarker.RenderOverlay(cameraInfo, color, shape: shape, enlarge: highlight, renderLimits: renderLimits);
-
-                foreach(var group in ALL_GROUPS) {
-                    if((group & groups) != 0) {
-                        bool track = group == LaneEndTransitionGroup.Track;
-                        bool deadEnd = IsDeadEnd(track);
-                        if (deadEnd) {
-                            RenderDeadEnd(cameraInfo, deadEndTexture, highlight);
-                        }
-                    }
-                }
             }
 
-            internal void RenderDeadEnd(RenderManager.CameraInfo cameraInfo, Texture2D deadEnd, bool enlarge) {
+            internal void RenderDeadEndSign(RenderManager.CameraInfo cameraInfo, Texture2D deadEnd, bool enlarge, bool overDraw) {
                 Vector3 pos = NodeMarker.Position;
-                pos -= NodeMarker.Direction * (enlarge ? 1.6f : 1.4f);
+                pos -= NodeMarker.Direction * (enlarge ? 1.7f : 1.4f);
                 const float scale = .7f;
+
+                overDraw |= TrafficManagerTool.IsUndergroundMode;
+                float overdrawHeight = overDraw ? 0f : 0.5f;
+                float minY = pos.y - overdrawHeight;
+                float maxY = pos.y + overdrawHeight;
+
                 Highlight.DrawTextureAt(
                     cameraInfo: cameraInfo,
                     pos: pos,
                     dir: NodeMarker.Direction,
-                    color: Color,
+                    color: Color.white,
                     texture: deadEnd,
                     size: scale,
-                    minY: pos.y - 5,
-                    maxY: pos.y + 5,
-                    renderLimits: false);
+                    minY: minY,
+                    maxY: maxY,
+                    renderLimits: overDraw);
             }
         }
 
@@ -315,9 +311,11 @@ namespace TrafficManager.UI.SubTools {
             RenderLaneCurves(cameraInfo);
 
             if (!viewOnly) {
-                RenderLaneOverlays(cameraInfo);
+                RenderLaneOverlays(cameraInfo); // render lane ends + dead end signs
                 RenderFloatingLaneCurve(cameraInfo);
-            }
+            } 
+
+            RenderDeadEnds(cameraInfo);
         }
 
         private void RenderNodeCircles(RenderManager.CameraInfo cameraInfo) {
@@ -472,10 +470,10 @@ namespace TrafficManager.UI.SubTools {
                     outlineColor: Color.white,
                     size: 0.18f,
                     overDraw: true);
-
+            } else {
                 // snap to hovered, render accurate connection bezier
                 bool connected = LaneConnectionManager.Instance.AreLanesConnected(
-                selectedLaneEnd.LaneId, hoveredLaneEnd.LaneId, selectedLaneEnd.StartNode, group_);
+                    selectedLaneEnd.LaneId, hoveredLaneEnd.LaneId, selectedLaneEnd.StartNode, group_);
 
                 Color fillColor = connected ?
                     Color.Lerp(a: selectedLaneEnd.Color, b: Color.white, t: 0.33f) : // show underneath color if there is connection.
@@ -579,6 +577,41 @@ namespace TrafficManager.UI.SubTools {
                         var color = isTarget ? Color.white : laneEnd.Color;
                         bool highlightMarker = laneEnd == selectedLaneEnd || markerIsHovered;
                         laneEnd.RenderOverlay(cameraInfo, deadEnd_, color, highlightMarker, true, group);
+                    }
+                }
+            }
+        }
+
+        private void RenderDeadEnds(RenderManager.CameraInfo cameraInfo) {
+            for (int cacheIndex = CachedVisibleNodeIds.Size - 1; cacheIndex >= 0; cacheIndex--) {
+                var nodeId = CachedVisibleNodeIds.Values[cacheIndex];
+                bool isVisible = MainTool.IsNodeVisible(nodeId);
+                bool hasMarkers = CurrentLaneEnds.TryGetValue(nodeId, out List<LaneEnd> laneEnds);
+
+                if (!isVisible || !hasMarkers) {
+                    continue;
+                }
+
+                LaneEndTransitionGroup groupAtNode = group_;
+                if (nodeId != SelectedNodeId) {
+                    if (AltIsPressed) {
+                        groupAtNode = LaneEndTransitionGroup.Track;
+                    } else {
+                        groupAtNode = LaneEndTransitionGroup.Vehicle;
+                    }
+                }
+
+                foreach (LaneEnd laneEnd in laneEnds) {
+                    foreach (var group in ALL_GROUPS) {
+                        if ((group & groupAtNode) != 0) {
+                            bool track = group == LaneEndTransitionGroup.Track;
+                            bool deadEnd = laneEnd.IsDeadEnd(track);
+                            if (deadEnd) {
+                                bool enlarge = laneEnd == hoveredLaneEnd || laneEnd == selectedLaneEnd;
+                                bool overDraw = nodeId == SelectedNodeId;
+                                laneEnd.RenderDeadEndSign(cameraInfo, deadEnd_, enlarge: enlarge, overDraw: overDraw);
+                            }
+                        }
                     }
                 }
             }
