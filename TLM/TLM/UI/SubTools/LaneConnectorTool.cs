@@ -290,7 +290,7 @@ namespace TrafficManager.UI.SubTools {
         }
 
         private void RenderNodeCircles(RenderManager.CameraInfo cameraInfo) {
-            if (GetSelectionMode() != SelectionMode.None) {
+            if (GetSelectionMode() == SelectionMode.None) {
                 for (int cacheIndex = CachedVisibleNodeIds.Size - 1; cacheIndex >= 0; cacheIndex--) {
                     var nodeId = CachedVisibleNodeIds.Values[cacheIndex];
                     bool isNodeVisible = MainTool.IsNodeVisible(nodeId);
