@@ -28,7 +28,7 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
 #pragma warning restore RAS0002 // Readonly field for a non-readonly struct
 
 #if DEBUG
-        private bool verbose_ = DebugSwitch.LaneConnections.Get();
+        private bool verbose_ => DebugSwitch.LaneConnections.Get();
 #else
         private const bool verbose_ = false;
 #endif
@@ -342,7 +342,7 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
         /// <param name="sourceLaneId">From lane id</param>
         /// <param name="targetLaneId">To lane id</param>
         /// <param name="sourceStartNode">The affected node</param>
-        /// <returns></returns>
+        /// <returns>true if any connection was added</returns>
         internal bool AddLaneConnection(uint sourceLaneId, uint targetLaneId, bool sourceStartNode) {
             if (sourceLaneId == targetLaneId) {
                 return false;
