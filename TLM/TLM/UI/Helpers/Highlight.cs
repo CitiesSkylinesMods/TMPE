@@ -123,9 +123,6 @@ namespace TrafficManager.UI.Helpers {
             }
         }
 
-        public static Texture2D SquareTexture;
-        public static Texture2D TriangleTexture;
-
         public static void DrawNodeCircle(RenderManager.CameraInfo cameraInfo,
                                           ushort nodeId,
                                           bool warning = false,
@@ -157,12 +154,91 @@ namespace TrafficManager.UI.Helpers {
         public static bool IsUndergroundMode =>
             InfoManager.instance.CurrentMode == InfoManager.InfoMode.Underground;
 
-        public static bool IsNodeVisible(ushort node) {
-            return node.IsUndergroundNode() == IsUndergroundMode;
+        public static bool IsNodeVisible(ushort nodeId) {
+            return nodeId.ToNode().IsUnderground() == IsUndergroundMode;
+        }
+
+        /// <param name="subDevide">for sharp beziers subdivide should be set to work around CS inability to render sharp beziers.</param>
+        public static void DrawBezier(
+            RenderManager.CameraInfo cameraInfo,
+            Bezier3 bezier,
+            Color color,
+            float size,
+            float cutStart,
+            float cutEnd,
+            float minY,
+            float maxY,
+            bool renderLimits = true,
+            bool alphaBlend = true,
+            bool subDevide = false) {
+            if (!subDevide) {
+                Singleton<ToolManager>.instance.m_drawCallData.m_overlayCalls++;
+                RenderManager.instance.OverlayEffect.DrawBezier(
+                    cameraInfo: cameraInfo,
+                    color: color,
+                    bezier: bezier,
+                    size: size,
+                    cutStart: cutStart,
+                    cutEnd: cutEnd,
+                    minY: minY,
+                    maxY: maxY,
+                    renderLimits: renderLimits,
+                    alphaBlend: alphaBlend);
+            } else {
+                const float step = 0.5f;
+                for (float t0 = 0; t0 < 1; t0 += step) {
+                    float t1 = t0 + step;
+                    Singleton<ToolManager>.instance.m_drawCallData.m_overlayCalls++;
+                    RenderManager.instance.OverlayEffect.DrawBezier(
+                        cameraInfo: cameraInfo,
+                        color: color,
+                        bezier: bezier.Cut(t0, t1),
+                        size: size,
+                        cutStart: cutStart,
+                        cutEnd: cutEnd,
+                        minY: minY,
+                        maxY: maxY,
+                        renderLimits: renderLimits,
+                        alphaBlend: alphaBlend);
+                }
+            }
+        }
+
+        /// <summary>Draws the given texture on the network</summary>
+        public static void DrawTextureAt(
+            RenderManager.CameraInfo cameraInfo,
+            Vector3 pos,
+            Vector3 dir,
+            Color color,
+            Texture2D texture,
+            float size,
+            float minY,
+            float maxY,
+            bool renderLimits,
+            bool alphaBlend = true) {
+            dir = dir.normalized * size;
+            Vector3 dir90 = dir.RotateXZ90CW();
+
+            Quad3 quad = new Quad3 {
+                a = pos - dir + dir90,
+                b = pos + dir + dir90,
+                c = pos + dir - dir90,
+                d = pos - dir - dir90,
+            };
+            Singleton<ToolManager>.instance.m_drawCallData.m_overlayCalls++;
+            RenderManager.instance.OverlayEffect.DrawQuad(
+                cameraInfo,
+                texture,
+                color,
+                quad,
+                minY,
+                maxY,
+                renderLimits: renderLimits,
+                alphaBlend: alphaBlend);
         }
 
         /// <summary>
-        /// draw triangular (sides = 2, 2.24, 2.24) arrow head at the given <paramref name="t"/> of the <paramref name="bezier"/>
+        /// draw triangular (sides = 2, 2.24, 2.24) arrow head texture at the given <paramref name="t"/> of the <paramref name="bezier"/>
         /// </summary>
         public static void DrawArrowHead(
             RenderManager.CameraInfo cameraInfo,
@@ -177,25 +253,7 @@ namespace TrafficManager.UI.Helpers {
             bool alphaBlend = true) {
             Vector3 center = bezier.Position(t);
             Vector3 dir = bezier.Tangent(t).normalized * size;
-            Vector3 dir90 = dir.RotateXZ90CW();
-
-            Quad3 quad = new Quad3 {
-                a = center - dir + dir90,
-                b = center + dir + dir90,
-                c = center + dir - dir90,
-                d = center - dir - dir90,
-            };
-
-            Singleton<ToolManager>.instance.m_drawCallData.m_overlayCalls++;
-            RenderManager.instance.OverlayEffect.DrawQuad(
-                cameraInfo,
-                texture,
-                color,
-                quad,
-                minY,
-                maxY,
-                renderLimits: renderLimits,
-                alphaBlend: alphaBlend);
+            DrawTextureAt(cameraInfo, center, dir, color, texture, size, minY, maxY, renderLimits, alphaBlend);
         }
 
         /// <summary>
@@ -232,8 +290,6 @@ namespace TrafficManager.UI.Helpers {
                 renderLimits: renderLimits,
                 alphaBlend: alphaBlend);
         }
-
-
 
         public static void DrawShape(
             RenderManager.CameraInfo cameraInfo,
@@ -334,7 +390,7 @@ namespace TrafficManager.UI.Helpers {
                                              bool bStartNode,
                                              Color color,
                                              bool alpha = false) {
-            if( segmentId == 0) {
+            if (segmentId == 0) {
                 return;
             }
 
