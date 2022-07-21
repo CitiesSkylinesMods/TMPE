@@ -37,11 +37,12 @@ namespace TrafficManager.Util.Extensions {
 
         /// <summary>Determines the <see cref="ExtVehicleType"/> for a vehicle based on its AI.</summary>
         /// <param name="vehicle">The vehicle to inspect.</param>
+        /// <param name="vehicleId">The vehicle ID to inspect.</param>
         /// <returns>The extended vehicle type.</returns>
         /// <remarks>This works for any vehicle type, including those which TM:PE doesn't manage.</remarks>
-        public static ExtVehicleType ToExtVehicleType(this ref Vehicle vehicle)
+        public static ExtVehicleType ToExtVehicleType(this ref Vehicle vehicle, ushort vehicleId)
             => vehicle.IsValid()
-                ? GetTypeFromVehicleAI(ref vehicle)
+                ? GetTypeFromVehicleAI(vehicleId, ref vehicle)
                 : ExtVehicleType.None;
 
         /// <summary>Determines the <see cref="ExtVehicleType"/> for a managed vehicle type.</summary>
@@ -65,12 +66,19 @@ namespace TrafficManager.Util.Extensions {
         /// <summary>
         /// Inspects the AI of the <paramref name="vehicle"/> to determine its type.
         /// </summary>
+        /// <param name="vehicleId">The vehicle id to inspect.</param>
         /// <param name="vehicle">The vehicle to inspect.</param>
         /// <returns>The determined <see cref="ExtVehicleType"/>.</returns>
         /// <remarks>If vehicle AI not recognised, returns <see cref="ExtVehicleType.None"/>.</remarks>
-        private static ExtVehicleType GetTypeFromVehicleAI(ref Vehicle vehicle) {
-            var vehicleId = vehicle.Info.m_instanceID.Vehicle;
-            var vehicleAI = vehicle.Info.m_vehicleAI;
+        private static ExtVehicleType GetTypeFromVehicleAI(ushort vehicleId, ref Vehicle vehicle) {
+            VehicleInfo info = vehicle.Info;
+            if (!info) {
+                // broken assets may have broken Info instance but still valid flags
+                // (probably other mods prevent proper skipping of broken assets)
+                return ExtVehicleType.None;
+            }
+
+            var vehicleAI = info.m_vehicleAI;
             var emergency = vehicle.m_flags.IsFlagSet(Vehicle.Flags.Emergency2);
 
             var ret = ExtVehicleManager.Instance.DetermineVehicleTypeFromAIType(
