@@ -1,9 +1,20 @@
 [Version] 11.6.6.0
 [Released]
 [Link] tmpe-v11660-test-22052022
+[New] Lightweight highway merging rules #1542 (kianzarrin)
 [New] Veitnamese translation #1551 (DucAnhLam)
+[Fixed] Lane connections save/restore issues (kianzarrin)
+[Fixed] Broken detection of hovered element #1594 (krzychu124)
+[Fixed] Incorrectly rendered lane connections #1605 #1604 (krzychu124)
+[Fixed] DLS incorrectly calculate 'max unsafe speed difference' #1581 (krzychu124)
+[Fixed] Redundant transitions at intersections with mixed rail/road vehicle lanes #1565 (kianzarrin)
+[Fixed] Trams/Trains get blocked by their own trailer when altering junction settings #1574 #1572 (kianzarrin)
+[Fixed] Improved pedestrian crossing gap calculations (very wide roads, with 10+ lanes) #1610 (kianzarrin)
+[Fixed] Hot-reload for API #1602 (kianzarrin)
 [Updated] Separate road and track lane routing #1550 #1546 #1545 #354 (kianzarrin)
 [Updated] Translations for multiple languages #1551 #1344 (Nguyễn Tài Đức, OldEj, AduitSSH, Chamëleon, 문주원, krzychu124, shg166, John Lok Ho, Márcio Saeger, DucAnhLam, DNSE, Arne Peirs, Neoone, Fatih YILDIRIM, Zeldslayer, GiorgioHerbie, krzychu124)
+[Updated] Junction restriction code cleanup (elesbaan70)
+[Updated] Lane rounting code improvements for debugging (elesbaan70)
 [/Version]
 
 [Version] 11.6.5.3
