@@ -2,6 +2,7 @@ namespace TrafficManager.State {
     using ICities;
     using TrafficManager.Lifecycle;
     using TrafficManager.Manager.Impl;
+    using TrafficManager.State.ConfigData;
     using TrafficManager.UI;
     using TrafficManager.UI.Helpers;
 
@@ -39,6 +40,20 @@ namespace TrafficManager.State {
                 Label = "Gameplay.Checkbox:No excessive transfers",
             };
 
+        public static CheckboxOption AllowBusInOldTown =
+            new(nameof(GlobalConfig.Instance.PathFinding.AllowBusInOldTownDistricts), Options.PersistTo.Global) {
+                Label = "Gameplay.Checkbox:Allow Buses in Old Town districts",
+                Handler = OnAllowBusInOldTownChanged,
+                Validator = AfterDarkDlcValidator,
+            };
+
+        public static CheckboxOption AllowTaxiInOldTown =
+            new(nameof(GlobalConfig.Instance.PathFinding.AllowTaxiInOldTownDistricts), Options.PersistTo.Global) {
+                Label = "Gameplay.Checkbox:Allow Taxis in Old Town districts",
+                Handler = OnAllowTaxiInOldTownChanged,
+                Validator = AfterDarkDlcValidator,
+            };
+
         internal static void AddUI(UIHelperBase tab) {
             UIHelperBase group;
 
@@ -56,9 +71,17 @@ namespace TrafficManager.State {
             group = tab.AddGroup(T("Gameplay.Group:Public transport"));
 
             RealisticPublicTransport.AddUI(group);
+
+            if (HasAfterDarkDLC) {
+                AllowBusInOldTown.AddUI(group);
+                AllowTaxiInOldTown.AddUI(group);
+            }
         }
 
         private static string T(string key) => Translation.Options.Get(key);
+
+        private static bool HasAfterDarkDLC
+            => SteamHelper.IsDLCOwned(SteamHelper.DLC.AfterDarkDLC);
 
         private static void OnAdvancedAIChanged(bool _) {
             if (TMPELifecycle.Instance.Deserializing) return;
@@ -84,6 +107,31 @@ namespace TrafficManager.State {
             } else {
                 AdvancedParkingManager.Instance.OnDisableFeature();
             }
+        }
+
+        private static void OnAllowBusInOldTownChanged(bool value) {
+            if (TMPELifecycle.Instance.Deserializing) return;
+
+            PathFinding config = GlobalConfig.Instance.PathFinding;
+            if (config.AllowBusInOldTownDistricts != value) {
+                config.AllowBusInOldTownDistricts = value;
+                GlobalConfig.WriteConfig();
+            }
+        }
+
+        private static void OnAllowTaxiInOldTownChanged(bool value) {
+            if (TMPELifecycle.Instance.Deserializing) return;
+
+            PathFinding config = GlobalConfig.Instance.PathFinding;
+            if (config.AllowTaxiInOldTownDistricts != value) {
+                config.AllowTaxiInOldTownDistricts = value;
+                GlobalConfig.WriteConfig();
+            }
+        }
+
+        private static bool AfterDarkDlcValidator(bool desired, out bool result) {
+            result = HasAfterDarkDLC && desired;
+            return true;
         }
     }
 }
