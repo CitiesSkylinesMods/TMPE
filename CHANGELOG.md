@@ -29,14 +29,28 @@ This changelog includes all versions and major variants of the mod going all the
 
 > Date format: dd/mm/yyyy
 
-#### TM:PE V11.6.6.0 TEST, 22/05/2022
+#### TM:PE V11.6.6.0 TEST, 26/07/2022
 
 - [Meta] This release adds a new language, updates translations, and improves lane routing
+- [New] Lightweight highway merging rules #1542 (kianzarrin)
+- [New] Allow buses and taxi to use `Old Town` districts (optional) #1618 (krzychi124)
+- [New] Notify the user in case of errors while loading savegame data #1617 (krzychu124)
 - [New] Veitnamese translation #1551 (DucAnhLam)
 - [Updated] Separate road and track lane routing #1550 #1546 #1545 #354 (kianzarrin)
 - [Updated] Translations for multiple languages #1551 #1344 (Nguyễn Tài Đức, OldEj, AduitSSH, Chamëleon, 문주원, krzychu124, shg166, John Lok Ho, Márcio Saeger, DucAnhLam, DNSE, Arne Peirs, Neoone, Fatih YILDIRIM, Zeldslayer, GiorgioHerbie, krzychu124)
+- [Updated] Junction restriction code cleanup (elesbaan70)
+- [Updated] Lane rounting code improvements for debugging (elesbaan70)
+- [Fixed] Lane connections save/restore issues (kianzarrin)
+- [Fixed] Broken detection of hovered element #1594 (krzychu124)
+- [Fixed] DLS incorrectly calculate 'max unsafe speed difference' #1581 (krzychu124)
+- [Fixed] Improved pedestrian crossing gap calculations (very wide roads, with 10+ lanes) #1610 (kianzarrin)
+- [Fixed] Redundant transitions at intersections with mixed rail/road vehicle lanes #1565 (kianzarrin)
+- [Fixed] Incorrectly rendered lane connections #1605 #1604 (krzychu124)
+- [Fixed] Trams/Trains get blocked by their own trailer when altering junction settings #1574 #1572 (kianzarrin)
+- [Fixed] Hot-reload for API #1602 (kianzarrin)
+- [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
 
-#### TM:PE V11.6.5.3 STABLE, 02/06/2022
+#### TM:PE V[11.6.5.3](https://github.com/CitiesSkylinesMods/TMPE/compare/11.6.4.8...11.6.5.3) STABLE, 02/06/2022
 
 - [Meta] TM:PE 11.6.5.3 branch released as STABLE - huge thanks to our beta testers!
 - [New] Vietnamese translation Locale key updates #1551 (DucAnhLam)
@@ -44,6 +58,7 @@ This changelog includes all versions and major variants of the mod going all the
 - [Updated] Translations for multiple languages #1551 #1344
 - [Fixed] Simulation Accuracy setting regression #1560 #1554 (krzychu124)
 - [Fixed] Fix regression with version naming #1568 (krzychu124)
+- [Steam] [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
 
 #### TM:PE V11.6.5.3 TEST, 01/06/2022
 
@@ -52,11 +67,13 @@ This changelog includes all versions and major variants of the mod going all the
 - [Updated] Translations for multiple languages #1551 #1344
 - [Fixed] Simulation Accuracy setting regression #1560 #1554 (krzychu124)
 - [Fixed] Fix regression with version naming #1568 (krzychu124)
+- [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
 
 #### TM:PE V11.6.5.2-hotfix-1 TEST, 08/05/2022
 
 - [Meta] TM:PE 11.6.5.2-hotfix-1
 - [Fixed] Simulation Accuracy setting regression #1560 (krzychu124)
+- [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
 
 #### TM:PE V11.6.5.2 TEST, 27/04/2022
 
@@ -94,6 +111,7 @@ This changelog includes all versions and major variants of the mod going all the
 - [Updated] Update `Microsoft.Unity.Analyzers` to version `1.13.0` #1513 (aubergine18)
 - [Updated] Add UI helpers for mod option sliders #1531 #1512 #1510 (kianzarrin)
 - [Removed] Flawed TTL API removed to prevent adoption #1495 (Elesbaan70)
+- [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
 
 #### TM:PE V11.6.5.1 TEST, 13/03/2022
 
