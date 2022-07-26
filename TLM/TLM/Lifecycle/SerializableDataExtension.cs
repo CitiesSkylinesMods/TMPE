@@ -6,6 +6,7 @@ namespace TrafficManager.Lifecycle {
     using System.IO;
     using System.Runtime.Serialization.Formatters.Binary;
     using System;
+    using ColossalFramework.UI;
     using TrafficManager.API.Manager;
     using TrafficManager.Manager.Impl;
     using TrafficManager.Manager.Impl.LaneConnection;
@@ -48,7 +49,7 @@ namespace TrafficManager.Lifecycle {
                     manager.OnBeforeLoadData();
                 }
                 catch (Exception e) {
-                    Log.Error($"OnLoadData: Error while initializing {manager.GetType().Name}: {e}");
+                    Log.Error($"OnLoadData_OnBeforeLoadData: Error while initializing {manager.GetType().Name}: {e}");
                     loadingSucceeded = false;
                 }
             }
@@ -95,15 +96,12 @@ namespace TrafficManager.Lifecycle {
             if (loadingSucceeded) {
                 Log.Info("OnLoadData completed successfully.");
             } else {
-                Log.Info("An error occurred while loading.");
-
-                // UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel")
-                // .SetMessage("An error occurred while loading",
-                // "Traffic Manager: President Edition detected an error while loading. Please do
-                // NOT save this game under the old filename, otherwise your timed traffic lights,
-                // custom lane arrows, etc. are in danger. Instead, please navigate to
-                // http://steamcommunity.com/sharedfiles/filedetails/?id=583429740 and follow the
-                // steps under 'In case problems arise'.", true);
+                Log.Warning("An error occurred while loading.");
+                UIView.ForwardException(new Exception(
+                                            "Traffic Manager mod detected an error while loading saved data.\n" +
+                                            "Please do NOT save this game under the old filename, \n" +
+                                            "otherwise your timed traffic lights, custom lane arrows, etc. will get unrecoverable.\n" +
+                                            "Contact TM:PE team via Steam Workshop page or Discord text chat, prepare log files."));
             }
 
             TMPELifecycle.Instance.Deserializing = false;
@@ -114,8 +112,13 @@ namespace TrafficManager.Lifecycle {
                     manager.OnAfterLoadData();
                 }
                 catch (Exception e) {
-                    Log.Error($"OnLoadData: Error while initializing {manager.GetType().Name}: {e}");
-                    loadingSucceeded = false;
+                    Log.Error($"OnLoadData_OnAfterLoadData: Error while initializing {manager.GetType().Name}: {e}");
+
+                    UIView.ForwardException(new Exception(
+                                                "Traffic Manager mod detected an initialization error.\n" +
+                                                "Some features of the mod may not work correctly and mod setting may not be fully initialized.\n" +
+                                                "Contact TM:PE team via Steam Workshop page or Discord text chat, prepare log files.",
+                                                new Exception($"OnAfterLoadData: Error while initializing {manager.GetType().Name}:\n{e}")));
                 }
             }
         }
