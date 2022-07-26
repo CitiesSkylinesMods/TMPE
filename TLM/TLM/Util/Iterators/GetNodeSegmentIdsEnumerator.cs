@@ -17,7 +17,7 @@ namespace TrafficManager.Util.Iterators {
 
         private bool firstRun;
         private ushort currentSegmentId;
-        private int counter = 0;
+        private int counter;
 
         public GetNodeSegmentIdsEnumerator(ushort nodeId, ushort initialSegmentId, ClockDirection clockDirection, NetSegment[] segmentBuffer) {
             this.nodeId = nodeId;
@@ -27,6 +27,7 @@ namespace TrafficManager.Util.Iterators {
 
             this.firstRun = true;
             this.currentSegmentId = default;
+            this.counter = 0;
         }
 
         public ushort Current => currentSegmentId;
