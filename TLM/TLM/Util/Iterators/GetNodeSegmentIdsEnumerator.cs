@@ -17,6 +17,7 @@ namespace TrafficManager.Util.Iterators {
 
         private bool firstRun;
         private ushort currentSegmentId;
+        private int counter = 0;
 
         public GetNodeSegmentIdsEnumerator(ushort nodeId, ushort initialSegmentId, ClockDirection clockDirection, NetSegment[] segmentBuffer) {
             this.nodeId = nodeId;
@@ -38,6 +39,7 @@ namespace TrafficManager.Util.Iterators {
             } else if (firstRun && initialSegment != 0) {
                 currentSegmentId = initialSegment;
                 firstRun = false;
+                counter++;
                 return true;
             }
 
@@ -49,7 +51,7 @@ namespace TrafficManager.Util.Iterators {
                 throw new Exception($"Unknown ClockDirection '{nameof(clockDirection)}'");
             }
 
-            if (currentSegmentId == 0 || currentSegmentId == initialSegment) {
+            if (currentSegmentId == 0 || currentSegmentId == initialSegment || ++counter == 8) {
                 return false;
             }
 
