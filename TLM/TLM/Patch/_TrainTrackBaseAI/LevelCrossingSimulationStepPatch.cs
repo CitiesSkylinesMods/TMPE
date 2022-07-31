@@ -1,16 +1,16 @@
-namespace TrafficManager.Patch._TrainTrackBase {
+namespace TrafficManager.Patch._TrainTrackBaseAI {
     using HarmonyLib;
     using JetBrains.Annotations;
     using TrafficManager.Manager.Impl;
     using TrafficManager.State;
 
-    [HarmonyPatch(typeof(RoadBaseAI), nameof(RoadBaseAI.TrafficLightSimulationStep))]
+    [HarmonyPatch(typeof(TrainTrackBaseAI), nameof(TrainTrackBaseAI.LevelCrossingSimulationStep))]
     public class LevelCrossingSimulationStepPatch {
         /// <summary>
         /// Decides whether the stock simulation step for traffic lights should run.
         /// </summary>
         [UsedImplicitly]
-        public static bool Prefix(TrainTrackBaseAI __instance, ushort nodeID, ref NetNode data) {
+        public static bool Prefix(ushort nodeID) {
             return !Options.timedLightsEnabled
                    || !TrafficLightSimulationManager
                                 .Instance
