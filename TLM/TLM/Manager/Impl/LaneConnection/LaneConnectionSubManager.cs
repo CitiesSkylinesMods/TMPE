@@ -712,7 +712,8 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
                 try {
                     var targets = pair.Value;
                     foreach (var target in pair.Value) {
-                        if (!ValidateLane(target.LaneId)) {
+                        // skip invalid connections. Modifying database while iterating will throw InvalidOperationException!!!
+                        if (!target.LaneId.ToLane().IsValidWithSegment()) {
                             continue;
                         }
 #if DEBUGSAVE
