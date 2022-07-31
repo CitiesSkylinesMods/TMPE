@@ -29,6 +29,13 @@ This changelog includes all versions and major variants of the mod going all the
 
 > Date format: dd/mm/yyyy
 
+#### TM:PE V11.6.6.1 TEST, 31/07/2022
+
+- [Meta] This update contains important bug fixes before release to Stable
+- [Fixed] Possible InvalidOperationException error while saving lane connection data #1621 (krzychu124)
+- [Fixed] Infinite loop while traversing segments of node #1619 #1612 #1439 (krzychu124)
+- [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
+
 #### TM:PE V11.6.6.0 TEST, 26/07/2022
 
 - [Meta] This release adds a new language, updates translations, and improves lane routing
