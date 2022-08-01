@@ -379,8 +379,8 @@ namespace TrafficManager.Manager.Impl {
                                 out float laneOffsetB))
                             {
                                 float dist = Vector3.SqrMagnitude(position - posA);
-                                if (secondaryPosition != null) {
-                                    dist += Vector3.SqrMagnitude((Vector3)secondaryPosition - posA);
+                                if (secondaryPosition.HasValue) {
+                                    dist += Vector3.SqrMagnitude(secondaryPosition.Value - posA);
                                 }
 
                                 if (dist < minDist) {
@@ -396,9 +396,9 @@ namespace TrafficManager.Manager.Impl {
                                     myDistanceSqrA = dist;
 
                                     dist = Vector3.SqrMagnitude(position - posB);
-                                    if (secondaryPosition != null) {
+                                    if (secondaryPosition.HasValue) {
                                         dist += Vector3.SqrMagnitude(
-                                            (Vector3)secondaryPosition - posB);
+                                            secondaryPosition.Value - posB);
                                     }
 
                                     if (laneIndexB < 0) {
