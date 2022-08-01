@@ -1930,7 +1930,7 @@ namespace TrafficManager.Manager.Impl {
                     // found a building with parking space
                     if (Constants.ManagerFactory.ExtPathManager.FindPathPositionWithSpiralLoop(
                         parkPos,
-                        endPos,
+                        null,
                         ItemClass.Service.Road,
                         NetInfo.LaneType.Pedestrian,
                         VehicleInfo.VehicleType.None,
