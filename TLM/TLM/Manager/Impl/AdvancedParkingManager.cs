@@ -2458,7 +2458,7 @@ namespace TrafficManager.Manager.Impl {
                 return true;
             }
 
-            var coords = _spiral.GetCoords(radius);
+            var coords = _spiral.GetCoordsCounterclockwise(radius);
             for (int i = 0; i < radius * radius; i++) {
                 if (!LoopHandler((int)(centerI + coords[i].x), (int)(centerJ + coords[i].y))) {
                     break;
@@ -2569,7 +2569,7 @@ namespace TrafficManager.Manager.Impl {
                 return true;
             }
 
-            var coords = _spiral.GetCoords(radius);
+            var coords = _spiral.GetCoordsCounterclockwise(radius);
             for (int i = 0; i < radius * radius; i++) {
                 if (!LoopHandler((int)(centerI + coords[i].x), (int)(centerJ + coords[i].y))) {
                     break;
