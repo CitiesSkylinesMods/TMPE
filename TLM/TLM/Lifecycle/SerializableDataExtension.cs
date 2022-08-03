@@ -121,6 +121,8 @@ namespace TrafficManager.Lifecycle {
                                                 new Exception($"OnAfterLoadData: Error while initializing {manager.GetType().Name}:\n{e}")));
                 }
             }
+
+            Patcher.Install();
         }
 
         private static void DeserializeVersionData(byte[] data) {

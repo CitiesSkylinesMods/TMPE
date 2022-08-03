@@ -1660,7 +1660,9 @@ namespace TrafficManager.UI {
         }
 
         public void RemoveUUIButton() {
-            Destroy(UUIButton?.gameObject);
+            if (UUIButton) {
+                Destroy(UUIButton.gameObject);
+            }
             UUIButton = null;
         }
     }
