@@ -1,7 +1,7 @@
 namespace TrafficManager.Manager.Impl {
-    using ColossalFramework;
     using System;
-    using System.Linq;
+    using ColossalFramework;
+    using ColossalFramework.Math;
     using State;
     using TrafficManager.API.Manager;
     using TrafficManager.Util;
@@ -13,12 +13,14 @@ namespace TrafficManager.Manager.Impl {
           IExtPathManager
     {
         private readonly Spiral _spiral;
+        private Randomizer _randomizer;
 
         public static readonly ExtPathManager Instance =
             new ExtPathManager(SingletonLite<Spiral>.instance);
 
         private ExtPathManager(Spiral spiral) {
             _spiral = spiral ?? throw new ArgumentNullException(nameof(spiral));
+            _randomizer = new Randomizer();
         }
 
         /// <summary>
@@ -324,7 +326,7 @@ namespace TrafficManager.Manager.Impl {
 
                 int spiralDist = Math.Max(Math.Abs(i - centerI), Math.Abs(j - centerJ)); // maximum norm
 
-                if (found && spiralDist > lastSpiralDist) {
+                if (found && lastSpiralDist > 0 && spiralDist > lastSpiralDist) {
                     // last iteration
                     return false;
                 }
@@ -433,7 +435,7 @@ namespace TrafficManager.Manager.Impl {
                 return true;
             }
 
-            var coords = _spiral.GetCoordsCounterclockwise(radius);
+            var coords = _spiral.GetCoordsRandomDirection(radius, ref _randomizer);
             for (int i = 0; i < radius * radius; i++) {
                 if (!FindHelper((int)(centerI + coords[i].x), (int)(centerJ + coords[i].y))) {
                     break;

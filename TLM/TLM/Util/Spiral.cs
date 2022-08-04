@@ -4,6 +4,8 @@ using System.Collections.ObjectModel;
 using UnityEngine;
 
 namespace TrafficManager.Util {
+    using ColossalFramework.Math;
+
     /// <summary>
     /// A spiral coords generator that will cache all previously generated values,
     /// and only generate new ones if necessary.
@@ -57,6 +59,22 @@ namespace TrafficManager.Util {
         /// Gets the largest radius the object was ever passed.
         /// </summary>
         public int MaxRadius => _maxRadius;
+
+        /// <summary>
+        /// Gets spiral in random direction and ensired that the giver radius is satisfied
+        /// </summary>
+        /// <param name="radius">Needed radius for the spiral coords.</param>
+        /// <param name="r">Randomizer instance to perform randomization</param>
+        /// <returns>
+        /// A readonly collection of spiral coords.
+        /// The result won't generate a new collection for performance reasons,
+        /// meaning it will return a reference to the same mutable underlying collection.
+        /// The returned collection will always contain the coords for 'MaxRadius',
+        /// the largest radius it was ever passed.
+        /// </returns>
+        public ReadOnlyCollection<Vector2> GetCoordsRandomDirection(int radius, ref Randomizer r) {
+            return r.Int32(2) == 0 ? GetCoordsCounterclockwise(radius) : GetCoordsClockwise(radius);
+        }
 
         /// <summary>
         /// Gets spiral coords clockwise and ensures that the given radius is satisfied.

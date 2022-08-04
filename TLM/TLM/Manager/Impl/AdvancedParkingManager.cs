@@ -22,6 +22,7 @@ namespace TrafficManager.Manager.Impl {
           IAdvancedParkingManager
     {
         private readonly Spiral _spiral;
+        private Randomizer _randomizer;
 
         public static readonly AdvancedParkingManager Instance
             = new AdvancedParkingManager(SingletonLite<Spiral>.instance);
@@ -32,6 +33,7 @@ namespace TrafficManager.Manager.Impl {
 
         public AdvancedParkingManager(Spiral spiral) {
             _spiral = spiral ?? throw new ArgumentNullException(nameof(spiral));
+            _randomizer = new Randomizer();
 
             _findParkingSpaceDelegate = GameConnectionManager.Instance.PassengerCarAIConnection.FindParkingSpace;
             _findParkingSpacePropDelegate = GameConnectionManager.Instance.PassengerCarAIConnection.FindParkingSpaceProp;
@@ -2458,7 +2460,7 @@ namespace TrafficManager.Manager.Impl {
                 return true;
             }
 
-            var coords = _spiral.GetCoordsCounterclockwise(radius);
+            var coords = _spiral.GetCoordsRandomDirection(radius, ref _randomizer);
             for (int i = 0; i < radius * radius; i++) {
                 if (!LoopHandler((int)(centerI + coords[i].x), (int)(centerJ + coords[i].y))) {
                     break;
@@ -2569,7 +2571,7 @@ namespace TrafficManager.Manager.Impl {
                 return true;
             }
 
-            var coords = _spiral.GetCoordsCounterclockwise(radius);
+            var coords = _spiral.GetCoordsRandomDirection(radius, ref _randomizer);
             for (int i = 0; i < radius * radius; i++) {
                 if (!LoopHandler((int)(centerI + coords[i].x), (int)(centerJ + coords[i].y))) {
                     break;
