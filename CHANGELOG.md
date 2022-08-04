@@ -29,6 +29,14 @@ This changelog includes all versions and major variants of the mod going all the
 
 > Date format: dd/mm/yyyy
 
+#### TM:PE V11.6.6.2 TEST, 04/08/2022
+
+- [Meta] This update contains important bug fixes before release to Stable
+- [Fixed] After loading savegame settings are not loaded immediately #1624 #1625 (krzychu124)
+- [Fixed] NullReferenceException after exit to the main menu or reloading the savegame #1625 (krzychu124)
+- [Updated] UnifiedUI library update to the latest version (krzychu124)
+- [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
+
 #### TM:PE V11.6.6.1 TEST, 31/07/2022
 
 - [Meta] This update contains important bug fixes before release to Stable

@@ -1,3 +1,11 @@
+[Version] 11.6.6.2
+[Released] Aug 4th 2022
+[Link] tmpe-v11662-test-04082022
+[Fixed] After loading savegame settings are not loaded immediately #1624 #1625 (krzychu124)
+[Fixed] NullReferenceException after exit to the main menu or reloading the savegame #1625 (krzychu124)
+[Updated] UnifiedUI library update to the latest version (krzychu124)
+[/Version]
+
 [Version] 11.6.6.1
 [Released] Jul 31st 2022
 [Link] tmpe-v11661-test-31072022
