@@ -1932,7 +1932,7 @@ namespace TrafficManager.Manager.Impl {
                     // found a building with parking space
                     if (Constants.ManagerFactory.ExtPathManager.FindPathPositionWithSpiralLoop(
                         parkPos,
-                        null,
+                        knownParkingSpaceLocationId.ToBuilding().m_position,
                         ItemClass.Service.Road,
                         NetInfo.LaneType.Pedestrian,
                         VehicleInfo.VehicleType.None,
@@ -1948,10 +1948,10 @@ namespace TrafficManager.Manager.Impl {
                     if (logParkingAi) {
                         Log._Debug(
                             $"Navigating citizen instance {extDriverInstance.instanceId} to parking " +
-                            $"building {knownParkingSpaceLocationId}! segment={endPathPos.m_segment}, " +
+                            $"building {knownParkingSpaceLocationId}, parkPos={parkPos}! segment={endPathPos.m_segment}, " +
                             $"laneIndex={endPathPos.m_lane}, offset={endPathPos.m_offset}. " +
                             $"CurrentPathMode={extDriverInstance.pathMode} " +
-                            $"calculateEndPos={calculateEndPos}");
+                            $"calculateEndPos={calculateEndPos}, endPos={endPos}");
                     }
 
                     return true;
@@ -2384,14 +2384,10 @@ namespace TrafficManager.Manager.Impl {
 
                     // randomize target position to allow for opposite road-side parking
                     ParkingAI parkingAiConf = GlobalConfig.Instance.ParkingAI;
-                    segCenter.x +=
-                        Singleton<SimulationManager>.instance.m_randomizer.Int32(
-                            parkingAiConf.ParkingSpacePositionRand) -
+                    segCenter.x += rng.Int32(parkingAiConf.ParkingSpacePositionRand) -
                         (parkingAiConf.ParkingSpacePositionRand / 2u);
 
-                    segCenter.z +=
-                        Singleton<SimulationManager>.instance.m_randomizer.Int32(
-                            parkingAiConf.ParkingSpacePositionRand) -
+                    segCenter.z += rng.Int32(parkingAiConf.ParkingSpacePositionRand) -
                         (parkingAiConf.ParkingSpacePositionRand / 2u);
 
                     if (netSegment.GetClosestLanePosition(
