@@ -1,3 +1,9 @@
+[Version] 11.6.6.3
+[Released] Aug 6th 2022
+[Link] tmpe-v11663-test-06082022
+[Fixed] Lane connections not removed from ugraded segments causing pathfinding issues and despawn of vehicles approaching new segment #1628 (krzychu124)
+[/Version]
+
 [Version] 11.6.6.2
 [Released] Aug 4th 2022
 [Link] tmpe-v11662-test-04082022
