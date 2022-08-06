@@ -39,6 +39,7 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
                 laneTypes_ |= TrackUtils.TRACK_LANE_TYPES;
                 vehicleTypes_ |= TrackUtils.TRACK_VEHICLE_TYPES;
             }
+            NetManagerEvents.Instance.ReleasingSegment += ReleasingSegment;
         }
 
         public NetInfo.LaneType LaneTypes => laneTypes_;
@@ -51,10 +52,6 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
         public bool Supports(LaneEndTransitionGroup group) => (group & Group) != 0;
 
         public bool Supports(NetInfo.Lane laneInfo) => laneInfo.Matches(laneTypes_, vehicleTypes_);
-
-        private LaneConnectionSubManager() {
-            NetManagerEvents.Instance.ReleasingSegment += ReleasingSegment;
-        }
 
         public override void OnBeforeLoadData() {
             base.OnBeforeLoadData();
