@@ -305,8 +305,6 @@ namespace TrafficManager.Lifecycle {
                     uiView.gameObject.AddComponent<RoadSelectionPanels>();
                 }
 
-                Patcher.Install();
-
                 Log.Info("Notifying managers...");
                 foreach (ICustomManager manager in RegisteredManagers) {
                     Log.Info($"OnLevelLoading: {manager.GetType().Name}");
