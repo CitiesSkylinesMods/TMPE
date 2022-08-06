@@ -29,6 +29,12 @@ This changelog includes all versions and major variants of the mod going all the
 
 > Date format: dd/mm/yyyy
 
+#### TM:PE V11.6.6.3 TEST, 06/08/2022
+
+- [Meta] This update contains important bug fixes before release to Stable
+- [Fixed] Lane connections not removed from upgraded segments causing pathfinding issues and despawn of vehicles approaching new segment #1628 (krzychu124)
+- [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
+
 #### TM:PE V11.6.6.2 TEST, 04/08/2022
 
 - [Meta] This update contains important bug fixes before release to Stable
@@ -50,11 +56,11 @@ This changelog includes all versions and major variants of the mod going all the
 - [New] Lightweight highway merging rules #1542 (kianzarrin)
 - [New] Allow buses and taxi to use `Old Town` districts (optional) #1618 (krzychi124)
 - [New] Notify the user in case of errors while loading savegame data #1617 (krzychu124)
-- [New] Veitnamese translation #1551 (DucAnhLam)
+- [New] Vietnamese translation #1551 (DucAnhLam)
 - [Updated] Separate road and track lane routing #1550 #1546 #1545 #354 (kianzarrin)
 - [Updated] Translations for multiple languages #1551 #1344 (Nguyễn Tài Đức, OldEj, AduitSSH, Chamëleon, 문주원, krzychu124, shg166, John Lok Ho, Márcio Saeger, DucAnhLam, DNSE, Arne Peirs, Neoone, Fatih YILDIRIM, Zeldslayer, GiorgioHerbie, krzychu124)
 - [Updated] Junction restriction code cleanup (elesbaan70)
-- [Updated] Lane rounting code improvements for debugging (elesbaan70)
+- [Updated] Lane routing code improvements for debugging (elesbaan70)
 - [Fixed] Lane connections save/restore issues (kianzarrin)
 - [Fixed] Broken detection of hovered element #1594 (krzychu124)
 - [Fixed] DLS incorrectly calculate 'max unsafe speed difference' #1581 (krzychu124)
