@@ -1,68 +1,24 @@
 [Version] 11.6.6.3
-[Released] Aug 6th 2022
-[Link] tmpe-v11663-test-06082022
-[Fixed] Lane connections not removed from upgraded segments causing pathfinding issues and despawn of vehicles approaching new segment #1628 (krzychu124)
-[/Version]
-
-[Version] 11.6.6.2
-[Released] Aug 4th 2022
-[Link] tmpe-v11662-test-04082022
-[Fixed] After loading savegame settings are not loaded immediately #1624 #1625 (krzychu124)
-[Fixed] NullReferenceException after exit to the main menu or reloading the savegame #1625 (krzychu124)
-[Updated] UnifiedUI library update to the latest version (krzychu124)
-[/Version]
-
-[Version] 11.6.6.1
-[Released] Jul 31st 2022
-[Link] tmpe-v11661-test-31072022
-[Meta] This update contains important bug fixes before release to Stable
-[Fixed] Possible InvalidOperationException error while saving lane connection data #1621 (krzychu124)
-[Fixed] Infinite loop while traversing segments of node #1619 #1612 #1439 (krzychu124)
-[/Version]
-
-[Version] 11.6.6.0
-[Released] Jul 26th 2022
-[Link] tmpe-v11660-test-26072022
+[Released] Aug 11th 2022
+[Stable]
+[Link] tmpe-v11663-stable-11082022
+[Meta] TM:PE 11.6.6.3 branch released as STABLE - huge thanks to our beta testers!
 [New] Lightweight highway merging rules #1542 (kianzarrin)
-[New] Allow buses and taxi to use Old Town districts (optional) #1618 (krzychi124)
 [New] Notify the user in case of errors while loading savegame data #1617 (krzychu124)
-[New] Vietnamese translation #1551 (DucAnhLam)
+[New] Allow buses and taxi to use Old Town districts (optional) #1618 (krzychi124)
 [Fixed] Lane connections save/restore issues (kianzarrin)
+[Fixed] After loading savegame settings are not loaded immediately #1624 #1625 (krzychu124)
 [Fixed] Broken detection of hovered element #1594 (krzychu124)
 [Fixed] DLS incorrectly calculate 'max unsafe speed difference' #1581 (krzychu124)
-[Fixed] Redundant transitions at intersections with mixed rail/road vehicle lanes #1565 (kianzarrin)
-[Fixed] Improved pedestrian crossing gap calculations (very wide roads, with 10+ lanes) #1610 (kianzarrin)
+[Fixed] Infinite loop while traversing segments of node #1619 #1612 #1439 (krzychu124)
+[Fixed] Lane connections not removed from upgraded segments causing pathfinding issues and despawn of vehicles approaching new segment #1628 (krzychu124)
 [Fixed] Incorrectly rendered lane connections #1605 #1604 (krzychu124)
+[Fixed] Improved pedestrian crossing gap calculations (very wide roads, with 10+ lanes) #1610 (kianzarrin)
 [Fixed] Trams/Trains get blocked by their own trailer when altering junction settings #1574 #1572 (kianzarrin)
+[Fixed] Redundant transitions at intersections with mixed rail/road vehicle lanes #1565 (kianzarrin)
+[Fixed] NullReferenceException after exit to the main menu or reloading the savegame #1625 (krzychu124)
 [Fixed] Hot-reload for API #1602 (kianzarrin)
 [Updated] Separate road and track lane routing #1550 #1546 #1545 #354 (kianzarrin)
-[Updated] Translations for multiple languages #1551 #1344 (Nguyễn Tài Đức, OldEj, AduitSSH, Chamëleon, 문주원, krzychu124, shg166, John Lok Ho, Márcio Saeger, DucAnhLam, DNSE, Arne Peirs, Neoone, Fatih YILDIRIM, Zeldslayer, GiorgioHerbie, krzychu124)
 [Updated] Junction restriction code cleanup (elesbaan70)
 [Updated] Lane routing code improvements for debugging (elesbaan70)
-[/Version]
-
-[Version] 11.6.5.3
-[Released] Jun 2nd 2022
-[Stable]
-[Link] tmpe-v11653-stable-02062022
-[New] Chinese road sign theme #1523 (kvakvs, lokpro, TianQiBuTian)
-[New] Overlays mod option to show default speed when overriding segment/lane speeds #1404 (aubergine18)
-[New] Directional lane connectors #1492 #1214 #1211 (kianzarrin, Chamëleon)
-[New] `Disable Despawn` feature now has vehicle-type filters #1465 #1441 #1434 (Marconius6, lokpro, krzychu124)
-[New] Timed Traffic Lights now available in Map and Scenario editors #1425 #959 (aubergine18)
-[New] Vietnamese Translation (DucAnhLam)
-[Mod] API: Mods can now use TMPE.API.dll alone, without referencing TrafficManager.dll #1448 (kianzarrin)
-[Mod] API: Api update: TrafficLights/JunctionRestrictions, Road sign theme, extended LaneEndTransitionGroup #1577 (kianzarrin)
-[Mod] Compatible: `Reversible Tram AI` full compatibility #1386 #1353 (sway2020)
-[Mod] Compatible: `Supply Chain Coloring` workshop version only #1390 (aubergine18)
-[Mod] Compatible: `Transfer Broker BETA` workshop version only #1390 (aubergine18)
-[Fixed] Parking AI: Residents ignoring `Electric Cars` district policy #1543 #1527 (krzychu124)
-[Fixed] Asset Editor crash when saving asset with no segments #1505 #1313 (krzychu124, kianzarrin)
-[Fixed] Trams unable to turn due to lane arrows #1501 #1053 (WildQuoll, RLemonache, kianzarrin)
-[Fixed] UI windows/overlays not consuming mouse events #1443 #934 #749 (somethingstarted, MacSergey, krzychu124)
-[Fixed] DLS slider value incorrectly saved/loaded under certain conditions (krzychu124)
-[Updated] Speed Limits: Always use themed icons in segment/lane modes #1404 (aubergine18)
-[Updated] Use game-defined elevation keymapping to select under/over-ground views #1454 #1326 (krzychu124)
-[Updated] Multiple icons updated, fallback theme, etc. #1523 (kvakvs)
-[Updated] Translations update #1551 (aubergine18)
 [/Version]
