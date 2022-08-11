@@ -29,6 +29,28 @@ This changelog includes all versions and major variants of the mod going all the
 
 > Date format: dd/mm/yyyy
 
+#### TM:PE V[11.6.6.3](https://github.com/CitiesSkylinesMods/TMPE/compare/11.6.5.3...11.6.6.3) STABLE, 11/08/2022
+
+- [Meta] TM:PE 11.6.6.3 branch released as STABLE - huge thanks to our beta testers!
+- [New] Lightweight highway merging rules #1542 (kianzarrin)
+- [New] Allow buses and taxi to use `Old Town` districts (optional) #1618 (krzychi124)
+- [New] Notify the user in case of errors while loading savegame data #1617 (krzychu124)
+- [Fixed] Lane connections save/restore issues (kianzarrin)
+- [Fixed] Broken detection of hovered element #1594 (krzychu124)
+- [Fixed] After loading savegame settings are not loaded immediately #1624 #1625 (krzychu124)
+- [Fixed] Lane connections not removed from upgraded segments causing pathfinding issues and despawn of vehicles approaching new segment #1628 (krzychu124)
+- [Fixed] Infinite loop while traversing segments of node #1619 #1612 #1439 (krzychu124)
+- [Fixed] DLS incorrectly calculate 'max unsafe speed difference' #1581 (krzychu124)
+- [Fixed] Improved pedestrian crossing gap calculations (very wide roads, with 10+ lanes) #1610 (kianzarrin)
+- [Fixed] Redundant transitions at intersections with mixed rail/road vehicle lanes #1565 (kianzarrin)
+- [Fixed] Incorrectly rendered lane connections #1605 #1604 (krzychu124)
+- [Fixed] Trams/Trains get blocked by their own trailer when altering junction settings #1574 #1572 (kianzarrin)
+- [Fixed] Possible InvalidOperationException error while saving lane connection data #1621 (krzychu124)
+- [Fixed] NullReferenceException after exit to the main menu or reloading the savegame #1625 (krzychu124)
+- [Updated] Separate road and track lane routing #1550 #1546 #1545 #354 (kianzarrin)
+- [Updated] UnifiedUI library update to the latest version (krzychu124)
+- [Steam] [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
+
 #### TM:PE V11.6.6.3 TEST, 06/08/2022
 
 - [Meta] This update contains important bug fixes before release to Stable
