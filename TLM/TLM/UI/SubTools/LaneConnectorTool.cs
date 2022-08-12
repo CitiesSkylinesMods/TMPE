@@ -453,7 +453,7 @@ namespace TrafficManager.UI.SubTools {
             Vector3 selNodePos = SelectedNodeId.ToNode().m_position;
 
             // Draw a currently dragged curve
-            if (hoveredLaneEnd == null || hoveredLaneEnd.LaneId == selectedLaneEnd.LaneId) {
+            if (hoveredLaneEnd == null) {
                 // get accurate position on a plane positioned at node height
                 Plane plane = new(Vector3.up, Vector3.zero.ChangeY(selNodePos.y));
                 Ray ray = InGameUtil.Instance.CachedMainCamera.ScreenPointToRay(Input.mousePosition);
