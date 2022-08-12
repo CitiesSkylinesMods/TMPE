@@ -646,7 +646,9 @@ namespace TrafficManager.Manager.Impl {
                         extendedLog?.Invoke(new { prevSegmentId, _ = "Exploring", nextSegmentId, nextLaneId, nextLaneIndex });
 
                         // next is compatible lane
-                        if (IsSupported(nextLaneInfo) && (prevLaneInfo.m_vehicleType & nextLaneInfo.m_vehicleType) != 0) {
+                        if (nextLaneId != prevLaneId &&
+                            IsSupported(nextLaneInfo) &&
+                            (prevLaneInfo.m_vehicleType & nextLaneInfo.m_vehicleType) != 0) {
                             extendedLog?.Invoke(new { _ = "vehicle type check passed for", nextLaneId, nextLaneIndex });
 
                             // next is incoming lane
@@ -919,7 +921,7 @@ namespace TrafficManager.Manager.Impl {
 
                         nextLaneId = nextLaneId.ToLane().m_nextLane;
                         ++nextLaneIndex;
-                    } // foreach lane
+                    }
 
                     extendedLog?.Invoke(new { isNextSegmentValid, nextCompatibleTransitionDatas = nextCompatibleTransitionDataIndices?.ArrayToString() });
 
