@@ -28,7 +28,7 @@ namespace TrafficManager.UI.SubTools {
         public LaneConnectorTool(TrafficManagerTool mainTool)
             : base(mainTool) {
             // Log._Debug($"LaneConnectorTool: Constructor called");
-            CurrentLaneEnds = new Dictionary<ushort, List<LaneEnd>>();
+            currentLaneEnds_ = new Dictionary<ushort, List<LaneEnd>>();
 
             CachedVisibleNodeIds = new(NetManager.MAX_NODE_COUNT);
             LastCachedCamera = new();
@@ -68,7 +68,7 @@ namespace TrafficManager.UI.SubTools {
         private static readonly Color DefaultDisabledLaneEndColor = new Color(1f, 0.48f, 0.16f, 0.63f);
         private LaneEnd selectedLaneEnd;
         private LaneEnd hoveredLaneEnd;
-        private readonly Dictionary<ushort, List<LaneEnd>> CurrentLaneEnds;
+        private readonly Dictionary<ushort, List<LaneEnd>> currentLaneEnds_;
         private StayInLaneMode stayInLaneMode = StayInLaneMode.None;
         // private bool initDone = false;
 
@@ -345,7 +345,7 @@ namespace TrafficManager.UI.SubTools {
             for (int cacheIndex = CachedVisibleNodeIds.Size - 1; cacheIndex >= 0; cacheIndex--) {
                 var nodeId = CachedVisibleNodeIds.Values[cacheIndex];
                 bool isVisible = MainTool.IsNodeVisible(nodeId);
-                bool hasMarkers = CurrentLaneEnds.TryGetValue(nodeId, out List<LaneEnd> laneEnds);
+                bool hasMarkers = currentLaneEnds_.TryGetValue(nodeId, out List<LaneEnd> laneEnds);
 
                 if (!isVisible || !hasMarkers) {
                     continue;
@@ -453,7 +453,7 @@ namespace TrafficManager.UI.SubTools {
             Vector3 selNodePos = SelectedNodeId.ToNode().m_position;
 
             // Draw a currently dragged curve
-            if (hoveredLaneEnd == null) {
+            if (hoveredLaneEnd == null || hoveredLaneEnd.LaneId == selectedLaneEnd.LaneId) {
                 // get accurate position on a plane positioned at node height
                 Plane plane = new(Vector3.up, Vector3.zero.ChangeY(selNodePos.y));
                 Ray ray = InGameUtil.Instance.CachedMainCamera.ScreenPointToRay(Input.mousePosition);
@@ -527,7 +527,7 @@ namespace TrafficManager.UI.SubTools {
 
         private void RenderLaneOverlays(RenderManager.CameraInfo cameraInfo) {
             ushort nodeId = SelectedNodeId;
-            if (!CurrentLaneEnds.TryGetValue(nodeId, out List<LaneEnd> laneEnds)) {
+            if (!currentLaneEnds_.TryGetValue(nodeId, out List<LaneEnd> laneEnds)) {
                 return;
             }
 
@@ -586,7 +586,7 @@ namespace TrafficManager.UI.SubTools {
             for (int cacheIndex = CachedVisibleNodeIds.Size - 1; cacheIndex >= 0; cacheIndex--) {
                 var nodeId = CachedVisibleNodeIds.Values[cacheIndex];
                 bool isVisible = MainTool.IsNodeVisible(nodeId);
-                bool hasMarkers = CurrentLaneEnds.TryGetValue(nodeId, out List<LaneEnd> laneEnds);
+                bool hasMarkers = currentLaneEnds_.TryGetValue(nodeId, out List<LaneEnd> laneEnds);
 
                 if (!isVisible || !hasMarkers) {
                     continue;
@@ -787,7 +787,7 @@ namespace TrafficManager.UI.SubTools {
             if (n == 2) {
                 segments.Add(0);
                 segments.Add(0);
-                if(segments[1].ToSegment().GetHeadNode() == segments[1].ToSegment().GetTailNode()) {
+                if(segments[1].ToSegment().GetHeadNode() == segments[0].ToSegment().GetTailNode()) {
                     segments.Swap(0, 1);
                 }
                 ret = true;
@@ -1146,7 +1146,7 @@ namespace TrafficManager.UI.SubTools {
                             selectedLaneTransitionGroup_ = 0;
                             stayInLaneMode = StayInLaneMode.None;
 
-                            CurrentLaneEnds[SelectedNodeId] = laneEnds;
+                            currentLaneEnds_[SelectedNodeId] = laneEnds;
                             MainTool.RequestOnscreenDisplayUpdate();
                         }
 
@@ -1340,9 +1340,10 @@ namespace TrafficManager.UI.SubTools {
 
         private void RefreshCurrentNodeMarkers(ushort forceNodeId = 0) {
             if (forceNodeId == 0) {
-                CurrentLaneEnds.Clear();
+                currentLaneEnds_.Clear();
             } else {
-                CurrentLaneEnds.Remove(forceNodeId);
+                currentLaneEnds_.Remove(forceNodeId);
+
             }
 
             for (ushort nodeId = forceNodeId == 0 ? (ushort)1 : forceNodeId;
@@ -1365,7 +1366,7 @@ namespace TrafficManager.UI.SubTools {
                     continue;
                 }
 
-                CurrentLaneEnds[nodeId] = laneEnds;
+                currentLaneEnds_[nodeId] = laneEnds;
             }
         }
 
@@ -1388,7 +1389,7 @@ namespace TrafficManager.UI.SubTools {
                 MassEditOverlay.IsActive) {
                 RefreshCurrentNodeMarkers();
             } else {
-                CurrentLaneEnds.Clear();
+                currentLaneEnds_.Clear();
             }
         }
 

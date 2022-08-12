@@ -45,6 +45,7 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
                 laneTypes_ |= TrackUtils.TRACK_LANE_TYPES;
                 vehicleTypes_ |= TrackUtils.TRACK_VEHICLE_TYPES;
             }
+            NetManagerEvents.Instance.ReleasingSegment += ReleasingSegment;
         }
 
         public NetInfo.LaneType LaneTypes => laneTypes_;
@@ -57,10 +58,6 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
         public bool Supports(LaneEndTransitionGroup group) => (group & Group) != 0;
 
         public bool Supports(NetInfo.Lane laneInfo) => laneInfo.Matches(laneTypes_, vehicleTypes_);
-
-        private LaneConnectionSubManager() {
-            NetManagerEvents.Instance.ReleasingSegment += ReleasingSegment;
-        }
 
         public override void OnBeforeLoadData() {
             base.OnBeforeLoadData();
@@ -599,13 +596,13 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
                         continue;
                     }
 
-                    ref NetLane lowerLane = ref conn.sourceLaneId.ToLane();
-                    if (!lowerLane.IsValidWithSegment()) {
+                    ref NetLane sourceLane = ref conn.sourceLaneId.ToLane();
+                    if (!sourceLane.IsValidWithSegment()) {
                         continue;
                     }
 
-                    ref NetLane higherLane = ref conn.targetLaneId.ToLane();
-                    if (!higherLane.IsValidWithSegment()) {
+                    ref NetLane targetLane = ref conn.targetLaneId.ToLane();
+                    if (!targetLane.IsValidWithSegment()) {
                         continue;
                     }
 
@@ -613,14 +610,13 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
                         continue;
                     }
 
+                    ushort nodeId = sourceLane.GetNodeId(conn.sourceStartNode);
 #if DEBUGLOAD
-                    Log._Debug($"Loading lane connection: lane {conn.sourceLaneId} -> {conn.targetLaneId}");
+                    Log._Debug($"Loading lane connection: lane {conn.sourceLaneId} -> {conn.targetLaneId} @ node: {nodeId}");
 #endif
                     AddLaneConnection(conn.sourceLaneId, conn.targetLaneId, conn.sourceStartNode);
                     if (conn.LegacyBidirectional) {
-                        ushort segmentId = conn.sourceLaneId.ToLane().m_segment;
-                        ushort nodeId = segmentId.ToSegment().GetNodeId(conn.sourceStartNode);
-                        bool targetStartNode = conn.targetLaneId.ToLane().IsStartNode(nodeId);
+                        bool targetStartNode = targetLane.IsStartNode(nodeId);
                         AddLaneConnection(conn.targetLaneId, conn.sourceLaneId, targetStartNode);
                     }
                 } catch (Exception e) {
@@ -641,11 +637,17 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
                 try {
                     var targets = pair.Value;
                     foreach (var target in pair.Value) {
-                        if (!ValidateLane(target.LaneId)) {
+                        if (!target.Enabled) {
+                            continue;
+                        }
+
+                        // skip invalid connections. Modifying database while iterating will throw InvalidOperationException!!!
+                        if (!target.LaneId.ToLane().IsValidWithSegment()) {
                             continue;
                         }
 #if DEBUGSAVE
-                        Log._Debug($"Saving lane connection: lane {sourceLaneId} -> {target}");
+                        ushort nodeId = source.LaneId.ToLane().GetNodeId(source.StartNode);
+                        Log._Debug($"Saving lane connection: lane {source.LaneId} -> {target.LaneId} @ node: {nodeId}");
 #endif
                         ret.Add(
                             new Configuration.LaneConnection(

@@ -113,8 +113,8 @@
     </Reference>
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Xml" />
-    <Reference Include="UnifiedUILib, Version=2.2.1.1037, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\UnifiedUILib.2.2.1\lib\net35\UnifiedUILib.dll</HintPath>
+    <Reference Include="UnifiedUILib, Version=2.2.12.31246, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\UnifiedUILib.2.2.12\lib\net35\UnifiedUILib.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine">
       <HintPath>$(MangedDLLPath)\UnityEngine.dll</HintPath>
@@ -154,6 +154,7 @@
     <Compile Include="Manager\Impl\LaneConnection\LaneConnectionSubManager.cs" />
     <Compile Include="Manager\Impl\LaneConnection\LaneConnectionManager.cs" />
     <Compile Include="Manager\Impl\LaneConnection\LaneEnd.cs" />
+    <Compile Include="Patch\_CitizenAI\GetPathTargetPositionPatch.cs" />
     <Compile Include="Patch\_External\RTramAIModPatch.cs" />
     <Compile Include="Patch\_VehicleAI\InvalidPathPatch.cs" />
     <Compile Include="State\OptionsTabs\GameplayTab_AIGroups.cs" />

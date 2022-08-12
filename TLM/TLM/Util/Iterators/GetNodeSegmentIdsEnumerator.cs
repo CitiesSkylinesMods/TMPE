@@ -17,6 +17,7 @@ namespace TrafficManager.Util.Iterators {
 
         private bool firstRun;
         private ushort currentSegmentId;
+        private int watchdog;
 
         public GetNodeSegmentIdsEnumerator(ushort nodeId, ushort initialSegmentId, ClockDirection clockDirection, NetSegment[] segmentBuffer) {
             this.nodeId = nodeId;
@@ -26,6 +27,7 @@ namespace TrafficManager.Util.Iterators {
 
             this.firstRun = true;
             this.currentSegmentId = default;
+            this.watchdog = 0;
         }
 
         public ushort Current => currentSegmentId;
@@ -38,6 +40,7 @@ namespace TrafficManager.Util.Iterators {
             } else if (firstRun && initialSegment != 0) {
                 currentSegmentId = initialSegment;
                 firstRun = false;
+                watchdog++;
                 return true;
             }
 
@@ -49,7 +52,7 @@ namespace TrafficManager.Util.Iterators {
                 throw new Exception($"Unknown ClockDirection '{nameof(clockDirection)}'");
             }
 
-            if (currentSegmentId == 0 || currentSegmentId == initialSegment) {
+            if (currentSegmentId == 0 || currentSegmentId == initialSegment || ++watchdog == Constants.MAX_SEGMENTS_OF_NODE) {
                 return false;
             }
 
