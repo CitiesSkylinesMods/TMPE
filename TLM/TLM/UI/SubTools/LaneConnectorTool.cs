@@ -1226,7 +1226,8 @@ namespace TrafficManager.UI.SubTools {
                 // when dead end connection is made, remove all other connections.
                 source.ConnectedCarLaneEnds.Clear();
                 Log._Debug("cleared cached car connections");
-            } else {
+            } else if(!LaneConnectionManager.Instance.Road.AreLanesConnected(
+                source.LaneId, source.LaneId, source.StartNode)) {
                 // when new connection is made, remove previous dead end connection.
                 source.ConnectedCarLaneEnds.Remove(source);
                 Log._Debug("removed cached car dead end");
@@ -1244,7 +1245,8 @@ namespace TrafficManager.UI.SubTools {
                 // when dead end connection is made, remove all other connections.
                 source.ConnectedTrackLaneEnds.Clear();
                 Log._Debug("cleared cached track connections");
-            } else {
+            } else if (!LaneConnectionManager.Instance.Track.AreLanesConnected(
+                 source.LaneId, source.LaneId, source.StartNode)) {
                 // when new connection is made, remove previous dead end connection.
                 source.ConnectedTrackLaneEnds.Remove(source);
                 Log._Debug("removed cached track dead end");
