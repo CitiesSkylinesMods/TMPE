@@ -606,10 +606,6 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
                         continue;
                     }
 
-                    if (conn.sourceLaneId == conn.targetLaneId) {
-                        continue;
-                    }
-
                     ushort nodeId = sourceLane.GetNodeId(conn.sourceStartNode);
 #if DEBUGLOAD
                     Log._Debug($"Loading lane connection: lane {conn.sourceLaneId} -> {conn.targetLaneId} @ node: {nodeId}");
