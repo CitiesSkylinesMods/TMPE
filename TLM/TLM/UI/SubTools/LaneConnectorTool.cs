@@ -1540,9 +1540,9 @@ namespace TrafficManager.UI.SubTools {
                     sourceLaneEnd.LaneId, sourceLaneEnd.StartNode);
                 if (!trackConnections.IsNullOrEmpty()) {
                     foreach (LaneEnd targetLaneEnd in laneEnds) {
-                        if (targetLaneEnd.IsTarget && trackConnections.Contains(targetLaneEnd.LaneId)) {
+                        if ((targetLaneEnd.IsTarget || targetLaneEnd == sourceLaneEnd) && trackConnections.Contains(targetLaneEnd.LaneId)) {
                             sourceLaneEnd.ConnectedTrackLaneEnds.Add(targetLaneEnd);
-                        }
+                        } 
                     }
                 }
             }
