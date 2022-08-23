@@ -13,7 +13,7 @@ namespace TrafficManager.UI.SubTools {
     using UnityEngine;
 
     public class ToggleTrafficLightsTool
-        : LegacySubTool,
+        : TrafficManagerSubTool,
           UI.MainMenu.IOnscreenDisplayProvider
     {
         /// <summary>
@@ -37,8 +37,11 @@ namespace TrafficManager.UI.SubTools {
             LastCachedCamera = new CameraTransformValue();
         }
 
-        public override void OnPrimaryClickOverlay() {
-            if (IsCursorInPanel()) {
+        public override void RenderGenericInfoOverlay_GUI() {
+        }
+
+        public override void OnToolLeftClick() {
+            if (LegacyIsCursorInPanel()) {
                 return;
             }
 
@@ -49,14 +52,19 @@ namespace TrafficManager.UI.SubTools {
             ToggleTrafficLight(HoveredNodeId, ref HoveredNodeId.ToNode());
         }
 
-        public override void OnSecondaryClickOverlay() {
+        public override void OnToolRightClick() {
+            // Right click cancels the mode
             MainTool.SetToolMode(ToolMode.None);
+        }
+
+        public override void UpdateEveryFrame() {
         }
 
         public void ToggleTrafficLight(ushort nodeId,
                                        ref NetNode node,
                                        bool showMessageOnError = true) {
             ToggleTrafficLightError reason;
+
             if (!TrafficLightManager.Instance.CanToggleTrafficLight(
                     nodeId,
                     !TrafficLightManager.Instance.HasTrafficLight(
@@ -88,7 +96,7 @@ namespace TrafficManager.UI.SubTools {
             TrafficLightManager.Instance.ToggleTrafficLight(nodeId, ref node);
         }
 
-        public override void OnToolGUI(Event e) {
+        public override void RenderActiveToolOverlay_GUI() {
             Vector3 camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
             var textures = TrafficLightTextures.Instance;
 
@@ -125,7 +133,13 @@ namespace TrafficManager.UI.SubTools {
             }
         }
 
-        public override void RenderOverlay(RenderManager.CameraInfo cameraInfo) {
+        public override void RenderGenericInfoOverlay(RenderManager.CameraInfo cameraInfo) {
+        }
+
+        public override void OnDeactivateTool() {
+        }
+
+        public override void RenderActiveToolOverlay(RenderManager.CameraInfo cameraInfo) {
             if (MainTool.GetToolController().IsInsideUI || !Cursor.visible) {
                 return;
             }
@@ -204,8 +218,7 @@ namespace TrafficManager.UI.SubTools {
             OnscreenDisplay.Display(items);
         }
 
-        public override void OnActivate() {
-            base.OnActivate();
+        public override void OnActivateTool() {
             MainTool.RequestOnscreenDisplayUpdate();
         }
     }
