@@ -929,32 +929,6 @@ namespace TrafficManager.UI {
             return minSegId;
         }
 
-        private static float prev_H = 0f;
-        private static float prev_H_Fixed;
-
-        /// <summary>
-        /// Calculates accurate vertical element of raycast hit position.
-        /// </summary>
-        internal static float GetAccurateHitHeight() {
-            // cache result.
-            if (FloatUtil.NearlyEqual(HitPos.y, prev_H)) {
-                return prev_H_Fixed;
-            }
-            prev_H = HitPos.y;
-
-            if (HoveredSegmentId.ToSegment().GetClosestLanePosition(
-                HitPos,
-                NetInfo.LaneType.All,
-                VehicleInfo.VehicleType.All,
-                out Vector3 pos,
-                out uint laneId,
-                out int laneIndex,
-                out float laneOffset)) {
-                return prev_H_Fixed = pos.y;
-            }
-            return prev_H_Fixed = HitPos.y + 0.5f;
-        }
-
         /// <summary>Displays lane ids over lanes.</summary>
         // TODO: Extract into a Debug Tool GUI class
         private void DebugGuiDisplayLanes(ushort segmentId,
@@ -1658,7 +1632,9 @@ namespace TrafficManager.UI {
         }
 
         public void RemoveUUIButton() {
-            Destroy(UUIButton?.gameObject);
+            if (UUIButton) {
+                Destroy(UUIButton.gameObject);
+            }
             UUIButton = null;
         }
     }

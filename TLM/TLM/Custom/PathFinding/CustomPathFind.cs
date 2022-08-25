@@ -2510,15 +2510,26 @@ namespace TrafficManager.Custom.PathFinding {
                 NetInfo.LaneType.None &&
                 (prevVehicleType & vehicleTypes_) == VehicleInfo.VehicleType.Car &&
                 (prevSegment.m_flags & carBanMask_) != NetSegment.Flags.None) {
-                offsetLength *= 7.5f;
 
-                if (isLogEnabled) {
+                // is vehicle type Car, in the district with Old Town Policy, skip penalty if bus or taxi when allowed
+                if ((!globalConf_.PathFinding.AllowTaxiInOldTownDistricts || (queueItem_.vehicleType & ExtVehicleType.Taxi) == 0) &&
+                    (!globalConf_.PathFinding.AllowBusInOldTownDistricts || (queueItem_.vehicleType & ExtVehicleType.Bus) == 0)) {
+                    offsetLength *= 7.5f;
+
+                    if (isLogEnabled) {
+                        DebugLog(
+                            unitId,
+                            item,
+                            nextSegmentId,
+                            $"ProcessItemCosts: Applied stock car ban cost factor\n" +
+                            $"\toffsetLength={offsetLength}");
+                    }
+                } else if (isLogEnabled) {
                     DebugLog(
                         unitId,
                         item,
                         nextSegmentId,
-                        $"ProcessItemCosts: Applied stock car ban cost factor\n" +
-                        $"\toffsetLength={offsetLength}");
+                        $"ProcessItemCosts: Skipped car ban, vehicle {queueItem_.vehicleType}");
                 }
             }
 
