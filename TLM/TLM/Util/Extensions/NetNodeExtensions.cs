@@ -1,5 +1,7 @@
 namespace TrafficManager.Util.Extensions {
     using ColossalFramework;
+    using TrafficManager.Network.Data;
+
     public static class NetNodeExtensions {
         private static NetNode[] _nodeBuffer = Singleton<NetManager>.instance.m_nodes.m_buffer;
 

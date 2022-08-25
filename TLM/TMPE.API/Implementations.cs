@@ -3,6 +3,7 @@ namespace TrafficManager.API {
     using TrafficManager.API.Manager;
     using TrafficManager.API.Notifier;
     using System.Linq;
+    using TrafficManager.API.Hook;
     using TrafficManager.API.UI;
     using ColossalFramework.Plugins;
     using System.Reflection;
@@ -10,6 +11,7 @@ namespace TrafficManager.API {
     public static class Implementations {
         private static Type constantsType_;
         private static IManagerFactory managerFactory_;
+        private static IHookFactory hookFactory_;
         private static INotifier notifier_;
         private static IUIFactory uiFactory_;
 
@@ -21,6 +23,7 @@ namespace TrafficManager.API {
         }
 
         public static IManagerFactory ManagerFactory => managerFactory_ ??= GetImplementation<IManagerFactory>();
+        public static IHookFactory HookFactory => hookFactory_ ??= GetImplementation<IHookFactory>();
         public static INotifier Notifier => notifier_ ??= GetImplementation<INotifier>();
         public static IUIFactory UIFactory => uiFactory_ ??= GetImplementation<IUIFactory>();
 

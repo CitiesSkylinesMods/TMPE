@@ -76,6 +76,8 @@
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="Harmony.cs" />
+    <Compile Include="Hook\IHookFactory.cs" />
+    <Compile Include="Hook\IJunctionRestrictionsHook.cs" />
     <Compile Include="Implementations.cs" />
     <Compile Include="Geometry\SegmentEndReplacement.cs" />
     <Compile Include="Manager\IAdvancedParkingManager.cs" />

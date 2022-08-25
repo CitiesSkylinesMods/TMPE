@@ -90,7 +90,7 @@ namespace TrafficManager.Manager.Impl {
             {
                 var replacement = new SegmentEndReplacement {
                     oldSegmentEndId = ExtNodes[nodeId].removedSegmentEndId,
-                    newSegmentEndId = new SegmentEndId(segmentId, nodeId),
+                    newSegmentEndId = new SegmentEndIdApi(segmentId, nodeId),
                 };
 
                 ExtNodes[nodeId].removedSegmentEndId = null;
@@ -100,7 +100,7 @@ namespace TrafficManager.Manager.Impl {
 
         public void RemoveSegment(ushort nodeId, ushort segmentId) {
             if (ExtNodes[nodeId].segmentIds.Remove(segmentId)) {
-                ExtNodes[nodeId].removedSegmentEndId = new SegmentEndId(segmentId, nodeId);
+                ExtNodes[nodeId].removedSegmentEndId = new SegmentEndIdApi(segmentId, nodeId);
             }
         }
 

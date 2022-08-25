@@ -405,9 +405,10 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
             }
 
             if (sourceSegmentId == targetSegmentId) {
-                JunctionRestrictionsManager.Instance.SetUturnAllowed(
+                JunctionRestrictionsManager.Instance.SetValue(
                     sourceSegmentId,
                     sourceStartNode,
+                    JunctionRestrictionFlags.AllowUTurn,
                     true);
             }
 
