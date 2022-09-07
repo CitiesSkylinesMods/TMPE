@@ -342,7 +342,6 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
         /// <param name="sourceStartNode">The affected node</param>
         /// <returns>true if any connection was added</returns>
         internal bool AddLaneConnection(uint sourceLaneId, uint targetLaneId, bool sourceStartNode) {
-            bool deadEnd = sourceLaneId == targetLaneId;
 
             bool valid = ValidateLane(sourceLaneId) & ValidateLane(targetLaneId);
             if (!valid) {
@@ -376,6 +375,7 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
                 }
             }
             canConnect = IsDirectionValid(ref sourceNetLane, sourceLaneInfo, nodeId, true);
+            bool deadEnd = sourceLaneId == targetLaneId;
             if (!deadEnd) {
                 canConnect &= IsDirectionValid(ref targetNetLane, targetLaneInfo, nodeId, false);
             }
@@ -453,6 +453,7 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
         }
 
         private void AssertLane(uint laneId, bool startNode) {
+            Assert(laneId.ToLane().IsValidWithSegment(), $"IsValidWithSegment() faild for laneId:{laneId}");
             var connections = GetLaneConnections(laneId, startNode);
             if (connections != null && connections.Contains(laneId)) {
                 // dead end should only have one connection to itself.
@@ -495,17 +496,6 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
                 if (verbose_) {
                     Log._Debug($"LaneConnectionSubManager({Group}).RecalculateLaneArrows({laneId}, {nodeId}): " +
                                $"lane {laneId}, startNode? {startNode} must not have lane arrows");
-                }
-
-                return;
-            }
-
-            const bool RESET = false; // reset lane arrows when last lane connection is removed.
-
-            if (RESET && !HasOutgoingConnections(laneId, startNode)) {
-                if (verbose_) {
-                    Log._Debug($"LaneConnectionSubManager({Group}).RecalculateLaneArrows({laneId}, {nodeId}): " +
-                               $"lane {laneId} does not have outgoing connections");
                 }
 
                 return;
