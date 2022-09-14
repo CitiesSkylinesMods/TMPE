@@ -29,6 +29,22 @@ This changelog includes all versions and major variants of the mod going all the
 
 > Date format: dd/mm/yyyy
 
+#### TM:PE V[11.7.0.0](https://github.com/CitiesSkylinesMods/TMPE/compare/11.6.6.3...11.7.0.0) STABLE, 14/09/2022
+
+- [New] Compatibility patch for game update 1.15.0-f5
+- [Fixed] Message about the reason of disabled options not showing correctly, updated translation
+- [Updated] Lane connection code cleanup #1615 (kianzarrin)
+- [Updated] Translations
+- [Steam] [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
+
+#### TM:PE V11.7.0.0 TEST, 14/09/2022
+
+- [New] Compatibility patch for game update 1.15.0-f5
+- [Fixed] Message about the reason of disabled options not showing correctly, updated translation
+- [Updated] Lane connection code cleanup #1615 (kianzarrin)
+- [Updated] Translations
+- [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
+
 #### TM:PE V[11.6.6.3](https://github.com/CitiesSkylinesMods/TMPE/compare/11.6.5.3...11.6.6.3) STABLE, 11/08/2022
 
 - [Meta] TM:PE 11.6.6.3 branch released as STABLE - huge thanks to our beta testers!

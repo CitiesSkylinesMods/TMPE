@@ -16,7 +16,7 @@ namespace TrafficManager.State {
         public static CheckboxOption HighwayMergingRules =
             new(nameof(Options.highwayMergingRules), Options.PersistTo.Savegame) {
                 Label = "VR.Checkbox:Enable highway merging rules",
-                Tooltip = "VR.Tooltip: Lightweight",
+                Tooltip = "VR.Tooltip: Lightweight merging rules",
                 Handler = OnHighwayMergingRulesChanged,
             };
 
