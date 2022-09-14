@@ -60,22 +60,8 @@ namespace TrafficManager.Custom.PathFinding {
         private readonly TrafficMeasurementManager trafficMeasurementManager =
             TrafficMeasurementManager.Instance;
 #endif
-
-        private VehicleInfo.VehicleCategory VehicleCategory
-        {
-            get
-            {
-                return VehicleInfo.GetCategory(_vehicleCategoriesPart1, _vehicleCategoriesPart2);
-            }
-            set
-            {
-                VehicleInfo.GetCategoryParts(value, out _vehicleCategoriesPart1, out _vehicleCategoriesPart2);
-            }
-        }
-
-        private VehicleInfo.VehicleCategoryPart1 _vehicleCategoriesPart1;
-
-        private VehicleInfo.VehicleCategoryPart2 _vehicleCategoriesPart2;
+        //Cached value (vanilla uses property to access it)
+        private VehicleInfo.VehicleCategory vehicleCategory_;
 
         private GlobalConfig globalConf_;
 
@@ -272,7 +258,7 @@ namespace TrafficManager.Custom.PathFinding {
 
             laneTypes_ = (NetInfo.LaneType)pathUnits_.m_buffer[unit].m_laneTypes;
             vehicleTypes_ = (VehicleInfo.VehicleType)pathUnits_.m_buffer[unit].m_vehicleTypes;
-            VehicleCategory = (VehicleInfo.VehicleCategory)pathUnits_.m_buffer[unit].m_vehicleCategories;
+            vehicleCategory_ = (VehicleInfo.VehicleCategory)pathUnits_.m_buffer[unit].m_vehicleCategories;
             maxLength_ = pathUnits_.m_buffer[unit].m_length;
             pathFindIndex_ = pathFindIndex_ + 1 & 0x7FFF;
             pathRandomizer_ = new Randomizer(unit);
@@ -1282,8 +1268,8 @@ namespace TrafficManager.Custom.PathFinding {
                                 if (nextPedZoneSegmentId != 0 && nextPedZoneSegmentId != prevSegmentId && isPrevSegmentPedZoneRoad) {
                                     ProcessItemCosts(
 #if DEBUG
-                                isLogEnabled,
-                                unitId,
+                                        isLogEnabled,
+                                        unitId,
 #endif
                                         item,
                                         ref prevSegment,
@@ -1425,7 +1411,7 @@ namespace TrafficManager.Custom.PathFinding {
                             prevLaneIndex,
                             nextLaneType,
                             nextVehicleType,
-                            VehicleCategory,
+                            vehicleCategory_,
                             out int sameSegLaneIndex,
                             out uint sameSegLaneId))
                     {
@@ -1985,7 +1971,7 @@ namespace TrafficManager.Custom.PathFinding {
                         item.Position.m_lane,
                         NetInfo.LaneType.Pedestrian,
                         vehicleTypes_,
-                        VehicleCategory,
+                        vehicleCategory_,
                         out int nextLaneIndex,
                         out uint nextLaneId)) {
                         if (isLogEnabled) {
@@ -2205,7 +2191,7 @@ namespace TrafficManager.Custom.PathFinding {
             }
 
             NetInfo.Lane nextLaneInfo = nextSegmentInfo.m_lanes[nextLaneIndex];
-            if (!nextLaneInfo.CheckType(laneTypes_, vehicleTypes_, VehicleCategory)) {
+            if (!nextLaneInfo.CheckType(laneTypes_, vehicleTypes_, vehicleCategory_)) {
                 return;
             }
 
@@ -2763,7 +2749,7 @@ namespace TrafficManager.Custom.PathFinding {
             }
 #endif
 
-            var currentVehicleCategory = VehicleCategory;
+            var currentVehicleCategory = vehicleCategory_;
             // NON-STOCK CODE END
             for (; nextLaneIndex <= maxNextLaneIndex && nextLaneId != 0; nextLaneIndex++) {
                 NetInfo.Lane nextLaneInfo = nextSegmentInfo.m_lanes[nextLaneIndex];
@@ -3083,7 +3069,7 @@ namespace TrafficManager.Custom.PathFinding {
 
                         if ((nextLaneInfo.m_laneType & prevLaneType) != NetInfo.LaneType.None &&
                             (nextLaneInfo.m_vehicleType & vehicleTypes_) != VehicleInfo.VehicleType.None &&
-                            (nextLaneInfo.vehicleCategory & VehicleCategory) != VehicleInfo.VehicleCategory.None) {
+                            (nextLaneInfo.vehicleCategory & vehicleCategory_) != VehicleInfo.VehicleCategory.None) {
 
 #if ADVANCEDAI && ROUTING
                             if (!enableAdvancedAI) {
