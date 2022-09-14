@@ -1227,7 +1227,6 @@
     <EmbeddedResource Include="Resources\SignThemes\Kmph_China_Generic\Restrict-Taxi.png" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\testbundle" />
     <EmbeddedResource Include="Resources\SignThemes\Fallback\Allow-EnterBlocked.png" />
     <EmbeddedResource Include="Resources\SignThemes\Fallback\Allow-LaneChange.png" />
     <EmbeddedResource Include="Resources\SignThemes\Fallback\Allow-LeftOnRed.png" />
