@@ -1,4 +1,5 @@
 namespace TrafficManager.Patch._VehicleAI._TrainAI {
+    using System.Collections.Generic;
     using System.Reflection;
     using HarmonyLib;
     using JetBrains.Annotations;
@@ -21,26 +22,8 @@ namespace TrafficManager.Patch._VehicleAI._TrainAI {
         public static MethodBase TargetMethod() => TranspilerUtil.DeclaredMethod<CalculatePositionDelegate>(typeof(TrainAI), "CalculateSegmentPosition");
 
         [UsedImplicitly]
-        public static bool Prefix(TrainAI __instance,
-                                  ushort vehicleID,
-                                  ref Vehicle vehicleData,
-                                  PathUnit.Position position,
-                                  uint laneID,
-                                  byte offset,
-                                  out Vector3 pos,
-                                  out Vector3 dir,
-                                  out float maxSpeed) {
-            VehicleAICommons.CustomCalculateSegmentPosition(
-                __instance,
-                vehicleID,
-                ref vehicleData,
-                position,
-                laneID,
-                offset,
-                out pos,
-                out dir,
-                out maxSpeed);
-            return false;
+        public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions) {
+            return VehicleAICommons.TranspileCalculateSegmentPosition(instructions, noSlowDriving: true, extendedDefinition: false);
         }
     }
 }

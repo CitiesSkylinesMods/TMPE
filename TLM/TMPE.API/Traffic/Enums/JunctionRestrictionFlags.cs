@@ -1,4 +1,7 @@
 namespace TrafficManager.API.Traffic.Enums {
+    using System;
+
+    [Flags]
     public enum JunctionRestrictionFlags {
         AllowUTurn = 1 << 0,
         AllowNearTurnOnRed = 1 << 1,

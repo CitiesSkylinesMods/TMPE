@@ -14,6 +14,7 @@ namespace TrafficManager.Manager.Impl {
     using System.Text;
     using TrafficManager.API.Traffic;
     using TrafficManager.Util.Extensions;
+    using UnityEngine;
 
     public class SpeedLimitManager
         : AbstractGeometryObservingManager,
@@ -518,6 +519,13 @@ namespace TrafficManager.Manager.Impl {
 
             Notifier.Instance.OnSegmentModified(segmentId, this);
             return true;
+        }
+
+        public static bool IsInSlowDrivingDistrict(ref NetSegment segment) {
+            Vector3 pos = segment.m_middlePosition;
+            DistrictManager districtManager = DistrictManager.instance;
+            byte parkId = districtManager.GetPark(pos);
+            return parkId != 0 && (districtManager.m_parks.m_buffer[parkId].m_parkPolicies & DistrictPolicies.Park.SlowDriving) != 0;
         }
 
         public override void OnBeforeLoadData() {
