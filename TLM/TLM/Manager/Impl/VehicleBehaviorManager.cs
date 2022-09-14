@@ -888,6 +888,7 @@ namespace TrafficManager.Manager.Impl {
                     ItemClass.Service.Road,
                     NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle,
                     vehicleTypes,
+                    VehicleInfo.VehicleCategory.All,
                     allowUnderground,
                     false,
                     32f,
@@ -908,6 +909,7 @@ namespace TrafficManager.Manager.Impl {
                                        ? NetInfo.LaneType.Pedestrian
                                        : (laneTypes | NetInfo.LaneType.Pedestrian),
                                    vehicleTypes,
+                                   VehicleInfo.VehicleCategory.All,
                                    undergroundTarget,
                                    out endPosA);
             // NON-STOCK CODE END
@@ -1206,7 +1208,8 @@ namespace TrafficManager.Manager.Impl {
             bool hasActiveTimedSimulation = (Options.timedLightsEnabled &&
                                              TrafficLightSimulationManager
                                                  .Instance.HasActiveTimedSimulation(targetNodeId));
-            bool hasTrafficLightFlag = (targetNode.m_flags & NetNode.Flags.TrafficLights) != NetNode.Flags.None;
+            NetNode.FlagsLong targetNodeFlagsLong = targetNode.flags;
+            bool hasTrafficLightFlag = (targetNodeFlagsLong & NetNode.FlagsLong.TrafficLights) != NetNode.FlagsLong.None;
 
             if (hasActiveTimedSimulation && !hasTrafficLightFlag) {
                 TrafficLightManager.Instance.AddTrafficLight(targetNodeId, ref targetNode);
@@ -1215,7 +1218,7 @@ namespace TrafficManager.Manager.Impl {
             bool hasTrafficLight = hasTrafficLightFlag || hasActiveTimedSimulation;
             bool checkTrafficLights = true;
             bool isTargetStartNode = prevSegment.m_startNode == targetNodeId;
-            bool isLevelCrossing = (targetNode.m_flags & NetNode.Flags.LevelCrossing) != NetNode.Flags.None;
+            bool isLevelCrossing = (targetNodeFlagsLong & NetNode.FlagsLong.LevelCrossing) != NetNode.FlagsLong.None;
 
             if ((vehicleData.Info.m_vehicleType &
                  (VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Metro |

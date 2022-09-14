@@ -264,7 +264,7 @@ namespace TrafficManager.Manager.Impl {
                 segEnd.segmentId,
                 segEnd.startNode,
                 ref node));
-            restrictions.SetDefault(JunctionRestrictionFlags.AllowForwardLaneChange, 
+            restrictions.SetDefault(JunctionRestrictionFlags.AllowForwardLaneChange,
                 GetDefaultLaneChangingAllowedWhenGoingStraight(
                     segEnd.segmentId,
                     segEnd.startNode,
@@ -338,8 +338,9 @@ namespace TrafficManager.Manager.Impl {
                     segmentId,
                     startNode,
                     ref node)) {
-                bool res = (node.m_flags & (NetNode.Flags.End | NetNode.Flags.OneWayOut)) !=
-                           NetNode.Flags.None;
+                // vanilla one-way or no other segment with matching vehicle categories
+                bool res = (node.m_flags & (NetNode.Flags.End | NetNode.Flags.OneWayOut)) != NetNode.Flags.None ||
+                           ((node.m_flags2 & NetNode.Flags2.PedestrianStreetTransition) != 0 &&!HasOtherSegmentsWithCategories(segmentId, ref node));
                 if (logLogic) {
                     Log._Debug(
                         $"JunctionRestrictionsManager.GetDefaultUturnAllowed({segmentId}, " +
@@ -349,8 +350,8 @@ namespace TrafficManager.Manager.Impl {
                 return res;
             }
 
-            bool ret = (node.m_flags & (NetNode.Flags.End | NetNode.Flags.OneWayOut)) !=
-                       NetNode.Flags.None;
+            bool ret = (node.m_flags & (NetNode.Flags.End | NetNode.Flags.OneWayOut)) != NetNode.Flags.None ||
+                       ((node.m_flags2 & NetNode.Flags2.PedestrianStreetTransition) != 0 &&!HasOtherSegmentsWithCategories(segmentId, ref node));
 
             if (!ret && Options.allowUTurns) {
                 ret = (node.m_flags & (NetNode.Flags.Junction | NetNode.Flags.Transition)) !=
@@ -364,6 +365,21 @@ namespace TrafficManager.Manager.Impl {
             }
 
             return ret;
+        }
+
+        private bool HasOtherSegmentsWithCategories(ushort ignoreSegment, ref NetNode node) {
+            VehicleInfo.VehicleCategory category = ignoreSegment.ToSegment().Info.m_vehicleCategories;
+            for (int i = 0; i < Constants.MAX_SEGMENTS_OF_NODE; i++) {
+                ushort segmentId = node.GetSegment(i);
+                if (segmentId == 0 || segmentId == ignoreSegment) {
+                    continue;
+                }
+                ref NetSegment segment = ref segmentId.ToSegment();
+                if ((segment.Info.m_vehicleCategories & category) == category) {
+                    return true;
+                }
+            }
+            return false;
         }
 
         public bool IsUturnAllowed(ushort segmentId, bool startNode) {
@@ -613,6 +629,7 @@ namespace TrafficManager.Manager.Impl {
                     0,
                     NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle,
                     VehicleInfo.VehicleType.Car,
+                    VehicleInfo.VehicleCategory.All,
                     true,
                     ref numOutgoing,
                     ref numIncoming);
@@ -634,13 +651,16 @@ namespace TrafficManager.Manager.Impl {
 
         public bool IsPedestrianCrossingAllowedConfigurable(ushort segmentId, bool startNode, ref NetNode node) {
             bool ret = (node.m_flags & (NetNode.Flags.Junction | NetNode.Flags.Bend)) != NetNode.Flags.None
-                       && node.Info?.m_class?.m_service != ItemClass.Service.Beautification;
+                       && node.Info?.m_class?.m_service != ItemClass.Service.Beautification
+                       && !node.Info.IsPedestrianZoneRoad() && (segmentId.ToSegment().Info.m_connectGroup & NetInfo.ConnectGroup.Pedestrian) == 0;
 #if DEBUG
             if (DebugSwitch.JunctionRestrictions.Get()) {
                 Log._Debug(
                     "JunctionRestrictionsManager.IsPedestrianCrossingAllowedConfigurable" +
                     $"({segmentId}, {startNode}): ret={ret}, flags={node.m_flags}, " +
-                    $"service={node.Info?.m_class?.m_service}");
+                    $"service={node.Info?.m_class?.m_service}, " +
+                    $"nodePedestrianZone={node.Info.IsPedestrianZoneRoad()}, " +
+                    $"segmentConnectGroup={segmentId.ToSegment().Info.m_connectGroup}");
             }
 #endif
             return ret;
@@ -873,7 +893,7 @@ namespace TrafficManager.Manager.Impl {
         private static ref NetNode GetNode(ushort segmentId, bool startNode) =>
             ref segmentId.ToSegment().GetNodeId(startNode).ToNode();
 
-        #region Set<Traffic Rule>Allowed: TernaryBool 
+        #region Set<Traffic Rule>Allowed: TernaryBool
 
         public bool SetUturnAllowed(ushort segmentId, bool startNode, TernaryBool value) {
             ref NetSegment netSegment = ref segmentId.ToSegment();

@@ -311,6 +311,7 @@ namespace TrafficManager.Custom.PathFinding {
             m_pathUnits.m_buffer[unit].m_position11 = args.vehiclePosition;
             m_pathUnits.m_buffer[unit].m_laneTypes = (byte)args.laneTypes;
             m_pathUnits.m_buffer[unit].m_vehicleTypes = (uint)args.vehicleTypes;
+            m_pathUnits.m_buffer[unit].m_vehicleCategories = (long)args.vehicleCategories;
             m_pathUnits.m_buffer[unit].m_length = args.maxLength;
             m_pathUnits.m_buffer[unit].m_positionCount = 20;
 
@@ -370,6 +371,7 @@ namespace TrafficManager.Custom.PathFinding {
                 PathUnit.Position endPosA,
                 PathUnit.Position endPosB,
                 VehicleInfo.VehicleType vehicleType,
+                VehicleInfo.VehicleCategory vehicleCategory,
                 bool skipQueue) {
 
             PathCreationArgs args = new PathCreationArgs {
@@ -384,6 +386,7 @@ namespace TrafficManager.Custom.PathFinding {
                 endPosB = endPosB,
                 vehiclePosition = default,
                 vehicleTypes = vehicleType,
+                vehicleCategories = vehicleCategory,
                 isHeavyVehicle = false,
                 hasCombustionEngine = false,
                 ignoreBlocked = true,

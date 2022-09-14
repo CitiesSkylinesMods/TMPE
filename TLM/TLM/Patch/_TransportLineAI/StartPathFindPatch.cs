@@ -26,6 +26,7 @@ namespace TrafficManager.Patch._TransportLineAI {
                                                  PathUnit.Position endPosB,
                                                  NetInfo.LaneType laneTypes,
                                                  VehicleInfo.VehicleType vehicleTypes,
+                                                 VehicleInfo.VehicleCategory vehicleCategories,
                                                  float maxLength,
                                                  bool isHeavyVehicle,
                                                  bool ignoreBlocked,
@@ -75,6 +76,7 @@ namespace TrafficManager.Patch._TransportLineAI {
                 new CodeInstruction(OpCodes.Ldloc_S, 10),
                 new CodeInstruction(OpCodes.Ldarg_S, 4),
                 new CodeInstruction(OpCodes.Ldarg_S, 5),
+                new CodeInstruction(OpCodes.Ldarg_S, 6),
                 new CodeInstruction(OpCodes.Callvirt, createTransportPath),
             };
         }
@@ -89,6 +91,7 @@ namespace TrafficManager.Patch._TransportLineAI {
                 endPosA,
                 endPosB,
                 vehicleType,
+                vehicleCategory,
                 skipQueue)) {
          ---------------------------
             ...
@@ -99,8 +102,9 @@ namespace TrafficManager.Patch._TransportLineAI {
             IL_02d3: ldloc.s      endPosA
             IL_02d5: ldloc.s      endPosB
             IL_02d7: ldarg.s      vehicleType
-            IL_02d9: ldarg.s      skipQueue
-            IL_02db: callvirt     instance bool TrafficManager.Custom.PathFinding.CustomPathManager::CreateTransportLinePath(unsigned int32&, valuetype ['Assembly-CSharp']PathUnit/Position, valuetype ['Assembly-CSharp']PathUnit/Position, valuetype ['Assembly-CSharp']PathUnit/Position, valuetype ['Assembly-CSharp']PathUnit/Position, valuetype ['Assembly-CSharp']VehicleInfo/VehicleType, bool)
+            IL_02d9: ldarg.s      vehicleCategory
+            IL_02db: ldarg.s      skipQueue
+            IL_02dd: callvirt     instance bool TrafficManager.Custom.PathFinding.CustomPathManager::CreateTransportLinePath(unsigned int32&, valuetype ['Assembly-CSharp']PathUnit/Position, valuetype ['Assembly-CSharp']PathUnit/Position, valuetype ['Assembly-CSharp']PathUnit/Position, valuetype ['Assembly-CSharp']PathUnit/Position, valuetype ['Assembly-CSharp']VehicleInfo/VehicleType, bool)
             ...
 
             .locals init (

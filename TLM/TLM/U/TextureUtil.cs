@@ -135,6 +135,26 @@ namespace TrafficManager.U {
             return ret;
         }
 
+        /// <summary>Creates new texture with in grayscale.</summary>
+        /// <param name="tex">Copy from.</param>
+        /// <returns>New texture.</returns>
+        public static Texture2D ToGrayscale(Texture2D tex) {
+            Color[] texColors = tex.GetPixels();
+            Color[] retPixels = new Color[texColors.Length];
+
+            for (int i = 0; i < texColors.Length; ++i) {
+                float l = texColors[i].grayscale;
+                retPixels[i] = new Color(l, l, l, texColors[i].a);
+            }
+
+            Texture2D ret = new Texture2D(tex.width, tex.height, TextureFormat.ARGB32, false);
+
+            ret.SetPixels(retPixels);
+            ret.Apply();
+
+            return ret;
+        }
+
         public static UITextureAtlas FindAtlasOrNull(string name) {
             UITextureAtlas[] atlases = Resources.FindObjectsOfTypeAll<UITextureAtlas>();
             for (int i = 0; i < atlases.Length; i++) {

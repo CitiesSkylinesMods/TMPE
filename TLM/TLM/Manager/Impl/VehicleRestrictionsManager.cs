@@ -261,7 +261,7 @@ namespace TrafficManager.Manager.Impl {
                                | ExtVehicleType.Emergency;
                     } else if ((laneInfo.m_vehicleType & VehicleInfo.VehicleType.Car) !=
                              VehicleInfo.VehicleType.None) {
-                        ret |= ExtVehicleType.RoadVehicle;
+                        ret |= laneInfo.vehicleCategory.MapToExtVehicleTypeRestrictions();
                     }
 
                     break;
@@ -270,7 +270,7 @@ namespace TrafficManager.Manager.Impl {
                 default: {
                     if ((laneInfo.m_vehicleType & VehicleInfo.VehicleType.Car) !=
                         VehicleInfo.VehicleType.None) {
-                        ret |= ExtVehicleType.RoadVehicle;
+                        ret |= laneInfo.vehicleCategory.MapToExtVehicleTypeRestrictions();
                     }
 
                     break;
@@ -776,6 +776,10 @@ namespace TrafficManager.Manager.Impl {
             ItemClass connectionClass = segmentInfo.GetConnectionClass();
             return connectionClass.m_service == ItemClass.Service.PublicTransport &&
                    connectionClass.m_subService == ItemClass.SubService.PublicTransportMonorail;
+        }
+
+        public ExtVehicleType GetConfigurableVehicleTypes(NetInfo segmentInfo, NetInfo.Lane laneInfo) {
+            return laneInfo.vehicleCategory.MapToExtVehicleTypeRestrictions();
         }
 
         internal void ClearCache(ushort segmentId) {
