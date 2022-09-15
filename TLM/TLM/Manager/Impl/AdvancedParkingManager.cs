@@ -1896,6 +1896,7 @@ namespace TrafficManager.Manager.Impl {
                             parkPos,
                             NetInfo.LaneType.Pedestrian,
                             VehicleInfo.VehicleType.None,
+                            VehicleInfo.VehicleCategory.None,
                             out _,
                             out uint laneId,
                             out int laneIndex,
@@ -2394,6 +2395,7 @@ namespace TrafficManager.Manager.Impl {
                         segCenter,
                         NetInfo.LaneType.Parking,
                         VehicleInfo.VehicleType.Car,
+                        VehicleInfo.VehicleCategory.PassengerCar,
                         out Vector3 innerParkPos,
                         out uint laneId,
                         out int laneIndex,
@@ -2620,7 +2622,7 @@ namespace TrafficManager.Manager.Impl {
                 return false;
             }
 
-            if ((building.m_problems & Notification.Problem.TurnedOff) != Notification.Problem.None) {
+            if ((building.m_problems & Notification.Problem1.TurnedOff).IsNotNone) {
                 Log._DebugIf(
                     logParkingAi,
                     () => $"Refusing to find parking space at building {buildingId}! Building is not active.");
@@ -2646,6 +2648,15 @@ namespace TrafficManager.Manager.Impl {
                 buildingId != homeId && rng.Int32((uint)Options.getRecklessDriverModulo()) != 0) {
                 // NON-STOCK CODE
                 return false;
+            }
+            if (building.m_accessSegment != 0) {
+                NetInfo accessSegmentInfo = building.m_accessSegment.ToSegment().Info;
+                if (accessSegmentInfo != null && accessSegmentInfo.IsPedestrianZoneOrPublicTransportRoad()) {
+                    if (logParkingAi) {
+                        Log._Debug($"Building connected to pedestrian zone road. {building.m_accessSegment}, building: {buildingId}, home: {homeId}, maxDist: {maxDistance}");
+                    }
+                    return false;
+                }
             }
 
             var propMinDistance = 9999f; // NON-STOCK CODE
@@ -2740,6 +2751,7 @@ namespace TrafficManager.Manager.Impl {
                         unspawnPos,
                         NetInfo.LaneType.Pedestrian,
                         VehicleInfo.VehicleType.None,
+                        VehicleInfo.VehicleCategory.None,
                         out Vector3 lanePos,
                         out uint laneId,
                         out int laneIndex,
@@ -2807,6 +2819,7 @@ namespace TrafficManager.Manager.Impl {
                     refPos,
                     NetInfo.LaneType.Parking,
                     VehicleInfo.VehicleType.Car,
+                    VehicleInfo.VehicleCategory.PassengerCar,
                     out parkPos,
                     out laneId,
                     out laneIndex,
@@ -2923,6 +2936,7 @@ namespace TrafficManager.Manager.Impl {
                         refPos,
                         NetInfo.LaneType.Parking,
                         VehicleInfo.VehicleType.Car,
+                        VehicleInfo.VehicleCategory.PassengerCar,
                         out _,
                         out _,
                         out int laneIndex,

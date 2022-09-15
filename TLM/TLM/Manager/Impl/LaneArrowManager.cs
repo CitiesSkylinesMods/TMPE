@@ -161,7 +161,7 @@ namespace TrafficManager.Manager.Impl {
                             continue;
 
                         int forward = 0, backward = 0;
-                        segmentId.ToSegment().CountLanes(segmentId, LANE_TYPES, VEHICLE_TYPES, ref forward, ref backward);
+                        segmentId.ToSegment().CountLanes(segmentId, LANE_TYPES, VEHICLE_TYPES, VehicleInfo.VehicleCategory.All,  ref forward, ref backward);
                         if (forward == 1 && backward == 1) {
                             // one lane cannot have dedicated turning lanes.
                             continue;

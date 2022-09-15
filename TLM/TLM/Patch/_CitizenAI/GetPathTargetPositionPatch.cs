@@ -11,7 +11,7 @@ namespace TrafficManager.Patch._CitizenAI {
             var mGetGap = AccessTools.Method(typeof(GetPathTargetPositionPatch), nameof(GetGap));
             foreach (var instruction in instructions) {
                 yield return instruction;
-                if (instruction.opcode == OpCodes.Ldc_R4 && instruction.operand is float value && value == 64) {
+                if (instruction.opcode == OpCodes.Ldc_R4 && instruction.operand is float value && value == 128) {
                     // we don't replace LDC_R4 64 but rather pass it to GetGap. This way it would be more compatible with other mods in future should they try to modify the same line.
                     yield return new CodeInstruction(OpCodes.Ldloc, 4); // path position
                     yield return new CodeInstruction(OpCodes.Call, mGetGap);
@@ -19,7 +19,7 @@ namespace TrafficManager.Patch._CitizenAI {
             }
         }
 
-        private static float GetGap(float gap /*64f*/, PathUnit.Position pathPos) {
+        private static float GetGap(float gap /*128f*/, PathUnit.Position pathPos) {
             NetInfo info = pathPos.m_segment.ToSegment().Info;
             return Max(gap, info.m_minCornerOffset, info.m_halfWidth * 2);
         }

@@ -165,7 +165,7 @@ namespace TrafficManager.UI.SubTools.RoutingDetector {
                 foreach (var item in netSegment.GetSegmentLaneIdsAndLaneIndexes()) {
                     uint laneId = item.laneId;
                     NetInfo.Lane laneInfo = netSegment.Info.m_lanes[item.laneIndex];
-                    bool routedLane = laneInfo.CheckType(RoutingManager.ROUTED_LANE_TYPES, RoutingManager.ROUTED_VEHICLE_TYPES);
+                    bool routedLane = laneInfo.CheckType(RoutingManager.ROUTED_LANE_TYPES, RoutingManager.ROUTED_VEHICLE_TYPES, VehicleInfo.VehicleCategory.All);
                     if (routedLane) {
                         ref NetLane netLane = ref laneId.ToLane();
                         bool startNode = netLane.IsStartNode(nodeId);

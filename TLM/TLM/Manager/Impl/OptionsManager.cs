@@ -11,6 +11,7 @@ namespace TrafficManager.Manager.Impl {
     using JetBrains.Annotations;
     using TrafficManager.Util;
     using System.Reflection;
+    using TrafficManager.Custom.PathFinding;
 
     public class OptionsManager
         : AbstractCustomManager,
@@ -108,7 +109,7 @@ namespace TrafficManager.Manager.Impl {
         private static void ToSlider(byte[] data, uint idx, ILegacySerializableOption opt, byte defaultVal = 0)
             => opt.Load(LoadByte(data, idx, defaultVal));
 
-        private static void ToDropDown<TEnum>(byte[] data, uint idx, ILegacySerializableOption opt, TEnum defaultVal) 
+        private static void ToDropDown<TEnum>(byte[] data, uint idx, ILegacySerializableOption opt, TEnum defaultVal)
             where TEnum: struct,Enum,IConvertible {
             if (idx < data.Length) {
                 opt.Load(data[idx]);
@@ -210,7 +211,7 @@ namespace TrafficManager.Manager.Impl {
                 ToCheckbox(data, idx: 56, PoliciesTab_OnRoadsGroup.NoDoubleCrossings, false);
                 ToCheckbox(data, idx: 57, PoliciesTab_AtJunctionsGroup.DedicatedTurningLanes, false);
 
-                Options.SavegamePathfinderEdition = LoadByte(data, idx: 58, defaultVal: 0);
+                Options.SavegamePathfinderEdition = LoadByte(data, idx: 58, defaultVal: PathfinderUpdates.LatestPathfinderEdition);
 
                 ToCheckbox(data, idx: 59, OverlaysTab_OverlaysGroup.ShowDefaultSpeedSubIcon, false);
 

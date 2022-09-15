@@ -385,6 +385,42 @@ namespace TrafficManager.TrafficLight.Impl {
                 pedestrianLightCopy,
                 false,
                 false);
+            bool isPedZoneRoad = netSegment.Info.IsPedestrianZoneRoad();
+            bool isRegularRoadEnd = (nodeId.ToNode().flags & NetNode.FlagsLong.RegularRoadEnd) != 0;
+            if (isPedZoneRoad != isRegularRoadEnd) {
+                RoadBaseAI.GetBollardState(
+                    nodeId,
+                    ref netSegment,
+                    now << 8,
+                    out RoadBaseAI.TrafficLightState enterState,
+                    out _);
+
+                TrafficLightSimulationManager.SetBollardVisualState(
+                    nodeId,
+                    ref netSegment,
+                    now << 8,
+                    enterState,
+                    vehicleLightState,
+                    false,
+                    false,
+                    skipEnterUpdate: true);
+
+                RoadBaseAI.GetBollardState(
+                    nodeId,
+                    ref netSegment,
+                    (1u - now) << 8,
+                    out RoadBaseAI.TrafficLightState enterState2,
+                    out _);
+                TrafficLightSimulationManager.SetBollardVisualState(
+                    nodeId,
+                    ref netSegment,
+                    (1u - now) << 8,
+                    enterState2,
+                    vehicleLightState,
+                    false,
+                    false,
+                    skipEnterUpdate: true);
+            }
         }
 
         public RoadBaseAI.TrafficLightState GetVisualLightState() {

@@ -10,12 +10,17 @@ namespace TrafficManager.Patch._RoadBaseAI {
         /// Decides whether the stock simulation step for traffic lights should run.
         /// </summary>
         [UsedImplicitly]
-        public static bool Prefix(ushort nodeID) {
-            return !Options.timedLightsEnabled
-                   || !TrafficLightSimulationManager
-                                .Instance
-                                .TrafficLightSimulations[nodeID]
-                                .IsSimulationRunning();
+        public static bool Prefix(ushort nodeID, ref NetNode data) {
+            bool stockTrafficLights = !Options.timedLightsEnabled
+                     || !TrafficLightSimulationManager
+                         .Instance
+                         .TrafficLightSimulations[nodeID]
+                         .IsSimulationRunning();
+            if (!stockTrafficLights && (data.flags & NetNode.FlagsLong.PedestrianBollards) != 0)
+            {
+                PedestrianZoneRoadAI.BollardsSimulationStep(nodeID, ref data, null);
+            }
+            return stockTrafficLights;
         }
     }
 }
