@@ -3,6 +3,7 @@ namespace TrafficManager.State {
     using ICities;
     using TrafficManager.Lifecycle;
     using TrafficManager.Manager.Impl;
+    using TrafficManager.Manager.Impl.LaneConnection;
     using TrafficManager.UI;
     using TrafficManager.UI.Helpers;
 
@@ -20,6 +21,10 @@ namespace TrafficManager.State {
             Label = "Maintenance.Button:Reset custom speed limits",
             Handler = OnResetSpeedLimitsClicked,
         };
+        public static ActionButton RemoveLaneConnections = new() {
+            Label = "Maintenance.Button:Remove all lane connections",
+            Handler = OnResetLaneConnectionsClicked,
+        };
 
         internal static void AddUI(UIHelperBase tab) {
             if (!TMPELifecycle.InGameOrEditor())
@@ -29,6 +34,7 @@ namespace TrafficManager.State {
 
             ResetStuckEntities.AddUI(group);
             RemoveTrafficLights.AddUI(group);
+            RemoveLaneConnections.AddUI(group);
 #if DEBUG
             ResetSpeedLimits.AddUI(group);
 #endif
@@ -55,5 +61,20 @@ namespace TrafficManager.State {
 
         private static void OnResetSpeedLimitsClicked()
             => SpeedLimitManager.Instance.ResetSpeedLimits();
+
+        private static void OnResetLaneConnectionsClicked() {
+            ConfirmPanel.ShowModal(
+                T("Maintenance.Dialog.Title:Remove all lane connections"),
+                T("Maintenance.Dialog.Text:Remove all lane connections, Confirmation"),
+                (_, result) => {
+                    if (result == 1) {
+                        SimulationManager.instance.AddAction(
+                            () => {
+                                LaneConnectionManager.Instance.RemoveAllLaneConnections();
+                                OptionsManager.UpdateRoutingManager();
+                            });
+                    }
+                });
+        }
     }
 }

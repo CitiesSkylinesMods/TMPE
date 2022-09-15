@@ -128,17 +128,17 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
 
             return ret;
         }
-        
+
         /// <summary>
         /// removes all connections from and to the given lane.
         /// </summary>
         internal void RemoveConnections(uint laneId) {
             var laneStart = new LaneEnd(laneId, true);
             var laneEnd = new LaneEnd(laneId, false);
-            if(this.TryGetValue(laneStart,out var startConnections)) { 
+            if(this.TryGetValue(laneStart,out var startConnections)) {
                 foreach (var connection in startConnections) {
                     uint laneId2 = connection.LaneId;
-                    ushort nodeId = laneId.ToLane().GetNodeId(true /* StartConnections */); 
+                    ushort nodeId = laneId.ToLane().GetNodeId(true /* StartConnections */);
                     RemoveConnection(laneId2, laneId, nodeId);
                 }
                 this.Remove(laneStart);
@@ -152,6 +152,10 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
                 }
                 this.Remove(laneEnd);
             }
+        }
+
+        internal void ResetConnectionsDatabase() {
+            this.Clear();
         }
 
         [Conditional("DEBUG")]

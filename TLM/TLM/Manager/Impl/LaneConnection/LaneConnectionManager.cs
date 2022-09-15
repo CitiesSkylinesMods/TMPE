@@ -263,6 +263,13 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
             return null;
         }
 
+        internal void RemoveAllLaneConnections() {
+            Log.Info("LaneConnectionManager(): Removing all lane connections...");
+            Road.ResetLaneConnections();
+            Track.ResetLaneConnections();
+            Log.Info("LaneConnectionManager(): All lane connections have been removed!");
+        }
+
         public bool LoadData(List<Configuration.LaneConnection> data) {
             bool success;
             Log.Info($"Loading {data.Count} lane connections");
