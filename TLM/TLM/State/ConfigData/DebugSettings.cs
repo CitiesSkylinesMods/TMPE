@@ -2,6 +2,10 @@ namespace TrafficManager.State.ConfigData {
     using ExtVehicleType = TrafficManager.Traffic.ExtVehicleType;
     using JetBrains.Annotations;
     using System;
+    using System.Xml;
+    using System.Xml.Schema;
+    using System.Xml.Serialization;
+    using CSUtil.Commons;
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.Traffic;
 
@@ -14,35 +18,36 @@ namespace TrafficManager.State.ConfigData {
         /// Do not use directly.
         /// Use DebugSwitch.$EnumName$.Get() to access the switch values.
         /// </summary>
-        public bool[] Switches = {
-            false, // 0: path-finding debug log
-            false, // 1: routing basic debug log
-            false, // 2: parking ai debug log (basic)
-            false, // 3: do not actually repair stuck vehicles/cims, just report
-            false, // 4: parking ai debug log (extended)
-            false, // 5: geometry debug log
-            false, // 6: debug parking AI distance issue
-            false, // 7: debug Timed Traffic Lights
-            false, // 8: debug routing
-            false, // 9: debug vehicle to segment end linking
-            false, // 10: prevent routing recalculation on global configuration reload
-            false, // 11: debug junction restrictions
-            false, // 12: debug pedestrian pathfinding
-            false, // 13: priority rules debug
-            false, // 14: disable GUI overlay of citizens having a valid path
-            false, // 15: disable checking of other vehicles for trams
-            false, // 16: debug TramBaseAI.SimulationStep (2)
-            false, // 17: debug alternative lane selection
-            false, // 18: transport line path-find debugging
-            false, // 19: enable obligation to drive on the right hand side of the road
-            false, // 20: debug realistic public transport
-            false, // 21: debug "CalculateSegmentPosition"
-            false, // 22: parking ai debug log (vehicles)
-            false, // 23: debug lane connections
-            false, // 24: debug resource loading
-            false, // 25: debug turn-on-red
-            false, // 26: debug speed limits (also lists NetInfos skipped due to m_netAI in SpeedLimitsManager.cs)
-            false, // 27: allow U library UI and event debugging
+        [XmlArrayItem("Value")]
+        public DebugSwitchValue[] DebugSwitchValues = {
+            new (false, "0: Path-finding debug log"),
+            new (false, "1: Routing basic debug log"),
+            new (false, "2: Parking ai debug log (basic)"),
+            new (false, "3: Do not actually repair stuck vehicles/cims, just report"),
+            new (false, "4: Parking ai debug log (extended)"),
+            new (false, "5: Geometry debug log"),
+            new (false, "6: Debug parking AI distance issue"),
+            new (false, "7: Debug Timed Traffic Lights"),
+            new (false, "8: Debug routing"),
+            new (false, "9: Debug vehicle to segment end linking"),
+            new (false, "10: Prevent routing recalculation on global configuration reload"),
+            new (false, "11: Debug junction restrictions"),
+            new (false, "12: Debug pedestrian pathfinding"),
+            new (false, "13: Priority rules debug"),
+            new (false, "14: Disable GUI overlay of citizens having a valid path"),
+            new (false, "15: Disable checking of other vehicles for trams"),
+            new (false, "16: Debug TramBaseAI.SimulationStep (2)"),
+            new (false, "17: Debug alternative lane selection"),
+            new (false, "18: Transport line path-find debugging"),
+            new (false, "19: Enable obligation to drive on the right hand side of the road"),
+            new (false, "20: Debug realistic public transport"),
+            new (false, "21: Debug 'CalculateSegmentPosition'"),
+            new (false, "22: Parking ai debug log (vehicles)"),
+            new (false, "23: Debug lane connections"),
+            new (false, "24: Debug resource loading"),
+            new (false, "25: Debug turn-on-red"),
+            new (false, "26: Debug speed limits (also lists NetInfos skipped due to m_netAI in SpeedLimitsManager.cs)"),
+            new (false, "27: Allow U library UI and event debugging"),
             // Added a new flag? Bump LATEST_VERSION in GlobalConfig!
         };
 
@@ -135,9 +140,46 @@ namespace TrafficManager.State.ConfigData {
         // Added a new flag? Bump LATEST_VERSION in GlobalConfig!
     }
 
-    static class DebugSwitchExtensions {
+    public class DebugSwitchValue : IXmlSerializable {
+        public bool Value = false;
+        public string Description = string.Empty;
+
+        [UsedImplicitly] //required for XmlSerializer
+        public DebugSwitchValue() { }
+
+        public DebugSwitchValue(bool value, string description) {
+            Value = value;
+            Description = description;
+        }
+        public XmlSchema GetSchema() {
+            return null;
+        }
+
+        public void ReadXml(XmlReader reader) {
+            while (reader.Read()) {
+                switch (reader.NodeType) {
+                    case XmlNodeType.Text:
+                        bool.TryParse(reader.Value, out Value);
+                        break;
+                    case XmlNodeType.Comment:
+                        Description = reader.Value;
+                        break;
+                    case XmlNodeType.EndElement:
+                        return;
+                }
+            }
+        }
+
+        public void WriteXml(XmlWriter writer) {
+            writer.WriteValue(Value);
+            writer.WriteComment(Description);
+            writer.WriteString(string.Empty); //adds line break
+        }
+    }
+
+    internal static class DebugSwitchExtensions {
         public static bool Get(this DebugSwitch sw) {
-            return GlobalConfig.Instance.Debug.Switches[(int)sw];
+            return GlobalConfig.Instance.Debug.DebugSwitchValues[(int)sw].Value;
         }
     }
 #endif
