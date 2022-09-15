@@ -512,9 +512,12 @@ namespace TrafficManager.UI.SubTools.SpeedLimits.Overlay {
             SignRenderer signRenderer = default;
             SignRenderer squareSignRenderer = default;
 
+            ref NetSegment segment = ref segmentId.ToSegment();
+            bool forceSlowDriving = SpeedLimitManager.IsInSlowDrivingDistrict(ref segment);
+
             // Recalculate visible rect for screen position and size
             Rect signScreenRect = signRenderer.Reset(screenPos, size: size * aspectRatio);
-            bool isHoveredHandle = args.IsInteractive && signRenderer.ContainsMouse(args.Mouse);
+            bool isHoveredHandle = !forceSlowDriving && args.IsInteractive && signRenderer.ContainsMouse(args.Mouse);
 
             //-----------
             // Rendering
@@ -525,10 +528,9 @@ namespace TrafficManager.UI.SubTools.SpeedLimits.Overlay {
                 intersectsGuiWindows: args.IntersectsAnyUIRect(signScreenRect),
                 opacityMultiplier: 1.0f); // Mathf.Sqrt(visibleScale) for fade
 
-            NetSegment segment = segmentId.ToSegment();
             NetInfo neti = segment.Info;
             var defaultSpeedLimit = new SpeedValue(
-                gameUnits: SpeedLimitManager.Instance.CalculateCustomNetinfoSpeedLimit(info: neti));
+                gameUnits: forceSlowDriving ? SpeedValue.FromKmph(20).GameUnits : SpeedLimitManager.Instance.CalculateCustomNetinfoSpeedLimit(info: neti));
 
             // Render override if interactive, or if readonly info layer and override exists
             if (drawEnv.drawDefaults_) {
@@ -540,7 +542,8 @@ namespace TrafficManager.UI.SubTools.SpeedLimits.Overlay {
                     size: size * RoadSignThemeManager.DefaultSpeedlimitsAspectRatio());
                 squareSignRenderer.DrawLargeTexture(
                     speedlimit: defaultSpeedLimit,
-                    theme: RoadSignThemeManager.Instance.SpeedLimitDefaults);
+                    theme: RoadSignThemeManager.Instance.SpeedLimitDefaults,
+                    disabled: forceSlowDriving);
             } else {
                 //-------------------------------------
                 // Draw override, if exists, otherwise draw circle and small blue default
@@ -553,10 +556,12 @@ namespace TrafficManager.UI.SubTools.SpeedLimits.Overlay {
                     drawSpeedlimit.Value.Equals(defaultSpeedLimit);
 
                 signRenderer.DrawLargeTexture(
-                    speedlimit: isDefaultSpeed ? defaultSpeedLimit : drawSpeedlimit,
-                    theme: drawEnv.largeSignsTextures_);
+                    speedlimit: (isDefaultSpeed || forceSlowDriving) ? defaultSpeedLimit : drawSpeedlimit,
+                    theme: drawEnv.largeSignsTextures_,
+                    disabled: forceSlowDriving);
 
-                if (args.IsInteractive &&
+                if (!forceSlowDriving &&
+                    args.IsInteractive &&
                     drawSpeedlimit.HasValue &&
                     !isDefaultSpeed &&
                     Options.showDefaultSpeedSubIcon) {

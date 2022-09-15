@@ -17,7 +17,7 @@ namespace TrafficManager.UI.AllowDespawn {
 
         public static CheckboxOption AllowDespawnPassengerCars =
             new ("AllowDespawnPassengerCar", Options.PersistTo.Global) {
-                Label = "AllowDespawn.Checkbox:Passenger Car",
+                Label = "AllowDespawn.Checkbox:Passenger Cars",
                 Handler = (bool newValue) => OnChange(ExtVehicleType.PassengerCar, newValue),
                 Value = IsDespawnAllowed(ExtVehicleType.PassengerCar)
             };

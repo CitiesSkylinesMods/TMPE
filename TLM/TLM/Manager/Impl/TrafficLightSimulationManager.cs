@@ -219,15 +219,17 @@ namespace TrafficManager.Manager.Impl {
                                    TrafficLightState pedestrianLightState,
                                    bool vehicles,
                                    bool pedestrians) {
-            // stock code from RoadBaseAI.SetTrafficLightState
+            // STOCK-CODE START from RoadBaseAI.SetTrafficLightState
             int num = (int)pedestrianLightState << 2 | (int)vehicleLightState;
             if (segmentData.m_startNode == nodeId) {
                 if ((frame >> 8 & 1u) == 0u) {
+                    // update 'x' bits (int)[0000 0000 0000 xxxx]
+                    // -16 / FFF0 / [1111 1111 1111 0000]
                     segmentData.m_trafficLightState0 =
-                        (byte)(segmentData.m_trafficLightState0 & 240 | num);
+                        (segmentData.m_trafficLightState0 & -16 | num);
                 } else {
                     segmentData.m_trafficLightState1 =
-                        (byte)(segmentData.m_trafficLightState1 & 240 | num);
+                        (segmentData.m_trafficLightState1 & -16 | num);
                 }
 
                 if (vehicles) {
@@ -243,11 +245,13 @@ namespace TrafficManager.Manager.Impl {
                 }
             } else {
                 if ((frame >> 8 & 1u) == 0u) {
+                    // update 'x' bits (int)[0000 0000 xxxx 0000]
+                    // -241 / FF0F / [1111 1111 0000 1111]
                     segmentData.m_trafficLightState0 =
-                        (byte)(segmentData.m_trafficLightState0 & 15 | num << 4);
+                        (segmentData.m_trafficLightState0 & -241 | num << 4);
                 } else {
                     segmentData.m_trafficLightState1 =
-                        (byte)(segmentData.m_trafficLightState1 & 15 | num << 4);
+                        (segmentData.m_trafficLightState1 & -241 | num << 4);
                 }
 
                 if (vehicles) {
@@ -260,6 +264,58 @@ namespace TrafficManager.Manager.Impl {
                     segmentData.m_flags |= NetSegment.Flags.CrossingEnd;
                 } else {
                     segmentData.m_flags &= ~NetSegment.Flags.CrossingEnd;
+                }
+            }
+            // STOCK-CODE END
+        }
+
+        public static void SetBollardVisualState(ushort nodeID,
+                                                 ref NetSegment segmentData,
+                                                 uint frame,
+                                                 TrafficLightState enterState,
+                                                 TrafficLightState exitState,
+                                                 bool enter,
+                                                 bool exit,
+                                                 bool skipEnterUpdate = false)
+        {
+            int num = ((int)exitState << 2) | (int)enterState;
+            if (segmentData.m_startNode == nodeID) {
+                if (((frame >> 8) & 1) == 0) {
+                    segmentData.m_trafficLightState0 =
+                        ((segmentData.m_trafficLightState0 & -3841) | (num << 8));
+                } else {
+                    segmentData.m_trafficLightState1 =
+                        ((segmentData.m_trafficLightState1 & -3841) | (num << 8));
+                }
+                if (!skipEnterUpdate) {
+                    if (enter) {
+                        segmentData.m_flags2 |= NetSegment.Flags2.BollardEnterStart;
+                    } else {
+                        segmentData.m_flags2 &= (NetSegment.Flags2)253;
+                    }
+                }
+                if (exit) {
+                    segmentData.m_flags2 |= NetSegment.Flags2.BollardExitStart;
+                } else {
+                    segmentData.m_flags2 &= (NetSegment.Flags2)247;
+                }
+            } else {
+                if (((frame >> 8) & 1) == 0) {
+                    segmentData.m_trafficLightState0 = ((segmentData.m_trafficLightState0 & -61441) | (num << 12));
+                } else {
+                    segmentData.m_trafficLightState1 = ((segmentData.m_trafficLightState1 & -61441) | (num << 12));
+                }
+                if (!skipEnterUpdate) {
+                    if (enter) {
+                        segmentData.m_flags2 |= NetSegment.Flags2.BollardEnterEnd;
+                    } else {
+                        segmentData.m_flags2 &= (NetSegment.Flags2)251;
+                    }
+                }
+                if (exit) {
+                    segmentData.m_flags2 |= NetSegment.Flags2.BollardExitEnd;
+                } else {
+                    segmentData.m_flags2 &= (NetSegment.Flags2)239;
                 }
             }
         }

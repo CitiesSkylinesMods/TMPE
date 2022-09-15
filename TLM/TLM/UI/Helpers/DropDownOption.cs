@@ -67,6 +67,7 @@ namespace TrafficManager.UI.Helpers {
                 eventCallback: InvokeOnValueChanged) as UIDropDown;
 
             _ui.width = 350;
+            _ui.parent.width = 350; //UIDropDown is added to the UIPanel which also require resize for correct tooltip interactions
             _dropdownLabel = _ui.parent.Find<UILabel>("Label");
 
             UpdateTooltip();
@@ -84,7 +85,8 @@ namespace TrafficManager.UI.Helpers {
         protected override void UpdateTooltip() {
             if (!HasUI) return;
 
-            _ui.tooltip = IsInScope
+            //UIDropDown parent(UIPanel) handles tooltip
+            _ui.parent.tooltip = IsInScope
                 ? $"{_tooltip}"
                 : Translate(INGAME_ONLY_SETTING);
         }

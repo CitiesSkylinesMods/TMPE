@@ -613,6 +613,7 @@ namespace TrafficManager.Util {
                 segmentId,
                 NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle,
                 VehicleInfo.VehicleType.Car,
+                VehicleInfo.VehicleCategory.All,
                 ref forward,
                 ref backward);
             return forward + backward;
