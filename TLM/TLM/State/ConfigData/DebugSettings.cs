@@ -173,7 +173,6 @@ namespace TrafficManager.State.ConfigData {
         public void WriteXml(XmlWriter writer) {
             writer.WriteValue(Value);
             writer.WriteComment(Description);
-            writer.WriteString(string.Empty); //adds line break
         }
     }
 
