@@ -3,6 +3,7 @@ namespace TrafficManager.Lifecycle {
     using ICities;
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using TrafficManager.State;
     using TrafficManager.State.Asset;
     using static TrafficManager.Util.Shortcuts;
@@ -51,6 +52,7 @@ namespace TrafficManager.Lifecycle {
             }
         }
 
+        [Conditional("DEBUG")]
         public static void HotReload() {
             var assets2UserData = Type.GetType("LoadOrderMod.LOMAssetDataExtension, LoadOrderMod", throwOnError: false)
                 ?.GetField("Assets2UserData")
