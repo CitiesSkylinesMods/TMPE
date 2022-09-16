@@ -92,6 +92,9 @@ namespace TrafficManager.Util.Extensions {
             if ((category & VehicleInfo.VehicleCategory.Emergency) != 0) {
                 type |= ExtVehicleType.Emergency;
             }
+            if ((category & VehicleInfo.VehicleCategory.Trains) != 0) {
+                type |= ExtVehicleType.RailVehicle;
+            }
             return type;
         }
 
