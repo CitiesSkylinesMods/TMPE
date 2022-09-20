@@ -1,10 +1,8 @@
-[Version] 11.7.0.0
-[Released] Sep 14th 2022
+[Version] 11.7.0.1
+[Released] Sep 20th 2022
 [Stable]
-[Link] tmpe-v11700-stable-14092022
-[New] Compatibility patch for game update 1.15.0-f5
-[Fixed] Message about the reason of disabled options not showing correctly
-[Updated] Lane connection code cleanup #1615 (kianzarrin)
-[Updated] Translations
-[Mod] Incompatible Loading Screen mod marked as incompatible, use Loading Screen Mod Revisited for replacement
+[Link] tmpe-v11701-stable-20092022
+[New] Remove all lane connections (Options -> Maintenance) #1647 (krzychu124)
+[Fixed] Train Vehicle Restrictions disabled #1644 #1645 (krzychu124)
+[Updated] Improved debug switch generation (debug-only)
 [/Version]
