@@ -138,7 +138,7 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
             if(this.TryGetValue(laneStart,out var startConnections)) {
                 foreach (var connection in startConnections) {
                     uint laneId2 = connection.LaneId;
-                    ushort nodeId = laneId.ToLane().GetNodeId(true /* StartConnections */);
+                    ushort nodeId = laneId.ToLane().GetNodeId(startNode: true); /* StartConnections */
                     RemoveConnection(laneId2, laneId, nodeId);
                 }
                 this.Remove(laneStart);
@@ -147,7 +147,7 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
             if (this.TryGetValue(laneEnd, out var endConnections)) {
                 foreach (var connection in endConnections) {
                     uint laneId2 = connection.LaneId;
-                    ushort nodeId = laneId.ToLane().GetNodeId(false /* EndConnections */);
+                    ushort nodeId = laneId.ToLane().GetNodeId(startNode: false); /* EndConnections */
                     RemoveConnection(laneId2, laneId, nodeId);
                 }
                 this.Remove(laneEnd);

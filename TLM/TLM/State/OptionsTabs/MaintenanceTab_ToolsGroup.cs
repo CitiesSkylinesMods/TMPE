@@ -68,11 +68,8 @@ namespace TrafficManager.State {
                 T("Maintenance.Dialog.Text:Remove all lane connections, Confirmation"),
                 (_, result) => {
                     if (result == 1) {
-                        SimulationManager.instance.AddAction(
-                            () => {
-                                LaneConnectionManager.Instance.RemoveAllLaneConnections();
-                                OptionsManager.UpdateRoutingManager();
-                            });
+                        SimulationManager.instance
+                                         .AddAction(() => LaneConnectionManager.Instance.RemoveAllLaneConnections());
                     }
                 });
         }

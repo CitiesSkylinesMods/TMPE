@@ -267,6 +267,7 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
             Log.Info("LaneConnectionManager(): Removing all lane connections...");
             Road.ResetLaneConnections();
             Track.ResetLaneConnections();
+            OptionsManager.UpdateRoutingManager();
             Log.Info("LaneConnectionManager(): All lane connections have been removed!");
         }
 
