@@ -29,14 +29,14 @@ This changelog includes all versions and major variants of the mod going all the
 
 > Date format: dd/mm/yyyy
 
-#### TM:PE V[11.7.0.1](https://github.com/CitiesSkylinesMods/TMPE/compare/11.7.0.0...11.7.0.1) STABLE, 20/09/2022
+#### TM:PE V[11.7.0.1](https://github.com/CitiesSkylinesMods/TMPE/compare/11.7.0.0...11.7.0.1) STABLE, 21/09/2022
 
 - [New] Remove all lane connections (Options -> Maintenance) #1647 (krzychu124)
 - [Fixed] `Train Vehicle Restrictions` disabled #1644 #1645 (krzychu124)
 - [Updated] Improved debug switch generation (debug-only)
 - [Steam] [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
 
-#### TM:PE V11.7.0.1 TEST, 20/09/2022
+#### TM:PE V11.7.0.1 TEST, 21/09/2022
 
 - [New] Remove all lane connections (Options -> Maintenance) #1647 (krzychu124)
 - [Fixed] `Train Vehicle Restrictions` disabled #1644 #1645 (krzychu124)

@@ -1,7 +1,7 @@
 [Version] 11.7.0.1
-[Released] Sep 20th 2022
+[Released] Sep 21st 2022
 [Stable]
-[Link] tmpe-v11701-stable-20092022
+[Link] tmpe-v11701-stable-21092022
 [New] Remove all lane connections (Options -> Maintenance) #1647 (krzychu124)
 [Fixed] Train Vehicle Restrictions disabled #1644 #1645 (krzychu124)
 [Updated] Improved debug switch generation (debug-only)
