@@ -41,9 +41,10 @@ namespace TrafficManager.UI.SubTools.SpeedLimits.Overlay {
         /// <summary>Draw large rect with the speed value or unlimited.</summary>
         /// <param name="speedlimit">Show this speed.</param>
         public void DrawLargeTexture(SpeedValue? speedlimit,
-                                     RoadSignTheme theme) {
+                                     RoadSignTheme theme,
+                                     bool disabled = false) {
             Texture2D tex = speedlimit.HasValue
-                                ? theme.SpeedLimitTexture(speedlimit.Value)
+                                ? theme.SpeedLimitTexture(speedlimit.Value, disabled)
                                 : RoadSignThemeManager.Instance.NoOverride;
 
             GUI.DrawTexture(

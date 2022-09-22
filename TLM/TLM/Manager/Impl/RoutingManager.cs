@@ -534,6 +534,7 @@ namespace TrafficManager.Manager.Impl {
                         ignoreSegment: 0,
                         laneTypes: LaneArrowManager.LANE_TYPES,
                         vehicleTypes: LaneArrowManager.VEHICLE_TYPES,
+                        vehicleCategories: VehicleInfo.VehicleCategory.All,
                         onePerSegment: false,
                         forward: ref numIncomingLanes,
                         backward: ref numOutgoingLanes);
@@ -1742,7 +1743,7 @@ namespace TrafficManager.Manager.Impl {
             bool segmentInvert1, NetInfo.Lane laneInfo1, bool startNode1,
             bool segmentInvert2, NetInfo.Lane laneInfo2, bool startNode2) {
 #if DEBUG
-            bool logRouting = DebugSwitch.Routing.Get(); 
+            bool logRouting = DebugSwitch.Routing.Get();
 #else
             const bool logRouting = false;
 #endif

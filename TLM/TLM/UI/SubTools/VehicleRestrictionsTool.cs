@@ -575,6 +575,8 @@ namespace TrafficManager.UI.SubTools {
 
                 var theme = RoadSignThemeManager.ActiveTheme;
 
+                ExtVehicleType configurableVehicleTypes = VehicleRestrictionsManager.Instance.GetConfigurableVehicleTypes(segmentInfo, laneInfo);
+
                 foreach (ExtVehicleType vehicleType in possibleVehicleTypes) {
                     bool allowed =
                         VehicleRestrictionsManager.Instance.IsAllowed(allowedTypes, vehicleType);
@@ -583,7 +585,8 @@ namespace TrafficManager.UI.SubTools {
                         continue; // do not draw allowed vehicles in view-only mode
                     }
 
-                    Texture2D drawTex = theme.VehicleRestriction(vehicleType, allowed);
+                    bool configurable = configurableVehicleTypes.IsFlagSet(vehicleType);
+                    Texture2D drawTex = theme.VehicleRestriction(vehicleType, allowed, disabled: !configurable);
                     // if (drawTex == null) {
                     //     drawTex = Texture2D.whiteTexture;
                     // }
@@ -595,7 +598,7 @@ namespace TrafficManager.UI.SubTools {
                         y: y,
                         width: this.vehicleRestrictionsSignSize,
                         height: this.vehicleRestrictionsSignSize,
-                        canHover: !viewOnly,
+                        canHover: !viewOnly && configurable,
                         screenRect: out _);
 
                     if (hoveredHandle) {

@@ -1,8 +1,10 @@
 namespace TrafficManager.Patch._VehicleAI.Connection {
     using System;
+    using ColossalFramework.Math;
     using UnityEngine;
 
     public delegate float CalculateTargetSpeedDelegate(VehicleAI vehicleAI, ushort vehicleID, ref Vehicle data, float speedLimit, float curve);
+    public delegate float CalculateTargetSpeedByNetInfoDelegate(VehicleAI vehicleAI, ushort vehicleID, ref Vehicle data, NetInfo info, uint lane, float curve);
     public delegate void PathfindFailureDelegate(CarAI carAI, ushort vehicleID, ref Vehicle data);
     public delegate void PathfindSuccessDelegate(CarAI carAI, ushort vehicleID, ref Vehicle data);
     public delegate void InvalidPathDelegate(VehicleAI vehicleAI, ushort vehicleID, ref Vehicle vehicleData, ushort leaderID, ref Vehicle leaderData);
@@ -14,9 +16,11 @@ namespace TrafficManager.Patch._VehicleAI.Connection {
     public delegate void UpdateNodeTargetPosDelegate(VehicleAI vehicleAI, ushort vehicleID, ref Vehicle vehicleData, ushort nodeID, ref NetNode nodeData, ref Vector4 targetPos, int index);
     public delegate void ArrivingToDestinationDelegate(VehicleAI vehicleAI, ushort vehicleID, ref Vehicle vehicleData);
     public delegate bool LeftHandDriveDelegate(VehicleAI vehicleAI, NetInfo.Lane lane);
+    public delegate bool NeedStopAtNodeDelegate(VehicleAI vehicleAI, ushort vehicleID, ref Vehicle vehicleData, ushort nodeID, ref NetNode nodeData, PathUnit.Position previousPosition, uint prevLane, PathUnit.Position nextPosition, uint nextLane, Bezier3 bezier, out byte stopOffset);
 
     internal class VehicleAIConnection {
         public VehicleAIConnection(CalculateTargetSpeedDelegate calculateTargetSpeedDelegate,
+                                   CalculateTargetSpeedByNetInfoDelegate calculateTargetSpeedByNetInfoDelegate,
                                    PathfindFailureDelegate pathfindFailureDelegate,
                                    PathfindSuccessDelegate pathfindSuccessDelegate,
                                    InvalidPathDelegate invalidPathDelegate,
@@ -27,8 +31,10 @@ namespace TrafficManager.Patch._VehicleAI.Connection {
                                    ChangeVehicleTypeDelegate changeVehicleTypeDelegate,
                                    UpdateNodeTargetPosDelegate updateNodeTargetPosDelegate,
                                    ArrivingToDestinationDelegate arrivingToDestinationDelegate,
-                                   LeftHandDriveDelegate leftHandDriveDelegate) {
+                                   LeftHandDriveDelegate leftHandDriveDelegate,
+                                   NeedStopAtNodeDelegate needStopAtNodeDelegate) {
             CalculateTargetSpeed = calculateTargetSpeedDelegate ?? throw new ArgumentNullException( nameof(calculateTargetSpeedDelegate));
+            CalculateTargetSpeedByNetInfo = calculateTargetSpeedByNetInfoDelegate ?? throw new ArgumentNullException( nameof(calculateTargetSpeedByNetInfoDelegate));
             PathfindFailure = pathfindFailureDelegate ?? throw new ArgumentNullException(nameof(pathfindFailureDelegate));
             PathfindSuccess = pathfindSuccessDelegate ?? throw new ArgumentNullException(nameof(pathfindSuccessDelegate));
             InvalidPath = invalidPathDelegate ?? throw new ArgumentNullException(nameof(invalidPathDelegate));
@@ -40,9 +46,11 @@ namespace TrafficManager.Patch._VehicleAI.Connection {
             UpdateNodeTargetPos = updateNodeTargetPosDelegate ?? throw new ArgumentNullException(nameof(updateNodeTargetPosDelegate));
             ArrivingToDestination = arrivingToDestinationDelegate ?? throw new ArgumentNullException(nameof(arrivingToDestinationDelegate));
             LeftHandDrive = leftHandDriveDelegate ?? throw new ArgumentNullException(nameof(leftHandDriveDelegate));
+            NeedStopAtNode = needStopAtNodeDelegate ?? throw new ArgumentNullException(nameof(needStopAtNodeDelegate));
         }
 
         public CalculateTargetSpeedDelegate CalculateTargetSpeed { get; }
+        public CalculateTargetSpeedByNetInfoDelegate CalculateTargetSpeedByNetInfo { get; }
         public PathfindFailureDelegate PathfindFailure { get; }
         public PathfindSuccessDelegate PathfindSuccess { get; }
         public InvalidPathDelegate InvalidPath { get; }
@@ -54,5 +62,6 @@ namespace TrafficManager.Patch._VehicleAI.Connection {
         public UpdateNodeTargetPosDelegate UpdateNodeTargetPos { get; }
         public ArrivingToDestinationDelegate ArrivingToDestination { get; }
         public LeftHandDriveDelegate LeftHandDrive { get; }
+        public NeedStopAtNodeDelegate NeedStopAtNode { get; }
     }
 }

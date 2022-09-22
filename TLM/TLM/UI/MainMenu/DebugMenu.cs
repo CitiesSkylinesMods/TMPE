@@ -277,7 +277,7 @@ namespace TrafficManager.UI.MainMenu {
                         pos,
                         (lastNodePos - pos).magnitude);
 
-                    if (stopNode.m_problems != Notification.Problem.None) {
+                    if (stopNode.m_problems.IsNotNone) {
                         Log.Warning("\t*** PROBLEMS DETECTED ***");
                     }
 

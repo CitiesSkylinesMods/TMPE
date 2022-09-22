@@ -576,6 +576,11 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
             }
         }
 
+        internal void ResetLaneConnections() {
+            Log.Info($"Resetting lane connections of group: {Group}");
+            connectionDataBase_.ResetConnectionsDatabase();
+        }
+
         public bool LoadData(List<Configuration.LaneConnection> data) {
             bool success = true;
             Log.Info($"Loading {data.Count} lane connections");

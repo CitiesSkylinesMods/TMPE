@@ -8,9 +8,15 @@ namespace TrafficManager.Patch {
     using HarmonyLib;
     using Manager.Impl;
     using State;
+    using TrafficManager.Patch._VehicleAI;
     using Util;
 
     public static class PatchCommons {
+        private delegate float CalculateTargetSpeedDelegate(ushort vehicleID,
+                                                            ref Vehicle data,
+                                                            NetInfo info,
+                                                            uint lane,
+                                                            float curve);
         private static FieldInfo _vehicleBehaviourManagerInstanceField => typeof(VehicleBehaviorManager).GetField(nameof(VehicleBehaviorManager.Instance));
         private static MethodBase _mayDespawnMethod => typeof(VehicleBehaviorManager).GetMethod(nameof(VehicleBehaviorManager.MayDespawn));
 
@@ -63,7 +69,7 @@ namespace TrafficManager.Patch {
         private delegate bool TrySpawnDelegate(ushort vehicleID, ref Vehicle vehicleData);
 
         /// <summary>
-        /// Revrites instructions adding necessary TMPE calls
+        /// Rewrites instructions adding necessary TMPE calls
         /// </summary>
         /// <param name="il"> Il Generator</param>
         /// <param name="instructions">List of instructions</param>
@@ -188,6 +194,100 @@ namespace TrafficManager.Patch {
               callvirt     instance bool TrafficManager.Manager.Impl.VehicleBehaviorManager::MayDespawn(valuetype ['Assembly-CSharp']Vehicle&)
               brfalse.s    IL_0248
              */
+        }
+
+
+        /// <summary>
+        /// Rewrites instructions adding necessary TMPE calls - Bus and Trolleybus
+        /// </summary>
+        /// <param name="il"> Il Generator</param>
+        /// <param name="instructions">List of instructions</param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
+        public static IEnumerable<CodeInstruction> TranspileBusTrolleybusCalculateTargetSpeed(
+                ILGenerator il,
+                IEnumerable<CodeInstruction> instructions
+            ) {
+            List<CodeInstruction> codes = TranspilerUtil.ToCodeList(instructions);
+            MethodInfo calcStopPosAndDir = typeof(NetLane).GetMethod(nameof(NetLane.CalculateStopPositionAndDirection));
+            MethodInfo calcTargetSpeedByNetInfo = TranspilerUtil.DeclaredMethod<CalculateTargetSpeedDelegate>(typeof(VehicleAI), "CalculateTargetSpeed");
+
+            CodeInstruction searchInstr = new CodeInstruction(OpCodes.Call, calcStopPosAndDir);
+            int index = codes.FindIndex( instr => TranspilerUtil.IsSameInstruction(instr, searchInstr));
+            if (index > -1) {
+                int targetIndex = index + 1; // var maxSpeed
+                int searchIndex = targetIndex + 1;
+                if (codes[searchIndex].opcode.Equals(OpCodes.Ldarg_0)) {
+                    CodeInstruction callCalcTargetSpeed = new CodeInstruction( OpCodes.Callvirt, calcTargetSpeedByNetInfo);
+                    int callvirtIndex = codes.FindIndex(targetIndex, instr => TranspilerUtil.IsSameInstruction(instr, callCalcTargetSpeed));
+                    if (callvirtIndex > -1) {
+                        // remove all starting from var maxSpeed to stind.r4 after original callvirt
+                        codes.RemoveRange(targetIndex, callvirtIndex - targetIndex + 2);
+                    } else {
+                        throw new Exception("Could not find Callvirt CalculateTargetSpeed instruction or instructions has been patched");
+                    }
+                } else {
+                    throw new Exception("Could not find Ldarg.0 instruction or instructions has been patched");
+                }
+                codes.InsertRange(targetIndex, GetModifiedBusCalculateTargetSpeedInstructions());
+            } else {
+                throw new Exception("Could not find CalculateStopPositionAndDirection call or instructions has been patched");
+            }
+
+            return codes;
+
+
+            /*
+                -------------------------------------------
+                GetCustomSpeed(..., out maxSpeed)//
+                -------------------------------------------
+
+                 <insert> ldarg.0      // AI instance
+                 <insert> ldarg.1      // VehicleID
+                 <insert> ldarg.2      // ref Vehicle data
+                 <insert> ldarg.3      // position
+                 <insert> ldarg.s      laneID
+                 <insert> ldloc.1      // info
+                 <insert> ldarg.s      maxSpeed // maxSpeed out variable
+                 <insert> call         float32 TrafficManager.Custom.AI.CustomTrolleybusAI::GetCustomSpeed(valuetype ['Assembly-CSharp']PathUnit/Position, unsigned int32, class ['Assembly-CSharp']NetInfo)
+
+                <remove>  IL_00B6: ldarg.s   maxSpeed
+                <remove>  IL_00B8: ldarg.0
+                <remove>  IL_00B9: ldarg.1
+                <remove>  IL_00BA: ldarg.2
+                <remove>  IL_00BB: ldloc.1
+                <remove>  IL_00BC: ldarga.s  position
+                <remove>  IL_00BE: ldfld     uint8 PathUnit/Position::m_lane
+                <remove>  IL_00C3: ldloc.0
+                <remove>  IL_00C4: ldfld     class Array32`1<valuetype NetLane> NetManager::m_lanes
+                <remove>  IL_00C9: ldfld     !0[] class Array32`1<valuetype NetLane>::m_buffer
+                <remove>  IL_00CE: ldarg.s   laneID
+                <remove>  IL_00D0: conv.u
+                <remove>  IL_00D1: ldelema   NetLane
+                <remove>  IL_00D6: ldfld     float32 NetLane::m_curve
+                <remove>  IL_00DB: callvirt  instance float32 VehicleAI::CalculateTargetSpeed(uint16, valuetype Vehicle&, class NetInfo, uint32, float32)
+                <remove>  IL_00E0: stind.r4
+                          IL_00E1: ret
+
+             */
+        }
+
+        private static List<CodeInstruction> GetModifiedBusCalculateTargetSpeedInstructions() {
+            MethodInfo getSpeed = typeof(PatchCommons).GetMethod(nameof(GetCustomSpeed), BindingFlags.Static | BindingFlags.NonPublic);
+            return new List<CodeInstruction> {
+                new CodeInstruction(OpCodes.Ldarg_0),
+                new CodeInstruction(OpCodes.Ldarg_1),
+                new CodeInstruction(OpCodes.Ldarg_2),
+                new CodeInstruction(OpCodes.Ldarg_3),
+                new CodeInstruction(OpCodes.Ldarg_S, 4), // laneID
+                new CodeInstruction(OpCodes.Ldloc_1),    //info variable
+                new CodeInstruction(OpCodes.Ldarg_S, 8), // out maxSpeed
+                new CodeInstruction(OpCodes.Call, getSpeed)
+            };
+        }
+
+        private static void GetCustomSpeed(VehicleAI ai, ushort vehicleId, ref Vehicle data, PathUnit.Position position, uint laneID, NetInfo info, out float maxSpeed) {
+            VehicleAICommons.CustomCalculateTargetSpeed(ai, vehicleId, ref data, position, laneID, info, out maxSpeed);
         }
     }
 }

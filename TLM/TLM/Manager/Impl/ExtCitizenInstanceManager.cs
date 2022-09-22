@@ -722,6 +722,8 @@ namespace TrafficManager.Manager.Impl {
             //------------------------------------------------------------------
             NetInfo.LaneType laneTypes = NetInfo.LaneType.Pedestrian;
             VehicleInfo.VehicleType vehicleTypes = VehicleInfo.VehicleType.None;
+            VehicleInfo.VehicleCategory vehicleCategory = VehicleInfo.VehicleCategory.None;
+
             bool randomParking = false;
             bool combustionEngine = false;
             ExtVehicleType extVehicleType = ExtVehicleType.None;
@@ -741,6 +743,7 @@ namespace TrafficManager.Manager.Impl {
                             laneTypes |= NetInfo.LaneType.Vehicle |
                                          NetInfo.LaneType.TransportVehicle;
                             vehicleTypes |= vehicleInfo.m_vehicleType;
+                            vehicleCategory |= vehicleInfo.vehicleCategory;
                             extVehicleType = ExtVehicleType.Taxi; // NON-STOCK CODE
                             // NON-STOCK CODE START
                             if (Options.parkingAI) {
@@ -758,6 +761,7 @@ namespace TrafficManager.Manager.Impl {
                                 extVehicleType = ExtVehicleType.PassengerCar;
                                 laneTypes |= NetInfo.LaneType.Vehicle;
                                 vehicleTypes |= vehicleInfo.m_vehicleType;
+                                vehicleCategory |= vehicleInfo.vehicleCategory;
                                 combustionEngine =
                                     vehicleInfo.m_class.m_subService ==
                                     ItemClass.SubService.ResidentialLow;
@@ -770,6 +774,7 @@ namespace TrafficManager.Manager.Impl {
                             extVehicleType = ExtVehicleType.Bicycle;
                             laneTypes |= NetInfo.LaneType.Vehicle;
                             vehicleTypes |= vehicleInfo.m_vehicleType;
+                            vehicleCategory |= vehicleInfo.vehicleCategory;
                             break;
                     }
                 }
@@ -912,6 +917,7 @@ namespace TrafficManager.Manager.Impl {
                     ItemClass.Service.Road,
                     NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle,
                     VehicleInfo.VehicleType.Car,
+                    VehicleInfo.VehicleCategory.PassengerCar,
                     NetInfo.LaneType.Pedestrian,
                     VehicleInfo.VehicleType.None,
                     false,
@@ -963,6 +969,7 @@ namespace TrafficManager.Manager.Impl {
                     ItemClass.Service.Road,
                     laneTypes & ~NetInfo.LaneType.Pedestrian,
                     vehicleTypes,
+                    VehicleInfo.VehicleCategory.All,
                     allowUnderground,
                     false,
                     parkingAiConf.MaxBuildingToPedestrianLaneDistance,
@@ -1036,6 +1043,7 @@ namespace TrafficManager.Manager.Impl {
                 args.vehiclePosition = parkedVehiclePathPos;
                 args.laneTypes = laneTypes;
                 args.vehicleTypes = vehicleTypes;
+                args.vehicleCategories = vehicleCategory;
                 args.maxLength = 20000f;
                 args.isHeavyVehicle = false;
                 args.hasCombustionEngine = combustionEngine;
@@ -1136,6 +1144,7 @@ namespace TrafficManager.Manager.Impl {
                     ItemClass.Service.Road,
                     laneTypes,
                     vehicleTypes,
+                    VehicleInfo.VehicleCategory.All,
                     allowUnderground,
                     false,
                     Options.parkingAI
@@ -1154,6 +1163,7 @@ namespace TrafficManager.Manager.Impl {
                     ItemClass.Service.Beautification,
                     laneTypes,
                     vehicleTypes,
+                    VehicleInfo.VehicleCategory.All,
                     allowUnderground,
                     false,
                     Options.parkingAI
@@ -1173,6 +1183,7 @@ namespace TrafficManager.Manager.Impl {
                     ItemClass.Service.PublicTransport,
                     laneTypes,
                     vehicleTypes,
+                    VehicleInfo.VehicleCategory.All,
                     allowUnderground,
                     false,
                     Options.parkingAI

@@ -103,7 +103,8 @@ namespace TrafficManager.UI.Helpers {
         protected override void UpdateTooltip() {
             if (!HasUI) return;
 
-            _ui.tooltip = IsInScope
+            //UISlider parent(UIPanel) handles tooltip
+            _ui.parent.tooltip = IsInScope
                 ? $"{Value}{_tooltip}"
                 : Translate(INGAME_ONLY_SETTING);
 
