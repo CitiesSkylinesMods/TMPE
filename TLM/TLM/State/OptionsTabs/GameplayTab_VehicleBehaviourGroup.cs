@@ -34,7 +34,7 @@ namespace TrafficManager.State {
 
 
         public static ActionButton AllowDespawnFiltersButton = new() {
-            Label = "Filter Disable despawning vehicle types",
+            Label = "Gameplay.Button:Filter Disable despawning vehicle type",
             Handler = AllowDespawningPanel.OpenModal,
             ReadOnly = !Options.disableDespawning,
         };

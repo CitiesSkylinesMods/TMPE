@@ -63,6 +63,41 @@ namespace TrafficManager.Util.Extensions {
         public static ExtVehicleType ToExtVehicleType(this uint vehicleId)
             => ExtVehicleManager.Instance.ExtVehicles[vehicleId].vehicleType;
 
+        public static ExtVehicleType MapToExtVehicleTypeRestrictions(this VehicleInfo.VehicleCategory category) {
+            if (category == VehicleInfo.VehicleCategory.None) {
+                return ExtVehicleType.None;
+            }
+            ExtVehicleType type = ExtVehicleType.None;
+            if ((category & VehicleInfo.VehicleCategory.PassengerCar) != 0) {
+                type |= ExtVehicleType.PassengerCar;
+            }
+            if ((category & VehicleInfo.VehicleCategory.CargoTruck) != 0) {
+                type |= ExtVehicleType.CargoTruck;
+            }
+            if ((category & VehicleInfo.VehicleCategory.Bus) != 0) {
+                type |= ExtVehicleType.Bus;
+            }
+            if ((category & VehicleInfo.VehicleCategory.Trolleybus) != 0) {
+                type |= ExtVehicleType.Bus;
+            }
+            if ((category & VehicleInfo.VehicleCategory.Taxi) != 0) {
+                type |= ExtVehicleType.Taxi;
+            }
+            if ((category & VehicleInfo.VehicleCategory.Hearse) != 0) {
+                type |= ExtVehicleType.Service;
+            }
+            if ((category & (VehicleInfo.VehicleCategory.CityServices & ~VehicleInfo.VehicleCategory.Emergency)) != 0) {
+                type |= ExtVehicleType.Service;
+            }
+            if ((category & VehicleInfo.VehicleCategory.Emergency) != 0) {
+                type |= ExtVehicleType.Emergency;
+            }
+            if ((category & VehicleInfo.VehicleCategory.Trains) != 0) {
+                type |= ExtVehicleType.RailVehicle;
+            }
+            return type;
+        }
+
         /// <summary>
         /// Inspects the AI of the <paramref name="vehicle"/> to determine its type.
         /// </summary>

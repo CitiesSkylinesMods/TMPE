@@ -63,6 +63,11 @@
         public VehicleInfo.VehicleType vehicleTypes;
 
         /// <summary>
+        /// Allowed set of vehicle categories
+        /// </summary>
+        public VehicleInfo.VehicleCategory vehicleCategories;
+
+        /// <summary>
         /// Maximum allowed path length
         /// </summary>
         public float maxLength;
