@@ -599,10 +599,17 @@ namespace TrafficManager.Util {
         internal static int CompareSegments(ushort seg1Id, ushort seg2Id) {
             ref NetSegment seg1 = ref seg1Id.ToSegment();
             ref NetSegment seg2 = ref seg2Id.ToSegment();
-            int diff = (int)Mathf.RoundToInt(seg2.Info.m_halfWidth - seg1.Info.m_halfWidth);
-            if (diff == 0) {
-                diff = CountRoadVehicleLanes(seg2Id) - CountRoadVehicleLanes(seg1Id);
+            int diff = -(seg2.Info.m_netAI is PedestrianZoneRoadAI).CompareTo(seg1.Info.m_netAI is PedestrianZoneRoadAI);
+            if (diff != 0) {
+                return diff;
             }
+
+            diff = (int)Mathf.RoundToInt(seg2.Info.m_halfWidth - seg1.Info.m_halfWidth);
+            if (diff != 0) {
+                return diff;
+            }
+
+            diff = CountRoadVehicleLanes(seg2Id) - CountRoadVehicleLanes(seg1Id);
             return diff;
         }
 
