@@ -165,7 +165,6 @@ namespace TrafficManager.UI.SubTools {
             /// </summary>
             internal void RenderOverlay(
                 RenderManager.CameraInfo cameraInfo,
-                Texture2D deadEndTexture,
                 Color color,
                 bool highlight = false,
                 bool renderLimits = false,
@@ -576,7 +575,7 @@ namespace TrafficManager.UI.SubTools {
                         bool isTarget = selectedLaneEnd != null && laneEnd != selectedLaneEnd;
                         var color = isTarget ? Color.white : laneEnd.Color;
                         bool highlightMarker = laneEnd == selectedLaneEnd || markerIsHovered;
-                        laneEnd.RenderOverlay(cameraInfo, deadEnd_, color, highlightMarker, true, group);
+                        laneEnd.RenderOverlay(cameraInfo, color, highlightMarker, true, group);
                     }
                 }
             }
@@ -584,7 +583,7 @@ namespace TrafficManager.UI.SubTools {
 
         private void RenderDeadEnds(RenderManager.CameraInfo cameraInfo) {
             for (int cacheIndex = CachedVisibleNodeIds.Size - 1; cacheIndex >= 0; cacheIndex--) {
-                var nodeId = CachedVisibleNodeIds.Values[cacheIndex];
+                ushort nodeId = CachedVisibleNodeIds.Values[cacheIndex];
                 bool isVisible = MainTool.IsNodeVisible(nodeId);
                 bool hasMarkers = currentLaneEnds_.TryGetValue(nodeId, out List<LaneEnd> laneEnds);
 
@@ -1222,42 +1221,26 @@ namespace TrafficManager.UI.SubTools {
         private static void UpdateConnection(LaneEnd source, LaneEnd target) {
             Log._Debug($"LaneConnectorTool.UpdateConnection({source.LaneId}, {target.LaneId}) called at node{source.NodeId})");
             bool deadEnd = source == target;
-            if (deadEnd) {
-                // when dead end connection is made, remove all other connections.
-                source.ConnectedCarLaneEnds.Clear();
-                Log._Debug("cleared cached car connections");
-            } else if(!LaneConnectionManager.Instance.Road.AreLanesConnected(
-                source.LaneId, source.LaneId, source.StartNode)) {
-                // when new connection is made, remove previous dead end connection.
-                source.ConnectedCarLaneEnds.Remove(source);
-                Log._Debug("removed cached car dead end");
-            }
-            if (LaneConnectionManager.Instance.Road.AreLanesConnected(
-                source.LaneId, target.LaneId, source.StartNode)) {
-                source.ConnectedCarLaneEnds.Add(target);
-                Log._Debug("there is car connection");
-            } else {
-                source.ConnectedCarLaneEnds.Remove(target);
-                Log._Debug("there is no car connection");
-            }
-
-            if (deadEnd) {
-                // when dead end connection is made, remove all other connections.
-                source.ConnectedTrackLaneEnds.Clear();
-                Log._Debug("cleared cached track connections");
-            } else if (!LaneConnectionManager.Instance.Track.AreLanesConnected(
-                 source.LaneId, source.LaneId, source.StartNode)) {
-                // when new connection is made, remove previous dead end connection.
-                source.ConnectedTrackLaneEnds.Remove(source);
-                Log._Debug("removed cached track dead end");
-            }
-            if (LaneConnectionManager.Instance.Track.AreLanesConnected(
-                source.LaneId, target.LaneId, source.StartNode)) {
-                source.ConnectedTrackLaneEnds.Add(target);
-                Log._Debug("there is track connection");
-            } else {
-                source.ConnectedTrackLaneEnds.Remove(target);
-                Log._Debug("there is no track connection");
+            foreach (var group in ALL_GROUPS) {
+                bool track = group == LaneEndTransitionGroup.Track;
+                if (deadEnd) {
+                    // when dead end connection is made, remove all other connections.
+                    source.ConnectedLaneEnds(track).Clear();
+                    Log._Debug($"cleared cached {group} connections");
+                } else if (!LaneConnectionManager.Instance.SubManager(track).AreLanesConnected(
+                     source.LaneId, source.LaneId, source.StartNode)) {
+                    // when new connection is made, remove previous dead end connection.
+                    source.ConnectedLaneEnds(track).Remove(source);
+                    Log._Debug($"removed cached {group} dead end");
+                }
+                if (LaneConnectionManager.Instance.SubManager(track).AreLanesConnected(
+                    source.LaneId, target.LaneId, source.StartNode)) {
+                    source.ConnectedLaneEnds(track).Add(target);
+                    Log._Debug($"there is {group} connection");
+                } else {
+                    source.ConnectedLaneEnds(track).Remove(target);
+                    Log._Debug($"there is no {group} connection");
+                }
             }
         }
 
@@ -1526,23 +1509,16 @@ namespace TrafficManager.UI.SubTools {
                     continue;
                 }
 
-                uint[] carConnections = LaneConnectionManager.Instance.Road.GetLaneConnections(
-                        sourceLaneEnd.LaneId, sourceLaneEnd.StartNode);
-                if (!carConnections.IsNullOrEmpty()) {
-                    foreach (LaneEnd targetLaneEnd in laneEnds) {
-                        if (targetLaneEnd.IsTarget && carConnections.Contains(targetLaneEnd.LaneId)) {
-                            sourceLaneEnd.ConnectedCarLaneEnds.Add(targetLaneEnd);
+                foreach(var group in ALL_GROUPS) {
+                    bool track = group == LaneEndTransitionGroup.Track;
+                    uint[] connections = LaneConnectionManager.Instance.SubManager(track)
+                        .GetLaneConnections(sourceLaneEnd.LaneId, sourceLaneEnd.StartNode);
+                    if (!connections.IsNullOrEmpty()) {
+                        foreach (LaneEnd targetLaneEnd in laneEnds) {
+                            if ((targetLaneEnd.IsTarget || targetLaneEnd == sourceLaneEnd) && connections.Contains(targetLaneEnd.LaneId)) {
+                                sourceLaneEnd.ConnectedLaneEnds(track).Add(targetLaneEnd);
+                            }
                         }
-                    }
-                }
-
-                uint[] trackConnections = LaneConnectionManager.Instance.Track.GetLaneConnections(
-                    sourceLaneEnd.LaneId, sourceLaneEnd.StartNode);
-                if (!trackConnections.IsNullOrEmpty()) {
-                    foreach (LaneEnd targetLaneEnd in laneEnds) {
-                        if ((targetLaneEnd.IsTarget || targetLaneEnd == sourceLaneEnd) && trackConnections.Contains(targetLaneEnd.LaneId)) {
-                            sourceLaneEnd.ConnectedTrackLaneEnds.Add(targetLaneEnd);
-                        } 
                     }
                 }
             }
