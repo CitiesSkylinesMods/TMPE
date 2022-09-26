@@ -411,6 +411,12 @@ namespace TrafficManager.UI.SubTools {
 
             if (this.selectedLaneEnd != null) {
                 // lane curves for selectedMarker will be drawn last to be on the top of other lane markers.
+                if (hoveredLaneEnd == null) {
+                    if (selectedLaneEnd.IntersectRay()) {
+                            hoveredLaneEnd = selectedLaneEnd;
+                    }
+                }
+
                 foreach (var group in ALL_GROUPS) {
                     if ((group & group_) == 0) {
                         continue;
