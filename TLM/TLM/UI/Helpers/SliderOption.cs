@@ -1,3 +1,4 @@
+#pragma warning disable
 namespace TrafficManager.UI.Helpers {
     using ICities;
     using ColossalFramework.UI;
@@ -104,13 +105,13 @@ namespace TrafficManager.UI.Helpers {
             if (!HasUI) return;
 
             //UISlider parent(UIPanel) handles tooltip
-            _ui.parent.tooltip = IsInScope
+            UIComponent parent = _ui.parent;
+            parent.tooltip = IsInScope
                 ? $"{Value}{_tooltip}"
                 : Translate(INGAME_ONLY_SETTING);
 
-            if (_ui.thumbObject.hasFocus) {
-                try { _ui.RefreshTooltip(); }
-                catch (Exception _) { }
+            if (parent.isVisible) {
+                parent.RefreshTooltip();
             }
         }
 
