@@ -100,7 +100,7 @@ namespace TrafficManager.UI.Helpers {
 
             string tooltip = IsInScope ? $"{Value}{_tooltip}" : Translate(INGAME_ONLY_SETTING);
             string label = Translate(Label);
-            _sliderLabel.text = label + " " + tooltip;
+            _sliderLabel.text = label + ": " + tooltip;
         }
 
         protected override void UpdateTooltip() => UpdateLabel();
