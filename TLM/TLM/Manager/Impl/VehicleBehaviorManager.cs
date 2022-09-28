@@ -927,6 +927,7 @@ namespace TrafficManager.Manager.Impl {
                 PathCreationArgs args = new PathCreationArgs {
                     extPathType = extPathType,
                     extVehicleType = ExtVehicleType.PassengerCar,
+                    vehicleCategories = VehicleInfo.VehicleCategory.PassengerCar,
                     vehicleId = vehicleID,
                     spawned = (vehicleData.m_flags & Vehicle.Flags.Spawned) != 0,
                     buildIndex = simMan.m_currentBuildIndex,
