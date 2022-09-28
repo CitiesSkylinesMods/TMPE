@@ -98,22 +98,12 @@ namespace TrafficManager.UI.Helpers {
         protected override void UpdateLabel() {
             if (!HasUI) return;
 
-            _sliderLabel.text = Translate(Label);
+            string tooltip = IsInScope ? $"{Value}{_tooltip}" : Translate(INGAME_ONLY_SETTING);
+            string label = Translate(Label);
+            _sliderLabel.text = label + " " + tooltip;
         }
 
-        protected override void UpdateTooltip() {
-            if (!HasUI) return;
-
-            //UISlider parent(UIPanel) handles tooltip
-            UIComponent parent = _ui.parent;
-            parent.tooltip = IsInScope
-                ? $"{Value}{_tooltip}"
-                : Translate(INGAME_ONLY_SETTING);
-
-            if (parent.isVisible) {
-                parent.RefreshTooltip();
-            }
-        }
+        protected override void UpdateTooltip() => UpdateLabel();
 
         protected override void UpdateReadOnly() {
             if (!HasUI) return;
