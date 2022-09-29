@@ -629,6 +629,7 @@ namespace TrafficManager.UI.SubTools {
                 frameClearPressed = 0; // consumed
                                        // remove all connections at selected node
                 LaneConnectionManager.Instance.RemoveLaneConnectionsFromNode(SelectedNodeId);
+                selectedLaneEnd = null;
                 RefreshCurrentNodeMarkers(SelectedNodeId);
             }
 
