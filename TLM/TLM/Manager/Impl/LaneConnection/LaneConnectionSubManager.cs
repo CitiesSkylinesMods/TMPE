@@ -299,6 +299,10 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
                 }
             }
 
+            if (Supports(LaneEndTransitionGroup.Road)) {
+                LaneArrowManager.Instance.ResetNodeLaneArrows(nodeId);
+            }
+
             for (int i = 0; i < 8; ++i) {
                 ushort segmentId = node.GetSegment(i);
                 RoutingManager.Instance.RequestRecalculation(segmentId);
