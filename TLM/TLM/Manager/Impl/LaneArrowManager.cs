@@ -140,6 +140,18 @@ namespace TrafficManager.Manager.Impl {
         }
 
         /// <summary>
+        /// Resets lane arrows to their default value for the given node
+        /// </summary>
+        public void ResetNodeLaneArrows(ushort nodeId) {
+            ref NetNode node = ref nodeId.ToNode();
+            for (int i = 0; i < 8; ++i) {
+                ushort segmentId = node.GetSegment(i);
+                bool startNode = segmentId.ToSegment().IsStartNode(nodeId);
+                LaneArrowManager.Instance.ResetLaneArrows(segmentId, startNode);
+            }
+        }
+
+        /// <summary>
         /// Updates all road relevant segments so that the dedicated turning lane policy would take effect.
         /// </summary>
         /// <param name="recalculateRoutings">
