@@ -169,8 +169,10 @@ namespace TrafficManager.Util.Extensions {
             NetInfo.LaneType laneType,
             VehicleInfo.VehicleType vehicleType) {
 
+#if DEBUG
             AssertNotNone(laneType, nameof(laneType));
             AssertNotNone(vehicleType, nameof(vehicleType));
+#endif
 
             NetInfo segmentInfo = netSegment.Info;
 
