@@ -37,6 +37,8 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
 
         public static LaneConnectionManager Instance { get; }
 
+        public LaneConnectionSubManager SubManager(bool track) => track ? Track : Road;
+
         public override void OnBeforeLoadData() {
             base.OnBeforeLoadData();
             Road.OnBeforeLoadData();
