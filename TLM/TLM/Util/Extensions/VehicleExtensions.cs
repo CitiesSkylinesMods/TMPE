@@ -117,6 +117,7 @@ namespace TrafficManager.Util.Extensions {
                                     VehicleInfo.VehicleCategory.Hearse |
                                     VehicleInfo.VehicleCategory.MaintenanceTruck |
                                     VehicleInfo.VehicleCategory.ParkTruck |
+                                    VehicleInfo.VehicleCategory.PostTruck |
                                     VehicleInfo.VehicleCategory.SnowTruck)) != 0) {
                 return ExtVehicleType.Service;
             } else if ((category & VehicleInfo.VehicleCategory.Bus) != 0) {
