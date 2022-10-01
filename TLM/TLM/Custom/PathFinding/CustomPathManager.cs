@@ -376,7 +376,7 @@ namespace TrafficManager.Custom.PathFinding {
 
             PathCreationArgs args = new PathCreationArgs {
                 extPathType = ExtPathType.None,
-                extVehicleType = ExtVehicleManager.ConvertToExtVehicleType(vehicleType),
+                extVehicleType = ExtVehicleManager.ConvertToExtVehicleType(vehicleType, vehicleCategory),
                 vehicleId = 0,
                 spawned = true,
                 buildIndex = Singleton<SimulationManager>.instance.m_currentBuildIndex,
