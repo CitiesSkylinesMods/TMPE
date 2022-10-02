@@ -1,5 +1,6 @@
 [Version] 11.7.1.0
 [Released] Oct 2nd 2022
+[Stable]
 [New] Dead-end lane connections #1613, #1213 (kianzarrin)
 [Fixed] Cargo Trucks ignoring vehicle restrictions #1661 (krzychu124)
 [Fixed] Parking AI - "thinking about a parking spot" near pedestrian streets #1661, #1655 (krzychu124)
