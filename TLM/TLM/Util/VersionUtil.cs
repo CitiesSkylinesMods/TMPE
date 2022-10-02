@@ -35,10 +35,10 @@ namespace TrafficManager.Util {
         // we could alternatively use BuildConfig.APPLICATION_VERSION because const values are evaluated at compile time.
         // but I have decided not to do this because I don't want this to happen automatically with a rebuild if
         // CS updates. these values should be changed manaually so as to force us to acknowledge that they have changed.
-        public const uint EXPECTED_GAME_VERSION_U = 197256464U;
+        public const uint EXPECTED_GAME_VERSION_U = 197256976U;
 
         // see comments for EXPECTED_GAME_VERSION_U.
-        public static Version ExpectedGameVersion => new Version(1, 15, 0, 5);
+        public static Version ExpectedGameVersion => new Version(1, 15, 0, 7);
 
         public static string ExpectedGameVersionString => BuildConfig.VersionToString(EXPECTED_GAME_VERSION_U, false);
 
