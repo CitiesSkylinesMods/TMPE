@@ -559,7 +559,6 @@
     <EmbeddedResource Include="Resources\MainMenu\LegacyButtons.png" />
     <EmbeddedResource Include="Resources\MainMenu\noimage.png" />
     <EmbeddedResource Include="Resources\MainMenu\remove-btn.png" />
-    <EmbeddedResource Include="Resources\MainMenu\Tool\Help-fg-active.png" />
     <EmbeddedResource Include="Resources\MainMenu\Tool\Help-fg-normal.png" />
     <EmbeddedResource Include="Resources\MainMenu\WindowBackground.png" />
     <EmbeddedResource Include="Resources\clear.png" />
@@ -937,32 +936,20 @@
     <EmbeddedResource Include="Resources\MainMenu\MainMenuButton-fg-hovered.png" />
     <EmbeddedResource Include="Resources\MainMenu\MainMenuButton-fg-normal.png" />
     <EmbeddedResource Include="Resources\MainMenu\Tool\ToggleTL-fg-normal.png" />
-    <EmbeddedResource Include="Resources\MainMenu\Tool\ToggleTL-fg-active.png" />
-    <EmbeddedResource Include="Resources\MainMenu\Tool\ManualTL-fg-active.png" />
     <EmbeddedResource Include="Resources\MainMenu\Tool\ManualTL-fg-normal.png" />
-    <EmbeddedResource Include="Resources\MainMenu\Tool\TimedTL-fg-active.png" />
     <EmbeddedResource Include="Resources\MainMenu\Tool\TimedTL-fg-normal.png" />
-    <EmbeddedResource Include="Resources\MainMenu\Tool\LaneArrows-fg-active.png" />
     <EmbeddedResource Include="Resources\MainMenu\Tool\LaneArrows-fg-normal.png" />
-    <EmbeddedResource Include="Resources\MainMenu\Tool\LaneConnector-fg-active.png" />
     <EmbeddedResource Include="Resources\MainMenu\Tool\LaneConnector-fg-normal.png" />
-    <EmbeddedResource Include="Resources\MainMenu\Tool\ClearTraffic-fg-active.png" />
     <EmbeddedResource Include="Resources\MainMenu\Tool\ClearTraffic-fg-normal.png" />
-    <EmbeddedResource Include="Resources\MainMenu\Tool\RoundButton-bg-active.png" />
     <EmbeddedResource Include="Resources\MainMenu\Tool\RoundButton-bg-disabled.png" />
     <EmbeddedResource Include="Resources\MainMenu\Tool\RoundButton-bg-hovered.png" />
     <EmbeddedResource Include="Resources\MainMenu\Tool\RoundButton-bg-normal.png" />
     <EmbeddedResource Include="Resources\MainMenu\Tool\TrafficDespawning-fg-active.png" />
     <EmbeddedResource Include="Resources\MainMenu\Tool\TrafficDespawning-fg-normal.png" />
-    <EmbeddedResource Include="Resources\MainMenu\Tool\ParkingRestrictions-fg-active.png" />
     <EmbeddedResource Include="Resources\MainMenu\Tool\ParkingRestrictions-fg-normal.png" />
-    <EmbeddedResource Include="Resources\MainMenu\Tool\SpeedLimits-fg-active.png" />
     <EmbeddedResource Include="Resources\MainMenu\Tool\SpeedLimits-fg-normal.png" />
-    <EmbeddedResource Include="Resources\MainMenu\Tool\JunctionRestrictions-fg-active.png" />
     <EmbeddedResource Include="Resources\MainMenu\Tool\JunctionRestrictions-fg-normal.png" />
-    <EmbeddedResource Include="Resources\MainMenu\Tool\PrioritySigns-fg-active.png" />
     <EmbeddedResource Include="Resources\MainMenu\Tool\PrioritySigns-fg-normal.png" />
-    <EmbeddedResource Include="Resources\MainMenu\Tool\VehicleRestrictions-fg-active.png" />
     <EmbeddedResource Include="Resources\MainMenu\Tool\VehicleRestrictions-fg-normal.png" />
     <EmbeddedResource Include="Resources\LaneArrows\LaneArrow-bg-active.png" />
     <EmbeddedResource Include="Resources\LaneArrows\LaneArrow-bg-disabled.png" />
@@ -1243,6 +1230,12 @@
   <ItemGroup Condition="'$(Configuration)'=='Debug' Or '$(Configuration)'=='FullDebug' Or '$(Configuration)'=='PF2_Debug'">
     <EmbeddedResource Include="Resources\MainMenu\Tool\RoutingDetector-fg-active.png" />
     <EmbeddedResource Include="Resources\MainMenu\Tool\RoutingDetector-fg-normal.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\MainMenu\Tool\Help-fg-active.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\MainMenu\Tool\RoundButton-bg-active.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="PostBuildMacros">

@@ -9,7 +9,8 @@ namespace TrafficManager.UI.MainMenu {
     public class ClearTrafficButton : BaseMenuButton {
         protected override bool IsActive() => false;
 
-        protected override string U_OverrideTooltipText() => Translation.Menu.Get("Tooltip:Clear traffic");
+        protected override string U_OverrideTooltipText() =>
+            Translation.Menu.Get("Tooltip:Clear traffic");
 
         protected override bool IsVisible() => true;
 
@@ -18,11 +19,10 @@ namespace TrafficManager.UI.MainMenu {
             this.Skin = ButtonSkin.CreateSimple(
                                       foregroundPrefix: "ClearTraffic",
                                       backgroundPrefix: UConst.MAINMENU_ROUND_BUTTON_BG)
-                                  .CanHover(foreground: false)
-                                  .CanActivate();
+                                  .CanHover(foreground: false);
             this.Skin.UpdateAtlasBuilder(
                 atlasBuilder: futureAtlas,
-                spriteSize: new IntVector2(50));
+                spriteSize: new IntVector2(128));
         }
 
         protected override void OnClick(UIMouseEventParameter p) {

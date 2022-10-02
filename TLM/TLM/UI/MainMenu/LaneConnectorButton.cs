@@ -14,10 +14,10 @@
                                       foregroundPrefix: "LaneConnector",
                                       backgroundPrefix: UConst.MAINMENU_ROUND_BUTTON_BG)
                                   .CanHover(foreground: false)
-                                  .CanActivate();
+                                  .CanActivate(foreground: false);
             this.Skin.UpdateAtlasBuilder(
                 atlasBuilder: atlasBuilder,
-                spriteSize: new IntVector2(50));
+                spriteSize: new IntVector2(128));
         }
 
         protected override string U_OverrideTooltipText() =>

@@ -1,9 +1,11 @@
 namespace TrafficManager.U {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using ColossalFramework.UI;
     using TrafficManager.Util;
     using TrafficManager.Util.Extensions;
+    using UnityEngine;
 
     /// <summary>
     /// Populates a set of spritedefs as your UI form is populated with controls. Allows to use
@@ -44,6 +46,19 @@ namespace TrafficManager.U {
         /// <param name="spriteDef">Sprite size, name, filename, optional path etc.</param>
         public void Add(AtlasSpriteDef spriteDef) {
             this.spriteDefs_.Add(spriteDef);
+        }
+
+        /// <summary>
+        /// Find and override
+        /// </summary>
+        /// <param name="name"></param>
+        public void OverrideGetTextureFor(string name, Func<Texture2D> getTexture) {
+            foreach (var sd in this.spriteDefs_) {
+                if (sd.Name == name) {
+                    sd.GetTexture = getTexture;
+                    return;
+                }
+            }
         }
 
         /// <summary>Following the settings in the Skin fields, load sprites into an UI atlas.
