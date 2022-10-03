@@ -63,7 +63,7 @@ namespace TrafficManager.Util.Extensions {
         public static ExtVehicleType ToExtVehicleType(this uint vehicleId)
             => ExtVehicleManager.Instance.ExtVehicles[vehicleId].vehicleType;
 
-        public static ExtVehicleType MapToExtVehicleTypeRestrictions(this VehicleInfo.VehicleCategory category) {
+        public static ExtVehicleType MapToExtVehicleTypeRestrictions(this VehicleInfo.VehicleCategory category, bool checkTrains) {
             if (category == VehicleInfo.VehicleCategory.None) {
                 return ExtVehicleType.None;
             }
@@ -92,10 +92,48 @@ namespace TrafficManager.Util.Extensions {
             if ((category & VehicleInfo.VehicleCategory.Emergency) != 0) {
                 type |= ExtVehicleType.Emergency;
             }
-            if ((category & VehicleInfo.VehicleCategory.Trains) != 0) {
-                type |= ExtVehicleType.RailVehicle;
+            if (checkTrains) {
+                if ((category & VehicleInfo.VehicleCategory.Trains) != 0) {
+                    type |= ExtVehicleType.RailVehicle;
+                }
             }
             return type;
+        }
+
+        /// <summary>
+        /// Maps VehicleCategory to ExtVehicleType - works correctly only for VehicleType.Car or shared with Car (Car | Tram)
+        /// Useful as a fallback in case of CreatePath request for not explicitly supported AIs (including custom)
+        /// </summary>
+        /// <param name="category"></param>
+        /// <returns></returns>
+        public static ExtVehicleType MapCarVehicleCategoryToExtVehicle(this VehicleInfo.VehicleCategory category) {
+            if ((category & (VehicleInfo.VehicleCategory.Ambulance |
+                             VehicleInfo.VehicleCategory.FireTruck |
+                             VehicleInfo.VehicleCategory.Police |
+                             VehicleInfo.VehicleCategory.Disaster |
+                             VehicleInfo.VehicleCategory.VacuumTruck)) != 0) {
+                return ExtVehicleType.Emergency;
+            } else if ((category & (VehicleInfo.VehicleCategory.GarbageTruck |
+                                    VehicleInfo.VehicleCategory.Hearse |
+                                    VehicleInfo.VehicleCategory.MaintenanceTruck |
+                                    VehicleInfo.VehicleCategory.ParkTruck |
+                                    VehicleInfo.VehicleCategory.PostTruck |
+                                    VehicleInfo.VehicleCategory.SnowTruck)) != 0) {
+                return ExtVehicleType.Service;
+            } else if ((category & VehicleInfo.VehicleCategory.Bus) != 0) {
+                return ExtVehicleType.Bus;
+            } else if ((category & VehicleInfo.VehicleCategory.Trolleybus) != 0) {
+                return ExtVehicleType.Trolleybus;
+            } else if ((category & VehicleInfo.VehicleCategory.CargoTruck) != 0) {
+                return ExtVehicleType.CargoTruck;
+            } else if ((category & VehicleInfo.VehicleCategory.PassengerCar) != 0) {
+                return ExtVehicleType.PassengerCar;
+            } else if ((category & VehicleInfo.VehicleCategory.Taxi) != 0) {
+                return ExtVehicleType.Taxi;
+            } else if ((category & VehicleInfo.VehicleCategory.Tram) != 0) {
+                return ExtVehicleType.Tram;
+            }
+            return ExtVehicleType.None;
         }
 
         /// <summary>

@@ -58,9 +58,9 @@ namespace TrafficManager.Patch._PathManager {
                     args.skipQueue = false;
 
             } else {
-                // CreatePath called for vanilla AI
+                // CreatePath called for vanilla or custom not supported AI
                 // determine vehicle type
-                args.extVehicleType = ExtVehicleManager.ConvertToExtVehicleType(vehicleTypes);
+                args.extVehicleType = ExtVehicleManager.ConvertToExtVehicleType(vehicleTypes, vehicleCategories);
                 args.skipQueue = skipQueue;
             }
 
