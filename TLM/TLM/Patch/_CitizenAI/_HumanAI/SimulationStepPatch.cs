@@ -63,8 +63,9 @@ namespace TrafficManager.Patch._CitizenAI._HumanAI {
             var logParkingAi = false;
 #endif
             CitizenManager citizenManager = Singleton<CitizenManager>.instance;
+            Citizen[] citizensBuf = citizenManager.m_citizens.m_buffer;
             uint citizenId = data.m_citizen;
-            ref Citizen citizen = ref data.m_citizen.ToCitizen();
+            ref Citizen citizen = ref citizensBuf[data.m_citizen];
 
             if ((data.m_flags & (CitizenInstance.Flags.Blown
                                          | CitizenInstance.Flags.Floating)) != CitizenInstance.Flags.None
@@ -108,7 +109,7 @@ namespace TrafficManager.Patch._CitizenAI._HumanAI {
                         ref ExtCitizenManager
                             .Instance.ExtCitizens[
                                 citizenId],
-                        ref data.m_citizen.ToCitizen(),
+                        ref citizen,
                         mainPathState);
                     if (logParkingAi) {
                         Log._Debug(
@@ -227,6 +228,7 @@ namespace TrafficManager.Patch._CitizenAI._HumanAI {
             // NON-STOCK CODE START
             if (Options.parkingAI) {
                 if (ExtSimulationStep(__instance,
+                                      ref citizen,
                                       instanceID,
                                       ref data,
                                       ref ExtCitizenInstanceManager.Instance.ExtInstances[instanceID],
@@ -238,10 +240,9 @@ namespace TrafficManager.Patch._CitizenAI._HumanAI {
             // NON-STOCK CODE END
             SimulationStepCitizenAI(__instance, instanceID, ref data, physicsLodRefPos);
 
-            VehicleManager vehicleManager = Singleton<VehicleManager>.instance;
             ushort vehicleId = 0;
             if (data.m_citizen != 0u) {
-                vehicleId = data.m_citizen.ToCitizen().m_vehicle;
+                vehicleId = citizensBuf[data.m_citizen].m_vehicle;
             }
 
             if (vehicleId != 0) {
@@ -270,7 +271,8 @@ namespace TrafficManager.Patch._CitizenAI._HumanAI {
 
             data.m_flags &= ~(CitizenInstance.Flags.HangAround
                                       | CitizenInstance.Flags.Panicking
-                                      | CitizenInstance.Flags.SittingDown);
+                                      | CitizenInstance.Flags.SittingDown
+                                      | CitizenInstance.Flags.Cheering);
             ArriveAtDestination(__instance, instanceID, ref data, false);
             citizenManager.ReleaseCitizenInstance(instanceID);
 
@@ -278,6 +280,7 @@ namespace TrafficManager.Patch._CitizenAI._HumanAI {
         }
 
         private static bool ExtSimulationStep(HumanAI instance,
+                                              ref Citizen citizen,
                                               ushort instanceID,
                                               ref CitizenInstance data,
                                               ref ExtCitizenInstance extInstance,
@@ -310,7 +313,7 @@ namespace TrafficManager.Patch._CitizenAI._HumanAI {
                 // check if the citizen has reached a parked car or target
                 case ExtPathMode.WalkingToParkedCar:
                 case ExtPathMode.ApproachingParkedCar: {
-                    ushort parkedVehicleId = data.m_citizen.ToCitizen().m_parkedVehicle;
+                    ushort parkedVehicleId = citizen.m_parkedVehicle;
 
                     if (parkedVehicleId == 0) {
                         // citizen is reaching their parked car but does not own a parked car

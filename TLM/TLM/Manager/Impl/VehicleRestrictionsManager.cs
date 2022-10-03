@@ -261,7 +261,7 @@ namespace TrafficManager.Manager.Impl {
                                | ExtVehicleType.Emergency;
                     } else if ((laneInfo.m_vehicleType & VehicleInfo.VehicleType.Car) !=
                              VehicleInfo.VehicleType.None) {
-                        ret |= laneInfo.vehicleCategory.MapToExtVehicleTypeRestrictions();
+                        ret |= laneInfo.vehicleCategory.MapToExtVehicleTypeRestrictions(checkTrains: false);
                     }
 
                     break;
@@ -270,7 +270,7 @@ namespace TrafficManager.Manager.Impl {
                 default: {
                     if ((laneInfo.m_vehicleType & VehicleInfo.VehicleType.Car) !=
                         VehicleInfo.VehicleType.None) {
-                        ret |= laneInfo.vehicleCategory.MapToExtVehicleTypeRestrictions();
+                        ret |= laneInfo.vehicleCategory.MapToExtVehicleTypeRestrictions(checkTrains: false);
                     }
 
                     break;
@@ -779,7 +779,7 @@ namespace TrafficManager.Manager.Impl {
         }
 
         public ExtVehicleType GetConfigurableVehicleTypes(NetInfo segmentInfo, NetInfo.Lane laneInfo) {
-            return laneInfo.vehicleCategory.MapToExtVehicleTypeRestrictions();
+            return laneInfo.vehicleCategory.MapToExtVehicleTypeRestrictions(checkTrains: (laneInfo.m_vehicleType & VehicleInfo.VehicleType.Car) == VehicleInfo.VehicleType.None);
         }
 
         internal void ClearCache(ushort segmentId) {

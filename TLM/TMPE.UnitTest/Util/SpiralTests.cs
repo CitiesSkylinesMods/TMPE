@@ -21,14 +21,14 @@ namespace TMUnitTest.Util {
 
             var cachedSpiral = new Spiral(initialRadius);
 
-            Assert.AreEqual(expectedSpiralCoordsCount, cachedSpiral.GetCoords(initialRadius).Count);
+            Assert.AreEqual(expectedSpiralCoordsCount, cachedSpiral.GetCoordsCounterclockwise(initialRadius).Count);
         }
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void GetSpiralCoords_RadiusOutOfRange_Should_ThrowException() {
             var spiral = new Spiral(1);
-            spiral.GetCoords(-1);
+            spiral.GetCoordsCounterclockwise(-1);
         }
 
         [TestMethod]
@@ -39,7 +39,7 @@ namespace TMUnitTest.Util {
 
             var cachedSpiral = new Spiral(initialRadius);
 
-            Assert.AreEqual(expectedSpiralCoordsCount, cachedSpiral.GetCoords(newRadius).Count);
+            Assert.AreEqual(expectedSpiralCoordsCount, cachedSpiral.GetCoordsCounterclockwise(newRadius).Count);
         }
 
         [TestMethod]
@@ -75,13 +75,13 @@ namespace TMUnitTest.Util {
             );
 
             var cachedSpiral = new Spiral(initialRadius);
-            var initialRadiusActualResult = cachedSpiral.GetCoords(initialRadius);
+            var initialRadiusActualResult = cachedSpiral.GetCoordsCounterclockwise(initialRadius);
             CollectionAssert.AreEqual(initialRadiusExpectedResult, initialRadiusActualResult);
 
-            var firstRadiusIncreaseActualResult = cachedSpiral.GetCoords(firstRadiusIncrease);
+            var firstRadiusIncreaseActualResult = cachedSpiral.GetCoordsCounterclockwise(firstRadiusIncrease);
             CollectionAssert.AreEqual(firstRadiusIncreaseExpectedResult, firstRadiusIncreaseActualResult);
 
-            var secondRadiusIncreaseActualResult = cachedSpiral.GetCoords(secondRadiusIncrease);
+            var secondRadiusIncreaseActualResult = cachedSpiral.GetCoordsCounterclockwise(secondRadiusIncrease);
             CollectionAssert.AreEqual(secondRadiusIncreaseExpectedResult, secondRadiusIncreaseActualResult);
         }
 
@@ -105,9 +105,9 @@ namespace TMUnitTest.Util {
             );
 
             var cachedSpiral = new Spiral(initialRadius);
-            var initialRadiusActualResult = cachedSpiral.GetCoords(initialRadius);
-            var firstRadiusIncreaseActualResult = cachedSpiral.GetCoords(firstRadiusIncrease);
-            var secondRadiusIncreaseActualResult = cachedSpiral.GetCoords(secondRadiusIncrease);
+            var initialRadiusActualResult = cachedSpiral.GetCoordsCounterclockwise(initialRadius);
+            var firstRadiusIncreaseActualResult = cachedSpiral.GetCoordsCounterclockwise(firstRadiusIncrease);
+            var secondRadiusIncreaseActualResult = cachedSpiral.GetCoordsCounterclockwise(secondRadiusIncrease);
 
             CollectionAssert.AreEqual(sharedExpectedResult, initialRadiusActualResult);
             CollectionAssert.AreEqual(sharedExpectedResult, firstRadiusIncreaseActualResult);

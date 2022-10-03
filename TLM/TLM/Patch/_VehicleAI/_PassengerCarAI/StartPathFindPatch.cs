@@ -39,7 +39,7 @@ namespace TrafficManager.Patch._VehicleAI._PassengerCarAI {
                        ref vehicleData,
                        ___m_info,
                        driverInstanceId,
-                       ref driverInstanceId.ToCitizenInstance(),
+                       ref CitizenManager.instance.m_instances.m_buffer[driverInstanceId],
                        ref ExtCitizenInstanceManager.Instance.ExtInstances[driverInstanceId],
                        startPos,
                        endPos,
