@@ -44,5 +44,15 @@
         /// Maximum penalty for entering public transport vehicles
         /// </summary>
         public float PublicTransportTransitionMaxPenalty = 100f;
+
+        /// <summary>
+        /// Allows Buses to drive through districts with Old Town policy (AfterDark DLC)
+        /// </summary>
+        public bool AllowBusInOldTownDistricts = false;
+
+        /// <summary>
+        /// Allows Taxis to drive through districts with Old Town policy (AfterDark DLC)
+        /// </summary>
+        public bool AllowTaxiInOldTownDistricts = false;
     }
 }

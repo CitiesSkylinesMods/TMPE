@@ -143,7 +143,6 @@ namespace TrafficManager.Util {
         /// <exception cref="ArgumentException">
         /// Thrown if <typeparamref name="T"/> is not some kind of <see cref="Enum"/>.
         /// </exception>
-        [Conditional("DEBUG")]
         internal static void AssertNotNone<T>(T value, string m = "") {
             if (!typeof(T).IsEnum)
                 throw new ArgumentException($"Type '{typeof(T).FullName}' is not an enum");

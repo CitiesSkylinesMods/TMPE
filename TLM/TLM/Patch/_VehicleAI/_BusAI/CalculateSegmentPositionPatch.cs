@@ -1,9 +1,14 @@
-namespace TrafficManager.Patch._VehicleAI._TramBaseAI {
+namespace TrafficManager.Patch._VehicleAI._BusAI {
+    using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Reflection;
     using System.Reflection.Emit;
+    using CSUtil.Commons;
     using HarmonyLib;
     using JetBrains.Annotations;
+    using Manager.Impl;
+    using State;
     using UnityEngine;
     using Util;
 
@@ -20,11 +25,11 @@ namespace TrafficManager.Patch._VehicleAI._TramBaseAI {
                                                         out float maxSpeed);
 
         [UsedImplicitly]
-        public static MethodBase TargetMethod() => TranspilerUtil.DeclaredMethod<CalculatePositionDelegate>(typeof(TramBaseAI), "CalculateSegmentPosition");
+        public static MethodBase TargetMethod() => TranspilerUtil.DeclaredMethod<CalculatePositionDelegate>(typeof(BusAI), "CalculateSegmentPosition");
 
         [UsedImplicitly]
-        public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions) {
-            return VehicleAICommons.TranspileCalculateSegmentPosition(instructions, noSlowDriving: true, extendedDefinition: false);
+        public static IEnumerable<CodeInstruction> Transpiler(ILGenerator ilGenerator, IEnumerable<CodeInstruction> instructions) {
+            return PatchCommons.TranspileBusTrolleybusCalculateTargetSpeed(ilGenerator, instructions);
         }
     }
 }

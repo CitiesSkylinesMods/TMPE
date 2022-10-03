@@ -113,8 +113,8 @@
     </Reference>
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Xml" />
-    <Reference Include="UnifiedUILib, Version=2.2.1.1037, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\UnifiedUILib.2.2.1\lib\net35\UnifiedUILib.dll</HintPath>
+    <Reference Include="UnifiedUILib, Version=2.2.12.31246, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\UnifiedUILib.2.2.12\lib\net35\UnifiedUILib.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine">
       <HintPath>$(MangedDLLPath)\UnityEngine.dll</HintPath>
@@ -156,7 +156,9 @@
     <Compile Include="Manager\Impl\LaneConnection\LaneEnd.cs" />
     <Compile Include="Patch\_CitizenAI\GetPathTargetPositionPatch.cs" />
     <Compile Include="Patch\_External\RTramAIModPatch.cs" />
+    <Compile Include="Patch\_PedestrianZoneRoadAI\BollardSimulationStepPatch.cs" />
     <Compile Include="Patch\_VehicleAI\InvalidPathPatch.cs" />
+    <Compile Include="Patch\_VehicleAI\_BusAI\CalculateSegmentPositionPatch.cs" />
     <Compile Include="State\OptionsTabs\GameplayTab_AIGroups.cs" />
     <Compile Include="State\OptionsTabs\GeneralTab_CompatibilityGroup.cs" />
     <Compile Include="State\OptionsTabs\GeneralTab_LocalisationGroup.cs" />
@@ -1096,9 +1098,8 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\LaneConnectionManager\add_cursor.png" />
     <EmbeddedResource Include="Resources\LaneConnectionManager\remove_cursor.png" />
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="Resources\LaneConnectionManager\direction_arrow.png" />
+    <EmbeddedResource Include="Resources\LaneConnectionManager\dead_end.png" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\SignThemes\Fallback\Allow-Bus.png" />

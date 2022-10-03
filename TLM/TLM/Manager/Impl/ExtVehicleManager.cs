@@ -1052,11 +1052,12 @@ namespace TrafficManager.Manager.Impl {
         /// Converts game VehicleInfo.VehicleType to closest TMPE.API.Traffic.Enums.ExtVehicleType
         /// </summary>
         /// <param name="vehicleType"></param>
+        /// <param name="vehicleCategory"></param>
         /// <returns></returns>
-        public static ExtVehicleType ConvertToExtVehicleType(VehicleInfo.VehicleType vehicleType) {
+        public static ExtVehicleType ConvertToExtVehicleType(VehicleInfo.VehicleType vehicleType, VehicleInfo.VehicleCategory vehicleCategory) {
             ExtVehicleType extVehicleType = ExtVehicleType.None;
             if ((vehicleType & VehicleInfo.VehicleType.Car) != VehicleInfo.VehicleType.None) {
-                extVehicleType = ExtVehicleType.Bus;
+                extVehicleType = vehicleCategory.MapCarVehicleCategoryToExtVehicle();
             } else if ((vehicleType & (VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Metro |
                                 VehicleInfo.VehicleType.Monorail)) !=
                 VehicleInfo.VehicleType.None) {

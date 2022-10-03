@@ -1,6 +1,7 @@
 namespace TrafficManager.UI.Textures {
     using System;
     using System.Collections.Generic;
+    using System.Management.Instrumentation;
     using CSUtil.Commons;
     using JetBrains.Annotations;
     using TrafficManager.API.Traffic.Data;
@@ -8,6 +9,7 @@ namespace TrafficManager.UI.Textures {
     using TrafficManager.API.UI;
     using TrafficManager.Manager.Impl;
     using TrafficManager.State;
+    using TrafficManager.U;
     using TrafficManager.UI.SubTools;
     using TrafficManager.Util;
     using UnityEngine;
@@ -39,7 +41,7 @@ namespace TrafficManager.UI.Textures {
         public readonly bool SupportsMph;
 
         /// <summary>Speed limit signs from 5 to 140 km (from 5 to 90 mph) and zero for no limit.</summary>
-        public readonly Dictionary<int, Texture2D> Textures = new();
+        public readonly Dictionary<int, SpeedLimitSignTexture> Textures = new();
 
         /// <summary>Set to true if an attempt to find and load textures was made.</summary>
         public bool AttemptedToLoad = false;
@@ -122,15 +124,19 @@ namespace TrafficManager.UI.Textures {
                 : this.ParentTheme.Parking(p);
 
         public Texture2D VehicleRestriction(ExtVehicleType type, bool allow) {
+            return VehicleRestriction(type, allow, false);
+        }
+
+        public Texture2D VehicleRestriction(ExtVehicleType type, bool allow, bool disabled) {
             if (allow) {
                 return this.vehicleRestrictions_.ContainsKey(type)
-                           ? this.vehicleRestrictions_[type].allow
-                           : this.ParentTheme.VehicleRestriction(type, allow: true);
+                           ? !disabled ? this.vehicleRestrictions_[type].allow : this.vehicleRestrictions_[type].allowDisabled
+                           : this.ParentTheme.VehicleRestriction(type, allow: true, disabled: disabled);
             }
 
             return this.vehicleRestrictions_.ContainsKey(type)
-                       ? this.vehicleRestrictions_[type].restrict
-                       : this.ParentTheme.VehicleRestriction(type, allow: false);
+                       ? !disabled ? this.vehicleRestrictions_[type].restrict : this.vehicleRestrictions_[type].restrictDisabled
+                       : this.ParentTheme.VehicleRestriction(type, allow: false, disabled: disabled);
         }
 
         /// <summary>
@@ -198,7 +204,12 @@ namespace TrafficManager.UI.Textures {
                     size: this.TextureSize,
                     mip: true,
                     logIfNotFound: false);
-                this.Textures.Add(speedLimit, resource ? resource : Texture2D.whiteTexture);
+                if (resource) {
+                    var disabledVarinat = TextureUtil.ToGrayscale(resource);
+                    this.Textures.Add(speedLimit, new SpeedLimitSignTexture() {regular = resource, disabled = disabledVarinat});
+                } else {
+                    this.Textures.Add(speedLimit, new SpeedLimitSignTexture() {regular = Texture2D.whiteTexture, disabled = Texture2D.whiteTexture});
+                }
             }
 
             LoadPrioritySign(p: PriorityType.None, name: "PriorityNone", whiteTexture);
@@ -289,7 +300,8 @@ namespace TrafficManager.UI.Textures {
             Dictionary<TIndex, AllowDisallowTexture> dict,
             string name,
             bool whiteTexture,
-            int sizeHint) {
+            int sizeHint,
+            bool createDisabledVariant = false) {
             var size = new IntVector2(sizeHint);
             Texture2D allowTex = TextureResources.LoadDllResource(
                 resourceName: $"{this.PathPrefix}.Allow-{name}.png",
@@ -305,12 +317,22 @@ namespace TrafficManager.UI.Textures {
                 var pairOfSigns = new AllowDisallowTexture {
                     allow = allowTex,
                     restrict = restrictTex,
+                    allowDisabled = Texture2D.whiteTexture,
+                    restrictDisabled = Texture2D.whiteTexture,
                 };
+                if (createDisabledVariant) {
+                    Texture2D allowDisabledTex = TextureUtil.ToGrayscale(allowTex);
+                    Texture2D restrictDisabledTex = TextureUtil.ToGrayscale(restrictTex);
+                    pairOfSigns.allowDisabled = allowDisabledTex;
+                    pairOfSigns.restrictDisabled = restrictDisabledTex;
+                }
                 dict[index] = pairOfSigns;
             } else if (whiteTexture) {
                 var whiteBox = new AllowDisallowTexture {
                     allow = Texture2D.whiteTexture,
+                    allowDisabled = Texture2D.whiteTexture,
                     restrict = Texture2D.whiteTexture,
+                    restrictDisabled = Texture2D.whiteTexture,
                 };
                 dict[index] = whiteBox;
             }
@@ -319,13 +341,13 @@ namespace TrafficManager.UI.Textures {
         private void LoadVehicleRestrictionSign(ExtVehicleType index,
                                                 string name,
                                                 bool whiteTexture) {
-            LoadRestrictionSignGeneric(index, this.vehicleRestrictions_, name, whiteTexture, 200);
+            LoadRestrictionSignGeneric(index, this.vehicleRestrictions_, name, whiteTexture, 200, createDisabledVariant: true);
         }
 
         private void LoadOtherRestrictionSign(OtherRestriction index,
                                               string name,
                                               bool whiteTexture) {
-            LoadRestrictionSignGeneric(index, this.otherRestrictions_, name, whiteTexture, 256);
+            LoadRestrictionSignGeneric(index, this.otherRestrictions_, name, whiteTexture, 256, createDisabledVariant: false);
         }
 
         private void DestroyTexture(Texture2D t) {
@@ -340,7 +362,8 @@ namespace TrafficManager.UI.Textures {
 
             // Speed limit textures
             foreach (var texture in this.Textures) {
-                DestroyTexture(texture.Value);
+                DestroyTexture(texture.Value.regular);
+                DestroyTexture(texture.Value.disabled);
             }
 
             this.Textures.Clear();
@@ -361,6 +384,14 @@ namespace TrafficManager.UI.Textures {
 
             // Vehicle Restriction signs
             foreach (var rs in this.vehicleRestrictions_) {
+                DestroyTexture(rs.Value.allow);
+                DestroyTexture(rs.Value.allowDisabled);
+                DestroyTexture(rs.Value.restrict);
+                DestroyTexture(rs.Value.restrictDisabled);
+            }
+
+            // Other Restriction signs
+            foreach (var rs in this.otherRestrictions_) {
                 DestroyTexture(rs.Value.allow);
                 DestroyTexture(rs.Value.restrict);
             }
@@ -383,10 +414,11 @@ namespace TrafficManager.UI.Textures {
         /// Does not use <see cref="ParentTheme"/> assuming that all speeds must be covered in a theme.
         /// </summary>
         /// <param name="spd">Speed to display.</param>
+        /// <param name="disabled">Should use disabled version of sign (grayscale)</param>
         /// <returns>Texture to display.</returns>
-        public Texture2D SpeedLimitTexture(SpeedValue spd) {
+        public Texture2D SpeedLimitTexture(SpeedValue spd, bool disabled = false) {
             if (!this.HaveSpeedLimitSigns) {
-                return this.ParentTheme.SpeedLimitTexture(spd);
+                return this.ParentTheme.SpeedLimitTexture(spd, disabled);
             }
 
             // Round to nearest 5 MPH or nearest 5 km/h
@@ -401,12 +433,12 @@ namespace TrafficManager.UI.Textures {
             try {
                 // Show unlimited if the speed cannot be represented by the available sign textures
                 if (index == 0 || index > upper) {
-                    return this.Textures[0];
+                    return disabled ? this.Textures[0].disabled : this.Textures[0].regular;
                 }
 
                 // Trim from below to not go below index 5 (5 kmph or 5 mph)
                 ushort trimIndex = Math.Max((ushort)5, index);
-                return this.Textures[trimIndex];
+                return disabled ? this.Textures[trimIndex].disabled : this.Textures[trimIndex].regular;
             }
             catch (KeyNotFoundException) {
                 return RoadSignThemeManager.Instance.NoOverride;
@@ -415,7 +447,14 @@ namespace TrafficManager.UI.Textures {
 
         public struct AllowDisallowTexture {
             public Texture2D allow;
+            public Texture2D allowDisabled;
             public Texture2D restrict;
+            public Texture2D restrictDisabled;
+        }
+
+        public struct SpeedLimitSignTexture {
+            public Texture2D regular;
+            public Texture2D disabled;
         }
     }
 }

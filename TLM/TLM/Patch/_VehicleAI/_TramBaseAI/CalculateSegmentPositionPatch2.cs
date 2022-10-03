@@ -108,7 +108,7 @@ namespace TrafficManager.Patch._VehicleAI._TramBaseAI {
                 }
             }
 
-            VehicleAICommons.CustomCalculateTargetSpeed(
+            VehicleAICommons.CustomCalculateTargetSpeed_NoSlowDriving(
                 __instance,
                 vehicleID,
                 ref vehicleData,

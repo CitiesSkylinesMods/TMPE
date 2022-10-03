@@ -33,7 +33,7 @@ namespace TrafficManager.Manager.Impl {
                 if (!vehicle.IsValid())
                     continue;
 
-                if ((vehicle.ToExtVehicleType() & filter) == 0)
+                if ((vehicle.ToExtVehicleType((ushort)vehicleId) & filter) == 0)
                     continue;
 
                 count++;
@@ -61,10 +61,11 @@ namespace TrafficManager.Manager.Impl {
                     if (!vehicle.IsValid())
                         continue;
 
-                    if (filter.HasValue && (vehicle.ToExtVehicleType() & filter) == 0)
+                    ushort id = (ushort)vehicleId;
+                    if (filter.HasValue && (vehicle.ToExtVehicleType(id) & filter) == 0)
                         continue;
 
-                    vehicleManager.ReleaseVehicle((ushort)vehicleId);
+                    vehicleManager.ReleaseVehicle(id);
                 }
 
                 TrafficMeasurementManager.Instance.ResetTrafficStats();

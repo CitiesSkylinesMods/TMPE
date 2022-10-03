@@ -117,6 +117,9 @@ namespace TrafficManager.Patch._VehicleAI._CarAI {
 
             if (nextSourceNodeId == curTargetNodeId
                 && withinBrakingDistance) {
+
+                ref NetNode nextSourceNode = ref nextSourceNodeId.ToNode();
+
                 // NON-STOCK CODE START (stock code replaced)
                 if (!VehicleBehaviorManager.Instance.MayChangeSegment(
                         vehicleID,
@@ -128,13 +131,52 @@ namespace TrafficManager.Patch._VehicleAI._CarAI {
                         prevLaneID,
                         ref position,
                         nextSourceNodeId,
-                        ref nextSourceNodeId.ToNode(),
+                        ref nextSourceNode,
                         laneID,
                         ref nextPosition,
                         nextTargetNodeId,
                         out maxSpeed)) {
                     // NON-STOCK CODE
                     return false;
+                }
+
+                NetNode.FlagsLong targetNodeFlagsLong = nextSourceNode.flags;
+                bool hasPedestrianBollards = (targetNodeFlagsLong & NetNode.FlagsLong.PedestrianBollards) != NetNode.FlagsLong.None;
+                if (hasPedestrianBollards && prevPos.m_segment != position.m_segment) {
+                    // STOCK CODE pedestrian bollard simulation
+                    uint currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;
+                    uint nodeSimGroup = (uint)(curTargetNodeId << 8) / 32768u;
+                    uint prevNodeSimGroup = (currentFrameIndex - nodeSimGroup) & 0xFF;
+
+                    ref NetSegment prevPosSegment = ref prevPos.m_segment.ToSegment();
+                    RoadBaseAI.GetBollardState(curTargetNodeId, ref prevPosSegment, currentFrameIndex - nodeSimGroup, out RoadBaseAI.TrafficLightState enterState, out RoadBaseAI.TrafficLightState exitState, out bool enter, out bool exit);
+
+                    bool hasTrafficLightFlag = (targetNodeFlagsLong & NetNode.FlagsLong.TrafficLights) != NetNode.FlagsLong.None;
+                    if (((vehicleData.m_flags & Vehicle.Flags.Emergency2) != 0 || (!hasTrafficLightFlag && lastFrameData.m_velocity == Vector3.zero && d <= 30f)) && !exit)
+                    {
+                        exit = true;
+                        RoadBaseAI.SetBollardState(curTargetNodeId, ref prevPosSegment, currentFrameIndex - nodeSimGroup, enterState, exitState, enter, exit);
+                    }
+                    switch (exitState)
+                    {
+                        case RoadBaseAI.TrafficLightState.RedToGreen:
+                            if (prevNodeSimGroup < 60)
+                            {
+                                maxSpeed = 0f;
+                                return false;
+                            }
+                            break;
+                        case RoadBaseAI.TrafficLightState.GreenToRed:
+                            if (prevNodeSimGroup >= 30)
+                            {
+                                maxSpeed = 0f;
+                                return false;
+                            }
+                            break;
+                        case RoadBaseAI.TrafficLightState.Red:
+                            maxSpeed = 0f;
+                            return false;
+                    }
                 }
 
                 ExtVehicleManager.Instance.UpdateVehiclePosition(

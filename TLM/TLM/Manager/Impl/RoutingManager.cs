@@ -534,6 +534,7 @@ namespace TrafficManager.Manager.Impl {
                         ignoreSegment: 0,
                         laneTypes: LaneArrowManager.LANE_TYPES,
                         vehicleTypes: LaneArrowManager.VEHICLE_TYPES,
+                        vehicleCategories: VehicleInfo.VehicleCategory.All,
                         onePerSegment: false,
                         forward: ref numIncomingLanes,
                         backward: ref numOutgoingLanes);
@@ -646,7 +647,9 @@ namespace TrafficManager.Manager.Impl {
                         extendedLog?.Invoke(new { prevSegmentId, _ = "Exploring", nextSegmentId, nextLaneId, nextLaneIndex });
 
                         // next is compatible lane
-                        if (IsSupported(nextLaneInfo) && (prevLaneInfo.m_vehicleType & nextLaneInfo.m_vehicleType) != 0) {
+                        if (nextLaneId != prevLaneId &&
+                            IsSupported(nextLaneInfo) &&
+                            (prevLaneInfo.m_vehicleType & nextLaneInfo.m_vehicleType) != 0) {
                             extendedLog?.Invoke(new { _ = "vehicle type check passed for", nextLaneId, nextLaneIndex });
 
                             // next is incoming lane
@@ -919,7 +922,7 @@ namespace TrafficManager.Manager.Impl {
 
                         nextLaneId = nextLaneId.ToLane().m_nextLane;
                         ++nextLaneIndex;
-                    } // foreach lane
+                    }
 
                     extendedLog?.Invoke(new { isNextSegmentValid, nextCompatibleTransitionDatas = nextCompatibleTransitionDataIndices?.ArrayToString() });
 
@@ -1740,7 +1743,7 @@ namespace TrafficManager.Manager.Impl {
             bool segmentInvert1, NetInfo.Lane laneInfo1, bool startNode1,
             bool segmentInvert2, NetInfo.Lane laneInfo2, bool startNode2) {
 #if DEBUG
-            bool logRouting = DebugSwitch.Routing.Get(); 
+            bool logRouting = DebugSwitch.Routing.Get();
 #else
             const bool logRouting = false;
 #endif

@@ -25,7 +25,7 @@ namespace TrafficManager.Custom.PathFinding {
         /// vehicle despawning.
         /// </summary>
         [SuppressMessage("Usage", "RAS0002:Readonly field for a non-readonly struct", Justification = "Not performance critical.")]
-        private static readonly byte LatestPathfinderEdition = 1;
+        internal static readonly byte LatestPathfinderEdition = 1;
 
         /// <summary>
         /// Checks savegame pathfinder edition and, if necessary, despawns

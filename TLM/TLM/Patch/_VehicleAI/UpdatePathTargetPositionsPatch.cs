@@ -26,6 +26,7 @@ namespace TrafficManager.Patch._VehicleAI {
         private static ArrivingToDestinationDelegate ArrivingToDestination;
         private static LeftHandDriveDelegate LeftHandDrive;
         private static CalculateTargetSpeedDelegate CalculateTargetSpeed;
+        private static NeedStopAtNodeDelegate NeedStopAtNode;
 
         private delegate void UpdatePathTargetPositionsDelegate(ushort vehicleID,
                                                                ref Vehicle vehicleData,
@@ -51,6 +52,7 @@ namespace TrafficManager.Patch._VehicleAI {
             ArrivingToDestination = vehicleAIConnection.ArrivingToDestination;
             LeftHandDrive = vehicleAIConnection.LeftHandDrive;
             CalculateTargetSpeed = vehicleAIConnection.CalculateTargetSpeed;
+            NeedStopAtNode = vehicleAIConnection.NeedStopAtNode;
         }
 
         [UsedImplicitly]
@@ -857,16 +859,33 @@ namespace TrafficManager.Patch._VehicleAI {
 
                     curSegDir.Normalize();
                     nextSegDir.Normalize();
-                    NetSegment.CalculateMiddlePoints(
-                        bezier.a,
-                        curSegDir,
-                        bezier.d,
-                        nextSegDir,
-                        true,
-                        true,
-                        out bezier.b,
-                        out bezier.c,
-                        out float dist);
+                    // STOCK CODE
+                    float dist;
+                    if (currentPosition.m_segment == nextPosition.m_segment)
+                    {
+                        dist = (bezier.d - bezier.a).magnitude;
+                        NetInfo currentSegmentInfo = currentPosition.m_segment.ToSegment().Info;
+                        float endRadius = currentSegmentInfo.m_netAI.GetEndRadius();
+                        NetInfo.Lane currentSegmentLane = currentSegmentInfo.m_lanes[currentPosition.m_lane];
+                        NetInfo.Lane currentSegmentNextLane = currentSegmentInfo.m_lanes[nextPosition.m_lane];
+                        float a = Mathf.Abs(currentSegmentLane.m_position - currentSegmentNextLane.m_position) * 0.75f;
+                        float num9 = Mathf.Max(currentSegmentLane.m_width, currentSegmentNextLane.m_width) * 0.5f;
+                        a = Mathf.Min(a, endRadius * (1f - currentSegmentInfo.m_pavementWidth / currentSegmentInfo.m_halfWidth) - num9);
+                        bezier.b = bezier.a + curSegDir * a * 1.333f;
+                        bezier.c = bezier.d + nextSegDir * a * 1.333f;
+                    } else {
+                        NetSegment.CalculateMiddlePoints(
+                            bezier.a,
+                            curSegDir,
+                            bezier.d,
+                            nextSegDir,
+                            true,
+                            true,
+                            out bezier.b,
+                            out bezier.c,
+                            out dist);
+                    }
+                    // STOCK CODE END
 
                     Log._DebugIf(
                         logLogic,
@@ -919,7 +938,27 @@ namespace TrafficManager.Patch._VehicleAI {
                                 $"pathOffset={pathOffset}, distDiff={distDiff}, " +
                                 $"pathOffsetDelta={pathOffsetDelta}");
 
+                            byte previousPathOffset = pathOffset;
+                            byte stopOffset;
+                            bool needStopAtNode = NeedStopAtNode(
+                                                      vehicleAI: __instance,
+                                                      vehicleID: vehicleID,
+                                                      vehicleData: ref vehicleData,
+                                                      nodeID: nextNodeId,
+                                                      nodeData: ref nextNodeId.ToNode(),
+                                                      previousPosition: currentPosition,
+                                                      prevLane: curLaneId,
+                                                      nextPosition: nextPosition,
+                                                      nextLane: nextLaneId,
+                                                      bezier: bezier,
+                                                      stopOffset: out stopOffset) && stopOffset >= previousPathOffset;
+
                             pathOffset = (byte)Mathf.Min(pathOffset + pathOffsetDelta, 255);
+
+                            if (needStopAtNode) {
+                                pathOffset = (byte)Mathf.Min(pathOffset, stopOffset);
+                            }
+
                             Vector3 bezierPos = bezier.Position(pathOffset * 0.003921569f);
                             targetPos.Set(
                                 bezierPos.x,
@@ -935,14 +974,14 @@ namespace TrafficManager.Patch._VehicleAI {
                                 $"pathOffset={pathOffset}, bezierPos={bezierPos}, " +
                                 $"targetPos={targetPos}, sqrMagnitude2={sqrMagnitude2}");
 
-                            if (!(sqrMagnitude2 >= minSqrDistA)) {
+                            if (!(sqrMagnitude2 >= minSqrDistA) && !needStopAtNode) {
                                 continue;
                             }
 
                             Log._DebugIf(
                                 logLogic,
                                 () => $"CustomVehicle.CustomUpdatePathTargetPositions({vehicleID}): " +
-                                $"sqrMagnitude2={sqrMagnitude2} >= minSqrDistA={minSqrDistA}");
+                                $"sqrMagnitude2={sqrMagnitude2} >= minSqrDistA={minSqrDistA} and no need to stop at node");
 
                             if (index <= 0) {
                                 vehicleData.m_lastPathOffset = pathOffset;
@@ -968,6 +1007,19 @@ namespace TrafficManager.Patch._VehicleAI {
                                         "CustomVehicle.CustomUpdatePathTargetPositions({vehicleID}): " +
                                         $"nextNodeId={nextNodeId} != 0: Updated node target position. " +
                                         $"targetPos={targetPos}, index={index}");
+                                }
+
+                                if (needStopAtNode && pathOffset == stopOffset) {
+                                    if (index <= 0) {
+                                        vehicleData.m_lastPathOffset = previousPathOffset;
+                                    }
+
+                                    targetPos.w = 0f;
+                                    while (index < max)
+                                    {
+                                        vehicleData.SetTargetPos(index++, targetPos);
+                                    }
+                                    return false;
                                 }
                             }
 
