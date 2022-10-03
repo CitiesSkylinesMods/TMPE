@@ -22,6 +22,7 @@ namespace TrafficManager.Manager.Impl {
           IAdvancedParkingManager
     {
         private readonly Spiral _spiral;
+        private Randomizer _randomizer;
 
         public static readonly AdvancedParkingManager Instance
             = new AdvancedParkingManager(SingletonLite<Spiral>.instance);
@@ -32,6 +33,7 @@ namespace TrafficManager.Manager.Impl {
 
         public AdvancedParkingManager(Spiral spiral) {
             _spiral = spiral ?? throw new ArgumentNullException(nameof(spiral));
+            _randomizer = new Randomizer();
 
             _findParkingSpaceDelegate = GameConnectionManager.Instance.PassengerCarAIConnection.FindParkingSpace;
             _findParkingSpacePropDelegate = GameConnectionManager.Instance.PassengerCarAIConnection.FindParkingSpaceProp;
@@ -1931,7 +1933,7 @@ namespace TrafficManager.Manager.Impl {
                     // found a building with parking space
                     if (Constants.ManagerFactory.ExtPathManager.FindPathPositionWithSpiralLoop(
                         parkPos,
-                        endPos,
+                        knownParkingSpaceLocationId.ToBuilding().m_position,
                         ItemClass.Service.Road,
                         NetInfo.LaneType.Pedestrian,
                         VehicleInfo.VehicleType.None,
@@ -1947,10 +1949,10 @@ namespace TrafficManager.Manager.Impl {
                     if (logParkingAi) {
                         Log._Debug(
                             $"Navigating citizen instance {extDriverInstance.instanceId} to parking " +
-                            $"building {knownParkingSpaceLocationId}! segment={endPathPos.m_segment}, " +
+                            $"building {knownParkingSpaceLocationId}, parkPos={parkPos}! segment={endPathPos.m_segment}, " +
                             $"laneIndex={endPathPos.m_lane}, offset={endPathPos.m_offset}. " +
                             $"CurrentPathMode={extDriverInstance.pathMode} " +
-                            $"calculateEndPos={calculateEndPos}");
+                            $"calculateEndPos={calculateEndPos}, endPos={endPos}");
                     }
 
                     return true;
@@ -2383,14 +2385,10 @@ namespace TrafficManager.Manager.Impl {
 
                     // randomize target position to allow for opposite road-side parking
                     ParkingAI parkingAiConf = GlobalConfig.Instance.ParkingAI;
-                    segCenter.x +=
-                        Singleton<SimulationManager>.instance.m_randomizer.Int32(
-                            parkingAiConf.ParkingSpacePositionRand) -
+                    segCenter.x += rng.Int32(parkingAiConf.ParkingSpacePositionRand) -
                         (parkingAiConf.ParkingSpacePositionRand / 2u);
 
-                    segCenter.z +=
-                        Singleton<SimulationManager>.instance.m_randomizer.Int32(
-                            parkingAiConf.ParkingSpacePositionRand) -
+                    segCenter.z += rng.Int32(parkingAiConf.ParkingSpacePositionRand) -
                         (parkingAiConf.ParkingSpacePositionRand / 2u);
 
                     if (netSegment.GetClosestLanePosition(
@@ -2460,7 +2458,7 @@ namespace TrafficManager.Manager.Impl {
                 return true;
             }
 
-            var coords = _spiral.GetCoords(radius);
+            var coords = _spiral.GetCoordsRandomDirection(radius, ref _randomizer);
             for (int i = 0; i < radius * radius; i++) {
                 if (!LoopHandler((int)(centerI + coords[i].x), (int)(centerJ + coords[i].y))) {
                     break;
@@ -2571,7 +2569,7 @@ namespace TrafficManager.Manager.Impl {
                 return true;
             }
 
-            var coords = _spiral.GetCoords(radius);
+            var coords = _spiral.GetCoordsRandomDirection(radius, ref _randomizer);
             for (int i = 0; i < radius * radius; i++) {
                 if (!LoopHandler((int)(centerI + coords[i].x), (int)(centerJ + coords[i].y))) {
                     break;

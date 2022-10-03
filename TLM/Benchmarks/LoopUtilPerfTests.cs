@@ -7,7 +7,7 @@ namespace Benchmarks {
         [Benchmark]
         public void GenerateSpiralGridCoordsClockwise_Once_Radius17() {
             var radius = 17;
-            var coords = LoopUtil.GenerateSpiralGridCoordsClockwise().Take(radius * radius);
+            var coords = LoopUtil.GenerateSpiralGridCoordsCounterclockwise().Take(radius * radius);
             foreach (var coord in coords) {
             }
         }
@@ -16,7 +16,7 @@ namespace Benchmarks {
         public void GenerateSpiralGridCoordsClockwise_10Times_Radius17() {
             var radius = 17;
             for (int i = 0; i < 10; i++) {
-                var coords = LoopUtil.GenerateSpiralGridCoordsClockwise().Take(radius * radius);
+                var coords = LoopUtil.GenerateSpiralGridCoordsCounterclockwise().Take(radius * radius);
                 foreach (var coord in coords) {
                 }
             }
