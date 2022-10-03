@@ -37,10 +37,10 @@ namespace TrafficManager.Manager.Impl {
             base.InternalPrintDebugInfo();
             Log._Debug($"Extended citizen data:");
 
-            Citizen[] citiziensBuf = CitizenManager.instance.m_citizens.m_buffer;
+            Citizen[] citizensBuf = CitizenManager.instance.m_citizens.m_buffer;
             for (uint i = 0; i < ExtCitizens.Length; ++i)
             {
-                ref Citizen citizen = ref citiziensBuf[i];
+                ref Citizen citizen = ref citizensBuf[i];
                 if ((citizen.m_flags & Citizen.Flags.Created) == 0) {
                     continue;
                 }
@@ -165,12 +165,12 @@ namespace TrafficManager.Manager.Impl {
 
         public List<Configuration.ExtCitizenData> SaveData(ref bool success) {
             List<Configuration.ExtCitizenData> ret = new List<Configuration.ExtCitizenData>();
-            Citizen[] citiziensBuf = CitizenManager.instance.m_citizens.m_buffer;
+            Citizen[] citizensBuf = CitizenManager.instance.m_citizens.m_buffer;
             uint maxCitizenCount = CitizenManager.instance.m_citizens.m_size;
 
             for (uint citizenId = 0; citizenId < maxCitizenCount; ++citizenId) {
                 try {
-                    if ((citiziensBuf[citizenId].m_flags & Citizen.Flags.Created) == Citizen.Flags.None) {
+                    if ((citizensBuf[citizenId].m_flags & Citizen.Flags.Created) == Citizen.Flags.None) {
                         continue;
                     }
 
