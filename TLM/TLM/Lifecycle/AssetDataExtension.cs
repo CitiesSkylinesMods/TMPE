@@ -1,7 +1,9 @@
 namespace TrafficManager.Lifecycle {
     using CSUtil.Commons;
     using ICities;
+    using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using TrafficManager.State;
     using TrafficManager.State.Asset;
     using static TrafficManager.Util.Shortcuts;
@@ -34,7 +36,7 @@ namespace TrafficManager.Lifecycle {
             }
         }
 
-        public void OnAssetSavedImpl(string name, object asset, out Dictionary<string, byte[]> userData) {
+        public static void OnAssetSavedImpl(string name, object asset, out Dictionary<string, byte[]> userData) {
             Log.Info($"AssetDataExtension.OnAssetSavedImpl({name}, {asset}, userData) called");
             userData = null;
             if (asset is BuildingInfo prefab) {
@@ -48,6 +50,47 @@ namespace TrafficManager.Lifecycle {
                     userData.Add(TMPE_RECORD_ID, SerializationUtil.Serialize(assetData));
                 }
             }
+        }
+
+        [Conditional("DEBUG")]
+        public static void HotReload() {
+            var assets2UserData = Type.GetType("LoadOrderMod.LOMAssetDataExtension, LoadOrderMod", throwOnError: false)
+                ?.GetField("Assets2UserData")
+                ?.GetValue(null)
+                as Dictionary<PrefabInfo, Dictionary<string, byte[]>>;
+
+            if (assets2UserData == null) {
+                Log.Warning("Could not hot reload assets because LoadOrderMod was not found");
+                return;
+            }
+
+            var editPrefabInfo = ToolsModifierControl.toolController.m_editPrefabInfo;
+            foreach (var asset2UserData in assets2UserData) {
+                var asset = asset2UserData.Key;
+                var userData = asset2UserData.Value;
+                if (asset) {
+                    if (editPrefabInfo) {
+                        // asset editor work around
+                        asset = FindLoadedCounterPart<NetInfo>(asset);
+                    }
+                    OnAssetLoadedImpl(asset.name, asset, userData);
+                }
+            }
+        }
+
+        /// <summary>
+        /// OnLoad() calls IntializePrefab() which can create duplicates. Therefore we should match by name.
+        /// </summary>
+        private static PrefabInfo FindLoadedCounterPart<T>(PrefabInfo source)
+            where T : PrefabInfo {
+            int n = PrefabCollection<T>.LoadedCount();
+            for (uint i = 0; i < n; ++i) {
+                T prefab = PrefabCollection<T>.GetLoaded(i);
+                if (prefab?.name == source.name) {
+                    return prefab;
+                }
+            }
+            return source;
         }
     }
 }
