@@ -79,12 +79,13 @@ namespace TrafficManager.UI {
                 Log._Debug($"Current citizen: {worldInfoPanelInstanceId.Citizen}");
 
                 if (worldInfoPanelInstanceId.Citizen != 0) {
-                    ushort citizenInstanceId = worldInfoPanelInstanceId.Citizen.ToCitizen().m_instance;
+                    CitizenManager citizenManager = Singleton<CitizenManager>.instance;
+                    ushort citizenInstanceId = citizenManager.m_citizens.m_buffer[worldInfoPanelInstanceId.Citizen].m_instance;
 
                     Log._Debug(
                         $"Current citizen: {worldInfoPanelInstanceId.Citizen} Instance: {citizenInstanceId}");
                     if (citizenInstanceId != 0) {
-                        bool isTourist = citizenInstanceId.ToCitizenInstance().Info.m_citizenAI is TouristAI;
+                        bool isTourist = citizenManager.m_instances.m_buffer[citizenInstanceId].Info.m_citizenAI is TouristAI;
                         Singleton<SimulationManager>.instance.AddAction(
                             () => Singleton<CitizenManager>.instance.ReleaseCitizenInstance(citizenInstanceId));
                         // InfoPanel needs to be closed manually because method responsible for hiding it testing against type Citizen instead of CitizenInstance

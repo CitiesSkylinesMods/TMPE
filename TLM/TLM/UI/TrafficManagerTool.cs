@@ -1296,6 +1296,8 @@ namespace TrafficManager.UI {
             GUIStyle _counterStyle = new GUIStyle();
             SimulationManager simManager = Singleton<SimulationManager>.instance;
             ExtVehicleManager vehStateManager = ExtVehicleManager.Instance;
+            CitizenManager citizenManager = CitizenManager.instance;
+            CitizenInstance[] citizenInstancesBuf = citizenManager.m_instances.m_buffer;
 
             int startVehicleId = 1;
             int endVehicleId = Singleton<VehicleManager>.instance.m_vehicles.m_buffer.Length - 1;
@@ -1371,7 +1373,7 @@ namespace TrafficManager.UI {
                     vState.nextLaneIndex,
                     vState.waitTime,
                     driverInst.instanceId,
-                    driverInst.instanceId.ToCitizenInstance().m_citizen,
+                    citizenInstancesBuf[driverInst.instanceId].m_citizen,
                     driverInst.pathMode,
                     driverInst.failedParkingAttempts,
                     driverInst.parkingSpaceLocation,
@@ -1398,8 +1400,14 @@ namespace TrafficManager.UI {
         private void DebugGuiDisplayCitizens() {
             GUIStyle counterStyle = new GUIStyle();
 
-            for (uint citizenInstanceId = 1; citizenInstanceId < CitizenManager.MAX_INSTANCE_COUNT; ++citizenInstanceId) {
-                ref CitizenInstance citizenInstance = ref citizenInstanceId.ToCitizenInstance();
+            ExtCitizen[] extCitizensBuf = ExtCitizenManager.Instance.ExtCitizens;
+            CitizenManager citizenManager = CitizenManager.instance;
+            CitizenInstance[] citizenInstancesBuf = citizenManager.m_instances.m_buffer;
+            Citizen[] citizensBuf = citizenManager.m_citizens.m_buffer;
+            uint maxCitizenInstanceCount = citizenManager.m_instances.m_size;
+
+            for (uint citizenInstanceId = 1; citizenInstanceId < maxCitizenInstanceCount; ++citizenInstanceId) {
+                ref CitizenInstance citizenInstance = ref citizenInstancesBuf[citizenInstanceId];
 
                 if (!citizenInstance.IsCreated()) {
                     continue;
@@ -1443,7 +1451,6 @@ namespace TrafficManager.UI {
 #endif
 
                 var labelSb = new StringBuilder();
-                ExtCitizen[] extCitizensBuf = ExtCitizenManager.Instance.ExtCitizens;
                 uint citizenId = citizenInstance.m_citizen;
                 labelSb.AppendFormat(
                     "Inst. {0}, Cit. {1},\nm: {2}, tm: {3}, ltm: {4}, ll: {5}",
@@ -1455,7 +1462,7 @@ namespace TrafficManager.UI {
                     extCitizensBuf[citizenId].lastLocation);
 
                 if (citizenId != 0) {
-                    ref Citizen citizen = ref citizenId.ToCitizen();
+                    ref Citizen citizen = ref citizensBuf[citizenId];
                     if (citizen.m_parkedVehicle != 0) {
                         labelSb.AppendFormat(
                             "\nparked: {0} dist: {1}",
