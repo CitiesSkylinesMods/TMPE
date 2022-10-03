@@ -271,7 +271,8 @@ namespace TrafficManager.Patch._CitizenAI._HumanAI {
 
             data.m_flags &= ~(CitizenInstance.Flags.HangAround
                                       | CitizenInstance.Flags.Panicking
-                                      | CitizenInstance.Flags.SittingDown);
+                                      | CitizenInstance.Flags.SittingDown
+                                      | CitizenInstance.Flags.Cheering);
             ArriveAtDestination(__instance, instanceID, ref data, false);
             citizenManager.ReleaseCitizenInstance(instanceID);
 
