@@ -1,6 +1,6 @@
 [Version] 11.7.1.0
-[Released] Oct 2nd 2022
-[Stable]
+[Released] Oct 4th 2022
+[Link] tmpe-v11710-test-04102022
 [New] Dead-end lane connections #1613, #1213 (kianzarrin)
 [New] Reset lane arrows when the user delete lane connections from selected node #1613 (kianzarrin)
 [Fixed] Cargo Trucks ignoring vehicle restrictions #1661 (krzychu124)
@@ -10,5 +10,5 @@
 [Updated] Slider value moved to label instead of tooltip #1660 (kianzarrin)
 [Updated] Hotreload save - debug improvements #1635 (kianzarrin)
 [Updated] Show DLC icon near the option if the feature requires DLC mechanics to work (previously the option was invisible without DLC) (krzychu124)
-[Updated] Translations update
+[Updated] Translations update - Chinese Simplified, French, Indonesian, Korean, Slovak, Spanish, Thai
 [/Version]
