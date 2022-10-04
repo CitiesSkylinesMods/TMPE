@@ -5,8 +5,8 @@ namespace TrafficManager.State {
 
     public static class PoliciesTab_InEmergenciesGroup {
 
-        public static CheckboxOption EvacBussesMayIgnoreRules =
-            new (nameof(Options.evacBussesMayIgnoreRules), Options.PersistTo.Savegame) {
+        public static DLCRestrictedCheckboxOption EvacBussesMayIgnoreRules =
+            new (nameof(Options.evacBussesMayIgnoreRules), SteamHelper.DLC.NaturalDisastersDLC, Options.PersistTo.Savegame) {
                 Label = "VR.Checkbox:Evacuation buses may ignore traffic rules",
                 Validator = NaturalDisastersDlcValidator,
             };
@@ -15,8 +15,6 @@ namespace TrafficManager.State {
             => SteamHelper.IsDLCOwned(SteamHelper.DLC.NaturalDisastersDLC);
 
         internal static void AddUI(UIHelperBase tab) {
-            if (!HasNaturalDisastersDLC) return;
-
             var group = tab.AddGroup(T("VR.Group:In case of emergency/disaster"));
 
             EvacBussesMayIgnoreRules.AddUI(group);
