@@ -148,6 +148,8 @@
     <Compile Include="Manager\Impl\ExtSegmentEndManager.cs" />
     <Compile Include="Manager\Impl\ExtSegmentManager.cs" />
     <Compile Include="Manager\Impl\GeometryNotifier.cs" />
+    <Compile Include="Patch\HotReload\ReadTypeMetadataPatch.cs" />
+    <Compile Include="Patch\PreloadPatchAttribute.cs" />
     <Compile Include="Patch\NetManagerEvents.cs" />
     <Compile Include="Manager\Impl\LaneConnection\ConnectionDataBase.cs" />
     <Compile Include="Manager\Impl\LaneConnection\LaneConnectionData.cs" />
@@ -194,7 +196,6 @@
     <Compile Include="UI\WhatsNew\MarkupKeyword.cs" />
     <Compile Include="UI\WhatsNew\WhatsNewMarkup.cs" />
     <Compile Include="Util\DetailLogger.cs" />
-    <Compile Include="Util\Extensions\CitizenUnitExtensions.cs" />
     <Compile Include="Util\Extensions\ParkedVehicleExtensions.cs" />
     <Compile Include="Util\Extensions\VersionExtension.cs" />
     <Compile Include="Util\Iterators\GetNodeSegmentIdsEnumerable.cs" />
@@ -467,7 +468,6 @@
     <Compile Include="UI\WhatsNew\WhatsNewPanel.cs" />
     <Compile Include="Util\AutoTimedTrafficLights.cs" />
     <Compile Include="Util\Extensions\BuildingExtensions.cs" />
-    <Compile Include="Util\Extensions\CitizenExtensions.cs" />
     <Compile Include="Util\Extensions\CitizenInstanceExtensions.cs" />
     <Compile Include="Util\Extensions\FlagsExtensions.cs" />
     <Compile Include="Util\Extensions\NetLaneExtensions.cs" />

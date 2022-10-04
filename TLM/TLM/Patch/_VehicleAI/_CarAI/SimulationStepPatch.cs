@@ -66,7 +66,7 @@ namespace TrafficManager.Patch._VehicleAI._CarAI {
                     finalPathState = AdvancedParkingManager.Instance.UpdateCarPathState(
                         vehicleID,
                         ref data,
-                        ref driverInstanceId.ToCitizenInstance(),
+                        ref CitizenManager.instance.m_instances.m_buffer[driverInstanceId],
                         ref ExtCitizenInstanceManager.Instance.ExtInstances[driverInstanceId],
                         mainPathState);
 

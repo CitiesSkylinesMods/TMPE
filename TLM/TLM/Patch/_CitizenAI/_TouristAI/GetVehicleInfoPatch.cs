@@ -74,8 +74,9 @@ namespace TrafficManager.Patch._CitizenAI._TouristAI {
                 }
             }
 
+            Citizen[] citizensBuf = CitizenManager.instance.m_citizens.m_buffer;
             // NON-STOCK CODE END
-            Citizen.Wealth wealthLevel = citizenData.m_citizen.ToCitizen().WealthLevel;
+            Citizen.Wealth wealthLevel = citizensBuf[citizenData.m_citizen].WealthLevel;
             int carProb;
             int bikeProb;
             int taxiProb;
@@ -126,7 +127,7 @@ namespace TrafficManager.Patch._CitizenAI._TouristAI {
             // NON-STOCK CODE START
             VehicleInfo carInfo = null;
             if (Options.parkingAI && useCar && !useTaxi) {
-                ushort parkedVehicleId = citizenData.m_citizen.ToCitizen().m_parkedVehicle;
+                ushort parkedVehicleId = citizensBuf[citizenData.m_citizen].m_parkedVehicle;
                 if (parkedVehicleId != 0) {
                     Log._DebugIf(
                         logParkingAi,
