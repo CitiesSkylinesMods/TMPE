@@ -150,8 +150,9 @@ namespace TrafficManager.Lifecycle {
         }
 
         internal void Preload() {
-            Log.Info("Preloading Managers");
+            Patcher.InstallPreload();
             Asset2Data = new Dictionary<BuildingInfo, AssetData>();
+            Log.Info("Preloading Managers");
             CustomPathManager.Initialize();
             RegisteredManagers.Clear();
             RegisterCustomManagers();
@@ -224,6 +225,7 @@ namespace TrafficManager.Lifecycle {
                 InGameHotReload = InGameOrEditor();
                 if (InGameHotReload) {
                     Preload();
+                    AssetDataExtension.HotReload();
                     SerializableDataExtension.Load();
                     Load();
                 }
@@ -243,6 +245,7 @@ namespace TrafficManager.Lifecycle {
         void OnDestroy() {
             try {
                 Log.Info("TMPELifecycle.OnDestroy()");
+                API.Implementations.Reset();
                 LoadingManager.instance.m_introLoaded -= CompatibilityCheck;
                 LocaleManager.eventLocaleChanged -= Translation.HandleGameLocaleChange;
                 LoadingManager.instance.m_levelPreLoaded -= Preload;
@@ -252,6 +255,7 @@ namespace TrafficManager.Lifecycle {
                     //Hot Unload
                     Unload();
                 }
+                Patcher.Uninstall(API.Harmony.HARMONY_ID_PRELOAD);
                 Instance = null;
             } catch (Exception ex) {
                 ex.LogException(true);
@@ -276,7 +280,6 @@ namespace TrafficManager.Lifecycle {
         }
 
         internal static void EndMod() {
-            API.Implementations.Reset();
             DestroyImmediate(Instance?.gameObject);
         }
 

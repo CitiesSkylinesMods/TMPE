@@ -21,8 +21,9 @@ namespace TrafficManager.Manager.Impl {
           IExtCitizenInstanceManager
     {
         private ExtCitizenInstanceManager() {
-            ExtInstances = new ExtCitizenInstance[CitizenManager.MAX_INSTANCE_COUNT];
-            for (uint i = 0; i < CitizenManager.MAX_INSTANCE_COUNT; ++i) {
+            uint maxInstanceCount = CitizenManager.instance.m_instances.m_size;
+            ExtInstances = new ExtCitizenInstance[maxInstanceCount];
+            for (uint i = 0; i < maxInstanceCount; ++i) {
                 ExtInstances[i] = new ExtCitizenInstance((ushort)i);
             }
         }
@@ -38,8 +39,9 @@ namespace TrafficManager.Manager.Impl {
             base.InternalPrintDebugInfo();
             Log._Debug("Extended citizen instance data:");
 
+            CitizenInstance[] instanceBuffer = CitizenManager.instance.m_instances.m_buffer;
             for (uint citizenInstanceId = 0; citizenInstanceId < ExtInstances.Length; ++citizenInstanceId) {
-                ref CitizenInstance citizenInstance = ref citizenInstanceId.ToCitizenInstance();
+                ref CitizenInstance citizenInstance = ref instanceBuffer[citizenInstanceId];
                 if (!citizenInstance.IsValid()) {
                     continue;
                 }
@@ -92,7 +94,7 @@ namespace TrafficManager.Manager.Impl {
             bool targetIsNode = (data.m_flags & CitizenInstance.Flags.TargetIsNode) != 0;
 
             if (citizenId != 0u) {
-                ref Citizen citizen = ref citizenId.ToCitizen();
+                ref Citizen citizen = ref CitizenManager.instance.m_citizens.m_buffer[citizenId];
                 vehicleId = citizen.m_vehicle;
             }
 
@@ -205,7 +207,7 @@ namespace TrafficManager.Manager.Impl {
             bool targetIsNode = (data.m_flags & CitizenInstance.Flags.TargetIsNode) != 0;
 
             if (citizenId != 0u) {
-                ref Citizen citizen = ref citizenId.ToCitizen();
+                ref Citizen citizen = ref CitizenManager.instance.m_citizens.m_buffer[citizenId];
                 homeId = citizen.m_homeBuilding;
                 workId = citizen.m_workBuilding;
                 vehicleId = citizen.m_vehicle;
@@ -421,7 +423,8 @@ namespace TrafficManager.Manager.Impl {
             }
 
             // NON-STOCK CODE START
-            ref Citizen citizen = ref instanceData.m_citizen.ToCitizen();
+            CitizenManager citizenManager = CitizenManager.instance;
+            ref Citizen citizen = ref citizenManager.m_citizens.m_buffer[instanceData.m_citizen];
             ushort parkedVehicleId = citizen.m_parkedVehicle;
             ushort homeId = citizen.m_homeBuilding;
             CarUsagePolicy carUsageMode = CarUsagePolicy.Allowed;
@@ -815,6 +818,7 @@ namespace TrafficManager.Manager.Impl {
                         if (AdvancedParkingManager.Instance.FindParkingSpaceForCitizen(
                                 endPos,
                                 vehicleInfo,
+                                ref instanceData,
                                 ref extInstance,
                                 homeId,
                                 instanceData.m_targetBuilding == homeId,
@@ -1000,9 +1004,7 @@ namespace TrafficManager.Manager.Impl {
                         // citizen may use public transport
                         laneTypes |= NetInfo.LaneType.PublicTransport;
 
-                        uint citizenId = instanceData.m_citizen;
-                        if (citizenId != 0u &&
-                            (citizenId.ToCitizen().m_flags & Citizen.Flags.Evacuating) != Citizen.Flags.None) {
+                        if ((citizen.m_flags & Citizen.Flags.Evacuating) != Citizen.Flags.None) {
                             laneTypes |= NetInfo.LaneType.EvacuationTransport;
                         }
                     } else if (Options.parkingAI) { // TODO check for incoming connection
@@ -1206,7 +1208,7 @@ namespace TrafficManager.Manager.Impl {
         public void ReleaseReturnPath(ref ExtCitizenInstance extInstance) {
 #if DEBUG
             bool citizenDebug = DebugSettings.CitizenId == 0
-                                || DebugSettings.CitizenId == extInstance.instanceId.ToCitizenInstance().m_citizen;
+                                || DebugSettings.CitizenId == CitizenManager.instance.m_instances.m_buffer[extInstance.instanceId].m_citizen;
 
             bool logParkingAi = DebugSwitch.BasicParkingAILog.Get() && citizenDebug;
             // bool extendedLogParkingAi = DebugSwitch.ExtendedParkingAILog.Get() && citizenDebug;
@@ -1231,7 +1233,7 @@ namespace TrafficManager.Manager.Impl {
         public void UpdateReturnPathState(ref ExtCitizenInstance extInstance) {
 #if DEBUG
             bool citizenDebug = DebugSettings.CitizenId == 0
-                                || DebugSettings.CitizenId == extInstance.instanceId.ToCitizenInstance().m_citizen;
+                                || DebugSettings.CitizenId == CitizenManager.instance.m_instances.m_buffer[extInstance.instanceId].m_citizen;
 
             bool logParkingAi = DebugSwitch.BasicParkingAILog.Get() && citizenDebug;
             bool extendedLogParkingAi = DebugSwitch.ExtendedParkingAILog.Get() && citizenDebug;
@@ -1279,7 +1281,7 @@ namespace TrafficManager.Manager.Impl {
                                         Vector3 targetPos) {
 #if DEBUG
             bool citizenDebug = DebugSettings.CitizenId == 0
-                                || DebugSettings.CitizenId == extInstance.instanceId.ToCitizenInstance().m_citizen;
+                                || DebugSettings.CitizenId == CitizenManager.instance.m_instances.m_buffer[extInstance.instanceId].m_citizen;
             bool logParkingAi = DebugSwitch.BasicParkingAILog.Get() && citizenDebug;
             // bool extendedLogParkingAi = DebugSwitch.ExtendedParkingAILog.Get() && citizenDebug;
 #else
@@ -1408,10 +1410,14 @@ namespace TrafficManager.Manager.Impl {
         public List<Configuration.ExtCitizenInstanceData> SaveData(ref bool success) {
             var ret = new List<Configuration.ExtCitizenInstanceData>();
 
-            for (uint instanceId = 0; instanceId < CitizenManager.MAX_INSTANCE_COUNT; ++instanceId) {
+            CitizenManager citizenManager = CitizenManager.instance;
+            CitizenInstance[] instancesBuffer = citizenManager.m_instances.m_buffer;
+            uint maxCitizenInstanceCount = citizenManager.m_instances.m_size;
+
+            for (uint instanceId = 0; instanceId < maxCitizenInstanceCount; ++instanceId) {
                 try
                 {
-                    ref CitizenInstance citizenInstance = ref instanceId.ToCitizenInstance();
+                    ref CitizenInstance citizenInstance = ref instancesBuffer[instanceId];
 
                     if (!citizenInstance.IsCreated()) {
                         continue;
