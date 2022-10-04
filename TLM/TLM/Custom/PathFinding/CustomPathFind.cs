@@ -475,7 +475,8 @@ namespace TrafficManager.Custom.PathFinding {
                         $"\tm_startSegmentB={startSegmentB_}\n"
 #if ROUTING
                         + $"\tm_isRoadVehicle={isRoadVehicle_}\n"
-                        + $"\tm_isLaneArrowObeyingEntity={isLaneArrowObeyingEntity_}"
+                        + $"\tm_isLaneArrowObeyingEntity={isLaneArrowObeyingEntity_}\n"
+                        + $"\tvehicleCategory={vehicleCategory_}"
 #endif
                     );
             }
@@ -1260,7 +1261,13 @@ namespace TrafficManager.Custom.PathFinding {
                                 connectOffset);
                         }
 
-                        if (isPedZoneRoad) {
+                        if (isPedZoneRoad &&
+                            // NON-STOCK CODE START skip execution when driving-only path for passenger car
+                            !(Options.parkingAI &&
+                              queueItem_.vehicleType == ExtVehicleType.PassengerCar &&
+                              queueItem_.pathType == ExtPathType.DrivingOnly)
+                            // NON-STOCK CODE END
+                        ) {
                             bool isPrevSegmentPedZoneRoad = prevSegmentInfo.IsPedestrianZoneOrPublicTransportRoad();
                             for (int i = 0; i < 8; i++)
                             {
@@ -1917,10 +1924,12 @@ namespace TrafficManager.Custom.PathFinding {
 #endif
                     VehicleInfo.VehicleCategory segmentVehicleCategories = netManager.m_segments.m_buffer[item.Position.m_segment].Info.m_vehicleCategories & VehicleInfo.VehicleCategory.RoadTransport;
                     if (!prevIsRouted && (currentVehicleCategories & segmentVehicleCategories) != segmentVehicleCategories) {
-                        DebugLog(
-                            unitId,
-                            item,
-                            $"ProcessItemMain: Different segment vehicle categories. Force explore U-turn. Previous value: {exploreUturn}");
+                        if (isLogEnabled) {
+                            DebugLog(
+                                unitId,
+                                item,
+                                $"ProcessItemMain: Different segment vehicle categories. Force explore U-turn. Previous value: {exploreUturn} | [{currentVehicleCategories}] != [{segmentVehicleCategories}]");
+                        }
                         exploreUturn = true;
                     }
 
@@ -3139,7 +3148,8 @@ namespace TrafficManager.Custom.PathFinding {
                                 $"ProcessItemCosts: Lane type and/or vehicle type mismatch or " +
                                 $"same segment/lane. Skipping." + // no newline
                                 $"\tallowedLaneTypes={allowedLaneTypes}\n" +
-                                $"\tallowedVehicleTypes={allowedVehicleTypes}");
+                                $"\tallowedVehicleTypes={allowedVehicleTypes}\n" +
+                                $"\tcurrentVehicleCategory={currentVehicleCategory}");
                         }
                     }
                 } else {

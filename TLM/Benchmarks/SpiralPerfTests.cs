@@ -9,7 +9,7 @@ namespace Benchmarks {
         public void SpiralGetCoords_Once_Radius17() {
             var radius = 17;
             var spiral = new Spiral(radius);
-            var coords = spiral.GetCoords(radius);
+            var coords = spiral.GetCoordsCounterclockwise(radius);
             for (int i = 0; i < coords.Count; i++) {
                 var coord = coords[i];
             }
@@ -20,7 +20,7 @@ namespace Benchmarks {
             var radius = 17;
             var spiral = new Spiral(radius);
             for (int i = 0; i < 10; i++) {
-                var coords = spiral.GetCoords(radius);
+                var coords = spiral.GetCoordsCounterclockwise(radius);
                 for (int j = 0; j < coords.Count; j++) {
                     var coord = coords[j];
                 }
@@ -30,7 +30,7 @@ namespace Benchmarks {
         [Benchmark]
         public void SpiralGetCoords_Once_Radius17_Precached() {
             var radius = 17;
-            var coords = _cachedSpiral17.GetCoords(radius);
+            var coords = _cachedSpiral17.GetCoordsCounterclockwise(radius);
             for (int i = 0; i < coords.Count; i++) {
                 var coord = coords[i];
             }
@@ -40,7 +40,7 @@ namespace Benchmarks {
         public void SpiralGetCoords_10Times_Radius17_Precached() {
             var radius = 17;
             for (int i = 0; i < 10; i++) {
-                var coords = _cachedSpiral17.GetCoords(radius);
+                var coords = _cachedSpiral17.GetCoordsCounterclockwise(radius);
                 for (int j = 0; j < coords.Count; j++) {
                     var coord = coords[j];
                 }

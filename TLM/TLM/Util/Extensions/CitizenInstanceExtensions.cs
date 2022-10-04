@@ -1,12 +1,6 @@
 namespace TrafficManager.Util.Extensions {
     using ColossalFramework;
     public static class CitizenInstanceExtensions {
-        private static CitizenInstance[] _citizenInstanceBuffer = Singleton<CitizenManager>.instance.m_instances.m_buffer;
-
-        internal static ref CitizenInstance ToCitizenInstance(this ushort citizenInstance) => ref _citizenInstanceBuffer[citizenInstance];
-
-        internal static ref CitizenInstance ToCitizenInstance(this uint citizenInstance) => ref _citizenInstanceBuffer[citizenInstance];
-
         public static bool IsCharacter(this ref CitizenInstance citizenInstance) =>
             citizenInstance.m_flags.IsFlagSet(CitizenInstance.Flags.Character);
 
