@@ -130,7 +130,7 @@ namespace TrafficManager.Patch._CitizenAI._ResidentAI {
             // NON-STOCK CODE START
             VehicleInfo carInfo = null;
             if (Options.parkingAI && useCar) {
-                ref Citizen citizen = ref citizenData.m_citizen.ToCitizen();
+                ref Citizen citizen = ref CitizenManager.instance.m_citizens.m_buffer[citizenData.m_citizen];
                 ushort parkedVehicleId = citizen.m_parkedVehicle;
 
                 if (parkedVehicleId != 0) {

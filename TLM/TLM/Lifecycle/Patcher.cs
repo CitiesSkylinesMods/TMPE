@@ -40,7 +40,7 @@ namespace TrafficManager.Lifecycle {
             Harmony.DEBUG = false; // set to true to get harmony debug info.
 #endif
             AssertCitiesHarmonyInstalled();
-            fail = !PatchAll(API.Harmony.HARMONY_ID, forbidden: typeof(CustomPathFindPatchAttribute));
+            fail = !PatchAll(API.Harmony.HARMONY_ID, typeof(CustomPathFindPatchAttribute), typeof(PreloadPatchAttribute));
 
             if (fail) {
                 Log.Info("patcher failed");
@@ -60,7 +60,7 @@ namespace TrafficManager.Lifecycle {
             Harmony.DEBUG = false; // set to true to get harmony debug info.
 #endif
             AssertCitiesHarmonyInstalled();
-            fail = !PatchAll(API.Harmony.HARMONY_ID_PATHFINDING , required: typeof(CustomPathFindPatchAttribute));;
+            fail = !PatchAll(API.Harmony.HARMONY_ID_PATHFINDING, required: typeof(CustomPathFindPatchAttribute));
 
             if (fail) {
                 Log.Info("TMPE Path-finding patcher failed");
@@ -74,13 +74,37 @@ namespace TrafficManager.Lifecycle {
             }
         }
 
+        public static void InstallPreload() {
+
+            bool fail = false;
+#if DEBUG
+            Harmony.DEBUG = false; // set to true to get harmony debug info.
+#endif
+            AssertCitiesHarmonyInstalled();
+
+            // reinstall:
+            Uninstall(API.Harmony.HARMONY_ID_PRELOAD);
+            fail = !PatchAll(API.Harmony.HARMONY_ID_PRELOAD, required: typeof(PreloadPatchAttribute));
+
+            if (fail) {
+                Log.Info("TMPE patcher failed at preload");
+                Prompt.Error(
+                    "TM:PE failed to patch at preload",
+                    "Traffic Manager: President Edition failed to load necessary patches. You can " +
+                    "continue playing but it's NOT recommended. Traffic Manager will " +
+                    "not work as expected.");
+            } else {
+                Log.Info("preload patches installed successfully");
+            }
+        }
+
         /// <summary>
         /// applies all attribute driven harmony patches.
         /// continues on error.
         /// </summary>
         /// <returns>false if exception happens, true otherwise</returns>
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private static bool PatchAll(string harmonyId, Type required = null, Type forbidden = null) {
+        private static bool PatchAll(string harmonyId, Type required = null, params Type[] forbiddens) {
             try {
                 bool success = true;
                 var harmony = new Harmony(harmonyId);
@@ -89,8 +113,10 @@ namespace TrafficManager.Lifecycle {
                     try {
                         if (required is not null && !type.IsDefined(required, true))
                             continue;
-                        if (forbidden is not null && type.IsDefined(forbidden, true))
+                        bool isForbidden = forbiddens?.Any(forbidden => type.IsDefined(forbidden, true)) ?? false;
+                        if (isForbidden)
                             continue;
+
                         var methods = harmony.CreateClassProcessor(type).Patch();
                         if (methods != null && methods.Any()) {
                             var strMethods = methods.Select(_method => _method.Name).ToArray();

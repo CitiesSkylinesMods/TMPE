@@ -29,6 +29,20 @@ This changelog includes all versions and major variants of the mod going all the
 
 > Date format: dd/mm/yyyy
 
+#### TM:PE V11.7.1.0 TEST, 04/10/2022
+
+- [New] Dead-end lane connections #1613, #1213 (kianzarrin)
+- [New] Reset lane arrows when the user delete lane connections from selected node #1613 (kianzarrin)
+- [Fixed] Cargo Trucks ignoring vehicle restrictions #1661 (krzychu124)
+- [Fixed] Parking AI - "thinking about a parking spot" near pedestrian streets #1661, #1655 (krzychu124)
+- [Fixed] Parking AI confused in large parking lots #1626, #1394, #924, #423, #352 (krzychu124)
+- [Fixed] Internal issues causing desyc when other mod patched Citizen / CitizenUnit size in CitizenManager #1599 (krzychu124)
+- [Updated] Slider value moved to label instead of tooltip #1660 (kianzarrin)
+- [Updated] Show DLC icon near the option if the feature requires DLC mechanics to work (previously the option was invisible without DLC) (krzychu124)
+- [Updated] Hotreload save - debug improvements #1635 (kianzarrin)
+- [Updated] Translations update - Chinese Simplified, French, Indonesian, Korean, Slovak, Spanish, Thai
+- [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
+
 #### TM:PE V[11.7.0.1](https://github.com/CitiesSkylinesMods/TMPE/compare/11.7.0.0...11.7.0.1) STABLE, 21/09/2022
 
 - [New] Remove all lane connections (Options -> Maintenance) #1647 (krzychu124)

@@ -44,11 +44,13 @@
         /// </summary>
         /// <param name="instanceID">Citizen instance id</param>
         /// <param name="instanceData">Citizen instance data</param>
+        /// <param name="citizen">Citizen data</param>
         /// <param name="parkedVehicleId">Parked vehicle id</param>
         /// <param name="vehicleId">Vehicle id</param>
         /// <returns>true if entering the car succeeded, false otherwise</returns>
         bool EnterParkedCar(ushort instanceID,
                             ref CitizenInstance instanceData,
+                            ref Citizen citizen,
                             ushort parkedVehicleId,
                             out ushort vehicleId);
 
@@ -144,7 +146,8 @@
         /// </summary>
         /// <param name="endPos">target position</param>
         /// <param name="vehicleInfo">vehicle type that is being used</param>
-        /// <param name="extDriverInstance">cititzen instance that is driving the car</param>
+        /// <param name="driverInstance">cititzen instance that is driving the car</param>
+        /// <param name="extDriverInstance">extended cititzen instance that is driving the car</param>
         /// <param name="homeId">Home building of the citizen (may be 0 for tourists/homeless cims)</param>
         /// <param name="goingHome">Specifies if the citizen is going home</param>
         /// <param name="vehicleId">Vehicle that is being used (used for logging)</param>
@@ -155,6 +158,7 @@
         /// <returns>true if a parking space could be found, false otherwise</returns>
         bool FindParkingSpaceForCitizen(Vector3 endPos,
                                         VehicleInfo vehicleInfo,
+                                        ref CitizenInstance driverInstance,
                                         ref ExtCitizenInstance extDriverInstance,
                                         ushort homeId,
                                         bool goingHome,
@@ -184,7 +188,8 @@
         /// Tries to spawn a parked passenger car for the given citizen <paramref name="citizenId"/>
         /// in the vicinity of the given position <paramref name="refPos"/>.
         /// </summary>
-        /// <param name="citizenId">Citizen that requires a parked car</param>
+        /// <param name="citizenId">Citizen ID that requires a parked car</param>
+        /// <param name="citizen">Citizen that requires a parked car</param>
         /// <param name="homeId">Home building id of the citizen (For residential buildings, parked cars may only spawn at the home building)</param>
         /// <param name="refPos">Reference position</param>
         /// <param name="vehicleInfo">Vehicle type to spawn</param>
@@ -192,6 +197,7 @@
         /// <param name="reason">Indicates the reason why no car could be spawned when the method returns false</param>
         /// <returns>true if a passenger car could be spawned, false otherwise</returns>
         bool TrySpawnParkedPassengerCar(uint citizenId,
+                                        ref Citizen citizen,
                                         ushort homeId,
                                         Vector3 refPos,
                                         VehicleInfo vehicleInfo,
@@ -218,7 +224,8 @@
         /// Tries to spawn a parked passenger car for the given citizen <paramref name="citizenId"/>
         /// at a building in the vicinity of the given position <paramref name="refPos"/>.
         /// </summary>
-        /// <param name="citizenId">Citizen that requires a parked car</param>
+        /// <param name="citizenId">Citizen id that requires a parked car</param>
+        /// <param name="citizen">Citizen that requires a parked car</param>
         /// <param name="homeId">Home building id of the citizen (For residential buildings, parked cars may only spawn at the home building)</param>
         /// <param name="refPos">Reference position</param>
         /// <param name="vehicleInfo">Vehicle type to spawn</param>
@@ -226,6 +233,7 @@
         /// <param name="reason">Indicates the reason why no car could be spawned when the method returns false</param>
         /// <returns>true if a passenger car could be spawned, false otherwise</returns>
         bool TrySpawnParkedPassengerCarBuilding(uint citizenId,
+                                                ref Citizen citizen,
                                                 ushort homeId,
                                                 Vector3 refPos,
                                                 VehicleInfo vehicleInfo,

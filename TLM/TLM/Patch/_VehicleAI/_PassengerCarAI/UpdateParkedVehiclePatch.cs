@@ -17,7 +17,7 @@ namespace TrafficManager.Patch._VehicleAI._PassengerCarAI {
 
             // NON-STOCK CODE START
             if (ownerCitizenId != 0u) {
-                homeId = ownerCitizenId.ToCitizen().m_homeBuilding;
+                homeId = CitizenManager.instance.m_citizens.m_buffer[ownerCitizenId].m_homeBuilding;
             }
 
             if (!AdvancedParkingManager.Instance.TryMoveParkedVehicle(

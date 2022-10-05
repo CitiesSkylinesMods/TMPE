@@ -40,15 +40,15 @@ namespace TrafficManager.State {
                 Label = "Gameplay.Checkbox:No excessive transfers",
             };
 
-        public static CheckboxOption AllowBusInOldTown =
-            new(nameof(GlobalConfig.Instance.PathFinding.AllowBusInOldTownDistricts), Options.PersistTo.Global) {
+        public static DLCRestrictedCheckboxOption AllowBusInOldTown =
+            new(nameof(GlobalConfig.Instance.PathFinding.AllowBusInOldTownDistricts), requiredDLC: SteamHelper.DLC.AfterDarkDLC, Options.PersistTo.Global) {
                 Label = "Gameplay.Checkbox:Allow Buses in Old Town districts",
                 Handler = OnAllowBusInOldTownChanged,
                 Validator = AfterDarkDlcValidator,
             };
 
-        public static CheckboxOption AllowTaxiInOldTown =
-            new(nameof(GlobalConfig.Instance.PathFinding.AllowTaxiInOldTownDistricts), Options.PersistTo.Global) {
+        public static DLCRestrictedCheckboxOption AllowTaxiInOldTown =
+            new(nameof(GlobalConfig.Instance.PathFinding.AllowTaxiInOldTownDistricts), requiredDLC: SteamHelper.DLC.AfterDarkDLC, Options.PersistTo.Global) {
                 Label = "Gameplay.Checkbox:Allow Taxis in Old Town districts",
                 Handler = OnAllowTaxiInOldTownChanged,
                 Validator = AfterDarkDlcValidator,
@@ -72,10 +72,8 @@ namespace TrafficManager.State {
 
             RealisticPublicTransport.AddUI(group);
 
-            if (HasAfterDarkDLC) {
-                AllowBusInOldTown.AddUI(group);
-                AllowTaxiInOldTown.AddUI(group);
-            }
+            AllowBusInOldTown.AddUI(group);
+            AllowTaxiInOldTown.AddUI(group);
         }
 
         private static string T(string key) => Translation.Options.Get(key);
