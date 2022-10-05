@@ -40,7 +40,7 @@ namespace TrafficManager.Lifecycle {
             Harmony.DEBUG = false; // set to true to get harmony debug info.
 #endif
             AssertCitiesHarmonyInstalled();
-            fail = !PatchAll(API.Harmony.HARMONY_ID, typeof(CustomPathFindPatchAttribute), typeof(PreloadPatchAttribute));
+            fail = !PatchAll(API.Harmony.HARMONY_ID, forbiddens: new [] {typeof(CustomPathFindPatchAttribute), typeof(PreloadPatchAttribute)});
 
             if (fail) {
                 Log.Info("patcher failed");
