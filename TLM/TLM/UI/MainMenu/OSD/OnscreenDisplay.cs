@@ -27,6 +27,13 @@ namespace TrafficManager.UI.MainMenu.OSD {
             var items = new List<OsdItem>();
             items.Add(new MainMenu.OSD.Label(
                           localizedText: Translation.Menu.Get("Onscreen.Idle:Choose a tool")));
+            items.Add(new MainMenu.OSD.HardcodedMouseShortcut(
+                button: ColossalFramework.UI.UIMouseButton.Left,
+                shift: false,
+                ctrl: false,
+                alt: true,
+                localizedText: "Select a node"));
+
             Display(items);
         }
 

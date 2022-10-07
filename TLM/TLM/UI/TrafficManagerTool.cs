@@ -44,6 +44,8 @@ namespace TrafficManager.UI {
         // activate when we know the mechinism.
         private bool ReadjustPathMode => false; //ShiftIsPressed;
 
+        private bool NodeSelectionMode => AltIsPressed;
+
         // /// <summary>Set this to true to once call <see cref="RequestOnscreenDisplayUpdate"/>.</summary>
         // public bool InvalidateOnscreenDisplayFlag { get; set; }
 
@@ -493,10 +495,6 @@ namespace TrafficManager.UI {
                 base.RenderOverlay(cameraInfo); // render path.
             }
 
-            if (HoveredSegmentId == 0) {
-                return;
-            }
-
             var netAdjust = NetManager.instance?.NetAdjust;
 
             if (netAdjust == null) {
@@ -507,8 +505,14 @@ namespace TrafficManager.UI {
             ref NetSegment segment = ref HoveredSegmentId.ToSegment();
             var color = ToolsModifierControl.toolController.m_validColorInfo;
             float alpha = 1f;
-            NetTool.CheckOverlayAlpha(ref segment, ref alpha);
+            if (HoveredSegmentId != 0) {
+                NetTool.CheckOverlayAlpha(ref segment, ref alpha);
+            }
+
             color.a *= alpha;
+            if (SelectedNodeId != 0) {
+                Highlight.DrawNodeCircle(cameraInfo, SelectedNodeId, color);
+            }
 
             if (ReadjustPathMode) {
                 if (Input.GetMouseButton(0)) {
@@ -530,6 +534,10 @@ namespace TrafficManager.UI {
                         segment: ref segmentId.ToSegment(),
                         importantColor: color,
                         nonImportantColor: color);
+                }
+            } else if (NodeSelectionMode) {
+                if (HoveredNodeId != SelectedNodeId && HoveredNodeId != 0) {
+                    Highlight.DrawNodeCircle(cameraInfo, HoveredNodeId, color);
                 }
             } else {
                 NetTool.RenderOverlay(cameraInfo, ref segment, color, color);
@@ -593,8 +601,11 @@ namespace TrafficManager.UI {
                     if(secondaryMouseClicked) {
                         if(GetToolMode() == ToolMode.None) {
                             RoadSelectionPanels roadSelectionPanels = UIView.GetAView().GetComponent<RoadSelectionPanels>();
-                            if(roadSelectionPanels && roadSelectionPanels.RoadWorldInfoPanelExt && roadSelectionPanels.RoadWorldInfoPanelExt.isVisible) {
+                            if (roadSelectionPanels && roadSelectionPanels.RoadWorldInfoPanelExt && roadSelectionPanels.RoadWorldInfoPanelExt.isVisible) {
                                 RoadSelectionPanels.RoadWorldInfoPanel.Hide();
+                            } else if (SelectedNodeId != 0) {
+                                SelectedNodeId = 0;
+                                RequestOnscreenDisplayUpdate();
                             } else {
                                 ModUI.Instance.CloseMainMenu();
                             }
@@ -680,38 +691,48 @@ namespace TrafficManager.UI {
             }
         }
 
-        void DefaultOnToolGUI(Event e) {
+        private void DefaultOnToolGUI(Event e) {
             if (!TMPELifecycle.PlayMode) {
                 return; // world info view panels are not availble in edit mode
             }
             if (e.type == EventType.MouseDown && e.button == 0) {
-                bool isRoad = HoveredSegmentId != 0 && HoveredSegmentId.ToSegment().Info.m_netAI is RoadBaseAI;
-                if (!isRoad)
-                    return;
+                if (NodeSelectionMode) {
+                    SelectedNodeId = HoveredNodeId;
+                    RequestOnscreenDisplayUpdate();
+                } else {
+                    bool isRoad = HoveredSegmentId != 0 && HoveredSegmentId.ToSegment().Info.m_netAI is RoadBaseAI;
+                    if (!isRoad)
+                        return;
 
-                if (ReadjustPathMode) {
-                    bool isRoundabout = RoundaboutMassEdit.Instance.TraverseLoop(HoveredSegmentId, out var segmentList);
-                    if (!isRoundabout) {
-                        var segments = SegmentTraverser.Traverse(
-                            HoveredSegmentId,
-                            TraverseDirection.AnyDirection,
-                            TraverseSide.Straight,
-                            SegmentStopCriterion.None,
-                            (_) => true);
-                        segmentList = new List<ushort>(segments);
+                    if (ReadjustPathMode) {
+                        bool isRoundabout = RoundaboutMassEdit.Instance.TraverseLoop(HoveredSegmentId, out var segmentList);
+                        if (!isRoundabout) {
+                            var segments = SegmentTraverser.Traverse(
+                                HoveredSegmentId,
+                                TraverseDirection.AnyDirection,
+                                TraverseSide.Straight,
+                                SegmentStopCriterion.None,
+                                (_) => true);
+                            segmentList = new List<ushort>(segments);
+                        }
+                        RoadSelectionUtil.SetRoad(HoveredSegmentId, segmentList);
                     }
-                    RoadSelectionUtil.SetRoad(HoveredSegmentId, segmentList);
+
+                    InstanceID instanceID = new InstanceID {
+                        NetSegment = HoveredSegmentId,
+                    };
+
+                    SimulationManager.instance.m_ThreadingWrapper.QueueMainThread(() => {
+                        OpenWorldInfoPanel(
+                            instanceID,
+                            HitPos);
+                    });
                 }
-
-                InstanceID instanceID = new InstanceID {
-                    NetSegment = HoveredSegmentId,
-                };
-
-                SimulationManager.instance.m_ThreadingWrapper.QueueMainThread(() => {
-                    OpenWorldInfoPanel(
-                        instanceID,
-                        HitPos);
-                });
+            } else if (e.type == EventType.keyDown && (e.keyCode is KeyCode.Backspace or KeyCode.Delete)) {
+                if (SelectedNodeId != 0) {
+                    ushort nodeId = SelectedNodeId;
+                    SimulationManager.instance.AddAction(() => PriorityRoad.EraseAllTrafficRoadsForNode(nodeId));
+                }
             }
         }
 
@@ -1612,9 +1633,21 @@ namespace TrafficManager.UI {
 
             if (activeOsd == null && activeLegacyOsd == null) {
                 // No tool hint support was available means we have to show the default
-                OnscreenDisplay.DisplayIdle();
+                if (SelectedNodeId != 0) {
+                    OnscreenDisplayNodeSlectionMode();
+                } else {
+                    OnscreenDisplay.DisplayIdle();
+                }
             }
         }
+
+        public static void OnscreenDisplayNodeSlectionMode() {
+            var items = new List<OsdItem>();
+            items.Add(new MainMenu.OSD.Label(localizedText: "Delete/backspace: reset all traffic rules for selected node"));
+            items.Add(new MainMenu.OSD.Label(localizedText: "right-click: deselect node"));
+            OnscreenDisplay.Display(items);
+        }
+
         public void AddUUIButton() {
             try {
                 var hotkeys = new UUIHotKeys { ActivationKey = KeybindSettingsBase.ToggleMainMenu.Key };
