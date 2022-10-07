@@ -1,3 +1,9 @@
+[Version] 11.7.1.1
+[Released] Oct 5th 2022
+[Link] tmpe-v11711-test-05102022
+[Fixed] Major bug in the patch intallation #1665 (krzychu124)
+[/Version]
+
 [Version] 11.7.1.0
 [Released] Oct 4th 2022
 [Link] tmpe-v11710-test-04102022
