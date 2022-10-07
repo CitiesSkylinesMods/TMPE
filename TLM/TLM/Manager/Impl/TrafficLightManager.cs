@@ -159,17 +159,6 @@ namespace TrafficManager.Manager.Impl {
                 : null;
         }
 
-        public bool GetDefaultTrafficLight(ushort nodeId) {
-            NetNode.Flags flags = nodeId.ToNode().m_flags;
-            if (flags.IsFlagSet(NetNode.Flags.CustomTrafficLights)) {
-                NetNode node2 = nodeId.ToNode(); // copy
-                node2.m_flags &= ~NetNode.Flags.CustomTrafficLights;
-                node2.Info?.m_netAI?.UpdateNodeFlags(nodeId, ref node2);
-                flags = node2.m_flags;
-            }
-            return flags.IsFlagSet(NetNode.Flags.TrafficLights);
-        }
-
         bool ITrafficLightManager.CanToggleTrafficLight(ushort nodeId) {
             ref NetNode netNode = ref nodeId.ToNode();
             return netNode.IsValid() &&
