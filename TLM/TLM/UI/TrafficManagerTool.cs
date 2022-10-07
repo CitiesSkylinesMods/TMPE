@@ -348,7 +348,7 @@ namespace TrafficManager.UI {
                 toolMode_ = ToolMode.None;
 
                 Log._Debug($"SetToolMode: reset because toolmode not found {newToolMode}");
-                OnscreenDisplay.DisplayIdle();
+                ScreenDisplay();
                 ModUI.Instance?.MainMenu?.UpdateButtons();
                 return;
             }
@@ -728,11 +728,9 @@ namespace TrafficManager.UI {
                             HitPos);
                     });
                 }
-            } else if (e.type == EventType.keyDown && (e.keyCode is KeyCode.Backspace or KeyCode.Delete)) {
-                if (SelectedNodeId != 0) {
-                    ushort nodeId = SelectedNodeId;
-                    SimulationManager.instance.AddAction(() => PriorityRoad.EraseAllTrafficRoadsForNode(nodeId));
-                }
+            } else if (SelectedNodeId != 0 && KeybindSettingsBase.RestoreDefaultsKey.KeyDown(e)) {
+                ushort nodeId = SelectedNodeId;
+                SimulationManager.instance.AddAction(() => PriorityRoad.EraseAllTrafficRoadsForNode(nodeId));
             }
         }
 
@@ -1633,18 +1631,46 @@ namespace TrafficManager.UI {
 
             if (activeOsd == null && activeLegacyOsd == null) {
                 // No tool hint support was available means we have to show the default
-                if (SelectedNodeId != 0) {
-                    OnscreenDisplayNodeSlectionMode();
-                } else {
-                    OnscreenDisplay.DisplayIdle();
-                }
+                ScreenDisplay();
             }
+        }
+
+        /// <summary>Clear the OSD panel and display the idle hint.</summary>
+        public void ScreenDisplay() {
+            var items = new List<OsdItem>();
+            items.Add(new MainMenu.OSD.Label(
+                          localizedText: Translation.Menu.Get("Onscreen.Idle:Choose a tool")));
+            items.Add(new MainMenu.OSD.HardcodedMouseShortcut(
+                button: ColossalFramework.UI.UIMouseButton.Left,
+                shift: false,
+                ctrl: false,
+                alt: false,
+                localizedText: "Onscreen.Default:Select a segment"));
+            items.Add(new MainMenu.OSD.HardcodedMouseShortcut(
+                button: ColossalFramework.UI.UIMouseButton.Left,
+                shift: false,
+                ctrl: false,
+                alt: true,
+                localizedText: "Onscreen.Default:Select a node"));
+
+            if(SelectedNodeId != 0) {
+                items.Add(new MainMenu.OSD.Shortcut(
+                    keybindSetting: KeybindSettingsBase.RestoreDefaultsKey,
+                    localizedText: "Onscreen.Default:Reset all traffic rules for selected node"));
+                items.Add(new MainMenu.OSD.HardcodedMouseShortcut(
+                    button: ColossalFramework.UI.UIMouseButton.Right,
+                    shift: false,
+                    ctrl: false,
+                    alt: false,
+                    localizedText: "Onscreen.Default:Deselect a node"));
+            }
+
+            OnscreenDisplay.Display(items);
         }
 
         public static void OnscreenDisplayNodeSlectionMode() {
             var items = new List<OsdItem>();
-            items.Add(new MainMenu.OSD.Label(localizedText: "Delete/backspace: reset all traffic rules for selected node"));
-            items.Add(new MainMenu.OSD.Label(localizedText: "right-click: deselect node"));
+
             OnscreenDisplay.Display(items);
         }
 
