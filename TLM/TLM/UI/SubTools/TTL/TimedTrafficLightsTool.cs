@@ -950,9 +950,9 @@ namespace TrafficManager.UI.SubTools.TTL {
                 }
 
                 if (GUILayout.Toggle(
-                        _stepMetric == StepChangeMetric.NoFlow,
-                        GetStepChangeMetricDescription(StepChangeMetric.NoFlow),
-                        EmptyOptionsArray)) {
+                    _stepMetric == StepChangeMetric.NoFlow,
+                    GetStepChangeMetricDescription(StepChangeMetric.NoFlow),
+                    EmptyOptionsArray)) {
                     _stepMetric = StepChangeMetric.NoFlow;
                 }
 
