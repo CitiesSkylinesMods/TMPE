@@ -1645,31 +1645,31 @@ namespace TrafficManager.UI {
                 shift: false,
                 ctrl: false,
                 alt: false,
-                localizedText: "Onscreen.Default:Select a segment"));
+                localizedText: "Onscreen.Default:Select a road")); // select a road to set as main road.
             items.Add(new MainMenu.OSD.HardcodedMouseShortcut(
                 button: ColossalFramework.UI.UIMouseButton.Left,
                 shift: false,
                 ctrl: false,
                 alt: true,
-                localizedText: "Onscreen.Default:Select a node"));
+                localizedText: "Onscreen.Default:Select a node")); // select a node to erase all traffic rules.
 
-            if(SelectedNodeId != 0) {
+            if (SelectedNodeId != 0) {
                 items.Add(new MainMenu.OSD.Shortcut(
                     keybindSetting: KeybindSettingsBase.RestoreDefaultsKey,
-                    localizedText: "Onscreen.Default:Reset all traffic rules for selected node"));
+                    localizedText: "Onscreen.Default:Erase")); // Erase all traffic rules from selected node.
                 items.Add(new MainMenu.OSD.HardcodedMouseShortcut(
                     button: ColossalFramework.UI.UIMouseButton.Right,
                     shift: false,
                     ctrl: false,
                     alt: false,
-                    localizedText: "Onscreen.Default:Deselect a node"));
+                    localizedText: "Onscreen.Default:Deselect node"));
             }
 
-            OnscreenDisplay.Display(items);
-        }
-
-        public static void OnscreenDisplayNodeSlectionMode() {
-            var items = new List<OsdItem>();
+            items.Add(new MainMenu.OSD.HoldModifier(
+                shift: false,
+                ctrl: true,
+                alt: false,
+                localizedText: "Onscreen.Default:Show traffic rules")); // show traffic rules for high priority roads
 
             OnscreenDisplay.Display(items);
         }
