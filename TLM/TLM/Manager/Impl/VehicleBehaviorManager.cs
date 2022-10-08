@@ -92,6 +92,9 @@ namespace TrafficManager.Manager.Impl {
             NetManager netManager = Singleton<NetManager>.instance;
             VehicleManager vehicleManager = Singleton<VehicleManager>.instance;
             uint maxUnitCount = citizenManager.m_units.m_size;
+            CitizenInstance[] citizenInstancesBuf = citizenManager.m_instances.m_buffer;
+            CitizenUnit[] citizenUnitsBuf = citizenManager.m_units.m_buffer;
+            Citizen[] citizensBuf = citizenManager.m_citizens.m_buffer;
 
             // NON-STOCK CODE START
             bool prohibitPocketCars = false;
@@ -105,7 +108,7 @@ namespace TrafficManager.Manager.Impl {
                 uint laneID = PathManager.GetLaneID(pathPos);
                 segmentOffset = (byte)Singleton<SimulationManager>.instance.m_randomizer.Int32(1, 254);
 
-               laneID.ToLane().CalculatePositionAndDirection(
+                laneID.ToLane().CalculatePositionAndDirection(
                     segmentOffset * 0.003921569f,
                     out Vector3 refPos,
                     out Vector3 vector);
@@ -411,18 +414,18 @@ namespace TrafficManager.Manager.Impl {
                     int numIter = 0;
 
                     while (curUnitId != 0u) {
-                        ref CitizenUnit currentCitizenUnit = ref curUnitId.ToCitizenUnit();
+                        ref CitizenUnit currentCitizenUnit = ref citizenUnitsBuf[curUnitId];
 
                         for (int i = 0; i < 5; i++) {
                             uint curCitizenId = currentCitizenUnit.GetCitizen(i);
 
                             if (curCitizenId != 0u) {
-                                ushort citizenInstanceId = curCitizenId.ToCitizen().m_instance;
+                                ushort citizenInstanceId = citizensBuf[curCitizenId].m_instance;
                                 if (citizenInstanceId == 0) {
                                     continue;
                                 }
 
-                                ref CitizenInstance citizenInstance = ref citizenInstanceId.ToCitizenInstance();
+                                ref CitizenInstance citizenInstance = ref citizenInstancesBuf[citizenInstanceId];
 
                                 if (logParkingAi) {
                                     Log._DebugFormat(
@@ -484,7 +487,7 @@ namespace TrafficManager.Manager.Impl {
                 int numIter = 0;
 
                 while (curCitizenUnitId != 0u) {
-                    ref CitizenUnit currentCitizenUnit = ref curCitizenUnitId.ToCitizenUnit();
+                    ref CitizenUnit currentCitizenUnit = ref citizenUnitsBuf[curCitizenUnitId];
 
                     for (int j = 0; j < 5; j++) {
                         uint citId = currentCitizenUnit.GetCitizen(j);
@@ -492,12 +495,12 @@ namespace TrafficManager.Manager.Impl {
                             continue;
                         }
 
-                        ushort citizenInstanceId = citId.ToCitizen().m_instance;
+                        ushort citizenInstanceId = citizensBuf[citId].m_instance;
                         if (citizenInstanceId == 0) {
                             continue;
                         }
 
-                        ref CitizenInstance citizenInstance = ref citizenInstanceId.ToCitizenInstance();
+                        ref CitizenInstance citizenInstance = ref citizenInstancesBuf[citizenInstanceId];
 
                         // NON-STOCK CODE START
                         if (prohibitPocketCars) {
@@ -580,6 +583,7 @@ namespace TrafficManager.Manager.Impl {
                                               bool ignoreBlocked)
         {
             var extCitizenInstanceManager = Constants.ManagerFactory.ExtCitizenInstanceManager;
+            CitizenManager citizenManager = CitizenManager.instance;
 #if DEBUG
             bool citizenDebug
                 = (DebugSettings.VehicleId == 0
@@ -760,13 +764,14 @@ namespace TrafficManager.Manager.Impl {
                         }
                     }
 
-                    ushort homeId = driverCitizenId.ToCitizen().m_homeBuilding;
+                    ushort homeId = citizenManager.m_citizens.m_buffer[driverCitizenId].m_homeBuilding;
                     Vector3 returnPos =
                         searchAtCurrentPos ? (Vector3)vehicleData.m_targetPos3 : endPos;
 
                     if (AdvancedParkingManager.Instance.FindParkingSpaceForCitizen(
                         returnPos,
                         vehicleData.Info,
+                        ref driverInstance,
                         ref driverExtInstance,
                         homeId,
                         targetBuildingId == homeId,
@@ -853,7 +858,7 @@ namespace TrafficManager.Manager.Impl {
 
                     uint citizenId = driverInstance.m_citizen;
                     if (citizenId != 0u
-                        && (citizenId.ToCitizen().m_flags & Citizen.Flags.Evacuating) != Citizen.Flags.None)
+                        && (citizenManager.m_citizens.m_buffer[citizenId].m_flags & Citizen.Flags.Evacuating) != Citizen.Flags.None)
                     {
                         laneTypes |= NetInfo.LaneType.EvacuationTransport;
                     }
@@ -888,6 +893,7 @@ namespace TrafficManager.Manager.Impl {
                     ItemClass.Service.Road,
                     NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle,
                     vehicleTypes,
+                    VehicleInfo.VehicleCategory.All,
                     allowUnderground,
                     false,
                     32f,
@@ -908,6 +914,7 @@ namespace TrafficManager.Manager.Impl {
                                        ? NetInfo.LaneType.Pedestrian
                                        : (laneTypes | NetInfo.LaneType.Pedestrian),
                                    vehicleTypes,
+                                   VehicleInfo.VehicleCategory.All,
                                    undergroundTarget,
                                    out endPosA);
             // NON-STOCK CODE END
@@ -925,6 +932,7 @@ namespace TrafficManager.Manager.Impl {
                 PathCreationArgs args = new PathCreationArgs {
                     extPathType = extPathType,
                     extVehicleType = ExtVehicleType.PassengerCar,
+                    vehicleCategories = VehicleInfo.VehicleCategory.PassengerCar,
                     vehicleId = vehicleID,
                     spawned = (vehicleData.m_flags & Vehicle.Flags.Spawned) != 0,
                     buildIndex = simMan.m_currentBuildIndex,
@@ -1206,7 +1214,8 @@ namespace TrafficManager.Manager.Impl {
             bool hasActiveTimedSimulation = (Options.timedLightsEnabled &&
                                              TrafficLightSimulationManager
                                                  .Instance.HasActiveTimedSimulation(targetNodeId));
-            bool hasTrafficLightFlag = (targetNode.m_flags & NetNode.Flags.TrafficLights) != NetNode.Flags.None;
+            NetNode.FlagsLong targetNodeFlagsLong = targetNode.flags;
+            bool hasTrafficLightFlag = (targetNodeFlagsLong & NetNode.FlagsLong.TrafficLights) != NetNode.FlagsLong.None;
 
             if (hasActiveTimedSimulation && !hasTrafficLightFlag) {
                 TrafficLightManager.Instance.AddTrafficLight(targetNodeId, ref targetNode);
@@ -1215,7 +1224,7 @@ namespace TrafficManager.Manager.Impl {
             bool hasTrafficLight = hasTrafficLightFlag || hasActiveTimedSimulation;
             bool checkTrafficLights = true;
             bool isTargetStartNode = prevSegment.m_startNode == targetNodeId;
-            bool isLevelCrossing = (targetNode.m_flags & NetNode.Flags.LevelCrossing) != NetNode.Flags.None;
+            bool isLevelCrossing = (targetNodeFlagsLong & NetNode.FlagsLong.LevelCrossing) != NetNode.FlagsLong.None;
 
             if ((vehicleData.Info.m_vehicleType &
                  (VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Metro |

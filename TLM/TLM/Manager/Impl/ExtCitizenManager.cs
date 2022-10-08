@@ -17,9 +17,10 @@ namespace TrafficManager.Manager.Impl {
           IExtCitizenManager
     {
         private ExtCitizenManager() {
-            ExtCitizens = new ExtCitizen[CitizenManager.MAX_CITIZEN_COUNT];
+            uint maxCitizenCount = CitizenManager.instance.m_citizens.m_size;
+            ExtCitizens = new ExtCitizen[maxCitizenCount];
 
-            for (uint i = 0; i < CitizenManager.MAX_CITIZEN_COUNT; ++i) {
+            for (uint i = 0; i < maxCitizenCount; ++i) {
                 ExtCitizens[i] = new ExtCitizen(i);
                 Reset(ref ExtCitizens[i]);
             }
@@ -36,9 +37,10 @@ namespace TrafficManager.Manager.Impl {
             base.InternalPrintDebugInfo();
             Log._Debug($"Extended citizen data:");
 
+            Citizen[] citizensBuf = CitizenManager.instance.m_citizens.m_buffer;
             for (uint i = 0; i < ExtCitizens.Length; ++i)
             {
-                ref Citizen citizen = ref (i).ToCitizen();
+                ref Citizen citizen = ref citizensBuf[i];
                 if ((citizen.m_flags & Citizen.Flags.Created) == 0) {
                     continue;
                 }
@@ -78,7 +80,7 @@ namespace TrafficManager.Manager.Impl {
 
             ushort targetBuildingId = instanceData.m_targetBuilding;
 
-            citizenId.ToCitizen().SetLocationByBuilding(citizenId, targetBuildingId);
+            citizenData.SetLocationByBuilding(citizenId, targetBuildingId);
 
             if (citizenData.CurrentLocation != Citizen.Location.Moving) {
                 ExtCitizens[citizenId].lastLocation = citizenData.CurrentLocation;
@@ -101,7 +103,7 @@ namespace TrafficManager.Manager.Impl {
         }
 
         private void ResetLastLocation(ref ExtCitizen extCitizen) {
-            extCitizen.lastLocation = extCitizen.citizenId.ToCitizen().CurrentLocation;
+            extCitizen.lastLocation = CitizenManager.instance.m_citizens.m_buffer[extCitizen.citizenId].CurrentLocation;
         }
 
         // stock code
@@ -163,9 +165,12 @@ namespace TrafficManager.Manager.Impl {
 
         public List<Configuration.ExtCitizenData> SaveData(ref bool success) {
             List<Configuration.ExtCitizenData> ret = new List<Configuration.ExtCitizenData>();
-            for (uint citizenId = 0; citizenId < CitizenManager.MAX_CITIZEN_COUNT; ++citizenId) {
+            Citizen[] citizensBuf = CitizenManager.instance.m_citizens.m_buffer;
+            uint maxCitizenCount = CitizenManager.instance.m_citizens.m_size;
+
+            for (uint citizenId = 0; citizenId < maxCitizenCount; ++citizenId) {
                 try {
-                    if ((citizenId.ToCitizen().m_flags & Citizen.Flags.Created) == Citizen.Flags.None) {
+                    if ((citizensBuf[citizenId].m_flags & Citizen.Flags.Created) == Citizen.Flags.None) {
                         continue;
                     }
 

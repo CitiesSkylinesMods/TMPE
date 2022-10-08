@@ -60,6 +60,8 @@ namespace TrafficManager.Custom.PathFinding {
         private readonly TrafficMeasurementManager trafficMeasurementManager =
             TrafficMeasurementManager.Instance;
 #endif
+        //Cached value (vanilla uses property to access it)
+        private VehicleInfo.VehicleCategory vehicleCategory_;
 
         private GlobalConfig globalConf_;
 
@@ -256,6 +258,7 @@ namespace TrafficManager.Custom.PathFinding {
 
             laneTypes_ = (NetInfo.LaneType)pathUnits_.m_buffer[unit].m_laneTypes;
             vehicleTypes_ = (VehicleInfo.VehicleType)pathUnits_.m_buffer[unit].m_vehicleTypes;
+            vehicleCategory_ = (VehicleInfo.VehicleCategory)pathUnits_.m_buffer[unit].m_vehicleCategories;
             maxLength_ = pathUnits_.m_buffer[unit].m_length;
             pathFindIndex_ = pathFindIndex_ + 1 & 0x7FFF;
             pathRandomizer_ = new Randomizer(unit);
@@ -472,7 +475,8 @@ namespace TrafficManager.Custom.PathFinding {
                         $"\tm_startSegmentB={startSegmentB_}\n"
 #if ROUTING
                         + $"\tm_isRoadVehicle={isRoadVehicle_}\n"
-                        + $"\tm_isLaneArrowObeyingEntity={isLaneArrowObeyingEntity_}"
+                        + $"\tm_isLaneArrowObeyingEntity={isLaneArrowObeyingEntity_}\n"
+                        + $"\tvehicleCategory={vehicleCategory_}"
 #endif
                     );
             }
@@ -1031,6 +1035,7 @@ namespace TrafficManager.Custom.PathFinding {
             } else if (prevIsPedestrianLane) {
                 // we are going to a pedestrian lane
                 if (!prevIsElevated) {
+                    bool isPedZoneRoad = prevSegmentInfo.IsPedestrianZoneOrPublicTransportRoad();
                     if (nextNode.Info.m_class.m_service != ItemClass.Service.Beautification) {
                         bool canCrossStreet =
                             (nextNode.m_flags &
@@ -1047,6 +1052,7 @@ namespace TrafficManager.Custom.PathFinding {
                             nextNodeId,
                             NetInfo.LaneType.Pedestrian,
                             VehicleInfo.VehicleType.None,
+                            VehicleInfo.VehicleCategory.None,
                             prevLaneIndex,
                             isOnCenterPlatform,
                             out int leftLaneIndex,
@@ -1068,6 +1074,7 @@ namespace TrafficManager.Custom.PathFinding {
                                     nextNodeId,
                                     NetInfo.LaneType.Pedestrian,
                                     VehicleInfo.VehicleType.None,
+                                    VehicleInfo.VehicleCategory.None,
                                     -1,
                                     isOnCenterPlatform,
                                     out _,
@@ -1106,6 +1113,7 @@ namespace TrafficManager.Custom.PathFinding {
                                     nextNodeId,
                                     NetInfo.LaneType.Pedestrian,
                                     VehicleInfo.VehicleType.None,
+                                    VehicleInfo.VehicleCategory.None,
                                     -1,
                                     isOnCenterPlatform,
                                     out int someLeftLaneIndex,
@@ -1138,8 +1146,8 @@ namespace TrafficManager.Custom.PathFinding {
                         }
 
                         if (leftLaneId != 0 &&
-                            (nextLeftSegmentId != prevSegmentId || canCrossStreet ||
-                             isOnCenterPlatform)) {
+                            (nextLeftSegmentId != prevSegmentId || canCrossStreet || isOnCenterPlatform) &&
+                            (!isPedZoneRoad || !netManager.m_segments.m_buffer[nextLeftSegmentId].Info.IsPedestrianZoneOrPublicTransportRoad())) {
                             if (isLogEnabled) {
                                 DebugLog(
                                     unitId,
@@ -1174,8 +1182,8 @@ namespace TrafficManager.Custom.PathFinding {
                         }
 
                         if (rightLaneId != 0 && rightLaneId != leftLaneId &&
-                            (nextRightSegmentId != prevSegmentId || canCrossStreet ||
-                             isOnCenterPlatform)) {
+                            (nextRightSegmentId != prevSegmentId || canCrossStreet || isOnCenterPlatform) &&
+                            (!isPedZoneRoad || !netManager.m_segments.m_buffer[nextRightSegmentId].Info.IsPedestrianZoneOrPublicTransportRoad())) {
                             if (isLogEnabled) {
                                 DebugLog(
                                     unitId,
@@ -1217,6 +1225,7 @@ namespace TrafficManager.Custom.PathFinding {
                                 item.Position.m_lane,
                                 NetInfo.LaneType.Vehicle,
                                 VehicleInfo.VehicleType.Bicycle,
+                                VehicleInfo.VehicleCategory.All,
                                 out int nextLaneIndex,
                                 out uint nextLaneId)) {
                             if (isLogEnabled) {
@@ -1250,6 +1259,41 @@ namespace TrafficManager.Custom.PathFinding {
                                 ref nextLaneId.ToLane(),
                                 connectOffset,
                                 connectOffset);
+                        }
+
+                        if (isPedZoneRoad &&
+                            // NON-STOCK CODE START skip execution when driving-only path for passenger car
+                            !(Options.parkingAI &&
+                              queueItem_.vehicleType == ExtVehicleType.PassengerCar &&
+                              queueItem_.pathType == ExtPathType.DrivingOnly)
+                            // NON-STOCK CODE END
+                        ) {
+                            bool isPrevSegmentPedZoneRoad = prevSegmentInfo.IsPedestrianZoneOrPublicTransportRoad();
+                            for (int i = 0; i < 8; i++)
+                            {
+                                ushort nextPedZoneSegmentId = nextNode.GetSegment(i);
+                                if (nextPedZoneSegmentId != 0 && nextPedZoneSegmentId != prevSegmentId && isPrevSegmentPedZoneRoad) {
+                                    ProcessItemCosts(
+#if DEBUG
+                                        isLogEnabled,
+                                        unitId,
+#endif
+                                        item,
+                                        ref prevSegment,
+                                        ref prevLane,
+                                        prevMaxSpeed,
+                                        prevLaneSpeed,
+                                        nextNodeId,
+                                        ref nextNode,
+                                        false,
+                                        nextPedZoneSegmentId,
+                                        ref nextPedZoneSegmentId.ToSegment(),
+                                        ref prevRelSimilarLaneIndex,
+                                        connectOffset,
+                                        false,
+                                        true);
+                                }
+                            }
                         }
                     } else {
                         if (isLogEnabled) {
@@ -1374,6 +1418,7 @@ namespace TrafficManager.Custom.PathFinding {
                             prevLaneIndex,
                             nextLaneType,
                             nextVehicleType,
+                            vehicleCategory_,
                             out int sameSegLaneIndex,
                             out uint sameSegLaneId))
                     {
@@ -1660,6 +1705,8 @@ namespace TrafficManager.Custom.PathFinding {
                         }
                     }
 
+                    VehicleInfo.VehicleCategory currentVehicleCategories = VehicleInfo.VehicleCategory.None;
+
                     if (allowBicycle || !prevIsRouted) {
                         // pedestrian to bicycle lane switch or no routing information available:
                         // if pedestrian lanes should be explored (allowBicycle == true): do this here
@@ -1733,6 +1780,7 @@ namespace TrafficManager.Custom.PathFinding {
 #endif
                             }
 
+                            currentVehicleCategories |= (netManager.m_segments.m_buffer[nextSegmentId].Info.m_vehicleCategories & VehicleInfo.VehicleCategory.RoadTransport);
                             nextSegmentId = nextSegmentId.ToSegment().GetRightSegment(nextNodeId);
                         }
 #if ROUTING
@@ -1874,6 +1922,16 @@ namespace TrafficManager.Custom.PathFinding {
                         }
                     }
 #endif
+                    VehicleInfo.VehicleCategory segmentVehicleCategories = netManager.m_segments.m_buffer[item.Position.m_segment].Info.m_vehicleCategories & VehicleInfo.VehicleCategory.RoadTransport;
+                    if (!prevIsRouted && (currentVehicleCategories & segmentVehicleCategories) != segmentVehicleCategories) {
+                        if (isLogEnabled) {
+                            DebugLog(
+                                unitId,
+                                item,
+                                $"ProcessItemMain: Different segment vehicle categories. Force explore U-turn. Previous value: {exploreUturn} | [{currentVehicleCategories}] != [{segmentVehicleCategories}]");
+                        }
+                        exploreUturn = true;
+                    }
 
                     if (exploreUturn
                         && (vehicleTypes_ & (VehicleInfo.VehicleType.Tram | VehicleInfo.VehicleType.Trolleybus)) == VehicleInfo.VehicleType.None)
@@ -1922,6 +1980,7 @@ namespace TrafficManager.Custom.PathFinding {
                         item.Position.m_lane,
                         NetInfo.LaneType.Pedestrian,
                         vehicleTypes_,
+                        vehicleCategory_,
                         out int nextLaneIndex,
                         out uint nextLaneId)) {
                         if (isLogEnabled) {
@@ -2141,7 +2200,7 @@ namespace TrafficManager.Custom.PathFinding {
             }
 
             NetInfo.Lane nextLaneInfo = nextSegmentInfo.m_lanes[nextLaneIndex];
-            if (!nextLaneInfo.CheckType(laneTypes_, vehicleTypes_)) {
+            if (!nextLaneInfo.CheckType(laneTypes_, vehicleTypes_, vehicleCategory_)) {
                 return;
             }
 
@@ -2460,11 +2519,13 @@ namespace TrafficManager.Custom.PathFinding {
             // float prevLaneSpeed = 1f; // stock code commented
             NetInfo.LaneType prevLaneType = NetInfo.LaneType.None;
             VehicleInfo.VehicleType prevVehicleType = VehicleInfo.VehicleType.None;
+            VehicleInfo.VehicleCategory prevVehicleCategory = VehicleInfo.VehicleCategory.None;
 
             if (item.Position.m_lane < prevSegmentInfo.m_lanes.Length) {
                 NetInfo.Lane prevLaneInfo = prevSegmentInfo.m_lanes[item.Position.m_lane];
                 prevLaneType = prevLaneInfo.m_laneType;
                 prevVehicleType = prevLaneInfo.m_vehicleType;
+                prevVehicleCategory = prevLaneInfo.vehicleCategory;
                 // prevMaxSpeed = prevLaneInfo.m_speedLimit; // stock code commented
                 // prevLaneSpeed = CalculateLaneSpeed(prevMaxSpeed, connectOffset,
                 // item.Position.m_offset, ref prevSegment, prevLaneInfo); // stock code commented
@@ -2510,15 +2571,26 @@ namespace TrafficManager.Custom.PathFinding {
                 NetInfo.LaneType.None &&
                 (prevVehicleType & vehicleTypes_) == VehicleInfo.VehicleType.Car &&
                 (prevSegment.m_flags & carBanMask_) != NetSegment.Flags.None) {
-                offsetLength *= 7.5f;
 
-                if (isLogEnabled) {
+                // is vehicle type Car, in the district with Old Town Policy, skip penalty if bus or taxi when allowed
+                if ((!globalConf_.PathFinding.AllowTaxiInOldTownDistricts || (queueItem_.vehicleType & ExtVehicleType.Taxi) == 0) &&
+                    (!globalConf_.PathFinding.AllowBusInOldTownDistricts || (queueItem_.vehicleType & ExtVehicleType.Bus) == 0)) {
+                    offsetLength *= 7.5f;
+
+                    if (isLogEnabled) {
+                        DebugLog(
+                            unitId,
+                            item,
+                            nextSegmentId,
+                            $"ProcessItemCosts: Applied stock car ban cost factor\n" +
+                            $"\toffsetLength={offsetLength}");
+                    }
+                } else if (isLogEnabled) {
                     DebugLog(
                         unitId,
                         item,
                         nextSegmentId,
-                        $"ProcessItemCosts: Applied stock car ban cost factor\n" +
-                        $"\toffsetLength={offsetLength}");
+                        $"ProcessItemCosts: Skipped car ban, vehicle {queueItem_.vehicleType}");
                 }
             }
 
@@ -2686,11 +2758,12 @@ namespace TrafficManager.Custom.PathFinding {
             }
 #endif
 
+            var currentVehicleCategory = vehicleCategory_;
             // NON-STOCK CODE END
             for (; nextLaneIndex <= maxNextLaneIndex && nextLaneId != 0; nextLaneIndex++) {
                 NetInfo.Lane nextLaneInfo = nextSegmentInfo.m_lanes[nextLaneIndex];
                 if ((nextLaneInfo.m_finalDirection & nextFinalDir) != NetInfo.Direction.None) {
-                    if (nextLaneInfo.CheckType(allowedLaneTypes, allowedVehicleTypes) &&
+                    if (nextLaneInfo.CheckType(allowedLaneTypes, allowedVehicleTypes, currentVehicleCategory) &&
                         (nextSegmentId != item.Position.m_segment ||
                          nextLaneIndex != item.Position.m_lane)) {
                         if (acuteTurningAngle &&
@@ -3004,8 +3077,9 @@ namespace TrafficManager.Custom.PathFinding {
 #endif
 
                         if ((nextLaneInfo.m_laneType & prevLaneType) != NetInfo.LaneType.None &&
-                            (nextLaneInfo.m_vehicleType & vehicleTypes_) !=
-                            VehicleInfo.VehicleType.None) {
+                            (nextLaneInfo.m_vehicleType & vehicleTypes_) != VehicleInfo.VehicleType.None &&
+                            (nextLaneInfo.vehicleCategory & vehicleCategory_) != VehicleInfo.VehicleCategory.None) {
+
 #if ADVANCEDAI && ROUTING
                             if (!enableAdvancedAI) {
 #endif
@@ -3041,6 +3115,12 @@ namespace TrafficManager.Custom.PathFinding {
                             }
                         }
 
+                        if ((nextLaneInfo.vehicleCategory & VehicleInfo.VehicleCategory.PublicTransportRoad) != 0 &&
+                            (nextLaneInfo.vehicleCategory & ~(VehicleInfo.VehicleCategory.Bus | VehicleInfo.VehicleCategory.Trolleybus | VehicleInfo.VehicleCategory.Taxi)) == 0)
+                        {
+                            nextItem.ComparisonValue /= 100f;
+                        }
+
                         if (isLogEnabled) {
                             DebugLog(
                                 unitId,
@@ -3068,7 +3148,8 @@ namespace TrafficManager.Custom.PathFinding {
                                 $"ProcessItemCosts: Lane type and/or vehicle type mismatch or " +
                                 $"same segment/lane. Skipping." + // no newline
                                 $"\tallowedLaneTypes={allowedLaneTypes}\n" +
-                                $"\tallowedVehicleTypes={allowedVehicleTypes}");
+                                $"\tallowedVehicleTypes={allowedVehicleTypes}\n" +
+                                $"\tcurrentVehicleCategory={currentVehicleCategory}");
                         }
                     }
                 } else {
@@ -3085,8 +3166,8 @@ namespace TrafficManager.Custom.PathFinding {
                     }
 
                     if ((nextLaneInfo.m_laneType & prevLaneType) != NetInfo.LaneType.None &&
-                        (nextLaneInfo.m_vehicleType & prevVehicleType) !=
-                        VehicleInfo.VehicleType.None) {
+                        (nextLaneInfo.m_vehicleType & prevVehicleType) != VehicleInfo.VehicleType.None &&
+                        (nextLaneInfo.vehicleCategory & prevVehicleCategory) != VehicleInfo.VehicleCategory.None) {
                         newLaneIndexFromInner++;
                     }
                 }
@@ -3298,7 +3379,7 @@ namespace TrafficManager.Custom.PathFinding {
             if ((nextLaneInfo.m_laneType & prevLaneType) == NetInfo.LaneType.None) {
                 nextItem.MethodDistance = 0f;
             } else {
-                if (item.MethodDistance == 0f) { // TODO fixme: Float comparison to 0
+                if (FloatUtil.IsZero(item.MethodDistance)) {
                     comparisonValue += 100f / (0.25f * maxLength_);
                 }
 

@@ -80,17 +80,19 @@ namespace TrafficManager.Manager.Impl {
         /// <returns>CitizenInstanceId of the driver.</returns>
         public ushort GetDriverInstanceId(ushort vehicleId, ref Vehicle data) {
             CitizenManager citizenManager = Singleton<CitizenManager>.instance;
+            CitizenUnit[] citizenUnitsBuf = citizenManager.m_units.m_buffer;
+            Citizen[] citizensBuf = citizenManager.m_citizens.m_buffer;
             uint citizenUnitId = data.m_citizenUnits;
             uint maxUnitCount = citizenManager.m_units.m_size;
             int numIter = 0;
 
             while (citizenUnitId != 0) {
-                ref CitizenUnit citizenUnit = ref citizenUnitId.ToCitizenUnit();
+                ref CitizenUnit citizenUnit = ref citizenUnitsBuf[citizenUnitId];
                 for (int i = 0; i < 5; i++) {
                     uint citizenId = citizenUnit.GetCitizen(i);
 
                     if (citizenId != 0) {
-                        ushort citizenInstanceId = citizenId.ToCitizen().m_instance;
+                        ushort citizenInstanceId = citizensBuf[citizenId].m_instance;
                         if (citizenInstanceId != 0) {
                             return citizenInstanceId;
                         }
@@ -821,7 +823,7 @@ namespace TrafficManager.Manager.Impl {
                     Mathf.Lerp(dls.MinMaxOptLaneChanges, dls.MaxMaxOptLaneChanges + 1, egoism));
                 extVehicle.maxUnsafeSpeedDiff = Mathf.Lerp(
                     dls.MinMaxUnsafeSpeedDiff,
-                    dls.MaxMaxOptLaneChanges,
+                    dls.MaxMaxUnsafeSpeedDiff,
                     egoism);
                 extVehicle.minSafeSpeedImprovement = Mathf.Lerp(
                     dls.MinMinSafeSpeedImprovement.GameUnits,
@@ -1050,11 +1052,12 @@ namespace TrafficManager.Manager.Impl {
         /// Converts game VehicleInfo.VehicleType to closest TMPE.API.Traffic.Enums.ExtVehicleType
         /// </summary>
         /// <param name="vehicleType"></param>
+        /// <param name="vehicleCategory"></param>
         /// <returns></returns>
-        public static ExtVehicleType ConvertToExtVehicleType(VehicleInfo.VehicleType vehicleType) {
+        public static ExtVehicleType ConvertToExtVehicleType(VehicleInfo.VehicleType vehicleType, VehicleInfo.VehicleCategory vehicleCategory) {
             ExtVehicleType extVehicleType = ExtVehicleType.None;
             if ((vehicleType & VehicleInfo.VehicleType.Car) != VehicleInfo.VehicleType.None) {
-                extVehicleType = ExtVehicleType.Bus;
+                extVehicleType = vehicleCategory.MapCarVehicleCategoryToExtVehicle();
             } else if ((vehicleType & (VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Metro |
                                 VehicleInfo.VehicleType.Monorail)) !=
                 VehicleInfo.VehicleType.None) {

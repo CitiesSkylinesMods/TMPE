@@ -140,6 +140,18 @@ namespace TrafficManager.Manager.Impl {
         }
 
         /// <summary>
+        /// Resets lane arrows to their default value for the given node
+        /// </summary>
+        public void ResetNodeLaneArrows(ushort nodeId) {
+            ref NetNode node = ref nodeId.ToNode();
+            for (int i = 0; i < 8; ++i) {
+                ushort segmentId = node.GetSegment(i);
+                bool startNode = segmentId.ToSegment().IsStartNode(nodeId);
+                LaneArrowManager.Instance.ResetLaneArrows(segmentId, startNode);
+            }
+        }
+
+        /// <summary>
         /// Updates all road relevant segments so that the dedicated turning lane policy would take effect.
         /// </summary>
         /// <param name="recalculateRoutings">
@@ -161,7 +173,7 @@ namespace TrafficManager.Manager.Impl {
                             continue;
 
                         int forward = 0, backward = 0;
-                        segmentId.ToSegment().CountLanes(segmentId, LANE_TYPES, VEHICLE_TYPES, ref forward, ref backward);
+                        segmentId.ToSegment().CountLanes(segmentId, LANE_TYPES, VEHICLE_TYPES, VehicleInfo.VehicleCategory.All,  ref forward, ref backward);
                         if (forward == 1 && backward == 1) {
                             // one lane cannot have dedicated turning lanes.
                             continue;

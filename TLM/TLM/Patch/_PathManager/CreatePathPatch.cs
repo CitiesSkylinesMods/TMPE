@@ -21,9 +21,9 @@ namespace TrafficManager.Patch._PathManager {
     public class CreatePathPatch {
         //public bool CreatePath(out uint unit, ref Randomizer randomizer, uint buildIndex,
         //  PathUnit.Position startPosA, PathUnit.Position startPosB, PathUnit.Position endPosA, PathUnit.Position endPosB, PathUnit.Position vehiclePosition,
-        //  NetInfo.LaneType laneTypes, VehicleInfo.VehicleType vehicleTypes, float maxLength, bool isHeavyVehicle,
+        //  NetInfo.LaneType laneTypes, VehicleInfo.VehicleType vehicleTypes, VehicleInfo.VehicleCategory vehicleCategories, float maxLength, bool isHeavyVehicle,
         //  bool ignoreBlocked, bool stablePath, bool skipQueue, bool randomParking, bool ignoreFlooded, bool combustionEngine, bool ignoreCost)
-        delegate bool TargetDelegate(out uint unit, ref Randomizer randomizer, uint buildIndex, PathUnit.Position startPosA, PathUnit.Position startPosB, PathUnit.Position endPosA, PathUnit.Position endPosB, PathUnit.Position vehiclePosition, NetInfo.LaneType laneTypes, VehicleInfo.VehicleType vehicleTypes, float maxLength, bool isHeavyVehicle, bool ignoreBlocked, bool stablePath, bool skipQueue, bool randomParking, bool ignoreFlooded, bool combustionEngine, bool ignoreCost);
+        delegate bool TargetDelegate(out uint unit, ref Randomizer randomizer, uint buildIndex, PathUnit.Position startPosA, PathUnit.Position startPosB, PathUnit.Position endPosA, PathUnit.Position endPosB, PathUnit.Position vehiclePosition, NetInfo.LaneType laneTypes, VehicleInfo.VehicleType vehicleTypes, VehicleInfo.VehicleCategory vehicleCategories, float maxLength, bool isHeavyVehicle, bool ignoreBlocked, bool stablePath, bool skipQueue, bool randomParking, bool ignoreFlooded, bool combustionEngine, bool ignoreCost);
 
         [UsedImplicitly]
         public static MethodBase TargetMethod() =>
@@ -39,7 +39,7 @@ namespace TrafficManager.Patch._PathManager {
         [UsedImplicitly]
         public static bool Prefix(ref bool __result, ref uint unit, ref Randomizer randomizer, uint buildIndex,
             PathUnit.Position startPosA, PathUnit.Position startPosB, PathUnit.Position endPosA, PathUnit.Position endPosB, PathUnit.Position vehiclePosition,
-            NetInfo.LaneType laneTypes, VehicleInfo.VehicleType vehicleTypes, float maxLength, bool isHeavyVehicle,
+            NetInfo.LaneType laneTypes, VehicleInfo.VehicleType vehicleTypes, VehicleInfo.VehicleCategory vehicleCategories, float maxLength, bool isHeavyVehicle,
             bool ignoreBlocked, bool stablePath, bool skipQueue, bool randomParking, bool ignoreFlooded, bool combustionEngine, bool ignoreCost)
         {
             PathCreationArgs args = default;
@@ -58,9 +58,9 @@ namespace TrafficManager.Patch._PathManager {
                     args.skipQueue = false;
 
             } else {
-                // CreatePath called for vanilla AI
+                // CreatePath called for vanilla or custom not supported AI
                 // determine vehicle type
-                args.extVehicleType = ExtVehicleManager.ConvertToExtVehicleType(vehicleTypes);
+                args.extVehicleType = ExtVehicleManager.ConvertToExtVehicleType(vehicleTypes, vehicleCategories);
                 args.skipQueue = skipQueue;
             }
 
@@ -74,6 +74,7 @@ namespace TrafficManager.Patch._PathManager {
 
             args.laneTypes = laneTypes;
             args.vehicleTypes = vehicleTypes;
+            args.vehicleCategories = vehicleCategories;
             args.isHeavyVehicle = isHeavyVehicle;
             args.hasCombustionEngine = combustionEngine;
             args.ignoreBlocked = ignoreBlocked;

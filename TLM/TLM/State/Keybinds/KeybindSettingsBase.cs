@@ -184,16 +184,5 @@ namespace TrafficManager.State.Keybinds {
                 (label as UILabel).text = Keybind.ToLocalizedString(label.objectUserData as SavedInputKey);
             }
         }
-
-        protected void OnEnable() {
-            LocaleManager.eventLocaleChanged += OnLocaleChanged;
-        }
-
-        protected void OnDisable() {
-            LocaleManager.eventLocaleChanged -= OnLocaleChanged;
-        }
-
-        private void OnLocaleChanged() {
-        }
     }
 }

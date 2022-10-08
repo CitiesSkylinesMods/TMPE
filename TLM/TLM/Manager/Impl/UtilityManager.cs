@@ -33,7 +33,7 @@ namespace TrafficManager.Manager.Impl {
                 if (!vehicle.IsValid())
                     continue;
 
-                if ((vehicle.ToExtVehicleType() & filter) == 0)
+                if ((vehicle.ToExtVehicleType((ushort)vehicleId) & filter) == 0)
                     continue;
 
                 count++;
@@ -61,10 +61,11 @@ namespace TrafficManager.Manager.Impl {
                     if (!vehicle.IsValid())
                         continue;
 
-                    if (filter.HasValue && (vehicle.ToExtVehicleType() & filter) == 0)
+                    ushort id = (ushort)vehicleId;
+                    if (filter.HasValue && (vehicle.ToExtVehicleType(id) & filter) == 0)
                         continue;
 
-                    vehicleManager.ReleaseVehicle((ushort)vehicleId);
+                    vehicleManager.ReleaseVehicle(id);
                 }
 
                 TrafficMeasurementManager.Instance.ResetTrafficStats();
@@ -77,7 +78,7 @@ namespace TrafficManager.Manager.Impl {
         public void ClearTraffic() => DespawnVehicles();
 
         public void RemoveParkedVehicles() {
-            var vehicleManager = Singleton<VehicleManager>.instance; 
+            var vehicleManager = Singleton<VehicleManager>.instance;
 
             lock (vehicleManager) {
                 try {
@@ -137,11 +138,14 @@ namespace TrafficManager.Manager.Impl {
 
             Log.Info("UtilityManager.RemoveStuckEntities(): Resetting citizen instances that are waiting for a path.");
             PathManager pathManager = Singleton<PathManager>.instance;
+            CitizenManager citizenManager = CitizenManager.instance;
+            CitizenInstance[] citizenInstancesBuf = citizenManager.m_instances.m_buffer;
+            Citizen[] citizensBuf = citizenManager.m_citizens.m_buffer;
+            uint maxCitizenInstanceCount = citizenManager.m_instances.m_size;
 
-            for (uint citizenInstanceId = 1; citizenInstanceId < CitizenManager.MAX_INSTANCE_COUNT; ++citizenInstanceId) {
-                ref CitizenInstance citizenInstance = ref citizenInstanceId.ToCitizenInstance();
-                
-                // Log._Debug($"UtilityManager.RemoveStuckEntities(): Processing instance {citizenInstanceId}.");
+            for (uint citizenInstanceId = 1; citizenInstanceId < maxCitizenInstanceCount; ++citizenInstanceId) {
+                ref CitizenInstance citizenInstance = ref citizenInstancesBuf[citizenInstanceId];
+
                 if (citizenInstance.IsWaitingPath())
                 {
                     if (citizenInstance.m_path != 0u) {
@@ -201,9 +205,9 @@ namespace TrafficManager.Manager.Impl {
                 {
                     ushort driverInstanceId = Constants.ManagerFactory.ExtVehicleManager.GetDriverInstanceId(
                         (ushort)vehicleId, ref vehicle);
-                    uint citizenId = driverInstanceId.ToCitizenInstance().m_citizen;
+                    uint citizenId = citizenInstancesBuf[driverInstanceId].m_citizen;
 
-                    if (citizenId != 0u && citizenId.ToCitizen().m_parkedVehicle == 0)
+                    if (citizenId != 0u && citizensBuf[citizenId].m_parkedVehicle == 0)
                     {
                         Log.Info($"Resetting vehicle {vehicleId} (parking without parked vehicle)");
                         vehicle.m_flags &= ~Vehicle.Flags.Parking;

@@ -36,6 +36,7 @@ namespace TrafficManager.Util {
                             otherSegmentId,
                             LaneArrowManager.LANE_TYPES,
                             LaneArrowManager.VEHICLE_TYPES,
+                            VehicleInfo.VehicleCategory.All,
                             ref forward,
                             ref backward);
                         bool startNode2 = otherSeg.m_startNode == nodeId;
@@ -135,9 +136,9 @@ namespace TrafficManager.Util {
         /// <summary>
         /// separates turning lanes for the input segment on the input node.
         /// </summary>
-        /// <paramref name="builtIn">determines whather to change default or forced lane arrows</paramref>
-        /// <param name="alt2">alternativ mode for two lanes(true => dedicated far turn)</param>
-        /// <param name="alt3">alternative mode for 3+ lanes(true => favour forward)</param>
+        /// <paramref name="builtIn">determines whether to change default or forced lane arrows</paramref>
+        /// <param name="alt2">alternative mode for two lanes(true => dedicated far turn)</param>
+        /// <param name="alt3">alternative mode for 3+ lanes(true => favor forward)</param>
         /// <param name="altBus">false => treat bus lanes differently</param>
         public static void SeparateSegmentLanes(
             ushort segmentId,
@@ -354,7 +355,7 @@ namespace TrafficManager.Util {
         /// calculates number of lanes in each direction such that the number of
         /// turning lanes are in porportion to the size of the roads they are turning into
         /// x is favoured over y. y is favoured over z.
-        /// This mixes DistributeLanes2 and DistributeLanes3 
+        /// This mixes DistributeLanes2 and DistributeLanes3
         /// </summary>
         /// <param name="total"> number of source lanes</param>
         /// <param name="a">number of target lanes in the favoured direction </param>

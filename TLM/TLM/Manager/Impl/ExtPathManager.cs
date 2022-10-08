@@ -1,7 +1,7 @@
 namespace TrafficManager.Manager.Impl {
-    using ColossalFramework;
     using System;
-    using System.Linq;
+    using ColossalFramework;
+    using ColossalFramework.Math;
     using State;
     using TrafficManager.API.Manager;
     using TrafficManager.Util;
@@ -13,12 +13,14 @@ namespace TrafficManager.Manager.Impl {
           IExtPathManager
     {
         private readonly Spiral _spiral;
+        private Randomizer _randomizer;
 
         public static readonly ExtPathManager Instance =
             new ExtPathManager(SingletonLite<Spiral>.instance);
 
         private ExtPathManager(Spiral spiral) {
             _spiral = spiral ?? throw new ArgumentNullException(nameof(spiral));
+            _randomizer = new Randomizer();
         }
 
         /// <summary>
@@ -132,6 +134,32 @@ namespace TrafficManager.Manager.Impl {
         }
 
         public bool FindPathPositionWithSpiralLoop(Vector3 position,
+                                                   ItemClass.Service service,
+                                                   NetInfo.LaneType laneType,
+                                                   VehicleInfo.VehicleType vehicleType,
+                                                   VehicleInfo.VehicleCategory vehicleCategory,
+                                                   NetInfo.LaneType otherLaneType,
+                                                   VehicleInfo.VehicleType otherVehicleType,
+                                                   bool allowUnderground,
+                                                   bool requireConnect,
+                                                   float maxDistance,
+                                                   out PathUnit.Position pathPos) {
+            return FindPathPositionWithSpiralLoop(
+                position,
+                null,
+                service,
+                laneType,
+                vehicleType,
+                vehicleCategory,
+                otherLaneType,
+                otherVehicleType,
+                allowUnderground,
+                requireConnect,
+                maxDistance,
+                out pathPos);
+        }
+
+        public bool FindPathPositionWithSpiralLoop(Vector3 position,
                                                    Vector3? secondaryPosition,
                                                    ItemClass.Service service,
                                                    NetInfo.LaneType laneType,
@@ -148,6 +176,39 @@ namespace TrafficManager.Manager.Impl {
                 service,
                 laneType,
                 vehicleType,
+                VehicleInfo.VehicleCategory.All,
+                otherLaneType,
+                otherVehicleType,
+                VehicleInfo.VehicleType.None,
+                allowUnderground,
+                requireConnect,
+                maxDistance,
+                out pathPos,
+                out PathUnit.Position _,
+                out float _,
+                out float _);
+        }
+
+        public bool FindPathPositionWithSpiralLoop(Vector3 position,
+                                                   Vector3? secondaryPosition,
+                                                   ItemClass.Service service,
+                                                   NetInfo.LaneType laneType,
+                                                   VehicleInfo.VehicleType vehicleType,
+                                                   VehicleInfo.VehicleCategory vehicleCategory,
+                                                   NetInfo.LaneType otherLaneType,
+                                                   VehicleInfo.VehicleType otherVehicleType,
+                                                   bool allowUnderground,
+                                                   bool requireConnect,
+                                                   float maxDistance,
+                                                   out PathUnit.Position pathPos
+            ) {
+            return FindPathPositionWithSpiralLoop(
+                position,
+                secondaryPosition,
+                service,
+                laneType,
+                vehicleType,
+                vehicleCategory,
                 otherLaneType,
                 otherVehicleType,
                 VehicleInfo.VehicleType.None,
@@ -210,6 +271,7 @@ namespace TrafficManager.Manager.Impl {
                 service,
                 laneType,
                 vehicleType,
+                VehicleInfo.VehicleCategory.All,
                 otherLaneType,
                 otherVehicleType,
                 VehicleInfo.VehicleType.None,
@@ -242,6 +304,7 @@ namespace TrafficManager.Manager.Impl {
                 service,
                 laneType,
                 vehicleType,
+                VehicleInfo.VehicleCategory.All,
                 otherLaneType,
                 otherVehicleType,
                 stopType,
@@ -259,6 +322,7 @@ namespace TrafficManager.Manager.Impl {
                                                    ItemClass.Service service,
                                                    NetInfo.LaneType laneType,
                                                    VehicleInfo.VehicleType vehicleType,
+                                                   VehicleInfo.VehicleCategory vehicleCategory,
                                                    NetInfo.LaneType otherLaneType,
                                                    VehicleInfo.VehicleType otherVehicleType,
                                                    VehicleInfo.VehicleType stopType,
@@ -324,7 +388,7 @@ namespace TrafficManager.Manager.Impl {
 
                 int spiralDist = Math.Max(Math.Abs(i - centerI), Math.Abs(j - centerJ)); // maximum norm
 
-                if (found && spiralDist > lastSpiralDist) {
+                if (found && lastSpiralDist > 0 && spiralDist > lastSpiralDist) {
                     // last iteration
                     return false;
                 }
@@ -365,10 +429,23 @@ namespace TrafficManager.Manager.Impl {
                         }
 
                         if (otherPassed) {
+                            // STOCK-CODE START
+                            if (segmentInfo.IsPedestrianZoneOrPublicTransportRoad())
+                            {
+                                vehicleCategory &= ~segmentInfo.m_vehicleCategories;
+                                if ((laneType & NetInfo.LaneType.Pedestrian) != 0)
+                                {
+                                    laneType &= ~NetInfo.LaneType.Vehicle;
+                                    vehicleType &= ~VehicleInfo.VehicleType.Car;
+                                }
+                            }
+                            // STOCK-CODE END
+
                             if (netSegment.GetClosestLanePosition(
                                 position,
                                 laneType,
                                 vehicleType,
+                                vehicleCategory,
                                 stopType,
                                 requireConnect,
                                 out Vector3 posA,
@@ -379,8 +456,8 @@ namespace TrafficManager.Manager.Impl {
                                 out float laneOffsetB))
                             {
                                 float dist = Vector3.SqrMagnitude(position - posA);
-                                if (secondaryPosition != null) {
-                                    dist += Vector3.SqrMagnitude((Vector3)secondaryPosition - posA);
+                                if (secondaryPosition.HasValue) {
+                                    dist += Vector3.SqrMagnitude(secondaryPosition.Value - posA);
                                 }
 
                                 if (dist < minDist) {
@@ -396,9 +473,9 @@ namespace TrafficManager.Manager.Impl {
                                     myDistanceSqrA = dist;
 
                                     dist = Vector3.SqrMagnitude(position - posB);
-                                    if (secondaryPosition != null) {
+                                    if (secondaryPosition.HasValue) {
                                         dist += Vector3.SqrMagnitude(
-                                            (Vector3)secondaryPosition - posB);
+                                            secondaryPosition.Value - posB);
                                     }
 
                                     if (laneIndexB < 0) {
@@ -433,7 +510,7 @@ namespace TrafficManager.Manager.Impl {
                 return true;
             }
 
-            var coords = _spiral.GetCoords(radius);
+            var coords = _spiral.GetCoordsRandomDirection(radius, ref _randomizer);
             for (int i = 0; i < radius * radius; i++) {
                 if (!FindHelper((int)(centerI + coords[i].x), (int)(centerJ + coords[i].y))) {
                     break;

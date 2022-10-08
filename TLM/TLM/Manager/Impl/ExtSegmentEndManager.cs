@@ -170,7 +170,7 @@ namespace TrafficManager.Manager.Impl {
 
         public ArrowDirection GetDirection(ushort segmentId0, ushort segmentId1, ushort nodeId = 0) {
             if (nodeId == 0) {
-                ref NetSegment netSegment = ref ((ushort)0).ToSegment();
+                ref NetSegment netSegment = ref segmentId0.ToSegment();
                 nodeId = netSegment.GetSharedNode(segmentId1);
                 if (nodeId == 0) {
                     return ArrowDirection.None;

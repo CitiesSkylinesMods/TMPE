@@ -71,7 +71,18 @@ namespace TrafficManager.Lifecycle {
         public bool MayPublishSegmentChanges()
             => InGameOrEditor() && !Instance.Deserializing;
 
-        public static AppMode? AppMode => SimulationManager.instance.m_ManagersWrapper.loading?.currentMode;
+        public static AppMode? AppMode {
+            get {
+                try {
+                    return SimulationManager.instance.m_ManagersWrapper.loading?.currentMode;
+                }
+                catch {
+                    // ignore, currentMode may throw NullReferenceException on return to main menu
+                }
+
+                return null;
+            }
+        }
 
         // throws null ref if used from main menu
         public static SimulationManager.UpdateMode UpdateMode => SimulationManager.instance.m_metaData.m_updateMode;
@@ -139,11 +150,13 @@ namespace TrafficManager.Lifecycle {
         }
 
         internal void Preload() {
-            Log.Info("Preloading Managers");
+            Patcher.InstallPreload();
             Asset2Data = new Dictionary<BuildingInfo, AssetData>();
+            Log.Info("Preloading Managers");
             CustomPathManager.Initialize();
             RegisteredManagers.Clear();
             RegisterCustomManagers();
+            API.Implementations.Reset();
         }
 
         internal void RegisterCustomManagers() {
@@ -212,6 +225,7 @@ namespace TrafficManager.Lifecycle {
                 InGameHotReload = InGameOrEditor();
                 if (InGameHotReload) {
                     Preload();
+                    AssetDataExtension.HotReload();
                     SerializableDataExtension.Load();
                     Load();
                 }
@@ -231,6 +245,7 @@ namespace TrafficManager.Lifecycle {
         void OnDestroy() {
             try {
                 Log.Info("TMPELifecycle.OnDestroy()");
+                API.Implementations.Reset();
                 LoadingManager.instance.m_introLoaded -= CompatibilityCheck;
                 LocaleManager.eventLocaleChanged -= Translation.HandleGameLocaleChange;
                 LoadingManager.instance.m_levelPreLoaded -= Preload;
@@ -240,6 +255,7 @@ namespace TrafficManager.Lifecycle {
                     //Hot Unload
                     Unload();
                 }
+                Patcher.Uninstall(API.Harmony.HARMONY_ID_PRELOAD);
                 Instance = null;
             } catch (Exception ex) {
                 ex.LogException(true);
@@ -291,8 +307,6 @@ namespace TrafficManager.Lifecycle {
                     uiView.gameObject.AddComponent<RemoveCitizenInstanceButtonExtender>();
                     uiView.gameObject.AddComponent<RoadSelectionPanels>();
                 }
-
-                Patcher.Install();
 
                 Log.Info("Notifying managers...");
                 foreach (ICustomManager manager in RegisteredManagers) {

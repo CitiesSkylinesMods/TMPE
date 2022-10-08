@@ -24,7 +24,7 @@
             {
                 Constants.ManagerFactory.ExtCitizenManager.OnArriveAtDestination(
                     citizenData.m_citizen,
-                    ref citizenData.m_citizen.ToCitizen(),
+                    ref CitizenManager.instance.m_citizens.m_buffer[citizenData.m_citizen],
                     ref citizenData);
             }
         }

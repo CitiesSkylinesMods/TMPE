@@ -37,9 +37,13 @@ namespace TrafficManager.State.Keybinds {
         /// <param name="root">The component where the UI is attached</param>
         /// <returns>The new scrollable panel</returns>
         public static UIComponent CreateScrollablePanel(UIComponent root) {
+            if (root is UIPanel p) {
+                // parent has wrong default layout direction (arranging panel then scrollbar)
+                p.autoLayoutDirection = LayoutDirection.Horizontal;
+            }
             var scrollablePanel = root.AddUIComponent<UIScrollablePanel>();
             scrollablePanel.backgroundSprite = string.Empty;
-            scrollablePanel.size = root.size;
+            scrollablePanel.size = new Vector2(root.width - 20, 680);
             scrollablePanel.relativePosition = Vector3.zero;
 
             scrollablePanel.clipChildren = true;
@@ -47,15 +51,14 @@ namespace TrafficManager.State.Keybinds {
             scrollablePanel.autoLayoutDirection = LayoutDirection.Vertical;
             scrollablePanel.autoLayout = true;
 
-            scrollablePanel.FitTo(root);
             scrollablePanel.scrollWheelDirection = UIOrientation.Vertical;
             scrollablePanel.builtinKeyNavigation = true;
 
             var verticalScroll = root.AddUIComponent<UIScrollbar>();
             verticalScroll.stepSize = 1;
-            verticalScroll.relativePosition = new Vector2(root.width - 15, 0);
+            verticalScroll.relativePosition = new Vector2(root.width - 10, 0);
             verticalScroll.orientation = UIOrientation.Vertical;
-            verticalScroll.size = new Vector2(20, root.height);
+            verticalScroll.size = new Vector2(16, 660);
             verticalScroll.incrementAmount = 25;
             verticalScroll.scrollEasingType = EasingType.BackEaseOut;
 
@@ -64,13 +67,14 @@ namespace TrafficManager.State.Keybinds {
             var track = verticalScroll.AddUIComponent<UISlicedSprite>();
             track.spriteName = "ScrollbarTrack";
             track.relativePosition = Vector3.zero;
-            track.size = new Vector2(16, 320);
+            track.size = new Vector2(14, 660);
 
             verticalScroll.trackObject = track;
 
             var thumb = track.AddUIComponent<UISlicedSprite>();
             thumb.spriteName = "ScrollbarThumb";
             thumb.autoSize = true;
+            thumb.size = new Vector3(14, 0);
             thumb.relativePosition = Vector3.zero;
             verticalScroll.thumbObject = thumb;
 

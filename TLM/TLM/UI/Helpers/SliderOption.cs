@@ -1,3 +1,4 @@
+#pragma warning disable
 namespace TrafficManager.UI.Helpers {
     using ICities;
     using ColossalFramework.UI;
@@ -97,21 +98,12 @@ namespace TrafficManager.UI.Helpers {
         protected override void UpdateLabel() {
             if (!HasUI) return;
 
-            _sliderLabel.text = Translate(Label);
+            string tooltip = IsInScope ? $"{Value}{_tooltip}" : Translate(INGAME_ONLY_SETTING);
+            string label = Translate(Label);
+            _sliderLabel.text = label + ": " + tooltip;
         }
 
-        protected override void UpdateTooltip() {
-            if (!HasUI) return;
-
-            _ui.tooltip = IsInScope
-                ? $"{Value}{_tooltip}"
-                : Translate(INGAME_ONLY_SETTING);
-
-            if (_ui.thumbObject.hasFocus) {
-                try { _ui.RefreshTooltip(); }
-                catch (Exception _) { }
-            }
-        }
+        protected override void UpdateTooltip() => UpdateLabel();
 
         protected override void UpdateReadOnly() {
             if (!HasUI) return;
@@ -120,8 +112,11 @@ namespace TrafficManager.UI.Helpers {
 
             Log._Debug($"SliderOption.UpdateReadOnly() - `{FieldName}` is {(readOnly ? "read-only" : "writeable")}");
 
+            _ui.isInteractive = !readOnly;
             _ui.thumbObject.isInteractive = !readOnly;
             _ui.thumbObject.opacity = readOnly ? 0.3f : 1f;
+            // parent is UIPanel containing text label and slider
+            _sliderLabel.opacity = readOnly ? 0.3f : 1f;
         }
     }
 }

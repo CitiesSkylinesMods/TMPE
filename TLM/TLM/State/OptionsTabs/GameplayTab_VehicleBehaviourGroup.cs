@@ -15,8 +15,8 @@ namespace TrafficManager.State {
             };
 
         // Requires Snowfall DLC
-        public static CheckboxOption StrongerRoadConditionEffects =
-            new(nameof(Options.strongerRoadConditionEffects), Options.PersistTo.Savegame) {
+        public static DLCRestrictedCheckboxOption StrongerRoadConditionEffects =
+            new(nameof(Options.strongerRoadConditionEffects), requiredDLC: SteamHelper.DLC.SnowFallDLC, Options.PersistTo.Savegame) {
                 Label = "Gameplay.Checkbox:Increase road condition impact",
                 Validator = SnowfallDlcValidator,
             };
@@ -34,7 +34,7 @@ namespace TrafficManager.State {
 
 
         public static ActionButton AllowDespawnFiltersButton = new() {
-            Label = "Filter Disable despawning vehicle types",
+            Label = "Gameplay.Button:Filter Disable despawning vehicle type",
             Handler = AllowDespawningPanel.OpenModal,
             ReadOnly = !Options.disableDespawning,
         };
@@ -46,8 +46,7 @@ namespace TrafficManager.State {
 
             IndividualDrivingStyle.AddUI(group);
 
-            if (HasSnowfallDLC)
-                StrongerRoadConditionEffects.AddUI(group);
+            StrongerRoadConditionEffects.AddUI(group);
 
             DisableDespawning.AddUI(group);
 

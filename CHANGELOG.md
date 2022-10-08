@@ -29,6 +29,144 @@ This changelog includes all versions and major variants of the mod going all the
 
 > Date format: dd/mm/yyyy
 
+#### TM:PE V11.7.1.1 TEST, 05/10/2022
+
+- [Fixed] Major bug in patch installation #1665 (krzychu124)
+- [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
+
+#### TM:PE V11.7.1.0 TEST, 04/10/2022
+
+- [New] Dead-end lane connections #1613, #1213 (kianzarrin)
+- [New] Reset lane arrows when the user delete lane connections from selected node #1613 (kianzarrin)
+- [Fixed] Cargo Trucks ignoring vehicle restrictions #1661 (krzychu124)
+- [Fixed] Parking AI - "thinking about a parking spot" near pedestrian streets #1661, #1655 (krzychu124)
+- [Fixed] Parking AI confused in large parking lots #1626, #1394, #924, #423, #352 (krzychu124)
+- [Fixed] Internal issues causing desyc when other mod patched Citizen / CitizenUnit size in CitizenManager #1599 (krzychu124)
+- [Updated] Slider value moved to label instead of tooltip #1660 (kianzarrin)
+- [Updated] Show DLC icon near the option if the feature requires DLC mechanics to work (previously the option was invisible without DLC) (krzychu124)
+- [Updated] Hotreload save - debug improvements #1635 (kianzarrin)
+- [Updated] Translations update - Chinese Simplified, French, Indonesian, Korean, Slovak, Spanish, Thai
+- [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
+
+#### TM:PE V[11.7.0.1](https://github.com/CitiesSkylinesMods/TMPE/compare/11.7.0.0...11.7.0.1) STABLE, 21/09/2022
+
+- [New] Remove all lane connections (Options -> Maintenance) #1647 (krzychu124)
+- [Fixed] `Train Vehicle Restrictions` disabled #1644 #1645 (krzychu124)
+- [Updated] Improved debug switch generation (debug-only)
+- [Steam] [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
+
+#### TM:PE V11.7.0.1 TEST, 21/09/2022
+
+- [New] Remove all lane connections (Options -> Maintenance) #1647 (krzychu124)
+- [Fixed] `Train Vehicle Restrictions` disabled #1644 #1645 (krzychu124)
+- [Updated] Improved debug switch generation (debug-only)
+- [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
+
+#### TM:PE V[11.7.0.0](https://github.com/CitiesSkylinesMods/TMPE/compare/11.6.6.3...11.7.0.0) STABLE, 14/09/2022
+
+- [New] Compatibility patch for game update 1.15.0-f5
+- [Fixed] Message about the reason of disabled options not showing correctly, updated translation
+- [Updated] Lane connection code cleanup #1615 (kianzarrin)
+- [Updated] Translations
+- [Steam] [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
+
+#### TM:PE V11.7.0.0 TEST, 14/09/2022
+
+- [New] Compatibility patch for game update 1.15.0-f5
+- [Fixed] Message about the reason of disabled options not showing correctly, updated translation
+- [Updated] Lane connection code cleanup #1615 (kianzarrin)
+- [Updated] Translations
+- [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
+
+#### TM:PE V[11.6.6.3](https://github.com/CitiesSkylinesMods/TMPE/compare/11.6.5.3...11.6.6.3) STABLE, 11/08/2022
+
+- [Meta] TM:PE 11.6.6.3 branch released as STABLE - huge thanks to our beta testers!
+- [New] Lightweight highway merging rules #1542 (kianzarrin)
+- [New] Allow buses and taxi to use `Old Town` districts (optional) #1618 (krzychi124)
+- [New] Notify the user in case of errors while loading savegame data #1617 (krzychu124)
+- [Fixed] Lane connections save/restore issues (kianzarrin)
+- [Fixed] Broken detection of hovered element #1594 (krzychu124)
+- [Fixed] After loading savegame settings are not loaded immediately #1624 #1625 (krzychu124)
+- [Fixed] Lane connections not removed from upgraded segments causing pathfinding issues and despawn of vehicles approaching new segment #1628 (krzychu124)
+- [Fixed] Infinite loop while traversing segments of node #1619 #1612 #1439 (krzychu124)
+- [Fixed] DLS incorrectly calculate 'max unsafe speed difference' #1581 (krzychu124)
+- [Fixed] Improved pedestrian crossing gap calculations (very wide roads, with 10+ lanes) #1610 (kianzarrin)
+- [Fixed] Redundant transitions at intersections with mixed rail/road vehicle lanes #1565 (kianzarrin)
+- [Fixed] Incorrectly rendered lane connections #1605 #1604 (krzychu124)
+- [Fixed] Trams/Trains get blocked by their own trailer when altering junction settings #1574 #1572 (kianzarrin)
+- [Fixed] Possible InvalidOperationException error while saving lane connection data #1621 (krzychu124)
+- [Fixed] NullReferenceException after exit to the main menu or reloading the savegame #1625 (krzychu124)
+- [Updated] Separate road and track lane routing #1550 #1546 #1545 #354 (kianzarrin)
+- [Updated] UnifiedUI library update to the latest version (krzychu124)
+- [Steam] [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
+
+#### TM:PE V11.6.6.3 TEST, 06/08/2022
+
+- [Meta] This update contains important bug fixes before release to Stable
+- [Fixed] Lane connections not removed from upgraded segments causing pathfinding issues and despawn of vehicles approaching new segment #1628 (krzychu124)
+- [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
+
+#### TM:PE V11.6.6.2 TEST, 04/08/2022
+
+- [Meta] This update contains important bug fixes before release to Stable
+- [Fixed] After loading savegame settings are not loaded immediately #1624 #1625 (krzychu124)
+- [Fixed] NullReferenceException after exit to the main menu or reloading the savegame #1625 (krzychu124)
+- [Updated] UnifiedUI library update to the latest version (krzychu124)
+- [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
+
+#### TM:PE V11.6.6.1 TEST, 31/07/2022
+
+- [Meta] This update contains important bug fixes before release to Stable
+- [Fixed] Possible InvalidOperationException error while saving lane connection data #1621 (krzychu124)
+- [Fixed] Infinite loop while traversing segments of node #1619 #1612 #1439 (krzychu124)
+- [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
+
+#### TM:PE V11.6.6.0 TEST, 26/07/2022
+
+- [Meta] This release adds a new language, updates translations, and improves lane routing
+- [New] Lightweight highway merging rules #1542 (kianzarrin)
+- [New] Allow buses and taxi to use `Old Town` districts (optional) #1618 (krzychi124)
+- [New] Notify the user in case of errors while loading savegame data #1617 (krzychu124)
+- [New] Vietnamese translation #1551 (DucAnhLam)
+- [Updated] Separate road and track lane routing #1550 #1546 #1545 #354 (kianzarrin)
+- [Updated] Translations for multiple languages #1551 #1344 (Nguyễn Tài Đức, OldEj, AduitSSH, Chamëleon, 문주원, krzychu124, shg166, John Lok Ho, Márcio Saeger, DucAnhLam, DNSE, Arne Peirs, Neoone, Fatih YILDIRIM, Zeldslayer, GiorgioHerbie, krzychu124)
+- [Updated] Junction restriction code cleanup (elesbaan70)
+- [Updated] Lane routing code improvements for debugging (elesbaan70)
+- [Fixed] Lane connections save/restore issues (kianzarrin)
+- [Fixed] Broken detection of hovered element #1594 (krzychu124)
+- [Fixed] DLS incorrectly calculate 'max unsafe speed difference' #1581 (krzychu124)
+- [Fixed] Improved pedestrian crossing gap calculations (very wide roads, with 10+ lanes) #1610 (kianzarrin)
+- [Fixed] Redundant transitions at intersections with mixed rail/road vehicle lanes #1565 (kianzarrin)
+- [Fixed] Incorrectly rendered lane connections #1605 #1604 (krzychu124)
+- [Fixed] Trams/Trains get blocked by their own trailer when altering junction settings #1574 #1572 (kianzarrin)
+- [Fixed] Hot-reload for API #1602 (kianzarrin)
+- [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
+
+#### TM:PE V[11.6.5.3](https://github.com/CitiesSkylinesMods/TMPE/compare/11.6.4.8...11.6.5.3) STABLE, 02/06/2022
+
+- [Meta] TM:PE 11.6.5.3 branch released as STABLE - huge thanks to our beta testers!
+- [New] Vietnamese translation Locale key updates #1551 (DucAnhLam)
+- [Updated] Api update: TrafficLights/JunctionRestrictions, Road sign theme, extended LaneEndTransitionGroup #1577 (kianzarrin)
+- [Updated] Translations for multiple languages #1551 #1344
+- [Fixed] Simulation Accuracy setting regression #1560 #1554 (krzychu124)
+- [Fixed] Fix regression with version naming #1568 (krzychu124)
+- [Steam] [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
+
+#### TM:PE V11.6.5.3 TEST, 01/06/2022
+
+- [New] Vietnamese translation Locale key updates #1551 (DucAnhLam)
+- [Updated] Api update: TrafficLights/JunctionRestrictions, Road sign theme, extended LaneEndTransitionGroup #1577 (kianzarrin)
+- [Updated] Translations for multiple languages #1551 #1344
+- [Fixed] Simulation Accuracy setting regression #1560 #1554 (krzychu124)
+- [Fixed] Fix regression with version naming #1568 (krzychu124)
+- [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
+
+#### TM:PE V11.6.5.2-hotfix-1 TEST, 08/05/2022
+
+- [Meta] TM:PE 11.6.5.2-hotfix-1
+- [Fixed] Simulation Accuracy setting regression #1560 (krzychu124)
+- [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
+
 #### TM:PE V11.6.5.2 TEST, 27/04/2022
 
 - [Meta] This release improves Lane Routing (UI, trams, trains, etc.), Parking AI (electric cars), and icon themes.
@@ -65,6 +203,7 @@ This changelog includes all versions and major variants of the mod going all the
 - [Updated] Update `Microsoft.Unity.Analyzers` to version `1.13.0` #1513 (aubergine18)
 - [Updated] Add UI helpers for mod option sliders #1531 #1512 #1510 (kianzarrin)
 - [Removed] Flawed TTL API removed to prevent adoption #1495 (Elesbaan70)
+- [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
 
 #### TM:PE V11.6.5.1 TEST, 13/03/2022
 

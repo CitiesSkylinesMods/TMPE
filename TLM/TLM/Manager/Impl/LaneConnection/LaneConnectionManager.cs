@@ -37,6 +37,8 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
 
         public static LaneConnectionManager Instance { get; }
 
+        public LaneConnectionSubManager SubManager(bool track) => track ? Track : Road;
+
         public override void OnBeforeLoadData() {
             base.OnBeforeLoadData();
             Road.OnBeforeLoadData();
@@ -261,6 +263,14 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
             }
 
             return null;
+        }
+
+        internal void RemoveAllLaneConnections() {
+            Log.Info("LaneConnectionManager(): Removing all lane connections...");
+            Road.ResetLaneConnections();
+            Track.ResetLaneConnections();
+            OptionsManager.UpdateRoutingManager();
+            Log.Info("LaneConnectionManager(): All lane connections have been removed!");
         }
 
         public bool LoadData(List<Configuration.LaneConnection> data) {
