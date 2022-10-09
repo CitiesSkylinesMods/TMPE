@@ -933,6 +933,9 @@ namespace TrafficManager.TrafficLight.Impl {
                             bool addToFlow = false;
                             bool ignore = false;
                             const bool IgnoreNearTurnFlow = true; // TODO: make optional
+                            const bool IgnoreFarTurnFlow = false; // TODO: make optional
+                            bool ignoreLeft = Shortcuts.RHT ? IgnoreFarTurnFlow : IgnoreNearTurnFlow;
+                            bool ignoreRight = Shortcuts.RHT ? IgnoreNearTurnFlow: IgnoreFarTurnFlow;
 
                             switch (dir) {
                                 case ArrowDirection.Turn: {
@@ -943,7 +946,7 @@ namespace TrafficManager.TrafficLight.Impl {
                                 }
 
                                 case ArrowDirection.Left: {
-                                    if (IgnoreNearTurnFlow && Shortcuts.LHT) {
+                                    if (ignoreLeft) {
                                         ignore = true;
                                     } else {
                                     addToFlow = segLight.IsLeftGreen();
@@ -952,7 +955,7 @@ namespace TrafficManager.TrafficLight.Impl {
                                 }
 
                                 case ArrowDirection.Right: {
-                                    if (IgnoreNearTurnFlow && Shortcuts.RHT) {
+                                    if (ignoreRight) {
                                         ignore = true;
                                     } else {
                                         addToFlow = segLight.IsRightGreen();
