@@ -283,7 +283,7 @@ namespace TrafficManager.Manager.Impl {
         }
 
         /// <summary>
-        /// This recalcualtion must requires to be called after CalcualteSegment(). therefore it is not being called together
+        /// This recalculation must requires to be called after CalcualteSegment(). therefore it is not being called together
         /// with other calculations.
         /// </summary>
         /// <param name="segmentId"></param>

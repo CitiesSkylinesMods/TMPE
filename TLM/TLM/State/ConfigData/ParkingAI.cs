@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.State.ConfigData {
+namespace TrafficManager.State.ConfigData {
     public class ParkingAI {
         /// <summary>
         /// Target position randomization to allow opposite road-side parking
@@ -31,7 +31,7 @@
         public float MaxBuildingToPedestrianLaneDistance = 96f;
 
         /// <summary>
-        /// Maximum allowed distance between home/source building and parked car when travelling home without forced to use the car
+        /// Maximum allowed distance between home/source building and parked car when traveling home without forced to use the car
         /// </summary>
         public float MaxParkedCarDistanceToHome = 256f;
 

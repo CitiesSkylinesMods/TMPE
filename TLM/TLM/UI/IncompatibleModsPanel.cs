@@ -176,7 +176,7 @@ namespace TrafficManager.UI {
         }
 
         /// <summary>
-        /// Hnadles click of the "Run incompatible check on startup" checkbox and updates game options accordingly.
+        /// Handles click of the "Run incompatible check on startup" checkbox and updates game options accordingly.
         /// </summary>
         ///
         /// <param name="value">The new value of the checkbox; <c>true</c> if checked, otherwise <c>false</c>.</param>

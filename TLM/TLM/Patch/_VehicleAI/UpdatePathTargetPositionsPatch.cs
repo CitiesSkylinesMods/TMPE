@@ -777,7 +777,7 @@ namespace TrafficManager.Patch._VehicleAI {
                         if (logLogic) {
                             Log._Debug(
                                 $"CustomVehicle.CustomUpdatePathTargetPositions({vehicleID}): " +
-                                "Next next path position needs to be calculated. Used triple-calculation. " +
+                                "Next path position needs to be calculated. Used triple-calculation. " +
                                 $"IN: nextNextPosition=[seg={nextNextPosition.m_segment}, " +
                                 $"lane={nextNextPosition.m_lane}, off={nextNextPosition.m_offset}], " +
                                 $"nextPosition=[seg={nextPosition.m_segment}, lane={nextPosition.m_lane}, " +
@@ -803,7 +803,7 @@ namespace TrafficManager.Patch._VehicleAI {
                         Log._DebugIf(
                             logLogic,
                             () => $"CustomVehicle.CustomUpdatePathTargetPositions({vehicleID}): " +
-                            "Next next path position needs not to be calculated. Used regular " +
+                            "Next path position needs not to be calculated. Used regular " +
                             $"calculation. IN: nextPosition=[seg={nextPosition.m_segment}, " +
                             $"lane={nextPosition.m_lane}, off={nextPosition.m_offset}], " +
                             $"nextLaneId={nextLaneId}, nextSegOffset={nextSegOffset}, " +
@@ -890,7 +890,7 @@ namespace TrafficManager.Patch._VehicleAI {
                     Log._DebugIf(
                         logLogic,
                         () => $"CustomVehicle.CustomUpdatePathTargetPositions({vehicleID}): " +
-                        $"Direction vectors normalied. curSegDir={curSegDir}, nextSegDir={nextSegDir}\n" +
+                        $"Direction vectors normalized. curSegDir={curSegDir}, nextSegDir={nextSegDir}\n" +
                         $"CustomVehicle.CustomUpdatePathTargetPositions({vehicleID}): " +
                         $"Calculated bezier middle points. IN: bezier.a={bezier.a}, " +
                         $"curSegDir={curSegDir}, bezier.d={bezier.d}, nextSegDir={nextSegDir}, " +

@@ -158,7 +158,7 @@ namespace TrafficManager.UI {
         #region Event handling
 
         /// <summary>
-        /// Refreshes all butons in all panels according to state indicated by FunctionMode.
+        /// Refreshes all buttons in all panels according to state indicated by FunctionMode.
         /// this is activated in response to user button click or roadSelectionUtil_.OnChanged
         /// </summary>
         /// <param name="reset">if true, deactivates all buttons</param>
@@ -215,8 +215,8 @@ namespace TrafficManager.UI {
             return NetManager.instance.NetAdjust.PathVisible;
         }
 
-        // even though we enqueu actions from main thread, we still need to enqueue them to
-        // the main thread in order to introduce some delay. this delay is necessarry to prevent
+        // even though we enqueue actions from main thread, we still need to enqueue them to
+        // the main thread in order to introduce some delay. this delay is necessary to prevent
         // the CO.UI from crashing.
         // this wrapper function exists to make it easier to customize the delaying mechanism.
         private void EnqueueAction(Action action) {
@@ -237,7 +237,7 @@ namespace TrafficManager.UI {
         }
 
         /// <summary>
-        /// Enables and refreshes overrlay for various traffic rules influenced by road selection pannel.
+        /// Enables and refreshes overlay for various traffic rules influenced by road selection panel.
         /// </summary>
         private void ShowMassEditOverlay() {
             var tmTool = ModUI.GetTrafficManagerTool();

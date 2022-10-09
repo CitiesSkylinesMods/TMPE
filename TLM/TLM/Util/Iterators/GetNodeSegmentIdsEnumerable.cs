@@ -6,7 +6,7 @@ namespace TrafficManager.Util.Iterators {
     /// <summary>
     /// Struct enumerable to be returned from the GetNodeSegmentIds method.
     /// This implementation is just for perf optimizations and should be handled with care since it returns a mutable struct!
-    /// This should be fine for the regular foreach usecase, but could cause bugs if used for anything else inappropriately.
+    /// This should be fine for the regular foreach use case, but could cause bugs if used for anything else inappropriately.
     /// </summary>
     public readonly struct GetNodeSegmentIdsEnumerable : IEnumerable<ushort> {
         private readonly ushort nodeId;

@@ -105,7 +105,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits.Overlay {
                 visitorFun: ForEachSegmentFun);
         }
 
-        /// <summary>Based on target value, applies speed limit to a segmet or default for that road type.</summary>
+        /// <summary>Based on target value, applies speed limit to a segment or default for that road type.</summary>
         /// <param name="netInfo">For defaults, will set default speed limit for that road type.</param>
         private static void Apply(
             ushort segmentId,

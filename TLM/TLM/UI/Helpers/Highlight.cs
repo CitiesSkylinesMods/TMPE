@@ -381,7 +381,7 @@ namespace TrafficManager.UI.Helpers {
         /// <summary>
         /// Draws a half sausage at segment end.
         /// </summary>
-        /// <param name="cut">The lenght of the highlight [0~1] </param>
+        /// <param name="cut">The length of the highlight [0~1] </param>
         /// <param name="bStartNode">Determines the direction of the half sausage.</param>
         public static void DrawCutSegmentEnd(RenderManager.CameraInfo cameraInfo,
                                              ushort segmentId,

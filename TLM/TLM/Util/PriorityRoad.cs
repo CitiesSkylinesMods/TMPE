@@ -16,7 +16,7 @@ namespace TrafficManager.Util {
     using static TrafficManager.Util.Shortcuts;
 
     /// <summary>
-    /// Utility for mass edit of prioirty roads.
+    /// Utility for mass edit of priority roads.
     /// </summary>
     public static class PriorityRoad {
         public static IRecordable FixPrioritySigns(
@@ -86,7 +86,7 @@ namespace TrafficManager.Util {
                 }
             }
 
-            // TODO avoid settin up the same node two times.
+            // TODO avoid setting up the same node two times.
             foreach (ushort segId in segmentList) {
                 ApplyPrioritySigns(segId, true);
                 ApplyPrioritySigns(segId, false);
@@ -109,7 +109,7 @@ namespace TrafficManager.Util {
         }
 
         /// <summary>
-        /// Quick-setups as priority junction: for every junctions on the road contianing
+        /// Quick-setups as priority junction: for every junctions on the road containing
         /// the input segment traversing straight.
         /// </summary>
         public static IRecordable FixRoad(ushort initialSegmentId) {
@@ -142,7 +142,7 @@ namespace TrafficManager.Util {
         }
 
         /// <summary>
-        /// Quick-setups as priority junction: for every junctions on the road contianing
+        /// Quick-setups as priority junction: for every junctions on the road containing
         /// the input segment traversing straight.
         /// </summary>
         public static IRecordable FixRoad(List<ushort> segmentList) {
@@ -201,13 +201,13 @@ namespace TrafficManager.Util {
 
         /// <summary>
         /// if the roads form a T shape then try to arrange them like this (if possible)
-        /// slot 0: incomming oneway road.
+        /// slot 0: incoming oneway road.
         /// slot 1: outgoing oneway road.
-        /// slot 2: 2 way raod.
-        /// Post Condtion: the arrangement of <paramref name="segmentList"/> might be
+        /// slot 2: 2 way road.
+        /// Post Condition: the arrangement of <paramref name="segmentList"/> might be
         /// altered regardless of return value.
         /// </summary>
-        /// <returns>true on sucessful arrangement, false otherwise</returns>
+        /// <returns>true on successful arrangement, false otherwise</returns>
         internal static bool ArrangeT(List<ushort> segmentList) {
             if (segmentList.Count != 3) {
                 return false;
@@ -228,7 +228,7 @@ namespace TrafficManager.Util {
             }
 
             ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
-            // slot 0: incomming road.
+            // slot 0: incoming road.
             // slot 1: outgoing road.
             if (extSegmentManager.GetHeadNode(segmentList[1]) == extSegmentManager.GetTailNode(segmentList[0])) {
                 segmentList.Swap(0, 1);
@@ -313,7 +313,7 @@ namespace TrafficManager.Util {
 
         /// <summary>
         /// Quick-setups the given junction as priority junction.
-        /// The two biggest roads are considererd priority road.
+        /// The two biggest roads are considerer priority road.
         /// all other roads are considered minor road.
         /// Also detects:
         ///  - split avenue into 2 oneway roads
@@ -356,11 +356,11 @@ namespace TrafficManager.Util {
         /// <summary>
         /// apply high priority junction rules
         /// - supports semi-roundabout.
-        /// - no support for road spliting.
+        /// - no support for road splitting.
         /// </summary>
         /// <param name="nodeId">Junction to apply rules</param>
         /// <param name="nodeSegments">list of segments. The first two elements are main/roundabout,
-        /// all other semenets are minor</param>
+        /// all other segments are minor</param>
         private static void FixHighPriorityJunctionHelper(ushort nodeId, List<ushort> nodeSegments) {
             bool isSemiRoundabout =
                 nodeSegments.Count == 3 &&
@@ -371,7 +371,7 @@ namespace TrafficManager.Util {
                 segMan.CalculateIsOneWay(nodeSegments[0]) ||
                 segMan.CalculateIsOneWay(nodeSegments[1]);
 
-            // Turning allowed when the main road is agnled.
+            // Turning allowed when the main road is angled.
             ArrowDirection dir = GetDirection(nodeSegments[0], nodeSegments[1], nodeId);
             ignoreLanes |= dir != ArrowDirection.Forward;
             ignoreLanes |= Options.PriorityRoad_AllowLeftTurns;
@@ -476,7 +476,7 @@ namespace TrafficManager.Util {
 
             Log._Debug($"HasAccelerationLane: segmentId:{segmentId} MainToward={MainToward} MainAgainst={MainAgainst} ");
             if (IsMain(MainToward) && IsMain(MainAgainst)) {
-                int Yt = CountLanesTowardJunction(segmentId, nodeId); // Yeild Toward.
+                int Yt = CountLanesTowardJunction(segmentId, nodeId); // Yield Toward.
                 int Mt = CountLanesTowardJunction(MainToward, nodeId); // Main Toward.
                 int Ma = CountLanesAgainstJunction(MainAgainst, nodeId); // Main Against.
                 bool ret = Yt > 0 && Yt + Mt <= Ma;
@@ -584,7 +584,7 @@ namespace TrafficManager.Util {
             }
 
             /* in case there are multiple minor roads attached to the priority road at the same side
-             * and the main road is straigh, then add a turn arrow into the other minor roads.
+             * and the main road is straight, then add a turn arrow into the other minor roads.
              */
             if (srcLaneCount > 0 && bnear && turnArrow == LaneArrows.Forward) {
                 LaneArrowManager.Instance.AddLaneArrows(
@@ -594,7 +594,7 @@ namespace TrafficManager.Util {
         }
 
         /// <summary>
-        /// returns a posetive value if seg1Id < seg2Id
+        /// returns a positive value if seg1Id < seg2Id
         /// </summary>
         internal static int CompareSegments(ushort seg1Id, ushort seg2Id) {
             ref NetSegment seg1 = ref seg1Id.ToSegment();
@@ -640,8 +640,8 @@ namespace TrafficManager.Util {
         }
 
         /// <summary>
-        /// Clears all rules traffic rules accross given segmeent list.
-        /// Clears segment ends of connected branchs as well.
+        /// Clears all rules traffic rules across given segment list.
+        /// Clears segment ends of connected branches as well.
         /// </summary>
         public static IRecordable ClearRoad(List<ushort> segmentList) {
             if (segmentList == null || segmentList.Count == 0)
