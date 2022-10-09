@@ -243,6 +243,8 @@ namespace TrafficManager.Traffic.Impl {
                 normLength = Math.Min(100u, (uint)(Math.Max(1u, state.totalLength) * 100u) / avgSegmentLength) + 1;
             }
 
+            if (state.vehicleType == ExtVehicleType.Emergency) normLength *= 100; // higher priority.
+
             if (logDebug) {
                 Log._DebugFormat(
                     "  MeasureOutgoingVehicle: (Segment {0}, Node {1}) NormLength of vehicle {2}: " +
