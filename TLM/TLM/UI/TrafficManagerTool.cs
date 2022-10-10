@@ -235,18 +235,16 @@ namespace TrafficManager.UI {
             Log.Info("TrafficManagerTool: Initialization running now.");
             Guide = new GuideHandler();
 
-            LegacySubTool timedLightsTool = new TimedTrafficLightsTool(this);
-
             subTools_ = new Dictionary<ToolMode, TrafficManagerSubTool> {
                 [ToolMode.LaneArrows] = new LaneArrowTool(this),
                 [ToolMode.SpeedLimits] = new SpeedLimitsTool(this),
                 [ToolMode.RoutingDetector] = new RoutingDetectorTool(this),
+                [ToolMode.TimedTrafficLights] = new TimedTrafficLightsTool(this),
+                [ToolMode.ToggleTrafficLight] = new ToggleTrafficLightsTool(this),
             };
             legacySubTools_ = new Dictionary<ToolMode, LegacySubTool> {
-                [ToolMode.ToggleTrafficLight] = new ToggleTrafficLightsTool(this),
                 [ToolMode.AddPrioritySigns] = new PrioritySignsTool(this),
                 [ToolMode.ManualSwitch] = new ManualTrafficLightsTool(this),
-                [ToolMode.TimedTrafficLights] = timedLightsTool,
                 [ToolMode.VehicleRestrictions] = new VehicleRestrictionsTool(this),
                 [ToolMode.LaneConnector] = new LaneConnectorTool(this),
                 [ToolMode.JunctionRestrictions] = new JunctionRestrictionsTool(this),
@@ -302,8 +300,8 @@ namespace TrafficManager.UI {
         }
 
         /// <summary>Only used from CustomRoadBaseAI.</summary>
-        public LegacySubTool GetSubTool(ToolMode mode) {
-            if (legacySubTools_.TryGetValue(mode, out LegacySubTool ret)) {
+        public TrafficManagerSubTool GetSubTool(ToolMode mode) {
+            if (subTools_.TryGetValue(mode, out TrafficManagerSubTool ret)) {
                 return ret;
             }
 

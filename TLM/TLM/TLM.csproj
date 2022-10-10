@@ -188,6 +188,7 @@
     <Compile Include="UI\Helpers\SliderOption.cs" />
     <Compile Include="UI\Helpers\OptionButtonBase.cs" />
     <Compile Include="UI\Helpers\UrlButton.cs" />
+    <Compile Include="UI\LegacySubToolMixin.cs" />
     <Compile Include="UI\Textures\RoadSignTheme.cs" />
     <Compile Include="UI\MainMenu\RoutingDetectorButton.cs" />
     <Compile Include="UI\SubTools\RoutingDetector\Connection.cs" />

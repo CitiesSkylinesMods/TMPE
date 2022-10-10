@@ -1,5 +1,5 @@
-namespace TrafficManager.UI.SubTools {
-    internal enum TTLToolMode {
+namespace TrafficManager.UI.SubTools.TTL {
+    internal enum TtlToolMode {
         /// <summary>Timed traffic light submode.</summary>
         SelectNode,
 
