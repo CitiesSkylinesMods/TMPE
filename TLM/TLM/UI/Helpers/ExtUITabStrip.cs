@@ -12,7 +12,7 @@ namespace TrafficManager.UI.Helpers {
     public sealed class ExtUITabstrip : UITabstrip {
 
         public const float V_SCROLLBAR_WIDTH = 16f;
-        public const int ROWS = 2;
+        public const int ROWS = 1;
         public const float ROW_HEIGHT = 40;
         public const float TAB_STRIP_HEIGHT = ROW_HEIGHT * ROWS;
 
