@@ -7,11 +7,14 @@ namespace TrafficManager.UI.Helpers {
     using ICities;
     using ColossalFramework.UI;
     using TrafficManager.U;
+    using TrafficManager.Util.Extensions;
 
     public sealed class ExtUITabstrip : UITabstrip {
 
         public const float V_SCROLLBAR_WIDTH = 16f;
-        public const float TAB_STRIP_HEIGHT = 40f;
+        public const int ROWS = 2;
+        public const float ROW_HEIGHT = 40;
+        public const float TAB_STRIP_HEIGHT = ROW_HEIGHT * ROWS;
 
         private UIScrollbar CreateVerticalScrollbar(UIPanel panel, UIScrollablePanel scrollablePanel) {
             UIScrollbar verticalScrollbar = panel.AddUIComponent<UIScrollbar>();
@@ -104,6 +107,32 @@ namespace TrafficManager.UI.Helpers {
                 panelHelper = new UIHelper(currentPanel);
             }
             return panelHelper;
+        }
+
+        public override void Update() {
+            base.Update();
+            if (isVisible) {
+                ArrangeTabsPostfix();
+            }
+        }
+
+        private void ArrangeTabsPostfix() {
+            this.SuspendLayout();
+            try {
+                float diff = 0;
+                foreach (UIComponent tab in tabs) {
+                    if(tab.relativePosition.x + tab.width > this.width - 10) {
+                        if(diff == 0) {
+                            diff = tab.relativePosition.x;
+                        }
+                        tab.relativePosition += new Vector3(
+                            -diff,
+                            ROW_HEIGHT);
+                    }
+                }
+            } finally {
+                this.ResumeLayout();
+            }
         }
 
         public static ExtUITabstrip Create(UIHelper helper) {
