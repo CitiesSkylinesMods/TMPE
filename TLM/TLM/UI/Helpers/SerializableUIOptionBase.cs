@@ -5,6 +5,7 @@ namespace TrafficManager.UI.Helpers {
     using ICities;
     using System.Reflection;
     using System;
+    using System.Threading;
     using TrafficManager.State;
     using JetBrains.Annotations;
     using TrafficManager.Lifecycle;
@@ -104,7 +105,8 @@ namespace TrafficManager.UI.Helpers {
 
         /* UI: */
 
-        public bool HasUI => _ui != null;
+        // TODO FIX - temporary solution!
+        public bool HasUI => _ui != null && Thread.CurrentThread != SimulationManager.instance.m_simulationThread;
         protected TUI _ui;
 
         protected string _label;
