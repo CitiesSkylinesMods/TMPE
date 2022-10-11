@@ -18,7 +18,7 @@ namespace TrafficManager.Util.Record {
 
         private List<SpeedLimitLaneRecord> speedLanes_; 
         private List<VehicleRestrictionsLaneRecord> vehicleRestrictionsLanes_; 
-        private List<uint> allLaneIds_; // store lane ids to help with transfering lanes.
+        private List<uint> allLaneIds_; // store lane ids to help with transferring lanes.
 
         private static ParkingRestrictionsManager pMan => ParkingRestrictionsManager.Instance;
 

@@ -675,7 +675,7 @@ namespace TrafficManager.Manager.Impl {
             }
 
             if (logVehicleLinking) {
-                Log._Debug($"ExtVehicleManager.UpdatePosition({extVehicle.vehicleId}) finshed: {extVehicle}");
+                Log._Debug($"ExtVehicleManager.UpdatePosition({extVehicle.vehicleId}) finished: {extVehicle}");
             }
         }
 

@@ -157,7 +157,7 @@ namespace TrafficManager.Custom.PathFinding {
                                         BindingFlags.NonPublic | BindingFlags.Instance)
                                     ?? throw new Exception("f_pathFinds is null");
 
-            // both stcok and custom PathMangers use the same lock object
+            // both stock and custom PathMangers use the same lock object
             lock (m_bufferLock) {
                 for (int i = 0; i < n; i++) {
                     Log._Debug($"PF {i}: {_replacementPathFinds[i].m_queuedPathFindCount} queued path-finds");

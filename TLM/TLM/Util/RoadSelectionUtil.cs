@@ -140,7 +140,7 @@ namespace TrafficManager.Util {
 
                     // Assumptions:
                     //  A- two different paths cannot share a segment.
-                    //  B- UI does not allow to move both ends of the selection simultanously.
+                    //  B- UI does not allow to move both ends of the selection simultaneously.
                     // Conclusions:
                     //  A- If user choses another path, all segments in path.m_buffer change.
                     //  B- If user modifies a path, the length of the path changes.

@@ -167,7 +167,7 @@ namespace TrafficManager.UI.SubTools {
             SelectedNodeId = HoveredNodeId;
             MainTool.RequestOnscreenDisplayUpdate();
 
-            // prevent accidential activation of signs on node selection (TODO [issue #740] improve this !)
+            // prevent accidental activation of signs on node selection (TODO [issue #740] improve this !)
             MainTool.CheckClicked();
         }
 

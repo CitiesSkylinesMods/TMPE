@@ -793,7 +793,7 @@ namespace TrafficManager.Manager.Impl {
         }
 
         public void NotifyStartEndNode(ushort segmentId) {
-            // TODO this is hacky. Instead of notifying geometry observers we should add a seperate notification mechanic
+            // TODO this is hacky. Instead of notifying geometry observers we should add a separate notification mechanic
             // notify observers of start node and end node (e.g. for separate traffic lights)
             ref NetSegment netSegment = ref segmentId.ToSegment();
 
