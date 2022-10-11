@@ -183,11 +183,13 @@
     <Compile Include="UI\AllowDespawn\AllowDespawnPanel.cs" />
     <Compile Include="UI\Helpers\IValuePropagator.cs" />
     <Compile Include="UI\Helpers\ActionButton.cs" />
+    <Compile Include="UI\Helpers\TriStateCheckboxOption.cs" />
     <Compile Include="UI\Helpers\GlobalConfigObserver.cs" />
     <Compile Include="UI\Helpers\DropDownOption.cs" />
     <Compile Include="UI\Helpers\DLCRestrictedCheckboxOption.cs" />
     <Compile Include="UI\Helpers\SliderOption.cs" />
     <Compile Include="UI\Helpers\OptionButtonBase.cs" />
+    <Compile Include="UI\Helpers\UITriStateCheckbox.cs" />
     <Compile Include="UI\Helpers\UrlButton.cs" />
     <Compile Include="UI\Textures\RoadSignTheme.cs" />
     <Compile Include="UI\MainMenu\RoutingDetectorButton.cs" />
@@ -1241,6 +1243,9 @@
     <EmbeddedResource Include="Resources\SignThemes\Fallback\Restrict-PedestrianCrossing.png" />
     <EmbeddedResource Include="Resources\SignThemes\Fallback\Restrict-RightOnRed.png" />
     <EmbeddedResource Include="Resources\SignThemes\Fallback\Restrict-UTurn.png" />
+    <EmbeddedResource Include="Resources\Options\tristate-false.png" />
+    <EmbeddedResource Include="Resources\Options\tristate-null.png" />
+    <EmbeddedResource Include="Resources\Options\tristate-true.png" />
     <Content Include="Resources\SignThemes\Kmph_China_Generic\README.md" />
   </ItemGroup>
   <ItemGroup Condition="'$(Configuration)'=='Debug' Or '$(Configuration)'=='FullDebug' Or '$(Configuration)'=='PF2_Debug'">
