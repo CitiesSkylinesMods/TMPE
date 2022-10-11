@@ -105,8 +105,7 @@ namespace TrafficManager.UI.Helpers {
 
         /* UI: */
 
-        // TODO FIX - temporary solution!
-        public bool HasUI => _ui != null && Thread.CurrentThread != SimulationManager.instance.m_simulationThread;
+        public bool HasUI => _ui != null;
         protected TUI _ui;
 
         protected string _label;

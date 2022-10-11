@@ -13,10 +13,13 @@ namespace TrafficManager.Util {
     using UnityEngine;
     using ColossalFramework.UI;
     using System.Diagnostics;
+    using ColossalFramework.Threading;
 
     internal static class Shortcuts {
         internal static bool InSimulationThread() =>
             System.Threading.Thread.CurrentThread == SimulationManager.instance.m_simulationThread;
+
+        internal static bool IsMainThread() => Dispatcher.currentSafe == Dispatcher.mainSafe;
 
         /// <summary>
         /// returns a new calling Clone() on all items.
