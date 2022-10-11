@@ -5,6 +5,7 @@ using ColossalFramework.Globalization;
 using ColossalFramework.UI;
 using ICities;
 using TrafficManager.State;
+using TrafficManager.Util.Extensions;
 using UnityEngine;
 
 public class DLCRestrictedCheckboxOption : CheckboxOption {
@@ -18,7 +19,7 @@ public class DLCRestrictedCheckboxOption : CheckboxOption {
     }
 
     public override CheckboxOption AddUI(UIHelperBase container) {
-        UIPanel panel = ((UIPanel)((UIHelper)container).self).AddUIComponent<UIPanel>();
+        UIPanel panel = container.AddUIComponent<UIPanel>();
         panel.autoLayout = false;
         panel.size = new Vector2(720, 22);//default checkbox template size
         panel.relativePosition = Vector3.zero;

@@ -198,6 +198,7 @@
     <Compile Include="UI\WhatsNew\WhatsNewMarkup.cs" />
     <Compile Include="Util\DetailLogger.cs" />
     <Compile Include="Util\Extensions\ParkedVehicleExtensions.cs" />
+    <Compile Include="Util\Extensions\UIHelperExtensions.cs" />
     <Compile Include="Util\Extensions\VersionExtension.cs" />
     <Compile Include="Util\Iterators\GetNodeSegmentIdsEnumerable.cs" />
     <Compile Include="Util\Iterators\GetNodeSegmentIdsEnumerator.cs" />
