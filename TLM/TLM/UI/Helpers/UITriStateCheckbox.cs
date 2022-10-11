@@ -46,7 +46,7 @@ namespace TrafficManager.UI.Helpers {
             base.Awake();
             name = GetType().Name;
             size = new Vector2(716, 22);
-            IntVector2 spriteSize = new(120, 30);
+            IntVector2 spriteSize = new(51, 19);
             AtlasBuilder atlasBuilder = new AtlasBuilder(name, "Options", spriteSize);
             string[] names = new[] { "tristate-false", "tristate-null", "tristate-true" };
             foreach(string name in names)
@@ -57,8 +57,8 @@ namespace TrafficManager.UI.Helpers {
             sprite.atlas = atlas;
             sprite.spriteName = names[0];
             sprite.tooltip = "no";
-            sprite.size = new(88, 22); 
-            sprite.relativePosition = new Vector2(0, (height - sprite.height) / 2);
+            sprite.size = new(51, 19); 
+            sprite.relativePosition = new Vector2(0, Mathf.FloorToInt((height - sprite.height) / 2));
             FalseComponent = sprite;
 
             var sprite2 = AddUIComponent<UISprite>();
@@ -79,7 +79,8 @@ namespace TrafficManager.UI.Helpers {
 
             label = AddUIComponent<UILabel>();
             label.text = name;
-            label.relativePosition = new Vector2(sprite.width + 5f, (height - label.height) / 2 + 1);
+            label.textScale = 1.125f;
+            label.relativePosition = new Vector2(sprite.width + 5f, Mathf.FloorToInt((height - label.height) / 2));
         }
 
         public override void Start() {
