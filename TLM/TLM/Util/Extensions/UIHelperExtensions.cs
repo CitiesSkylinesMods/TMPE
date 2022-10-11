@@ -4,8 +4,8 @@ namespace TrafficManager.Util.Extensions {
     using UnityEngine;
 
     internal static class UIHelperExtensions {
-        public static UIPanel GetSelf(this UIHelperBase container) =>
-            (container as UIHelper).self as UIPanel;
+        public static UIComponent GetSelf(this UIHelperBase container) =>
+            (container as UIHelper).self as UIComponent;
         public static T AddComponent<T>(this UIHelperBase container)
             where T : Component => container.GetSelf().gameObject.AddComponent<T>();
 
