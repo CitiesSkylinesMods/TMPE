@@ -181,6 +181,7 @@
     <Compile Include="TrafficLight\Impl\ITrafficLightContainer.cs" />
     <Compile Include="TrafficLight\Impl\TrafficLightSimulation.cs" />
     <Compile Include="UI\AllowDespawn\AllowDespawnPanel.cs" />
+    <Compile Include="UI\Helpers\IValuePropagator.cs" />
     <Compile Include="UI\Helpers\ActionButton.cs" />
     <Compile Include="UI\Helpers\GlobalConfigObserver.cs" />
     <Compile Include="UI\Helpers\DropDownOption.cs" />

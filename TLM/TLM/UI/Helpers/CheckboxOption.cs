@@ -7,17 +7,17 @@ namespace TrafficManager.UI.Helpers {
     using JetBrains.Annotations;
     using UnityEngine;
 
-    public class CheckboxOption : SerializableUIOptionBase<bool, UICheckBox, CheckboxOption> {
+    public class CheckboxOption :
+        SerializableUIOptionBase<bool, UICheckBox, CheckboxOption>, IValuePropagator {
         private const int CHECKBOX_LABEL_MAX_WIDTH = 695;
         private const int CHECKBOX_LABEL_MAX_WIDTH_INDENTED = 680;
 
-        private List<CheckboxOption> _propagatesTrueTo;
-        private List<CheckboxOption> _propagatesFalseTo;
+        private HashSet<IValuePropagator> _propagatesTrueTo = new();
+        private HashSet<IValuePropagator> _propagatesFalseTo = new();
 
         public CheckboxOption(string fieldName, Options.PersistTo scope = Options.PersistTo.Savegame)
         : base(fieldName, scope) { }
 
-        /* Data */
         /// <summary>
         /// If this checkbox is set <c>true</c>, it will propagate that to the <paramref name="target"/>.
         /// Chainable.
@@ -26,23 +26,27 @@ namespace TrafficManager.UI.Helpers {
         /// <remarks>
         /// If target is set <c>false</c>, it will proapagate that back to this checkbox.
         /// </remarks>
-        public CheckboxOption PropagateTrueTo([NotNull] CheckboxOption target) {
-            Log.Info($"CheckboxOption.PropagateTrueTo: `{FieldName}` will proagate to `{target.FieldName}`");
-
-            if (_propagatesTrueTo == null)
-                _propagatesTrueTo = new();
-
-            if (!_propagatesTrueTo.Contains(target))
-                _propagatesTrueTo.Add(target);
-
-            if (target._propagatesFalseTo == null)
-                target._propagatesFalseTo = new();
-
-            if (!target._propagatesFalseTo.Contains(this))
-                target._propagatesFalseTo.Add(this);
-
+        public CheckboxOption PropagateTrueTo([NotNull] IValuePropagator target) {
+            Log.Info($"CheckboxOption.PropagateTrueTo: `{FieldName}` will propagate to `{target}`");
+            this.AddPropagate(target,true);
+            target.AddPropagate(this, false);
             return this;
         }
+
+        private HashSet<IValuePropagator> GetTargetPropagates(bool value) =>
+            value ? _propagatesTrueTo : _propagatesFalseTo;
+
+        public void AddPropagate(IValuePropagator target, bool value) =>
+            GetTargetPropagates(value).Add(target);
+
+        public void Propagate(bool value) => Value = value;
+
+        private void PropagateAll(bool value) {
+            foreach (var target in GetTargetPropagates(value))
+                target.Propagate(value);
+        }
+
+        public override string ToString() => FieldName;
 
         public override void Load(byte data) => Value = data != 0;
 
@@ -65,15 +69,8 @@ namespace TrafficManager.UI.Helpers {
                     return;
 
                 base.Value = value;
-
                 Log.Info($"CheckboxOption.Value: `{FieldName}` changed to {value}");
-
-                if (value && _propagatesTrueTo != null)
-                    PropagateTo(_propagatesTrueTo, true);
-
-                if (!value && _propagatesFalseTo != null)
-                    PropagateTo(_propagatesFalseTo, false);
-
+                PropagateAll(value);
                 if (HasUI) _ui.isChecked = value;
             }
         }
@@ -89,11 +86,6 @@ namespace TrafficManager.UI.Helpers {
             UpdateReadOnly();
 
             return this;
-        }
-
-        private void PropagateTo(IList<CheckboxOption> targets, bool value) {
-            foreach (var target in targets)
-                target.Value = value;
         }
 
         protected override void UpdateLabel() {
