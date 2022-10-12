@@ -36,7 +36,7 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
         }
 
         /// <summary>
-        /// show overlay for other subtools influced by mass edit.
+        /// show overlay for other subtools influenced by mass edit.
         /// </summary>
         public static bool IsActive {
             get {

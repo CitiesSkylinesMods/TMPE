@@ -9,7 +9,7 @@ namespace TrafficManager.Util {
     using TrafficManager.Util.Extensions;
 
     public static class PlaceIntersectionUtil {
-        ///<summary>maps old netowkr ids to new network ids</summary>
+        ///<summary>maps old network ids to new network ids</summary>
         /// <param name="oldSegments">source segment id array created by on asset serialization</param>
         /// <param name="newSegmentIds">segment list provided by LoadPaths.</param>
         /// <param name="map">segment map to fill in with pairs (old;new)</param>

@@ -1,12 +1,15 @@
-[Version] 11.7.1.1
-[Released] Oct 5th 2022
-[Link] tmpe-v11711-test-05102022
-[Fixed] Major bug in the patch intallation #1665 (krzychu124)
+[Version] 11.7.1.2
+[Released] Oct 11th 2022
+[Link] tmpe-v11712-stable-11102022
+[Stable]
+[Fixed] Game crash on load (krzychu124)
 [/Version]
 
-[Version] 11.7.1.0
-[Released] Oct 4th 2022
-[Link] tmpe-v11710-test-04102022
+[Version] 11.7.1.1
+[Released] Oct 10th 2022
+[Link] tmpe-v11711-stable-10102022
+[Stable]
+[Meta] TM:PE 11.7.1.1 TEST branch released as STABLE - huge thanks to our beta testers!
 [New] Dead-end lane connections #1613, #1213 (kianzarrin)
 [New] Reset lane arrows when the user delete lane connections from selected node #1613 (kianzarrin)
 [Fixed] Cargo Trucks ignoring vehicle restrictions #1661 (krzychu124)

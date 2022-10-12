@@ -168,7 +168,7 @@ namespace TrafficManager.UI.Localization {
         /// Split stream of data on first row and remaining dataBlock
         /// </summary>
         /// <param name="sr">stream to read from</param>
-        /// <param name="firstLine">first line of tranlation - row with language code names</param>
+        /// <param name="firstLine">first line of translation - row with language code names</param>
         /// <param name="dataBlock">string block of data (all remaining lines)</param>
         private static void ReadLines(StreamReader sr, out string firstLine, out string dataBlock) {
             firstLine = sr.ReadLine();

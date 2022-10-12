@@ -184,7 +184,7 @@ namespace TrafficManager.Manager.Impl {
         }
 
         /// <summary>
-        /// called when deserailizing or when policy changes.
+        /// called when deserializing or when policy changes.
         /// TODO [issue #1116]: publish segment changes? if so it should be done only when policy changes not when deserializing.
         /// </summary>
         public void UpdateAllDefaults() {
@@ -710,7 +710,7 @@ namespace TrafficManager.Manager.Impl {
                 if (sizeDiff == 0)
                     return true; //if same size then both will get crossings.
 
-                // at bridge/tunnel entracnes, pedestrian crossing is on ground road.
+                // at bridge/tunnel entrances, pedestrian crossing is on ground road.
                 bool isRoad1 = info1.m_netAI is RoadAI;
                 bool isRoad2 = info2.m_netAI is RoadAI;
                 if (isRoad1 && !isRoad2)

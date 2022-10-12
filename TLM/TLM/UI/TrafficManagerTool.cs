@@ -41,7 +41,7 @@ namespace TrafficManager.UI {
           IObserver<GlobalConfig>
     {
         // TODO [issue #710] Road adjust mechanism seem to have changed in Sunset Harbor DLC.
-        // activate when we know the mechinism.
+        // activate when we know the mechanism.
         private bool ReadjustPathMode => false; //ShiftIsPressed;
 
         private bool NodeSelectionMode => AltIsPressed;
@@ -393,7 +393,7 @@ namespace TrafficManager.UI {
 
         // Overridden to disable base class behavior
         protected override void OnEnable() {
-            // If TMPE was enabled by switching back from another tool (eg: buldozer, free camera), show main menue panel.
+            // If TMPE was enabled by switching back from another tool (eg: bulldozer, free camera), show main menu panel.
             if (ModUI.Instance != null && !ModUI.Instance.IsVisible())
                 ModUI.Instance.ShowMainMenu();
 
@@ -444,7 +444,7 @@ namespace TrafficManager.UI {
         }
 
         /// <summary>
-        /// renders presistent overlay.
+        /// renders persistent overlay.
         /// if any subtool is active it renders overlay for that subtool (e.g. node selection, segment selection, etc.)
         /// Must not call base.RenderOverlay() . Doing so may cause infinite recursion with Postfix of base.RenderOverlay()
         /// </summary>
@@ -480,12 +480,12 @@ namespace TrafficManager.UI {
 
         /// <summary>
         /// Renders overlay when no subtool is active.
-        /// May call base.RenderOverlay() without risk of infinte recursion.
+        /// May call base.RenderOverlay() without risk of infinite recursion.
         /// </summary>
         void DefaultRenderOverlay(RenderManager.CameraInfo cameraInfo)
         {
             if (!TMPELifecycle.PlayMode) {
-                return; // world info view panels are not availble in edit mode
+                return; // world info view panels are not available in edit mode
             }
             MassEditOverlay.Show = ControlIsPressed || RoadSelectionPanels.Root.ShouldShowMassEditOverlay();
 
@@ -693,7 +693,7 @@ namespace TrafficManager.UI {
 
         private void DefaultOnToolGUI(Event e) {
             if (!TMPELifecycle.PlayMode) {
-                return; // world info view panels are not availble in edit mode
+                return; // world info view panels are not available in edit mode
             }
             if (e.type == EventType.MouseDown && e.button == 0) {
                 if (NodeSelectionMode) {

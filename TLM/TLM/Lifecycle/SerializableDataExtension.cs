@@ -257,7 +257,7 @@ namespace TrafficManager.Lifecycle {
                     error = true;
                 }
             } else {
-                Log.Info("Parking restrctions structure undefined!");
+                Log.Info("Parking restrictions structure undefined!");
             }
 
             // load vehicle restrictions (warning: has to be done before loading timed lights!)
@@ -266,7 +266,7 @@ namespace TrafficManager.Lifecycle {
                     error = true;
                 }
             } else {
-                Log.Info("Vehicle restrctions structure undefined!");
+                Log.Info("Vehicle restrictions structure undefined!");
             }
 
             if (_configuration.TimedLights != null) {
@@ -295,7 +295,7 @@ namespace TrafficManager.Lifecycle {
                 Log.Info("Junction traffic lights data structure (new) undefined!");
             }
 
-            // load lane arrrows (old method)
+            // load lane arrows (old method)
             if (_configuration.LaneFlags != null) {
                 if (!LaneArrowManager.Instance.LoadData(_configuration.LaneFlags)) {
                     error = true;

@@ -7,7 +7,7 @@ namespace TrafficManager.UI.MainMenu {
         protected override ToolMode ToolMode => ToolMode.TimedTrafficLights;
 
         public override void SetupButtonSkin(AtlasBuilder futureAtlas) {
-            // Button backround (from BackgroundPrefix) is provided by MainMenuPanel.Start
+            // Button background (from BackgroundPrefix) is provided by MainMenuPanel.Start
             this.Skin = ButtonSkin.CreateSimple(
                                       foregroundPrefix: "TimedTL",
                                       backgroundPrefix: UConst.MAINMENU_ROUND_BUTTON_BG)

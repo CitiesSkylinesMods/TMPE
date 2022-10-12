@@ -26,7 +26,7 @@ namespace TrafficManager.Manager.Impl {
             NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle;
 
         /// <summary>
-        /// vehcile types for all road vehicles
+        /// vehicle types for all road vehicles
         /// </summary>
         public const VehicleInfo.VehicleType VEHICLE_TYPES = VehicleInfo.VehicleType.Car;
 
@@ -67,7 +67,7 @@ namespace TrafficManager.Manager.Impl {
         }
 
         /// <summary>
-        /// Add arrows to the lane. This will not remove any prevously set flags and
+        /// Add arrows to the lane. This will not remove any previously set flags and
         /// will remove and replace default arrows only where flag is set.
         /// default arrows may change as user connects or remove more segments to the junction but
         /// the user arrows stay the same no matter what.
@@ -202,7 +202,7 @@ namespace TrafficManager.Manager.Impl {
             ref NetSegment segment = ref segmentId.ToSegment();
             NetAI ai = segment.Info.m_netAI;
 #if DEBUGFLAGS
-            Log._Debug($"Flags.RecalculateFlags: Recalculateing lane arrows of segment {segmentId}.");
+            Log._Debug($"Flags.RecalculateFlags: Recalculating lane arrows of segment {segmentId}.");
 #endif
             ai.UpdateLanes(segmentId, ref segment, true);
         }

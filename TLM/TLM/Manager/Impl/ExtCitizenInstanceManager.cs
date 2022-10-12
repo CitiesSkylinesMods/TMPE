@@ -660,7 +660,7 @@ namespace TrafficManager.Manager.Impl {
                                     "their car before and is not at home. Forcing to walk to parked car.");
                             }
                         } else {
-                            // citizen travelled by other means of transport
+                            // citizen traveled by other means of transport
                             // -> check distance between home and parked car. if too far away:
                             // force to take the car back home
                             float distHomeToParked = (parkedVehicle.m_position - homeId.ToBuilding().m_position).magnitude;

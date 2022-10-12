@@ -1,7 +1,7 @@
-﻿namespace TrafficManager.State.ConfigData {
+namespace TrafficManager.State.ConfigData {
     public class PathFinding {
         /// <summary>
-        /// penalty for busses not driving on bus lanes
+        /// penalty for buses not driving on bus lanes
         /// </summary>
         public float PublicTransportLanePenalty = 10f;
 
@@ -21,12 +21,12 @@
         public uint HeavyVehicleInnerLanePenaltySegmentSel = 3;
 
         /// <summary>
-        /// artifical lane distance for vehicles that change to lanes which have an incompatible lane arrow configuration
+        /// artificial lane distance for vehicles that change to lanes which have an incompatible lane arrow configuration
         /// </summary>
         public byte IncompatibleLaneDistance = 2;
 
         /// <summary>
-        /// artifical lane distance for u-turns
+        /// artificial lane distance for u-turns
         /// </summary>
         public int UturnLaneDistance = 2;
 

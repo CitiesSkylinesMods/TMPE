@@ -6,6 +6,7 @@ namespace TrafficManager.UI.Helpers {
     using CSUtil.Commons;
     using UnityEngine;
     using System;
+    using TrafficManager.Util;
 
     public class SliderOption : SerializableUIOptionBase<float, UISlider, SliderOption> {
 
@@ -70,9 +71,20 @@ namespace TrafficManager.UI.Helpers {
 
                 Log.Info($"SliderOption.Value: `{FieldName}` changed to {value}");
 
-                if (HasUI) {
-                    _ui.value = value;
-                    UpdateTooltip();
+                if (Shortcuts.IsMainThread()) {
+                    if (HasUI) {
+                        _ui.value = value;
+                        UpdateTooltip();
+                    }
+                } else {
+                    SimulationManager.instance
+                                     .m_ThreadingWrapper
+                                     .QueueMainThread(() => {
+                                         if (HasUI) {
+                                             _ui.value = value;
+                                             UpdateTooltip();
+                                         }
+                                     });
                 }
             }
         }

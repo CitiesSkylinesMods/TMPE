@@ -22,6 +22,11 @@ namespace TrafficManager.UI.SubTools.TTL {
     public class TimedTrafficLightsTool
         : LegacySubTool,
           UI.MainMenu.IOnscreenDisplayProvider {
+        private static float minSensitivity_ = 0.001f;
+        private static float maxSensitivity_ = 10;
+        private static float logMinSensitivity_ = Mathf.Log10(minSensitivity_);
+        private static float logMaxSensitivity_ = Mathf.Log10(maxSensitivity_);
+
         private readonly GUI.WindowFunction _guiTimedControlPanelDelegate;
         private readonly GUI.WindowFunction _guiTimedTrafficLightsNodeWindowDelegate;
         private readonly GUI.WindowFunction _guiTimedTrafficLightsPasteWindowDelegate;
@@ -945,10 +950,10 @@ namespace TrafficManager.UI.SubTools.TTL {
                 }
 
                 if (GUILayout.Toggle(
-                    _stepMetric == StepChangeMetric.FirstFlow,
-                    GetStepChangeMetricDescription(StepChangeMetric.FirstFlow),
+                    _stepMetric == StepChangeMetric.NoFlow,
+                    GetStepChangeMetricDescription(StepChangeMetric.NoFlow),
                     EmptyOptionsArray)) {
-                    _stepMetric = StepChangeMetric.FirstFlow;
+                    _stepMetric = StepChangeMetric.NoFlow;
                 }
 
                 if (GUILayout.Toggle(
@@ -959,10 +964,10 @@ namespace TrafficManager.UI.SubTools.TTL {
                 }
 
                 if (GUILayout.Toggle(
-                    _stepMetric == StepChangeMetric.NoFlow,
-                    GetStepChangeMetricDescription(StepChangeMetric.NoFlow),
+                    _stepMetric == StepChangeMetric.FirstFlow,
+                    GetStepChangeMetricDescription(StepChangeMetric.FirstFlow),
                     EmptyOptionsArray)) {
-                    _stepMetric = StepChangeMetric.NoFlow;
+                    _stepMetric = StepChangeMetric.FirstFlow;
                 }
 
                 if (GUILayout.Toggle(
@@ -982,13 +987,17 @@ namespace TrafficManager.UI.SubTools.TTL {
         }
 
         private void BuildFlowPolicyDisplay(bool editable) {
-            string formatStr;
+            if(_stepMetric != StepChangeMetric.Default) {
+                return;
+            }
+
+            string flowBalanceText;
             if (_waitFlowBalance < 0.01f) {
-                formatStr = "{0:0.###}";
+                flowBalanceText = $"{_waitFlowBalance:0.###}";
             } else if (_waitFlowBalance < 0.1f) {
-                formatStr = "{0:0.##}";
+                flowBalanceText = $"{_waitFlowBalance:0.##}";
             } else {
-                formatStr = "{0:0.#}";
+                flowBalanceText = $"{_waitFlowBalance:0.#}";
             }
 
             GUILayout.BeginHorizontal(EmptyOptionsArray);
@@ -996,58 +1005,31 @@ namespace TrafficManager.UI.SubTools.TTL {
 
             // TODO: Clarify for the user what this means, more help text, simpler UI
             if (editable) {
-                string flowBalanceText = string.Format(formatStr, _waitFlowBalance);
                 GUILayout.Label(
                     $"{sensText} ({flowBalanceText}, {GetWaitFlowBalanceInfo()}):",
                     EmptyOptionsArray);
-
-                if (_waitFlowBalance <= 0.01f) {
-                    if (_waitFlowBalance >= 0) {
-                        if (GUILayout.Button("-.001", EmptyOptionsArray)) {
-                            _waitFlowBalance -= 0.001f;
-                        }
-                    }
-
-                    if (_waitFlowBalance < 0.01f) {
-                        if (GUILayout.Button("+.001", EmptyOptionsArray)) {
-                            _waitFlowBalance += 0.001f;
-                        }
-                    }
-                } else if (_waitFlowBalance <= 0.1f) {
-                    if (GUILayout.Button("-.01", EmptyOptionsArray)) {
-                        _waitFlowBalance -= 0.01f;
-                    }
-
-                    if (_waitFlowBalance < 0.1f) {
-                        if (GUILayout.Button("+.01", EmptyOptionsArray)) {
-                            _waitFlowBalance += 0.01f;
-                        }
-                    }
-                }
-
-                if (_waitFlowBalance < 0) {
-                    _waitFlowBalance = 0;
-                }
-
-                if (_waitFlowBalance > 10) {
-                    _waitFlowBalance = 10;
-                }
-
                 GUILayout.EndHorizontal();
 
-                _waitFlowBalance = GUILayout.HorizontalSlider(_waitFlowBalance, 0.001f, 10f, EmptyOptionsArray);
 
-                // step snapping
-                if (_waitFlowBalance < 0.001f) {
+                // logarithmic slider
+                float logValue = GUILayout.HorizontalSlider(
+                    value: Mathf.Log10(_waitFlowBalance),
+                    leftValue: logMinSensitivity_,
+                    rightValue: logMaxSensitivity_,
+                    options: EmptyOptionsArray);
+                _waitFlowBalance = Mathf.Pow(10, logValue);
+
+                // clamp + step snapping
+                if (_waitFlowBalance < minSensitivity_) {
                     _waitFlowBalance = 0.001f;
                 } else if (_waitFlowBalance < 0.01f) {
                     _waitFlowBalance = Mathf.Round(_waitFlowBalance * 1000f) * 0.001f;
                 } else if (_waitFlowBalance < 0.1f) {
                     _waitFlowBalance = Mathf.Round(_waitFlowBalance * 100f) * 0.01f;
-                } else if (_waitFlowBalance < 10f) {
+                } else if (_waitFlowBalance < maxSensitivity_) {
                     _waitFlowBalance = Mathf.Round(_waitFlowBalance * 10f) * 0.1f;
                 } else {
-                    _waitFlowBalance = 10f;
+                    _waitFlowBalance = maxSensitivity_;
                 }
 
                 GUILayout.BeginHorizontal(EmptyOptionsArray);
@@ -1065,7 +1047,6 @@ namespace TrafficManager.UI.SubTools.TTL {
                     style,
                     GUILayout.Height(10));
             } else {
-                string flowBalanceText = string.Format(formatStr, _waitFlowBalance);
                 GUILayout.Label($"{sensText}: {flowBalanceText} ({GetWaitFlowBalanceInfo()})", EmptyOptionsArray);
             }
 
