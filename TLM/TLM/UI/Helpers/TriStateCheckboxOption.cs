@@ -7,6 +7,7 @@ namespace TrafficManager.UI.Helpers {
     using TrafficManager.Util.Extensions;
     using JetBrains.Annotations;
     using System.Collections.Generic;
+    using TrafficManager.Util;
 
     public class TriStateCheckboxOption :
         SerializableUIOptionBase<TernaryBool, UITriStateCheckbox, TriStateCheckboxOption>, IValuePropagator {
@@ -55,7 +56,18 @@ namespace TrafficManager.UI.Helpers {
                     base.Value = value;
                     Log.Info($"TriStateCheckboxOption.Value: `{FieldName}` changed to {value}");
                     PropagateAll(Value2.HasValue);
-                    if (HasUI) _ui.Value = Value2;
+
+                    if (Shortcuts.IsMainThread()) {
+                        if (HasUI) {
+                            _ui.Value = Value2;
+                        }
+                    } else {
+                        SimulationManager.instance.m_ThreadingWrapper.QueueMainThread(() => {
+                            if (HasUI) {
+                                _ui.Value = Value2;
+                            }
+                        });
+                    }
                 }
             }
         }

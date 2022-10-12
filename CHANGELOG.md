@@ -29,6 +29,16 @@ This changelog includes all versions and major variants of the mod going all the
 
 > Date format: dd/mm/yyyy
 
+#### TM:PE V[11.7.1.2](https://github.com/CitiesSkylinesMods/TMPE/compare/11.7.1.1...11.7.1.2) STABLE, 11/10/2022
+
+- [Fixed] Game crash on load (krzychu124)
+- [Steam] [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
+
+#### TM:PE V11.7.1.2 TEST, 11/10/2022
+
+- [Fixed] Game crash on load (krzychu124)
+- [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
+
 #### TM:PE V[11.7.1.1](https://github.com/CitiesSkylinesMods/TMPE/compare/11.7.0.1...11.7.1.1) STABLE, 10/10/2022
 - [Meta] TM:PE 11.7.1.1 TEST branch released as STABLE - huge thanks to our beta testers!
 - [New] Dead-end lane connections #1613, #1213 (kianzarrin)

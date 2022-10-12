@@ -335,7 +335,7 @@ namespace TrafficManager.Manager.Impl {
                 failedNodeId = 0;
             }
             catch (Exception ex) {
-                Log.Error($"Error occured while simulating traffic light @ node {failedNodeId}: {ex}");
+                Log.Error($"Error occurred while simulating traffic light @ node {failedNodeId}: {ex}");
 
                 if (failedNodeId != 0) {
                     RemoveNodeFromSimulation(failedNodeId);

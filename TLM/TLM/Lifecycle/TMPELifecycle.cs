@@ -367,7 +367,7 @@ namespace TrafficManager.Lifecycle {
                 GlobalConfig.OnLevelUnloading();
 
                 if (PlayMode) {
-                    // destroy immidately to prevent duplicates after hot-reload.
+                    // destroy immediately to prevent duplicates after hot-reload.
                     var uiviewGO = UIView.GetAView().gameObject;
                     DestroyImmediate(uiviewGO.GetComponent<RoadSelectionPanels>());
                     DestroyImmediate(uiviewGO.GetComponent<RemoveVehicleButtonExtender>());

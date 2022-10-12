@@ -24,6 +24,6 @@ Manager classes that allow for creating and controlling custom behavior.
 - **TrafficPriorityManager**: Manages priority signs and implements priority rules at junctions with priority signs (entry point: **HasVehiclePriority**).   
 - **UtilityManager**: Offers auxiliary functions that must be executed within the simulation thread
 - **VehicleBehaviorManager**: Implements vehicle behavior (mainly at junctions). Traffic light states and priority rule checking is delegated here.
-- **VehicleRestrictionsManager**: Manages custom vehicle restrictions (custom bans for cars, cargo trucks, busses, etc.).
+- **VehicleRestrictionsManager**: Manages custom vehicle restrictions (custom bans for cars, cargo trucks, buses, etc.).
 - **VehicleStateManager**: Manages vehicle states (both positional and general vehicle states are stored).
 

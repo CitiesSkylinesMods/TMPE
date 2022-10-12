@@ -195,7 +195,7 @@ namespace TrafficManager.UI.SubTools {
         }
 
         /// <summary>
-        /// highlitghts all the lanes with the same sorted index as the current lane.
+        /// highlights all the lanes with the same sorted index as the current lane.
         /// </summary>
         private void RenderRoadLane(RenderManager.CameraInfo cameraInfo) {
             SegmentLaneTraverser.Traverse(
@@ -379,7 +379,7 @@ namespace TrafficManager.UI.SubTools {
         }
 
         /// <summary>
-        /// coppies vehicle restrictions of the current segment
+        /// copies vehicle restrictions of the current segment
         /// and applies them to all segments until the next junction.
         /// </summary>
         /// <param name="sortedLaneIndex">if provided only current lane is considered</param>

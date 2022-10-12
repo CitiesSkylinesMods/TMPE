@@ -1,3 +1,10 @@
+[Version] 11.7.1.2
+[Released] Oct 11th 2022
+[Link] tmpe-v11712-stable-11102022
+[Stable]
+[Fixed] Game crash on load (krzychu124)
+[/Version]
+
 [Version] 11.7.1.1
 [Released] Oct 10th 2022
 [Link] tmpe-v11711-stable-10102022

@@ -5,6 +5,7 @@ namespace TrafficManager.UI.Helpers {
     using ICities;
     using System.Reflection;
     using System;
+    using System.Threading;
     using TrafficManager.State;
     using JetBrains.Annotations;
     using TrafficManager.Lifecycle;
@@ -52,7 +53,6 @@ namespace TrafficManager.UI.Helpers {
 
             _fieldName = fieldName;
             _scope = scope;
-
             if (scope.IsFlagSet(Options.PersistTo.Savegame)) {
                 _fieldInfo = typeof(Options).GetField(fieldName, BindingFlags.Static | BindingFlags.Public);
 

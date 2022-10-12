@@ -4,7 +4,9 @@ namespace TrafficManager.UI.Helpers {
     using TrafficManager.State;
     using CSUtil.Commons;
     using System.Collections.Generic;
+    using ColossalFramework.Threading;
     using JetBrains.Annotations;
+    using TrafficManager.Util;
     using UnityEngine;
 
     public class CheckboxOption :
@@ -22,9 +24,9 @@ namespace TrafficManager.UI.Helpers {
         /// If this checkbox is set <c>true</c>, it will propagate that to the <paramref name="target"/>.
         /// Chainable.
         /// </summary>
-        /// <param name="target">The checkox to propagate <c>true</c> value to.</param>
+        /// <param name="target">The checkbox to propagate <c>true</c> value to.</param>
         /// <remarks>
-        /// If target is set <c>false</c>, it will proapagate that back to this checkbox.
+        /// If target is set <c>false</c>, it will propagate that back to this checkbox.
         /// </remarks>
         public CheckboxOption PropagateTrueTo([NotNull] IValuePropagator target) {
             Log.Info($"CheckboxOption.PropagateTrueTo: `{FieldName}` will propagate to `{target}`");
@@ -71,7 +73,20 @@ namespace TrafficManager.UI.Helpers {
                 base.Value = value;
                 Log.Info($"CheckboxOption.Value: `{FieldName}` changed to {value}");
                 PropagateAll(value);
-                if (HasUI) _ui.isChecked = value;
+
+                if (Shortcuts.IsMainThread()) {
+                    if (HasUI) {
+                        _ui.isChecked = value;
+                    }
+                } else {
+                    SimulationManager.instance
+                                     .m_ThreadingWrapper
+                                     .QueueMainThread(() => {
+                                         if (HasUI) {
+                                             _ui.isChecked = value;
+                                         }
+                                     });
+                }
             }
         }
 

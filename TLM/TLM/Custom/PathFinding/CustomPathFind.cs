@@ -675,7 +675,7 @@ namespace TrafficManager.Custom.PathFinding {
                 string reachableBuf = string.Empty;
                 string unreachableBuf = string.Empty;
 
-                // TODO: optimizeme: Building a list of positions is faster than string concat
+                // TODO: optimize: Building a list of positions is faster than string concat
                 foreach (KeyValuePair<ushort, IList<ushort>> e in debugPositions_) {
                     string buf = $"{e.Key} -> {e.Value.CollectionToString()}\n";
                     if (e.Value.Count <= 0) {
@@ -1301,7 +1301,7 @@ namespace TrafficManager.Custom.PathFinding {
                                 unitId,
                                 item,
                                 "ProcessItemMain: beautification -> ped: Exploring " +
-                                $"pedestrian lane to beautficiation node\n\tnextNodeId={nextNodeId}");
+                                $"pedestrian lane to beautification node\n\tnextNodeId={nextNodeId}");
                         }
 
                         // we are going from pedestrian lane to a beautification node
@@ -2889,7 +2889,7 @@ namespace TrafficManager.Custom.PathFinding {
                                         (NetInfo.LaneType.Pedestrian |
                                          NetInfo.LaneType.PublicTransport)) ==
                                        NetInfo.LaneType.Pedestrian) {
-                                // account for public tranport transition costs on non-PT paths
+                                // account for public transport transition costs on non-PT paths
                                 float transportTransitionPenalty =
                                     (2f * pfPublicTransportTransitionMaxPenalty) /
                                     (0.5f * maxLength_);

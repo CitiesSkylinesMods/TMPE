@@ -100,7 +100,7 @@ namespace TrafficManager.UI {
             TMPELifecycle.Instance.TranslationDatabase.aiCarLookup_;
 
         /// <summary>
-        /// Gets or sets a value indicating the current lanugage to use for translations.
+        /// Gets or sets a value indicating the current language to use for translations.
         /// Note: Don't access directly, instead use <see cref="GetCurrentLanguage()"/>.
         /// </summary>
         private static string CurrentLanguage { get; set; } = string.Empty;

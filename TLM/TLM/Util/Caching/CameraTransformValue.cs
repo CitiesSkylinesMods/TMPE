@@ -5,7 +5,7 @@ namespace TrafficManager.Util.Caching {
     /// <summary>
     /// Stores transform of the camera, namely position, rotation.
     /// Fov and other parameters are not stored and not checked.
-    /// Having two inequal transforms means that the camera has moved, or turned.
+    /// Having two unequal transforms means that the camera has moved, or turned.
     /// </summary>
     public class CameraTransformValue {
         private Vector3 Position;
