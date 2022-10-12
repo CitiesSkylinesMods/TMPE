@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <svg
-   xmlns:dc="http://purl.org/dc/elements/1.1/"
-   xmlns:cc="http://creativecommons.org/ns#"
-   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-   xmlns:svg="http://www.w3.org/2000/svg"
-   xmlns="http://www.w3.org/2000/svg"
-   xmlns:xlink="http://www.w3.org/1999/xlink"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    width="210mm"
    height="297mm"
    viewBox="0 0 210 297"
    version="1.1"
    id="svg8"
-   inkscape:version="1.0.2-2 (e86c870879, 2021-01-15)"
-   sodipodi:docname="Tristate-switch.svg">
+   inkscape:version="1.2.1 (9c6d41e410, 2022-07-14)"
+   sodipodi:docname="Tristate-switch.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:dc="http://purl.org/dc/elements/1.1/">
   <defs
      id="defs2" />
   <sodipodi:namedview
@@ -24,18 +24,21 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="2.8"
-     inkscape:cx="385.77896"
-     inkscape:cy="196.85151"
+     inkscape:zoom="1.979899"
+     inkscape:cx="876.55987"
+     inkscape:cy="113.13708"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      inkscape:document-rotation="0"
      showgrid="false"
-     inkscape:window-width="2560"
-     inkscape:window-height="1417"
-     inkscape:window-x="-8"
-     inkscape:window-y="-8"
-     inkscape:window-maximized="1" />
+     inkscape:window-width="3840"
+     inkscape:window-height="2066"
+     inkscape:window-x="-11"
+     inkscape:window-y="-11"
+     inkscape:window-maximized="1"
+     inkscape:showpageshadow="2"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1" />
   <metadata
      id="metadata5">
     <rdf:RDF>
@@ -44,7 +47,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -287,7 +290,7 @@
        id="g886"
        inkscape:export-xdpi="302.36002"
        inkscape:export-ydpi="302.36002"
-       transform="translate(21.171515,-0.23623846)">
+       transform="matrix(1.0217364,0,0,1.1742226,18.647607,-8.2715716)">
       <rect
          style="color:#000000;overflow:visible;fill:#000000;fill-opacity:1;stroke:#d1d1d1;stroke-width:0.8;stroke-linecap:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:4.87559;stroke-opacity:1;stop-color:#000000"
          id="rect876"
@@ -323,7 +326,7 @@
        id="g898"
        inkscape:export-xdpi="302.35999"
        inkscape:export-ydpi="302.35999"
-       transform="translate(21.171515,-0.23623846)">
+       transform="matrix(1.0222873,0,0,1.1729546,18.584471,-9.3144269)">
       <rect
          style="color:#000000;overflow:visible;fill:#000000;fill-opacity:1;stroke:#d1d1d1;stroke-width:0.8;stroke-linecap:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:4.87559;stroke-opacity:1;stop-color:#000000"
          id="rect888"
@@ -359,7 +362,7 @@
        id="g910"
        inkscape:export-xdpi="302.35999"
        inkscape:export-ydpi="302.35999"
-       transform="translate(21.171515,-0.23623846)">
+       transform="matrix(1.0223787,0,0,0.99804824,18.574004,-0.334404)">
       <rect
          style="color:#000000;overflow:visible;fill:#000000;fill-opacity:1;stroke:#d1d1d1;stroke-width:0.8;stroke-linecap:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:4.87559;stroke-opacity:1;stop-color:#000000"
          id="rect900"

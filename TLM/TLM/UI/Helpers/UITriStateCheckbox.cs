@@ -57,7 +57,7 @@ namespace TrafficManager.UI.Helpers {
             sprite.atlas = atlas;
             sprite.spriteName = names[0];
             sprite.tooltip = "no";
-            sprite.size = new(51, 19); 
+            sprite.size = new(51, 22); 
             sprite.relativePosition = new Vector2(0, Mathf.FloorToInt((height - sprite.height) / 2));
             FalseComponent = sprite;
 
