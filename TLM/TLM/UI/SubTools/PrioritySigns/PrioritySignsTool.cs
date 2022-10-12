@@ -139,15 +139,15 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
         public override void OnToolGUI(Event e) { }
 
         /// <summary>
-        /// refreshes all subtools incflucned by mass edit.
+        /// refreshes all subtools influenced by mass edit.
         /// the mass edit overlay active while processing
         /// and remains active for one extra second so that
         /// </summary>
         private void RefreshMassEditOverlay() {
             // processing takes while.
-            // Keep mass edit overlay active so that user has visual feedaback
+            // Keep mass edit overlay active so that user has visual feedback
             // that something is happening.
-            // this is also to make sure overlay is refresshed
+            // this is also to make sure overlay is refreshed
             // even when the user lets go of the mass edit overlay hotkey.
             MassEditOverlay.SetTimer(float.MaxValue);
 

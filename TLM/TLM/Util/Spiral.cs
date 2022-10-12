@@ -61,7 +61,7 @@ namespace TrafficManager.Util {
         public int MaxRadius => _maxRadius;
 
         /// <summary>
-        /// Gets spiral in random direction and ensired that the giver radius is satisfied
+        /// Gets spiral in random direction and ensures that the given radius is satisfied
         /// </summary>
         /// <param name="radius">Needed radius for the spiral coords.</param>
         /// <param name="r">Randomizer instance to perform randomization</param>

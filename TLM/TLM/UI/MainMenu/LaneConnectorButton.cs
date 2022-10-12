@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.UI.MainMenu {
+namespace TrafficManager.UI.MainMenu {
     using System.Collections.Generic;
     using TrafficManager.State;
     using TrafficManager.State.Keybinds;
@@ -9,7 +9,7 @@
         protected override ToolMode ToolMode => ToolMode.LaneConnector;
 
         public override void SetupButtonSkin(AtlasBuilder atlasBuilder) {
-            // Button backround (from BackgroundPrefix) is provided by MainMenuPanel.Start
+            // Button background (from BackgroundPrefix) is provided by MainMenuPanel.Start
             this.Skin = ButtonSkin.CreateSimple(
                                       foregroundPrefix: "LaneConnector",
                                       backgroundPrefix: UConst.MAINMENU_ROUND_BUTTON_BG)

@@ -37,7 +37,7 @@ namespace TrafficManager.Patch._VehicleAI {
         }
 
         /// <summary>
-        /// Caclulate segment position for other vehicles like Tram, Train that are excluded from 'Slow Driving' district policy
+        /// Calculate segment position for other vehicles like Tram, Train that are excluded from 'Slow Driving' district policy
         /// </summary>
         public static void CustomCalculateSegmentPosition_NoSlowDriving(VehicleAI instance,
                                                           ushort vehicleId,
@@ -60,7 +60,7 @@ namespace TrafficManager.Patch._VehicleAI {
         }
 
         /// <summary>
-        /// Caclulate target speed for other vehicles like Tram, Train that are excluded from 'Slow Driving' district policy
+        /// Calculate target speed for other vehicles like Tram, Train that are excluded from 'Slow Driving' district policy
         /// </summary>
         public static void CustomCalculateTargetSpeed_NoSlowDriving(VehicleAI instance,
                                                       ushort vehicleId,

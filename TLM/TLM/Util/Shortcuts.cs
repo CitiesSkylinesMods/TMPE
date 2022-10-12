@@ -67,10 +67,10 @@ namespace TrafficManager.Util {
         internal static Func<bool, int> Int = (bool b) => b ? 1 : 0;
 
         /// <summary>
-        /// useful for easily debuggin inline functions
+        /// useful for easily debugging inline functions
         /// to be used like this example:
         /// TYPE inlinefunctionname(...) => expression
-        /// TYPE inlinefunctionname(...) => expression.LogRet("messege");
+        /// TYPE inlinefunctionname(...) => expression.LogRet("message");
         /// </summary>
         internal static T LogRet<T>(this T a, string m) {
             Log._Debug(m + a);
@@ -140,9 +140,9 @@ namespace TrafficManager.Util {
         /// </summary>
         /// <typeparam name="T">Must be some kind of <see cref="Enum"/>.</typeparam>
         /// <param name="value">Value to test.</param>
-        /// <param name="m">Name of the value or other informative messsage.</param>
+        /// <param name="m">Name of the value or other informative message.</param>
         /// <example>AssertNotZero((int)laneType);</example>
-        /// <remarks>Conditional("DEBUG") - no perforamnce impact on release builds.</remarks>
+        /// <remarks>Conditional("DEBUG") - no performance impact on release builds.</remarks>
         /// <exception cref="ArgumentException">
         /// Thrown if <typeparamref name="T"/> is not some kind of <see cref="Enum"/>.
         /// </exception>
@@ -166,7 +166,7 @@ namespace TrafficManager.Util {
             if (ex is null)
                 Log.Error("null argument ex was passed to Log.Exception()");
             try {
-                Log.Error(ex.ToString() + "\n\t===================="); // stack trace is prited after this.
+                Log.Error(ex.ToString() + "\n\t===================="); // stack trace is printed after this.
                 UnityEngine.Debug.LogException(ex);
                 if (showInPanel)
                     UIView.ForwardException(ex);

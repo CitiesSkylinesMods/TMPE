@@ -257,7 +257,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
         /// <summary>
         /// if the segment has at least one lane without outgoing lane connections, then it can be reset.
         /// </summary>
-        /// <returns>true if the segemnt can be reset.</returns>
+        /// <returns>true if the segment can be reset.</returns>
         private static bool CanReset(ushort segmentId, bool startNode) {
 
             ref NetSegment segment = ref segmentId.ToSegment();
@@ -501,7 +501,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
             ExtSegmentEnd segEnd = segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segmentId, nodeId)];
             bool bJunction = (nodeId.ToNode().m_flags & NetNode.Flags.Junction) != 0;
 
-            // Outgoing lanes toward the node is incomming lanes to the segment end.
+            // Outgoing lanes toward the node is incoming lanes to the segment end.
             return bJunction && segEnd.incoming;
         }
 

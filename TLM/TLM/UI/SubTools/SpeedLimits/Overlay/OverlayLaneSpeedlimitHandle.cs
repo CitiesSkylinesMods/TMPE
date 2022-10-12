@@ -133,7 +133,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits.Overlay {
         /// of all lanes with a matching <paramref name="sortedLaneIndex"/> based on <paramref name="segmentId0"/>.
         /// </summary>
         /// <param name="segmentList">input list of roundabout segments (must be oneway, and in the same direction).</param>
-        /// <param name="segmentId0">The segment to match lane agaisnt.</param>
+        /// <param name="segmentId0">The segment to match lane against.</param>
         /// <param name="sortedLaneIndex">Index.</param>
         internal IEnumerable<LanePos> FollowRoundaboutLane(
             List<ushort> segmentList,

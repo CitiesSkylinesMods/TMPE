@@ -457,7 +457,7 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
         }
 
         private void AssertLane(uint laneId, bool startNode) {
-            Assert(laneId.ToLane().IsValidWithSegment(), $"IsValidWithSegment() faild for laneId:{laneId}");
+            Assert(laneId.ToLane().IsValidWithSegment(), $"IsValidWithSegment() failed for laneId:{laneId}");
             var connections = GetLaneConnections(laneId, startNode);
             if (connections != null && connections.Contains(laneId)) {
                 // dead end should only have one connection to itself.
