@@ -39,8 +39,8 @@ namespace TrafficManager.Util {
         /// <summary>
         /// Gets directly declared method.
         /// </summary>
-        /// <typeparam name="TDelegate">delegate that has the same argument types as the intented overloaded method</typeparam>
-        /// <param name="type">the class/type where the method is delcared</param>
+        /// <typeparam name="TDelegate">delegate that has the same argument types as the intended overloaded method</typeparam>
+        /// <param name="type">the class/type where the method is declared</param>
         /// <param name="name">the name of the method</param>
         /// <param name="instance">is instance delegate (require skip if the first param)</param>
         /// <returns>a method or null when type is null or when a method is not found</returns>

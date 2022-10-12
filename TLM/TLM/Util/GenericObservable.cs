@@ -7,7 +7,7 @@ namespace TrafficManager.Util {
     public abstract class GenericObservable<T> : IObservable<T> {
         /// <summary>
         /// Holds a list of observers which are being notified as soon as the managed node's
-        /// geometry is updated (but not neccessarily modified)
+        /// geometry is updated (but not necessarily modified)
         /// </summary>
         protected List<IObserver<T>> _observers = new List<IObserver<T>>();
 
@@ -39,7 +39,7 @@ namespace TrafficManager.Util {
                         observer.OnUpdate(subject);
                     }
                     catch (Exception e) {
-                        Log.Error("GenericObserable.NotifyObservers: An exception occured while " +
+                        Log.Error("GenericObserable.NotifyObservers: An exception occurred while " +
                                   $"notifying an observer of observable {this}: {e}");
                     }
                 }

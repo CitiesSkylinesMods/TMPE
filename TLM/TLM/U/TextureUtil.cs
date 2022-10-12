@@ -36,7 +36,7 @@ namespace TrafficManager.U {
 
             // Load separate sprites and then pack it in a texture together
             foreach (U.AtlasSpriteDef spriteDef in spriteDefs) {
-                // Allow spritedef resouce prefix to override prefix given to this func
+                // Allow spritedef resource prefix to override prefix given to this func
                 string prefix = resourcePrefix;
                 string resourceName;
 

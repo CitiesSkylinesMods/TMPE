@@ -283,7 +283,7 @@ namespace TrafficManager.Manager.Impl {
         }
 
         /// <summary>
-        /// Scans lanes which may have customisaable speed limit and returns the fastest <c>m_speedLimit</c> encountered.
+        /// Scans lanes which may have customizable speed limit and returns the fastest <c>m_speedLimit</c> encountered.
         /// </summary>
         /// <param name="info">The <see cref="NetInfo"/> to inspect.</param>
         /// <returns>The vanilla speed limit, in game units.</returns>

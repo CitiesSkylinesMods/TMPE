@@ -190,7 +190,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
 
         /// <summary>Format string to display under the speed limit button with km/hour.</summary>
         /// <param name="speed">The speed.</param>
-        /// <returns>The string formatted formatted with km: NN km/h.</returns>
+        /// <returns>The string formatted with km: NN km/h.</returns>
         private static string ToKmphPreciseString(SpeedValue speed) {
             return FloatUtil.IsZero(speed.GameUnits)
                        ? Translation.SpeedLimits.Get("Unlimited")
