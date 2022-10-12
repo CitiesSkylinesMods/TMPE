@@ -15,7 +15,7 @@ namespace TrafficManager.Util {
 
     public static class SeparateTurningLanesUtil {
         /// <summary>
-        /// returns the number of all target lanes from input segment toward the secified direction.
+        /// returns the number of all target lanes from input segment toward the specified direction.
         /// </summary>
         private static int CountTargetLanesTowardDirection(ushort segmentId, ushort nodeId, ArrowDirection dir) {
             int count = 0;
@@ -167,7 +167,7 @@ namespace TrafficManager.Util {
                     alt3: alt3);
             } else {
                 if (busLanes.Count == 1 && busLanes[0].Arrows() == LaneArrows.Forward) {
-                    // edge case: this optional piece of code imrpoves the lane arrows a little bit in some edge cases.
+                    // edge case: this optional piece of code improves the lane arrows a little bit in some edge cases.
                     // see https://github.com/CitiesSkylinesMods/TMPE/pull/1104#issuecomment-834145850
                     // no need to have separate code for bus and car. bus lane is already a dedicated forward lane.
                     SeparateSegmentLanes(
@@ -203,8 +203,8 @@ namespace TrafficManager.Util {
 
         /// <summary>
         /// separates turning lanes for the input segment on the input node.
-        /// <paramref name="builtIn">determines whather to change default or forced lane arrows</paramref>
-        /// <param name="alt2">alternativ mode for two lanes(true => dedicated far turn)</param>
+        /// <paramref name="builtIn">determines whether to change default or forced lane arrows</paramref>
+        /// <param name="alt2">alternative mode for two lanes(true => dedicated far turn)</param>
         /// <param name="alt3">alternative mode for 3+ lanes(true => favour forward)</param>
         /// </summary>
         private static void SeparateSegmentLanes(
@@ -297,7 +297,7 @@ namespace TrafficManager.Util {
 
         /// <summary>
         /// Adds forward flag to lanes where applicable.
-        /// <paramref name="builtIn">determines whather to change default or forced lane arrows</paramref>
+        /// <paramref name="builtIn">determines whether to change default or forced lane arrows</paramref>
         /// </summary>
         private static void AddForwardToLanes(
             ushort segmentId,
@@ -353,7 +353,7 @@ namespace TrafficManager.Util {
 
         /// <summary>
         /// calculates number of lanes in each direction such that the number of
-        /// turning lanes are in porportion to the size of the roads they are turning into
+        /// turning lanes are in proportion to the size of the roads they are turning into
         /// x is favoured over y. y is favoured over z.
         /// This mixes DistributeLanes2 and DistributeLanes3
         /// </summary>
@@ -381,12 +381,12 @@ namespace TrafficManager.Util {
                 Debug.Assert(numdirs == 3 && total >= 3);
                 DistributeLanes3(total, a, b, c, out x, out y, out z);
             }
-            Log._Debug($"DistributeLanes (by prioirty): {a}=>{x} | {b}=>{y} | {c}=>{z}");
+            Log._Debug($"DistributeLanes (by priority): {a}=>{x} | {b}=>{y} | {c}=>{z}");
         }
 
         /// <summary>
         /// calculates number of lanes in each direction such that the number of
-        /// turning lanes are in porportion to the size of the roads they are turning into
+        /// turning lanes are in proportion to the size of the roads they are turning into
         /// in other words calculate x and y such that a/b = x/y and x+y=total and x>=1 and y>=1.
         /// x is favoured over y (may get more lanes)
         /// </summary>
@@ -410,7 +410,7 @@ namespace TrafficManager.Util {
 
         /// <summary>
         /// calculates number of lanes in each direction such that the number of
-        /// turning lanes are in porportion to the size of the roads they are turning into
+        /// turning lanes are in proportion to the size of the roads they are turning into
         /// x is favoured over y. y is favoured over z.
         /// </summary>
         /// <param name="total"> number of source lanes</param>

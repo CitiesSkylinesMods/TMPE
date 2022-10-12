@@ -13,7 +13,7 @@ namespace TrafficManager.State.Asset {
     public class AssetData {
         private string version_;
 
-        /// <summary>Mod version at the time where data was serailized.</summary>
+        /// <summary>Mod version at the time where data was serialized.</summary>
         public Version Version {
             get => version_ != null ? new Version(version_) : default;
             set => version_ = value.ToString();

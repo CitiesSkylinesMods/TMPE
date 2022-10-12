@@ -157,7 +157,7 @@ namespace TrafficManager.Util {
                 return ((IUserMod)plugin.userModInstance).Name;
             }
             catch {
-                return $"(error retreiving Name)";
+                return $"(error retrieving Name)";
             }
         }
 

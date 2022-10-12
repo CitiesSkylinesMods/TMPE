@@ -352,7 +352,7 @@ namespace TrafficManager.Util.Extensions {
                     bool fwd = forward;
                     if (Math.Abs(x.position - y.position) < 1e-12) {
                         if (x.position > 0) {
-                            // mirror type-bound lanes (e.g. for coherent disply of lane-wise speed limits)
+                            // mirror type-bound lanes (e.g. for coherent display of lane-wise speed limits)
                             fwd = !fwd;
                         }
 

@@ -208,7 +208,7 @@ namespace TrafficManager.Manager.Impl {
                 instanceData.m_flags &= ~CitizenInstance.Flags.BoredOfWaiting;
                 instanceData.m_waitCounter = 0;
 
-                // unspawn citizen instance
+                // despawn citizen instance
                 instanceData.Unspawn(instanceId);
 
                 if (extendedLogParkingAi) {
@@ -1076,7 +1076,7 @@ namespace TrafficManager.Manager.Impl {
             if (logParkingAi) {
                 Log._Debug(
                     $"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): " +
-                    $"Citizen instance {instanceId} is now travelling by foot to their final " +
+                    $"Citizen instance {instanceId} is now traveling by foot to their final " +
                     $"target. CurrentDepartureMode={extInstance.pathMode}, " +
                     $"targetPos={instanceData.m_targetPos} " +
                     $"lastFramePos={instanceData.GetLastFramePosition()}");
@@ -1232,7 +1232,7 @@ namespace TrafficManager.Manager.Impl {
                         Log._Debug(
                             $"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): " +
                             $"Citizen instance {instanceId} has entered their car and is now " +
-                            $"travelling by car (vehicleId={vehicleId}). " +
+                            $"traveling by car (vehicleId={vehicleId}). " +
                             $"CurrentDepartureMode={extInstance.pathMode}, " +
                             $"targetPos={instanceData.m_targetPos} " +
                             $"lastFramePos={instanceData.GetLastFramePosition()}");
@@ -1268,7 +1268,7 @@ namespace TrafficManager.Manager.Impl {
                     extCitInstMan.Reset(ref extInstance);
 
                     if (usesPublicTransport) {
-                        // decrease public tranport demand
+                        // decrease public transport demand
                         if (instanceData.m_sourceBuilding != 0) {
                             extBuildingMan.RemovePublicTransportDemand(
                                 ref extBuildingMan.ExtBuildings[instanceData.m_sourceBuilding],
@@ -1376,13 +1376,13 @@ namespace TrafficManager.Manager.Impl {
 
                     // if tourist (does not have home) and at outside connection, don't try to spawn parked vehicle
                     // cim might just exit the vehicle to despawn at outside connection
-                    // or just spawned at the edge of the map - must walk to closest node to spawn the vehicle to enter city(resident/tourist) or go to different conneciton(dummy traffic)
+                    // or just spawned at the edge of the map - must walk to closest node to spawn the vehicle to enter city(resident/tourist) or go to different connection(dummy traffic)
                     if (homeId == 0 && ExtCitizenInstanceManager.Instance.IsAtOutsideConnection(instanceId, ref instanceData, ref extInstance, currentPos)) {
                         Log._DebugIf(
                             logParkingAi,
                             () => $"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): " +
                                   $">> Skipped spawning parked vehicle for citizen {instanceData.m_citizen} " +
-                                  $"(instance {instanceId}) is at/near outside conneciton, currentPos: {currentPos}");
+                                  $"(instance {instanceId}) is at/near outside connection, currentPos: {currentPos}");
 
                         extInstance.pathMode = ExtPathMode.RequiresWalkingPathToTarget;
                         return ExtSoftPathState.FailedSoft;
@@ -1487,7 +1487,7 @@ namespace TrafficManager.Manager.Impl {
                 "Switching path mode to walking.");
 
             if (usesPublicTransport) {
-                // decrease public tranport demand
+                // decrease public transport demand
                 if (instanceData.m_sourceBuilding != 0) {
                     extBuildingMan.RemovePublicTransportDemand(
                         ref extBuildingMan.ExtBuildings[instanceData.m_sourceBuilding],
@@ -2281,7 +2281,7 @@ namespace TrafficManager.Manager.Impl {
                             logParkingAi,
                             () => "Found an (alternative) road-side parking position for " +
                             $"vehicle {vehicleId} @ segment {parkingSpaceSegmentId} after comparing " +
-                            $"distance with a bulding parking position @ {parkingBuildingId}!");
+                            $"distance with a building parking position @ {parkingBuildingId}!");
 
                         parkPos = roadParkPos;
                         parkRot = roadParkRot;
@@ -2749,7 +2749,7 @@ namespace TrafficManager.Manager.Impl {
                 // check if building is accessible from the given segment
                 Log._DebugIf(
                     logParkingAi,
-                    () => $"Calculating unspawn position of building {buildingId} for segment {segmentId}.");
+                    () => $"Calculating despawn position of building {buildingId} for segment {segmentId}.");
 
                 building.Info.m_buildingAI.CalculateUnspawnPosition(
                     buildingId,
@@ -2772,24 +2772,16 @@ namespace TrafficManager.Manager.Impl {
                 {
                     Log._DebugIf(
                         logParkingAi,
-                        () => "Succeeded in finding unspawn position lane offset for building " +
+                        () => "Succeeded in finding despawn position lane offset for building " +
                         $"{buildingId}, segment {segmentId}, unspawnPos={unspawnPos}! " +
                         $"lanePos={lanePos}, dist={(lanePos - unspawnPos).magnitude}, " +
                         $"laneId={laneId}, laneIndex={laneIndex}, laneOffset={laneOffset}");
-
-                        // if (dist > 16f) {
-                        //    if (debug)
-                        //        Log._Debug(
-                        //            $"Distance between unspawn position and lane position is too big! {dist}
-                        //             unspawnPos={unspawnPos} lanePos={lanePos}");
-                        //    return false;
-                        // }
 
                     parkOffset = laneOffset;
                 } else {
                     Log._DebugIf(
                         logParkingAi,
-                        () => $"Could not find unspawn position lane offset for building {buildingId}, " +
+                        () => $"Could not find despawn position lane offset for building {buildingId}, " +
                         $"segment {segmentId}, unspawnPos={unspawnPos}!");
                 }
 

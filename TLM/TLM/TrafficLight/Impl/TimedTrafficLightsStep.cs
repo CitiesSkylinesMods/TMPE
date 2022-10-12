@@ -779,7 +779,7 @@ namespace TrafficManager.TrafficLight.Impl {
                 logTrafficLights,
                 () => $"calcWaitFlow: called for node {timedNode.NodeId} @ step {stepRefIndex}");
 
-            // TODO checking agains getCurrentFrame() is only valid if this is the current step
+            // TODO checking against getCurrentFrame() is only valid if this is the current step
             // during start phase all vehicles on "green" segments are counted as flowing
             if (countOnlyMovingIfGreen
                 && GetCurrentFrame() <= startFrame + MinTime + 1)

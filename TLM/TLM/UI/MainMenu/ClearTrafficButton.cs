@@ -14,7 +14,7 @@ namespace TrafficManager.UI.MainMenu {
         protected override bool IsVisible() => true;
 
         public override void SetupButtonSkin(AtlasBuilder futureAtlas) {
-            // Button backround (from BackgroundPrefix) is provided by MainMenuPanel.Start
+            // Button background (from BackgroundPrefix) is provided by MainMenuPanel.Start
             this.Skin = ButtonSkin.CreateSimple(
                                       foregroundPrefix: "ClearTraffic",
                                       backgroundPrefix: UConst.MAINMENU_ROUND_BUTTON_BG)

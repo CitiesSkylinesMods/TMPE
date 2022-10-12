@@ -84,7 +84,7 @@ namespace TrafficManager.Util {
         /// additionally allocates dedicated turning lanes if possible.
         /// </summary>
         /// <param name="nodeId">the junction for which we want a traffic light</param>
-        /// <returns>true if sucessful</returns>
+        /// <returns>true if successful</returns>
         public static bool Add(ushort nodeId) {
             List<ushort> nodeGroup = new List<ushort>(1);
             nodeGroup.Add(nodeId);

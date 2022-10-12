@@ -144,7 +144,7 @@ namespace TrafficManager.Patch._CitizenAI._ResidentAI {
                     if (forceElectric && carInfo.m_class.m_subService != ItemClass.SubService.ResidentialLowEco) {
                         Log._DebugIf(logParkingAi,
                                      () => $"CustomResidentAI.CustomGetVehicleInfo({instanceID}): " +
-                                                         $"Force electric! Parked vehicle {parkedVehicleId} is not electric vehicle, wwap with electric one.");
+                                                         $"Force electric! Parked vehicle {parkedVehicleId} is not electric vehicle, swap with electric one.");
 
                         if (AdvancedParkingManager.SwapParkedVehicleWithElectric(
                                 logParkingAi: logParkingAi,
