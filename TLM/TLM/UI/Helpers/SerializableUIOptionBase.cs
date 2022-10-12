@@ -12,7 +12,6 @@ namespace TrafficManager.UI.Helpers {
 
     public abstract class SerializableUIOptionBase<TVal, TUI, TComponent> : ILegacySerializableOption
         where TUI : UIComponent
-        where TVal : IConvertible
     {
 
         /// <summary>Use as tooltip for readonly UI components.</summary>

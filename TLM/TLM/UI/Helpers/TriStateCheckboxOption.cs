@@ -10,7 +10,7 @@ namespace TrafficManager.UI.Helpers {
     using TrafficManager.Util;
 
     public class TriStateCheckboxOption :
-        SerializableUIOptionBase<TernaryBool, UITriStateCheckbox, TriStateCheckboxOption>, IValuePropagator {
+        SerializableUIOptionBase<bool?, UITriStateCheckbox, TriStateCheckboxOption>, IValuePropagator {
         private const int LABEL_MAX_WIDTH = 615;
         private const int LABEL_MAX_WIDTH_INDENTED = 600;
 
@@ -35,7 +35,7 @@ namespace TrafficManager.UI.Helpers {
 
         public void Propagate(bool value) {
             if (!value)
-                Value2 = null;
+                Value = null;
         }
 
         private void PropagateAll(bool value) {
@@ -45,26 +45,28 @@ namespace TrafficManager.UI.Helpers {
 
         public override string ToString() => FieldName;
 
-        public override void Load(byte data) => Value = (TernaryBool)data;
+        public override void Load(byte data) =>
+            Value = TernaryBoolUtil.ToOptBool((TernaryBool)data);
 
-        public override byte Save() => (byte)Value;
+        public override byte Save() =>
+            (byte)TernaryBoolUtil.ToTernaryBool(Value);
 
-        public override TernaryBool Value {
+        public override bool? Value {
             get => base.Value;
             set {
                 if (value != base.Value) {
                     base.Value = value;
                     Log.Info($"TriStateCheckboxOption.Value: `{FieldName}` changed to {value}");
-                    PropagateAll(Value2.HasValue);
+                    PropagateAll(value.HasValue);
 
                     if (Shortcuts.IsMainThread()) {
                         if (HasUI) {
-                            _ui.Value = Value2;
+                            _ui.Value = value;
                         }
                     } else {
                         SimulationManager.instance.m_ThreadingWrapper.QueueMainThread(() => {
                             if (HasUI) {
-                                _ui.Value = Value2;
+                                _ui.Value = value;
                             }
                         });
                     }
@@ -72,19 +74,9 @@ namespace TrafficManager.UI.Helpers {
             }
         }
 
-        public bool? Value2 {
-            get => TernaryBoolUtil.ToOptBool(Value);
-            set => Value = TernaryBoolUtil.ToTernaryBool(value);
-        }
-
-        public static implicit operator bool?(TriStateCheckboxOption a) => a.Value2;
-
-        private void HandleValueChanged(UIComponent c, bool? value) =>
-            InvokeOnValueChanged(TernaryBoolUtil.ToTernaryBool(value));
-
         public override TriStateCheckboxOption AddUI(UIHelperBase container) {
             _ui = container.AddUIComponent<UITriStateCheckbox>();
-            _ui.eventValueChanged += HandleValueChanged;
+            _ui.eventValueChanged += (_,val) => InvokeOnValueChanged(val);
             if (Indent) ApplyIndent(_ui);
             UpdateLabel();
             ApplyTextWrap(_ui, Indent);

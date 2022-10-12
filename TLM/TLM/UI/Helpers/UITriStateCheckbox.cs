@@ -57,7 +57,7 @@ namespace TrafficManager.UI.Helpers {
             sprite.atlas = atlas;
             sprite.spriteName = names[0];
             sprite.tooltip = "no";
-            sprite.size = new(60, 22); 
+            sprite.size = new(50, 22);
             sprite.relativePosition = new Vector2(0, Mathf.FloorToInt((height - sprite.height) / 2));
             FalseComponent = sprite;
 
@@ -80,7 +80,9 @@ namespace TrafficManager.UI.Helpers {
             label = AddUIComponent<UILabel>();
             label.text = name;
             label.textScale = 1.125f;
-            label.relativePosition = new Vector2(sprite.width + 5f, Mathf.FloorToInt((height - label.height) / 2));
+            label.relativePosition = new Vector2(
+                sprite.relativePosition.x + sprite.width + 5f,
+                Mathf.FloorToInt((height - label.height) / 2)); 
         }
 
         public override void Start() {
