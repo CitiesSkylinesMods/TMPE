@@ -17,6 +17,7 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.Util.Extensions;
     using System.Text;
     using System.Runtime.CompilerServices;
+    using static NetInfo;
 
     public class RoutingManager
         : AbstractGeometryObservingManager,
@@ -1774,6 +1775,28 @@ namespace TrafficManager.Manager.Impl {
             }
 
             return reverse;
+        }
+
+        public bool SupportsTrolleyBus(LaneTransitionData transition, uint otherLaneId) {
+            // should not be invalid.
+            // relaxed is also accepted.
+            if (transition.type == LaneEndTransitionType.Invalid)
+                return false;
+
+            // should be vehicle.
+            if ((transition.group & LaneEndTransitionGroup.Vehicle) == 0)
+                return false;
+
+            // both lanes should support trolleybus.
+            var laneInfo1 = transition.laneId.ToLane().m_segment.ToSegment().Info.m_lanes[transition.laneIndex];
+            if (!laneInfo1.m_vehicleType.IsFlagSet(VehicleInfo.VehicleType.Trolleybus))
+                return false;
+
+            var laneInfo2 = ExtLaneManager.Instance.GetLaneInfo(otherLaneId);
+            if (!laneInfo2.m_vehicleType.IsFlagSet(VehicleInfo.VehicleType.Trolleybus))
+                return false;
+
+            return true;
         }
     }
 }

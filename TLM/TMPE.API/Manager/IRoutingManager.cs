@@ -35,6 +35,15 @@ namespace TrafficManager.API.Manager {
         int CalcInnerSimilarLaneIndex(NetInfo.Lane laneInfo);
         int CalcOuterSimilarLaneIndex(ushort segmentId, int laneIndex);
         int CalcOuterSimilarLaneIndex(NetInfo.Lane laneInfo);
+
+        /// <summary>
+        /// tests if trolleybuses can use the given transition from/to the given lane.
+        /// </summary>
+        /// <param name="otherLaneId">
+        /// source lane ID for forward transition,
+        /// target lane ID for backward transition,
+        /// </param>
+        bool SupportsTrolleyBus(LaneTransitionData transition, uint otherLaneId);
     }
 
     public struct SegmentRoutingData {
