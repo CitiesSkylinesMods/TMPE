@@ -76,7 +76,7 @@ namespace TrafficManager.UI.Helpers {
 
         public override TriStateCheckboxOption AddUI(UIHelperBase container) {
             _ui = container.AddUIComponent<UITriStateCheckbox>();
-            _ui.eventValueChanged += (_,val) => InvokeOnValueChanged(val);
+            _ui.EventValueChanged += (_,val) => InvokeOnValueChanged(val);
             if (Indent) ApplyIndent(_ui);
             UpdateLabel();
             ApplyTextWrap(_ui, Indent);
