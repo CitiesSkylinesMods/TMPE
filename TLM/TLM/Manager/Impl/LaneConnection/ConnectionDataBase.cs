@@ -66,7 +66,6 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
         /// <summary>removes the connection from source to target lane at the given node</summary>
         internal bool Disconnect(uint sourceLaneId, uint targetLaneId, ushort nodeId) {
             if(sourceLaneId == targetLaneId) {
-                RemoveConnection(sourceLaneId, targetLaneId, nodeId);
                 return RemoveConnection(sourceLaneId, targetLaneId, nodeId);
             }
 
