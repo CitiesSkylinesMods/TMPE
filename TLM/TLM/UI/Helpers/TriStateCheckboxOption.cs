@@ -8,6 +8,7 @@ namespace TrafficManager.UI.Helpers {
     using JetBrains.Annotations;
     using System.Collections.Generic;
     using TrafficManager.Util;
+    using System;
 
     public class TriStateCheckboxOption :
         SerializableUIOptionBase<bool?, UITriStateCheckbox, TriStateCheckboxOption>, IValuePropagator {
@@ -34,8 +35,14 @@ namespace TrafficManager.UI.Helpers {
             GetTargetPropagates(value).Add(target);
 
         public void Propagate(bool value) {
-            if (!value)
+            if (!value) {
+                // this tristate button depends on another option that has been disabled.
                 Value = null;
+            } else {
+                // Don't know to set to true or false because both are none-null.
+                // I don't think it makes sense for other options to depend on tristate checkbox anyway.
+                throw new NotImplementedException("other options cannot depend on tristate checkbox");
+            }
         }
 
         private void PropagateAll(bool value) {
