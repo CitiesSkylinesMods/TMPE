@@ -26,6 +26,8 @@ namespace TrafficManager.Util.Record {
                                    : (float?)null;
         }
 
+        public bool IsDefault() => speedLimit_ == null;
+
         public void Restore() => Transfer(LaneId);
 
         public void Transfer(Dictionary<InstanceID, InstanceID> map) =>

@@ -1,4 +1,4 @@
-using System;
+using System.Linq;
 using System.Collections.Generic;
 
 namespace TrafficManager.Util.Record {
@@ -19,6 +19,18 @@ namespace TrafficManager.Util.Record {
         /// <param name="map">maps old Instance IDs to new Instance IDs</param>
         void Transfer(Dictionary<InstanceID, InstanceID> map);
 
+        /// <summary>
+        /// Detects if record is empty to help releasing empty records from memory.
+        /// </summary>
+        /// <returns>true if record stores only default values. false if record stores any useful information.</returns>
+        bool IsDefault();
+
         byte[] Serialize();
+    }
+
+    public static class RecordUtil {
+        public static bool IsDefault<T>(this IEnumerable<T> records)
+            where T : IRecordable =>
+            records == null || records.All(record => record.IsDefault());
     }
 }
