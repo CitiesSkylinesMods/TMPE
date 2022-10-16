@@ -29,7 +29,7 @@ namespace TrafficManager.Util.Record {
     }
 
     public static class RecordUtil {
-        public static bool IsDefault<T>(this IEnumerable<T> records)
+        public static bool AreDefault<T>(this IEnumerable<T> records)
             where T : IRecordable =>
             records == null || records.All(record => record.IsDefault());
     }

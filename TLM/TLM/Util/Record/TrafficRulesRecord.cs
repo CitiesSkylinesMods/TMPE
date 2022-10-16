@@ -64,7 +64,7 @@ namespace TrafficManager.Util.Record {
             }
         }
 
-        public bool IsDefault() => Records.IsDefault();
+        public bool IsDefault() => Records.AreDefault();
 
         public void Record() {
             foreach (ushort nodeId in NodeIDs)

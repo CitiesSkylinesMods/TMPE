@@ -38,8 +38,8 @@ namespace TrafficManager.Util.Record {
             return
                 parkingForward_ == true &&
                 parkingBackward_ == true &&
-                speedLanes_.IsDefault() &&
-                vehicleRestrictionsLanes_.IsDefault();
+                speedLanes_.AreDefault() &&
+                vehicleRestrictionsLanes_.AreDefault();
         }
 
         public void Restore() {
