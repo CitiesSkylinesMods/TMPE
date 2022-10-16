@@ -730,7 +730,10 @@ namespace TrafficManager.UI {
                 }
             } else if (SelectedNodeId != 0 && KeybindSettingsBase.RestoreDefaultsKey.KeyDown(e)) {
                 ushort nodeId = SelectedNodeId;
-                SimulationManager.instance.AddAction(() => PriorityRoad.EraseAllTrafficRoadsForNode(nodeId));
+                SimulationManager.instance.m_ThreadingWrapper.QueueSimulationThread(() => {
+                    PriorityRoad.EraseAllTrafficRoadsForNode(nodeId);
+                    SimulationManager.instance.m_ThreadingWrapper.QueueMainThread(RoadSelectionUtil.ShowMassEditOverlay);
+                });
             }
         }
 

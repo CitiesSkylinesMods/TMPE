@@ -185,7 +185,7 @@ namespace TrafficManager.UI {
             if (tool && tool.GetToolMode() == ToolMode.None) {
                 if (!UI.SubTools.PrioritySigns.MassEditOverlay.IsActive) {
                     if (ShouldShowMassEditOverlay()) {
-                        ShowMassEditOverlay();
+                        RoadSelectionUtil.ShowMassEditOverlay();
                     }
                 } else {
                     if (!ShouldShowMassEditOverlay()) {
@@ -234,21 +234,6 @@ namespace TrafficManager.UI {
             roadSelectLabel.isVisible = false;
             roadSelectLegend.isVisible = false;
             roadSelectSprite.isVisible = false;
-        }
-
-        /// <summary>
-        /// Enables and refreshes overlay for various traffic rules influenced by road selection panel.
-        /// </summary>
-        private void ShowMassEditOverlay() {
-            var tmTool = ModUI.GetTrafficManagerTool();
-            if (tmTool == null) {
-                Log.Error("ModUI.GetTrafficManagerTool() returned null");
-                return;
-            }
-            UI.SubTools.PrioritySigns.MassEditOverlay.Show = true;
-            tmTool.SetToolMode(ToolMode.None);
-            tmTool.InitializeSubTools();
-            Log._Debug("Mass edit overlay enabled");
         }
 
         private void HideMassEditOverlay() {
@@ -452,11 +437,11 @@ namespace TrafficManager.UI {
                     if (!IsActive()) {
                         Root.Function = this.Function;
                         Root.Record = Do();
-                        Root.EnqueueAction(Root.ShowMassEditOverlay);
+                        Root.EnqueueAction(RoadSelectionUtil.ShowMassEditOverlay);
                     } else {
                         Root.Function = FunctionModes.None;
                         Undo();
-                        Root.EnqueueAction(Root.ShowMassEditOverlay);
+                        Root.EnqueueAction(RoadSelectionUtil.ShowMassEditOverlay);
                     }
                 }
                 #endregion
