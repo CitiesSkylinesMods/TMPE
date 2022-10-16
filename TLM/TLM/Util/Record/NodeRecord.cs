@@ -24,7 +24,7 @@ namespace TrafficManager.Util.Record {
         }
 
         public bool IsDefault() =>
-            trafficLight_ == null && lanes_.IsDefault();
+            trafficLight_ == null && lanes_.AreDefault();
 
         public void Restore() {
             tlMan.SetHasTrafficLight(NodeId, trafficLight_);

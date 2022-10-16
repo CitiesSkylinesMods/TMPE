@@ -47,7 +47,7 @@ namespace TrafficManager.Util.Record {
                 enteringBlockedJunctionAllowed_ == TernaryBool.Undefined &&
                 pedestrianCrossingAllowed_ == TernaryBool.Undefined &&
                 prioirtySign_ == PriorityType.None &&
-                arrowLanes_.IsDefault();
+                arrowLanes_.AreDefault();
         }
 
         public void Record() {
