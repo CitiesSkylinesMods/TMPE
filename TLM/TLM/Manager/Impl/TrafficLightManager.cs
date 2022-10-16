@@ -12,6 +12,8 @@ namespace TrafficManager.Manager.Impl {
     using ColossalFramework;
     using TrafficManager.TrafficLight.Impl;
     using TrafficManager.API.Traffic.Data;
+    using static EconomyManager;
+    using UnityEngine.Networking.Types;
 
     /// <summary>
     /// Manages traffic light toggling
@@ -157,6 +159,14 @@ namespace TrafficManager.Manager.Impl {
             return flags.IsFlagSet(NetNode.Flags.CustomTrafficLights)
                 ? HasTrafficLight(nodeId)
                 : null;
+        }
+
+        public void SetHasTrafficLight(ushort nodeId, bool? value) {
+            if (value == null) {
+                ResetTrafficLightAndPrioritySignsFromNode(nodeId);
+            } else {
+                SetTrafficLight(nodeId, value.Value, ref nodeId.ToNode());
+            }
         }
 
         bool ITrafficLightManager.CanToggleTrafficLight(ushort nodeId) {

@@ -38,6 +38,18 @@ namespace TrafficManager.Util.Record {
         private static TrafficPriorityManager priorityMan => TrafficPriorityManager.Instance;
         private static JunctionRestrictionsManager JRMan => JunctionRestrictionsManager.Instance;
 
+        public bool IsDefault() {
+            return
+                uturnAllowed_ == TernaryBool.Undefined &&
+                nearTurnOnRedAllowed_ == TernaryBool.Undefined &&
+                farTurnOnRedAllowed_ == TernaryBool.Undefined &&
+                laneChangingAllowedWhenGoingStraight_ == TernaryBool.Undefined &&
+                enteringBlockedJunctionAllowed_ == TernaryBool.Undefined &&
+                pedestrianCrossingAllowed_ == TernaryBool.Undefined &&
+                prioirtySign_ == PriorityType.None &&
+                arrowLanes_.IsDefault();
+        }
+
         public void Record() {
             uturnAllowed_ = JRMan.GetUturnAllowed(SegmentId, StartNode);
             nearTurnOnRedAllowed_ = JRMan.GetNearTurnOnRedAllowed(SegmentId, StartNode);
