@@ -12,8 +12,6 @@ namespace TrafficManager.Manager.Impl {
     using ColossalFramework;
     using TrafficManager.TrafficLight.Impl;
     using TrafficManager.API.Traffic.Data;
-    using static EconomyManager;
-    using UnityEngine.Networking.Types;
 
     /// <summary>
     /// Manages traffic light toggling

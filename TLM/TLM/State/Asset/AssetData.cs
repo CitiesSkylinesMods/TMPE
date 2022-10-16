@@ -37,10 +37,14 @@ namespace TrafficManager.State.Asset {
             if (!HasPaths(prefab)) {
                 return null;
             }
-                
+            var record = RecordAll();
+            if (record == null || record.IsDefault()) {
+                return null;
+            }
+
             return new AssetData {
                 Version = VersionUtil.ModVersion,
-                Record = RecordAll(),
+                Record = record,
                 PathNetworkIDs = GetPathsNetworkIDs(prefab),
             };
         }

@@ -43,7 +43,7 @@ namespace TrafficManager.Lifecycle {
                 Log.Info("AssetDataExtension.OnAssetSavedImpl():  prefab is " + prefab);
                 var assetData = AssetData.GetAssetData(prefab);
                 if (assetData == null) {
-                    Log._Debug("AssetDataExtension.OnAssetSavedImpl(): No segments to record.");
+                    Log._Debug("AssetDataExtension.OnAssetSavedImpl(): Nothing to record.");
                 } else {
                     Log._Debug("AssetDataExtension.OnAssetSavedImpl(): assetData=" + assetData);
                     userData = new Dictionary<string, byte[]>();
