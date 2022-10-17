@@ -65,6 +65,10 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
 
         /// <summary>removes the connection from source to target lane at the given node</summary>
         internal bool Disconnect(uint sourceLaneId, uint targetLaneId, ushort nodeId) {
+            if(sourceLaneId == targetLaneId) {
+                return RemoveConnection(sourceLaneId, targetLaneId, nodeId);
+            }
+
             // if backward connection exists (uni-directional) then just disable the connection.
             // otherwise delete both connections.
             bool backward = IsConnectedTo(targetLaneId, sourceLaneId, nodeId);
