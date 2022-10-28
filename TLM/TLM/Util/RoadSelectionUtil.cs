@@ -5,9 +5,7 @@ namespace TrafficManager.Util {
     using ColossalFramework;
     using ICities;
     using CSUtil.Commons;
-    using static TrafficManager.Util.Shortcuts;
-    using static NetAdjust;
-    using static SegmentTraverser;
+    using TrafficManager.UI;
 
     public class RoadSelectionUtil {
         public RoadSelectionUtil() : base() {
@@ -16,6 +14,21 @@ namespace TrafficManager.Util {
 
         // instance of singleton
         public static RoadSelectionUtil Instance { get; private set; }
+
+        /// <summary>
+        /// Enables and refreshes overlay for various traffic rules influenced by road selection panel.
+        /// </summary>
+        public static void ShowMassEditOverlay() {
+            var tmTool = ModUI.GetTrafficManagerTool();
+            if (tmTool == null) {
+                Log.Error("ModUI.GetTrafficManagerTool() returned null");
+                return;
+            }
+            UI.SubTools.PrioritySigns.MassEditOverlay.Show = true;
+            tmTool.SetToolMode(ToolMode.None);
+            tmTool.InitializeSubTools();
+            Log._Debug("Mass edit overlay enabled");
+        }
 
         public static void Release() {
             if (Instance != null) {
@@ -164,7 +177,7 @@ namespace TrafficManager.Util {
                         RoadSelectionUtil.Instance.OnChanged?.Invoke();
                     }
                     prev_segmentID = segmentID;
-                }catch(Exception e) {
+                } catch(Exception e) {
                     Log.Error(e.Message);
                 }
             }

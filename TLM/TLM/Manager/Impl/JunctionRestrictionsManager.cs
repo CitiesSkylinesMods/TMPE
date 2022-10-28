@@ -855,6 +855,19 @@ namespace TrafficManager.Manager.Impl {
             return ret;
         }
 
+        public bool ClearNode(ushort nodeId) {
+            bool ret = false;
+            ref NetNode node = ref nodeId.ToNode();
+            for (int segmentIndex = 0; segmentIndex < Constants.MAX_SEGMENTS_OF_NODE; ++segmentIndex) {
+                ushort segmentId = node.GetSegment(segmentIndex);
+                if (segmentId != 0) {
+                    bool startNode = segmentId.ToSegment().IsStartNode(nodeId);
+                    ret |= ClearSegmentEnd(segmentId, startNode);
+                }
+            }
+            return ret;
+        }
+
         private void SetSegmentJunctionRestrictions(ushort segmentId, bool startNode, JunctionRestrictions restrictions) {
             if (restrictions.HasValue(JunctionRestrictionFlags.AllowUTurn)) {
                 SetUturnAllowed(segmentId, startNode, restrictions.GetValueOrDefault(JunctionRestrictionFlags.AllowUTurn));
