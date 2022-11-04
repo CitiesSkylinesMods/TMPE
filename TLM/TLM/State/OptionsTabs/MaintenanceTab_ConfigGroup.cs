@@ -14,12 +14,19 @@ namespace TrafficManager.State {
             Handler = OnResetGlobalConfigClicked,
         };
 
+        public static DropDownOption<ConfigData.DebugSwitch> DebugSwitch = new(
+            nameof(DebugSwitch), Options.PersistTo.Global) {
+            Label = "Debug Switch",
+            Value = ConfigData.DebugSwitch.None,
+        };
+
         internal static void AddUI(UIHelperBase tab) {
 
             var group = tab.AddGroup(T("Group:Configuration"));
 
             ReloadGlobalConfig.AddUI(group);
             ResetGlobalConfig.AddUI(group);
+            DebugSwitch.AddUI(group);
         }
 
         private static string T(string key) => Translation.Options.Get(key);

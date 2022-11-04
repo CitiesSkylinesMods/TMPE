@@ -8,6 +8,7 @@ namespace TrafficManager.State.ConfigData {
     using CSUtil.Commons;
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.Traffic;
+    using System.Diagnostics;
 
 #if DEBUG
     /// <summary>
@@ -51,41 +52,37 @@ namespace TrafficManager.State.ConfigData {
             // Added a new flag? Bump LATEST_VERSION in GlobalConfig!
         };
 
-        private int nodeId_ = 0;
+        internal static DebugSwitch DebugSwitch => MaintenanceTab_ConfigGroup.DebugSwitch.Value;
 
-        public static int NodeId => GlobalConfig.Instance.Debug.nodeId_;
+        private static InstanceID SelectedInstance => InstanceManager.instance.GetSelectedInstance();
+        private static DebugSettings Instance => GlobalConfig.Instance.Debug;
+        private static ushort Get(ushort val1, ushort val2) => val1 != 0 ? val1 : val2;
+        private static uint Get(uint val1, uint val2) => val1 != 0 ? val1 : val2;
 
-        private int segmentId_ = 0;
+        public static ushort NodeId => SelectedInstance.NetNode;
 
-        public static int SegmentId => GlobalConfig.Instance.Debug.segmentId_;
+        public static ushort SegmentId => SelectedInstance.NetSegment;
 
-        private int startSegmentId_ = 0;
+        private ushort startSegmentId_ = 0;
 
-        public static int StartSegmentId => GlobalConfig.Instance.Debug.startSegmentId_;
+        public static ushort StartSegmentId => Get(Instance.startSegmentId_, SegmentId);
 
-        private int endSegmentId_ = 0;
+        private ushort endSegmentId_ = 0;
 
-        public static int EndSegmentId => GlobalConfig.Instance.Debug.endSegmentId_;
+        public static int EndSegmentId => Get(Instance.endSegmentId_, SegmentId);
 
-        private int vehicleId_ = 0;
+        public static int VehicleId => SelectedInstance.Vehicle;
 
-        public static int VehicleId => GlobalConfig.Instance.Debug.vehicleId_;
+        public static int CitizenInstanceId => SelectedInstance.CitizenInstance;
 
-        private int citizenInstanceId_ = 0;
-
-        public static int CitizenInstanceId => GlobalConfig.Instance.Debug.citizenInstanceId_;
-
-        private uint citizenId_ = 0;
-
-        public static uint CitizenId => GlobalConfig.Instance.Debug.citizenId_;
+        public static uint CitizenId => SelectedInstance.Citizen;
 
         private uint sourceBuildingId_ = 0;
 
-        public static uint SourceBuildingId => GlobalConfig.Instance.Debug.sourceBuildingId_;
+        public static uint SourceBuildingId => Get(Instance.sourceBuildingId_, SelectedInstance.Building);
 
         private uint targetBuildingId_ = 0;
-
-        public static uint TargetBuildingId => GlobalConfig.Instance.Debug.targetBuildingId_;
+        public static uint TargetBuildingId => Get(Instance.targetBuildingId_, SelectedInstance.Building);
 
         [Obsolete]
         public ExtVehicleType ExtVehicleType = ExtVehicleType.None;
@@ -106,6 +103,7 @@ namespace TrafficManager.State.ConfigData {
     /// Indexes into Debug.Switches
     /// </summary>
     public enum DebugSwitch {
+        None = -1,
         PathFindingLog = 0,
         RoutingBasicLog = 1,
         BasicParkingAILog = 2,
@@ -178,7 +176,7 @@ namespace TrafficManager.State.ConfigData {
 
     internal static class DebugSwitchExtensions {
         public static bool Get(this DebugSwitch sw) {
-            return GlobalConfig.Instance.Debug.DebugSwitchValues[(int)sw].Value;
+            return DebugSettings.DebugSwitch == sw || GlobalConfig.Instance.Debug.DebugSwitchValues[(int)sw].Value;
         }
     }
 #endif
