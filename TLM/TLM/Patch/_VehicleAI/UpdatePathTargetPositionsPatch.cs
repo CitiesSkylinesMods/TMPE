@@ -10,6 +10,7 @@ namespace TrafficManager.Patch._VehicleAI {
     using Manager.Impl;
     using State;
     using State.ConfigData;
+    using TrafficManager.Patch._DefaultTool;
     using TrafficManager.Util.Extensions;
     using UnityEngine;
     using Util;
@@ -751,12 +752,11 @@ namespace TrafficManager.Patch._VehicleAI {
 
                     Vector3 nextSegDir;
                     float curMaxSpeed;
+                    PathUnit.Position nextNextPosition = default;
                     if (calculateNextNextPos) {
-                        if (!pathMan.m_pathUnits.m_buffer[nextPathId].GetNextPosition(
+                        pathMan.m_pathUnits.m_buffer[nextPathId].GetNextPosition(
                                 nextCoarsePathPosIndex,
-                                out PathUnit.Position nextNextPosition)) {
-                            nextNextPosition = default;
-                        }
+                                out nextNextPosition);
 
                         CalculateSegmentPosition2(
                             __instance,
@@ -952,6 +952,33 @@ namespace TrafficManager.Patch._VehicleAI {
                                                       nextLane: nextLaneId,
                                                       bezier: bezier,
                                                       stopOffset: out stopOffset) && stopOffset >= previousPathOffset;
+                            if (!calculateNextNextPos) {
+                                if ((vehicleData.m_flags & Vehicle.Flags.Reversed) != 0) {
+                                    calculateNextNextPos = vehicleData.m_trailingVehicle == 0;
+                                } else {
+                                    calculateNextNextPos = vehicleData.m_leadingVehicle == 0;
+                                }
+                                if (calculateNextNextPos) {
+                                    pathMan.m_pathUnits.m_buffer[nextPathId].GetNextPosition(
+                                        nextCoarsePathPosIndex,
+                                        out nextNextPosition);
+                                }
+                            }
+
+                            if (calculateNextNextPos && !needStopAtNode) {
+                                needStopAtNode = CustomNeedStopAtNode(
+                                    vehicleID, ref vehicleData,
+                                    nextNodeId, ref nextNodeId.ToNode(),
+                                    currentPosition, curLaneId,
+                                    nextPosition, nextLaneId,
+                                    nextNextPosition,
+                                    bezier,
+                                    out stopOffset) && stopOffset >= previousPathOffset;
+                                if (logLogic) {
+                                    Log._Debug($"CustomVehicle.CustomUpdatePathTargetPositions({vehicleID}): " +
+                                        $"needStopAtNode={needStopAtNode} stopOffset={stopOffset} previousPathOffset={previousPathOffset}");
+                                }
+                            }
 
                             pathOffset = (byte)Mathf.Min(pathOffset + pathOffsetDelta, 255);
 
@@ -981,7 +1008,8 @@ namespace TrafficManager.Patch._VehicleAI {
                             Log._DebugIf(
                                 logLogic,
                                 () => $"CustomVehicle.CustomUpdatePathTargetPositions({vehicleID}): " +
-                                $"sqrMagnitude2={sqrMagnitude2} >= minSqrDistA={minSqrDistA} and no need to stop at node");
+                                $"sqrMagnitude2={sqrMagnitude2} >= minSqrDistA={minSqrDistA}={sqrMagnitude2 >= minSqrDistA} " +
+                                $"needStopAtNode={needStopAtNode} pathOffset={pathOffset} stopOffset={stopOffset}");
 
                             if (index <= 0) {
                                 vehicleData.m_lastPathOffset = pathOffset;
@@ -1004,7 +1032,7 @@ namespace TrafficManager.Patch._VehicleAI {
                                     index);
                                 if (logLogic) {
                                     Log._Debug(
-                                        "CustomVehicle.CustomUpdatePathTargetPositions({vehicleID}): " +
+                                        $"CustomVehicle.CustomUpdatePathTargetPositions({vehicleID}): " +
                                         $"nextNodeId={nextNodeId} != 0: Updated node target position. " +
                                         $"targetPos={targetPos}, index={index}");
                                 }
@@ -1013,11 +1041,17 @@ namespace TrafficManager.Patch._VehicleAI {
                                     if (index <= 0) {
                                         vehicleData.m_lastPathOffset = previousPathOffset;
                                     }
-
                                     targetPos.w = 0f;
                                     while (index < max)
                                     {
                                         vehicleData.SetTargetPos(index++, targetPos);
+                                    }
+
+                                    if (logLogic) {
+                                        Log._Debug(
+                                            $"CustomVehicle.CustomUpdatePathTargetPositions({vehicleID}): " +
+                                            $"pathOffset={pathOffset} previousPathOffset={previousPathOffset} : " +
+                                            $"Stopped at node. FINISH.");
                                     }
                                     return false;
                                 }
@@ -1145,6 +1179,140 @@ namespace TrafficManager.Patch._VehicleAI {
             } // end while true
 
             // Unreachable
+        }
+
+        public static bool CustomNeedStopAtNode(
+            ushort vehicleID, ref Vehicle vehicle,
+            ushort nodeId, ref NetNode node,
+            PathUnit.Position prevPosition, uint prevLaneID,
+            PathUnit.Position nextPosition, uint nextLaneID,
+            PathUnit.Position nextNextPosition,
+            Bezier3 trajectory,
+            out byte stopOffset) {
+#if DEBUG
+            bool logLogic = DebugSwitch.CalculateSegmentPosition.Get()
+                && (GlobalConfig.Instance.Debug.ApiExtVehicleType == API.Traffic.Enums.ExtVehicleType.None
+                    || GlobalConfig.Instance.Debug.ApiExtVehicleType == API.Traffic.Enums.ExtVehicleType.RoadVehicle)
+                && (DebugSettings.VehicleId == 0 || DebugSettings.VehicleId == vehicleID);
+#else
+            var logLogic = false;
+#endif
+
+            ushort nextNextnodeID = nextPosition.m_segment.ToSegment().GetOtherNode(nodeId);
+
+            bool pass = VehicleBehaviorManager.Instance.MayChangeSegment(
+                vehicleID, ref vehicle,
+                vehicle.GetLastFrameVelocity().sqrMagnitude,
+                ref prevPosition, ref prevPosition.m_segment.ToSegment(), nodeId, prevLaneID,
+                ref nextPosition, nodeId, ref nodeId.ToNode(), nextLaneID,
+                ref nextNextPosition, nextNextnodeID, out _);
+            if (!pass) {
+                ushort leftSegmentId = GetNextSegment(prevPosition.m_segment, nodeId: nodeId, false);
+                ushort rightSegmentID = GetNextSegment(prevPosition.m_segment, nodeId, true);
+                // TODO consider LHT
+                uint laneId1 = GetOuterMostVehicleLaneID(leftSegmentId, nodeId, true, out var laneInfo1);
+                uint laneId2 = GetOuterMostVehicleLaneID(rightSegmentID, nodeId, false, out var laneInfo2);
+                if(laneId1 == 0 || laneId2 == 0) {
+                    stopOffset = 255;
+                    return false;
+                }
+                float hw = Mathf.Max(laneInfo1.m_width, laneInfo2.m_width) * 0.5f;
+
+                Bezier3 stopLine = default;
+                GetLaneEndPositionAndDirection(laneId1, nodeId, out stopLine.a, out Vector3 dira);
+                GetLaneEndPositionAndDirection(laneId2, nodeId, out stopLine.d, out Vector3 dird);
+                NetSegment.CalculateMiddlePoints(
+                    startPos: stopLine.a,
+                    startDir: dira,
+                    endPos: stopLine.d,
+                    endDir: dird,
+                    smoothStart: true,
+                    smoothEnd: true,
+                    middlePos1: out stopLine.b,
+                    middlePos2: out stopLine.c);
+
+                bool intersected = Bezier2.XZ(trajectory).Intersect(Bezier2.XZ(stopLine), out float t, out float t2, iterations: 8);
+                if (logLogic) {
+                    Log._Debug($"CarAI.CustomNeedStopAtNode({vehicleID}): " +
+                        $"intersected={intersected} t={t} t2={t2}");
+                    RenderOverlayPatch.Actions[1] = cameraInfo => trajectory.RenderDebugOverlay(cameraInfo, Color.blue, t);
+                    RenderOverlayPatch.Actions[2] = cameraInfo => stopLine.RenderDebugOverlay(cameraInfo, Color.red);
+                }
+
+                t = trajectory.Travel(t, -.5f - hw); // stop 0.5 meter behind the stop line.
+                stopOffset = (byte)Mathf.Clamp(t * 255, 0, 255);
+                if (logLogic) {
+                    Log._Debug($"CarAI.CustomNeedStopAtNode({vehicleID}) -> true stopOffset={stopOffset} t={t}");
+                }
+                return true;
+            } else {
+                if (logLogic) {
+                    Log._Debug($"CarAI.CustomNeedStopAtNode({vehicleID}) -> false");
+                    RenderOverlayPatch.Actions.Remove(1);
+                    RenderOverlayPatch.Actions.Remove(2);
+                }
+                stopOffset = 255;
+                return false;
+            }
+
+            static ushort GetNextSegment(ushort segmentId, ushort nodeId, bool right) {
+                ref NetSegment segment = ref segmentId.ToSegment();
+                if (segment.IsStartNode(nodeId)) {
+                    if (right) {
+                        return segment.m_startRightSegment;
+                    } else {
+                        return segment.m_startLeftSegment;
+                    }
+                } else {
+                    if (right) {
+                        return segment.m_endRightSegment;
+                    } else {
+                        return segment.m_endLeftSegment;
+                    }
+                }
+            }
+
+            // direction is normalized and going toward the node.
+            static void GetLaneEndPositionAndDirection(uint laneId, ushort nodeID, out Vector3 position, out Vector3 direction) {
+                ref NetLane lane = ref laneId.ToLane();
+                if (lane.IsStartNode(nodeID)) {
+                    position = lane.m_bezier.a;
+                    direction = position - lane.m_bezier.b;
+                } else {
+                    position = lane.m_bezier.d;
+                    direction = position - lane.m_bezier.c;
+                }
+                direction.Normalize();
+            }
+
+            static uint GetOuterMostVehicleLaneID(ushort segmentId, ushort nodeId, bool towardNode, out NetInfo.Lane laneInfo) {
+                ref NetSegment segment = ref segmentId.ToSegment();
+                NetInfo info = segment.Info;
+                bool startNode = segment.IsStartNode(nodeId);
+                bool invert = segment.m_flags.IsFlagSet(NetSegment.Flags.Invert);
+                bool right = towardNode ^ startNode ^ invert;
+
+                if (!right) {
+                    for (int i = 0; i < info.m_sortedLanes.Length; ++i) {
+                        int laneIndex = info.m_sortedLanes[i];
+                        laneInfo = info.m_lanes[laneIndex];
+                        if (RoutingManager.IsSupported(laneInfo)) {
+                            return ExtSegmentManager.Instance.GetLaneId(segmentId, laneIndex);
+                        }
+                    }
+                } else {
+                    for (int i = info.m_sortedLanes.Length - 1; i >= 0; --i) {
+                        int laneIndex = info.m_sortedLanes[i];
+                        laneInfo = info.m_lanes[laneIndex];
+                        if (RoutingManager.IsSupported(laneInfo)) {
+                            laneInfo = info.m_lanes[laneIndex];
+                            return ExtSegmentManager.Instance.GetLaneId(segmentId, laneIndex);
+                        }
+                    }
+                }
+                laneInfo = null;
+                return 0;
+            }
         }
     }
 }

@@ -63,9 +63,8 @@ namespace TrafficManager.Patch._VehicleAI._CarAI {
 
             ref NetSegment previousPositionSegment = ref prevPos.m_segment.ToSegment();
             ushort curTargetNodeId;
-            curTargetNodeId = prevOffset == 0
-                ? previousPositionSegment.m_startNode
-                : previousPositionSegment.m_endNode;
+            bool curStartNode = prevOffset == 0;
+            curTargetNodeId = previousPositionSegment.GetNodeId(curStartNode);
 
 #if DEBUG
             bool logCalculation = DebugSwitch.CalculateSegmentPosition.Get()
@@ -84,7 +83,7 @@ namespace TrafficManager.Patch._VehicleAI._CarAI {
                            $"position.m_offset={position.m_offset}\n" +
                            $"\tnextNextPosition.m_segment={nextPosition.m_segment}, " +
                            $"nextNextPosition.m_offset={nextPosition.m_offset}\n" +
-                           $"\tcurLaneId={prevLaneID}, prevOffset={prevOffset}\n" +
+                           $"\tcurLaneId={prevLaneID}, curOffset={prevOffset}\n" +
                            $"\tnextLaneId={laneID}, nextOffset={offset}\n" +
                            $"\tnextSourceNodeId={nextSourceNodeId}, nextTargetNodeId={nextTargetNodeId}\n" +
                            $"\tcurTargetNodeId={curTargetNodeId}, curTargetNodeId={curTargetNodeId}\n" +
@@ -99,6 +98,11 @@ namespace TrafficManager.Patch._VehicleAI._CarAI {
                 Constants.ByteToFloat(offset),
                 out pos,
                 out dir);
+
+            if (logCalculation) {
+                Log._Debug($"CustomCarAI.CustomCalculateSegmentPosition({vehicleID}): " +
+                    $"CalculatePositionAndDirection(laneID={laneID}, offset={offset})-> pos={pos} dir={dir}");
+            }
 
             float braking = __instance.m_info.m_braking;
             if ((vehicleData.m_flags & Vehicle.Flags.Emergency2) != 0) {
@@ -121,7 +125,17 @@ namespace TrafficManager.Patch._VehicleAI._CarAI {
                 ref NetNode nextSourceNode = ref nextSourceNodeId.ToNode();
 
                 // NON-STOCK CODE START (stock code replaced)
-                if (!VehicleBehaviorManager.Instance.MayChangeSegment(
+                bool crossing = JunctionRestrictionsManager.Instance.IsPedestrianCrossingAllowed(
+                    segmentId: prevPos.m_segment,
+                    startNode: curStartNode);
+                bool needCheck = Options.simulationAccuracy < SimulationAccuracy.VeryHigh || crossing;
+
+                if (logCalculation) {
+                    Log._Debug($"CustomCarAI.CustomCalculateSegmentPosition({vehicleID}): " +
+                        $"crossing={crossing} needCheck={needCheck}");
+                }
+
+                if (needCheck && !VehicleBehaviorManager.Instance.MayChangeSegment(
                         vehicleID,
                         ref vehicleData,
                         sqrVelocity,

@@ -32,6 +32,8 @@ namespace TrafficManager.Manager.Impl {
         /// </summary>
         public ExtSegmentEnd[] ExtSegmentEnds { get; }
 
+        public ref ExtSegmentEnd GetEnd(ushort segmentId, bool startNode) => ref ExtSegmentEnds[GetIndex(segmentId, startNode)];
+        public ref ExtSegmentEnd GetEnd(ushort segmentId, ushort nodeID) => ref ExtSegmentEnds[GetIndex(segmentId, nodeID)];
 #if DEBUG
         public string GenerateVehicleChainDebugInfo(ushort segmentId, bool startNode) {
             int index = GetIndex(segmentId, startNode);
