@@ -125,14 +125,10 @@ namespace TrafficManager.Patch._VehicleAI._CarAI {
                 ref NetNode nextSourceNode = ref nextSourceNodeId.ToNode();
 
                 // NON-STOCK CODE START (stock code replaced)
-                bool crossing = JunctionRestrictionsManager.Instance.IsPedestrianCrossingAllowed(
-                    segmentId: prevPos.m_segment,
-                    startNode: curStartNode);
-                bool needCheck = Options.simulationAccuracy < SimulationAccuracy.VeryHigh || crossing;
+                bool needCheck = !StopLineUtil.NeedsStopLineOffset(prevPos.m_segment, curTargetNodeId);
 
                 if (logCalculation) {
-                    Log._Debug($"CustomCarAI.CustomCalculateSegmentPosition({vehicleID}): " +
-                        $"crossing={crossing} needCheck={needCheck}");
+                    Log._Debug($"CustomCarAI.CustomCalculateSegmentPosition({vehicleID}): needCheck={needCheck}");
                 }
 
                 if (needCheck && !VehicleBehaviorManager.Instance.MayChangeSegment(

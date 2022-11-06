@@ -12,8 +12,12 @@ namespace TrafficManager.Patch._DefaultTool {
     [HarmonyPatch(typeof(DefaultTool), "RenderOverlay")]
     [UsedImplicitly]
     public static class RenderOverlayPatch {
-        // id : render action
+        /// <summary>
+        /// key : id
+        /// value : render action
+        /// </summary>
         public static Dictionary<int, Action<RenderManager.CameraInfo>> Actions = new();
+
         public static void RenderDebugOverlay(this Bezier3 bezier, RenderManager.CameraInfo cameraInfo, Color color) {
             float y = bezier.a.y;
             RenderManager.instance.OverlayEffect.DrawBezier(
