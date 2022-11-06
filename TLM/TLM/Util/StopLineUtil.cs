@@ -12,6 +12,14 @@ public static class StopLineUtil {
 
     public static float ToFloatOffset(this byte offset) => offset * (1/255);
     public static byte ToByteOffset(this float t) => (byte)Mathf.Clamp(t * 255, 0, 255);
+    public static uint GetLaneID(this ref PathUnit.Position pathPos) =>
+        ExtSegmentManager.Instance.GetLaneId(pathPos.m_segment, pathPos.m_lane);
+
+    public static uint GetNodeId(this ref PathUnit.Position pathPos) => pathPos.m_offset switch {
+        0 => pathPos.m_segment.ToSegment().m_startNode,
+        255 => pathPos.m_segment.ToSegment().m_endNode,
+        _ => 0,
+    };
 
     public static bool CanConflict(NetInfo.Lane laneInfo) => laneInfo.Matches(LANE_TYPES, VEHICLE_TYPES);
 
