@@ -81,6 +81,8 @@ namespace TrafficManager.Patch._VehicleAI {
                     $"\tminSqrDistanceB={minSqrDistanceB}\n\tvehicleData.m_path={vehicleData.m_path}\n" +
                     $"\tvehicleData.m_pathPositionIndex={vehicleData.m_pathPositionIndex}\n" +
                     $"\tvehicleData.m_lastPathOffset={vehicleData.m_lastPathOffset}");
+                RenderOverlayPatch.Actions.Clear();
+                RenderOverlayPatch.Actions[10] = c => refPos.RenderDebugOverlay(c, Color.cyan);
             }
 
             PathManager pathMan = Singleton<PathManager>.instance;
@@ -89,7 +91,7 @@ namespace TrafficManager.Patch._VehicleAI {
             Vector4 targetPos = vehicleData.m_targetPos0;
             targetPos.w = 1000f;
 
-            float minSqrDistA = minSqrDistanceA;
+            float minSqrDist = minSqrDistanceA;
             uint pathId = vehicleData.m_path;
             byte finePathPosIndex = vehicleData.m_pathPositionIndex;
             byte pathOffset = vehicleData.m_lastPathOffset;
@@ -180,7 +182,7 @@ namespace TrafficManager.Patch._VehicleAI {
                             ++iter;
 
                             if (iter != 0) {
-                                float distDiff = Mathf.Sqrt(minSqrDistA) - Vector3.Distance(targetPos, refPos);
+                                float distDiff = Mathf.Sqrt(minSqrDist) - Vector3.Distance(targetPos, refPos);
                                 int pathOffsetDelta;
                                 if (distDiff < 0f) {
                                     pathOffsetDelta = 4;
@@ -260,20 +262,20 @@ namespace TrafficManager.Patch._VehicleAI {
                                 $"Set targetPos={targetPos}, refPosSqrDist={refPosSqrDist}, " +
                                 $"curSegPos={curSegPos}, refPos={refPos}");
 
-                            if (refPosSqrDist >= minSqrDistA) {
+                            if (refPosSqrDist >= minSqrDist) {
                                 if (index <= 0) {
                                     vehicleData.m_lastPathOffset = pathOffset;
                                 }
 
                                 vehicleData.SetTargetPos(index++, targetPos);
-                                minSqrDistA = minSqrDistanceB;
+                                minSqrDist = minSqrDistanceB;
                                 refPos = targetPos;
                                 targetPos.w = 1000f;
                                 if (logLogic) {
                                     Log._Debug(
                                         $"CustomVehicle.CustomUpdatePathTargetPositions({vehicleID}): " +
-                                        $"refPosSqrDist >= minSqrDistA: index={index}, " +
-                                        $"refPosSqrDist={refPosSqrDist}, minSqrDistA ={minSqrDistA}, " +
+                                        $"refPosSqrDist >= minSqrDist: index={index}, " +
+                                        $"refPosSqrDist={refPosSqrDist}, minSqrDist ={minSqrDist}, " +
                                         $"refPos={refPos}, targetPos={targetPos}");
                                 }
 
@@ -292,8 +294,8 @@ namespace TrafficManager.Patch._VehicleAI {
                             if (logLogic) {
                                 Log._Debug(
                                     $"CustomVehicle.CustomUpdatePathTargetPositions({vehicleID}): " +
-                                    $"refPosSqrDist < minSqrDistA: refPosSqrDist={refPosSqrDist}, " +
-                                    $"index={index}, minSqrDistA={minSqrDistA}, " +
+                                    $"refPosSqrDist < minSqrDist: refPosSqrDist={refPosSqrDist}, " +
+                                    $"index={index}, minSqrDist={minSqrDist}, " +
                                     $"refPos={refPos}, targetPos={targetPos}, curSegPos={curSegPos}");
                             }
                         } // while (pathOffset != currentPosition.m_offset)
@@ -657,7 +659,7 @@ namespace TrafficManager.Patch._VehicleAI {
                         ref targetPos))
                 {
                     float targetPos0ToRefPosSqrDist = ((Vector3)targetPos - refPos).sqrMagnitude;
-                    if (targetPos0ToRefPosSqrDist >= minSqrDistA) {
+                    if (targetPos0ToRefPosSqrDist >= minSqrDist) {
                         vehicleData.SetTargetPos(index++, targetPos);
                     }
 
@@ -868,11 +870,12 @@ namespace TrafficManager.Patch._VehicleAI {
                         float endRadius = currentSegmentInfo.m_netAI.GetEndRadius();
                         NetInfo.Lane currentSegmentLane = currentSegmentInfo.m_lanes[currentPosition.m_lane];
                         NetInfo.Lane currentSegmentNextLane = currentSegmentInfo.m_lanes[nextPosition.m_lane];
-                        float a = Mathf.Abs(currentSegmentLane.m_position - currentSegmentNextLane.m_position) * 0.75f;
-                        float num9 = Mathf.Max(currentSegmentLane.m_width, currentSegmentNextLane.m_width) * 0.5f;
-                        a = Mathf.Min(a, endRadius * (1f - currentSegmentInfo.m_pavementWidth / currentSegmentInfo.m_halfWidth) - num9);
-                        bezier.b = bezier.a + curSegDir * a * 1.333f;
-                        bezier.c = bezier.d + nextSegDir * a * 1.333f;
+                        float len = dist * 1.5f;
+                        float laneHalfWidth = Mathf.Max(currentSegmentLane.m_width, currentSegmentNextLane.m_width) * 0.5f;
+                        len = Mathf.Min(len, endRadius * (1f - currentSegmentInfo.m_pavementWidth / currentSegmentInfo.m_halfWidth) - laneHalfWidth);
+                        bezier.b = bezier.a + curSegDir * len * 1.333f;
+                        bezier.c = bezier.d + nextSegDir * len * 1.333f;
+                        if (logLogic) Log._Debug($"endRadius={endRadius} len={len}");
                     } else {
                         NetSegment.CalculateMiddlePoints(
                             bezier.a,
@@ -886,15 +889,17 @@ namespace TrafficManager.Patch._VehicleAI {
                             out dist);
                     }
                     // STOCK CODE END
-
-                    Log._DebugIf(
-                        logLogic,
-                        () => $"CustomVehicle.CustomUpdatePathTargetPositions({vehicleID}): " +
-                        $"Direction vectors normalized. curSegDir={curSegDir}, nextSegDir={nextSegDir}\n" +
-                        $"CustomVehicle.CustomUpdatePathTargetPositions({vehicleID}): " +
-                        $"Calculated bezier middle points. IN: bezier.a={bezier.a}, " +
-                        $"curSegDir={curSegDir}, bezier.d={bezier.d}, nextSegDir={nextSegDir}, " +
-                        $"true, true, OUT: bezier.b={bezier.b}, bezier.c={bezier.c}, dist={dist}");
+                    if (logLogic) {
+                        Log._DebugIf(
+                            logLogic,
+                            () => $"CustomVehicle.CustomUpdatePathTargetPositions({vehicleID}): " +
+                            $"Direction vectors normalized. curSegDir={curSegDir}, nextSegDir={nextSegDir}\n" +
+                            $"CustomVehicle.CustomUpdatePathTargetPositions({vehicleID}): " +
+                            $"Calculated bezier middle points. IN: bezier.a={bezier.a}, " +
+                            $"curSegDir={curSegDir}, bezier.d={bezier.d}, nextSegDir={nextSegDir}, " +
+                            $"true, true, OUT: bezier.b={bezier.b}, bezier.c={bezier.c}, dist={dist}");
+                        RenderOverlayPatch.Actions[11] = c => bezier.RenderDebugOverlay(c, Color.yellow);
+                    }
 
                     if (dist > 1f) {
                         ushort nextNodeId;
@@ -923,7 +928,7 @@ namespace TrafficManager.Patch._VehicleAI {
 
                         // update node target positions
                         while (pathOffset < 255) {
-                            float distDiff = Mathf.Sqrt(minSqrDistA) - Vector3.Distance(targetPos, refPos);
+                            float distDiff = Mathf.Sqrt(minSqrDist) - Vector3.Distance(targetPos, refPos);
                             int pathOffsetDelta;
                             if (distDiff < 0f) {
                                 pathOffsetDelta = 8;
@@ -931,12 +936,22 @@ namespace TrafficManager.Patch._VehicleAI {
                                 pathOffsetDelta = 8 + Mathf.Max(0, Mathf.CeilToInt(distDiff * 256f / (dist + 1f)));
                             }
 
-                            Log._DebugIf(
-                                logLogic,
-                                () => $"CustomVehicle.CustomUpdatePathTargetPositions({vehicleID}): " +
-                                "Preparing to update node target positions (1). " +
-                                $"pathOffset={pathOffset}, distDiff={distDiff}, " +
-                                $"pathOffsetDelta={pathOffsetDelta}");
+                            if (logLogic) {
+                                Log._Debug($"CustomVehicle.CustomUpdatePathTargetPositions({vehicleID}): " +
+                                    "Preparing to update node target positions (1). " +
+                                    $"pathOffset={pathOffset}, minSqrDist={minSqrDist} dist={dist} distDiff={distDiff}, " +
+                                    $"pathOffsetDelta={pathOffsetDelta} ");
+                            }
+
+                            bool uturn = currentPosition.m_segment == nextPosition.m_segment;
+                            if (uturn) {
+                                pathOffsetDelta = 40;
+                                minSqrDist = dist * .20f;
+                                if (logLogic) {
+                                    Log._Debug($"CustomVehicle.CustomUpdatePathTargetPositions({vehicleID}): " +
+                                        $"uturn modifying pathOffsetDelta={pathOffsetDelta} minSqrDist={minSqrDist}");
+                                }
+                            }
 
                             byte previousPathOffset = pathOffset;
                             byte stopOffset;
@@ -1004,14 +1019,14 @@ namespace TrafficManager.Patch._VehicleAI {
                                 $"pathOffset={pathOffset}, bezierPos={bezierPos}, " +
                                 $"targetPos={targetPos}, sqrMagnitude2={sqrMagnitude2}");
 
-                            if (!(sqrMagnitude2 >= minSqrDistA) && !needStopAtNode) {
+                            if (!(sqrMagnitude2 >= minSqrDist) && !needStopAtNode) {
                                 continue;
                             }
 
                             Log._DebugIf(
                                 logLogic,
                                 () => $"CustomVehicle.CustomUpdatePathTargetPositions({vehicleID}): " +
-                                $"sqrMagnitude2={sqrMagnitude2} >= minSqrDistA={minSqrDistA}={sqrMagnitude2 >= minSqrDistA} " +
+                                $"sqrMagnitude2={sqrMagnitude2} >= minSqrDist={minSqrDist}={sqrMagnitude2 >= minSqrDist} " +
                                 $"needStopAtNode={needStopAtNode} pathOffset={pathOffset} stopOffset={stopOffset}");
 
                             if (index <= 0) {
@@ -1061,13 +1076,13 @@ namespace TrafficManager.Patch._VehicleAI {
                             }
 
                             vehicleData.SetTargetPos(index++, targetPos);
-                            minSqrDistA = minSqrDistanceB;
+                            minSqrDist = minSqrDistanceB;
                             refPos = targetPos;
                             targetPos.w = 1000f;
                             Log._DebugIf(
                                 logLogic,
                                 () => $"CustomVehicle.CustomUpdatePathTargetPositions({vehicleID}): " +
-                                $"After updating node target positions. minSqrDistA={minSqrDistA}, " +
+                                $"After updating node target positions. minSqrDist={minSqrDist}, " +
                                 $"refPos={refPos}");
 
                             if (index == max) {
