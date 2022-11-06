@@ -991,7 +991,7 @@ namespace TrafficManager.Patch._VehicleAI {
                                     nextLaneId,
                                     nextNextPosition,
                                     bezier,
-                                    out stopOffset) && stopOffset >= previousPathOffset;
+                                    ref stopOffset) && stopOffset >= previousPathOffset;
                                 if (logLogic) {
                                     Log._Debug($"CustomVehicle.CustomUpdatePathTargetPositions({vehicleID}): " +
                                         $"needStopAtNode={needStopAtNode} stopOffset={stopOffset} previousPathOffset={previousPathOffset}");
@@ -1209,7 +1209,8 @@ namespace TrafficManager.Patch._VehicleAI {
             uint nextLaneID,
             PathUnit.Position nextNextPosition,
             Bezier3 trajectory,
-            out byte stopOffset) {
+            ref byte stopOffset) {
+            return false;
 #if DEBUG
             bool logLogic = DebugSwitch.CalculateSegmentPosition.Get()
                 && (GlobalConfig.Instance.Debug.ApiExtVehicleType == API.Traffic.Enums.ExtVehicleType.None
@@ -1253,7 +1254,6 @@ namespace TrafficManager.Patch._VehicleAI {
                     RenderOverlayPatch.Actions.Remove(1);
                     RenderOverlayPatch.Actions.Remove(2);
                 }
-                stopOffset = 255;
                 return false;
             }
         }
