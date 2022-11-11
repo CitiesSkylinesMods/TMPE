@@ -11,6 +11,7 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.Util.Extensions;
     using ColossalFramework;
     using TrafficManager.TrafficLight.Impl;
+    using TrafficManager.API.Traffic.Data;
 
     /// <summary>
     /// Manages traffic light toggling
@@ -127,6 +128,35 @@ namespace TrafficManager.Manager.Impl {
 
         public bool ToggleTrafficLight(ushort nodeId, ref NetNode node, out ToggleTrafficLightError reason) {
             return SetTrafficLight(nodeId, !HasTrafficLight(nodeId, ref node), ref node, out reason);
+        }
+
+        public void ResetTrafficLightAndPrioritySignsFromNode(ushort nodeId) {
+            if (!Shortcuts.InSimulationThread()) {
+                SimulationManager.instance.AddAction(() => ResetTrafficLightAndPrioritySignsFromNode(nodeId));
+                return;
+            }
+
+            ref NetNode netNode = ref nodeId.ToNode();
+            if (!netNode.IsValid())
+                return;
+            if (netNode.m_flags.IsFlagSet(NetNode.Flags.CustomTrafficLights) &&
+                (this as ITrafficLightManager).CanToggleTrafficLight(nodeId)) {
+                TrafficPriorityManager.Instance.RemovePrioritySignsFromNode(nodeId);
+
+                // if CustomTrafficLights is not set, UpdateNodeFlags() resets traffic lights.
+                netNode.m_flags &= ~NetNode.Flags.CustomTrafficLights;
+                NetManager.instance.UpdateNodeFlags(nodeId);
+
+                Constants.ManagerFactory.GeometryManager.MarkAsUpdated(nodeId, true);
+                Notifier.Instance.OnNodeModified(nodeId, this);
+            }
+        }
+
+        public bool? GetHasTrafficLight(ushort nodeId) {
+            NetNode.Flags flags = nodeId.ToNode().m_flags;
+            return flags.IsFlagSet(NetNode.Flags.CustomTrafficLights)
+                ? HasTrafficLight(nodeId)
+                : null;
         }
 
         bool ITrafficLightManager.CanToggleTrafficLight(ushort nodeId) {

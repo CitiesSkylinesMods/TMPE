@@ -682,5 +682,16 @@ namespace TrafficManager.Util {
             record.Record();
             return record;
         }
+
+        public static void EraseAllTrafficRoadsForNode(ushort nodeId) {
+            try {
+                TrafficLightManager.Instance.ResetTrafficLightAndPrioritySignsFromNode(nodeId);
+                LaneConnectionManager.Instance.RemoveLaneConnectionsFromNode(nodeId);
+                LaneArrowManager.Instance.ResetNodeLaneArrows(nodeId);
+                JunctionRestrictionsManager.Instance.ClearNode(nodeId);
+            } catch (Exception ex) {
+                ex.LogException();
+            }
+        }
     } //end class
 }
