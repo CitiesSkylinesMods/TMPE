@@ -63,6 +63,9 @@ namespace TrafficManager.UI.Helpers {
             OnValueChanged = DefaultOnValueChanged;
         }
 
+        /// <summary>type safe version of <c>Convert.ChangeType()</c>.</summary>
+        private static IConvertible ChangeType(IConvertible value, Type type) => Convert.ChangeType(value, type) as IConvertible;
+
         /// <summary>Gets or sets the value of the field this option represents.</summary>
         public virtual TVal Value {
             get {
@@ -71,8 +74,8 @@ namespace TrafficManager.UI.Helpers {
                 }
 
                 var value = _fieldInfo.GetValue(null);
-                if(value is IConvertible) {
-                    return (TVal)Convert.ChangeType(value, typeof(TVal));
+                if(value is IConvertible convertibleValue) {
+                    return (TVal)ChangeType(convertibleValue, typeof(TVal));
                 } else {
                     return (TVal)value;
                 }
@@ -80,8 +83,8 @@ namespace TrafficManager.UI.Helpers {
             set {
                 if (_fieldInfo == null) {
                     _value = value;
-                } else if (value is IConvertible) {
-                    object val = Convert.ChangeType(value, _fieldInfo.FieldType);
+                } else if (value is IConvertible convertibleValue) {
+                    IConvertible val = ChangeType(convertibleValue, _fieldInfo.FieldType);
                     _fieldInfo.SetValue(null, val);
                 } else {
                     _fieldInfo.SetValue(null, value);
