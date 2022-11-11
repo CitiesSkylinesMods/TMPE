@@ -65,13 +65,27 @@ namespace TrafficManager.UI.Helpers {
 
         /// <summary>Gets or sets the value of the field this option represents.</summary>
         public virtual TVal Value {
-            get => _fieldInfo != null ? (TVal)Convert.ChangeType(_fieldInfo.GetValue(null), typeof(TVal)) : _value;
+            get {
+                if(_fieldInfo == null) {
+                    return _value;
+                }
+
+                var value = _fieldInfo.GetValue(null);
+                if(value is IConvertible) {
+                    return (TVal)Convert.ChangeType(value, typeof(TVal));
+                } else {
+                    return (TVal)value;
+                }
+            }
             set {
-                if (_fieldInfo != null) {
+                if (_fieldInfo == null) {
+                    _value = value;
+                } else if (value is IConvertible) {
                     object val = Convert.ChangeType(value, _fieldInfo.FieldType);
                     _fieldInfo.SetValue(null, val);
                 } else {
-                    _value = value;
+                    _fieldInfo.SetValue(null, value);
+
                 }
             }
         }
