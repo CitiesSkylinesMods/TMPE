@@ -52,6 +52,7 @@ namespace TrafficManager.UI.Helpers {
             foreach(string name in names)
                 atlasBuilder.Add(new AtlasSpriteDef(name, spriteSize));
             var atlas = atlasBuilder.CreateAtlas();
+            disabledColor = new Color32(71, 71, 71, 255);
 
             UISprite sprite = AddUIComponent<UISprite>();
             sprite.atlas = atlas;
@@ -59,6 +60,7 @@ namespace TrafficManager.UI.Helpers {
             sprite.tooltip = "no";
             sprite.size = new(39, 22);
             sprite.relativePosition = new Vector2(0, Mathf.FloorToInt((height - sprite.height) / 2));
+            sprite.disabledColor = disabledColor;
             FalseComponent = sprite;
 
             var sprite2 = AddUIComponent<UISprite>();
@@ -67,6 +69,7 @@ namespace TrafficManager.UI.Helpers {
             sprite2.tooltip = "N/A";
             sprite2.size = sprite.size;
             sprite2.relativePosition = sprite.relativePosition;
+            sprite2.disabledColor = disabledColor;
             NullComponent = sprite2;
 
             var sprite3 = AddUIComponent<UISprite>();
@@ -75,14 +78,17 @@ namespace TrafficManager.UI.Helpers {
             sprite3.tooltip = "yes";
             sprite3.size = sprite.size;
             sprite3.relativePosition = sprite.relativePosition;
+            sprite3.disabledColor = disabledColor;
             TrueComponent = sprite3;
 
             label = AddUIComponent<UILabel>();
             label.text = name;
             label.textScale = 1.125f;
+            label.disabledColor = label.disabledTextColor = disabledColor;
             label.relativePosition = new Vector2(
                 sprite.relativePosition.x + sprite.width + 5f,
-                Mathf.FloorToInt((height - label.height) / 2)); 
+                Mathf.FloorToInt((height - label.height) / 2));
+
         }
 
         public override void Start() {
