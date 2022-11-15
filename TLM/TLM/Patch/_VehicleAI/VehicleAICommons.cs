@@ -12,7 +12,7 @@ namespace TrafficManager.Patch._VehicleAI {
     using UnityEngine.UI;
 
     public class VehicleAICommons {
-        private static readonly float vanillaSlowDrivingSpeed = 0.16f;
+        private static readonly float vanillaSlowDrivingSpeed = 0.4f;
 
         private static CalculateTargetSpeedDelegate CalculateTargetSpeed = GameConnectionManager.Instance.VehicleAIConnection.CalculateTargetSpeed;
         private static CalculateTargetSpeedByNetInfoDelegate CalculateTargetSpeedByNetInfo = GameConnectionManager.Instance.VehicleAIConnection.CalculateTargetSpeedByNetInfo;

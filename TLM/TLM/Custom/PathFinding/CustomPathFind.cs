@@ -2630,6 +2630,11 @@ namespace TrafficManager.Custom.PathFinding {
                     $"\toffsetLength={offsetLength}");
             }
 #endif
+            if ((vehicleCategory_ & VehicleInfo.VehicleCategory.PublicTransportRoad) != 0 &&
+                (vehicleCategory_ & ~(VehicleInfo.VehicleCategory.Bus | VehicleInfo.VehicleCategory.Trolleybus | VehicleInfo.VehicleCategory.Taxi)) == 0)
+            {
+                offsetLength *= 0.75f;
+            }
 
             float baseLength = offsetLength / (prevLaneSpeed * maxLength_); // NON-STOCK CODE
             float comparisonValue = item.ComparisonValue; // NON-STOCK CODE
@@ -3113,12 +3118,6 @@ namespace TrafficManager.Custom.PathFinding {
                                 nextItem.ComparisonValue +=
                                     20f / ((prevMaxSpeed + nextMaxSpeed) * 0.5f * maxLength_);
                             }
-                        }
-
-                        if ((nextLaneInfo.vehicleCategory & VehicleInfo.VehicleCategory.PublicTransportRoad) != 0 &&
-                            (nextLaneInfo.vehicleCategory & ~(VehicleInfo.VehicleCategory.Bus | VehicleInfo.VehicleCategory.Trolleybus | VehicleInfo.VehicleCategory.Taxi)) == 0)
-                        {
-                            nextItem.ComparisonValue /= 100f;
                         }
 
                         if (isLogEnabled) {
