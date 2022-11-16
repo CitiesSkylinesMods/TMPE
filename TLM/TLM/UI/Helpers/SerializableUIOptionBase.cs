@@ -12,7 +12,6 @@ namespace TrafficManager.UI.Helpers {
 
     public abstract class SerializableUIOptionBase<TVal, TUI, TComponent> : ILegacySerializableOption
         where TUI : UIComponent
-        where TVal : IConvertible
     {
 
         /// <summary>Use as tooltip for readonly UI components.</summary>
@@ -53,7 +52,6 @@ namespace TrafficManager.UI.Helpers {
 
             _fieldName = fieldName;
             _scope = scope;
-
             if (scope.IsFlagSet(Options.PersistTo.Savegame)) {
                 _fieldInfo = typeof(Options).GetField(fieldName, BindingFlags.Static | BindingFlags.Public);
 
@@ -65,15 +63,32 @@ namespace TrafficManager.UI.Helpers {
             OnValueChanged = DefaultOnValueChanged;
         }
 
+        /// <summary>type safe version of <c>Convert.ChangeType()</c>.</summary>
+        private static IConvertible ChangeType(IConvertible value, Type type) => Convert.ChangeType(value, type) as IConvertible;
+
         /// <summary>Gets or sets the value of the field this option represents.</summary>
         public virtual TVal Value {
-            get => _fieldInfo != null ? (TVal)Convert.ChangeType(_fieldInfo.GetValue(null), typeof(TVal)) : _value;
+            get {
+                if(_fieldInfo == null) {
+                    return _value;
+                }
+
+                var value = _fieldInfo.GetValue(null);
+                if(value is IConvertible convertibleValue) {
+                    return (TVal)ChangeType(convertibleValue, typeof(TVal));
+                } else {
+                    return (TVal)value;
+                }
+            }
             set {
-                if (_fieldInfo != null) {
-                    object val = Convert.ChangeType(value, _fieldInfo.FieldType);
+                if (_fieldInfo == null) {
+                    _value = value;
+                } else if (value is IConvertible convertibleValue) {
+                    IConvertible val = ChangeType(convertibleValue, _fieldInfo.FieldType);
                     _fieldInfo.SetValue(null, val);
                 } else {
-                    _value = value;
+                    _fieldInfo.SetValue(null, value);
+
                 }
             }
         }
