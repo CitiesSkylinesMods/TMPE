@@ -22,14 +22,6 @@ namespace TrafficManager.UI.MainMenu.OSD {
             }
         }
 
-        /// <summary>Clear the OSD panel and display the idle hint.</summary>
-        public static void DisplayIdle() {
-            var items = new List<OsdItem>();
-            items.Add(new MainMenu.OSD.Label(
-                          localizedText: Translation.Menu.Get("Onscreen.Idle:Choose a tool")));
-            Display(items);
-        }
-
         /// <summary>
         /// On Screen Display feature:
         /// Clear, and hide the keybind panel.
