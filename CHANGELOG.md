@@ -29,6 +29,24 @@ This changelog includes all versions and major variants of the mod going all the
 
 > Date format: dd/mm/yyyy
 
+#### TM:PE V[11.7.2.0](https://github.com/CitiesSkylinesMods/TMPE/compare/11.7.1.2...11.7.2.0) STABLE, 15/11/2022
+
+- [Meta] Compatibility patch for the game update 1.15.1-f4 (krzychu124)
+- [New] Clear all TM:PE rules from selected node #692, #1668 (kianzarrin)
+- [Fixed] Timed Traffic Lights wait = 0 issues #1497, #1674 (kianzarrin)
+- [Updated] Minor changes to Timed Traffic Lights sensitivity slider #1670 (kianzarrin)
+- [Updated] Pedestrian zone roads have now lower priority when setting up high priority road #1653 (kianzarrin)
+- [Steam] [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
+
+#### TM:PE V11.7.2.0 TEST, 15/11/2022
+
+- [Meta] Compatibility patch for the game update 1.15.1-f4 (krzychu124)
+- [New] Clear all TM:PE rules from selected node #692, #1668 (kianzarrin)
+- [Fixed] Timed Traffic Lights wait = 0 issues #1497, #1674 (kianzarrin)
+- [Updated] Minor changes to Timed Traffic Lights sensitivity slider #1670 (kianzarrin)
+- [Updated] Pedestrian zone roads have now lower priority when setting up high priority road #1653 (kianzarrin)
+- [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
+
 #### TM:PE V[11.7.1.2](https://github.com/CitiesSkylinesMods/TMPE/compare/11.7.1.1...11.7.1.2) STABLE, 11/10/2022
 
 - [Fixed] Game crash on load (krzychu124)
