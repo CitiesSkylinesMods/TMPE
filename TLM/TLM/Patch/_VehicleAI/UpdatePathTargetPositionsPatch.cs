@@ -868,7 +868,7 @@ namespace TrafficManager.Patch._VehicleAI {
                         float endRadius = currentSegmentInfo.m_netAI.GetEndRadius();
                         NetInfo.Lane currentSegmentLane = currentSegmentInfo.m_lanes[currentPosition.m_lane];
                         NetInfo.Lane currentSegmentNextLane = currentSegmentInfo.m_lanes[nextPosition.m_lane];
-                        float len = Mathf.Abs(currentSegmentLane.m_position - currentSegmentNextLane.m_position) * 0.75f;
+                        float len = dist * 0.75f; // NON_STOCK CODE for NC compatibility
                         float laneHalfWidth = Mathf.Max(currentSegmentLane.m_width, currentSegmentNextLane.m_width) * 0.5f;
                         len = Mathf.Min(len, endRadius * (1f - currentSegmentInfo.m_pavementWidth / currentSegmentInfo.m_halfWidth) - laneHalfWidth);
                         bezier.b = bezier.a + curSegDir * len * 1.333f;
