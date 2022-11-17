@@ -8,6 +8,10 @@ namespace TrafficManager.API.Manager {
         /// </summary>
         ExtSegmentEnd[] ExtSegmentEnds { get; }
 
+        ref ExtSegmentEnd GetEnd(ushort segmentId, bool startNode);
+
+        ref ExtSegmentEnd GetEnd(ushort segmentId, ushort nodeID);
+
         /// <summary>
         /// Resets both segment ends of the given segment.
         /// </summary>
