@@ -99,7 +99,7 @@ namespace TrafficManager.Manager.Impl {
         }
 
         public ref ExtSegmentEnd GetEnd(ushort segmentId, bool startNode) => ref ExtSegmentEnds[GetIndex(segmentId, startNode)];
-        public ref ExtSegmentEnd GetEnd(ushort segmentId, ushort nodeID) => ref ExtSegmentEnds[GetIndex(segmentId, nodeID)];
+        public ref ExtSegmentEnd GetEnd(ushort segmentId, ushort nodeId) => ref ExtSegmentEnds[GetIndex(segmentId, nodeId)];
 
         public int GetIndex(ushort segmentId, ushort nodeId) {
             bool found = false;
