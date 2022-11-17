@@ -28,9 +28,9 @@ namespace TrafficManager.Util.Record {
         byte[] Serialize();
     }
 
-    public static class RecordUtil {
+    public static class RecordExtensions {
         public static bool AreDefault<T>(this IEnumerable<T> records)
             where T : IRecordable =>
-            records == null || records.All(record => record.IsDefault());
+            records == null || records.All(record => record == null || record.IsDefault());
     }
 }
