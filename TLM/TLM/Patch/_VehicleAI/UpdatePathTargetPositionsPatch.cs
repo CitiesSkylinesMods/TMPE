@@ -745,7 +745,7 @@ namespace TrafficManager.Patch._VehicleAI {
                         logLogic,
                         () => $"CustomVehicle.CustomUpdatePathTargetPositions({vehicleID}): " +
                         "Calculated current segment position for regular vehicle. " +
-                        $"nextSegOffset={nextSegOffset}, bezier.a={bezier.a}, " +
+                        $"nextSegOffset={nextSegOffset}, bezier.len={bezier.a}, " +
                         $"curSegDir={curSegDir}, maxSpeed={maxSpeed}, pathOffset={pathOffset}, " +
                         $"calculateNextNextPos={calculateNextNextPos}");
 
@@ -868,11 +868,11 @@ namespace TrafficManager.Patch._VehicleAI {
                         float endRadius = currentSegmentInfo.m_netAI.GetEndRadius();
                         NetInfo.Lane currentSegmentLane = currentSegmentInfo.m_lanes[currentPosition.m_lane];
                         NetInfo.Lane currentSegmentNextLane = currentSegmentInfo.m_lanes[nextPosition.m_lane];
-                        float a = Mathf.Abs(currentSegmentLane.m_position - currentSegmentNextLane.m_position) * 0.75f;
-                        float num9 = Mathf.Max(currentSegmentLane.m_width, currentSegmentNextLane.m_width) * 0.5f;
-                        a = Mathf.Min(a, endRadius * (1f - currentSegmentInfo.m_pavementWidth / currentSegmentInfo.m_halfWidth) - num9);
-                        bezier.b = bezier.a + curSegDir * a * 1.333f;
-                        bezier.c = bezier.d + nextSegDir * a * 1.333f;
+                        float len = dist * 0.75f; // NON_STOCK CODE for NC compatibility
+                        float laneHalfWidth = Mathf.Max(currentSegmentLane.m_width, currentSegmentNextLane.m_width) * 0.5f;
+                        len = Mathf.Min(len, endRadius * (1f - currentSegmentInfo.m_pavementWidth / currentSegmentInfo.m_halfWidth) - laneHalfWidth);
+                        bezier.b = bezier.a + curSegDir * len * 1.333f;
+                        bezier.c = bezier.d + nextSegDir * len * 1.333f;
                     } else {
                         NetSegment.CalculateMiddlePoints(
                             bezier.a,
@@ -892,7 +892,7 @@ namespace TrafficManager.Patch._VehicleAI {
                         () => $"CustomVehicle.CustomUpdatePathTargetPositions({vehicleID}): " +
                         $"Direction vectors normalized. curSegDir={curSegDir}, nextSegDir={nextSegDir}\n" +
                         $"CustomVehicle.CustomUpdatePathTargetPositions({vehicleID}): " +
-                        $"Calculated bezier middle points. IN: bezier.a={bezier.a}, " +
+                        $"Calculated bezier middle points. IN: bezier.len={bezier.a}, " +
                         $"curSegDir={curSegDir}, bezier.d={bezier.d}, nextSegDir={nextSegDir}, " +
                         $"true, true, OUT: bezier.b={bezier.b}, bezier.c={bezier.c}, dist={dist}");
 
