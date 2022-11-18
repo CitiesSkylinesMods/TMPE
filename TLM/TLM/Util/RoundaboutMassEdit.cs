@@ -47,7 +47,7 @@ namespace TrafficManager.Util {
             }
 
             // allocation of dedicated exit lanes is supported only when the roundabout is round
-            // in which case the next segment should be straigh ahead.
+            // in which case the next segment should be straight ahead.
             bool isStraight = segEndMan.GetDirection(segmentId, nextSegmentId, nodeId) == ArrowDirection.Forward;
 
             if (Options.RoundAboutQuickFix_DedicatedExitLanes &&
@@ -228,15 +228,8 @@ namespace TrafficManager.Util {
         }
 
         /// <summary>
-        /// Traverses around a roundabout. At each
-        /// traversed segment, the given `visitor` is notified.
+        /// Traverses around a roundabout.
         /// </summary>
-        /// <param name="initialSegmentGeometry">Specifies the segment at which the traversal
-        ///     should start.</param>
-        /// <param name="visitorFun">Specifies the stateful visitor that should be notified as soon as
-        ///     a traversable segment (which has not been traversed before) is found.
-        /// pass null if you are trying to see if segment is part of a round about.
-        /// </param>
         /// <returns>true if its a roundabout</returns>
         public bool TraverseLoop(ushort segmentId, out List<ushort> segList) {
             if (segmentList_ != null) {
@@ -304,11 +297,11 @@ namespace TrafficManager.Util {
         }
 
         /// <summary>
-        /// in RHT prefering forward then left then right.
+        /// in RHT preferring forward then left then right.
         /// if there are multiple forwards then prefer the leftmost ones.
-        /// if there are mutiple lefts then prefer the rightmost ones.
+        /// if there are multiple lefts then prefer the rightmost ones.
         /// if there are multiple rights then prefer the leftmost ones
-        /// LHT is the oposite.
+        /// LHT is the opposite.
         /// </summary>
         private static List<ushort> GetSortedSegments(ushort segmentId) {
             ushort headNodeId = ExtSegmentManager.Instance.GetHeadNode(segmentId);
@@ -354,7 +347,7 @@ namespace TrafficManager.Util {
         }
 
         /// <summary>
-        /// Checks wheather the next segmentId looks like to be part of a roundabout.
+        /// Checks whether the next segmentId looks like to be part of a roundabout.
         /// Assumes prevSegmentId is oneway
         /// </summary>
         /// <param name="nextSegmentId"></param>
@@ -413,11 +406,11 @@ namespace TrafficManager.Util {
         }
 
         /// <summary>
-        /// Calculates Raduis of a curved segment assuming it is part of a circle.
+        /// Calculates Radius of a curved segment assuming it is part of a circle.
         /// </summary>
         internal static float CalculateRadius(ref NetSegment segment) {
-            // TDOO: to calculate maximum curviture for eleptical roundabout, cut the bezier in 10 portions
-            // and then find the bezier with minimum raduis.
+            // TDOO: to calculate maximum curvature for elliptical roundabout, cut the bezier in 10 portions
+            // and then find the bezier with minimum radius.
             Vector2 startDir = VectorUtils.XZ(segment.m_startDirection);
             Vector2 endDir = VectorUtils.XZ(segment.m_endDirection);
             Vector2 startPos = VectorUtils.XZ(segment.m_startNode.ToNode().m_position);
@@ -429,10 +422,10 @@ namespace TrafficManager.Util {
         }
 
         /// <summary>
-        /// calculates realisitic speed limit of input curved segment assuming it is part of a circle.
+        /// calculates realistic speed limit of input curved segment assuming it is part of a circle.
         /// minimum speed is 10kmph.
         /// </summary>
-        /// <returns>Null if segment is straight, otherwise if successful it retunrs calcualted speed.</returns>
+        /// <returns>Null if segment is straight, otherwise if successful it returns calculated speed.</returns>
         private static SpeedValue? CalculatePreferedSpeed(ushort segmentId) {
             float r = CalculateRadius(ref segmentId.ToSegment());
             float kmph = 11.3f * Mathf.Sqrt(r); // see https://github.com/CitiesSkylinesMods/TMPE/issues/793#issue-589462235

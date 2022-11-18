@@ -890,7 +890,7 @@ namespace TrafficManager.Patch._VehicleAI {
                     Log._DebugIf(
                         logLogic,
                         () => $"CustomVehicle.CustomUpdatePathTargetPositions({vehicleID}): " +
-                        $"Direction vectors normalied. curSegDir={curSegDir}, nextSegDir={nextSegDir}\n" +
+                        $"Direction vectors normalized. curSegDir={curSegDir}, nextSegDir={nextSegDir}\n" +
                         $"CustomVehicle.CustomUpdatePathTargetPositions({vehicleID}): " +
                         $"Calculated bezier middle points. IN: bezier.a={bezier.a}, " +
                         $"curSegDir={curSegDir}, bezier.d={bezier.d}, nextSegDir={nextSegDir}, " +

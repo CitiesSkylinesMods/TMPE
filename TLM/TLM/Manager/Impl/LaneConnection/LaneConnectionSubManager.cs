@@ -457,13 +457,22 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
         }
 
         private void AssertLane(uint laneId, bool startNode) {
-            Assert(laneId.ToLane().IsValidWithSegment(), $"IsValidWithSegment() faild for laneId:{laneId}");
-            var connections = GetLaneConnections(laneId, startNode);
-            if (connections != null && connections.Contains(laneId)) {
-                // dead end should only have one connection to itself.
-                ushort nodeId = laneId.ToLane().GetNodeId(startNode);
-                Assert(connections.Length == 1, $"connections for lane:{laneId} at node:{nodeId} = " + connections.ToSTR());
-            } 
+            try {
+                Assert(laneId.ToLane().IsValidWithSegment(), $"IsValidWithSegment() failed for laneId:{laneId}");
+                if (connectionDataBase_.TryGetValue(new LaneEnd(laneId, startNode), out var connections) &&
+                    connections.Any(item => item.LaneId == laneId)) {
+                    ushort nodeId = laneId.ToLane().GetNodeId(startNode);
+                    Assert(connections.Length == 1,
+                        $"dead end should only have one connection to itself. " +
+                        $"connections for lane:{laneId} at node:{nodeId} = " + connections.ToSTR());
+
+                    Assert(connections[0].Enabled,
+                        $"disabled dead should be deleted. " +
+                        $"connection data for lane:{laneId} at node:{nodeId} = " + connections[0]);
+                }
+            } catch(Exception ex) {
+                ex.LogException();
+            }
         }
 
         private void ReleasingSegment(ushort segmentId, ref NetSegment segment) {

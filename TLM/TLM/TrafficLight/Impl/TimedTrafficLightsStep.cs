@@ -677,10 +677,6 @@ namespace TrafficManager.TrafficLight.Impl {
             float newFlow = CurrentFlow;
             float newWait = CurrentWait;
 
-#if DEBUG
-            newFlow = flow;
-            newWait = wait;
-#else
             if (ChangeMetric != StepChangeMetric.Default || Single.IsNaN(newFlow)) {
                 newFlow = flow;
             } else {
@@ -689,7 +685,7 @@ namespace TrafficManager.TrafficLight.Impl {
                           flow; // some smoothing
             }
 
-            if (Single.IsNaN(newWait)) {
+            if (Single.IsNaN(newWait) && ChangeMetric != StepChangeMetric.NoWait) {
                 newWait = 0;
             } else if (ChangeMetric != StepChangeMetric.Default) {
                 newWait = wait;
@@ -698,7 +694,6 @@ namespace TrafficManager.TrafficLight.Impl {
                           (1f - GlobalConfig.Instance.TimedTrafficLights.SmoothingFactor) *
                           wait; // some smoothing
             }
-#endif
 
             // if more cars are waiting than flowing, we change the step
             bool done = ShouldGoToNextStep(newFlow, newWait, out float _);
@@ -779,7 +774,7 @@ namespace TrafficManager.TrafficLight.Impl {
                 logTrafficLights,
                 () => $"calcWaitFlow: called for node {timedNode.NodeId} @ step {stepRefIndex}");
 
-            // TODO checking agains getCurrentFrame() is only valid if this is the current step
+            // TODO checking against getCurrentFrame() is only valid if this is the current step
             // during start phase all vehicles on "green" segments are counted as flowing
             if (countOnlyMovingIfGreen
                 && GetCurrentFrame() <= startFrame + MinTime + 1)

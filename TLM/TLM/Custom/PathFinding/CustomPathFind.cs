@@ -675,7 +675,7 @@ namespace TrafficManager.Custom.PathFinding {
                 string reachableBuf = string.Empty;
                 string unreachableBuf = string.Empty;
 
-                // TODO: optimizeme: Building a list of positions is faster than string concat
+                // TODO: optimize: Building a list of positions is faster than string concat
                 foreach (KeyValuePair<ushort, IList<ushort>> e in debugPositions_) {
                     string buf = $"{e.Key} -> {e.Value.CollectionToString()}\n";
                     if (e.Value.Count <= 0) {
@@ -1301,7 +1301,7 @@ namespace TrafficManager.Custom.PathFinding {
                                 unitId,
                                 item,
                                 "ProcessItemMain: beautification -> ped: Exploring " +
-                                $"pedestrian lane to beautficiation node\n\tnextNodeId={nextNodeId}");
+                                $"pedestrian lane to beautification node\n\tnextNodeId={nextNodeId}");
                         }
 
                         // we are going from pedestrian lane to a beautification node
@@ -2630,6 +2630,11 @@ namespace TrafficManager.Custom.PathFinding {
                     $"\toffsetLength={offsetLength}");
             }
 #endif
+            if ((vehicleCategory_ & VehicleInfo.VehicleCategory.PublicTransportRoad) != 0 &&
+                (vehicleCategory_ & ~(VehicleInfo.VehicleCategory.Bus | VehicleInfo.VehicleCategory.Trolleybus | VehicleInfo.VehicleCategory.Taxi)) == 0)
+            {
+                offsetLength *= 0.75f;
+            }
 
             float baseLength = offsetLength / (prevLaneSpeed * maxLength_); // NON-STOCK CODE
             float comparisonValue = item.ComparisonValue; // NON-STOCK CODE
@@ -2889,7 +2894,7 @@ namespace TrafficManager.Custom.PathFinding {
                                         (NetInfo.LaneType.Pedestrian |
                                          NetInfo.LaneType.PublicTransport)) ==
                                        NetInfo.LaneType.Pedestrian) {
-                                // account for public tranport transition costs on non-PT paths
+                                // account for public transport transition costs on non-PT paths
                                 float transportTransitionPenalty =
                                     (2f * pfPublicTransportTransitionMaxPenalty) /
                                     (0.5f * maxLength_);
@@ -3113,12 +3118,6 @@ namespace TrafficManager.Custom.PathFinding {
                                 nextItem.ComparisonValue +=
                                     20f / ((prevMaxSpeed + nextMaxSpeed) * 0.5f * maxLength_);
                             }
-                        }
-
-                        if ((nextLaneInfo.vehicleCategory & VehicleInfo.VehicleCategory.PublicTransportRoad) != 0 &&
-                            (nextLaneInfo.vehicleCategory & ~(VehicleInfo.VehicleCategory.Bus | VehicleInfo.VehicleCategory.Trolleybus | VehicleInfo.VehicleCategory.Taxi)) == 0)
-                        {
-                            nextItem.ComparisonValue /= 100f;
                         }
 
                         if (isLogEnabled) {

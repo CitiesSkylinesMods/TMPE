@@ -6,6 +6,7 @@ namespace TrafficManager.UI.Helpers {
     using System;
     using System.Linq;
     using TrafficManager.API.Traffic.Enums;
+    using TrafficManager.Util;
 
     public class DropDownOption<TEnum> : SerializableUIOptionBase<TEnum, UIDropDown, DropDownOption<TEnum>>
         where TEnum : struct, Enum, IConvertible {
@@ -50,8 +51,18 @@ namespace TrafficManager.UI.Helpers {
             set {
                 if (values_.Contains(value)) {
                     base.Value = value;
-                    if (HasUI) {
-                        _ui.selectedIndex = IndexOf(value);
+                    if (Shortcuts.IsMainThread()) {
+                        if (HasUI) {
+                            _ui.selectedIndex = IndexOf(value);
+                        }
+                    } else {
+                        SimulationManager.instance
+                                         .m_ThreadingWrapper
+                                         .QueueMainThread(() => {
+                                             if (HasUI) {
+                                                 _ui.selectedIndex = IndexOf(value);
+                                             }
+                                         });
                     }
                 } else {
                     Log.Error($"unrecognised value:{value} for enum:{typeof(TEnum).Name}");

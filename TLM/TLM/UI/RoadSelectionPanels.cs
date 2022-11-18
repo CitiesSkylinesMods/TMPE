@@ -158,7 +158,7 @@ namespace TrafficManager.UI {
         #region Event handling
 
         /// <summary>
-        /// Refreshes all butons in all panels according to state indicated by FunctionMode.
+        /// Refreshes all buttons in all panels according to state indicated by FunctionMode.
         /// this is activated in response to user button click or roadSelectionUtil_.OnChanged
         /// </summary>
         /// <param name="reset">if true, deactivates all buttons</param>
@@ -185,7 +185,7 @@ namespace TrafficManager.UI {
             if (tool && tool.GetToolMode() == ToolMode.None) {
                 if (!UI.SubTools.PrioritySigns.MassEditOverlay.IsActive) {
                     if (ShouldShowMassEditOverlay()) {
-                        ShowMassEditOverlay();
+                        RoadSelectionUtil.ShowMassEditOverlay();
                     }
                 } else {
                     if (!ShouldShowMassEditOverlay()) {
@@ -215,8 +215,8 @@ namespace TrafficManager.UI {
             return NetManager.instance.NetAdjust.PathVisible;
         }
 
-        // even though we enqueu actions from main thread, we still need to enqueue them to
-        // the main thread in order to introduce some delay. this delay is necessarry to prevent
+        // even though we enqueue actions from main thread, we still need to enqueue them to
+        // the main thread in order to introduce some delay. this delay is necessary to prevent
         // the CO.UI from crashing.
         // this wrapper function exists to make it easier to customize the delaying mechanism.
         private void EnqueueAction(Action action) {
@@ -234,21 +234,6 @@ namespace TrafficManager.UI {
             roadSelectLabel.isVisible = false;
             roadSelectLegend.isVisible = false;
             roadSelectSprite.isVisible = false;
-        }
-
-        /// <summary>
-        /// Enables and refreshes overrlay for various traffic rules influenced by road selection pannel.
-        /// </summary>
-        private void ShowMassEditOverlay() {
-            var tmTool = ModUI.GetTrafficManagerTool();
-            if (tmTool == null) {
-                Log.Error("ModUI.GetTrafficManagerTool() returned null");
-                return;
-            }
-            UI.SubTools.PrioritySigns.MassEditOverlay.Show = true;
-            tmTool.SetToolMode(ToolMode.None);
-            tmTool.InitializeSubTools();
-            Log._Debug("Mass edit overlay enabled");
         }
 
         private void HideMassEditOverlay() {
@@ -452,11 +437,11 @@ namespace TrafficManager.UI {
                     if (!IsActive()) {
                         Root.Function = this.Function;
                         Root.Record = Do();
-                        Root.EnqueueAction(Root.ShowMassEditOverlay);
+                        Root.EnqueueAction(RoadSelectionUtil.ShowMassEditOverlay);
                     } else {
                         Root.Function = FunctionModes.None;
                         Undo();
-                        Root.EnqueueAction(Root.ShowMassEditOverlay);
+                        Root.EnqueueAction(RoadSelectionUtil.ShowMassEditOverlay);
                     }
                 }
                 #endregion

@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.UI.MainMenu {
+namespace TrafficManager.UI.MainMenu {
     using TrafficManager.State.Keybinds;
     using TrafficManager.U;
     using TrafficManager.Util;
@@ -7,7 +7,7 @@
         protected override ToolMode ToolMode => ToolMode.ToggleTrafficLight;
 
         public override void SetupButtonSkin(AtlasBuilder futureAtlas) {
-            // Button backround (from BackgroundPrefix) is provided by MainMenuPanel.Start
+            // Button background (from BackgroundPrefix) is provided by MainMenuPanel.Start
             this.Skin = ButtonSkin.CreateSimple(
                                       foregroundPrefix: "ToggleTL",
                                       backgroundPrefix: UConst.MAINMENU_ROUND_BUTTON_BG)

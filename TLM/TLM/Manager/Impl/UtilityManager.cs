@@ -91,7 +91,7 @@ namespace TrafficManager.Manager.Impl {
                         }
                     }
                 } catch (Exception ex) {
-                    Log.Error($"Error occured while trying to remove parked vehicles: {ex}");
+                    Log.Error($"Error occurred while trying to remove parked vehicles: {ex}");
                 }
             }
         }
