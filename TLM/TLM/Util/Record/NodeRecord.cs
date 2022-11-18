@@ -1,8 +1,10 @@
 namespace TrafficManager.Util.Record {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using TrafficManager.Manager.Impl;
     using TrafficManager.State;
+    using TrafficManager.Util.Extensions;
 
     [Serializable]
     public class NodeRecord : IRecordable {
@@ -18,8 +20,8 @@ namespace TrafficManager.Util.Record {
         public void Record() {
             trafficLight_ = tlMan.GetHasTrafficLight(NodeId);
             lanes_ = LaneConnectionRecord.GetLanes(NodeId);
-            foreach (LaneConnectionRecord sourceLane in lanes_) {
-                sourceLane.Record();
+            foreach (LaneConnectionRecord sourceLane in lanes_.EmptyIfNull()) {
+                sourceLane?.Record();
             }
         }
 
@@ -28,17 +30,16 @@ namespace TrafficManager.Util.Record {
 
         public void Restore() {
             tlMan.SetHasTrafficLight(NodeId, trafficLight_);
-            foreach (LaneConnectionRecord sourceLane in lanes_) {
-                sourceLane.Restore();
+            foreach (LaneConnectionRecord sourceLane in lanes_.EmptyIfNull()) {
+                sourceLane?.Restore();
             }
         }
 
         public void Transfer(Dictionary<InstanceID, InstanceID> map) {
             tlMan.SetHasTrafficLight(map[InstanceID].NetNode, trafficLight_);
-            foreach (LaneConnectionRecord sourceLane in lanes_)
-                sourceLane.Transfer(map);
+            foreach (LaneConnectionRecord sourceLane in lanes_.EmptyIfNull())
+                sourceLane?.Transfer(map);
         }
-
 
         public byte[] Serialize() => SerializationUtil.Serialize(this);
     }

@@ -6,9 +6,10 @@ namespace TrafficManager.Util.Record {
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.Manager.Impl;
     using TrafficManager.State;
+    using TrafficManager.Util.Extensions;
 
     [Serializable]
-    class SegmentEndRecord : IRecordable {
+    public class SegmentEndRecord : IRecordable {
         public SegmentEndRecord(int segmentEndIndex) {
             SegmentEndManager.Instance.
                 GetSegmentAndNodeFromIndex(segmentEndIndex, out ushort segmentId, out bool startNode);
@@ -23,7 +24,7 @@ namespace TrafficManager.Util.Record {
 
         public ushort SegmentId { get; private set; }
         public bool StartNode { get; private set; }
-        InstanceID InstanceID => new InstanceID { NetSegment = SegmentId };
+        private InstanceID InstanceID => new InstanceID { NetSegment = SegmentId };
 
         private TernaryBool uturnAllowed_;
         private TernaryBool nearTurnOnRedAllowed_;
@@ -61,13 +62,13 @@ namespace TrafficManager.Util.Record {
             prioirtySign_ = priorityMan.GetPrioritySign(SegmentId, StartNode);
 
             arrowLanes_ = LaneArrowsRecord.GetLanes(SegmentId, StartNode);
-            foreach(IRecordable lane in arrowLanes_) 
-                lane.Record();
+            foreach(IRecordable lane in arrowLanes_.EmptyIfNull()) 
+                lane?.Record();
         }
 
         public void Restore() {
-            foreach (IRecordable lane in arrowLanes_)
-                lane.Restore();
+            foreach (IRecordable lane in arrowLanes_.EmptyIfNull())
+                lane?.Restore();
 
             if (priorityMan.MaySegmentHavePrioritySign(SegmentId, StartNode) &&
                 prioirtySign_ != priorityMan.GetPrioritySign(SegmentId, StartNode)) {
@@ -86,8 +87,8 @@ namespace TrafficManager.Util.Record {
 
         public void Transfer(Dictionary<InstanceID, InstanceID> map) {
             ushort segmentId = map[InstanceID].NetSegment;
-            foreach (IRecordable lane in arrowLanes_)
-                lane.Transfer(map);
+            foreach (IRecordable lane in arrowLanes_.EmptyIfNull())
+                lane?.Transfer(map);
 
             if (priorityMan.MaySegmentHavePrioritySign(segmentId, StartNode) &&
                 prioirtySign_ != priorityMan.GetPrioritySign(segmentId, StartNode)) {
@@ -107,8 +108,9 @@ namespace TrafficManager.Util.Record {
             ushort segmentId = (ushort)mappedId;
 
             var mappedLanes = SpeedLimitLaneRecord.GetLanes(segmentId);
-            for (int i = 0; i == arrowLanes_.Count; ++i) {
-                arrowLanes_[i].Transfer(mappedLanes[i].LaneId);
+            int n = arrowLanes_?.Count ?? 0;
+            for (int i = 0; i == n; ++i) {
+                arrowLanes_[i]?.Transfer(mappedLanes[i].LaneId);
             }
         }
 

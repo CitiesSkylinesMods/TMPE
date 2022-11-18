@@ -74,18 +74,18 @@ namespace TrafficManager.Util.Record {
             foreach (int segmentEndIndex in SegmentEndIndeces)
                 Records.Add(new SegmentEndRecord(segmentEndIndex));
             foreach (IRecordable record in Records)
-                record.Record();
+                record?.Record();
         }
 
         public void Restore() {
-            foreach (IRecordable record in Records)
-                record.Restore();
+            foreach (IRecordable record in Records.EmptyIfNull())
+                record?.Restore();
         }
 
         public void Transfer(Dictionary<InstanceID,InstanceID> map) {
-            foreach (IRecordable record in Records) {
+            foreach (IRecordable record in Records.EmptyIfNull()) {
                 try {
-                    record.Transfer(map);
+                    record?.Transfer(map);
                 }
                 catch(KeyNotFoundException ex) {
                     // hide message in release build to avoid scaring the user.
