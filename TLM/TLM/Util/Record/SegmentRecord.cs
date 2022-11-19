@@ -26,32 +26,40 @@ namespace TrafficManager.Util.Record {
             parkingForward_ = pMan.IsParkingAllowed(SegmentId, NetInfo.Direction.Forward);
             parkingBackward_ = pMan.IsParkingAllowed(SegmentId, NetInfo.Direction.Backward);
             speedLanes_ = SpeedLimitLaneRecord.GetLanes(SegmentId);
-            foreach (var lane in speedLanes_)
-                lane.Record();
+            foreach (var lane in speedLanes_.EmptyIfNull())
+                lane?.Record();
             vehicleRestrictionsLanes_ = VehicleRestrictionsLaneRecord.GetLanes(SegmentId);
-            foreach (var lane in vehicleRestrictionsLanes_)
-                lane.Record();
+            foreach (var lane in vehicleRestrictionsLanes_.EmptyIfNull())
+                lane?.Record();
             allLaneIds_ = GetAllLanes(SegmentId);
+        }
+
+        public bool IsDefault() {
+            return
+                parkingForward_ == true &&
+                parkingBackward_ == true &&
+                speedLanes_.AreDefault() &&
+                vehicleRestrictionsLanes_.AreDefault();
         }
 
         public void Restore() {
             // TODO fix SetParkingAllowed 
             pMan.SetParkingAllowed(SegmentId, NetInfo.Direction.Forward, parkingForward_);
             pMan.SetParkingAllowed(SegmentId, NetInfo.Direction.Backward, parkingBackward_);
-            foreach (var lane in speedLanes_)
-                lane.Restore();
-            foreach (var lane in vehicleRestrictionsLanes_)
-                lane.Restore();
+            foreach (var lane in speedLanes_.EmptyIfNull())
+                lane?.Restore();
+            foreach (var lane in vehicleRestrictionsLanes_.EmptyIfNull())
+                lane?.Restore();
         }
 
         public void Transfer(Dictionary<InstanceID, InstanceID> map){
             ushort segmentId = map[InstanceID].NetSegment;
             pMan.SetParkingAllowed(segmentId, NetInfo.Direction.Forward, parkingForward_);
             pMan.SetParkingAllowed(segmentId, NetInfo.Direction.Backward, parkingBackward_);
-            foreach (var lane in speedLanes_)
-                lane.Transfer(map);
-            foreach (var lane in vehicleRestrictionsLanes_)
-                lane.Transfer(map);
+            foreach (var lane in speedLanes_.EmptyIfNull())
+                lane?.Transfer(map);
+            foreach (var lane in vehicleRestrictionsLanes_.EmptyIfNull())
+                lane?.Transfer(map);
         }
 
         public byte[] Serialize() => SerializationUtil.Serialize(this);

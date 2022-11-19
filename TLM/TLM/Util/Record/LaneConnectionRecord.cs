@@ -48,6 +48,11 @@ namespace TrafficManager.Util.Record {
             }
         }
 
+        public bool IsDefault() =>
+            connections_.IsNullOrEmpty() &&
+            roadConnections_.IsNullOrEmpty() &&
+            trackConnections_.IsNullOrEmpty();
+
         public void Restore() {
             if (connections_ != null) {
                 // legacy
