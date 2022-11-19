@@ -21,6 +21,8 @@ namespace TrafficManager.Util.Record {
 
         InstanceID InstanceID => new InstanceID { NetLane = LaneId };
 
+        public bool IsDefault() => allowedVehicleTypes_ == null;
+
         public void Record() {
             allowedVehicleTypes_ = VehicleRestrictionsManager.Instance.GetAllowedVehicleTypesRaw(SegmentId, LaneIndex);
         }

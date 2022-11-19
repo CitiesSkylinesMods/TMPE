@@ -159,6 +159,14 @@ namespace TrafficManager.Manager.Impl {
                 : null;
         }
 
+        public void SetHasTrafficLight(ushort nodeId, bool? value) {
+            if (value == null) {
+                ResetTrafficLightAndPrioritySignsFromNode(nodeId);
+            } else {
+                SetTrafficLight(nodeId, value.Value, ref nodeId.ToNode());
+            }
+        }
+
         bool ITrafficLightManager.CanToggleTrafficLight(ushort nodeId) {
             ref NetNode netNode = ref nodeId.ToNode();
             return netNode.IsValid() &&

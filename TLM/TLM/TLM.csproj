@@ -200,6 +200,7 @@
     <Compile Include="UI\WhatsNew\MarkupKeyword.cs" />
     <Compile Include="UI\WhatsNew\WhatsNewMarkup.cs" />
     <Compile Include="Util\DetailLogger.cs" />
+    <Compile Include="Util\Extensions\EnumerableExtensions.cs" />
     <Compile Include="Util\Extensions\ParkedVehicleExtensions.cs" />
     <Compile Include="Util\Extensions\UIHelperExtensions.cs" />
     <Compile Include="Util\Extensions\VersionExtension.cs" />
