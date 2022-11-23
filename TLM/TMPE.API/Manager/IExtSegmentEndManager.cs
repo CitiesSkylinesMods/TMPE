@@ -14,6 +14,10 @@ namespace TrafficManager.API.Manager {
         /// <param name="segmentId">segment id</param>
         void Reset(ushort segmentId);
 
+        ref ExtSegmentEnd GetEnd(ushort segmentId, bool startNode);
+
+        ref ExtSegmentEnd GetEnd(ushort segmentId, ushort nodeID);
+
         /// <summary>
         /// Determines the index of the segment end.
         /// </summary>
