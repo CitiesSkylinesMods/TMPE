@@ -50,42 +50,36 @@ namespace TrafficManager.State.ConfigData {
             new (false, "27: Allow U library UI and event debugging"),
             // Added a new flag? Bump LATEST_VERSION in GlobalConfig!
         };
+        private static InstanceID SelectedInstance => InstanceManager.instance.GetSelectedInstance();
+        private static DebugSettings Instance => GlobalConfig.Instance.Debug;
+        private static ushort Get(ushort val1, ushort val2) => val1 != 0 ? val1 : val2;
+        private static uint Get(uint val1, uint val2) => val1 != 0 ? val1 : val2;
 
-        private int nodeId_ = 0;
+        public static ushort NodeId => SelectedInstance.NetNode;
 
-        public static int NodeId => GlobalConfig.Instance.Debug.nodeId_;
+        public static ushort SegmentId => SelectedInstance.NetSegment;
 
-        private int segmentId_ = 0;
+        [XmlElement("StartSegmentId")]
+        public ushort SavedStartSegmentId = 0;
+        public static ushort StartSegmentId => Get(Instance.SavedStartSegmentId, SegmentId);
 
-        public static int SegmentId => GlobalConfig.Instance.Debug.segmentId_;
+        [XmlElement("EndSegmentId")]
+        public ushort SavedEndSegmentId = 0;
+        public static int EndSegmentId => Get(Instance.SavedEndSegmentId, SegmentId);
 
-        private int startSegmentId_ = 0;
+        public static int VehicleId => SelectedInstance.Vehicle;
 
-        public static int StartSegmentId => GlobalConfig.Instance.Debug.startSegmentId_;
+        public static int CitizenInstanceId => SelectedInstance.CitizenInstance;
 
-        private int endSegmentId_ = 0;
+        public static uint CitizenId => SelectedInstance.Citizen;
 
-        public static int EndSegmentId => GlobalConfig.Instance.Debug.endSegmentId_;
+        [XmlElement("SourceBuildingId")]
+        public uint SavedSourceBuildingId = 0;
+        public static uint SourceBuildingId => Get(Instance.SavedSourceBuildingId, SelectedInstance.Building);
 
-        private int vehicleId_ = 0;
-
-        public static int VehicleId => GlobalConfig.Instance.Debug.vehicleId_;
-
-        private int citizenInstanceId_ = 0;
-
-        public static int CitizenInstanceId => GlobalConfig.Instance.Debug.citizenInstanceId_;
-
-        private uint citizenId_ = 0;
-
-        public static uint CitizenId => GlobalConfig.Instance.Debug.citizenId_;
-
-        private uint sourceBuildingId_ = 0;
-
-        public static uint SourceBuildingId => GlobalConfig.Instance.Debug.sourceBuildingId_;
-
-        private uint targetBuildingId_ = 0;
-
-        public static uint TargetBuildingId => GlobalConfig.Instance.Debug.targetBuildingId_;
+        [XmlElement("TargetBuildingId")]
+        public uint SavedTargetBuildingId = 0;
+        public static uint TargetBuildingId => Get(Instance.SavedTargetBuildingId, SelectedInstance.Building);
 
         [Obsolete]
         public ExtVehicleType ExtVehicleType = ExtVehicleType.None;
