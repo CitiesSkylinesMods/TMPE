@@ -94,6 +94,10 @@ namespace TrafficManager.Manager.Impl {
             extSegmentEnd.firstVehicleId = 0;
         }
 
+        public ref ExtSegmentEnd GetEnd(ushort segmentId, bool startNode) => ref ExtSegmentEnds[GetIndex(segmentId, startNode)];
+
+        public ref ExtSegmentEnd GetEnd(ushort segmentId, ushort nodeId) => ref ExtSegmentEnds[GetIndex(segmentId, nodeId)];
+
         public int GetIndex(ushort segmentId, bool startNode) {
             return (segmentId * 2) + (startNode ? 0 : 1);
         }

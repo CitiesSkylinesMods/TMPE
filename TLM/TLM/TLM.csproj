@@ -158,6 +158,7 @@
     <Compile Include="Manager\Impl\LaneConnection\LaneEnd.cs" />
     <Compile Include="Patch\_CitizenAI\GetPathTargetPositionPatch.cs" />
     <Compile Include="Patch\_External\RTramAIModPatch.cs" />
+    <Compile Include="Patch\_NetLane\CalculateStopPositionAndDirection.cs" />
     <Compile Include="Patch\_PedestrianZoneRoadAI\BollardSimulationStepPatch.cs" />
     <Compile Include="Patch\_VehicleAI\InvalidPathPatch.cs" />
     <Compile Include="Patch\_VehicleAI\_BusAI\CalculateSegmentPositionPatch.cs" />

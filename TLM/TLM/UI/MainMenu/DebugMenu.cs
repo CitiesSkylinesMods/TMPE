@@ -16,9 +16,10 @@ namespace TrafficManager.UI.MainMenu {
     using TrafficManager.Manager.Impl;
     using TrafficManager.Util.Extensions;
     using TrafficManager.U;
-    using TrafficManager.UI.DebugSwitches;
 
 #if DEBUG // whole class coverage
+    using TrafficManager.UI.DebugSwitches;
+
     public class DebugMenuPanel : UIPanel
     {
         // private static UIState _uiState = UIState.None;
