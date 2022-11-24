@@ -10,6 +10,7 @@ namespace TrafficManager.Patch._VehicleAI {
     using Manager.Impl;
     using State;
     using State.ConfigData;
+    using TrafficManager.UI.Helpers;
     using TrafficManager.Util.Extensions;
     using UnityEngine;
     using Util;
@@ -69,9 +70,18 @@ namespace TrafficManager.Patch._VehicleAI {
                            && (GlobalConfig.Instance.Debug.ApiExtVehicleType == API.Traffic.Enums.ExtVehicleType.None
                                || GlobalConfig.Instance.Debug.ApiExtVehicleType == API.Traffic.Enums.ExtVehicleType.RoadVehicle)
                            && (DebugSettings.VehicleId == 0 || DebugSettings.VehicleId == vehicleID);
+            bool debugOverlay = logLogic && DebugSettings.VehicleId != 0;
 #else
-            var logLogic = false;
+            const bool logLogic = false;
+            const bool debugOverlay = false;
 #endif
+            if (debugOverlay) {
+                DebugOverlay.Actions.Remove(0);
+                DebugOverlay.Actions.Remove(1);
+                DebugOverlay.Actions.Remove(2);
+                DebugOverlay.Actions.Remove(3);
+            }
+
             if (logLogic) {
                 Log._Debug(
                     $"CustomVehicle.CustomUpdatePathTargetPositions({vehicleID}) called.\n" +
@@ -745,7 +755,7 @@ namespace TrafficManager.Patch._VehicleAI {
                         logLogic,
                         () => $"CustomVehicle.CustomUpdatePathTargetPositions({vehicleID}): " +
                         "Calculated current segment position for regular vehicle. " +
-                        $"nextSegOffset={nextSegOffset}, bezier.len={bezier.a}, " +
+                        $"nextSegOffset={nextSegOffset}, bezier.a={bezier.a}, " +
                         $"curSegDir={curSegDir}, maxSpeed={maxSpeed}, pathOffset={pathOffset}, " +
                         $"calculateNextNextPos={calculateNextNextPos}");
 
@@ -887,14 +897,15 @@ namespace TrafficManager.Patch._VehicleAI {
                     }
                     // STOCK CODE END
 
-                    Log._DebugIf(
-                        logLogic,
-                        () => $"CustomVehicle.CustomUpdatePathTargetPositions({vehicleID}): " +
-                        $"Direction vectors normalized. curSegDir={curSegDir}, nextSegDir={nextSegDir}\n" +
-                        $"CustomVehicle.CustomUpdatePathTargetPositions({vehicleID}): " +
-                        $"Calculated bezier middle points. IN: bezier.len={bezier.a}, " +
-                        $"curSegDir={curSegDir}, bezier.d={bezier.d}, nextSegDir={nextSegDir}, " +
-                        $"true, true, OUT: bezier.b={bezier.b}, bezier.c={bezier.c}, dist={dist}");
+                    if (debugOverlay) {
+                        Color color = Color.yellow;
+                        Color color2 = Color.Lerp(color, Color.black, 0.2f);
+                        Segment3 arrow1 = new(bezier.a, bezier.a + curSegDir);
+                        Segment3 arrow2 = new(bezier.d, bezier.d + nextSegDir);
+                        DebugOverlay.Actions[0] = () => bezier.RenderDebugOverlay(color);
+                        DebugOverlay.Actions[1] = () => arrow1.RenderDebugArrowOverlay(color);
+                        DebugOverlay.Actions[2] = () => arrow2.RenderDebugArrowOverlay(color2);
+                    }
 
                     if (dist > 1f) {
                         ushort nextNodeId;
