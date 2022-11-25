@@ -193,7 +193,7 @@ namespace TrafficManager.Manager.Impl {
                 => (data.Length > idx) ? data[idx] : defaultVal;
 
             static void LoadOption(byte[] data, uint idx, ILegacySerializableOption opt) {
-                if (data != null && idx > data.Length) {
+                if (data != null && idx < data.Length) {
                     opt.Load(data[idx]);
                 } else {
                     opt.ResetValue();
