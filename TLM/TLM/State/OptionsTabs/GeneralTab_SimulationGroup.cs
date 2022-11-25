@@ -6,14 +6,15 @@ namespace TrafficManager.State {
 
     public static class GeneralTab_SimulationGroup {
 
-        public static DropDownOption<SimulationAccuracy> SimulationAccuracy =
+        public static DropDownOption<SimulationAccuracy> SimulationAccuracyOption =
             new(nameof(Options.simulationAccuracy), Options.PersistTo.Savegame) {
                 Label = "General.Dropdown:Simulation accuracy",
+                DefaultValue = SimulationAccuracy.VeryHigh,
             };
 
         internal static void AddUI(UIHelperBase tab) {
             var group = tab.AddGroup(T("General.Group:Simulation"));
-            SimulationAccuracy.AddUI(group);
+            SimulationAccuracyOption.AddUI(group);
         }
 
         private static string T(string key) => Translation.Options.Get(key);

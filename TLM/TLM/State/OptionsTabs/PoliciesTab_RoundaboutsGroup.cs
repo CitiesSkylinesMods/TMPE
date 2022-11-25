@@ -9,23 +9,27 @@ namespace TrafficManager.State {
 
         public static CheckboxOption RoundAboutQuickFix_DedicatedExitLanes =
             new (nameof(Options.RoundAboutQuickFix_DedicatedExitLanes), Options.PersistTo.Savegame) {
+                DefaultValue = true,
                 Label = "Roundabout.Option:Allocate dedicated exit lanes",
                 Tooltip = "Roundabout.Tooltip:Allocate dedicated exit lanes",
             };
 
         public static CheckboxOption RoundAboutQuickFix_StayInLaneMainR =
             new (nameof(Options.RoundAboutQuickFix_StayInLaneMainR), Options.PersistTo.Savegame) {
+                DefaultValue = true,
                 Label = "Roundabout.Option:Stay in lane inside roundabout",
             };
 
         public static CheckboxOption RoundAboutQuickFix_StayInLaneNearRabout =
             new (nameof(Options.RoundAboutQuickFix_StayInLaneNearRabout), Options.PersistTo.Savegame) {
+                DefaultValue = true,
                 Label = "Roundabout.Option:Stay in lane outside roundabout",
                 Tooltip = "Roundabout.Tooltip:Stay in lane outside roundabout",
             };
 
         public static CheckboxOption RoundAboutQuickFix_NoCrossMainR =
             new (nameof(Options.RoundAboutQuickFix_NoCrossMainR), Options.PersistTo.Savegame) {
+                DefaultValue = true,
                 Label = "Roundabout.Option:No crossing inside",
             };
 
@@ -36,11 +40,13 @@ namespace TrafficManager.State {
 
         public static CheckboxOption RoundAboutQuickFix_PrioritySigns =
             new (nameof(Options.RoundAboutQuickFix_PrioritySigns), Options.PersistTo.Savegame) {
+                DefaultValue = true,
                 Label = "Roundabout.Option:Set priority signs",
             };
 
         public static CheckboxOption RoundAboutQuickFix_KeepClearYieldR =
             new (nameof(Options.RoundAboutQuickFix_KeepClearYieldR), Options.PersistTo.Savegame) {
+                DefaultValue = true,
                 Label = "Roundabout.Option:Yielding vehicles keep clear of blocked roundabout",
                 Tooltip = "Roundabout.Tooltip:Yielding vehicles keep clear of blocked roundabout",
             };
@@ -53,6 +59,7 @@ namespace TrafficManager.State {
 
         public static CheckboxOption RoundAboutQuickFix_ParkingBanMainR =
             new (nameof(Options.RoundAboutQuickFix_ParkingBanMainR), Options.PersistTo.Savegame) {
+                DefaultValue = true,
                 Label = "Roundabout.Option:Put parking ban inside roundabouts",
             };
 

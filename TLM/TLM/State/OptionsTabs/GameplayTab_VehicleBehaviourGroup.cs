@@ -11,6 +11,7 @@ namespace TrafficManager.State {
 
         public static CheckboxOption IndividualDrivingStyle =
             new (nameof(Options.individualDrivingStyle), Options.PersistTo.Savegame) {
+                DefaultValue = true,
                 Label = "Gameplay.Checkbox:Individual driving styles",
             };
 
@@ -27,11 +28,11 @@ namespace TrafficManager.State {
                 Handler = (newValue) => AllowDespawnFiltersButton.ReadOnly = !newValue,
             };
 
-        public static DropDownOption<RecklessDrivers> RecklessDrivers =
+        public static DropDownOption<RecklessDrivers> RecklessDriversOption =
             new(nameof(Options.recklessDrivers), Options.PersistTo.Savegame) {
                 Label = "Gameplay.Dropdown:Reckless drivers%",
+                DefaultValue = RecklessDrivers.HolyCity,
             };
-
 
         public static ActionButton AllowDespawnFiltersButton = new() {
             Label = "Gameplay.Button:Filter Disable despawning vehicle type",
@@ -42,7 +43,7 @@ namespace TrafficManager.State {
         internal static void AddUI(UIHelperBase tab) {
             var group = tab.AddGroup(T("Gameplay.Group:Vehicle behavior"));
 
-            RecklessDrivers.AddUI(group);
+            RecklessDriversOption.AddUI(group);
 
             IndividualDrivingStyle.AddUI(group);
 

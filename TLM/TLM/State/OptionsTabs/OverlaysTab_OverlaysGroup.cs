@@ -73,6 +73,7 @@ namespace TrafficManager.State {
             };
         public static CheckboxOption ShowPathFindStats =
             new(nameof(Options.showPathFindStats), Options.PersistTo.Savegame) {
+                DefaultValue = VersionUtil.IS_DEBUG,
                 Label = "Maintenance.Checkbox:Show path-find stats",
                 Validator = QueuedStatsOnlyValidator,
                 Handler = OnShowPathFindStatsChanged,

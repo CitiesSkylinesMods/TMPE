@@ -23,8 +23,9 @@ namespace TrafficManager.State {
                 Handler = JunctionRestrictionsUpdateHandler,
             };
 
-        public static DropDownOption<VehicleRestrictionsAggression> VehicleRestrictionsAggression =
+        public static DropDownOption<VehicleRestrictionsAggression> VehicleRestrictionsAggressionOption =
             new(nameof(Options.vehicleRestrictionsAggression), Options.PersistTo.Savegame) {
+                DefaultValue = VehicleRestrictionsAggression.Medium,
                 Label = "VR.Dropdown:Vehicle restrictions aggression",
             };
 
@@ -42,7 +43,7 @@ namespace TrafficManager.State {
 
             var group = tab.AddGroup(T("VR.Group:On roads"));
 
-            VehicleRestrictionsAggression.AddUI(group);
+            VehicleRestrictionsAggressionOption.AddUI(group);
 
             BanRegularTrafficOnBusLanes.AddUI(group);
 

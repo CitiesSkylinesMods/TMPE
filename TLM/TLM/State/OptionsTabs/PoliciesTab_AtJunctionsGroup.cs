@@ -16,6 +16,7 @@ namespace TrafficManager.State {
         public static CheckboxOption RelaxedBusses =
             new (nameof(Options.relaxedBusses), Options.PersistTo.Savegame) {
                 Label = "VR.Checkbox:Buses may ignore lane arrows",
+                DefaultValue = true,
             };
         public static CheckboxOption AllowEnterBlockedJunctions =
             new (nameof(Options.allowEnterBlockedJunctions), Options.PersistTo.Savegame) {
@@ -49,6 +50,7 @@ namespace TrafficManager.State {
             };
         public static CheckboxOption AutomaticallyAddTrafficLightsIfApplicable =
             new (nameof(Options.automaticallyAddTrafficLightsIfApplicable), Options.PersistTo.Savegame) {
+                DefaultValue = true,
                 Label = "VR.Checkbox:Automatically add traffic lights if applicable",
             };
         public static CheckboxOption DedicatedTurningLanes =
