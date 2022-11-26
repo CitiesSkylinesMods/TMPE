@@ -1,8 +1,10 @@
 namespace TrafficManager.State {
     using ICities;
     using TrafficManager.UI;
-    using TrafficManager.UI.DebugSwitches;
     using TrafficManager.UI.Helpers;
+#if DEBUG
+    using TrafficManager.UI.DebugSwitches;
+#endif
 
     public static class MaintenanceTab_ConfigGroup {
 
