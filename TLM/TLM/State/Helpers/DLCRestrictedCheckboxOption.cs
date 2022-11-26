@@ -13,7 +13,7 @@ public class DLCRestrictedCheckboxOption : CheckboxOption {
 
     public DLCRestrictedCheckboxOption(string fieldName,
                                        SteamHelper.DLC requiredDLC,
-                                       Options.PersistTo scope = Options.PersistTo.Savegame) : base(fieldName, scope) {
+                                       Options.Scope scope = Options.Scope.Savegame) : base(fieldName, scope) {
         _requiredDLC = requiredDLC;
         _readOnly = !SteamHelper.IsDLCOwned(_requiredDLC);
     }

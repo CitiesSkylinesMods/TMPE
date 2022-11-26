@@ -10,26 +10,26 @@ namespace TrafficManager.State {
     public static class GameplayTab_VehicleBehaviourGroup {
 
         public static CheckboxOption IndividualDrivingStyle =
-            new (nameof(Options.individualDrivingStyle), Options.PersistTo.Savegame) {
+            new (nameof(Options.individualDrivingStyle), Options.Scope.Savegame) {
                 DefaultValue = true,
                 Label = "Gameplay.Checkbox:Individual driving styles",
             };
 
         // Requires Snowfall DLC
         public static DLCRestrictedCheckboxOption StrongerRoadConditionEffects =
-            new(nameof(Options.strongerRoadConditionEffects), requiredDLC: SteamHelper.DLC.SnowFallDLC, Options.PersistTo.Savegame) {
+            new(nameof(Options.strongerRoadConditionEffects), requiredDLC: SteamHelper.DLC.SnowFallDLC, Options.Scope.Savegame) {
                 Label = "Gameplay.Checkbox:Increase road condition impact",
                 Validator = SnowfallDlcValidator,
             };
 
         public static CheckboxOption DisableDespawning =
-            new(nameof(Options.disableDespawning), Options.PersistTo.Savegame) {
+            new(nameof(Options.disableDespawning), Options.Scope.Savegame) {
                 Label = "Maintenance.Checkbox:Disable despawning",
                 Handler = (newValue) => AllowDespawnFiltersButton.ReadOnly = !newValue,
             };
 
         public static DropDownOption<RecklessDrivers> RecklessDriversOption =
-            new(nameof(Options.recklessDrivers), Options.PersistTo.Savegame) {
+            new(nameof(Options.recklessDrivers), Options.Scope.Savegame) {
                 Label = "Gameplay.Dropdown:Reckless drivers%",
                 DefaultValue = RecklessDrivers.HolyCity,
             };

@@ -16,35 +16,35 @@ namespace TrafficManager.UI.AllowDespawn {
         private const int _defaultHeight = 280;
 
         public static CheckboxOption AllowDespawnPassengerCars =
-            new ("AllowDespawnPassengerCar", Options.PersistTo.Global) {
+            new ("AllowDespawnPassengerCar", Options.Scope.Global) {
                 Label = "AllowDespawn.Checkbox:Passenger Cars",
                 Handler = (bool newValue) => OnChange(ExtVehicleType.PassengerCar, newValue),
                 Value = IsDespawnAllowed(ExtVehicleType.PassengerCar)
             };
 
         public static CheckboxOption AllowDespawnBuses =
-            new ("AllowDespawnBus", Options.PersistTo.Global) {
+            new ("AllowDespawnBus", Options.Scope.Global) {
                 Label = "AllowDespawn.Checkbox:Buses",
                 Handler = (bool newValue) => OnChange(ExtVehicleType.Bus, newValue),
                 Value = IsDespawnAllowed(ExtVehicleType.Bus)
             };
 
         public static CheckboxOption AllowDespawnTaxis =
-            new ("AllowDespawnTaxi", Options.PersistTo.Global) {
+            new ("AllowDespawnTaxi", Options.Scope.Global) {
                 Label = "AllowDespawn.Checkbox:Taxis",
                 Handler = (bool newValue) => OnChange(ExtVehicleType.Taxi, newValue),
                 Value = IsDespawnAllowed(ExtVehicleType.Taxi)
             };
 
         public static CheckboxOption AllowDespawnTrams =
-            new ("AllowDespawnTram", Options.PersistTo.Global) {
+            new ("AllowDespawnTram", Options.Scope.Global) {
                 Label = "AllowDespawn.Checkbox:Trams",
                 Handler = (bool newValue) => OnChange(ExtVehicleType.Tram, newValue),
                 Value = IsDespawnAllowed(ExtVehicleType.Tram)
             };
 
         public static CheckboxOption AllowDespawnTrolleybuses =
-            new ("AllowDespawnTrolleybus", Options.PersistTo.Global) {
+            new ("AllowDespawnTrolleybus", Options.Scope.Global) {
                 Label = "AllowDespawn.Checkbox:Trolleybuses",
                 Handler = (bool newValue) => OnChange(ExtVehicleType.Trolleybus, newValue),
                 Value = IsDespawnAllowed(ExtVehicleType.Trolleybus)
@@ -60,7 +60,7 @@ namespace TrafficManager.UI.AllowDespawn {
         */
 
         public static CheckboxOption AllowDespawnPassengerTrains =
-            new ("AllowDespawnPassengerTrain", Options.PersistTo.Global) {
+            new ("AllowDespawnPassengerTrain", Options.Scope.Global) {
                 Label = "AllowDespawn.Checkbox:Passenger Trains",
                 Handler = (bool newValue) => OnChange(ExtVehicleType.PassengerTrain, newValue),
                 Value = IsDespawnAllowed(ExtVehicleType.PassengerTrain)
@@ -76,21 +76,21 @@ namespace TrafficManager.UI.AllowDespawn {
         */
 
         public static CheckboxOption AllowDespawnCargoTrains =
-            new ("AllowDespawnCargoTrain", Options.PersistTo.Global) {
+            new ("AllowDespawnCargoTrain", Options.Scope.Global) {
                 Label = "AllowDespawn.Checkbox:Cargo Trains",
                 Handler = (bool newValue) => OnChange(ExtVehicleType.CargoTrain, newValue),
                 Value = IsDespawnAllowed(ExtVehicleType.CargoTrain)
             };
 
         public static CheckboxOption AllowDespawnCargoTrucks =
-            new ("AllowDespawnPassengerTruck", Options.PersistTo.Global) {
+            new ("AllowDespawnPassengerTruck", Options.Scope.Global) {
                 Label = "AllowDespawn.Checkbox:Cargo Trucks",
                 Handler = (bool newValue) => OnChange(ExtVehicleType.CargoTruck, newValue),
                 Value = IsDespawnAllowed(ExtVehicleType.CargoTruck)
             };
 
         public static CheckboxOption AllowDespawnService =
-            new ("AllowDespawnService", Options.PersistTo.Global) {
+            new ("AllowDespawnService", Options.Scope.Global) {
                 Label = "AllowDespawn.Checkbox:Service vehicles",
                 Handler = (bool newValue) => OnChange(ExtVehicleType.Service, newValue),
                 Value = IsDespawnAllowed(ExtVehicleType.Service)

@@ -17,7 +17,7 @@ namespace TrafficManager.UI.Helpers {
         private byte _step = 5;
         private UILabel _sliderLabel;
 
-        public SliderOption(string fieldName, Options.PersistTo scope = Options.PersistTo.Savegame)
+        public SliderOption(string fieldName, Options.Scope scope = Options.Scope.Savegame)
         : base(fieldName, scope) { }
 
         /* Data */

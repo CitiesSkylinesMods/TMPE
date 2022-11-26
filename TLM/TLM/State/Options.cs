@@ -22,7 +22,7 @@ namespace TrafficManager.State {
 
         // Likely to change or be removed in future
         [Flags]
-        public enum PersistTo {
+        public enum Scope {
             None = 0,
             Global = 1,
             Savegame = 2,
