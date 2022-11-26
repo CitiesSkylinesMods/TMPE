@@ -1,4 +1,5 @@
 namespace TrafficManager.State.ConfigData {
+    using CSUtil.Commons;
     using System;
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.Traffic;
@@ -9,7 +10,14 @@ namespace TrafficManager.State.ConfigData {
     /// DebugSettings is a part of GlobalConfig, enabled only in Debug mode
     /// </summary>
     public class DebugSettings {
-        public static DebugSwitch DebugSwitch;
+        private static DebugSwitch _debugSwitches;
+        public static DebugSwitch DebugSwitches {
+            get => _debugSwitches;
+            set {
+                _debugSwitches = value;
+                Log._Debug("DebugSettings.DebugSwitches set to " + DebugSwitches);
+            }
+        }
 
         private int nodeId_ = 0;
 
@@ -96,7 +104,7 @@ namespace TrafficManager.State.ConfigData {
 
     internal static class DebugSwitchExtensions {
         public static bool Get(this DebugSwitch sw) {
-            return (DebugSettings.DebugSwitch & sw) != 0;
+            return (DebugSettings.DebugSwitches & sw) != 0;
         }
     }
 #endif

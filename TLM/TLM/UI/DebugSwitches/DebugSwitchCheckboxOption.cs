@@ -15,7 +15,7 @@ namespace TrafficManager.UI.DebugSwitches {
             : base(sw.ToString(), Options.PersistTo.Global) {
             DebugSwitch = sw;
             Translator = val => val;
-            Handler = val => DebugSwitch.SetFlags(DebugSwitch, val);
+            Handler = val => DebugSettings.DebugSwitches = DebugSettings.DebugSwitches.SetFlags(DebugSwitch, val);
             Label = sw.ToString();
             Refresh();
         }
