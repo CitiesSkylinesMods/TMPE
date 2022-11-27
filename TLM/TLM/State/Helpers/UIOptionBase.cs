@@ -24,6 +24,8 @@ namespace TrafficManager.State.Helpers {
         protected string _tooltip;
         protected bool _readOnly;
 
+        public string Name => Option.Name;
+
         public bool Indent { get; set; }
 
         public Options.Scope Scope => Option.Scope;
@@ -44,7 +46,7 @@ namespace TrafficManager.State.Helpers {
         }
 
         public string Label {
-            get => _label;
+            get => _label ?? Name;
             set {
                 _label = value;
                 UpdateLabel();

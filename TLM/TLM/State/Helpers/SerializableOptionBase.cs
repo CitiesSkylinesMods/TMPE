@@ -17,9 +17,12 @@ namespace TrafficManager.State.Helpers {
 
         protected const string INGAME_ONLY_SETTING = "This setting can only be changed in-game.";
 
+        public string Name { get; private set; }
+
         public Options.Scope Scope { get; private set; }
 
-        public SerializableOptionBase(Options.Scope scope) {
+        public SerializableOptionBase(string name, Options.Scope scope) {
+            Name = name;
             Scope = scope;
         }
 
@@ -44,8 +47,8 @@ namespace TrafficManager.State.Helpers {
 
         public event OnChanged OnValueChanged;
 
-        public SerializableOptionBase(Options.Scope scope)
-            : base(scope) {
+        public SerializableOptionBase(string name, Options.Scope scope)
+            : base(name, scope) {
             OnValueChanged = DefaultOnValueChanged;
         }
 
@@ -63,7 +66,12 @@ namespace TrafficManager.State.Helpers {
 
         public virtual TVal Value {
             get => _value;
-            set => _value = value;
+            set {
+                if (!_value.Equals(value)) {
+                    _value = value;
+                    OnValueChanged(value);
+                }
+            }
         }
 
         /// <summary>set only during initialization</summary>
@@ -85,7 +93,7 @@ namespace TrafficManager.State.Helpers {
             if (Value.Equals(newVal)) {
                 return;
             }
-            Log._Debug($"SerializableOptionBase.DefaultOnValueChanged: value changed to {newVal}");
+            Log._Debug($"SerializableOptionBase.DefaultOnValueChanged: {Name} value changed to {newVal}");
             Value = newVal;
         }
 
