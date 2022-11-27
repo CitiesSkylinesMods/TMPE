@@ -8,25 +8,25 @@ namespace TrafficManager.State {
     public static class GeneralTab_InterfaceGroup {
 
         public static CheckboxOption MainMenuButtonPosLocked =
-            new(nameof(Main.MainMenuButtonPosLocked), Options.Scope.Global) {
+            new(nameof(Main.MainMenuButtonPosLocked), Scope.Global) {
                 Label = "General.Checkbox:Lock main menu button position",
                 Handler = OnMainMenuButtonPosLockedChanged,
             };
 
         public static CheckboxOption MainMenuPosLocked =
-            new(nameof(Main.MainMenuPosLocked), Options.Scope.Global) {
+            new(nameof(Main.MainMenuPosLocked), Scope.Global) {
                 Label = "General.Checkbox:Lock main menu window position",
                 Handler = OnMainMenuPosLockedChanged,
             };
 
         public static CheckboxOption UseUUI =
-            new(nameof(Main.UseUUI), Options.Scope.Global) {
+            new(nameof(Main.UseUUI), Scope.Global) {
                 Label = "General.Checkbox:Use UnifiedUI",
                 Handler = OnUseUUIChanged,
             };
 
         public static SliderOption GuiScale =
-            new(nameof(Main.GuiScale), Options.Scope.Global) {
+            new(nameof(Main.GuiScale), Scope.Global) {
                 Label = "General.Slider:GUI scale",
                 Tooltip = "%",
                 Min = 50,
@@ -35,7 +35,7 @@ namespace TrafficManager.State {
             };
 
         public static SliderOption GuiOpacity =
-            new(nameof(Main.GuiOpacity), Options.Scope.Global) {
+            new(nameof(Main.GuiOpacity), Scope.Global) {
                 Label = "General.Slider:Window opacity",
                 Tooltip = "%",
                 Min = TrafficManagerTool.MINIMUM_OPACITY,
@@ -44,7 +44,7 @@ namespace TrafficManager.State {
             };
 
         public static SliderOption OverlayOpacity =
-            new(nameof(Main.OverlayOpacity), Options.Scope.Global) {
+            new(nameof(Main.OverlayOpacity), Scope.Global) {
                 Label = "General.Slider:Overlay opacity",
                 Tooltip = "%",
                 Min = TrafficManagerTool.MINIMUM_OPACITY,
@@ -53,13 +53,13 @@ namespace TrafficManager.State {
             };
 
         public static CheckboxOption EnableTutorial =
-            new(nameof(Main.EnableTutorial), Options.Scope.Global) {
+            new(nameof(Main.EnableTutorial), Scope.Global) {
                 Label = "General.Checkbox:Enable tutorials",
                 Handler = OnEnableTutorialChanged,
             };
 
         public static CheckboxOption OpenUrlsInSteamOverlay =
-            new(nameof(Main.OpenUrlsInSteamOverlay), Options.Scope.Global) {
+            new(nameof(Main.OpenUrlsInSteamOverlay), Scope.Global) {
                 Label = "Checkbox:Use Steam Overlay to show TM:PE website links",
                 Tooltip = "Checkbox.Tooltip:When disabled, website links will open in your default web browser",
                 Handler = OnOpenUrlsInSteamOverlayChanged,

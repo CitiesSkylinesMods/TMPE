@@ -12,55 +12,55 @@ namespace TrafficManager.State {
     public static class MaintenanceTab_DespawnGroup {
 
         public static CheckboxOption DespawnerAll =
-            new ("DespawnerAll", Options.Scope.None) {
+            new ("DespawnerAll", Scope.None) {
                 Label = "Despawn.Checkbox:All vehicles",
                 Handler = OnDespawnerAllChange,
             };
 
         public static CheckboxOption DespawnerRoad =
-            new ("DespawnerRoad", Options.Scope.None) {
+            new ("DespawnerRoad", Scope.None) {
                 Label = "Despawn.Checkbox:Road vehicles",
                 Handler = OnDespawnerChange,
             };
 
         public static CheckboxOption DespawnerParked =
-            new ("DespawnerParked", Options.Scope.None) {
+            new ("DespawnerParked", Scope.None) {
                 Label = "Despawn.Checkbox:Parked vehicles",
                 Handler = OnDespawnerChange,
             };
 
         public static CheckboxOption DespawnerServices =
-            new ("DespawnerServices", Options.Scope.None) {
+            new ("DespawnerServices", Scope.None) {
                 Label = "Despawn.Checkbox:Service vehicles",
                 Handler = OnDespawnerChange,
             };
 
         public static CheckboxOption DespawnerTransport =
-            new ("DespawnerTransport", Options.Scope.None) {
+            new ("DespawnerTransport", Scope.None) {
                 Label = "Despawn.Checkbox:Public Transport vehicles",
                 Handler = OnDespawnerChange,
             };
 
         public static CheckboxOption DespawnerPassengerTrains =
-            new ("DespawnerPassengerTrains", Options.Scope.None) {
+            new ("DespawnerPassengerTrains", Scope.None) {
                 Label = "Despawn.Checkbox:Passenger Trains",
                 Handler = OnDespawnerChange,
             };
 
         public static CheckboxOption DespawnerCargoTrains =
-            new ("DespawnerCargoTrains", Options.Scope.None) {
+            new ("DespawnerCargoTrains", Scope.None) {
                 Label = "Despawn.Checkbox:Cargo Trains",
                 Handler = OnDespawnerChange,
             };
 
         public static CheckboxOption DespawnerAircraft =
-            new ("DespawnerAircraft", Options.Scope.None) {
+            new ("DespawnerAircraft", Scope.None) {
                 Label = "Despawn.Checkbox:Aircraft",
                 Handler = OnDespawnerChange,
             };
 
         public static CheckboxOption DespawnerShips =
-            new ("DespawnerShips", Options.Scope.None) {
+            new ("DespawnerShips", Scope.None) {
                 Label = "Despawn.Checkbox:Ships",
                 Handler = OnDespawnerChange,
             };

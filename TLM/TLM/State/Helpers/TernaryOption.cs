@@ -5,7 +5,7 @@ namespace TrafficManager.State.Helpers {
     using JetBrains.Annotations;
 
     public class TernaryOption : PropagatorOptionBase<bool?> {
-        public TernaryOption(string name, Options.Scope scope) : base(name, scope) { }
+        public TernaryOption(string name, Scope scope) : base(name, scope) { }
 
         public new TernaryOption PropagateTrueTo([NotNull] IValuePropagator target) {
             base.PropagateTrueTo(target);

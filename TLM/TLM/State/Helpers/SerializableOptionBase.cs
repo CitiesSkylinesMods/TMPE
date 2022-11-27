@@ -19,9 +19,9 @@ namespace TrafficManager.State.Helpers {
 
         public string Name { get; private set; }
 
-        public Options.Scope Scope { get; private set; }
+        public Scope Scope { get; private set; }
 
-        public SerializableOptionBase(string name, Options.Scope scope) {
+        public SerializableOptionBase(string name, Scope scope) {
             Name = name;
             Scope = scope;
         }
@@ -47,7 +47,7 @@ namespace TrafficManager.State.Helpers {
 
         public event OnChanged OnValueChanged;
 
-        public SerializableOptionBase(string name, Options.Scope scope)
+        public SerializableOptionBase(string name, Scope scope)
             : base(name, scope) {
             OnValueChanged = DefaultOnValueChanged;
         }

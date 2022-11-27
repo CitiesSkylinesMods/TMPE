@@ -4,7 +4,7 @@ namespace TrafficManager.State.Helpers {
     using System.Xml;
 
     public class BoolOption : PropagatorOptionBase<bool> {
-        public BoolOption(string name, Options.Scope scope) : base(name, scope) { }
+        public BoolOption(string name, Scope scope) : base(name, scope) { }
 
         public new BoolOption PropagateTrueTo([NotNull] IValuePropagator target) {
             base.PropagateTrueTo(target);

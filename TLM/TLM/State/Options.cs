@@ -12,23 +12,6 @@ namespace TrafficManager.State {
     using System;
 
     public class Options : MonoBehaviour {
-#if DEBUG
-        private static List<UICheckBox> debugSwitchFields = new List<UICheckBox>();
-        private static List<UITextField> debugValueFields = new List<UITextField>();
-
-        // private static UITextField pathCostMultiplicatorField = null;
-        // private static UITextField pathCostMultiplicator2Field = null;
-#endif
-
-        // Likely to change or be removed in future
-        [Flags]
-        public enum Scope {
-            None = 0,
-            Global = 1,
-            Savegame = 2,
-            GlobalOrSavegame = Global | Savegame,
-        }
-
         /// <summary>
         /// When <c>true</c>, options are safe to query.
         /// </summary>

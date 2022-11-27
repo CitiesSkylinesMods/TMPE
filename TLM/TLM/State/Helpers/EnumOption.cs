@@ -5,7 +5,7 @@ using TrafficManager.Util;
 
 public class EnumOption<TEnum> : SerializableOptionBase<TEnum>
     where TEnum : Enum {
-    public EnumOption(Options.Scope scope) : base(scope) { }
+    public EnumOption(Scope scope) : base(scope) { }
 
     public override byte Save() => ChangeType<byte>(Value);
 

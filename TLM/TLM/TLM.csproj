@@ -165,6 +165,7 @@
     <Compile Include="State\Helpers\FloatOption.cs" />
     <Compile Include="State\Helpers\EnumOption.cs" />
     <Compile Include="State\Helpers\PropagatorOptionBase.cs" />
+    <Compile Include="State\Helpers\Scope.cs" />
     <Compile Include="State\Helpers\TernaryOption.cs" />
     <Compile Include="State\Helpers\BoolOption.cs" />
     <Compile Include="State\Helpers\UIOptionBase.cs" />

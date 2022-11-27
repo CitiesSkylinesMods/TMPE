@@ -28,7 +28,7 @@ namespace TrafficManager.State.Helpers {
 
         public bool Indent { get; set; }
 
-        public Options.Scope Scope => Option.Scope;
+        public Scope Scope => Option.Scope;
 
         /// <summary>Returns <c>true</c> if setting can persist in current <see cref="_scope"/>.</summary>
         /// <remarks>
@@ -36,9 +36,9 @@ namespace TrafficManager.State.Helpers {
         /// and <see cref="_tooltip"/> should be set to <see cref="INGAME_ONLY_SETTING"/>.
         /// </remarks>
         public bool IsInScope =>
-            Scope.IsFlagSet(Options.Scope.Global) ||
-            (Scope.IsFlagSet(Options.Scope.Savegame) && TMPELifecycle.AppMode != null) ||
-            Scope == Options.Scope.None;
+            Scope.IsFlagSet(Scope.Global) ||
+            (Scope.IsFlagSet(Scope.Savegame) && TMPELifecycle.AppMode != null) ||
+            Scope == Scope.None;
 
         public TranslatorDelegate Translator {
             get => _translator ?? Translation.Options.Get;

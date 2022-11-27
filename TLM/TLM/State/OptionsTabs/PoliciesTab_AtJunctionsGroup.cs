@@ -9,47 +9,47 @@ namespace TrafficManager.State {
     public static class PoliciesTab_AtJunctionsGroup {
 
         public static CheckboxOption AllRelaxed =
-            new (nameof(Options.allRelaxed), Options.Scope.Savegame) {
+            new (nameof(Options.allRelaxed), Scope.Savegame) {
                 Label = "VR.Checkbox:All vehicles may ignore lane arrows",
                 Validator = DebugOnlyValidator,
             };
         public static CheckboxOption RelaxedBusses =
-            new (nameof(Options.relaxedBusses), Options.Scope.Savegame) {
+            new (nameof(Options.relaxedBusses), Scope.Savegame) {
                 Label = "VR.Checkbox:Buses may ignore lane arrows",
                 DefaultValue = true,
             };
         public static CheckboxOption AllowEnterBlockedJunctions =
-            new (nameof(Options.allowEnterBlockedJunctions), Options.Scope.Savegame) {
+            new (nameof(Options.allowEnterBlockedJunctions), Scope.Savegame) {
                 Label = "VR.Checkbox:Vehicles may enter blocked junctions",
                 Handler = OnJunctionRestrictionPolicyChanged,
             };
         public static CheckboxOption AllowUTurns =
-            new (nameof(Options.allowUTurns), Options.Scope.Savegame) {
+            new (nameof(Options.allowUTurns), Scope.Savegame) {
                 Label = "VR.Checkbox:Vehicles may do u-turns at junctions",
                 Handler = OnJunctionRestrictionPolicyChanged,
             };
         public static CheckboxOption AllowNearTurnOnRed =
-            new (nameof(Options.allowNearTurnOnRed), Options.Scope.Savegame) {
+            new (nameof(Options.allowNearTurnOnRed), Scope.Savegame) {
                 Label = "VR.Checkbox:Vehicles may turn on red",
                 Handler = OnJunctionRestrictionPolicyChanged,
             };
         public static CheckboxOption AllowFarTurnOnRed =
-            new (nameof(Options.allowFarTurnOnRed), Options.Scope.Savegame) {
+            new (nameof(Options.allowFarTurnOnRed), Scope.Savegame) {
                 Label = "VR.Checkbox:Also apply to left/right turns between one-way streets",
                 Indent = true,
                 Handler = OnJunctionRestrictionPolicyChanged,
             };
         public static CheckboxOption AllowLaneChangesWhileGoingStraight =
-            new (nameof(Options.allowLaneChangesWhileGoingStraight), Options.Scope.Savegame) {
+            new (nameof(Options.allowLaneChangesWhileGoingStraight), Scope.Savegame) {
                 Label = "VR.Checkbox:Vehicles going straight may change lanes at junctions",
                 Handler = OnJunctionRestrictionPolicyChanged,
             };
         public static CheckboxOption TrafficLightPriorityRules =
-            new (nameof(Options.trafficLightPriorityRules), Options.Scope.Savegame) {
+            new (nameof(Options.trafficLightPriorityRules), Scope.Savegame) {
                 Label = "VR.Checkbox:Vehicles follow priority rules at junctions with timedTL",
             };
         public static CheckboxOption AutomaticallyAddTrafficLightsIfApplicable =
-            new (nameof(Options.automaticallyAddTrafficLightsIfApplicable), Options.Scope.Savegame) {
+            new (nameof(Options.automaticallyAddTrafficLightsIfApplicable), Scope.Savegame) {
                 DefaultValue = true,
                 Label = "VR.Checkbox:Automatically add traffic lights if applicable",
             };

@@ -7,7 +7,7 @@ namespace TrafficManager.State {
     public static class GeneralTab_SimulationGroup {
 
         public static DropDownOption<SimulationAccuracy> SimulationAccuracyOption =
-            new(nameof(Options.simulationAccuracy), Options.Scope.Savegame) {
+            new(nameof(Options.simulationAccuracy), Scope.Savegame) {
                 Label = "General.Dropdown:Simulation accuracy",
                 DefaultValue = SimulationAccuracy.VeryHigh,
             };

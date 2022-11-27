@@ -8,7 +8,7 @@ using System;
 public abstract class PropagatorOptionBase<TVal> : SerializableOptionBase<TVal>, IValuePropagator {
     private HashSet<IValuePropagator> _propagatesTrueTo = new();
     private HashSet<IValuePropagator> _propagatesFalseTo = new();
-    protected PropagatorOptionBase(string name, Options.Scope scope) : base(name, scope) { }
+    protected PropagatorOptionBase(string name, Scope scope) : base(name, scope) { }
 
 
     /// <summary>

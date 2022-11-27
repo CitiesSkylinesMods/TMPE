@@ -9,70 +9,70 @@ namespace TrafficManager.State {
     public static class OverlaysTab_OverlaysGroup {
 
         public static CheckboxOption PrioritySignsOverlay =
-            new (nameof(Options.prioritySignsOverlay), Options.Scope.Savegame) {
+            new (nameof(Options.prioritySignsOverlay), Scope.Savegame) {
                 Label = "Checkbox:Priority signs",
                 Handler = OnOverlayChanged,
             };
         public static CheckboxOption TimedLightsOverlay =
-            new (nameof(Options.timedLightsOverlay), Options.Scope.Savegame) {
+            new (nameof(Options.timedLightsOverlay), Scope.Savegame) {
                 Label = "Checkbox:Timed traffic lights",
                 Handler = OnOverlayChanged,
             };
         public static CheckboxOption SpeedLimitsOverlay =
-            new (nameof(Options.speedLimitsOverlay), Options.Scope.Savegame) {
+            new (nameof(Options.speedLimitsOverlay), Scope.Savegame) {
                 Label = "Checkbox:Speed limits",
                 Handler = OnOverlayChanged,
             };
         public static CheckboxOption ShowDefaultSpeedSubIcon =
-            new (nameof(Options.showDefaultSpeedSubIcon), Options.Scope.Savegame) {
+            new (nameof(Options.showDefaultSpeedSubIcon), Scope.Savegame) {
                 Label = "Overlays.Checkbox:Show default speed with customised speeds",
                 Indent = true,
             };
         public static CheckboxOption VehicleRestrictionsOverlay =
-            new (nameof(Options.vehicleRestrictionsOverlay), Options.Scope.Savegame) {
+            new (nameof(Options.vehicleRestrictionsOverlay), Scope.Savegame) {
                 Label = "Checkbox:Vehicle restrictions",
                 Handler = OnOverlayChanged,
             };
         public static CheckboxOption ParkingRestrictionsOverlay =
-            new (nameof(Options.parkingRestrictionsOverlay), Options.Scope.Savegame) {
+            new (nameof(Options.parkingRestrictionsOverlay), Scope.Savegame) {
                 Label = "Checkbox:Parking restrictions",
                 Handler = OnOverlayChanged,
             };
         public static CheckboxOption JunctionRestrictionsOverlay =
-            new (nameof(Options.junctionRestrictionsOverlay), Options.Scope.Savegame) {
+            new (nameof(Options.junctionRestrictionsOverlay), Scope.Savegame) {
                 Label = "Checkbox:Junction restrictions",
                 Handler = OnOverlayChanged,
             };
         public static CheckboxOption ConnectedLanesOverlay =
-            new (nameof(Options.connectedLanesOverlay), Options.Scope.Savegame) {
+            new (nameof(Options.connectedLanesOverlay), Scope.Savegame) {
                 Label = "Overlay.Checkbox:Connected lanes",
                 Handler = OnOverlayChanged,
             };
         public static CheckboxOption NodesOverlay =
-            new (nameof(Options.nodesOverlay), Options.Scope.Savegame) {
+            new (nameof(Options.nodesOverlay), Scope.Savegame) {
                 Label = "Overlay.Checkbox:Nodes and segments",
             };
         public static CheckboxOption ShowLanes =
-            new (nameof(Options.showLanes), Options.Scope.Savegame) {
+            new (nameof(Options.showLanes), Scope.Savegame) {
                 Label = "Overlay.Checkbox:Lanes",
             };
         public static CheckboxOption VehicleOverlay =
-            new (nameof(Options.vehicleOverlay), Options.Scope.Savegame) {
+            new (nameof(Options.vehicleOverlay), Scope.Savegame) {
                 Label = "Overlay.Checkbox:Vehicles",
                 Validator = DebugOnlyValidator,
             };
         public static CheckboxOption CitizenOverlay =
-            new (nameof(Options.citizenOverlay), Options.Scope.Savegame) {
+            new (nameof(Options.citizenOverlay), Scope.Savegame) {
                 Label = "Overlay.Checkbox:Citizens",
                 Validator = DebugOnlyValidator,
             };
         public static CheckboxOption BuildingOverlay =
-            new (nameof(Options.buildingOverlay), Options.Scope.Savegame) {
+            new (nameof(Options.buildingOverlay), Scope.Savegame) {
                 Label = "Overlay.Checkbox:Buildings",
                 Validator = DebugOnlyValidator,
             };
         public static CheckboxOption ShowPathFindStats =
-            new(nameof(Options.showPathFindStats), Options.Scope.Savegame) {
+            new(nameof(Options.showPathFindStats), Scope.Savegame) {
                 DefaultValue = VersionUtil.IS_DEBUG,
                 Label = "Maintenance.Checkbox:Show path-find stats",
                 Validator = QueuedStatsOnlyValidator,

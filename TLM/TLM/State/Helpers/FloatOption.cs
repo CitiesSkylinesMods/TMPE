@@ -7,7 +7,7 @@ namespace TrafficManager.State.Helpers {
     using UnityEngine;
 
     public class FloatOption : SerializableOptionBase<float> {
-        public FloatOption(Options.Scope scope) : base(scope) { }
+        public FloatOption(Scope scope) : base(scope) { }
 
         public override void Load(byte data) => Value = data;
         public override byte Save() => FloatToByte(Value);
