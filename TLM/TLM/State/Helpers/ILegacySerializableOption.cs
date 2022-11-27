@@ -1,4 +1,4 @@
-namespace TrafficManager.UI.Helpers {
+namespace TrafficManager.State.Helpers {
 
     //legacy load and save
     public interface ILegacySerializableOption

@@ -1,6 +1,7 @@
-namespace TrafficManager.UI.Helpers {
+namespace TrafficManager.State.Helpers {
     using ColossalFramework.UI;
     using ICities;
+    using TrafficManager.UI;
 
     public abstract class OptionButtonBase {
         protected string _label;
@@ -45,13 +46,13 @@ namespace TrafficManager.UI.Helpers {
         }
 
         protected virtual void UpdateLabel() {
-            if (!HasUI) return;
+            if (_ui == null) return;
 
             _ui.text = T(_label);
         }
 
         protected virtual void UpdateTooltip() {
-            if (!HasUI) return;
+            if (_ui == null) return;
 
             _ui.tooltip = string.IsNullOrEmpty(_tooltip)
                 ? string.Empty
@@ -59,7 +60,7 @@ namespace TrafficManager.UI.Helpers {
         }
 
         protected virtual void UpdateReadOnly() {
-            if (!HasUI) return;
+            if (_ui == null) return;
 
             _ui.isInteractive = !_readOnly;
             _ui.opacity = _readOnly ? 0.3f : 1f;

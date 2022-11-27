@@ -1,4 +1,4 @@
-namespace TrafficManager.UI.Helpers {
+namespace TrafficManager.State.Helpers {
     using ColossalFramework.UI;
     using ColossalFramework;
     using CSUtil.Commons;
@@ -9,6 +9,7 @@ namespace TrafficManager.UI.Helpers {
     using JetBrains.Annotations;
     using TrafficManager.Lifecycle;
     using UnityEngine;
+    using TrafficManager.UI;
 
     public abstract class UIOptionBase {
         /// <summary>Use as tooltip for readonly UI components.</summary>
@@ -17,7 +18,7 @@ namespace TrafficManager.UI.Helpers {
         protected const string INGAME_ONLY_SETTING = "This setting can only be changed in-game.";
 
         [CanBeNull]
-        protected readonly SerializableOptionBase Option;
+        protected SerializableOptionBase Option { get; set; }
         private TranslatorDelegate _translator;
         protected string _label;
         protected string _tooltip;
@@ -25,7 +26,7 @@ namespace TrafficManager.UI.Helpers {
 
         public bool Indent { get; set; }
 
-        Options.Scope Scope => Option.Scope;
+        public Options.Scope Scope => Option.Scope;
 
         /// <summary>Returns <c>true</c> if setting can persist in current <see cref="_scope"/>.</summary>
         /// <remarks>
@@ -66,9 +67,6 @@ namespace TrafficManager.UI.Helpers {
             }
         }
 
-        public abstract bool HasUI { get; }
-
-
         public void ResetValue() => Option.ResetValue();
 
         protected abstract void UpdateTooltip();
@@ -83,11 +81,34 @@ namespace TrafficManager.UI.Helpers {
         protected string Translate(string key) => Translator(key);
     }
 
-    public abstract class UIOptionBase<TUI, TComponent> : UIOptionBase
-        where TUI : UIComponent
-    {
-        protected TUI _ui;
-        public override bool HasUI => _ui != null;
-        public abstract TComponent AddUI(UIHelperBase container);
+    public abstract class UIOptionBase<TVal> : UIOptionBase {
+        public SerializableOptionBase<TVal> Option {
+            get => base.Option as SerializableOptionBase<TVal>;
+            set => base.Option = value;
+        }
+
+        public abstract void SetValue(TVal value);
+
+        public void SetValueSafe(TVal value) {
+            SimulationManager.instance.m_ThreadingWrapper.QueueMainThread(
+                () => SetValue(value));
+        }
+
+        protected void EvenVisibilityChanged(UIComponent _, bool isVisible) {
+            if (isVisible) {
+                SetValue(Option.Value);
+            }
+        }
+
+        public void InitUI(UIComponent ui) {
+            UpdateLabel();
+            UpdateTooltip();
+            UpdateReadOnly();
+            Option.OnValueChanged += SetValue;
+            ui.eventVisibilityChanged += EvenVisibilityChanged;
+        }
+
+        public void OnValueChanged(TVal value) => Option.Value = value;
+        public void OnValueChanged(UIComponent c, TVal value) => Option.Value = value;
     }
 }

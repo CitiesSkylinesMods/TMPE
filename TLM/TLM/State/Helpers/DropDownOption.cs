@@ -1,20 +1,15 @@
-namespace TrafficManager.UI.Helpers {
+namespace TrafficManager.State.Helpers {
     using ICities;
     using ColossalFramework.UI;
-    using TrafficManager.State;
     using CSUtil.Commons;
     using System;
     using System.Linq;
     using TrafficManager.API.Traffic.Enums;
-    using TrafficManager.Util;
 
-    public class DropDownOption<TEnum> : SerializableUIOptionBase<TEnum, UIDropDown, DropDownOption<TEnum>>
+    public class DropDownOption<TEnum> : UIOptionBase<TEnum>
         where TEnum : struct, Enum, IConvertible {
         private UILabel _dropdownLabel;
-
-        public DropDownOption(string fieldName, Options.Scope scope = Options.Scope.Savegame)
-        : base(fieldName, scope) { }
-
+        private UIDropDown _ui;
         /* Data */
         private static TEnum[] values_ = Enum.GetValues(typeof(TEnum)) as TEnum[];
 
@@ -32,69 +27,39 @@ namespace TrafficManager.UI.Helpers {
         private static int IndexOf(TEnum value) =>
             Array.FindIndex(values_, item => item.Equals(value));
 
-        protected void InvokeOnValueChanged(int index) {
-            TEnum val = values_[index];
-            InvokeOnValueChanged(val);
-        }
-
-        public override void Load(byte data) {
-            unchecked {
-                Value = (TEnum)(IConvertible)(int)data;
-            }
-        }
-
-        public override byte Save() => Value.ToByte(null);
-
-        /* UI */
-        public override TEnum Value {
-            get => base.Value;
-            set {
-                if (values_.Contains(value)) {
-                    base.Value = value;
-                    if (Shortcuts.IsMainThread()) {
-                        if (HasUI) {
-                            _ui.selectedIndex = IndexOf(value);
-                        }
-                    } else {
-                        SimulationManager.instance
-                                         .m_ThreadingWrapper
-                                         .QueueMainThread(() => {
-                                             if (HasUI) {
-                                                 _ui.selectedIndex = IndexOf(value);
-                                             }
-                                         });
-                    }
-                } else {
-                    Log.Error($"unrecognised value:{value} for enum:{typeof(TEnum).Name}");
-                }
-            }
-        }
-
-        public override DropDownOption<TEnum> AddUI(UIHelperBase container) {
+        public virtual DropDownOption<TEnum> AddUI(UIHelperBase container) {
             _ui = container.AddDropdown(
                 text: Translate(Label) + ":",
                 options: GetTranslatedItems(),
-                defaultSelection: IndexOf(Value),
-                eventCallback: InvokeOnValueChanged) as UIDropDown;
-
+                defaultSelection: IndexOf(Option.Value),
+                eventCallback: OnValueChanged) as UIDropDown;
             _ui.width = 350;
             _ui.parent.width = 350; //UIDropDown is added to the UIPanel which also require resize for correct tooltip interactions
             _dropdownLabel = _ui.parent.Find<UILabel>("Label");
-
-            UpdateTooltip();
-            UpdateReadOnly();
-
+            InitUI(_ui);
             return this;
         }
 
+        public override void SetValue(TEnum value) {
+            if (values_.Contains(value)) {
+                if (_ui != null) {
+                    _ui.selectedIndex = IndexOf(value);
+                }
+            } else {
+                Log.Error($"unrecognised value:{value} for enum:{typeof(TEnum).Name}");
+            }
+        }
+
+        protected void OnValueChanged(int index) => OnValueChanged(values_[index]);
+
         protected override void UpdateLabel() {
-            if (!HasUI) return;
+            if (_ui == null) return;
             _ui.text = Translate(Label) + ":";
             _ui.items = GetTranslatedItems();
         }
 
         protected override void UpdateTooltip() {
-            if (!HasUI) return;
+            if (_ui == null) return;
 
             //UIDropDown parent(UIPanel) handles tooltip
             _ui.parent.tooltip = IsInScope
@@ -103,11 +68,11 @@ namespace TrafficManager.UI.Helpers {
         }
 
         protected override void UpdateReadOnly() {
-            if (!HasUI) return;
+            if (_ui == null) return;
 
             var readOnly = !IsInScope || _readOnly;
 
-            Log._Debug($"DropDownOption.UpdateReadOnly() - `{FieldName}` is {(readOnly ? "read-only" : "writeable")}");
+            Log._Debug($"DropDownOption.UpdateReadOnly() - `Name` is {(readOnly ? "read-only" : "writeable")}");
 
             _ui.isInteractive = !readOnly;
             _ui.opacity = readOnly ? 0.3f : 1f;

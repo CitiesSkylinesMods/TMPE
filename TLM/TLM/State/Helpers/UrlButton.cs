@@ -1,4 +1,4 @@
-namespace TrafficManager.UI.Helpers {
+namespace TrafficManager.State.Helpers {
     using ColossalFramework.PlatformServices;
     using System.Diagnostics;
     using TrafficManager.Lifecycle;
@@ -25,7 +25,7 @@ namespace TrafficManager.UI.Helpers {
         }
 
         protected override void UpdateTooltip() {
-            if (!HasUI) return;
+            if (_ui == null) return;
 
             _ui.tooltip = string.IsNullOrEmpty(_tooltip)
                 ? _url

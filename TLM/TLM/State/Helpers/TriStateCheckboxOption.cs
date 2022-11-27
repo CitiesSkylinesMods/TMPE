@@ -1,124 +1,55 @@
-namespace TrafficManager.UI.Helpers {
+namespace TrafficManager.State.Helpers {
     using ICities;
     using ColossalFramework.UI;
-    using TrafficManager.State;
     using CSUtil.Commons;
     using UnityEngine;
     using TrafficManager.Util.Extensions;
-    using JetBrains.Annotations;
-    using System.Collections.Generic;
-    using TrafficManager.Util;
     using System;
+    using TrafficManager.UI.Helpers;
 
-    public class TriStateCheckboxOption :
-        SerializableUIOptionBase<bool?, UITriStateCheckbox, TriStateCheckboxOption>, IValuePropagator {
+    public class TriStateCheckboxOption : UIOptionBase<bool?> {
         private const int LABEL_MAX_WIDTH = 615;
         private const int LABEL_MAX_WIDTH_INDENTED = 600;
+        protected UITriStateCheckbox ui_;
 
-        public TriStateCheckboxOption(string fieldName, Options.Scope scope = Options.Scope.Savegame)
-        : base(fieldName, scope) { }
-
-        private HashSet<IValuePropagator> _propagatesTrueTo = new();
-        private HashSet<IValuePropagator> _propagatesFalseTo = new();
-
-        public TriStateCheckboxOption PropagateTrueTo([NotNull] IValuePropagator target) {
-            Log.Info($"TriStateCheckboxOption.PropagateTrueTo: `{FieldName}` will propagate to `{target}`");
-            this.AddPropagate(target, true);
-            target.AddPropagate(this, false);
+        public virtual TriStateCheckboxOption AddUI(UIHelperBase container) {
+            ui_ = container.AddUIComponent<UITriStateCheckbox>();
+            ui_.EventValueChanged += OnValueChanged;
+            if (Indent) ApplyIndent(ui_);
+            InitUI(ui_);
+            ApplyTextWrap(ui_, Indent);
             return this;
         }
 
-        private HashSet<IValuePropagator> GetTargetPropagates(bool value) =>
-            value ? _propagatesTrueTo : _propagatesFalseTo;
-
-        public void AddPropagate(IValuePropagator target, bool value) =>
-            GetTargetPropagates(value).Add(target);
-
-        public void Propagate(bool value) {
-            if (!value) {
-                // this tristate button depends on another option that has been disabled.
-                Value = null;
-            } else {
-                // Don't know to set to true or false because both are none-null.
-                // I don't think it makes sense for other options to depend on tristate checkbox anyway.
-                throw new NotImplementedException("other options cannot depend on tristate checkbox");
-            }
-        }
-
-        private void PropagateAll(bool value) {
-            foreach (var target in GetTargetPropagates(value))
-                target.Propagate(value);
-        }
-
-        public override string ToString() => FieldName;
-
-        public override void Load(byte data) =>
-            Value = TernaryBoolUtil.ToOptBool((TernaryBool)data);
-
-        public override byte Save() =>
-            (byte)TernaryBoolUtil.ToTernaryBool(Value);
-
-        public override bool? Value {
-            get => base.Value;
-            set {
-                if (value != base.Value) {
-                    base.Value = value;
-                    Log.Info($"TriStateCheckboxOption.Value: `{FieldName}` changed to {value}");
-                    PropagateAll(value.HasValue);
-
-                    if (Shortcuts.IsMainThread()) {
-                        if (HasUI) {
-                            _ui.Value = value;
-                        }
-                    } else {
-                        SimulationManager.instance.m_ThreadingWrapper.QueueMainThread(() => {
-                            if (HasUI) {
-                                _ui.Value = value;
-                            }
-                        });
-                    }
-                }
-            }
-        }
-
-        public override TriStateCheckboxOption AddUI(UIHelperBase container) {
-            _ui = container.AddUIComponent<UITriStateCheckbox>();
-            _ui.EventValueChanged += (_,val) => InvokeOnValueChanged(val);
-            if (Indent) ApplyIndent(_ui);
-            UpdateLabel();
-            ApplyTextWrap(_ui, Indent);
-
-            UpdateTooltip();
-            UpdateReadOnly();
-
-            return this;
-        }
+        public override void SetValue(bool? value) => ui_.Value = value;
 
         protected override void UpdateLabel() {
-            if (!HasUI) return;
-
-            _ui.label.text = Translate(Label);
+            if (ui_ != null) {
+                ui_.label.text = Translate(Label);
+            }
         }
 
         protected override void UpdateTooltip() {
-            if (!HasUI) return;
+            if (ui_ == null) return;
 
-            _ui.tooltip = IsInScope
-                ? string.IsNullOrEmpty(_tooltip)
-                    ? string.Empty // avoid invalidating UI if already no tooltip
-                    : Translate(_tooltip)
-                : Translate(INGAME_ONLY_SETTING);
+            if (!IsInScope) {
+                ui_.tooltip = Translate(INGAME_ONLY_SETTING);
+            } else if (string.IsNullOrEmpty(_tooltip)) {
+                ui_.tooltip = string.Empty;
+            } else {
+                ui_.tooltip = Translate(_tooltip);
+            }
         }
 
         protected override void UpdateReadOnly() {
-            if (!HasUI) return;
+            if (ui_ == null) return;
 
             var readOnly = !IsInScope || _readOnly;
 
-            Log._Debug($"TriStateCheckboxOption.UpdateReadOnly() - `{FieldName}` is {(readOnly ? "read-only" : "writeable")}");
+            Log._Debug($"TriStateCheckboxOption.UpdateReadOnly() - `Name` is {(readOnly ? "read-only" : "writeable")}");
 
-            _ui.readOnly = readOnly;
-            _ui.opacity = readOnly ? 0.3f : 1f;
+            ui_.readOnly = readOnly;
+            ui_.opacity = readOnly ? 0.3f : 1f;
         }
 
         /* UI helper methods */

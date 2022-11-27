@@ -1,4 +1,4 @@
-namespace TrafficManager.UI.Helpers {
+namespace TrafficManager.State.Helpers {
     /// <summary>
     /// we propagate <c>true</c> when depender* has been enabled.
     /// we propagate <c>false</c> when dependee* has been disabled.

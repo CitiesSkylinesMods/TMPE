@@ -1,134 +1,74 @@
-#pragma warning disable
-namespace TrafficManager.UI.Helpers {
-    using ICities;
-    using ColossalFramework.UI;
-    using TrafficManager.State;
-    using CSUtil.Commons;
-    using UnityEngine;
-    using System;
-    using TrafficManager.Util;
+namespace TrafficManager.State.Helpers; 
+using ICities;
+using ColossalFramework.UI;
+using CSUtil.Commons;
+using UnityEngine;
 
-    public class SliderOption : SerializableUIOptionBase<float, UISlider, SliderOption> {
+public class SliderOption : UIOptionBase<float> {
 
-        private const int SLIDER_LABEL_MAX_WIDTH = 695;
+    private const int SLIDER_LABEL_MAX_WIDTH = 695;
 
-        private byte _min = 0;
-        private byte _max = 255;
-        private byte _step = 5;
-        private UILabel _sliderLabel;
+    private byte _step = 5;
+    private UILabel _sliderLabel;
+    private UISlider _ui;
+    public bool HasUI => _ui != null;
 
-        public SliderOption(string fieldName, Options.Scope scope = Options.Scope.Savegame)
-        : base(fieldName, scope) { }
+    public byte Min => (Option as FloatOption).Min;
+    public byte Max => (Option as FloatOption).Max;
+    public byte Step {
+        get => _step;
+        set {
+            if (_step == value) return;
 
-        /* Data */
-
-        public byte Min {
-            get => _min;
-            set {
-                if (_min == value) return;
-
-                _min = value;
-                if (HasUI) _ui.minValue = _min;
-            }
+            _step = value;
+            if (HasUI) _ui.stepSize = value;
         }
+    }
 
-        public byte Max {
-            get => _max;
-            set {
-                if (_max == value) return;
-
-                _max = value;
-                if (HasUI) _ui.maxValue = _max;
-            }
-        }
-
-        public byte Step {
-            get => _step;
-            set {
-                if (_step == value) return;
-
-                _step = value;
-                if (HasUI) _ui.stepSize = value;
-            }
-        }
-
-        public byte FloatToByte(float val)
-            => (byte)Mathf.RoundToInt(Mathf.Clamp(val, Min, Max).Quantize(Step));
-
-        public override void Load(byte data) => Value = data;
-
-        public override byte Save() => FloatToByte(Value);
-
-        /* UI */
-        public override float Value {
-            get => base.Value;
-            set {
-                value = FloatToByte(value);
-
-                if (Mathf.Approximately(value, base.Value)) return;
-
-                base.Value = value;
-
-                Log.Info($"SliderOption.Value: `{FieldName}` changed to {value}");
-
-                if (Shortcuts.IsMainThread()) {
-                    if (HasUI) {
-                        _ui.value = value;
-                        UpdateTooltip();
-                    }
-                } else {
-                    SimulationManager.instance
-                                     .m_ThreadingWrapper
-                                     .QueueMainThread(() => {
-                                         if (HasUI) {
-                                             _ui.value = value;
-                                             UpdateTooltip();
-                                         }
-                                     });
-                }
-            }
-        }
-
-        public override SliderOption AddUI(UIHelperBase container) {
-            _ui = container.AddSlider(
-                text: Translate(Label) + ":",
-                min: Min,
-                max: Max,
-                step: Step,
-                defaultValue: Value,
-                eventCallback: InvokeOnValueChanged) as UISlider;
-
-            _sliderLabel = _ui.parent.Find<UILabel>("Label");
-            _sliderLabel.width = SLIDER_LABEL_MAX_WIDTH;
-
+    public override void SetValue(float value) {
+        if (Mathf.Approximately(value, _ui.value)) return;
+        Log.Info($"SliderOption.Value: `Name` changed to {value}");
+        if (HasUI) {
+            _ui.value = value;
             UpdateTooltip();
-            UpdateReadOnly();
-
-            return this;
         }
+    }
 
-        protected override void UpdateLabel() {
-            if (!HasUI) return;
+    public virtual SliderOption AddUI(UIHelperBase container) {
+        _ui = container.AddSlider(
+            text: Translate(Label) + ":",
+            min: Min,
+            max: Max,
+            step: Step,
+            defaultValue: Option.Value,
+            eventCallback: OnValueChanged) as UISlider;
+        _sliderLabel = _ui.parent.Find<UILabel>("Label");
+        _sliderLabel.width = SLIDER_LABEL_MAX_WIDTH;
+        InitUI(_ui);
+        return this;
+    }
 
-            string tooltip = IsInScope ? $"{Value}{_tooltip}" : Translate(INGAME_ONLY_SETTING);
-            string label = Translate(Label);
-            _sliderLabel.text = label + ": " + tooltip;
-        }
+    protected override void UpdateLabel() {
+        if (_ui == null) return;
 
-        protected override void UpdateTooltip() => UpdateLabel();
+        string tooltip = IsInScope ? $"{Option.Value}{_tooltip}" : Translate(INGAME_ONLY_SETTING);
+        string label = Translate(Label);
+        _sliderLabel.text = label + ": " + tooltip;
+    }
 
-        protected override void UpdateReadOnly() {
-            if (!HasUI) return;
+    protected override void UpdateTooltip() => UpdateLabel();
 
-            var readOnly = !IsInScope || _readOnly;
+    protected override void UpdateReadOnly() {
+        if (_ui == null) return;
 
-            Log._Debug($"SliderOption.UpdateReadOnly() - `{FieldName}` is {(readOnly ? "read-only" : "writeable")}");
+        var readOnly = !IsInScope || _readOnly;
 
-            _ui.isInteractive = !readOnly;
-            _ui.thumbObject.isInteractive = !readOnly;
-            _ui.thumbObject.opacity = readOnly ? 0.3f : 1f;
-            // parent is UIPanel containing text label and slider
-            _sliderLabel.opacity = readOnly ? 0.3f : 1f;
-        }
+        Log._Debug($"SliderOption.UpdateReadOnly() - `Name` is {(readOnly ? "read-only" : "writeable")}");
+
+        _ui.isInteractive = !readOnly;
+        _ui.thumbObject.isInteractive = !readOnly;
+        _ui.thumbObject.opacity = readOnly ? 0.3f : 1f;
+        // parent is UIPanel containing text label and slider
+        _sliderLabel.opacity = readOnly ? 0.3f : 1f;
     }
 }

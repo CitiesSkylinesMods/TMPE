@@ -1,4 +1,4 @@
-namespace TrafficManager.UI.Helpers {
+namespace TrafficManager.State.Helpers {
     using ColossalFramework.UI;
     using ColossalFramework;
     using CSUtil.Commons;
@@ -7,8 +7,11 @@ namespace TrafficManager.UI.Helpers {
     using TrafficManager.State;
     using TrafficManager.Lifecycle;
     using System.Runtime.CompilerServices;
+    using System.Xml.Serialization;
+    using System.Xml.Schema;
+    using System.Xml;
 
-    public abstract class SerializableOptionBase : ILegacySerializableOption {
+    public abstract class SerializableOptionBase : ILegacySerializableOption, IXmlSerializable {
         /// <summary>Use as tooltip for readonly UI components.</summary>
         public delegate string TranslatorDelegate(string key);
 
@@ -23,8 +26,10 @@ namespace TrafficManager.UI.Helpers {
         public abstract void ResetValue();
 
         public abstract void Load(byte data);
-
         public abstract byte Save();
+        public XmlSchema GetSchema() => null;
+        public abstract void ReadXml(XmlReader reader);
+        public abstract void WriteXml(XmlWriter writer);
     }
 
     public abstract class SerializableOptionBase<TVal> : SerializableOptionBase {
@@ -87,5 +92,7 @@ namespace TrafficManager.UI.Helpers {
         public override void ResetValue() => Value = DefaultValue;
 
         public void InvokeOnValueChanged(TVal value) => OnValueChanged?.Invoke(value);
+        public override void WriteXml(XmlWriter writer) => writer.WriteString(Value.ToString());
+
     }
 }

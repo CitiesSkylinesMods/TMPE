@@ -1,4 +1,4 @@
-namespace TrafficManager.UI.Helpers;
+namespace TrafficManager.State.Helpers;
 
 using System;
 using ColossalFramework.Globalization;
@@ -11,17 +11,16 @@ using UnityEngine;
 public class DLCRestrictedCheckboxOption : CheckboxOption {
     private SteamHelper.DLC _requiredDLC;
 
-    public DLCRestrictedCheckboxOption(string fieldName,
-                                       SteamHelper.DLC requiredDLC,
-                                       Options.Scope scope = Options.Scope.Savegame) : base(fieldName, scope) {
+    public DLCRestrictedCheckboxOption(SteamHelper.DLC requiredDLC)
+        : base() {
         _requiredDLC = requiredDLC;
         _readOnly = !SteamHelper.IsDLCOwned(_requiredDLC);
     }
 
-    public override CheckboxOption AddUI(UIHelperBase container) {
+    public DLCRestrictedCheckboxOption AddUI(UIHelperBase container) {
         UIPanel panel = container.AddUIComponent<UIPanel>();
         panel.autoLayout = false;
-        panel.size = new Vector2(720, 22);//default checkbox template size
+        panel.size = new Vector2(720, 22); //default checkbox template size
         panel.relativePosition = Vector3.zero;
         UIPanel innerPanel = panel.AddUIComponent<UIPanel>();
         UISprite icon = innerPanel.AddUIComponent<UISprite>();
@@ -29,7 +28,7 @@ public class DLCRestrictedCheckboxOption : CheckboxOption {
         icon.size = new Vector2(24, 24);
         icon.spriteName = MapToSpriteIconName(_requiredDLC);
 
-        var option = base.AddUI(new UIHelper(innerPanel));
+        base.AddUI(new UIHelper(innerPanel));
         innerPanel.relativePosition = new Vector3(-icon.size.x, 0);
         innerPanel.autoLayoutDirection = LayoutDirection.Horizontal;
         innerPanel.autoFitChildrenHorizontally = true;
@@ -38,10 +37,10 @@ public class DLCRestrictedCheckboxOption : CheckboxOption {
 
         if (_readOnly) {
             icon.tooltip = Locale.Get("CONTENT_REQUIRED", _requiredDLC.ToString());
-            _ui.tooltip = Translate("Checkbox:DLC is required to change this option and see effects in game");
+            ui_.tooltip = Translate("Checkbox:DLC is required to change this option and see effects in game");
         }
 
-        return option;
+        return this;
     }
 
     private static string MapToSpriteIconName(SteamHelper.DLC dlc) {
@@ -56,5 +55,4 @@ public class DLCRestrictedCheckboxOption : CheckboxOption {
                 return string.Empty;
         }
     }
-
 }

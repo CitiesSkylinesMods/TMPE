@@ -162,6 +162,10 @@
     <Compile Include="Patch\_PedestrianZoneRoadAI\BollardSimulationStepPatch.cs" />
     <Compile Include="Patch\_VehicleAI\InvalidPathPatch.cs" />
     <Compile Include="Patch\_VehicleAI\_BusAI\CalculateSegmentPositionPatch.cs" />
+    <Compile Include="State\Helpers\FloatOption.cs" />
+    <Compile Include="State\Helpers\EnumOption.cs" />
+    <Compile Include="State\Helpers\TernaryOption.cs" />
+    <Compile Include="State\Helpers\BoolOption.cs" />
     <Compile Include="State\Helpers\UIOptionBase.cs" />
     <Compile Include="State\OptionsTabs\GameplayTab_AIGroups.cs" />
     <Compile Include="State\OptionsTabs\GeneralTab_CompatibilityGroup.cs" />
@@ -191,11 +195,11 @@
     <Compile Include="TrafficLight\Impl\ITrafficLightContainer.cs" />
     <Compile Include="TrafficLight\Impl\TrafficLightSimulation.cs" />
     <Compile Include="UI\AllowDespawn\AllowDespawnPanel.cs" />
-    <Compile Include="UI\Helpers\IValuePropagator.cs" />
+    <Compile Include="State\Helpers\IValuePropagator.cs" />
     <Compile Include="UI\Helpers\ActionButton.cs" />
     <Compile Include="UI\Helpers\GlobalConfigObserver.cs" />
     <Compile Include="UI\Helpers\UITriStateCheckbox.cs" />
-    <Compile Include="UI\Helpers\UrlButton.cs" />
+    <Compile Include="State\Helpers\UrlButton.cs" />
     <Compile Include="UI\Textures\RoadSignTheme.cs" />
     <Compile Include="UI\MainMenu\RoutingDetectorButton.cs" />
     <Compile Include="UI\SubTools\RoutingDetector\Connection.cs" />
