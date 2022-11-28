@@ -12,6 +12,7 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.Util;
     using System.Reflection;
     using TrafficManager.Custom.PathFinding;
+    using TrafficManager.State.Helpers;
 
     public class OptionsManager
         : AbstractCustomManager,
@@ -51,6 +52,11 @@ namespace TrafficManager.Manager.Impl {
 
             value = (TVal)field.GetValue(null);
             return true;
+        }
+
+
+        public override void OnBeforeLoadData() {
+            Options.Ensure();
         }
 
         /// <summary>
@@ -153,7 +159,7 @@ namespace TrafficManager.Manager.Impl {
                 LoadOption(data, idx: 42, PoliciesTab_RoundaboutsGroup.RoundAboutQuickFix_StayInLaneMainR);
                 LoadOption(data, idx: 43, PoliciesTab_RoundaboutsGroup.RoundAboutQuickFix_StayInLaneNearRabout);
                 LoadOption(data, idx: 44, PoliciesTab_RoundaboutsGroup.RoundAboutQuickFix_DedicatedExitLanes);
-                LoadOption(data, idx: 45, PoliciesTab_RoundaboutsGroup.RoundAboutQuickFix_NoCrossMainR);
+                LoadOption(data, idx: 45, Options.Instance.RoundAboutQuickFix_NoCrossMainR);
                 LoadOption(data, idx: 46, PoliciesTab_RoundaboutsGroup.RoundAboutQuickFix_NoCrossYieldR);
                 LoadOption(data, idx: 47, PoliciesTab_RoundaboutsGroup.RoundAboutQuickFix_PrioritySigns);
 
@@ -258,7 +264,7 @@ namespace TrafficManager.Manager.Impl {
                 save[42] = PoliciesTab_RoundaboutsGroup.RoundAboutQuickFix_StayInLaneMainR.Save();
                 save[43] = PoliciesTab_RoundaboutsGroup.RoundAboutQuickFix_StayInLaneNearRabout.Save();
                 save[44] = PoliciesTab_RoundaboutsGroup.RoundAboutQuickFix_DedicatedExitLanes.Save();
-                save[45] = PoliciesTab_RoundaboutsGroup.RoundAboutQuickFix_NoCrossMainR.Save();
+                save[45] = Options.Instance.RoundAboutQuickFix_NoCrossMainR.Save();
                 save[46] = PoliciesTab_RoundaboutsGroup.RoundAboutQuickFix_NoCrossYieldR.Save();
                 save[47] = PoliciesTab_RoundaboutsGroup.RoundAboutQuickFix_PrioritySigns.Save();
 

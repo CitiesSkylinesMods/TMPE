@@ -10,8 +10,24 @@ namespace TrafficManager.State {
     using UnityEngine;
     using TrafficManager.Lifecycle;
     using System;
+    using TrafficManager.State.Helpers;
 
-    public class Options : MonoBehaviour {
+    public class Options {
+        public static Options Instance { get; private set; }
+        public static void Ensure() {
+            if(Instance == null) {
+                Create();
+            }
+        }
+        private static void Create() {
+            Instance = new();
+            Instance.Awake();
+        }
+        public static void Release() {
+            Instance = null; // TODO: release events.
+            Available = false;
+        }
+
         /// <summary>
         /// When <c>true</c>, options are safe to query.
         /// </summary>
@@ -81,10 +97,16 @@ namespace TrafficManager.State {
         public static bool laneConnectorEnabled;
 
         public static VehicleRestrictionsAggression vehicleRestrictionsAggression;
-        public static bool RoundAboutQuickFix_DedicatedExitLanes;
+
+        public bool RoundAboutQuickFix_DedicatedExitLanes;
         public static bool RoundAboutQuickFix_StayInLaneMainR;
         public static bool RoundAboutQuickFix_StayInLaneNearRabout;
-        public static bool RoundAboutQuickFix_NoCrossMainR;
+
+        public BoolOption RoundAboutQuickFix_NoCrossMainR = new() {
+            Name = "RoundAboutQuickFix_NoCrossMainR",
+            DefaultValue = true,
+        };
+
         public static bool RoundAboutQuickFix_NoCrossYieldR;
         public static bool RoundAboutQuickFix_PrioritySigns;
         public static bool RoundAboutQuickFix_KeepClearYieldR;
@@ -101,18 +123,24 @@ namespace TrafficManager.State {
 
         public static bool showDefaultSpeedSubIcon;
 
-        public static void MakeSettings(UIHelper helper) {
+        PoliciesTab PoliciesTab = new();
+
+        private void Awake() {
+            RoundAboutQuickFix_NoCrossMainR
+                .PropagateTrueTo(MaintenanceTab_FeaturesGroup.JunctionRestrictionsEnabled);
+        }
+
+        public void MakeSettings(UIHelper helper) {
             Log.Info("Options.MakeSettings() - Adding UI to mod options tabs");
 
             try {
                 ExtUITabstrip tabStrip = ExtUITabstrip.Create(helper);
-                GeneralTab.MakeSettings_General(tabStrip);
-                GameplayTab.MakeSettings_Gameplay(tabStrip);
+                //GeneralTab.MakeSettings_General(tabStrip);
+                //GameplayTab.MakeSettings_Gameplay(tabStrip);
                 PoliciesTab.MakeSettings_VehicleRestrictions(tabStrip);
-                OverlaysTab.MakeSettings_Overlays(tabStrip);
-                MaintenanceTab.MakeSettings_Maintenance(tabStrip);
-                KeybindsTab.MakeSettings_Keybinds(tabStrip);
-                tabStrip.Invalidate();
+                //OverlaysTab.MakeSettings_Overlays(tabStrip);
+                //MaintenanceTab.MakeSettings_Maintenance(tabStrip);
+                //KeybindsTab.MakeSettings_Keybinds(tabStrip);
             } catch (Exception ex) {
                 ex.LogException();
             }

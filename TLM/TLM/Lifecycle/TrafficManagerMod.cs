@@ -26,7 +26,8 @@ namespace TrafficManager.Lifecycle {
             // Note: This bugs out if done in OnEnabled(), hence doing it here instead.
             LocaleManager.eventLocaleChanged -= Translation.HandleGameLocaleChange;
             LocaleManager.eventLocaleChanged += Translation.HandleGameLocaleChange;
-            Options.MakeSettings(helper);
+            Options.Ensure();
+            Options.Instance.MakeSettings(helper);
         }
 
         public void OnCreated(ILoading loading) { }
