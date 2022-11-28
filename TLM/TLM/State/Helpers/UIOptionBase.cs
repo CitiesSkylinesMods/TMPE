@@ -28,7 +28,7 @@ namespace TrafficManager.State.Helpers {
 
         public bool Indent { get; set; }
 
-        public Scope Scope => Option.Scope;
+        public Scope Scope { get; set; }
 
         /// <summary>Returns <c>true</c> if setting can persist in current <see cref="_scope"/>.</summary>
         /// <remarks>

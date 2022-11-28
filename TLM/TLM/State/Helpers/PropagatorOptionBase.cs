@@ -8,8 +8,6 @@ using System;
 public abstract class PropagatorOptionBase<TVal> : SerializableOptionBase<TVal>, IValuePropagator {
     private HashSet<IValuePropagator> _propagatesTrueTo = new();
     private HashSet<IValuePropagator> _propagatesFalseTo = new();
-    protected PropagatorOptionBase(string name, Scope scope) : base(name, scope) { }
-
 
     /// <summary>
     /// If this checkbox is set <c>true</c>, it will propagate that to the <paramref name="target"/>.
