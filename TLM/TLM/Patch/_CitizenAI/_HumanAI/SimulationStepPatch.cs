@@ -99,7 +99,7 @@ namespace TrafficManager.Patch._CitizenAI._HumanAI {
 
                 ExtSoftPathState finalPathState = ExtCitizenInstance.ConvertPathStateToSoftPathState(mainPathState);
 
-                if (Options.parkingAI) {
+                if (SavedGameOptions.Instance.parkingAI) {
                     finalPathState = AdvancedParkingManager.Instance.UpdateCitizenPathState(
                         instanceID,
                         ref data,
@@ -118,7 +118,7 @@ namespace TrafficManager.Patch._CitizenAI._HumanAI {
                             $"mainPathState={mainPathState}, finalPathState={finalPathState}, " +
                             $"extCitizenInstance={ExtCitizenInstanceManager.Instance.ExtInstances[instanceID]}");
                     }
-                } // if Options.parkingAi
+                } // if SavedGameOptions.Instance.parkingAi
 
                 switch (finalPathState) {
                     case ExtSoftPathState.Ready: {
@@ -226,7 +226,7 @@ namespace TrafficManager.Patch._CitizenAI._HumanAI {
             }
 
             // NON-STOCK CODE START
-            if (Options.parkingAI) {
+            if (SavedGameOptions.Instance.parkingAI) {
                 if (ExtSimulationStep(__instance,
                                       ref citizen,
                                       instanceID,

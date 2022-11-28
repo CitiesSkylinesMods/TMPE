@@ -59,7 +59,7 @@ namespace TrafficManager.Patch._VehicleAI._CarAI {
 
                 IExtVehicleManager extVehicleManager = Constants.ManagerFactory.ExtVehicleManager;
                 ExtSoftPathState finalPathState = ExtCitizenInstance.ConvertPathStateToSoftPathState(mainPathState);
-                if (Options.parkingAI
+                if (SavedGameOptions.Instance.parkingAI
                     && extVehicleManager.ExtVehicles[vehicleID].vehicleType == ExtVehicleType.PassengerCar)
                 {
                     ushort driverInstanceId = extVehicleManager.GetDriverInstanceId(vehicleID, ref data);
@@ -167,7 +167,7 @@ namespace TrafficManager.Patch._VehicleAI._CarAI {
             IExtVehicleManager extVehicleMan = Constants.ManagerFactory.ExtVehicleManager;
             extVehicleMan.UpdateVehiclePosition(vehicleID, ref data);
 
-            if (Options.advancedAI
+            if (SavedGameOptions.Instance.advancedAI
                 && (data.m_flags & Vehicle.Flags.Spawned) != 0)
             {
                 extVehicleMan.LogTraffic(vehicleID, ref data);

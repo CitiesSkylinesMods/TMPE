@@ -112,7 +112,7 @@ namespace TrafficManager.Patch {
             PropertyInfo getFactory = typeof(Constants).GetProperty(nameof(Constants.ManagerFactory));
             PropertyInfo getExtVehMan = typeof(IManagerFactory).GetProperty(nameof(IManagerFactory.ExtVehicleManager));
             MethodInfo updateVehPos = typeof(IExtVehicleManager).GetMethod( nameof(IExtVehicleManager.UpdateVehiclePosition));
-            FieldInfo advAIField = typeof(Options).GetField(nameof(Options.advancedAI));
+            FieldInfo advAIField = typeof(Options).GetField(nameof(SavedGameOptions.advancedAI));
             FieldInfo vehFlags = typeof(Vehicle).GetField(nameof(Vehicle.m_flags));
             MethodInfo logTraffic = typeof(IExtVehicleManager).GetMethod(nameof(IExtVehicleManager.LogTraffic));
 
@@ -139,7 +139,7 @@ namespace TrafficManager.Patch {
             /*
              --------------------------------------
                 Constants.ManagerFactory.ExtVehicleManager.UpdateVehiclePosition(vehicleId, ref vehicleData);
-                if (Options.advancedAI && (vehicleData.m_flags & Vehicle.Flags.Spawned) != 0)
+                if (SavedGameOptions.Instance.advancedAI && (vehicleData.m_flags & Vehicle.Flags.Spawned) != 0)
                 {
                     // Advanced AI traffic measurement
                     Constants.ManagerFactory.ExtVehicleManager..LogTraffic(vehicleId, ref vehicleData);

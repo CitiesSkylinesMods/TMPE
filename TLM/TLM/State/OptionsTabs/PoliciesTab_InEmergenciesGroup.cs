@@ -6,7 +6,7 @@ namespace TrafficManager.State {
     public static class PoliciesTab_InEmergenciesGroup {
 
         public static DLCRestrictedCheckboxOption EvacBussesMayIgnoreRules =
-            new (nameof(Options.evacBussesMayIgnoreRules), SteamHelper.DLC.NaturalDisastersDLC, Options.PersistTo.Savegame) {
+            new (nameof(SavedGameOptions.evacBussesMayIgnoreRules), SteamHelper.DLC.NaturalDisastersDLC, Scope.Savegame) {
                 Label = "VR.Checkbox:Evacuation buses may ignore traffic rules",
                 Validator = NaturalDisastersDlcValidator,
             };

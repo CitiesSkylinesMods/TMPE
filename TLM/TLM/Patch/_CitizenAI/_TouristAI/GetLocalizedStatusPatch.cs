@@ -18,7 +18,7 @@ namespace TrafficManager.Patch._CitizenAI._TouristAI {
 
         [UsedImplicitly]
         public static void Postfix(ref string __result, ushort instanceID, ref CitizenInstance data) {
-            if (Options.parkingAI
+            if (SavedGameOptions.Instance.parkingAI
                 && data.m_targetBuilding != 0
                 && !ExtCitizenInstanceManager.IsSweaptAway(ref data)
                 && !ExtCitizenInstanceManager.IsHangingAround(ref data)) {

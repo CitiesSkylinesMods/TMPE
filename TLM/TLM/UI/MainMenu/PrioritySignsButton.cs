@@ -27,6 +27,6 @@ namespace TrafficManager.UI.MainMenu {
 
         protected override bool IsVisible() => IsButtonEnabled();
 
-        public static bool IsButtonEnabled() => Options.prioritySignsEnabled;
+        public static bool IsButtonEnabled() => SavedGameOptions.Instance.prioritySignsEnabled;
     }
 }

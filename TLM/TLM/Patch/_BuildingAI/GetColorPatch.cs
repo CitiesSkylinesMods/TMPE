@@ -20,7 +20,7 @@ namespace TrafficManager.Patch._BuildingAI {
             // maneuvers, or if the public transport info view is active, colorizes
             // buildings depending on the current unfulfilled incoming/outgoing demand
             // for public transport.
-            if (Options.parkingAI && infoMode != InfoManager.InfoMode.None) {
+            if (SavedGameOptions.Instance.parkingAI && infoMode != InfoManager.InfoMode.None) {
                 if (AdvancedParkingManager.Instance.GetBuildingInfoViewColor(
                     buildingID,
                     ref data,

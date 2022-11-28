@@ -343,7 +343,7 @@ namespace TrafficManager.Lifecycle {
 
         internal void Unload() {
             try {
-                Options.Available = false;
+                SavedGameOptions.Instance.Available = false;
 
                 GeometryNotifierDisposable?.Dispose();
                 GeometryNotifierDisposable = null;

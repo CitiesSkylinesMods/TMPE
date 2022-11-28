@@ -15,7 +15,7 @@ namespace TrafficManager.UI.Helpers {
         private const int LABEL_MAX_WIDTH = 615;
         private const int LABEL_MAX_WIDTH_INDENTED = 600;
 
-        public TriStateCheckboxOption(string fieldName, Options.PersistTo scope = Options.PersistTo.Savegame)
+        public TriStateCheckboxOption(string fieldName, Scope scope = Scope.Savegame)
         : base(fieldName, scope) { }
 
         private HashSet<IValuePropagator> _propagatesTrueTo = new();

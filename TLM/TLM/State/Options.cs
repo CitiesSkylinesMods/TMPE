@@ -11,22 +11,111 @@ namespace TrafficManager.State {
     using TrafficManager.Lifecycle;
     using System;
 
-    public class Options : MonoBehaviour {
-#if DEBUG
-        private static List<UICheckBox> debugSwitchFields = new List<UICheckBox>();
-        private static List<UITextField> debugValueFields = new List<UITextField>();
+    // Likely to change or be removed in future
+    [Flags]
+    public enum Scope {
+        None = 0,
+        Global = 1,
+        Savegame = 2,
+        GlobalOrSavegame = Global | Savegame,
+    }
 
-        // private static UITextField pathCostMultiplicatorField = null;
-        // private static UITextField pathCostMultiplicator2Field = null;
+    public class SavedGameOptions {
+        public bool individualDrivingStyle;
+        public RecklessDrivers recklessDrivers;
+
+        /// <summary>Option: buses may ignore lane arrows.</summary>
+        public bool relaxedBusses;
+
+        /// <summary>debug option: all vehicles may ignore lane arrows.</summary>
+        public bool allRelaxed;
+        public bool evacBussesMayIgnoreRules;
+        public bool prioritySignsOverlay;
+        public bool timedLightsOverlay;
+        public bool speedLimitsOverlay;
+        public bool vehicleRestrictionsOverlay;
+        public bool parkingRestrictionsOverlay;
+        public bool junctionRestrictionsOverlay;
+        public bool connectedLanesOverlay;
+#if QUEUEDSTATS
+        public bool showPathFindStats = VersionUtil.IS_DEBUG;
 #endif
 
-        // Likely to change or be removed in future
-        [Flags]
-        public enum PersistTo {
-            None = 0,
-            Global = 1,
-            Savegame = 2,
-            GlobalOrSavegame = Global | Savegame,
+        public bool nodesOverlay;
+        public bool vehicleOverlay;
+        public bool citizenOverlay;
+        public bool buildingOverlay;
+
+        public bool allowEnterBlockedJunctions;
+        public bool allowUTurns;
+        public bool allowNearTurnOnRed;
+        public bool allowFarTurnOnRed;
+        public bool allowLaneChangesWhileGoingStraight;
+        public bool trafficLightPriorityRules;
+        public bool banRegularTrafficOnBusLanes;
+        public bool advancedAI;
+        public SimulationAccuracy simulationAccuracy;
+        public bool realisticPublicTransport;
+        public byte altLaneSelectionRatio;
+        public bool highwayRules;
+        public bool highwayMergingRules;
+        public bool automaticallyAddTrafficLightsIfApplicable;
+        public bool NoDoubleCrossings;
+        public bool DedicatedTurningLanes;
+
+        public bool showLanes = VersionUtil.IS_DEBUG;
+
+        public bool strongerRoadConditionEffects;
+        public bool parkingAI;
+        public bool disableDespawning;
+        public bool preferOuterLane;
+        //public byte publicTransportUsage = 1;
+
+        public bool prioritySignsEnabled;
+        public bool timedLightsEnabled;
+        public bool customSpeedLimitsEnabled;
+        public bool vehicleRestrictionsEnabled;
+        public bool parkingRestrictionsEnabled;
+        public bool junctionRestrictionsEnabled;
+        public bool turnOnRedEnabled;
+        public bool laneConnectorEnabled;
+
+        public VehicleRestrictionsAggression vehicleRestrictionsAggression;
+        public bool RoundAboutQuickFix_DedicatedExitLanes;
+        public bool RoundAboutQuickFix_StayInLaneMainR;
+        public bool RoundAboutQuickFix_StayInLaneNearRabout;
+        public bool RoundAboutQuickFix_NoCrossMainR;
+        public bool RoundAboutQuickFix_NoCrossYieldR;
+        public bool RoundAboutQuickFix_PrioritySigns;
+        public bool RoundAboutQuickFix_KeepClearYieldR;
+        public bool RoundAboutQuickFix_RealisticSpeedLimits;
+        public bool RoundAboutQuickFix_ParkingBanMainR;
+        public bool RoundAboutQuickFix_ParkingBanYieldR;
+        public bool PriorityRoad_CrossMainR;
+        public bool PriorityRoad_AllowLeftTurns;
+        public bool PriorityRoad_EnterBlockedYeild;
+        public bool PriorityRoad_StopAtEntry;
+
+        // See PathfinderUpdates.cs
+        public byte SavegamePathfinderEdition; // Persist to save-game only
+
+        public bool showDefaultSpeedSubIcon;
+
+        internal int getRecklessDriverModulo() => CalculateRecklessDriverModulo(recklessDrivers);
+
+        internal static int CalculateRecklessDriverModulo(RecklessDrivers level) => level switch {
+            RecklessDrivers.PathOfEvil => 10,
+            RecklessDrivers.RushHour => 20,
+            RecklessDrivers.MinorComplaints => 50,
+            RecklessDrivers.HolyCity => 10000,
+            _ => 10000,
+        };
+
+        /// <summary>
+        /// Determines whether Dynamic Lane Selection (DLS) is enabled.
+        /// </summary>
+        public bool IsDynamicLaneSelectionActive() {
+            return advancedAI && altLaneSelectionRatio > 0;
         }
 
         /// <summary>
@@ -36,90 +125,31 @@ namespace TrafficManager.State {
         /// Is set <c>true</c> after options are loaded via <see cref="Manager.Impl.OptionsManager"/>.
         /// Is set <c>false</c> while options are being loaded, and also when level unloads.
         /// </remarks>
-        public static bool Available = false;
+        public static bool Available { get; set; } = false;
 
-        public static bool individualDrivingStyle;
-        public static RecklessDrivers recklessDrivers;
+        public static SavedGameOptions Instance { get; private set; }
+        public static void Ensure() {
+            if (Instance == null) {
+                Create();
+            }
+        }
+        private static void Create() {
+            Instance = new();
+            Instance.Awake();
+        }
+        public static void Release() {
+            Instance = null;
+            Available = false;
+        }
 
-        /// <summary>Option: buses may ignore lane arrows.</summary>
-        public static bool relaxedBusses;
+        private void Awake() {
 
-        /// <summary>debug option: all vehicles may ignore lane arrows.</summary>
-        public static bool allRelaxed;
-        public static bool evacBussesMayIgnoreRules;
-        public static bool prioritySignsOverlay;
-        public static bool timedLightsOverlay;
-        public static bool speedLimitsOverlay;
-        public static bool vehicleRestrictionsOverlay;
-        public static bool parkingRestrictionsOverlay;
-        public static bool junctionRestrictionsOverlay;
-        public static bool connectedLanesOverlay;
-#if QUEUEDSTATS
-        public static bool showPathFindStats = VersionUtil.IS_DEBUG;
-#endif
+        }
+    }
 
-        public static bool nodesOverlay;
-        public static bool vehicleOverlay;
-        public static bool citizenOverlay;
-        public static bool buildingOverlay;
-
-        public static bool allowEnterBlockedJunctions;
-        public static bool allowUTurns;
-        public static bool allowNearTurnOnRed;
-        public static bool allowFarTurnOnRed;
-        public static bool allowLaneChangesWhileGoingStraight;
-        public static bool trafficLightPriorityRules;
-        public static bool banRegularTrafficOnBusLanes;
-        public static bool advancedAI;
-        public static SimulationAccuracy simulationAccuracy;
-        public static bool realisticPublicTransport;
-        public static byte altLaneSelectionRatio;
-        public static bool highwayRules;
-        public static bool highwayMergingRules;
-        public static bool automaticallyAddTrafficLightsIfApplicable;
-        public static bool NoDoubleCrossings;
-        public static bool DedicatedTurningLanes;
-
-        public static bool showLanes = VersionUtil.IS_DEBUG;
-
-        public static bool strongerRoadConditionEffects;
-        public static bool parkingAI;
-        public static bool disableDespawning;
-        public static bool preferOuterLane;
-        //public static byte publicTransportUsage = 1;
-
-        public static bool prioritySignsEnabled;
-        public static bool timedLightsEnabled;
-        public static bool customSpeedLimitsEnabled;
-        public static bool vehicleRestrictionsEnabled;
-        public static bool parkingRestrictionsEnabled;
-        public static bool junctionRestrictionsEnabled;
-        public static bool turnOnRedEnabled;
-        public static bool laneConnectorEnabled;
-
-        public static VehicleRestrictionsAggression vehicleRestrictionsAggression;
-        public static bool RoundAboutQuickFix_DedicatedExitLanes;
-        public static bool RoundAboutQuickFix_StayInLaneMainR;
-        public static bool RoundAboutQuickFix_StayInLaneNearRabout;
-        public static bool RoundAboutQuickFix_NoCrossMainR;
-        public static bool RoundAboutQuickFix_NoCrossYieldR;
-        public static bool RoundAboutQuickFix_PrioritySigns;
-        public static bool RoundAboutQuickFix_KeepClearYieldR;
-        public static bool RoundAboutQuickFix_RealisticSpeedLimits;
-        public static bool RoundAboutQuickFix_ParkingBanMainR;
-        public static bool RoundAboutQuickFix_ParkingBanYieldR;
-        public static bool PriorityRoad_CrossMainR;
-        public static bool PriorityRoad_AllowLeftTurns;
-        public static bool PriorityRoad_EnterBlockedYeild;
-        public static bool PriorityRoad_StopAtEntry;
-
-        // See PathfinderUpdates.cs
-        public static byte SavegamePathfinderEdition; // Persist to save-game only
-
-        public static bool showDefaultSpeedSubIcon;
-
+    public static class TMPESettings {
         public static void MakeSettings(UIHelper helper) {
-            Log.Info("Options.MakeSettings() - Adding UI to mod options tabs");
+            Log.Info("SavedGameOptions.Instance.MakeSettings() - Adding UI to mod options tabs");
 
             try {
                 ExtUITabstrip tabStrip = ExtUITabstrip.Create(helper);
@@ -156,23 +186,6 @@ namespace TrafficManager.State {
             return false;
         }
 
-        internal static int getRecklessDriverModulo() => CalculateRecklessDriverModulo(recklessDrivers);
-
-        internal static int CalculateRecklessDriverModulo(RecklessDrivers level) => level switch {
-            RecklessDrivers.PathOfEvil => 10,
-            RecklessDrivers.RushHour => 20,
-            RecklessDrivers.MinorComplaints => 50,
-            RecklessDrivers.HolyCity => 10000,
-            _ => 10000,
-        };
-
-        /// <summary>
-        /// Determines whether Dynamic Lane Selection (DLS) is enabled.
-        /// </summary>
-        /// <returns></returns>
-        public static bool IsDynamicLaneSelectionActive() {
-            return advancedAI && altLaneSelectionRatio > 0;
-        }
 
         /// <summary>
         /// Inform the main Options window of the C:S about language change. This should rebuild the

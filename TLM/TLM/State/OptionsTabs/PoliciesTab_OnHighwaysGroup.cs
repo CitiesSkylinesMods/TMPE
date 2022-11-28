@@ -8,20 +8,20 @@ namespace TrafficManager.State {
     public static class PoliciesTab_OnHighwaysGroup {
 
         public static CheckboxOption HighwayRules =
-            new (nameof(Options.highwayRules), Options.PersistTo.Savegame) {
+            new (nameof(SavedGameOptions.highwayRules), Scope.Savegame) {
                 Label = "VR.Checkbox:Enable highway merging/splitting rules", //legacy
                 Handler = OnHighwayRulesChanged,
             };
 
         public static CheckboxOption HighwayMergingRules =
-            new(nameof(Options.highwayMergingRules), Options.PersistTo.Savegame) {
+            new(nameof(SavedGameOptions.highwayMergingRules), Scope.Savegame) {
                 Label = "VR.Checkbox:Enable highway merging rules",
                 Tooltip = "VR.Tooltip: Lightweight merging rules",
                 Handler = OnHighwayMergingRulesChanged,
             };
 
         public static CheckboxOption PreferOuterLane =
-            new (nameof(Options.preferOuterLane), Options.PersistTo.Savegame) {
+            new (nameof(SavedGameOptions.preferOuterLane), Scope.Savegame) {
                 Label = "VR.Checkbox:Heavy trucks prefer outer lanes on highways",
             };
 

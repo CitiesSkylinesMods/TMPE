@@ -27,6 +27,6 @@ namespace TrafficManager.UI.MainMenu {
 
         protected override bool IsVisible() => IsButtonEnabled();
 
-        public static bool IsButtonEnabled() => Options.laneConnectorEnabled;
+        public static bool IsButtonEnabled() => SavedGameOptions.Instance.laneConnectorEnabled;
     }
 }

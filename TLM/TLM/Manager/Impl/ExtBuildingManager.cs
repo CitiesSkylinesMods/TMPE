@@ -33,7 +33,7 @@ namespace TrafficManager.Manager.Impl {
 
         public void OnBeforeSimulationStep(ushort buildingId, ref Building data) {
             // slowly decrease parking space demand / public transport demand if Parking AI is active
-            if (!Options.parkingAI) {
+            if (!SavedGameOptions.Instance.parkingAI) {
                 return;
             }
 

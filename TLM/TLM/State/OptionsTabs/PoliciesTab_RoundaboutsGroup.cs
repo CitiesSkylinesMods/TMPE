@@ -8,56 +8,56 @@ namespace TrafficManager.State {
     public static class PoliciesTab_RoundaboutsGroup {
 
         public static CheckboxOption RoundAboutQuickFix_DedicatedExitLanes =
-            new (nameof(Options.RoundAboutQuickFix_DedicatedExitLanes), Options.PersistTo.Savegame) {
+            new (nameof(SavedGameOptions.RoundAboutQuickFix_DedicatedExitLanes), Scope.Savegame) {
                 Label = "Roundabout.Option:Allocate dedicated exit lanes",
                 Tooltip = "Roundabout.Tooltip:Allocate dedicated exit lanes",
             };
 
         public static CheckboxOption RoundAboutQuickFix_StayInLaneMainR =
-            new (nameof(Options.RoundAboutQuickFix_StayInLaneMainR), Options.PersistTo.Savegame) {
+            new (nameof(SavedGameOptions.RoundAboutQuickFix_StayInLaneMainR), Scope.Savegame) {
                 Label = "Roundabout.Option:Stay in lane inside roundabout",
             };
 
         public static CheckboxOption RoundAboutQuickFix_StayInLaneNearRabout =
-            new (nameof(Options.RoundAboutQuickFix_StayInLaneNearRabout), Options.PersistTo.Savegame) {
+            new (nameof(SavedGameOptions.RoundAboutQuickFix_StayInLaneNearRabout), Scope.Savegame) {
                 Label = "Roundabout.Option:Stay in lane outside roundabout",
                 Tooltip = "Roundabout.Tooltip:Stay in lane outside roundabout",
             };
 
         public static CheckboxOption RoundAboutQuickFix_NoCrossMainR =
-            new (nameof(Options.RoundAboutQuickFix_NoCrossMainR), Options.PersistTo.Savegame) {
+            new (nameof(SavedGameOptions.RoundAboutQuickFix_NoCrossMainR), Scope.Savegame) {
                 Label = "Roundabout.Option:No crossing inside",
             };
 
         public static CheckboxOption RoundAboutQuickFix_NoCrossYieldR =
-            new (nameof(Options.RoundAboutQuickFix_NoCrossYieldR), Options.PersistTo.Savegame) {
+            new (nameof(SavedGameOptions.RoundAboutQuickFix_NoCrossYieldR), Scope.Savegame) {
                 Label = "Roundabout.Option:No crossing on incoming roads",
             };
 
         public static CheckboxOption RoundAboutQuickFix_PrioritySigns =
-            new (nameof(Options.RoundAboutQuickFix_PrioritySigns), Options.PersistTo.Savegame) {
+            new (nameof(SavedGameOptions.RoundAboutQuickFix_PrioritySigns), Scope.Savegame) {
                 Label = "Roundabout.Option:Set priority signs",
             };
 
         public static CheckboxOption RoundAboutQuickFix_KeepClearYieldR =
-            new (nameof(Options.RoundAboutQuickFix_KeepClearYieldR), Options.PersistTo.Savegame) {
+            new (nameof(SavedGameOptions.RoundAboutQuickFix_KeepClearYieldR), Scope.Savegame) {
                 Label = "Roundabout.Option:Yielding vehicles keep clear of blocked roundabout",
                 Tooltip = "Roundabout.Tooltip:Yielding vehicles keep clear of blocked roundabout",
             };
 
         public static CheckboxOption RoundAboutQuickFix_RealisticSpeedLimits =
-            new (nameof(Options.RoundAboutQuickFix_RealisticSpeedLimits), Options.PersistTo.Savegame) {
+            new (nameof(SavedGameOptions.RoundAboutQuickFix_RealisticSpeedLimits), Scope.Savegame) {
                 Label = "Roundabout.Option:Assign realistic speed limits to roundabouts",
                 Tooltip = "Roundabout.Tooltip:Assign realistic speed limits to roundabouts",
             };
 
         public static CheckboxOption RoundAboutQuickFix_ParkingBanMainR =
-            new (nameof(Options.RoundAboutQuickFix_ParkingBanMainR), Options.PersistTo.Savegame) {
+            new (nameof(SavedGameOptions.RoundAboutQuickFix_ParkingBanMainR), Scope.Savegame) {
                 Label = "Roundabout.Option:Put parking ban inside roundabouts",
             };
 
         public static CheckboxOption RoundAboutQuickFix_ParkingBanYieldR =
-            new (nameof(Options.RoundAboutQuickFix_ParkingBanYieldR), Options.PersistTo.Savegame) {
+            new (nameof(SavedGameOptions.RoundAboutQuickFix_ParkingBanYieldR), Scope.Savegame) {
                 Label = "Roundabout.Option:Put parking ban on roundabout branches",
             };
 

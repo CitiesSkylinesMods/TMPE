@@ -304,7 +304,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
 
         /// <summary>Called in the GUI mode for GUI.DrawTexture.</summary>
         public override void RenderGenericInfoOverlay_GUI() {
-            if (!Options.speedLimitsOverlay && !MassEditOverlay.IsActive) {
+            if (!SavedGameOptions.Instance.speedLimitsOverlay && !MassEditOverlay.IsActive) {
                 return;
             }
 

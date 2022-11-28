@@ -63,7 +63,7 @@ namespace TrafficManager.UI.SubTools {
 
         public override void ShowGUIOverlay(ToolMode toolMode, bool viewOnly) {
             if (viewOnly &&
-                !(Options.junctionRestrictionsOverlay
+                !(SavedGameOptions.Instance.junctionRestrictionsOverlay
                 || MassEditOverlay.IsActive)) {
                 return;
             }
@@ -191,7 +191,7 @@ namespace TrafficManager.UI.SubTools {
         public override void Initialize() {
             base.Initialize();
             Cleanup();
-            if (Options.junctionRestrictionsOverlay ||
+            if (SavedGameOptions.Instance.junctionRestrictionsOverlay ||
                 MassEditOverlay.IsActive) {
                 RefreshCurrentRestrictedNodeIds();
             } else {

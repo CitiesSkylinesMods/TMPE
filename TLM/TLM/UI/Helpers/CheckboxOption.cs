@@ -17,7 +17,7 @@ namespace TrafficManager.UI.Helpers {
         private HashSet<IValuePropagator> _propagatesTrueTo = new();
         private HashSet<IValuePropagator> _propagatesFalseTo = new();
 
-        public CheckboxOption(string fieldName, Options.PersistTo scope = Options.PersistTo.Savegame)
+        public CheckboxOption(string fieldName, Scope scope = Scope.Savegame)
         : base(fieldName, scope) { }
 
         /// <summary>

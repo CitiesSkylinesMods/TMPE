@@ -258,7 +258,7 @@ namespace TrafficManager.Manager.Impl {
         public float GetGameSpeedLimit(uint laneId, NetInfo.Lane laneInfo) {
             try {
 #if !SPEEDLIMIT
-                if (!Options.customSpeedLimitsEnabled || !laneInfo.MayHaveCustomSpeedLimits())
+                if (!SavedGameOptions.Instance.customSpeedLimitsEnabled || !laneInfo.MayHaveCustomSpeedLimits())
 #endif
                 {
                     return laneInfo.m_speedLimit;

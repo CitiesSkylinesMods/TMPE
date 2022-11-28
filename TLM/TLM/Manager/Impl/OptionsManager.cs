@@ -37,7 +37,7 @@ namespace TrafficManager.Manager.Impl {
         /// <returns>Returns <c>true</c> if successful, or <c>false</c> if there was a problem (eg. option not found, wrong TVal, etc).</returns>
         /// <remarks>Check <see cref="OptionsAreSafeToQuery"/> first before trying to get an option value.</remarks>
         public bool TryGetOptionByName<TVal>(string optionName, out TVal value) {
-            if (!Options.Available) {
+            if (!SavedGameOptions.Instance.Available) {
                 value = default;
                 return false;
             }
@@ -129,7 +129,7 @@ namespace TrafficManager.Manager.Impl {
             int dataVersion = SerializableDataExtension.Version;
 
             try {
-                Options.Available = false;
+                SavedGameOptions.Instance.Available = false;
 
                 Log.Info($"OptionsManager.LoadData: {data.Length} bytes");
 
@@ -141,7 +141,7 @@ namespace TrafficManager.Manager.Impl {
                     GeneralTab_SimulationGroup.SimulationAccuracy.Load((byte)(SimulationAccuracy.MaxValue - data[0]));
                 }
 
-                // skip Options.setLaneChangingRandomization(options[1]);
+                // skip SavedGameOptions.Instance.setLaneChangingRandomization(options[1]);
                 ToDropDown(data, idx: 2, GameplayTab_VehicleBehaviourGroup.RecklessDrivers, RecklessDrivers.HolyCity);
                 ToCheckbox(data, idx: 3, PoliciesTab_AtJunctionsGroup.RelaxedBusses, true);
                 ToCheckbox(data, idx: 4, OverlaysTab_OverlaysGroup.NodesOverlay, false);
@@ -162,7 +162,7 @@ namespace TrafficManager.Manager.Impl {
                     ToCheckbox(data, idx: 15, GameplayTab_VehicleBehaviourGroup.DisableDespawning, false); // not inverted
                 }
 
-                // skip Options.setDynamicPathRecalculation(data[16] == (byte)1);
+                // skip SavedGameOptions.Instance.setDynamicPathRecalculation(data[16] == (byte)1);
                 ToCheckbox(data, idx: 17, OverlaysTab_OverlaysGroup.ConnectedLanesOverlay, false);
                 ToCheckbox(data, idx: 18, MaintenanceTab_FeaturesGroup.PrioritySignsEnabled, true);
                 ToCheckbox(data, idx: 19, MaintenanceTab_FeaturesGroup.TimedLightsEnabled, true);
@@ -211,19 +211,19 @@ namespace TrafficManager.Manager.Impl {
                 ToCheckbox(data, idx: 56, PoliciesTab_OnRoadsGroup.NoDoubleCrossings, false);
                 ToCheckbox(data, idx: 57, PoliciesTab_AtJunctionsGroup.DedicatedTurningLanes, false);
 
-                Options.SavegamePathfinderEdition = LoadByte(data, idx: 58, defaultVal: PathfinderUpdates.LatestPathfinderEdition);
+                SavedGameOptions.Instance.SavegamePathfinderEdition = LoadByte(data, idx: 58, defaultVal: PathfinderUpdates.LatestPathfinderEdition);
 
                 ToCheckbox(data, idx: 59, OverlaysTab_OverlaysGroup.ShowDefaultSpeedSubIcon, false);
 
                 ToCheckbox(data, idx: 60, PoliciesTab_OnHighwaysGroup.HighwayMergingRules, false);
 
-                Options.Available = true;
+                SavedGameOptions.Instance.Available = true;
                 return true;
             }
             catch (Exception ex) {
                 ex.LogException();
 
-                Options.Available = true;
+                SavedGameOptions.Instance.Available = true;
                 return false;
             }
         }
@@ -240,47 +240,47 @@ namespace TrafficManager.Manager.Impl {
 
             try {
                 save[0] = GeneralTab_SimulationGroup.SimulationAccuracy.Save();
-                save[1] = 0; // Options.laneChangingRandomization
+                save[1] = 0; // SavedGameOptions.Instance.laneChangingRandomization
                 save[2] = GameplayTab_VehicleBehaviourGroup.RecklessDrivers.Save();
-                save[3] = (byte)(Options.relaxedBusses ? 1 : 0);
-                save[4] = (byte)(Options.nodesOverlay ? 1 : 0);
-                save[5] = (byte)(Options.allowEnterBlockedJunctions ? 1 : 0);
-                save[6] = (byte)(Options.advancedAI ? 1 : 0);
-                save[7] = (byte)(Options.highwayRules ? 1 : 0);
-                save[8] = (byte)(Options.prioritySignsOverlay ? 1 : 0);
-                save[9] = (byte)(Options.timedLightsOverlay ? 1 : 0);
-                save[10] = (byte)(Options.speedLimitsOverlay ? 1 : 0);
-                save[11] = (byte)(Options.vehicleRestrictionsOverlay ? 1 : 0);
+                save[3] = (byte)(SavedGameOptions.Instance.relaxedBusses ? 1 : 0);
+                save[4] = (byte)(SavedGameOptions.Instance.nodesOverlay ? 1 : 0);
+                save[5] = (byte)(SavedGameOptions.Instance.allowEnterBlockedJunctions ? 1 : 0);
+                save[6] = (byte)(SavedGameOptions.Instance.advancedAI ? 1 : 0);
+                save[7] = (byte)(SavedGameOptions.Instance.highwayRules ? 1 : 0);
+                save[8] = (byte)(SavedGameOptions.Instance.prioritySignsOverlay ? 1 : 0);
+                save[9] = (byte)(SavedGameOptions.Instance.timedLightsOverlay ? 1 : 0);
+                save[10] = (byte)(SavedGameOptions.Instance.speedLimitsOverlay ? 1 : 0);
+                save[11] = (byte)(SavedGameOptions.Instance.vehicleRestrictionsOverlay ? 1 : 0);
                 save[12] = GameplayTab_VehicleBehaviourGroup.StrongerRoadConditionEffects.Save();
-                save[13] = (byte)(Options.allowUTurns ? 1 : 0);
-                save[14] = (byte)(Options.allowLaneChangesWhileGoingStraight ? 1 : 0);
-                save[15] = (byte)(Options.disableDespawning ? 1 : 0);
-                save[16] = 0; // Options.IsDynamicPathRecalculationActive
-                save[17] = (byte)(Options.connectedLanesOverlay ? 1 : 0);
-                save[18] = (byte)(Options.prioritySignsEnabled ? 1 : 0);
-                save[19] = (byte)(Options.timedLightsEnabled ? 1 : 0);
-                save[20] = (byte)(Options.customSpeedLimitsEnabled ? 1 : 0);
-                save[21] = (byte)(Options.vehicleRestrictionsEnabled ? 1 : 0);
-                save[22] = (byte)(Options.laneConnectorEnabled ? 1 : 0);
-                save[23] = (byte)(Options.junctionRestrictionsOverlay ? 1 : 0);
-                save[24] = (byte)(Options.junctionRestrictionsEnabled ? 1 : 0);
-                save[25] = (byte)(Options.parkingAI ? 1 : 0);
-                save[26] = (byte)(Options.preferOuterLane ? 1 : 0);
+                save[13] = (byte)(SavedGameOptions.Instance.allowUTurns ? 1 : 0);
+                save[14] = (byte)(SavedGameOptions.Instance.allowLaneChangesWhileGoingStraight ? 1 : 0);
+                save[15] = (byte)(SavedGameOptions.Instance.disableDespawning ? 1 : 0);
+                save[16] = 0; // SavedGameOptions.Instance.IsDynamicPathRecalculationActive
+                save[17] = (byte)(SavedGameOptions.Instance.connectedLanesOverlay ? 1 : 0);
+                save[18] = (byte)(SavedGameOptions.Instance.prioritySignsEnabled ? 1 : 0);
+                save[19] = (byte)(SavedGameOptions.Instance.timedLightsEnabled ? 1 : 0);
+                save[20] = (byte)(SavedGameOptions.Instance.customSpeedLimitsEnabled ? 1 : 0);
+                save[21] = (byte)(SavedGameOptions.Instance.vehicleRestrictionsEnabled ? 1 : 0);
+                save[22] = (byte)(SavedGameOptions.Instance.laneConnectorEnabled ? 1 : 0);
+                save[23] = (byte)(SavedGameOptions.Instance.junctionRestrictionsOverlay ? 1 : 0);
+                save[24] = (byte)(SavedGameOptions.Instance.junctionRestrictionsEnabled ? 1 : 0);
+                save[25] = (byte)(SavedGameOptions.Instance.parkingAI ? 1 : 0);
+                save[26] = (byte)(SavedGameOptions.Instance.preferOuterLane ? 1 : 0);
                 save[27] = GameplayTab_VehicleBehaviourGroup.IndividualDrivingStyle.Save();
-                save[28] = (byte)(Options.evacBussesMayIgnoreRules ? 1 : 0);
-                save[29] = 0; // (byte)(Options.instantEffects ? 1 : 0);
-                save[30] = (byte)(Options.parkingRestrictionsEnabled ? 1 : 0);
-                save[31] = (byte)(Options.parkingRestrictionsOverlay ? 1 : 0);
-                save[32] = (byte)(Options.banRegularTrafficOnBusLanes ? 1 : 0);
-                save[33] = (byte)(Options.showPathFindStats ? 1 : 0);
-                save[34] = Options.altLaneSelectionRatio;
+                save[28] = (byte)(SavedGameOptions.Instance.evacBussesMayIgnoreRules ? 1 : 0);
+                save[29] = 0; // (byte)(SavedGameOptions.Instance.instantEffects ? 1 : 0);
+                save[30] = (byte)(SavedGameOptions.Instance.parkingRestrictionsEnabled ? 1 : 0);
+                save[31] = (byte)(SavedGameOptions.Instance.parkingRestrictionsOverlay ? 1 : 0);
+                save[32] = (byte)(SavedGameOptions.Instance.banRegularTrafficOnBusLanes ? 1 : 0);
+                save[33] = (byte)(SavedGameOptions.Instance.showPathFindStats ? 1 : 0);
+                save[34] = SavedGameOptions.Instance.altLaneSelectionRatio;
                 save[35] = PoliciesTab_OnRoadsGroup.VehicleRestrictionsAggression.Save();
-                save[36] = (byte)(Options.trafficLightPriorityRules ? 1 : 0);
-                save[37] = (byte)(Options.realisticPublicTransport ? 1 : 0);
-                save[38] = (byte)(Options.turnOnRedEnabled ? 1 : 0);
-                save[39] = (byte)(Options.allowNearTurnOnRed ? 1 : 0);
-                save[40] = (byte)(Options.allowFarTurnOnRed ? 1 : 0);
-                save[41] = (byte)(Options.automaticallyAddTrafficLightsIfApplicable ? 1 : 0);
+                save[36] = (byte)(SavedGameOptions.Instance.trafficLightPriorityRules ? 1 : 0);
+                save[37] = (byte)(SavedGameOptions.Instance.realisticPublicTransport ? 1 : 0);
+                save[38] = (byte)(SavedGameOptions.Instance.turnOnRedEnabled ? 1 : 0);
+                save[39] = (byte)(SavedGameOptions.Instance.allowNearTurnOnRed ? 1 : 0);
+                save[40] = (byte)(SavedGameOptions.Instance.allowFarTurnOnRed ? 1 : 0);
+                save[41] = (byte)(SavedGameOptions.Instance.automaticallyAddTrafficLightsIfApplicable ? 1 : 0);
 
                 save[42] = PoliciesTab_RoundaboutsGroup.RoundAboutQuickFix_StayInLaneMainR.Save();
                 save[43] = PoliciesTab_RoundaboutsGroup.RoundAboutQuickFix_StayInLaneNearRabout.Save();
@@ -302,7 +302,7 @@ namespace TrafficManager.Manager.Impl {
                 save[56] = PoliciesTab_OnRoadsGroup.NoDoubleCrossings.Save();
                 save[57] = PoliciesTab_AtJunctionsGroup.DedicatedTurningLanes.Save();
 
-                save[58] = Options.SavegamePathfinderEdition;
+                save[58] = SavedGameOptions.Instance.SavegamePathfinderEdition;
 
                 save[59] = OverlaysTab_OverlaysGroup.ShowDefaultSpeedSubIcon.Save();
 
@@ -361,7 +361,7 @@ namespace TrafficManager.Manager.Impl {
         /// </summary>
         internal static void UpdateJunctionRestrictionsManager() {
             if (TMPELifecycle.Instance.Deserializing) {
-                Log._Debug("Options.UpdateJunctionRestrictionsManager() - Waiting for deserialisation");
+                Log._Debug("SavedGameOptions.Instance.UpdateJunctionRestrictionsManager() - Waiting for deserialisation");
                 _needUpdateJunctionRestrictionsManager = true;
                 return;
             }
@@ -378,7 +378,7 @@ namespace TrafficManager.Manager.Impl {
         /// </summary>
         internal static void UpdateDedicatedTurningLanes() {
             if (TMPELifecycle.Instance.Deserializing) {
-                Log._Debug("Options.UpdateDedicatedTurningLanes() - Waiting for deserialisation");
+                Log._Debug("SavedGameOptions.Instance.UpdateDedicatedTurningLanes() - Waiting for deserialisation");
                 _needUpdateDedicatedTurningLanes = true;
                 return;
             }

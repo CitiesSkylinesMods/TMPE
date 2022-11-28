@@ -15,7 +15,7 @@ namespace TrafficManager.Patch._PedestrianZoneRoadAI {
         [UsedImplicitly]
         public static bool Prefix(ushort nodeID,
                                   ref NetNode data) {
-            if (!Options.timedLightsEnabled
+            if (!SavedGameOptions.Instance.timedLightsEnabled
                 || !TrafficLightSimulationManager
                     .Instance
                     .TrafficLightSimulations[nodeID]

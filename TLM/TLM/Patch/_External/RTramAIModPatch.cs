@@ -70,7 +70,7 @@ namespace TrafficManager.Patch._External._RTramAIModPatch {
             PropertyInfo getFactory = typeof(Constants).GetProperty(nameof(Constants.ManagerFactory));
             PropertyInfo getExtVehMan = typeof(IManagerFactory).GetProperty(nameof(IManagerFactory.ExtVehicleManager));
             MethodInfo updateVehPos = typeof(IExtVehicleManager).GetMethod(nameof(IExtVehicleManager.UpdateVehiclePosition));
-            FieldInfo advAIField = typeof(Options).GetField(nameof(Options.advancedAI));
+            FieldInfo advAIField = typeof(Options).GetField(nameof(SavedGameOptions.advancedAI));
             FieldInfo vehFlags = typeof(Vehicle).GetField(nameof(Vehicle.m_flags));
             MethodInfo logTraffic = typeof(IExtVehicleManager).GetMethod(nameof(IExtVehicleManager.LogTraffic));
 
