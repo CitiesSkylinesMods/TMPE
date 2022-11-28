@@ -698,6 +698,7 @@ namespace TrafficManager.UI {
             if (e.type == EventType.MouseDown && e.button == 0) {
                 if (NodeSelectionMode) {
                     SelectedNodeId = HoveredNodeId;
+                    InstanceManager.instance.SelectInstance(new InstanceID { NetNode = SelectedNodeId });
                     RequestOnscreenDisplayUpdate();
                 } else {
                     bool isRoad = HoveredSegmentId != 0 && HoveredSegmentId.ToSegment().Info.m_netAI is RoadBaseAI;
