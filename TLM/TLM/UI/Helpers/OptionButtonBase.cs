@@ -1,6 +1,7 @@
 namespace TrafficManager.UI.Helpers {
     using ColossalFramework.UI;
     using ICities;
+    using System;
 
     public abstract class OptionButtonBase {
         protected string _label;
@@ -37,6 +38,8 @@ namespace TrafficManager.UI.Helpers {
             }
         }
 
+        public Func<string, string> Translator { get; set; } = Translation.Options.Get;
+
         public void AddUI(UIHelperBase container) {
             _ui = container.AddButton(T(_label), OnClicked) as UIButton;
 
@@ -65,8 +68,6 @@ namespace TrafficManager.UI.Helpers {
             _ui.opacity = _readOnly ? 0.3f : 1f;
         }
 
-        protected virtual string T(string key)
-            => Translation.Options.Get(key);
-
+        protected virtual string T(string key) => Translator(key);
     }
 }
