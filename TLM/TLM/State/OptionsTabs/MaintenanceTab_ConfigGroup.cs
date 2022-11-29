@@ -2,6 +2,9 @@ namespace TrafficManager.State {
     using ICities;
     using TrafficManager.UI;
     using TrafficManager.UI.Helpers;
+#if DEBUG
+    using TrafficManager.UI.DebugSwitches;
+#endif
 
     public static class MaintenanceTab_ConfigGroup {
 
@@ -14,12 +17,22 @@ namespace TrafficManager.State {
             Handler = OnResetGlobalConfigClicked,
         };
 
-        internal static void AddUI(UIHelperBase tab) {
+#if DEBUG
+        public static ActionButton DebugSwiches = new() {
+            Translator = key => key,
+            Label = "Debug Switches",
+            Handler = DebugSwitchPanel.OpenModal,
+        };
+#endif
 
+        internal static void AddUI(UIHelperBase tab) {
             var group = tab.AddGroup(T("Group:Configuration"));
 
             ReloadGlobalConfig.AddUI(group);
             ResetGlobalConfig.AddUI(group);
+#if DEBUG
+            DebugSwiches.AddUI(group);
+#endif
         }
 
         private static string T(string key) => Translation.Options.Get(key);

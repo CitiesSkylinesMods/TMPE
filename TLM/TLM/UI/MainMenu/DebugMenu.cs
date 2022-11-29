@@ -18,6 +18,8 @@ namespace TrafficManager.UI.MainMenu {
     using TrafficManager.U;
 
 #if DEBUG // whole class coverage
+    using TrafficManager.UI.DebugSwitches;
+
     public class DebugMenuPanel : UIPanel
     {
         // private static UIState _uiState = UIState.None;
@@ -37,6 +39,7 @@ namespace TrafficManager.UI.MainMenu {
         private static UIButton _goToPosButton;
         private static UIButton _printDebugInfoButton;
         private static UIButton _reloadConfigButton;
+        private static UIButton _debugSwitchesButton;
         private static UIButton _recalcLinesButton;
         private static UIButton _checkDetoursButton;
         private static UIButton _noneToVehicleButton = null;
@@ -97,6 +100,9 @@ namespace TrafficManager.UI.MainMenu {
             y += 40;
             height += 40;
             _reloadConfigButton = CreateButton("Reload configuration", y, ClickReloadConfig);
+            y += 40;
+            height += 40;
+            _debugSwitchesButton = CreateButton("Debug switches", y, ClickDebugSwitches);
             y += 40;
             height += 40;
             _recalcLinesButton = CreateButton("Recalculate transport lines", y, ClickRecalcLines);
@@ -213,6 +219,10 @@ namespace TrafficManager.UI.MainMenu {
 
         private void ClickReloadConfig(UIComponent component, UIMouseEventParameter eventParam) {
             GlobalConfig.Reload();
+        }
+
+        private void ClickDebugSwitches(UIComponent component, UIMouseEventParameter eventParam) {
+            DebugSwitchPanel.OpenModal();
         }
 
         private void ClickRecalcLines(UIComponent component, UIMouseEventParameter eventParam) {
