@@ -121,7 +121,7 @@ namespace TrafficManager.State {
                 ModUI.Instance.Events.LanguageChanged();
             }
 
-            SavedGameOptions.Instance.RebuildOptions();
+            TMPESettings.RebuildOptions();
         }
 
         private static void OnDisplaySpeedLimitsMphChanged(bool value) {
@@ -145,13 +145,13 @@ namespace TrafficManager.State {
             mainConfig.DisplaySpeedLimitsMph = value;
             GlobalConfig.WriteConfig();
 
-            if (SavedGameOptions.Instance.IsGameLoaded(false)) {
+            if (TMPESettings.IsGameLoaded(false)) {
                 ModUI.Instance.Events.DisplayMphChanged(value);
             }
         }
 
         private static void OnRoadSignsThemeChanged(int newThemeIndex) {
-            if (!SavedGameOptions.Instance.IsGameLoaded(false)) {
+            if (!TMPESettings.IsGameLoaded(false)) {
                 // update global config only, skip reloading theme
                 var selectedTheme = RoadSignThemeManager.Instance.ThemeNames[newThemeIndex];
                 // TODO: Should be simplified / ChangeTheme support change in main menu (without reloading)
@@ -189,7 +189,7 @@ namespace TrafficManager.State {
 
                     Log.Info($"Road Sign theme was changed to {newTheme} AND display switched to km/h");
 
-                    if (SavedGameOptions.Instance.IsGameLoaded(false)) {
+                    if (TMPESettings.IsGameLoaded(false)) {
                         ModUI.Instance.Events.DisplayMphChanged(false);
                     }
                     break;
@@ -199,7 +199,7 @@ namespace TrafficManager.State {
 
                     Log.Info($"Road Sign theme was changed to {newTheme} AND display switched to MPH");
 
-                    if (SavedGameOptions.Instance.IsGameLoaded(false)) {
+                    if (TMPESettings.IsGameLoaded(false)) {
                         ModUI.Instance.Events.DisplayMphChanged(true);
                     }
                     break;

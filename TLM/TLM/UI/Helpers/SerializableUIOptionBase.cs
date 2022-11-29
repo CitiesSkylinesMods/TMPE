@@ -53,7 +53,7 @@ namespace TrafficManager.UI.Helpers {
             _fieldName = fieldName;
             _scope = scope;
             if (scope.IsFlagSet(Scope.Savegame)) {
-                _fieldInfo = typeof(SavedGameOptions).GetField(fieldName, BindingFlags.Instance | BindingFlags.Public);
+                _fieldInfo = typeof(SavedGameOptions).GetField(fieldName);
 
                 if (_fieldInfo == null) {
                     throw new Exception($"SerializableUIOptionBase.ctor: `{fieldName}` does not exist");

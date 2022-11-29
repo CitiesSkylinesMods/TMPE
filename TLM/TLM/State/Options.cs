@@ -10,6 +10,7 @@ namespace TrafficManager.State {
     using UnityEngine;
     using TrafficManager.Lifecycle;
     using System;
+    using TrafficManager.Custom.PathFinding;
 
     // Likely to change or be removed in future
     [Flags]
@@ -21,22 +22,23 @@ namespace TrafficManager.State {
     }
 
     public class SavedGameOptions {
-        public bool individualDrivingStyle;
-        public RecklessDrivers recklessDrivers;
+        public bool individualDrivingStyle = true;
+        public RecklessDrivers recklessDrivers = RecklessDrivers.HolyCity;
 
         /// <summary>Option: buses may ignore lane arrows.</summary>
-        public bool relaxedBusses;
+        public bool relaxedBusses = true;
 
         /// <summary>debug option: all vehicles may ignore lane arrows.</summary>
         public bool allRelaxed;
         public bool evacBussesMayIgnoreRules;
-        public bool prioritySignsOverlay;
-        public bool timedLightsOverlay;
-        public bool speedLimitsOverlay;
-        public bool vehicleRestrictionsOverlay;
-        public bool parkingRestrictionsOverlay;
-        public bool junctionRestrictionsOverlay;
-        public bool connectedLanesOverlay;
+
+        public bool prioritySignsOverlay = true;
+        public bool timedLightsOverlay = true;
+        public bool speedLimitsOverlay = true;
+        public bool vehicleRestrictionsOverlay = true;
+        public bool parkingRestrictionsOverlay = true;
+        public bool junctionRestrictionsOverlay = true;
+        public bool connectedLanesOverlay = true;
 #if QUEUEDSTATS
         public bool showPathFindStats = VersionUtil.IS_DEBUG;
 #endif
@@ -54,12 +56,12 @@ namespace TrafficManager.State {
         public bool trafficLightPriorityRules;
         public bool banRegularTrafficOnBusLanes;
         public bool advancedAI;
-        public SimulationAccuracy simulationAccuracy;
+        public SimulationAccuracy simulationAccuracy = SimulationAccuracy.VeryHigh;
         public bool realisticPublicTransport;
         public byte altLaneSelectionRatio;
         public bool highwayRules;
         public bool highwayMergingRules;
-        public bool automaticallyAddTrafficLightsIfApplicable;
+        public bool automaticallyAddTrafficLightsIfApplicable = true;
         public bool NoDoubleCrossings;
         public bool DedicatedTurningLanes;
 
@@ -71,25 +73,25 @@ namespace TrafficManager.State {
         public bool preferOuterLane;
         //public byte publicTransportUsage = 1;
 
-        public bool prioritySignsEnabled;
-        public bool timedLightsEnabled;
-        public bool customSpeedLimitsEnabled;
-        public bool vehicleRestrictionsEnabled;
-        public bool parkingRestrictionsEnabled;
-        public bool junctionRestrictionsEnabled;
-        public bool turnOnRedEnabled;
-        public bool laneConnectorEnabled;
+        public bool prioritySignsEnabled = true;
+        public bool timedLightsEnabled = true;
+        public bool customSpeedLimitsEnabled = true;
+        public bool vehicleRestrictionsEnabled = true;
+        public bool parkingRestrictionsEnabled = true;
+        public bool junctionRestrictionsEnabled = true;
+        public bool turnOnRedEnabled = true;
+        public bool laneConnectorEnabled = true;
 
-        public VehicleRestrictionsAggression vehicleRestrictionsAggression;
-        public bool RoundAboutQuickFix_DedicatedExitLanes;
-        public bool RoundAboutQuickFix_StayInLaneMainR;
-        public bool RoundAboutQuickFix_StayInLaneNearRabout;
-        public bool RoundAboutQuickFix_NoCrossMainR;
-        public bool RoundAboutQuickFix_NoCrossYieldR;
-        public bool RoundAboutQuickFix_PrioritySigns;
-        public bool RoundAboutQuickFix_KeepClearYieldR;
+        public VehicleRestrictionsAggression vehicleRestrictionsAggression = VehicleRestrictionsAggression.Medium;
+        public bool RoundAboutQuickFix_DedicatedExitLanes = true;
+        public bool RoundAboutQuickFix_StayInLaneMainR = true;
+        public bool RoundAboutQuickFix_StayInLaneNearRabout = true;
+        public bool RoundAboutQuickFix_NoCrossMainR = true;
+        public bool RoundAboutQuickFix_NoCrossYieldR = false;
+        public bool RoundAboutQuickFix_PrioritySigns = true;
+        public bool RoundAboutQuickFix_KeepClearYieldR = true;
         public bool RoundAboutQuickFix_RealisticSpeedLimits;
-        public bool RoundAboutQuickFix_ParkingBanMainR;
+        public bool RoundAboutQuickFix_ParkingBanMainR = true;
         public bool RoundAboutQuickFix_ParkingBanYieldR;
         public bool PriorityRoad_CrossMainR;
         public bool PriorityRoad_AllowLeftTurns;
@@ -97,7 +99,7 @@ namespace TrafficManager.State {
         public bool PriorityRoad_StopAtEntry;
 
         // See PathfinderUpdates.cs
-        public byte SavegamePathfinderEdition; // Persist to save-game only
+        public byte SavegamePathfinderEdition = PathfinderUpdates.LatestPathfinderEdition;
 
         public bool showDefaultSpeedSubIcon;
 

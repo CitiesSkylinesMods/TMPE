@@ -11,7 +11,7 @@ namespace TrafficManager.Manager.Impl {
     using JetBrains.Annotations;
     using TrafficManager.Util;
     using System.Reflection;
-    using TrafficManager.Custom.PathFinding;
+
 
     public class OptionsManager
         : AbstractCustomManager,
@@ -37,20 +37,24 @@ namespace TrafficManager.Manager.Impl {
         /// <returns>Returns <c>true</c> if successful, or <c>false</c> if there was a problem (eg. option not found, wrong TVal, etc).</returns>
         /// <remarks>Check <see cref="OptionsAreSafeToQuery"/> first before trying to get an option value.</remarks>
         public bool TryGetOptionByName<TVal>(string optionName, out TVal value) {
-            if (!SavedGameOptions.Instance.Available) {
+            if (!SavedGameOptions.Available) {
                 value = default;
                 return false;
             }
 
-            var field = typeof(Options).GetField(optionName, BindingFlags.Static | BindingFlags.Public);
+            var field = typeof(SavedGameOptions).GetField(optionName);
 
             if (field == null || field.FieldType is not TVal) {
                 value = default;
                 return false;
             }
 
-            value = (TVal)field.GetValue(null);
+            value = (TVal)field.GetValue(SavedGameOptions.Instance);
             return true;
+        }
+
+        public override void OnBeforeLoadData() {
+            SavedGameOptions.Ensure();
         }
 
         /// <summary>
@@ -77,44 +81,16 @@ namespace TrafficManager.Manager.Impl {
         public bool MayPublishSegmentChanges()
             => TMPELifecycle.Instance.MayPublishSegmentChanges();
 
-        /// <summary>
-        /// Converts value to SimulationAccuracy
-        /// </summary>
-        /// <param name="value">Old value</param>
-        /// <returns>SimulationAccuracy value</returns>
-        private static SimulationAccuracy ConvertToSimulationAccuracy(byte value) {
-            return SimulationAccuracy.MaxValue - value;
+        private static void LoadByte([NotNull] byte[] data, uint idx, ref byte value) {
+            if(idx < data.Length) {
+                value = data[idx];
+            }
         }
 
-        /// <summary>
-        /// Converts SimulationAccuracy to SimulationAccuracy
-        /// </summary>
-        /// <param name="value">SimulationAccuracy value</param>
-        /// <returns>byte representation of value (backward compatible)</returns>
-        private static byte ConvertFromSimulationAccuracy(SimulationAccuracy value) {
-            return (byte)(SimulationAccuracy.MaxValue - value);
-        }
-
-        private static bool LoadBool([NotNull] byte[] data, uint idx, bool defaultVal = false)
-            => (data.Length > idx) ? data[idx] == 1 : defaultVal;
-
-        private static byte LoadByte([NotNull] byte[] data, uint idx, byte defaultVal = 0)
-            => (data.Length > idx) ? data[idx] : defaultVal;
-
-        /// <summary>Load LegacySerializableOption bool.</summary>
-        private static void ToCheckbox(byte[] data, uint idx, ILegacySerializableOption opt, bool defaultVal = false)
-            => opt.Load((byte)(LoadBool(data, idx, defaultVal) ? 1 : 0));
-
-        /// <summary>Load LegacySerializableOption byte.</summary>
-        private static void ToSlider(byte[] data, uint idx, ILegacySerializableOption opt, byte defaultVal = 0)
-            => opt.Load(LoadByte(data, idx, defaultVal));
-
-        private static void ToDropDown<TEnum>(byte[] data, uint idx, ILegacySerializableOption opt, TEnum defaultVal)
-            where TEnum: struct,Enum,IConvertible {
-            if (idx < data.Length) {
+        /// <summary>Load LegacySerializableOption</summary>
+        private static void ToOption(byte[] data, uint idx, ILegacySerializableOption opt) {
+            if(idx < data.Length) {
                 opt.Load(data[idx]);
-            } else {
-                opt.Load(defaultVal.ToByte(null));
             }
         }
 
@@ -125,106 +101,102 @@ namespace TrafficManager.Manager.Impl {
         /// <returns>Returns <c>true</c> if successful, otherwise <c>false</c>.</returns>
         /// <remarks>Applies default values if the data for an option does not exist.</remarks>
         public bool LoadData(byte[] data) {
-
-            int dataVersion = SerializableDataExtension.Version;
-
             try {
-                SavedGameOptions.Instance.Available = false;
+                SavedGameOptions.Available = false;
+                int dataVersion = SerializableDataExtension.Version;
 
                 Log.Info($"OptionsManager.LoadData: {data.Length} bytes");
 
                 if (dataVersion >= 3 || data.Length == 0) {
                     // new version or default.
-                    ToDropDown(data, idx: 0, GeneralTab_SimulationGroup.SimulationAccuracy, SimulationAccuracy.VeryHigh);
+                    ToOption(data, idx: 0, GeneralTab_SimulationGroup.SimulationAccuracy);
                 } else {
                     // legacy
                     GeneralTab_SimulationGroup.SimulationAccuracy.Load((byte)(SimulationAccuracy.MaxValue - data[0]));
                 }
 
                 // skip SavedGameOptions.Instance.setLaneChangingRandomization(options[1]);
-                ToDropDown(data, idx: 2, GameplayTab_VehicleBehaviourGroup.RecklessDrivers, RecklessDrivers.HolyCity);
-                ToCheckbox(data, idx: 3, PoliciesTab_AtJunctionsGroup.RelaxedBusses, true);
-                ToCheckbox(data, idx: 4, OverlaysTab_OverlaysGroup.NodesOverlay, false);
-                ToCheckbox(data, idx: 5, PoliciesTab_AtJunctionsGroup.AllowEnterBlockedJunctions, false);
-                ToCheckbox(data, idx: 6, GameplayTab_AIGroups.AdvancedAI, false);
-                ToCheckbox(data, idx: 7, PoliciesTab_OnHighwaysGroup.HighwayRules, false);
-                ToCheckbox(data, idx: 8, OverlaysTab_OverlaysGroup.PrioritySignsOverlay, false);
-                ToCheckbox(data, idx: 9, OverlaysTab_OverlaysGroup.TimedLightsOverlay, false);
-                ToCheckbox(data, idx: 10, OverlaysTab_OverlaysGroup.SpeedLimitsOverlay, false);
-                ToCheckbox(data, idx: 11, OverlaysTab_OverlaysGroup.VehicleRestrictionsOverlay, false);
-                ToCheckbox(data, idx: 12, GameplayTab_VehicleBehaviourGroup.StrongerRoadConditionEffects, false);
-                ToCheckbox(data, idx: 13, PoliciesTab_AtJunctionsGroup.AllowUTurns, false);
-                ToCheckbox(data, idx: 14, PoliciesTab_AtJunctionsGroup.AllowLaneChangesWhileGoingStraight, false);
+                ToOption(data, idx: 2, GameplayTab_VehicleBehaviourGroup.RecklessDrivers);
+                ToOption(data, idx: 3, PoliciesTab_AtJunctionsGroup.RelaxedBusses);
+                ToOption(data, idx: 4, OverlaysTab_OverlaysGroup.NodesOverlay);
+                ToOption(data, idx: 5, PoliciesTab_AtJunctionsGroup.AllowEnterBlockedJunctions);
+                ToOption(data, idx: 6, GameplayTab_AIGroups.AdvancedAI);
+                ToOption(data, idx: 7, PoliciesTab_OnHighwaysGroup.HighwayRules);
+                ToOption(data, idx: 8, OverlaysTab_OverlaysGroup.PrioritySignsOverlay);
+                ToOption(data, idx: 9, OverlaysTab_OverlaysGroup.TimedLightsOverlay);
+                ToOption(data, idx: 10, OverlaysTab_OverlaysGroup.SpeedLimitsOverlay);
+                ToOption(data, idx: 11, OverlaysTab_OverlaysGroup.VehicleRestrictionsOverlay);
+                ToOption(data, idx: 12, GameplayTab_VehicleBehaviourGroup.StrongerRoadConditionEffects);
+                ToOption(data, idx: 13, PoliciesTab_AtJunctionsGroup.AllowUTurns);
+                ToOption(data, idx: 14, PoliciesTab_AtJunctionsGroup.AllowLaneChangesWhileGoingStraight);
 
+                ToOption(data, idx: 15, GameplayTab_VehicleBehaviourGroup.DisableDespawning);
                 if (dataVersion < 1) {
-                    GameplayTab_VehicleBehaviourGroup.DisableDespawning.Value = !LoadBool(data, idx: 15, true); // inverted
-                } else {
-                    ToCheckbox(data, idx: 15, GameplayTab_VehicleBehaviourGroup.DisableDespawning, false); // not inverted
+                    //legacy:
+                    GameplayTab_VehicleBehaviourGroup.DisableDespawning.Value = !GameplayTab_VehicleBehaviourGroup.DisableDespawning.Value; 
                 }
 
                 // skip SavedGameOptions.Instance.setDynamicPathRecalculation(data[16] == (byte)1);
-                ToCheckbox(data, idx: 17, OverlaysTab_OverlaysGroup.ConnectedLanesOverlay, false);
-                ToCheckbox(data, idx: 18, MaintenanceTab_FeaturesGroup.PrioritySignsEnabled, true);
-                ToCheckbox(data, idx: 19, MaintenanceTab_FeaturesGroup.TimedLightsEnabled, true);
-                ToCheckbox(data, idx: 20, MaintenanceTab_FeaturesGroup.CustomSpeedLimitsEnabled, true);
-                ToCheckbox(data, idx: 21, MaintenanceTab_FeaturesGroup.VehicleRestrictionsEnabled, true);
-                ToCheckbox(data, idx: 22, MaintenanceTab_FeaturesGroup.LaneConnectorEnabled, true);
-                ToCheckbox(data, idx: 23, OverlaysTab_OverlaysGroup.JunctionRestrictionsOverlay, false);
-                ToCheckbox(data, idx: 24, MaintenanceTab_FeaturesGroup.JunctionRestrictionsEnabled, true);
-                ToCheckbox(data, idx: 25, GameplayTab_AIGroups.ParkingAI, false);
-                ToCheckbox(data, idx: 26, PoliciesTab_OnHighwaysGroup.PreferOuterLane, false);
-                ToCheckbox(data, idx: 27, GameplayTab_VehicleBehaviourGroup.IndividualDrivingStyle, true);
-                ToCheckbox(data, idx: 28, PoliciesTab_InEmergenciesGroup.EvacBussesMayIgnoreRules, false);
-                // skip ToCheckbox(data, idx: 29, GeneralTab_SimulationGroup.InstantEffects, true);
-                ToCheckbox(data, idx: 30, MaintenanceTab_FeaturesGroup.ParkingRestrictionsEnabled, true);
-                ToCheckbox(data, idx: 31, OverlaysTab_OverlaysGroup.ParkingRestrictionsOverlay, false);
-                ToCheckbox(data, idx: 32, PoliciesTab_OnRoadsGroup.BanRegularTrafficOnBusLanes, false);
-                ToCheckbox(data, idx: 33, OverlaysTab_OverlaysGroup.ShowPathFindStats, VersionUtil.IS_DEBUG);
-                ToSlider(data, idx: 34, GameplayTab_AIGroups.AltLaneSelectionRatio, 0);
+                ToOption(data, idx: 17, OverlaysTab_OverlaysGroup.ConnectedLanesOverlay);
+                ToOption(data, idx: 18, MaintenanceTab_FeaturesGroup.PrioritySignsEnabled);
+                ToOption(data, idx: 19, MaintenanceTab_FeaturesGroup.TimedLightsEnabled);
+                ToOption(data, idx: 20, MaintenanceTab_FeaturesGroup.CustomSpeedLimitsEnabled);
+                ToOption(data, idx: 21, MaintenanceTab_FeaturesGroup.VehicleRestrictionsEnabled);
+                ToOption(data, idx: 22, MaintenanceTab_FeaturesGroup.LaneConnectorEnabled);
+                ToOption(data, idx: 23, OverlaysTab_OverlaysGroup.JunctionRestrictionsOverlay);
+                ToOption(data, idx: 24, MaintenanceTab_FeaturesGroup.JunctionRestrictionsEnabled);
+                ToOption(data, idx: 25, GameplayTab_AIGroups.ParkingAI);
+                ToOption(data, idx: 26, PoliciesTab_OnHighwaysGroup.PreferOuterLane);
+                ToOption(data, idx: 27, GameplayTab_VehicleBehaviourGroup.IndividualDrivingStyle);
+                ToOption(data, idx: 28, PoliciesTab_InEmergenciesGroup.EvacBussesMayIgnoreRules);
+                // skip ToOption(data, idx: 29, GeneralTab_SimulationGroup.InstantEffects, true);
+                ToOption(data, idx: 30, MaintenanceTab_FeaturesGroup.ParkingRestrictionsEnabled);
+                ToOption(data, idx: 31, OverlaysTab_OverlaysGroup.ParkingRestrictionsOverlay);
+                ToOption(data, idx: 32, PoliciesTab_OnRoadsGroup.BanRegularTrafficOnBusLanes);
+                ToOption(data, idx: 33, OverlaysTab_OverlaysGroup.ShowPathFindStats);
+                ToOption(data, idx: 34, GameplayTab_AIGroups.AltLaneSelectionRatio);
 
-                ToDropDown(data, idx: 35, PoliciesTab_OnRoadsGroup.VehicleRestrictionsAggression, VehicleRestrictionsAggression.Medium);
+                ToOption(data, idx: 35, PoliciesTab_OnRoadsGroup.VehicleRestrictionsAggression);
 
-                ToCheckbox(data, idx: 36, PoliciesTab_AtJunctionsGroup.TrafficLightPriorityRules, false);
-                ToCheckbox(data, idx: 37, GameplayTab_AIGroups.RealisticPublicTransport, false);
-                ToCheckbox(data, idx: 38, MaintenanceTab_FeaturesGroup.TurnOnRedEnabled, true);
-                ToCheckbox(data, idx: 39, PoliciesTab_AtJunctionsGroup.AllowNearTurnOnRed, false);
-                ToCheckbox(data, idx: 40, PoliciesTab_AtJunctionsGroup.AllowFarTurnOnRed, false);
-                ToCheckbox(data, idx: 41, PoliciesTab_AtJunctionsGroup.AutomaticallyAddTrafficLightsIfApplicable, true);
+                ToOption(data, idx: 36, PoliciesTab_AtJunctionsGroup.TrafficLightPriorityRules);
+                ToOption(data, idx: 37, GameplayTab_AIGroups.RealisticPublicTransport);
+                ToOption(data, idx: 38, MaintenanceTab_FeaturesGroup.TurnOnRedEnabled);
+                ToOption(data, idx: 39, PoliciesTab_AtJunctionsGroup.AllowNearTurnOnRed);
+                ToOption(data, idx: 40, PoliciesTab_AtJunctionsGroup.AllowFarTurnOnRed);
+                ToOption(data, idx: 41, PoliciesTab_AtJunctionsGroup.AutomaticallyAddTrafficLightsIfApplicable);
 
-                ToCheckbox(data, idx: 42, PoliciesTab_RoundaboutsGroup.RoundAboutQuickFix_StayInLaneMainR, true);
-                ToCheckbox(data, idx: 43, PoliciesTab_RoundaboutsGroup.RoundAboutQuickFix_StayInLaneNearRabout, true);
-                ToCheckbox(data, idx: 44, PoliciesTab_RoundaboutsGroup.RoundAboutQuickFix_DedicatedExitLanes, true);
-                ToCheckbox(data, idx: 45, PoliciesTab_RoundaboutsGroup.RoundAboutQuickFix_NoCrossMainR, true);
-                ToCheckbox(data, idx: 46, PoliciesTab_RoundaboutsGroup.RoundAboutQuickFix_NoCrossYieldR);
-                ToCheckbox(data, idx: 47, PoliciesTab_RoundaboutsGroup.RoundAboutQuickFix_PrioritySigns, true);
+                ToOption(data, idx: 42, PoliciesTab_RoundaboutsGroup.RoundAboutQuickFix_StayInLaneMainR);
+                ToOption(data, idx: 43, PoliciesTab_RoundaboutsGroup.RoundAboutQuickFix_StayInLaneNearRabout);
+                ToOption(data, idx: 44, PoliciesTab_RoundaboutsGroup.RoundAboutQuickFix_DedicatedExitLanes);
+                ToOption(data, idx: 45, PoliciesTab_RoundaboutsGroup.RoundAboutQuickFix_NoCrossMainR);
+                ToOption(data, idx: 46, PoliciesTab_RoundaboutsGroup.RoundAboutQuickFix_NoCrossYieldR);
+                ToOption(data, idx: 47, PoliciesTab_RoundaboutsGroup.RoundAboutQuickFix_PrioritySigns);
 
-                ToCheckbox(data, idx: 48, PoliciesTab_PriorityRoadsGroup.PriorityRoad_CrossMainR, false);
-                ToCheckbox(data, idx: 49, PoliciesTab_PriorityRoadsGroup.PriorityRoad_AllowLeftTurns, false);
-                ToCheckbox(data, idx: 50, PoliciesTab_PriorityRoadsGroup.PriorityRoad_EnterBlockedYeild, false);
-                ToCheckbox(data, idx: 51, PoliciesTab_PriorityRoadsGroup.PriorityRoad_StopAtEntry, false);
+                ToOption(data, idx: 48, PoliciesTab_PriorityRoadsGroup.PriorityRoad_CrossMainR);
+                ToOption(data, idx: 49, PoliciesTab_PriorityRoadsGroup.PriorityRoad_AllowLeftTurns);
+                ToOption(data, idx: 50, PoliciesTab_PriorityRoadsGroup.PriorityRoad_EnterBlockedYeild);
+                ToOption(data, idx: 51, PoliciesTab_PriorityRoadsGroup.PriorityRoad_StopAtEntry);
 
-                ToCheckbox(data, idx: 52, PoliciesTab_RoundaboutsGroup.RoundAboutQuickFix_KeepClearYieldR, true);
-                ToCheckbox(data, idx: 53, PoliciesTab_RoundaboutsGroup.RoundAboutQuickFix_RealisticSpeedLimits, false);
-                ToCheckbox(data, idx: 54, PoliciesTab_RoundaboutsGroup.RoundAboutQuickFix_ParkingBanMainR, true);
-                ToCheckbox(data, idx: 55, PoliciesTab_RoundaboutsGroup.RoundAboutQuickFix_ParkingBanYieldR, false);
+                ToOption(data, idx: 52, PoliciesTab_RoundaboutsGroup.RoundAboutQuickFix_KeepClearYieldR);
+                ToOption(data, idx: 53, PoliciesTab_RoundaboutsGroup.RoundAboutQuickFix_RealisticSpeedLimits);
+                ToOption(data, idx: 54, PoliciesTab_RoundaboutsGroup.RoundAboutQuickFix_ParkingBanMainR);
+                ToOption(data, idx: 55, PoliciesTab_RoundaboutsGroup.RoundAboutQuickFix_ParkingBanYieldR);
 
-                ToCheckbox(data, idx: 56, PoliciesTab_OnRoadsGroup.NoDoubleCrossings, false);
-                ToCheckbox(data, idx: 57, PoliciesTab_AtJunctionsGroup.DedicatedTurningLanes, false);
+                ToOption(data, idx: 56, PoliciesTab_OnRoadsGroup.NoDoubleCrossings);
+                ToOption(data, idx: 57, PoliciesTab_AtJunctionsGroup.DedicatedTurningLanes);
 
-                SavedGameOptions.Instance.SavegamePathfinderEdition = LoadByte(data, idx: 58, defaultVal: PathfinderUpdates.LatestPathfinderEdition);
+                LoadByte(data, idx: 58, ref SavedGameOptions.Instance.SavegamePathfinderEdition);
 
-                ToCheckbox(data, idx: 59, OverlaysTab_OverlaysGroup.ShowDefaultSpeedSubIcon, false);
+                ToOption(data, idx: 59, OverlaysTab_OverlaysGroup.ShowDefaultSpeedSubIcon);
 
-                ToCheckbox(data, idx: 60, PoliciesTab_OnHighwaysGroup.HighwayMergingRules, false);
-
-                SavedGameOptions.Instance.Available = true;
+                ToOption(data, idx: 60, PoliciesTab_OnHighwaysGroup.HighwayMergingRules);
                 return true;
             }
             catch (Exception ex) {
                 ex.LogException();
-
-                SavedGameOptions.Instance.Available = true;
                 return false;
+            } finally {
+                SavedGameOptions.Available = true;
             }
         }
 

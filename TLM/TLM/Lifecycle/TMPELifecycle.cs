@@ -150,6 +150,7 @@ namespace TrafficManager.Lifecycle {
         }
 
         internal void Preload() {
+            SavedGameOptions.Release();
             Patcher.InstallPreload();
             Asset2Data = new Dictionary<BuildingInfo, AssetData>();
             Log.Info("Preloading Managers");
@@ -343,7 +344,7 @@ namespace TrafficManager.Lifecycle {
 
         internal void Unload() {
             try {
-                SavedGameOptions.Instance.Available = false;
+                SavedGameOptions.Release();
 
                 GeometryNotifierDisposable?.Dispose();
                 GeometryNotifierDisposable = null;
