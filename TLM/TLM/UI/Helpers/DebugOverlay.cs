@@ -73,7 +73,7 @@ internal static class DebugOverlay {
             cameraInfo: cameraInfo_,
             color: color,
             segment: segment,
-            dashLen: 1,
+            dashLen: 0,
             size: 1,
             minY: y - 5,
             maxY: y + 5,
@@ -86,10 +86,10 @@ internal static class DebugOverlay {
         Vector3 center = segment.b;
 
         Quad3 quad = new Quad3 {
-            a = center - dir + dir90,
-            b = center - dir - dir90,
-            c = center + dir,
-            d = center + dir,
+            a = center + dir90,
+            b = center - dir90,
+            c = center + 2 * dir,
+            d = center + 2 * dir,
         };
 
         RenderManager.instance.OverlayEffect.DrawQuad(
