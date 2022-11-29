@@ -1,55 +1,24 @@
 namespace TrafficManager.State.ConfigData {
-    using ExtVehicleType = TrafficManager.Traffic.ExtVehicleType;
-    using JetBrains.Annotations;
-    using System;
-    using System.Xml;
-    using System.Xml.Schema;
-    using System.Xml.Serialization;
     using CSUtil.Commons;
+    using System;
+    using System.Xml.Serialization;
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.Traffic;
+    using ExtVehicleType = TrafficManager.Traffic.ExtVehicleType;
 
 #if DEBUG
     /// <summary>
     /// DebugSettings is a part of GlobalConfig, enabled only in Debug mode
     /// </summary>
     public class DebugSettings {
-        /// <summary>
-        /// Do not use directly.
-        /// Use DebugSwitch.$EnumName$.Get() to access the switch values.
-        /// </summary>
-        [XmlArrayItem("Value")]
-        public DebugSwitchValue[] DebugSwitchValues = {
-            new (false, "0: Path-finding debug log"),
-            new (false, "1: Routing basic debug log"),
-            new (false, "2: Parking ai debug log (basic)"),
-            new (false, "3: Do not actually repair stuck vehicles/cims, just report"),
-            new (false, "4: Parking ai debug log (extended)"),
-            new (false, "5: Geometry debug log"),
-            new (false, "6: Debug parking AI distance issue"),
-            new (false, "7: Debug Timed Traffic Lights"),
-            new (false, "8: Debug routing"),
-            new (false, "9: Debug vehicle to segment end linking"),
-            new (false, "10: Prevent routing recalculation on global configuration reload"),
-            new (false, "11: Debug junction restrictions"),
-            new (false, "12: Debug pedestrian pathfinding"),
-            new (false, "13: Priority rules debug"),
-            new (false, "14: Disable GUI overlay of citizens having a valid path"),
-            new (false, "15: Disable checking of other vehicles for trams"),
-            new (false, "16: Debug TramBaseAI.SimulationStep (2)"),
-            new (false, "17: Debug alternative lane selection"),
-            new (false, "18: Transport line path-find debugging"),
-            new (false, "19: Enable obligation to drive on the right hand side of the road"),
-            new (false, "20: Debug realistic public transport"),
-            new (false, "21: Debug 'CalculateSegmentPosition'"),
-            new (false, "22: Parking ai debug log (vehicles)"),
-            new (false, "23: Debug lane connections"),
-            new (false, "24: Debug resource loading"),
-            new (false, "25: Debug turn-on-red"),
-            new (false, "26: Debug speed limits (also lists NetInfos skipped due to m_netAI in SpeedLimitsManager.cs)"),
-            new (false, "27: Allow U library UI and event debugging"),
-            // Added a new flag? Bump LATEST_VERSION in GlobalConfig!
-        };
+        private static DebugSwitch _debugSwitches;
+        public static DebugSwitch DebugSwitches {
+            get => _debugSwitches;
+            set {
+                _debugSwitches = value;
+                Log._Debug("DebugSettings.DebugSwitches set to " + DebugSwitches);
+            }
+        }
         private static InstanceID SelectedInstance => InstanceManager.instance.GetSelectedInstance();
         private static DebugSettings Instance => GlobalConfig.Instance.Debug;
         private static ushort Get(ushort val1, ushort val2) => val1 != 0 ? val1 : val2;
@@ -88,91 +57,49 @@ namespace TrafficManager.State.ConfigData {
         /// This adds access to the new moved type from the compatible old field
         /// </summary>
         // Property will not be serialized, permit use of obsolete symbol
-#pragma warning disable 612
+        [Obsolete]
         public API.Traffic.Enums.ExtVehicleType ApiExtVehicleType
             => LegacyExtVehicleType.ToNew(ExtVehicleType);
-#pragma warning restore 612
 
         public ExtPathMode ExtPathMode = ExtPathMode.None;
     }
 
-    /// <summary>
-    /// Indexes into Debug.Switches
-    /// </summary>
+    [Flags]
     public enum DebugSwitch {
-        PathFindingLog = 0,
-        RoutingBasicLog = 1,
-        BasicParkingAILog = 2,
-        [UsedImplicitly]
-        NoRepairStuckVehiclesCims = 3,
-        ExtendedParkingAILog = 4,
-        GeometryDebug = 5,
-        ParkingAIDistanceIssue = 6,
-        TimedTrafficLights = 7,
-        Routing = 8,
-        VehicleLinkingToSegmentEnd = 9,
-        NoRoutingRecalculationOnConfigReload = 10,
-        JunctionRestrictions = 11,
-        PedestrianPathfinding = 12,
-        PriorityRules = 13,
-        NoValidPathCitizensOverlay = 14,
-        [UsedImplicitly]
-        TramsNoOtherVehiclesChecking = 15,
-        TramBaseAISimulationStep = 16,
-        AlternativeLaneSelection = 17,
-        TransportLinePathfind = 18,
-        [UsedImplicitly]
-        ObligationToRHD = 19,
-        RealisticPublicTransport = 20,
-        CalculateSegmentPosition = 21,
-        VehicleParkingAILog = 22,
-        LaneConnections = 23,
-        ResourceLoading = 24,
-        TurnOnRed = 25,
-        SpeedLimits = 26,
-        ULibraryEvents = 27,
-        // Added a new flag? Bump LATEST_VERSION in GlobalConfig!
-    }
-
-    public class DebugSwitchValue : IXmlSerializable {
-        public bool Value = false;
-        public string Description = string.Empty;
-
-        [UsedImplicitly] //required for XmlSerializer
-        public DebugSwitchValue() { }
-
-        public DebugSwitchValue(bool value, string description) {
-            Value = value;
-            Description = description;
-        }
-        public XmlSchema GetSchema() {
-            return null;
-        }
-
-        public void ReadXml(XmlReader reader) {
-            while (reader.Read()) {
-                switch (reader.NodeType) {
-                    case XmlNodeType.Text:
-                        bool.TryParse(reader.Value, out Value);
-                        break;
-                    case XmlNodeType.Comment:
-                        Description = reader.Value;
-                        break;
-                    case XmlNodeType.EndElement:
-                        return;
-                }
-            }
-        }
-
-        public void WriteXml(XmlWriter writer) {
-            writer.WriteValue(Value);
-            writer.WriteComment(Description);
-        }
+        None = 0,
+        RoutingBasicLog = 1 << 0,
+        Routing = 1 << 1,
+        NoRoutingRecalculationOnConfigReload = 1 << 2, // Prevent routing recalculation on global configuration reload
+        PathFindingLog = 1 << 3,
+        PedestrianPathfinding = 1 << 4,
+        TransportLinePathfind = 1 << 5,
+        BasicParkingAILog = 1 << 6,
+        ExtendedParkingAILog = 1 << 7,
+        ParkingAIDistanceIssue = 1 << 8,
+        VehicleParkingAILog = 1 << 9,
+        NoRepairStuckVehiclesCims = 1 << 10, // Do not actually repair stuck vehicles/cims, just report
+        GeometryDebug = 1 << 11,
+        TimedTrafficLights = 1 << 12,
+        VehicleLinkingToSegmentEnd = 1 << 13,
+        JunctionRestrictions = 1 << 14,
+        PriorityRules = 1 << 15,
+        NoValidPathCitizensOverlay = 1 << 16, // Disable GUI overlay of citizens having a valid path
+        TramsNoOtherVehiclesChecking = 1 << 17, // Disable checking of other vehicles for trams
+        TramBaseAISimulationStep = 1 << 18,
+        AlternativeLaneSelection = 1 << 19,
+        ObligationToRHD = 1 << 19, // obligation to drive on the right hand side of the road
+        RealisticPublicTransport = 1 << 20,
+        CalculateSegmentPosition = 1 << 21,
+        LaneConnections = 1 << 23,
+        ResourceLoading = 1 << 24,
+        TurnOnRed = 1 << 25,
+        SpeedLimits = 1 << 26, // also lists NetInfos skipped due to m_netAI in SpeedLimitsManager.cs
+        ULibraryEvents = 1 << 27, // U library UI and event
     }
 
     internal static class DebugSwitchExtensions {
         public static bool Get(this DebugSwitch sw) {
-            return GlobalConfig.Instance.Debug.DebugSwitchValues[(int)sw].Value;
+            return (DebugSettings.DebugSwitches & sw) != 0;
         }
     }
 #endif
