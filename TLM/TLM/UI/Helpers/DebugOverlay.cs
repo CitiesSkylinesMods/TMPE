@@ -9,6 +9,8 @@ using static RenderManager;
 using TrafficManager.Util;
 
 internal static class DebugOverlay {
+    private static RenderManager.CameraInfo cameraInfo_;
+
     /// <summary>
     /// key : id
     /// value : render action
@@ -16,10 +18,7 @@ internal static class DebugOverlay {
     public static Dictionary<int, Action> Actions;
 
 #if DEBUG
-    private static RenderManager.CameraInfo cameraInfo_;
-
     static DebugOverlay() => Actions = new();
-
 #endif
 
     public static void RenderDebugOverlay(this Bezier3 bezier, Color color) {
