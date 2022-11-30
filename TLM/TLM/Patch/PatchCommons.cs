@@ -118,7 +118,7 @@ namespace TrafficManager.Patch {
         internal static List<CodeInstruction> GetUpdatePositionInstructions() {
             return new List<CodeInstruction> {
                 new CodeInstruction(OpCodes.Ldarg_1), // vehicleID
-                new CodeInstruction(OpCodes.Ldarga_S, 2), // ref vehicleData
+                new CodeInstruction(OpCodes.Ldarg_2), // ref vehicleData
                 new CodeInstruction(OpCodes.Call, typeof(PatchCommons).GetMethod(nameof(UpdatePosition))),
             };
         }
@@ -131,7 +131,7 @@ namespace TrafficManager.Patch {
             return new List<CodeInstruction> {
                 new CodeInstruction(OpCodes.Ldsfld, instance),
                 new CodeInstruction(OpCodes.Ldarg_1), // vehicleID
-                new CodeInstruction(OpCodes.Ldarga_S, 2), // ref vehicleData
+                new CodeInstruction(OpCodes.Ldarg_2), // ref vehicleData
                 new CodeInstruction(OpCodes.Callvirt, mayDespawn),
                 new CodeInstruction(OpCodes.Brfalse_S, retLabel)
             };
@@ -231,7 +231,7 @@ namespace TrafficManager.Patch {
             return new List<CodeInstruction> {
                 new CodeInstruction(OpCodes.Ldarg_0),
                 new CodeInstruction(OpCodes.Ldarg_1), // vehicleID
-                new CodeInstruction(OpCodes.Ldarga_S, 2), // ref vehicleData
+                new CodeInstruction(OpCodes.Ldarg_2), // ref vehicleData
                 new CodeInstruction(OpCodes.Ldarg_3),
                 new CodeInstruction(OpCodes.Ldarg_S, 4), // laneID
                 new CodeInstruction(OpCodes.Ldloc_1),    //info variable
