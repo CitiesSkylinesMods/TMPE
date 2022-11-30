@@ -4,18 +4,54 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 using System.Diagnostics;
-using ColossalFramework;
-using static RenderManager;
 using TrafficManager.Util;
+using System.Linq;
 
 internal static class DebugOverlay {
+    public class ActionDict {
+        private static Dictionary<int, Action> dict_ = new();
+
+        public Action this[int key] {
+            get {
+                lock (dict_) {
+                    return dict_[key];
+                }
+            }
+            set {
+                lock (dict_) {
+                    dict_[key] = value;
+                }
+            }
+        }
+
+        public Action[] Values {
+            get {
+                lock (dict_) {
+                    return dict_.Values.ToArray();
+                }
+            }
+        }
+
+        public bool Remove(int key) {
+            lock (dict_) {
+                return dict_.Remove(key);
+            }
+        }
+
+        public void Clear() {
+            lock (dict_) {
+                dict_.Clear();
+            }
+        }
+    }
+
     private static RenderManager.CameraInfo cameraInfo_;
 
     /// <summary>
     /// key : id
     /// value : render action
     /// </summary>
-    public static Dictionary<int, Action> Actions;
+    public static ActionDict Actions;
 
 #if DEBUG
     static DebugOverlay() => Actions = new();
