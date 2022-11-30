@@ -9,6 +9,7 @@ namespace TrafficManager.UI.Helpers {
     using TrafficManager.State;
     using JetBrains.Annotations;
     using TrafficManager.Lifecycle;
+    using TrafficManager.Util;
 
     public abstract class SerializableUIOptionBase<TVal, TUI, TComponent> : ILegacySerializableOption
         where TUI : UIComponent
@@ -73,6 +74,7 @@ namespace TrafficManager.UI.Helpers {
                     return _value;
                 }
 
+                Shortcuts.AssertNotNull(SavedGameOptions.Instance, "SavedGameOptions.Instance");
                 var value = _fieldInfo.GetValue(SavedGameOptions.Instance);
                 if(value is IConvertible convertibleValue) {
                     return (TVal)ChangeType(convertibleValue, typeof(TVal));
@@ -85,10 +87,11 @@ namespace TrafficManager.UI.Helpers {
                     _value = value;
                 } else if (value is IConvertible convertibleValue) {
                     IConvertible val = ChangeType(convertibleValue, _fieldInfo.FieldType);
-                    _fieldInfo.SetValue(null, val);
+                    Shortcuts.AssertNotNull(SavedGameOptions.Instance, "SavedGameOptions.Instance");
+                    _fieldInfo.SetValue(SavedGameOptions.Instance, val);
                 } else {
-                    _fieldInfo.SetValue(null, value);
-
+                    Shortcuts.AssertNotNull(SavedGameOptions.Instance, "SavedGameOptions.Instance");
+                    _fieldInfo.SetValue(SavedGameOptions.Instance, value);
                 }
             }
         }
