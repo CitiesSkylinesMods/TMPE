@@ -10,7 +10,7 @@ using TrafficManager.Util;
 
 public static class TMPESettings {
     public static void MakeSettings(UIHelper helper) {
-        Log.Info("SavedGameOptions.Instance.MakeSettings() - Adding UI to mod options tabs");
+        Log.Info("TMPESettings.MakeSettings() - Adding UI to mod options tabs");
 
         try {
             ExtUITabstrip tabStrip = ExtUITabstrip.Create(helper);
