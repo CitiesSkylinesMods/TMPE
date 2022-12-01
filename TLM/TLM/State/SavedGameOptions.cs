@@ -3,6 +3,17 @@ using CSUtil.Commons;
 using TrafficManager.API.Traffic.Enums;
 using TrafficManager.Custom.PathFinding;
 using TrafficManager.Util;
+using HarmonyLib;
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using System;
+
+[HarmonyPatch]
+public static class SavedGameOptionsPatch {
+    public static MethodBase TargetMethod()
+        => typeof(SavedGameOptions).GetProperty(nameof(SavedGameOptions.Instance)).GetGetMethod();
+    public static void Prefix() => Log.Info("SavedGameOptions.Instance is NOT inlined\n" + Environment.StackTrace);
+}
 
 public class SavedGameOptions {
     public bool individualDrivingStyle = true;
@@ -132,5 +143,12 @@ public class SavedGameOptions {
 
     private void Awake() {
         Log.Info("SavedGameOptions.Awake() called");
+        Test();
+    }
+
+    public static void Test() {
+        try {
+            Log.Info($"SavedGameOptions.Test() called : Instance.advancedAI = {Instance?.advancedAI}");
+        } catch { }
     }
 }

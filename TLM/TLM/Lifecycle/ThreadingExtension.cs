@@ -8,6 +8,7 @@ namespace TrafficManager.Lifecycle {
     public sealed class ThreadingExtension : ThreadingExtensionBase {
         public override void OnBeforeSimulationTick() {
             base.OnBeforeSimulationTick();
+            SavedGameOptions.Test();
 
             GeometryManager.Instance.SimulationStep();
             RoutingManager.Instance.SimulationStep();
