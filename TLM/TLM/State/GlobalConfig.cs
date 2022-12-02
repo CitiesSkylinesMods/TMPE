@@ -8,9 +8,7 @@ namespace TrafficManager.State {
     using TrafficManager.Util;
     using TrafficManager.Lifecycle;
 
-    [XmlRootAttribute(
-        "GlobalConfig",
-        IsNullable = false)]
+    [XmlRoot("GlobalConfig", IsNullable = false)]
     public class GlobalConfig : GenericObservable<GlobalConfig> {
         public const string FILENAME = "TMPE_GlobalConfig.xml";
         public const string BACKUP_FILENAME = FILENAME + ".bak";
@@ -79,17 +77,25 @@ namespace TrafficManager.State {
 
         public ConfigData.TimedTrafficLights TimedTrafficLights = new();
 
+        [XmlElement("DefaultsForNewGame")]
+        public SavedGameOptions SavedGameOptions = null;
+
         internal static void WriteConfig() {
             ModifiedTime = WriteConfig(Instance);
         }
 
+        /// <summary>
+        /// Replaces global config file with default config.
+        /// </summary>
+        /// <param name="oldConfig">if null, all is reset, otherwise old config is migrated to new config.</param>
+        /// <param name="modifiedTime">time of the file created</param>
+        /// <returns>the new default config</returns>
         private static GlobalConfig WriteDefaultConfig(GlobalConfig oldConfig,
-                                                       bool resetAll,
                                                        out DateTime modifiedTime) {
             Log._Debug($"Writing default config...");
             GlobalConfig conf = new GlobalConfig();
 
-            if (!resetAll && oldConfig != null) {
+            if (oldConfig != null) {
                 conf.Main.MainMenuButtonX = oldConfig.Main.MainMenuButtonX;
                 conf.Main.MainMenuButtonY = oldConfig.Main.MainMenuButtonY;
 
@@ -190,7 +196,7 @@ namespace TrafficManager.State {
             }
             catch (Exception e) {
                 Log.Warning($"Could not load global config: {e} Generating default config.");
-                return WriteDefaultConfig(null, false, out modifiedTime);
+                return WriteDefaultConfig(null, out modifiedTime);
             }
         }
 
@@ -214,17 +220,17 @@ namespace TrafficManager.State {
                         $"Error occurred while saving backup config to '{filename}': {e.ToString()}");
                 }
 
-                Reset(conf);
+                Reset(oldConfig: conf);
             } else {
                 Instance = conf;
                 ModifiedTime = WriteConfig(Instance);
             }
         }
 
-        public static void Reset(GlobalConfig oldConfig, bool resetAll = false) {
+        public static void Reset(GlobalConfig oldConfig) {
             Log.Info($"Resetting global config.");
             DateTime modifiedTime;
-            Instance = WriteDefaultConfig(oldConfig, resetAll, out modifiedTime);
+            Instance = WriteDefaultConfig(oldConfig, out modifiedTime);
             ModifiedTime = modifiedTime;
         }
 

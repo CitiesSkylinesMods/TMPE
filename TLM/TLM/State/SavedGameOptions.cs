@@ -3,7 +3,7 @@ using CSUtil.Commons;
 using System;
 using System.Text;
 using TrafficManager.API.Traffic.Enums;
-using TrafficManager.Custom.PathFinding;
+using TrafficManager.Lifecycle;
 using TrafficManager.Util;
 
 public class SavedGameOptions {
@@ -112,10 +112,19 @@ public class SavedGameOptions {
     public static bool Available { get; set; } = false;
 
     public static SavedGameOptions Instance { get; private set; }
+
+    /// <summary>
+    /// ensures SavedGameOptions exists.
+    /// if not then it is set to global default or built-in default (if global default does not exist).
+    /// </summary>
     public static void Ensure() {
         Log.Info("SavedGameOptions.Ensure() called");
         if (Instance == null) {
-            Create();
+            if (GlobalConfig.Instance?.SavedGameOptions != null) {
+                Instance = GlobalConfig.Instance.SavedGameOptions;
+            } else {
+                Create();
+            }
         }
     }
     private static void Create() {
@@ -142,7 +151,6 @@ public class SavedGameOptions {
             return null;
         }
     }
-
     public static bool Deserialzie(byte[] data) {
         try {
             if (!data.IsNullOrEmpty()) {

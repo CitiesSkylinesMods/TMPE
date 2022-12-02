@@ -110,7 +110,7 @@ namespace TrafficManager.UI.Helpers {
         protected override void UpdateLabel() {
             if (!HasUI) return;
 
-            string tooltip = IsInScope ? $"{Value}{_tooltip}" : Translate(INGAME_ONLY_SETTING);
+            string tooltip = $"{Value}{Tooltip}";
             string label = Translate(Label);
             _sliderLabel.text = label + ": " + tooltip;
         }
@@ -119,16 +119,12 @@ namespace TrafficManager.UI.Helpers {
 
         protected override void UpdateReadOnly() {
             if (!HasUI) return;
+            Log._Debug($"SliderOption.UpdateReadOnly() - `{FieldName}` is {(ReadOnly ? "read-only" : "writeable")}");
 
-            var readOnly = !IsInScope || _readOnly;
-
-            Log._Debug($"SliderOption.UpdateReadOnly() - `{FieldName}` is {(readOnly ? "read-only" : "writeable")}");
-
-            _ui.isInteractive = !readOnly;
-            _ui.thumbObject.isInteractive = !readOnly;
-            _ui.thumbObject.opacity = readOnly ? 0.3f : 1f;
-            // parent is UIPanel containing text label and slider
-            _sliderLabel.opacity = readOnly ? 0.3f : 1f;
+            _ui.isInteractive = !ReadOnly;
+            _ui.thumbObject.isInteractive = !ReadOnly;
+            _ui.thumbObject.opacity = ReadOnly ? 0.3f : 1f;
+            _sliderLabel.opacity = ReadOnly ? 0.3f : 1f;
         }
     }
 }

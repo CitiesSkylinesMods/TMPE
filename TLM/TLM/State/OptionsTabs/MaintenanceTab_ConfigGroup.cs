@@ -13,8 +13,13 @@ namespace TrafficManager.State {
             Handler = OnReloadGlobalConfigClicked,
         };
         public static ActionButton ResetGlobalConfig = new() {
-            Label = "Maintenance.Button:Reset global configuration",
+            Label = "Maintenance.Button:Reset all configuration",
             Handler = OnResetGlobalConfigClicked,
+        };
+
+        public static ActionButton SetAsDefaultForNewGames = new() {
+            Label = "Maintenance.Button:Set as default for new games",
+            Handler = OnSetAsDefaultForNewGamesClicked,
         };
 
 #if DEBUG
@@ -33,6 +38,7 @@ namespace TrafficManager.State {
 #if DEBUG
             DebugSwiches.AddUI(group);
 #endif
+            SetAsDefaultForNewGames.AddUI(group);
         }
 
         private static string T(string key) => Translation.Options.Get(key);
@@ -41,6 +47,10 @@ namespace TrafficManager.State {
             => GlobalConfig.Reload();
 
         private static void OnResetGlobalConfigClicked()
-            => GlobalConfig.Reset(oldConfig: null, resetAll: true);
+            => GlobalConfig.Reset(oldConfig: null);
+        private static void OnSetAsDefaultForNewGamesClicked() {
+            GlobalConfig.Instance.SavedGameOptions = SavedGameOptions.Instance;
+            GlobalConfig.WriteConfig();
+        }
     }
 }

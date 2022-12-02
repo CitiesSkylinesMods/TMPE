@@ -94,25 +94,18 @@ namespace TrafficManager.UI.Helpers {
         }
 
         protected override void UpdateTooltip() {
-            if (!HasUI) return;
-
-            //UIDropDown parent(UIPanel) handles tooltip
-            _ui.parent.tooltip = IsInScope
-                ? $"{_tooltip}"
-                : Translate(INGAME_ONLY_SETTING);
+            if (HasUI) {
+                _ui.parent.tooltip = Tooltip;
+            }
         }
 
         protected override void UpdateReadOnly() {
             if (!HasUI) return;
+            Log._Debug($"DropDownOption.UpdateReadOnly() - `{FieldName}` is {(ReadOnly ? "read-only" : "writeable")}");
 
-            var readOnly = !IsInScope || _readOnly;
-
-            Log._Debug($"DropDownOption.UpdateReadOnly() - `{FieldName}` is {(readOnly ? "read-only" : "writeable")}");
-
-            _ui.isInteractive = !readOnly;
-            _ui.opacity = readOnly ? 0.3f : 1f;
-            // parent is UIPanel containing text label and dropdown
-            _dropdownLabel.opacity = readOnly ? 0.3f : 1f;
+            _ui.isInteractive = !ReadOnly;
+            _ui.opacity = ReadOnly ? 0.3f : 1f;
+            _dropdownLabel.opacity = ReadOnly ? 0.3f : 1f;
         }
     }
 }

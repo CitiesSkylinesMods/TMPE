@@ -15,7 +15,7 @@ public class DLCRestrictedCheckboxOption : CheckboxOption {
                                        SteamHelper.DLC requiredDLC,
                                        Scope scope = Scope.Savegame) : base(fieldName, scope) {
         _requiredDLC = requiredDLC;
-        _readOnly = !SteamHelper.IsDLCOwned(_requiredDLC);
+        ReadOnly = !SteamHelper.IsDLCOwned(_requiredDLC);
     }
 
     public override CheckboxOption AddUI(UIHelperBase container) {
@@ -36,7 +36,7 @@ public class DLCRestrictedCheckboxOption : CheckboxOption {
         innerPanel.autoFitChildrenVertically = true;
         innerPanel.autoLayout = true;
 
-        if (_readOnly) {
+        if (ReadOnly) {
             icon.tooltip = Locale.Get("CONTENT_REQUIRED", _requiredDLC.ToString());
             _ui.tooltip = Translate("Checkbox:DLC is required to change this option and see effects in game");
         }
