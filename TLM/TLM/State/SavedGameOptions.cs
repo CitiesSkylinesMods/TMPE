@@ -149,6 +149,13 @@ public class SavedGameOptions {
     public static void Test() {
         try {
             Log.Info($"SavedGameOptions.Test() called : Instance.advancedAI = {Instance?.advancedAI}");
+            Test2();
+        } catch { }
+    }
+
+    public static void Test2() {
+        try {
+            Log.Info($"SavedGameOptions.Test2() called : Instance.advancedAI = {Instance?.advancedAI}");
         } catch { }
     }
 }
