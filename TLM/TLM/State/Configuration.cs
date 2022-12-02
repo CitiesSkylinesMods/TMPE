@@ -8,7 +8,7 @@ namespace TrafficManager {
     using TrafficManager.Traffic;
     using System.Runtime.Serialization;
     using TrafficManager.Lifecycle;
-    using Util;
+    using TrafficManager.Custom.PathFinding;
     using LaneEndTransitionGroup = TrafficManager.API.Traffic.Enums.LaneEndTransitionGroup;
 
     [Serializable]
@@ -361,6 +361,8 @@ namespace TrafficManager {
         /// Parking restrictions
         /// </summary>
         public List<ParkingRestriction> ParkingRestrictions = new List<ParkingRestriction>();
+
+        public byte SavegamePathfinderEdition = PathfinderUpdates.LatestPathfinderEdition;
 
         [Obsolete]
         public string NodeTrafficLights = string.Empty;

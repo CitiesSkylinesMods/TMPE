@@ -11,7 +11,8 @@ namespace TrafficManager.Lifecycle {
     using TrafficManager.Manager.Impl;
     using TrafficManager.Manager.Impl.LaneConnection;
     using TrafficManager.State;
-    using Util;
+    using TrafficManager.Util;
+    using TrafficManager.Custom.PathFinding;
 
     [UsedImplicitly]
     public class SerializableDataExtension
@@ -215,6 +216,9 @@ namespace TrafficManager.Lifecycle {
                 Log.Warning("Configuration NULL, Couldn't load save data. Possibly a new game?");
                 return;
             }
+
+            // load Path Find Update
+            PathfinderUpdates.SavegamePathfinderEdition = _configuration.SavegamePathfinderEdition;
 
             // load ext. citizens
             if (_configuration.ExtCitizens != null) {
