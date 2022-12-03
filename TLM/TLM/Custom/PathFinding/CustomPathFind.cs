@@ -291,6 +291,8 @@ namespace TrafficManager.Custom.PathFinding {
                 disableMask_ |= NetSegment.Flags.Flooded;
             }
 
+            allowMixedCargoPath_ = false;
+            mixedPathVehicleTypes_ = queueItem_.vehicleType;
             if ((laneTypes_ & NetInfo.LaneType.Vehicle) != NetInfo.LaneType.None) {
                 laneTypes_ |= NetInfo.LaneType.TransportVehicle;
 
