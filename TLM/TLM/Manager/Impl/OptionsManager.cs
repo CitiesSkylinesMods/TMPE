@@ -120,7 +120,7 @@ namespace TrafficManager.Manager.Impl {
                 } else if (dataVersion < 4) {
                     return LoadDataLegacy(data);
                 } else {
-                    return SavedGameOptions.Deserialzie(data);
+                    return SavedGameOptions.Deserialize(data);
                 }
             } finally {
                 SavedGameOptions.Available = true;

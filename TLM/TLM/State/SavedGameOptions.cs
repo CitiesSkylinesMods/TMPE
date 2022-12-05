@@ -142,7 +142,7 @@ public class SavedGameOptions {
         Log.Info("SavedGameOptions.Awake() called");
     }
 
-    public byte[] Seraialize() {
+    public byte[] Serialize() {
         try {
             string xml = XMLUtil.Serialize(this);
             return Encoding.ASCII.GetBytes(xml);
@@ -151,7 +151,8 @@ public class SavedGameOptions {
             return null;
         }
     }
-    public static bool Deserialzie(byte[] data) {
+    
+    public static bool Deserialize(byte[] data) {
         try {
             if (!data.IsNullOrEmpty()) {
                 string xml = Encoding.ASCII.GetString(data);
