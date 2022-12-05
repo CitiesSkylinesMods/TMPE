@@ -8,7 +8,7 @@ namespace TrafficManager.UI.Helpers {
     using System;
     using TrafficManager.Util;
 
-    public class SliderOption : SerializableUIOptionBase<float, UISlider, SliderOption> {
+    public class SliderOption : SerializableUIOptionBase<float, UISlider> {
 
         private const int SLIDER_LABEL_MAX_WIDTH = 695;
 
@@ -19,8 +19,6 @@ namespace TrafficManager.UI.Helpers {
 
         public SliderOption(string fieldName, Scope scope = Scope.Savegame)
         : base(fieldName, scope) { }
-
-        /* Data */
 
         public byte Min {
             get => _min;
@@ -59,37 +57,9 @@ namespace TrafficManager.UI.Helpers {
 
         public override byte Save() => FloatToByte(Value);
 
-        /* UI */
-        public override float Value {
-            get => base.Value;
-            set {
-                value = FloatToByte(value);
+        public override void SetUIValue(float value) => _ui.value = value;
 
-                if (Mathf.Approximately(value, base.Value)) return;
-
-                base.Value = value;
-
-                Log.Info($"SliderOption.Value: `{FieldName}` changed to {value}");
-
-                if (Shortcuts.IsMainThread()) {
-                    if (HasUI) {
-                        _ui.value = value;
-                        UpdateTooltip();
-                    }
-                } else {
-                    SimulationManager.instance
-                                     .m_ThreadingWrapper
-                                     .QueueMainThread(() => {
-                                         if (HasUI) {
-                                             _ui.value = value;
-                                             UpdateTooltip();
-                                         }
-                                     });
-                }
-            }
-        }
-
-        public override SliderOption AddUI(UIHelperBase container) {
+        public override void AddUI(UIHelperBase container) {
             _ui = container.AddSlider(
                 text: Translate(Label) + ":",
                 min: Min,
@@ -103,8 +73,6 @@ namespace TrafficManager.UI.Helpers {
 
             UpdateTooltip();
             UpdateReadOnly();
-
-            return this;
         }
 
         protected override void UpdateLabel() {
@@ -119,7 +87,7 @@ namespace TrafficManager.UI.Helpers {
 
         protected override void UpdateReadOnly() {
             if (!HasUI) return;
-            Log._Debug($"SliderOption.UpdateReadOnly() - `{FieldName}` is {(ReadOnly ? "read-only" : "writeable")}");
+            Log._Debug($"SliderOption.UpdateReadOnly() - `{Name}` is {(ReadOnly ? "read-only" : "writeable")}");
 
             _ui.isInteractive = !ReadOnly;
             _ui.thumbObject.isInteractive = !ReadOnly;

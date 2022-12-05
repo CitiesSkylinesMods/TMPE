@@ -43,7 +43,7 @@ public class SavedGameOptions {
     public bool advancedAI;
     public SimulationAccuracy simulationAccuracy = SimulationAccuracy.VeryHigh;
     public bool realisticPublicTransport;
-    public byte altLaneSelectionRatio;
+    public float altLaneSelectionRatio;
     public bool highwayRules;
     public bool highwayMergingRules;
     public bool automaticallyAddTrafficLightsIfApplicable = true;

@@ -3053,7 +3053,7 @@ namespace TrafficManager.Manager.Impl {
 
             uint vehicleRand = Constants.ManagerFactory.ExtVehicleManager.GetStaticVehicleRand(vehicleId);
 
-            if (vehicleRand < 100 - SavedGameOptions.Instance.altLaneSelectionRatio) {
+            if (vehicleRand < 100 - (int)SavedGameOptions.Instance.altLaneSelectionRatio) {
                 Log._DebugIf(
                     logLaneSelection,
                     () => $"VehicleBehaviorManager.MayFindBestLane({vehicleId}): Skipping lane checking " +

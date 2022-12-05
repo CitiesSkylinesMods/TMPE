@@ -8,7 +8,7 @@ namespace TrafficManager.UI.Helpers {
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.Util;
 
-    public class DropDownOption<TEnum> : SerializableUIOptionBase<TEnum, UIDropDown, DropDownOption<TEnum>>
+    public class DropDownOption<TEnum> : SerializableUIOptionBase<TEnum, UIDropDown>
         where TEnum : struct, Enum, IConvertible {
         private UILabel _dropdownLabel;
 
@@ -51,26 +51,15 @@ namespace TrafficManager.UI.Helpers {
             set {
                 if (values_.Contains(value)) {
                     base.Value = value;
-                    if (Shortcuts.IsMainThread()) {
-                        if (HasUI) {
-                            _ui.selectedIndex = IndexOf(value);
-                        }
-                    } else {
-                        SimulationManager.instance
-                                         .m_ThreadingWrapper
-                                         .QueueMainThread(() => {
-                                             if (HasUI) {
-                                                 _ui.selectedIndex = IndexOf(value);
-                                             }
-                                         });
-                    }
                 } else {
                     Log.Error($"unrecognised value:{value} for enum:{typeof(TEnum).Name}");
                 }
             }
         }
 
-        public override DropDownOption<TEnum> AddUI(UIHelperBase container) {
+        public override void SetUIValue(TEnum value) => _ui.selectedIndex = IndexOf(value);
+
+        public override void AddUI(UIHelperBase container) {
             _ui = container.AddDropdown(
                 text: Translate(Label) + ":",
                 options: GetTranslatedItems(),
@@ -83,8 +72,6 @@ namespace TrafficManager.UI.Helpers {
 
             UpdateTooltip();
             UpdateReadOnly();
-
-            return this;
         }
 
         protected override void UpdateLabel() {
@@ -101,7 +88,7 @@ namespace TrafficManager.UI.Helpers {
 
         protected override void UpdateReadOnly() {
             if (!HasUI) return;
-            Log._Debug($"DropDownOption.UpdateReadOnly() - `{FieldName}` is {(ReadOnly ? "read-only" : "writeable")}");
+            Log._Debug($"DropDownOption.UpdateReadOnly() - `{Name}` is {(ReadOnly ? "read-only" : "writeable")}");
 
             _ui.isInteractive = !ReadOnly;
             _ui.opacity = ReadOnly ? 0.3f : 1f;
