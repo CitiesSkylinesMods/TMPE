@@ -36,7 +36,7 @@ namespace TrafficManager.Manager.Impl {
         public bool MayHaveParkingRestriction(ushort segmentId, NetInfo.Direction finalDir) {
             ref NetSegment segment = ref segmentId.ToSegment();
             var dir = Shortcuts.RHT ? finalDir : NetInfo.InvertDirection(finalDir);
-            bool right = dir == NetInfo.Direction.Forward != segment.m_flags.IsFlagSet(NetSegment.Flags.Invert);
+            bool right = (dir == NetInfo.Direction.Forward) != segment.m_flags.IsFlagSet(NetSegment.Flags.Invert);
             if (right) {
                 if (segment.m_flags.IsFlagSet(NetSegment.Flags.StopRight | NetSegment.Flags.StopRight2)) {
                     return false;
