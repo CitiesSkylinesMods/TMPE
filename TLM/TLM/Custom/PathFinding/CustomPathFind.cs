@@ -4130,7 +4130,7 @@ namespace TrafficManager.Custom.PathFinding {
                 extVehicleType |= ExtVehicleType.CargoShip;
             }
 
-            return extVehicleType | defaultExtVehicleType
+            return extVehicleType | defaultExtVehicleType;
         }
 
 #endif
