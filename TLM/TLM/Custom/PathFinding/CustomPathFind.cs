@@ -296,7 +296,7 @@ namespace TrafficManager.Custom.PathFinding {
             if ((laneTypes_ & NetInfo.LaneType.Vehicle) != NetInfo.LaneType.None) {
                 laneTypes_ |= NetInfo.LaneType.TransportVehicle;
 
-                // allowed mixed vehicle path when requeted path is Vehicle + CargoVehicle (at current state CargoTruck and PostVanAI)
+                // allow mixed vehicle path when requested path is Vehicle + CargoVehicle (e.g.: CargoTruck and PostVanAI)
                 allowMixedCargoPath_ = (laneTypes_ & NetInfo.LaneType.CargoVehicle) != NetInfo.LaneType.None;
                 if (allowMixedCargoPath_) {
                     mixedPathVehicleTypes_ = VehicleTypeToMixedCargoExtVehicle(vehicleTypes_, queueItem_.vehicleType);
