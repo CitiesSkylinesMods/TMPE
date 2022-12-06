@@ -25,13 +25,27 @@ namespace TrafficManager.Manager.Impl {
 
         public bool MayHaveParkingRestriction(ushort segmentId) {
             ref NetSegment segment = ref segmentId.ToSegment();
-            if ((segment.m_flags & NetSegment.Flags.Created) == NetSegment.Flags.None) {
-                return true;
+            if (!segment.IsValid()) {
+                return false;
             }
 
             ItemClass connectionClass = segment.Info.GetConnectionClass();
-
             return connectionClass.m_service == ItemClass.Service.Road && segment.Info.m_hasParkingSpaces;
+        }
+
+        public bool MayHaveParkingRestriction(ushort segmentId, NetInfo.Direction finalDir) {
+            ref NetSegment segment = ref segmentId.ToSegment();
+            bool right = (finalDir == NetInfo.Direction.Forward) != segment.m_flags.IsFlagSet(NetSegment.Flags.Invert);
+            if (right) {
+                if (segment.m_flags.IsFlagSet(NetSegment.Flags.StopRight | NetSegment.Flags.StopRight2)) {
+                    return false;
+                }
+            } else {
+                if (!right && segment.m_flags.IsFlagSet(NetSegment.Flags.StopLeft | NetSegment.Flags.StopLeft2)) {
+                    return false;
+                }
+            }
+            return MayHaveParkingRestriction(segmentId);
         }
 
         public bool IsParkingAllowed(ushort segmentId, NetInfo.Direction finalDir) {
