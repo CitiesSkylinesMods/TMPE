@@ -42,7 +42,7 @@ namespace TrafficManager.Manager.Impl {
                     return false;
                 }
             } else {
-                if (!right && segment.m_flags.IsFlagSet(NetSegment.Flags.StopLeft | NetSegment.Flags.StopLeft2)) {
+                if (segment.m_flags.IsFlagSet(NetSegment.Flags.StopLeft | NetSegment.Flags.StopLeft2)) {
                     return false;
                 }
             }
