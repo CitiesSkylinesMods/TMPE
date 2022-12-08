@@ -502,11 +502,11 @@ namespace TrafficManager.UI {
             }
 
             // use the same color as in NetAdjust
-            ref NetSegment segment = ref HoveredSegmentId.ToSegment();
+            ref NetSegment hoverSegmentId = ref HoveredSegmentId.ToSegment();
             var color = ToolsModifierControl.toolController.m_validColorInfo;
             float alpha = 1f;
             if (HoveredSegmentId != 0) {
-                NetTool.CheckOverlayAlpha(ref segment, ref alpha);
+                NetTool.CheckOverlayAlpha(ref hoverSegmentId, ref alpha);
             }
 
             color.a *= alpha;
@@ -539,8 +539,8 @@ namespace TrafficManager.UI {
                 if (HoveredNodeId != SelectedNodeId && HoveredNodeId != 0) {
                     Highlight.DrawNodeCircle(cameraInfo, HoveredNodeId, color);
                 }
-            } else {
-                NetTool.RenderOverlay(cameraInfo, ref segment, color, color);
+            } else if(HoveredSegmentId != 0) {
+                NetTool.RenderOverlay(cameraInfo, ref hoverSegmentId, color, color);
             }
         }
 
