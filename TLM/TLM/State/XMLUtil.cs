@@ -24,8 +24,8 @@ namespace TrafficManager.State {
                 return default;
             }
             XmlSerializer ser = new XmlSerializer(typeof(T));
-            using (var stream = new StreamReader(data)) {
-                return (T)ser.Deserialize(stream);
+            using (var reader = new StringReader(data)) {
+                return (T)ser.Deserialize(reader);
             }
         }
     }
