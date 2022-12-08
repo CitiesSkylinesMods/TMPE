@@ -103,8 +103,7 @@ namespace TrafficManager.Manager.Impl {
         /// <returns>Returns <c>true</c> if successful, otherwise <c>false</c>.</returns>
         public byte[] SaveData(ref bool success) {
             try {
-                string xml = XMLUtil.Serialize(SavedGameOptions.Instance);
-                return Encoding.ASCII.GetBytes(xml);
+                return SavedGameOptions.Instance.Serialize();
             } catch (Exception ex) {
                 ex.LogException();
                 return null; // try and salvage some of the settings

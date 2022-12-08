@@ -28,5 +28,26 @@ namespace TrafficManager.State {
                 return (T)ser.Deserialize(reader);
             }
         }
+
+        internal static void Serialize<T>(T obj, string filePath) {
+            var serializer = new XmlSerializer(typeof(T));
+            using (StreamWriter writer = new StreamWriter(filePath)) {
+                using (var xmlWriter = new XmlTextWriter(writer)) {
+                    xmlWriter.Formatting = Formatting.Indented;
+                    serializer.Serialize(xmlWriter, obj, NoNamespaces);
+                }
+            }
+        }
+
+        public static T DeserializeFile<T>(string filePath) {
+            if (!File.Exists(filePath)) {
+                return default;
+            }
+
+            XmlSerializer ser = new XmlSerializer(typeof(T));
+            using (FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.Read)) {
+                return (T)ser.Deserialize(fs);
+            }
+        }
     }
 }

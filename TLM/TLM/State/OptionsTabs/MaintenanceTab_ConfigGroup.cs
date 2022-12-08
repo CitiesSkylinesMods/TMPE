@@ -4,6 +4,7 @@ namespace TrafficManager.State {
     using TrafficManager.UI.Helpers;
 #if DEBUG
     using TrafficManager.UI.DebugSwitches;
+    using UnityEngine;
 #endif
 
     public static class MaintenanceTab_ConfigGroup {
@@ -13,13 +14,17 @@ namespace TrafficManager.State {
             Handler = OnReloadGlobalConfigClicked,
         };
         public static ActionButton ResetGlobalConfig = new() {
-            Label = "Maintenance.Button:Reset all configuration",
+            Label = "Maintenance.Button:Reset global configuration",
             Handler = OnResetGlobalConfigClicked,
         };
 
         public static ActionButton SetAsDefaultForNewGames = new() {
             Label = "Maintenance.Button:Set as default for new games",
             Handler = OnSetAsDefaultForNewGamesClicked,
+        };
+        public static ActionButton ResetDefaultsForNewGames = new() {
+            Label = "Maintenance.Button:Reset defaults for new games",
+            Handler = SavedGameOptions.ResetDefaults,
         };
 
 #if DEBUG
@@ -35,10 +40,11 @@ namespace TrafficManager.State {
 
             ReloadGlobalConfig.AddUI(group);
             ResetGlobalConfig.AddUI(group);
+            SetAsDefaultForNewGames.AddUI(group);
+            ResetDefaultsForNewGames.AddUI(group);
 #if DEBUG
             DebugSwiches.AddUI(group);
 #endif
-            SetAsDefaultForNewGames.AddUI(group);
         }
 
         private static string T(string key) => Translation.Options.Get(key);
@@ -49,8 +55,7 @@ namespace TrafficManager.State {
         private static void OnResetGlobalConfigClicked()
             => GlobalConfig.Reset(oldConfig: null);
         private static void OnSetAsDefaultForNewGamesClicked() {
-            GlobalConfig.Instance.SavedGameOptions = SavedGameOptions.Instance;
-            GlobalConfig.WriteConfig();
+            SavedGameOptions.Instance.SerializeDefaults();
         }
     }
 }

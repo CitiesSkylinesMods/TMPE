@@ -77,9 +77,6 @@ namespace TrafficManager.State {
 
         public ConfigData.TimedTrafficLights TimedTrafficLights = new();
 
-        [XmlElement("DefaultsForNewGame")]
-        public SavedGameOptions SavedGameOptions = null;
-
         internal static void WriteConfig() {
             ModifiedTime = WriteConfig(Instance);
         }

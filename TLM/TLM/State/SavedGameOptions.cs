@@ -1,12 +1,15 @@
 namespace TrafficManager.State;
 using CSUtil.Commons;
 using System;
+using System.IO;
 using System.Text;
 using TrafficManager.API.Traffic.Enums;
 using TrafficManager.Lifecycle;
 using TrafficManager.Util;
 
 public class SavedGameOptions {
+    private const string FILE = "TMPE_DefaultGameSettings.xml";
+
     public bool individualDrivingStyle = true;
     public RecklessDrivers recklessDrivers = RecklessDrivers.HolyCity;
 
@@ -120,18 +123,10 @@ public class SavedGameOptions {
     public static void Ensure() {
         Log.Info("SavedGameOptions.Ensure() called");
         if (Instance == null) {
-            if (GlobalConfig.Instance?.SavedGameOptions != null) {
-                Instance = GlobalConfig.Instance.SavedGameOptions;
-            } else {
-                Create();
-            }
+            DeserializeDefaults();
         }
     }
-    private static void Create() {
-        Log.Info("SavedGameOptions.Create() called");
-        Instance = new();
-        Instance.Awake();
-    }
+
     public static void Release() {
         Log.Info("SavedGameOptions.Release() called");
         Instance = null;
@@ -144,6 +139,7 @@ public class SavedGameOptions {
 
     public byte[] Serialize() {
         try {
+            Log.Info("SavedGameOptions.Serialize() called");
             string xml = XMLUtil.Serialize(this);
             return Encoding.ASCII.GetBytes(xml);
         } catch (Exception ex) {
@@ -154,9 +150,10 @@ public class SavedGameOptions {
     
     public static bool Deserialize(byte[] data) {
         try {
+            Log.Info("SavedGameOptions.Deserialize() called");
             if (!data.IsNullOrEmpty()) {
                 string xml = Encoding.ASCII.GetString(data);
-                Instance = XMLUtil.Deserialize<SavedGameOptions>(xml);
+                Instance = XMLUtil.Deserialize<SavedGameOptions>(xml); 
                 Instance.Awake();
                 return true;
             }
@@ -164,5 +161,35 @@ public class SavedGameOptions {
             ex.LogException();
         }
         return false;
+    }
+
+    public void SerializeDefaults() {
+        try {
+            Log.Info("SavedGameOptions.SerializeDefaults() called");
+            XMLUtil.Serialize(this, FILE);
+        } catch (Exception ex) {
+            ex.LogException();
+        }
+    }
+
+    public static void DeserializeDefaults() {
+        try {
+            Log.Info("SavedGameOptions.DeserializeDefaults() called");
+            Instance = XMLUtil.DeserializeFile<SavedGameOptions>(FILE) ?? new();
+            Instance.Awake();
+        } catch (Exception ex) {
+            ex.LogException();
+        }
+    }
+
+    public static void ResetDefaults() {
+        try {
+            Log.Info("SavedGameOptions.ResetDefaults() called");
+            if (File.Exists(FILE)) {
+                File.Delete(FILE);
+            }
+        } catch (Exception ex) {
+            ex.LogException();
+        }
     }
 }
