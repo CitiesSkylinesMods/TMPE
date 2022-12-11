@@ -67,12 +67,11 @@ namespace TrafficManager.UI.Helpers {
                     }
                 }
 
-                if (value == base.Value)
-                    return;
-
-                base.Value = value;
-                Log.Info($"CheckboxOption.Value: `{FieldName}` changed to {value}");
-                PropagateAll(value);
+                if (value != base.Value) {
+                    base.Value = value;
+                    Log.Info($"CheckboxOption.Value: `{FieldName}` changed to {value}");
+                    PropagateAll(value);
+                }
 
                 if (Shortcuts.IsMainThread()) {
                     if (HasUI) {
