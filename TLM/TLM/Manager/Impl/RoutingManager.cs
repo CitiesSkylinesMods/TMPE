@@ -27,7 +27,7 @@ namespace TrafficManager.Manager.Impl {
         private RoutingManager() { }
 
         public const NetInfo.LaneType ROUTED_LANE_TYPES =
-            NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle;
+            NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle | NetInfo.LaneType.CargoVehicle;
 
         public const VehicleInfo.VehicleType ROUTED_VEHICLE_TYPES =
             VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Metro |
@@ -558,7 +558,7 @@ namespace TrafficManager.Manager.Impl {
             bool onHighway = Options.highwayRules && onOnewayHighway;
             bool applyHighwayRules = onHighway && nodeIsSimpleJunction;
             bool applyHighwayRulesAtJunction = applyHighwayRules && nodeIsRealJunction;
-            bool iterateViaGeometry = (applyHighwayRulesAtJunction || applyHighwayMergingRules) && prevLaneInfo.MatchesRoad();
+            bool iterateViaGeometry = (applyHighwayRulesAtJunction || applyHighwayMergingRules) && prevLaneInfo.MatchesRoutedRoad();
 
             // start with u-turns at highway junctions
             ushort nextSegmentId = iterateViaGeometry ? prevSegmentId : (ushort)0;
@@ -759,7 +759,7 @@ namespace TrafficManager.Manager.Impl {
                                     }
                                 }
 
-                                if (nextLaneInfo.MatchesRoad() && prevLaneInfo.MatchesRoad()) {
+                                if (nextLaneInfo.MatchesRoutedRoad() && prevLaneInfo.MatchesRoutedRoad()) {
                                     // routing road vehicles (car, SOS, bus, trolleybus, ...)
                                     // lane may be mixed car+tram
                                     ++incomingCarLanes;
@@ -905,7 +905,7 @@ namespace TrafficManager.Manager.Impl {
                                     nextLaneInfo = new { nextLaneInfo.m_finalDirection }, nextExpectedDirection });
 
                                 bool outgoing = (nextLaneInfo.m_finalDirection & NetInfo.InvertDirection(nextExpectedDirection)) != NetInfo.Direction.None;
-                                if (outgoing && nextLaneInfo.MatchesRoad()) {
+                                if (outgoing && nextLaneInfo.MatchesRoutedRoad()) {
                                     ++outgoingCarLanes;
 
                                     extendedLog?.Invoke(new { _ = "increasing number of outgoing lanes at ",

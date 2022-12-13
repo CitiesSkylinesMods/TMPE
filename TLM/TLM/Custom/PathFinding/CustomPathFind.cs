@@ -140,6 +140,11 @@ namespace TrafficManager.Custom.PathFinding {
 
         // custom fields
         private PathUnitQueueItem queueItem_;
+        /// <summary>
+        /// Contains allowed extVehicle types, in normal conditions just QueueIten.vehicleType,
+        /// when path may include CargoVehicle lanes then it contains also respective cargo vehicle types
+        /// </summary>
+        private ExtVehicleType allowedPathVehicleTypes_;
         private bool isHeavyVehicle_;
 
         private bool debugLog_; // this will be false in non-Debug
@@ -289,8 +294,15 @@ namespace TrafficManager.Custom.PathFinding {
                 disableMask_ |= NetSegment.Flags.Flooded;
             }
 
+            allowedPathVehicleTypes_ = queueItem_.vehicleType;
             if ((laneTypes_ & NetInfo.LaneType.Vehicle) != NetInfo.LaneType.None) {
                 laneTypes_ |= NetInfo.LaneType.TransportVehicle;
+
+                // allow mixed vehicle path when requested path is Vehicle + CargoVehicle (e.g.: CargoTruck and PostVanAI)
+                bool allowMixedCargoPath = (laneTypes_ & NetInfo.LaneType.CargoVehicle) != NetInfo.LaneType.None;
+                if (allowMixedCargoPath) {
+                    allowedPathVehicleTypes_ |= VehicleTypesToMixedCargoExtVehicle(vehicleTypes_);
+                }
             }
 
 #if ROUTING
@@ -4088,15 +4100,36 @@ namespace TrafficManager.Custom.PathFinding {
                 return true;
             }
 
-            ExtVehicleType allowedTypes = vehicleRestrictionsManager.GetAllowedVehicleTypes(
+            ExtVehicleType allowedLaneVehicleTypes = vehicleRestrictionsManager.GetAllowedVehicleTypes(
                 segmentId,
                 segmentInfo,
                 (uint)laneIndex,
                 laneInfo,
                 VehicleRestrictionsMode.Configured);
-
-            return (allowedTypes & queueItem_.vehicleType) != ExtVehicleType.None;
+            return (allowedLaneVehicleTypes & allowedPathVehicleTypes_) != ExtVehicleType.None;
         }
+
+        /// <summary>
+        /// Maps all allowed vehicle types to mixed ExtVehicleType
+        /// Later used to correctly test lane for match with configured allowed vehicle types
+        /// </summary>
+        /// <param name="vehicleTypes">Allowed additional vehicle types</param>
+        /// <returns>Combined ExtVehicleType of all alowed cargo vehicle lane types</returns>
+        private ExtVehicleType VehicleTypesToMixedCargoExtVehicle(VehicleInfo.VehicleType vehicleTypes) {
+            ExtVehicleType extVehicleType = ExtVehicleType.None;
+            if ((vehicleTypes & VehicleInfo.VehicleType.Train) != VehicleInfo.VehicleType.None) {
+                extVehicleType |= ExtVehicleType.CargoTrain;
+            }
+            if ((vehicleTypes & VehicleInfo.VehicleType.Plane) != VehicleInfo.VehicleType.None) {
+                extVehicleType |= ExtVehicleType.CargoPlane;
+            }
+            if ((vehicleTypes & VehicleInfo.VehicleType.Ship) != VehicleInfo.VehicleType.None) {
+                extVehicleType |= ExtVehicleType.CargoShip;
+            }
+
+            return extVehicleType;
+        }
+
 #endif
 
 #if ADVANCEDAI && ROUTING

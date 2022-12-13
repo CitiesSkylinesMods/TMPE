@@ -17,14 +17,23 @@ namespace TrafficManager.Util {
             VehicleInfo.VehicleType.Monorail;
 
         internal const NetInfo.LaneType ROAD_LANE_TYPES = LaneArrowManager.LANE_TYPES;
+        internal const NetInfo.LaneType ROUTED_ROAD_LANE_TYPES = LaneArrowManager.LANE_TYPES | NetInfo.LaneType.CargoVehicle;
 
         internal const VehicleInfo.VehicleType ROAD_VEHICLE_TYPES = LaneArrowManager.VEHICLE_TYPES | VehicleInfo.VehicleType.Trolleybus;
 
         internal static bool MatchesTrack([NotNull] this NetInfo.Lane laneInfo) =>
             laneInfo.Matches(TRACK_LANE_TYPES, TRACK_VEHICLE_TYPES);
-    
+
         internal static bool MatchesRoad([NotNull] this NetInfo.Lane laneInfo) =>
             laneInfo.Matches(ROAD_LANE_TYPES, ROAD_VEHICLE_TYPES);
+
+        /// <summary>
+        /// Testing lane info if matches with predefined allowed road lane types and vehicle types
+        /// </summary>
+        /// <param name="laneInfo">Lane info instance to test</param>
+        /// <returns>True if matches, otherwise False</returns>
+        internal static bool MatchesRoutedRoad([NotNull] this NetInfo.Lane laneInfo) =>
+            laneInfo.Matches(ROUTED_ROAD_LANE_TYPES, ROAD_VEHICLE_TYPES);
 
         internal static bool Matches([NotNull] this NetInfo.Lane laneInfo , NetInfo.LaneType laneType, VehicleInfo.VehicleType vehicleType) {
             return (laneType & laneInfo.m_laneType) != 0 && (vehicleType & laneInfo.m_vehicleType) != 0;
@@ -32,7 +41,7 @@ namespace TrafficManager.Util {
 
         internal static bool IsTrackOnly(this NetInfo.Lane laneInfo) {
             return
-                laneInfo.MatchesTrack() && 
+                laneInfo.MatchesTrack() &&
                 !laneInfo.m_laneType.IsFlagSet(~TRACK_LANE_TYPES) &&
                 !laneInfo.m_vehicleType.IsFlagSet(~TRACK_VEHICLE_TYPES);
         }
