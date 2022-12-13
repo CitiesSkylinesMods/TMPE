@@ -65,18 +65,17 @@ namespace TrafficManager.UI.Helpers {
                     base.Value = value;
                     Log.Info($"TriStateCheckboxOption.Value: `{FieldName}` changed to {value}");
                     PropagateAll(value.HasValue);
-
-                    if (Shortcuts.IsMainThread()) {
+                }
+                if (Shortcuts.IsMainThread()) {
+                    if (HasUI) {
+                        _ui.Value = value;
+                    }
+                } else {
+                    SimulationManager.instance.m_ThreadingWrapper.QueueMainThread(() => {
                         if (HasUI) {
                             _ui.Value = value;
                         }
-                    } else {
-                        SimulationManager.instance.m_ThreadingWrapper.QueueMainThread(() => {
-                            if (HasUI) {
-                                _ui.Value = value;
-                            }
-                        });
-                    }
+                    });
                 }
             }
         }
