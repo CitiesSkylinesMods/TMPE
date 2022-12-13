@@ -133,20 +133,18 @@ public class SavedGameOptions {
         Log.Info("SavedGameOptions.Awake() called");
     }
 
-    public byte[] Serialize() {
+    public string Serialize() {
         try {
-            string xml = XMLUtil.Serialize(this);
-            return Encoding.ASCII.GetBytes(xml);
+            return XMLUtil.Serialize(this);
         } catch (Exception ex) {
             ex.LogException();
             return null;
         }
     }
 
-    public static bool Deserialize(byte[] data) {
+    public static bool Deserialize(string xml) {
         try {
-            if (!data.IsNullOrEmpty()) {
-                string xml = Encoding.ASCII.GetString(data);
+            if (!string.IsNullOrEmpty(xml)) {
                 Instance = XMLUtil.Deserialize<SavedGameOptions>(xml);
                 Instance.Awake();
                 return true;
@@ -155,5 +153,14 @@ public class SavedGameOptions {
             ex.LogException();
         }
         return false;
+    }
+
+    public SavedGameOptions Save() {
+        return this.MemberwiseClone() as SavedGameOptions;
+    }
+
+    public static void Load(SavedGameOptions options) {
+        Instance = options ?? new();
+        Instance.Awake();
     }
 }

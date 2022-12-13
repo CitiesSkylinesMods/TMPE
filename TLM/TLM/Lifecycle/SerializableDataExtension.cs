@@ -80,12 +80,13 @@ namespace TrafficManager.Lifecycle {
                 if (TMPELifecycle.InGameOrEditor()) {
                     // Always force default options on new game
                     // See: https://github.com/CitiesSkylinesMods/TMPE/pull/1425
-                    byte[] options = TMPELifecycle.IsNewGame
-                        ? null
-                        : SerializableData.LoadData("TMPE_Options");
-
-                    if (!OptionsManager.Instance.LoadData(options ?? new byte[0])) {
-                        loadingSucceeded = false;
+                    if (!TMPELifecycle.IsNewGame && Version <= 3) {
+                        byte[] legacyOptions = SerializableData.LoadData("TMPE_Options");
+                        if(legacyOptions != null) {
+                            if (!OptionsManager.Instance.LoadDataLegacy(legacyOptions)) {
+                                loadingSucceeded = false;
+                            }
+                        }
                     }
                 }
             }
@@ -219,6 +220,10 @@ namespace TrafficManager.Lifecycle {
 
             // load Path Find Update
             PathfinderUpdates.SavegamePathfinderEdition = _configuration.SavegamePathfinderEdition;
+
+            if(_configuration.Options != null) {
+                OptionsManager.Instance.LoadData(_configuration.Options);
+            }
 
             // load ext. citizens
             if (_configuration.ExtCitizens != null) {
@@ -454,7 +459,10 @@ namespace TrafficManager.Lifecycle {
 
                 try {
                     if (TMPELifecycle.PlayMode) {
-                        SerializableData.SaveData("TMPE_Options", OptionsManager.Instance.SaveData(ref success));
+                        configuration.Options = OptionsManager.Instance.SaveData(ref success);
+
+                        // forward compatibility. only needed for a short time:
+                        SerializableData.SaveData("TMPE_Options", OptionsManager.Instance.SaveDataLegacy(ref success)); 
                     }
                 } catch (Exception ex) {
                     Log.Error("Unexpected error while saving options: " + ex.Message);
