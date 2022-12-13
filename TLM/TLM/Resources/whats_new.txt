@@ -3,7 +3,7 @@
 [Link] tmpe-v11730-stable-13122022
 [Stable]
 [Meta] Compatibility patch for the game update 1.16.0-f3 (krzychu124)
-[New] Improved bus/trolleybus stop path #1688, #1690 (kianzarrin)
+[New] Improved bus/trolleybus stop path (pull to side earlier and use more of available space) #1688, #1690 (kianzarrin)
 [Fixed] Cargo truck pathfinding via CargoVehicle networks (cargo stations/terminals) #1701, #1703 (krzychu124)
 [Fixed] Lane connector on overlapping lanes #1706 (kianzarrin)
 [Fixed] Parking signs on lanes with bus stop #1707 (kianzarrin)
