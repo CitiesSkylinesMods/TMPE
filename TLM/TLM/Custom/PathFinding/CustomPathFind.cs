@@ -2646,12 +2646,6 @@ namespace TrafficManager.Custom.PathFinding {
                     $"\toffsetLength={offsetLength}");
             }
 #endif
-            if ((vehicleCategory_ & VehicleInfo.VehicleCategory.PublicTransportRoad) != 0 &&
-                (vehicleCategory_ & ~(VehicleInfo.VehicleCategory.Bus | VehicleInfo.VehicleCategory.Trolleybus | VehicleInfo.VehicleCategory.Taxi)) == 0)
-            {
-                offsetLength *= 0.75f;
-            }
-
             float baseLength = offsetLength / (prevLaneSpeed * maxLength_); // NON-STOCK CODE
             float comparisonValue = item.ComparisonValue; // NON-STOCK CODE
 #if ROUTING
@@ -3144,6 +3138,11 @@ namespace TrafficManager.Custom.PathFinding {
                                 nextLaneIndex,
                                 nextLaneId,
                                 $"ProcessItemCosts: Adding next item\n\tnextItem={nextItem}");
+                        }
+
+                        if ((nextLaneInfo.vehicleCategory & VehicleInfo.VehicleCategory.PublicTransportRoad) != 0 &&
+                            (nextLaneInfo.vehicleCategory & ~(VehicleInfo.VehicleCategory.Bus | VehicleInfo.VehicleCategory.Trolleybus | VehicleInfo.VehicleCategory.Taxi)) == 0) {
+                            nextItem.ComparisonValue -= baseLength * 0.25f;
                         }
 
                         AddBufferItem(
