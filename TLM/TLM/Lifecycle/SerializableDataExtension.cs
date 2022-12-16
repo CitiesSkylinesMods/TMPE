@@ -22,6 +22,9 @@ namespace TrafficManager.Lifecycle {
 
         private const string DATA_ID = "TrafficManager_v1.0";
         private const string VERSION_INFO_DATA_ID = "TrafficManager_VersionInfo_v1.0";
+        private const string OPTIONS_ID = "TMPE_OptionsXML";
+        private const string OPTIONS_LEGACY_ID = "TMPE_Options";
+
 
         private static ISerializableData SerializableData => SimulationManager.instance.m_SerializableDataWrapper;
         private static Configuration _configuration;
@@ -80,17 +83,21 @@ namespace TrafficManager.Lifecycle {
                 if (TMPELifecycle.InGameOrEditor()) {
                     // Always force default options on new game
                     // See: https://github.com/CitiesSkylinesMods/TMPE/pull/1425
-                    if (!TMPELifecycle.IsNewGame && Version <= 3) {
-                        byte[] legacyOptions = SerializableData.LoadData("TMPE_Options");
-                        if(legacyOptions != null) {
-                            if (!OptionsManager.Instance.LoadDataLegacy(legacyOptions)) {
-                                loadingSucceeded = false;
+                    if (!TMPELifecycle.IsNewGame) {
+                        if (Version <= 3) {
+                            byte[] data = SerializableData.LoadData(OPTIONS_ID);
+                            if (data != null) {
+                                loadingSucceeded &= OptionsManager.Instance.LoadData(data);
+                            }
+                        } else {
+                            byte[] data = SerializableData.LoadData(OPTIONS_LEGACY_ID);
+                            if (data != null) {
+                                loadingSucceeded &= OptionsManager.Instance.LoadDataLegacy(data);
                             }
                         }
                     }
                 }
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 Log.Error($"OnLoadData: Error while loading options: {e}");
                 loadingSucceeded = false;
             }
@@ -220,12 +227,6 @@ namespace TrafficManager.Lifecycle {
 
             // load Path Find Update
             PathfinderUpdates.SavegamePathfinderEdition = _configuration.SavegamePathfinderEdition;
-
-            // Always force default options on new game (even if TMPE was used in editor).
-            // See: https://github.com/CitiesSkylinesMods/TMPE/pull/1425
-            if (!TMPELifecycle.IsNewGame && !string.IsNullOrEmpty(_configuration.SavedGameOptionsXML)) {
-                OptionsManager.Instance.LoadData(_configuration.SavedGameOptionsXML);
-            }
 
             // load ext. citizens
             if (_configuration.ExtCitizens != null) {
@@ -461,10 +462,10 @@ namespace TrafficManager.Lifecycle {
 
                 try {
                     if (TMPELifecycle.PlayMode) {
-                        configuration.SavedGameOptionsXML = OptionsManager.Instance.SaveData(ref success);
+                        SerializableData.SaveData(OPTIONS_ID, OptionsManager.Instance.SaveData(ref success));
 
                         // forward compatibility. only needed for a short time:
-                        SerializableData.SaveData("TMPE_Options", OptionsManager.Instance.SaveDataLegacy(ref success)); 
+                        SerializableData.SaveData(OPTIONS_LEGACY_ID, OptionsManager.Instance.SaveDataLegacy(ref success)); 
                     }
                 } catch (Exception ex) {
                     Log.Error("Unexpected error while saving options: " + ex.Message);

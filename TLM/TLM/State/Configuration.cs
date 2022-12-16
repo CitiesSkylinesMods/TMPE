@@ -302,8 +302,6 @@ namespace TrafficManager {
             }
         }
 
-        public string SavedGameOptionsXML;
-
         /// <summary>
         /// Stored ext. citizen data
         /// </summary>
