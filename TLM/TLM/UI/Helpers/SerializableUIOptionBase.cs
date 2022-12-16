@@ -26,7 +26,7 @@ namespace TrafficManager.UI.Helpers {
         public abstract void OnUpdate();
     }
 
-    public abstract class SerializableUIOptionBase<TVal, TUI, TComponent> : ILegacySerializableOption
+    public abstract class SerializableUIOptionBase<TVal, TUI, TComponent> : SerializableUIOptionBase, ILegacySerializableOption
         where TUI : UIComponent
     {
 
@@ -136,7 +136,7 @@ namespace TrafficManager.UI.Helpers {
         public abstract void Load(byte data);
         public abstract byte Save();
 
-        public void OnUpdate() {
+        public override void OnUpdate() {
             try {
                 Value = Value;
             } catch (Exception ex) {
@@ -198,6 +198,6 @@ namespace TrafficManager.UI.Helpers {
             }
         }
 
-        public bool Indent { get; set; }
+        public bool Indent { get; set; }   
     }
 }

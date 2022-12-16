@@ -114,9 +114,9 @@ namespace TrafficManager.Manager.Impl {
 
         public bool LoadData(string xml) {
             try {
+                Log._Debug("OptionsManager.LoadedData() called. XML =\n" + xml);
                 SavedGameOptions.Available = false;
-                SavedGameOptions.Deserialize(xml);
-                return true;
+                return SavedGameOptions.Deserialize(xml);
             } catch(Exception ex) {
                 ex.LogException();
                 return false;

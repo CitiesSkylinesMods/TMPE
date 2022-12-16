@@ -20,7 +20,6 @@ public static class TMPESettings {
             OverlaysTab.MakeSettings_Overlays(tabStrip);
             MaintenanceTab.MakeSettings_Maintenance(tabStrip);
             KeybindsTab.MakeSettings_Keybinds(tabStrip);
-            SerializableUIOptionBase.UpdateAll();
             tabStrip.Invalidate();
         } catch (Exception ex) {
             ex.LogException();

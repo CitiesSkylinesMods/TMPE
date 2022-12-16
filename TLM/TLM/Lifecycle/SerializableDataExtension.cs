@@ -221,7 +221,9 @@ namespace TrafficManager.Lifecycle {
             // load Path Find Update
             PathfinderUpdates.SavegamePathfinderEdition = _configuration.SavegamePathfinderEdition;
 
-            if(!string.IsNullOrEmpty(_configuration.SavedGameOptionsXML)) {
+            // Always force default options on new game (even if TMPE was used in editor).
+            // See: https://github.com/CitiesSkylinesMods/TMPE/pull/1425
+            if (!TMPELifecycle.IsNewGame && !string.IsNullOrEmpty(_configuration.SavedGameOptionsXML)) {
                 OptionsManager.Instance.LoadData(_configuration.SavedGameOptionsXML);
             }
 
