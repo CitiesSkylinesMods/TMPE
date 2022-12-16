@@ -1,15 +1,12 @@
 namespace TrafficManager.State;
 using CSUtil.Commons;
 using System;
-using System.IO;
 using System.Text;
 using TrafficManager.API.Traffic.Enums;
-using TrafficManager.Lifecycle;
+using TrafficManager.Custom.PathFinding;
 using TrafficManager.Util;
 
 public class SavedGameOptions {
-    private const string FILE = "TMPE_DefaultGameSettings.xml";
-
     public bool individualDrivingStyle = true;
     public RecklessDrivers recklessDrivers = RecklessDrivers.HolyCity;
 
@@ -115,18 +112,17 @@ public class SavedGameOptions {
     public static bool Available { get; set; } = false;
 
     public static SavedGameOptions Instance { get; private set; }
-
-    /// <summary>
-    /// ensures SavedGameOptions exists.
-    /// if not then it is set to global default or built-in default (if global default does not exist).
-    /// </summary>
     public static void Ensure() {
         Log.Info("SavedGameOptions.Ensure() called");
         if (Instance == null) {
-            DeserializeDefaults();
+            Create();
         }
     }
-
+    private static void Create() {
+        Log.Info("SavedGameOptions.Create() called");
+        Instance = new();
+        Instance.Awake();
+    }
     public static void Release() {
         Log.Info("SavedGameOptions.Release() called");
         Instance = null;
@@ -137,23 +133,19 @@ public class SavedGameOptions {
         Log.Info("SavedGameOptions.Awake() called");
     }
 
-    public byte[] Serialize() {
+    public string Serialize() {
         try {
-            Log.Info("SavedGameOptions.Serialize() called");
-            string xml = XMLUtil.Serialize(this);
-            return Encoding.ASCII.GetBytes(xml);
+            return XMLUtil.Serialize(this);
         } catch (Exception ex) {
             ex.LogException();
             return null;
         }
     }
-    
-    public static bool Deserialize(byte[] data) {
+
+    public static bool Deserialize(string xml) {
         try {
-            Log.Info("SavedGameOptions.Deserialize() called");
-            if (!data.IsNullOrEmpty()) {
-                string xml = Encoding.ASCII.GetString(data);
-                Instance = XMLUtil.Deserialize<SavedGameOptions>(xml); 
+            if (!string.IsNullOrEmpty(xml)) {
+                Instance = XMLUtil.Deserialize<SavedGameOptions>(xml);
                 Instance.Awake();
                 return true;
             }
@@ -161,35 +153,5 @@ public class SavedGameOptions {
             ex.LogException();
         }
         return false;
-    }
-
-    public void SerializeDefaults() {
-        try {
-            Log.Info("SavedGameOptions.SerializeDefaults() called");
-            XMLUtil.Serialize(this, FILE);
-        } catch (Exception ex) {
-            ex.LogException();
-        }
-    }
-
-    public static void DeserializeDefaults() {
-        try {
-            Log.Info("SavedGameOptions.DeserializeDefaults() called");
-            Instance = XMLUtil.DeserializeFile<SavedGameOptions>(FILE) ?? new();
-            Instance.Awake();
-        } catch (Exception ex) {
-            ex.LogException();
-        }
-    }
-
-    public static void ResetDefaults() {
-        try {
-            Log.Info("SavedGameOptions.ResetDefaults() called");
-            if (File.Exists(FILE)) {
-                File.Delete(FILE);
-            }
-        } catch (Exception ex) {
-            ex.LogException();
-        }
     }
 }

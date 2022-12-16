@@ -537,6 +537,10 @@ namespace TrafficManager.UI.SubTools {
             }
 
             foreach (LaneEnd laneEnd in laneEnds) {
+                if((laneEnd.TransitionGroup & group_) == 0) {
+                    continue;
+                }
+
                 bool drawMarker = false;
                 bool acute = true;
                 bool sourceMode = GetSelectionMode() == SelectionMode.SelectSource;

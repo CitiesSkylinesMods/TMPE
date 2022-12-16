@@ -17,6 +17,7 @@ namespace TrafficManager.Custom.PathFinding {
         // Edition History:
         // 0 - An old save, unknown pathfinder edition
         // 1 - #1338 Aircraft pathfinding fix
+        // TODO: This feature is not used and does not persist. if we increment this we need to also serialize this.
 
         /// <summary>
         /// Update this each time a despawn-requiring change is

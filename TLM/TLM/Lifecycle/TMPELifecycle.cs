@@ -299,6 +299,8 @@ namespace TrafficManager.Lifecycle {
 
                 IsGameLoaded = true;
 
+                SerializableUIOptionBase.UpdateAll();
+
                 ModUI.OnLevelLoaded();
                 if (PlayMode) {
                     Log._Debug("PlayMode");

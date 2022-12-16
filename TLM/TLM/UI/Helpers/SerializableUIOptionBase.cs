@@ -10,8 +10,23 @@ namespace TrafficManager.UI.Helpers {
     using JetBrains.Annotations;
     using TrafficManager.Lifecycle;
     using TrafficManager.Util;
+    using TrafficManager.API.Util;
+    using System.Collections.Generic;
 
-    public abstract class SerializableUIOptionBase<TVal, TUI, TComponent> : ILegacySerializableOption
+    public abstract class SerializableUIOptionBase {
+        private static List<SerializableUIOptionBase> _options = new();
+
+        public SerializableUIOptionBase() => _options.Add(this);
+        public static void UpdateAll() {
+            foreach (var option in _options) {
+                option.OnUpdate();
+            }
+        }
+
+        public abstract void OnUpdate();
+    }
+
+    public abstract class SerializableUIOptionBase<TVal, TUI, TComponent> : SerializableUIOptionBase, ILegacySerializableOption
         where TUI : UIComponent
     {
 
@@ -47,8 +62,8 @@ namespace TrafficManager.UI.Helpers {
         // used as internal store of value if _fieldInfo is null
         private TVal _value = default;
 
-        public SerializableUIOptionBase(string fieldName, Scope scope) {
-
+        public SerializableUIOptionBase(string fieldName, Scope scope)
+            : base() {
             _fieldName = fieldName;
             if (scope.IsFlagSet(Scope.Savegame)) {
                 _fieldInfo = typeof(SavedGameOptions).GetField(fieldName);
@@ -108,6 +123,13 @@ namespace TrafficManager.UI.Helpers {
         public abstract void Load(byte data);
         public abstract byte Save();
 
+        public override void OnUpdate() {
+            try {
+                Value = Value;
+            } catch (Exception ex) {
+                ex.LogException();
+            }
+        }
         /* UI: */
 
         public bool HasUI => _ui != null;
@@ -163,6 +185,6 @@ namespace TrafficManager.UI.Helpers {
             }
         }
 
-        public bool Indent { get; set; }
+        public bool Indent { get; set; }   
     }
 }
