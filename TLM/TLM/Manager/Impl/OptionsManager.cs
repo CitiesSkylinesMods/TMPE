@@ -17,7 +17,7 @@ namespace TrafficManager.Manager.Impl {
 
     public class OptionsManager
         : AbstractCustomManager,
-          IOptionsManager, ICustomDataManager<SavedGameOptions> {
+          IOptionsManager, ICustomDataManager<string> {
 
         public static OptionsManager Instance = new OptionsManager();
 
@@ -102,9 +102,9 @@ namespace TrafficManager.Manager.Impl {
         /// </summary>
         /// <param name="success">Current success state of SaveData operation.</param>
         /// <returns>Returns <c>true</c> if successful, otherwise <c>false</c>.</returns>
-        public SavedGameOptions SaveData(ref bool success) {
+        public string SaveData(ref bool success) {
             try {
-                return SavedGameOptions.Instance.Save();
+                return SavedGameOptions.Instance.Serialize();
             } catch (Exception ex) {
                 ex.LogException();
                 success = false;
@@ -112,10 +112,10 @@ namespace TrafficManager.Manager.Impl {
             }
         }
 
-        public bool LoadData(SavedGameOptions options) {
+        public bool LoadData(string xml) {
             try {
                 SavedGameOptions.Available = false;
-                SavedGameOptions.Load(options);
+                SavedGameOptions.Deserialize(xml);
                 return true;
             } catch(Exception ex) {
                 ex.LogException();

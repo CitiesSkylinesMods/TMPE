@@ -154,13 +154,4 @@ public class SavedGameOptions {
         }
         return false;
     }
-
-    public SavedGameOptions Save() {
-        return this.MemberwiseClone() as SavedGameOptions;
-    }
-
-    public static void Load(SavedGameOptions options) {
-        Instance = options ?? new();
-        Instance.Awake();
-    }
 }

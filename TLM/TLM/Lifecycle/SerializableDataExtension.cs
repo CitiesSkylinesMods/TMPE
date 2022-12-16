@@ -221,8 +221,8 @@ namespace TrafficManager.Lifecycle {
             // load Path Find Update
             PathfinderUpdates.SavegamePathfinderEdition = _configuration.SavegamePathfinderEdition;
 
-            if(_configuration.Options != null) {
-                OptionsManager.Instance.LoadData(_configuration.Options);
+            if(!string.IsNullOrEmpty(_configuration.SavedGameOptionsXML)) {
+                OptionsManager.Instance.LoadData(_configuration.SavedGameOptionsXML);
             }
 
             // load ext. citizens
@@ -459,7 +459,7 @@ namespace TrafficManager.Lifecycle {
 
                 try {
                     if (TMPELifecycle.PlayMode) {
-                        configuration.Options = OptionsManager.Instance.SaveData(ref success);
+                        configuration.SavedGameOptionsXML = OptionsManager.Instance.SaveData(ref success);
 
                         // forward compatibility. only needed for a short time:
                         SerializableData.SaveData("TMPE_Options", OptionsManager.Instance.SaveDataLegacy(ref success)); 
