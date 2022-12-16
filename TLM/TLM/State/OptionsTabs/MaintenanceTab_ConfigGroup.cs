@@ -4,6 +4,7 @@ namespace TrafficManager.State {
     using TrafficManager.UI.Helpers;
 #if DEBUG
     using TrafficManager.UI.DebugSwitches;
+    using UnityEngine;
 #endif
 
     public static class MaintenanceTab_ConfigGroup {
@@ -15,6 +16,15 @@ namespace TrafficManager.State {
         public static ActionButton ResetGlobalConfig = new() {
             Label = "Maintenance.Button:Reset global configuration",
             Handler = OnResetGlobalConfigClicked,
+        };
+
+        public static ActionButton SetAsDefaultForNewGames = new() {
+            Label = "Maintenance.Button:Set as default for new games",
+            Handler = OnSetAsDefaultForNewGamesClicked,
+        };
+        public static ActionButton ResetDefaultsForNewGames = new() {
+            Label = "Maintenance.Button:Reset defaults for new games",
+            Handler = OnResetDefaultForNewGamesClicked,
         };
 
 #if DEBUG
@@ -30,6 +40,8 @@ namespace TrafficManager.State {
 
             ReloadGlobalConfig.AddUI(group);
             ResetGlobalConfig.AddUI(group);
+            SetAsDefaultForNewGames.AddUI(group);
+            ResetDefaultsForNewGames.AddUI(group);
 #if DEBUG
             DebugSwiches.AddUI(group);
 #endif
@@ -37,10 +49,22 @@ namespace TrafficManager.State {
 
         private static string T(string key) => Translation.Options.Get(key);
 
-        private static void OnReloadGlobalConfigClicked()
-            => GlobalConfig.Reload();
+        private static void OnReloadGlobalConfigClicked() { 
+            GlobalConfig.Reload();
+            SerializableUIOptionBase.UpdateAll();
+        }
 
-        private static void OnResetGlobalConfigClicked()
-            => GlobalConfig.Reset(oldConfig: null, resetAll: true);
+        private static void OnResetGlobalConfigClicked() { 
+            GlobalConfig.Reset(oldConfig: null);
+            SerializableUIOptionBase.UpdateAll();
+        }
+        private static void OnSetAsDefaultForNewGamesClicked() {
+            SavedGameOptions.Instance.SerializeDefaults();
+            SerializableUIOptionBase.UpdateAll();
+        }
+        private static void OnResetDefaultForNewGamesClicked() {
+            SavedGameOptions.ResetDefaults();
+            SerializableUIOptionBase.UpdateAll();
+        }
     }
 }

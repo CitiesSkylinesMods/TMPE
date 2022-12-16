@@ -1,12 +1,13 @@
 namespace TrafficManager.State;
 using CSUtil.Commons;
 using System;
-using System.Text;
+using System.IO;
 using TrafficManager.API.Traffic.Enums;
-using TrafficManager.Custom.PathFinding;
 using TrafficManager.Util;
 
 public class SavedGameOptions {
+    private const string FILE = "TMPE_DefaultGameSettings.xml";
+
     public bool individualDrivingStyle = true;
     public RecklessDrivers recklessDrivers = RecklessDrivers.HolyCity;
 
@@ -115,7 +116,7 @@ public class SavedGameOptions {
     public static void Ensure() {
         Log.Info("SavedGameOptions.Ensure() called");
         if (Instance == null) {
-            Create();
+            DeserializeDefaults();
         }
     }
     private static void Create() {
@@ -153,5 +154,35 @@ public class SavedGameOptions {
             ex.LogException();
         }
         return false;
+    }
+
+    public void SerializeDefaults() {
+        try {
+            Log.Info("SavedGameOptions.SerializeDefaults() called");
+            XMLUtil.Serialize(this, FILE);
+        } catch (Exception ex) {
+            ex.LogException();
+        }
+    }
+
+    public static void DeserializeDefaults() {
+        try {
+            Log.Info("SavedGameOptions.DeserializeDefaults() called");
+            Instance = XMLUtil.DeserializeFile<SavedGameOptions>(FILE) ?? new();
+            Instance.Awake();
+        } catch (Exception ex) {
+            ex.LogException();
+        }
+    }
+
+    public static void ResetDefaults() {
+        try {
+            Log.Info("SavedGameOptions.ResetDefaults() called");
+            if (File.Exists(FILE)) {
+                File.Delete(FILE);
+            }
+        } catch (Exception ex) {
+            ex.LogException();
+        }
     }
 }

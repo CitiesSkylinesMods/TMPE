@@ -100,24 +100,18 @@ namespace TrafficManager.UI.Helpers {
         }
 
         protected override void UpdateTooltip() {
-            if (!HasUI) return;
-
-            _ui.tooltip = IsInScope
-                ? string.IsNullOrEmpty(_tooltip)
-                    ? string.Empty // avoid invalidating UI if already no tooltip
-                    : Translate(_tooltip)
-                : Translate(INGAME_ONLY_SETTING);
+            if (HasUI) {
+                _ui.tooltip = Tooltip;
+            }
         }
 
         protected override void UpdateReadOnly() {
             if (!HasUI) return;
 
-            var readOnly = !IsInScope || _readOnly;
+            Log._Debug($"TriStateCheckboxOption.UpdateReadOnly() - `{FieldName}` is {(ReadOnly ? "read-only" : "writeable")}");
 
-            Log._Debug($"TriStateCheckboxOption.UpdateReadOnly() - `{FieldName}` is {(readOnly ? "read-only" : "writeable")}");
-
-            _ui.readOnly = readOnly;
-            _ui.opacity = readOnly ? 0.3f : 1f;
+            _ui.readOnly = ReadOnly;
+            _ui.opacity = ReadOnly ? 0.3f : 1f;
         }
 
         /* UI helper methods */

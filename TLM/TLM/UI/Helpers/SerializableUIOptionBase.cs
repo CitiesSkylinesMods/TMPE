@@ -54,8 +54,6 @@ namespace TrafficManager.UI.Helpers {
         /// </summary>
         public ValidatorDelegate Validator { get; set; }
 
-        protected Scope _scope;
-
         [CanBeNull]
         private FieldInfo _fieldInfo;
 
@@ -67,7 +65,6 @@ namespace TrafficManager.UI.Helpers {
         public SerializableUIOptionBase(string fieldName, Scope scope)
             : base() {
             _fieldName = fieldName;
-            _scope = scope;
             if (scope.IsFlagSet(Scope.Savegame)) {
                 _fieldInfo = typeof(SavedGameOptions).GetField(fieldName);
 
@@ -113,16 +110,6 @@ namespace TrafficManager.UI.Helpers {
 
         public string FieldName => _fieldInfo?.Name ?? _fieldName;
 
-        /// <summary>Returns <c>true</c> if setting can persist in current <see cref="_scope"/>.</summary>
-        /// <remarks>
-        /// When <c>false</c>, UI component should be <see cref="_readOnly"/>
-        /// and <see cref="_tooltip"/> should be set to <see cref="INGAME_ONLY_SETTING"/>.
-        /// </remarks>
-        protected bool IsInScope =>
-            _scope.IsFlagSet(Scope.Global) ||
-            (_scope.IsFlagSet(Scope.Savegame) && TMPELifecycle.AppMode != null) ||
-            _scope == Scope.None;
-
         public static implicit operator TVal(SerializableUIOptionBase<TVal, TUI, TComponent> a) => a.Value;
 
         public void DefaultOnValueChanged(TVal newVal) {
@@ -148,10 +135,10 @@ namespace TrafficManager.UI.Helpers {
         public bool HasUI => _ui != null;
         protected TUI _ui;
 
-        protected string _label;
-        protected string _tooltip;
+        private string _label;
+        private string _tooltip;
 
-        protected bool _readOnly;
+        private bool _readOnly;
 
         private TranslatorDelegate _translator;
         public delegate string TranslatorDelegate(string key);
@@ -183,7 +170,7 @@ namespace TrafficManager.UI.Helpers {
         }
 
         public string Tooltip {
-            get => _tooltip;
+            get => _tooltip ?? string.Empty;
             set {
                 _tooltip = value;
                 UpdateTooltip();
@@ -193,7 +180,7 @@ namespace TrafficManager.UI.Helpers {
         public bool ReadOnly {
             get => _readOnly;
             set {
-                _readOnly = !IsInScope || value;
+                _readOnly = value;
                 UpdateReadOnly();
             }
         }
