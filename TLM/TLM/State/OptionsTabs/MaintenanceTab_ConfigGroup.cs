@@ -24,7 +24,7 @@ namespace TrafficManager.State {
         };
         public static ActionButton ResetDefaultsForNewGames = new() {
             Label = "Maintenance.Button:Reset defaults for new games",
-            Handler = SavedGameOptions.ResetDefaults,
+            Handler = OnResetDefaultForNewGamesClicked,
         };
 
 #if DEBUG
@@ -49,13 +49,22 @@ namespace TrafficManager.State {
 
         private static string T(string key) => Translation.Options.Get(key);
 
-        private static void OnReloadGlobalConfigClicked()
-            => GlobalConfig.Reload();
+        private static void OnReloadGlobalConfigClicked() { 
+            GlobalConfig.Reload();
+            SerializableUIOptionBase.UpdateAll();
+        }
 
-        private static void OnResetGlobalConfigClicked()
-            => GlobalConfig.Reset(oldConfig: null);
+        private static void OnResetGlobalConfigClicked() { 
+            GlobalConfig.Reset(oldConfig: null);
+            SerializableUIOptionBase.UpdateAll();
+        }
         private static void OnSetAsDefaultForNewGamesClicked() {
             SavedGameOptions.Instance.SerializeDefaults();
+            SerializableUIOptionBase.UpdateAll();
+        }
+        private static void OnResetDefaultForNewGamesClicked() {
+            SavedGameOptions.ResetDefaults();
+            SerializableUIOptionBase.UpdateAll();
         }
     }
 }
