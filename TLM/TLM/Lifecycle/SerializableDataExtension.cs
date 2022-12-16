@@ -225,9 +225,6 @@ namespace TrafficManager.Lifecycle {
                 return;
             }
 
-            // load Path Find Update
-            PathfinderUpdates.SavegamePathfinderEdition = _configuration.SavegamePathfinderEdition;
-
             // load ext. citizens
             if (_configuration.ExtCitizens != null) {
                 if (!ExtCitizenManager.Instance.LoadData(_configuration.ExtCitizens)) {
