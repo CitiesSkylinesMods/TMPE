@@ -126,7 +126,7 @@ namespace TrafficManager.Manager.Impl {
             }
 #endif
 
-            if (Options.advancedAI) {
+            if (SavedGameOptions.Instance.advancedAI) {
                 TrafficMeasurementManager.Instance.AddTraffic(
                     extVehicle.currentSegmentId,
                     extVehicle.currentLaneIndex,
@@ -780,7 +780,7 @@ namespace TrafficManager.Manager.Impl {
             if (force
                 || (rand.UInt32(GlobalConfig.Instance.Gameplay.VehicleTimedRandModulo) == 0))
             {
-                extVehicle.timedRand = Options.individualDrivingStyle
+                extVehicle.timedRand = SavedGameOptions.Instance.individualDrivingStyle
                                            ? (byte)rand.UInt32(100)
                                            : (byte)50;
             }
@@ -794,7 +794,7 @@ namespace TrafficManager.Manager.Impl {
             }
 #endif
 
-            if (!Options.IsDynamicLaneSelectionActive()) {
+            if (!SavedGameOptions.Instance.IsDynamicLaneSelectionActive()) {
                 extVehicle.dlsReady = false;
                 return;
             }
@@ -807,7 +807,7 @@ namespace TrafficManager.Manager.Impl {
             float altruism = 1f - egoism;
             DynamicLaneSelection dls = GlobalConfig.Instance.DynamicLaneSelection;
 
-            if (Options.individualDrivingStyle) {
+            if (SavedGameOptions.Instance.individualDrivingStyle) {
                 extVehicle.maxReservedSpace
                     = extVehicle.recklessDriver
                           ? Mathf.Lerp(

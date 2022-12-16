@@ -116,7 +116,7 @@ namespace TrafficManager.UI.SubTools {
             base.Initialize();
             Cleanup();
 
-            if (Options.vehicleRestrictionsOverlay) {
+            if (SavedGameOptions.Instance.vehicleRestrictionsOverlay) {
                 RefreshCurrentRestrictedSegmentIds();
             } else {
                 currentRestrictedSegmentIds.Clear();
@@ -252,7 +252,7 @@ namespace TrafficManager.UI.SubTools {
         }
 
         public override void ShowGUIOverlay(ToolMode toolMode, bool viewOnly) {
-            if (viewOnly && !Options.vehicleRestrictionsOverlay) {
+            if (viewOnly && !SavedGameOptions.Instance.vehicleRestrictionsOverlay) {
                 return;
             }
 
@@ -467,7 +467,7 @@ namespace TrafficManager.UI.SubTools {
                                                    out bool stateUpdated) {
             stateUpdated = false;
 
-            if (viewOnly && !Options.vehicleRestrictionsOverlay &&
+            if (viewOnly && !SavedGameOptions.Instance.vehicleRestrictionsOverlay &&
                 MainTool.GetToolMode() != ToolMode.VehicleRestrictions) {
                 return false;
             }

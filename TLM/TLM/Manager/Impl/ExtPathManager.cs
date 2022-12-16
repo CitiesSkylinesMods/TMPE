@@ -55,7 +55,7 @@ namespace TrafficManager.Manager.Impl {
                     otherVehicleType: otherVehicleTypes,
                     allowUnderground: allowUnderground,
                     requireConnect: false,
-                    maxDistance: Options.parkingAI
+                    maxDistance: SavedGameOptions.Instance.parkingAI
                                      ? GlobalConfig.Instance.ParkingAI.MaxBuildingToPedestrianLaneDistance
                                      : 32f,
                     pathPosA: out PathUnit.Position posA,
@@ -75,7 +75,7 @@ namespace TrafficManager.Manager.Impl {
                     otherVehicleTypes,
                     allowUnderground,
                     false,
-                    Options.parkingAI
+                    SavedGameOptions.Instance.parkingAI
                         ? GlobalConfig.Instance.ParkingAI.MaxBuildingToPedestrianLaneDistance
                         : 32f,
                     out posA,
@@ -95,7 +95,7 @@ namespace TrafficManager.Manager.Impl {
                     otherVehicleTypes,
                     allowUnderground,
                     false,
-                    Options.parkingAI
+                    SavedGameOptions.Instance.parkingAI
                         ? GlobalConfig
                           .Instance.ParkingAI.MaxBuildingToPedestrianLaneDistance
                         : 32f,

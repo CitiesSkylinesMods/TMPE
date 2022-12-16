@@ -20,7 +20,7 @@ namespace TrafficManager.Patch._RoadBaseAI {
                                   TrafficLightState pedestrianLightState,
                                   bool vehicles,
                                   bool pedestrians) {
-            return !Options.timedLightsEnabled
+            return !SavedGameOptions.Instance.timedLightsEnabled
                    || !TrafficLightSimulationManager
                                 .Instance
                                 .TrafficLightSimulations[nodeID]

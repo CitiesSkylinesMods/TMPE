@@ -120,9 +120,9 @@ namespace TrafficManager.Traffic.Impl {
                             ref vehStateManager.ExtVehicles[vehicleId],
                             ref numProcessed);
 
-                if ((Options.simulationAccuracy <= SimulationAccuracy.Low && numProcessed >= 3) ||
-                    (Options.simulationAccuracy == SimulationAccuracy.Medium && numProcessed >= 5) ||
-                    (Options.simulationAccuracy == SimulationAccuracy.High && numProcessed >= 10)) {
+                if ((SavedGameOptions.Instance.simulationAccuracy <= SimulationAccuracy.Low && numProcessed >= 3) ||
+                    (SavedGameOptions.Instance.simulationAccuracy == SimulationAccuracy.Medium && numProcessed >= 5) ||
+                    (SavedGameOptions.Instance.simulationAccuracy == SimulationAccuracy.High && numProcessed >= 10)) {
                     break;
                 }
 

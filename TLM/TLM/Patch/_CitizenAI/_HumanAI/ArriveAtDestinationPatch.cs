@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.Patch._CitizenAI._HumanAI {
+namespace TrafficManager.Patch._CitizenAI._HumanAI {
     using HarmonyLib;
     using JetBrains.Annotations;
     using TrafficManager.State;
@@ -15,7 +15,7 @@
                                   ushort instanceID,
                                   ref CitizenInstance citizenData,
                                   bool success) {
-            if (!Options.parkingAI) {
+            if (!SavedGameOptions.Instance.parkingAI) {
                 return;
             }
 

@@ -253,7 +253,7 @@ namespace TrafficManager.Manager.Impl {
 
             switch (busLaneMode) {
                 case VehicleRestrictionsMode.Restricted:
-                case VehicleRestrictionsMode.Configured when Options.banRegularTrafficOnBusLanes: {
+                case VehicleRestrictionsMode.Configured when SavedGameOptions.Instance.banRegularTrafficOnBusLanes: {
                     if ((laneInfo.m_laneType & NetInfo.LaneType.TransportVehicle) !=
                         NetInfo.LaneType.None) {
                         ret |= ExtVehicleType.RoadPublicTransport
@@ -619,7 +619,7 @@ namespace TrafficManager.Manager.Impl {
                 return true;
             }
 
-            if (!Options.vehicleRestrictionsEnabled) {
+            if (!SavedGameOptions.Instance.vehicleRestrictionsEnabled) {
                 return (GetDefaultAllowedVehicleTypes(
                             laneInfo,
                             VehicleRestrictionsMode.Configured) & type) != ExtVehicleType.None;

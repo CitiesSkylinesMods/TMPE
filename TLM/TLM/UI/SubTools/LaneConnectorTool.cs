@@ -246,7 +246,7 @@ namespace TrafficManager.UI.SubTools {
             ShowOverlay(true, cameraInfo);
         }
         private void ShowOverlay(bool viewOnly, RenderManager.CameraInfo cameraInfo) {
-            if (viewOnly && !(Options.connectedLanesOverlay ||
+            if (viewOnly && !(SavedGameOptions.Instance.connectedLanesOverlay ||
                 MassEditOverlay.IsActive)) {
                 return;
             }
@@ -1381,7 +1381,7 @@ namespace TrafficManager.UI.SubTools {
         public override void Initialize() {
             base.Initialize();
             Cleanup();
-            if (Options.connectedLanesOverlay ||
+            if (SavedGameOptions.Instance.connectedLanesOverlay ||
                 MassEditOverlay.IsActive) {
                 RefreshCurrentNodeMarkers();
             } else {

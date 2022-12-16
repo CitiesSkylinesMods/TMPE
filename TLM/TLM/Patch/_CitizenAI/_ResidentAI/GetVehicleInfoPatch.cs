@@ -67,7 +67,7 @@ namespace TrafficManager.Patch._CitizenAI._ResidentAI {
 
             // NON-STOCK CODE START
             bool forceTaxi = false;
-            if (Options.parkingAI) {
+            if (SavedGameOptions.Instance.parkingAI) {
                 if (ExtCitizenInstanceManager.Instance.ExtInstances[instanceID]
                                              .pathMode == ExtPathMode.TaxiToTarget) {
                     forceTaxi = true;
@@ -129,7 +129,7 @@ namespace TrafficManager.Patch._CitizenAI._ResidentAI {
 
             // NON-STOCK CODE START
             VehicleInfo carInfo = null;
-            if (Options.parkingAI && useCar) {
+            if (SavedGameOptions.Instance.parkingAI && useCar) {
                 ref Citizen citizen = ref CitizenManager.instance.m_citizens.m_buffer[citizenData.m_citizen];
                 ushort parkedVehicleId = citizen.m_parkedVehicle;
 

@@ -11,7 +11,7 @@ namespace TrafficManager.Patch._TrainTrackBaseAI {
         /// </summary>
         [UsedImplicitly]
         public static bool Prefix(ushort nodeID) {
-            return !Options.timedLightsEnabled
+            return !SavedGameOptions.Instance.timedLightsEnabled
                    || !TrafficLightSimulationManager
                                 .Instance
                                 .TrafficLightSimulations[nodeID]

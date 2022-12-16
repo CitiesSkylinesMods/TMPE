@@ -144,17 +144,17 @@ namespace TrafficManager {
             public bool IsDefault() {
                 // TODO v1.11.0: check this
                 bool uturnIsDefault =
-                    uturnAllowed == null || (bool)uturnAllowed == Options.allowUTurns;
+                    uturnAllowed == null || (bool)uturnAllowed == SavedGameOptions.Instance.allowUTurns;
                 bool turnOnRedIsDefault =
                     turnOnRedAllowed == null || (bool)turnOnRedAllowed;
                 bool farTurnOnRedIsDefault =
                     farTurnOnRedAllowed == null || (bool)farTurnOnRedAllowed;
                 bool straightChangeIsDefault
                     = straightLaneChangingAllowed == null
-                      || (bool)straightLaneChangingAllowed == Options.allowLaneChangesWhileGoingStraight;
+                      || (bool)straightLaneChangingAllowed == SavedGameOptions.Instance.allowLaneChangesWhileGoingStraight;
                 bool enterWhenBlockedIsDefault =
                     enterWhenBlockedAllowed == null
-                    || (bool)enterWhenBlockedAllowed == Options.allowEnterBlockedJunctions;
+                    || (bool)enterWhenBlockedAllowed == SavedGameOptions.Instance.allowEnterBlockedJunctions;
                 bool pedCrossingIsDefault =
                     pedestrianCrossingAllowed == null || (bool)pedestrianCrossingAllowed;
 

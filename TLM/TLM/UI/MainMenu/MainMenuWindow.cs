@@ -323,7 +323,7 @@ namespace TrafficManager.UI.MainMenu {
         private void SetupControls_DebugLabels(UBuilder builder,
                                                UIComponent stackUnder) {
             // Pathfinder stats label (debug only)
-            if (Options.showPathFindStats) {
+            if (SavedGameOptions.Instance.showPathFindStats) {
                 var statsLabel = builder.Label<StatsLabel>(
                     parent: this,
                     t: string.Empty);
@@ -354,7 +354,7 @@ namespace TrafficManager.UI.MainMenu {
                 hotReloadLabel.ResizeFunction(
                     (UResizer r) => {
                         // If pathFind stats label above was not visible, we need extra spacing
-                        float extraSpacing = Options.showPathFindStats ? UConst.UIPADDING : 0f;
+                        float extraSpacing = SavedGameOptions.Instance.showPathFindStats ? UConst.UIPADDING : 0f;
                         r.Stack(
                             mode: UStackMode.Below,
                             spacing: extraSpacing + UConst.UIPADDING,
@@ -409,7 +409,7 @@ namespace TrafficManager.UI.MainMenu {
 
             if (StatsLabel != null) {
                 // might not exist
-                StatsLabel.enabled = Options.showPathFindStats && value;
+                StatsLabel.enabled = SavedGameOptions.Instance.showPathFindStats && value;
             }
 
             UResizer.UpdateControl(this);

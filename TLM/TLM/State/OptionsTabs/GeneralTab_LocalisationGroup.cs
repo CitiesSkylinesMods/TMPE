@@ -18,7 +18,7 @@ namespace TrafficManager.State {
 
         // TODO: Implement global config updates direct from CheckboxOption
         public static CheckboxOption DisplaySpeedLimitsMph =
-            new (nameof(GlobalConfig.Instance.Main.DisplaySpeedLimitsMph), Options.PersistTo.Global) {
+            new (nameof(GlobalConfig.Instance.Main.DisplaySpeedLimitsMph), Scope.Global) {
                 Label = "Checkbox:Display speed limits mph",
                 Translator = TSpeedLimits,
                 Handler = OnDisplaySpeedLimitsMphChanged,
@@ -121,7 +121,7 @@ namespace TrafficManager.State {
                 ModUI.Instance.Events.LanguageChanged();
             }
 
-            Options.RebuildOptions();
+            TMPESettings.RebuildOptions();
         }
 
         private static void OnDisplaySpeedLimitsMphChanged(bool value) {
@@ -145,13 +145,13 @@ namespace TrafficManager.State {
             mainConfig.DisplaySpeedLimitsMph = value;
             GlobalConfig.WriteConfig();
 
-            if (Options.IsGameLoaded(false)) {
+            if (TMPESettings.IsGameLoaded(false)) {
                 ModUI.Instance.Events.DisplayMphChanged(value);
             }
         }
 
         private static void OnRoadSignsThemeChanged(int newThemeIndex) {
-            if (!Options.IsGameLoaded(false)) {
+            if (!TMPESettings.IsGameLoaded(false)) {
                 // update global config only, skip reloading theme
                 var selectedTheme = RoadSignThemeManager.Instance.ThemeNames[newThemeIndex];
                 // TODO: Should be simplified / ChangeTheme support change in main menu (without reloading)
@@ -189,7 +189,7 @@ namespace TrafficManager.State {
 
                     Log.Info($"Road Sign theme was changed to {newTheme} AND display switched to km/h");
 
-                    if (Options.IsGameLoaded(false)) {
+                    if (TMPESettings.IsGameLoaded(false)) {
                         ModUI.Instance.Events.DisplayMphChanged(false);
                     }
                     break;
@@ -199,7 +199,7 @@ namespace TrafficManager.State {
 
                     Log.Info($"Road Sign theme was changed to {newTheme} AND display switched to MPH");
 
-                    if (Options.IsGameLoaded(false)) {
+                    if (TMPESettings.IsGameLoaded(false)) {
                         ModUI.Instance.Events.DisplayMphChanged(true);
                     }
                     break;

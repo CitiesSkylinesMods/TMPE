@@ -8,14 +8,14 @@ namespace TrafficManager.State {
     public static class GeneralTab_CompatibilityGroup {
 
         public static CheckboxOption ScanForKnownIncompatibleModsAtStartup =
-            new (nameof(Main.ScanForKnownIncompatibleModsAtStartup), Options.PersistTo.Global) {
+            new (nameof(Main.ScanForKnownIncompatibleModsAtStartup), Scope.Global) {
                 Label = "Checkbox:Scan for known incompatible mods on startup",
                 Translator = Translation.ModConflicts.Get,
                 Handler = OnScanForKnownIncompatibleModsAtStartupChanged,
             };
 
         public static CheckboxOption IgnoreDisabledMods =
-            new (nameof(Main.IgnoreDisabledMods), Options.PersistTo.Global) {
+            new (nameof(Main.IgnoreDisabledMods), Scope.Global) {
                 Label = "Checkbox:Ignore disabled mods",
                 Indent = true,
                 Translator = Translation.ModConflicts.Get,
@@ -23,7 +23,7 @@ namespace TrafficManager.State {
             };
 
         public static CheckboxOption ShowCompatibilityCheckErrorMessage =
-            new(nameof(Main.ShowCompatibilityCheckErrorMessage), Options.PersistTo.Global) {
+            new(nameof(Main.ShowCompatibilityCheckErrorMessage), Scope.Global) {
                 Label = "General.Checkbox:Notify me about TM:PE startup conflicts",
                 Handler = OnShowCompatibilityCheckErrorMessageChanged,
             };

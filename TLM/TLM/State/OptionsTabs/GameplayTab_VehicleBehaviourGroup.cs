@@ -10,25 +10,25 @@ namespace TrafficManager.State {
     public static class GameplayTab_VehicleBehaviourGroup {
 
         public static CheckboxOption IndividualDrivingStyle =
-            new (nameof(Options.individualDrivingStyle), Options.PersistTo.Savegame) {
+            new (nameof(SavedGameOptions.individualDrivingStyle), Scope.Savegame) {
                 Label = "Gameplay.Checkbox:Individual driving styles",
             };
 
         // Requires Snowfall DLC
         public static DLCRestrictedCheckboxOption StrongerRoadConditionEffects =
-            new(nameof(Options.strongerRoadConditionEffects), requiredDLC: SteamHelper.DLC.SnowFallDLC, Options.PersistTo.Savegame) {
+            new(nameof(SavedGameOptions.strongerRoadConditionEffects), requiredDLC: SteamHelper.DLC.SnowFallDLC, Scope.Savegame) {
                 Label = "Gameplay.Checkbox:Increase road condition impact",
                 Validator = SnowfallDlcValidator,
             };
 
         public static CheckboxOption DisableDespawning =
-            new(nameof(Options.disableDespawning), Options.PersistTo.Savegame) {
+            new(nameof(SavedGameOptions.disableDespawning), Scope.Savegame) {
                 Label = "Maintenance.Checkbox:Disable despawning",
                 Handler = (newValue) => AllowDespawnFiltersButton.ReadOnly = !newValue,
             };
 
         public static DropDownOption<RecklessDrivers> RecklessDrivers =
-            new(nameof(Options.recklessDrivers), Options.PersistTo.Savegame) {
+            new(nameof(SavedGameOptions.recklessDrivers), Scope.Savegame) {
                 Label = "Gameplay.Dropdown:Reckless drivers%",
             };
 
@@ -36,7 +36,7 @@ namespace TrafficManager.State {
         public static ActionButton AllowDespawnFiltersButton = new() {
             Label = "Gameplay.Button:Filter Disable despawning vehicle type",
             Handler = AllowDespawningPanel.OpenModal,
-            ReadOnly = !Options.disableDespawning,
+            ReadOnly = !SavedGameOptions.Instance.disableDespawning,
         };
 
         internal static void AddUI(UIHelperBase tab) {

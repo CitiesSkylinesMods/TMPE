@@ -65,6 +65,8 @@ namespace TrafficManager.Custom.PathFinding {
 
         private GlobalConfig globalConf_;
 
+        private SavedGameOptions savedGameOptions_;
+
         private struct BufferItem {
             public PathUnit.Position Position;
             public float ComparisonValue;
@@ -257,7 +259,9 @@ namespace TrafficManager.Custom.PathFinding {
         }
 
         private void PathFindImplementation(uint unit, ref PathUnit data) {
+
             globalConf_ = GlobalConfig.Instance; // NON-STOCK CODE
+            savedGameOptions_ = SavedGameOptions.Instance;
 
             NetManager netManager = Singleton<NetManager>.instance;
 
@@ -310,11 +314,11 @@ namespace TrafficManager.Custom.PathFinding {
                 (queueItem_.vehicleType & ExtVehicleType.RoadVehicle) != ExtVehicleType.None;
 
             isLaneArrowObeyingEntity_ =
-                (!Options.relaxedBusses || queueItem_.vehicleType != ExtVehicleType.Bus) &&
+                (!savedGameOptions_.relaxedBusses || queueItem_.vehicleType != ExtVehicleType.Bus) &&
                 (vehicleTypes_ & LaneArrowManager.VEHICLE_TYPES) != VehicleInfo.VehicleType.None &&
                 (queueItem_.vehicleType & LaneArrowManager.EXT_VEHICLE_TYPES) != ExtVehicleType.None;
 #if DEBUG
-            isLaneArrowObeyingEntity_ &= !Options.allRelaxed;
+            isLaneArrowObeyingEntity_ &= !savedGameOptions_.allRelaxed;
 #endif
 #endif
 
@@ -1275,7 +1279,7 @@ namespace TrafficManager.Custom.PathFinding {
 
                         if (isPedZoneRoad &&
                             // NON-STOCK CODE START skip execution when driving-only path for passenger car
-                            !(Options.parkingAI &&
+                            !(savedGameOptions_.parkingAI &&
                               queueItem_.vehicleType == ExtVehicleType.PassengerCar &&
                               queueItem_.pathType == ExtPathType.DrivingOnly)
                             // NON-STOCK CODE END
@@ -1378,7 +1382,7 @@ namespace TrafficManager.Custom.PathFinding {
                     bool parkingAllowed = true;
 
                     // Parking AI: Determine if parking is allowed
-                    if (Options.parkingAI) {
+                    if (savedGameOptions_.parkingAI) {
                         if (isLogEnabled) {
                             DebugLog(
                                 unitId,
@@ -1540,7 +1544,7 @@ namespace TrafficManager.Custom.PathFinding {
                         }
                     } else {
                         // pocket car spawning
-                        if (Options.parkingAI) {
+                        if (savedGameOptions_.parkingAI) {
                             if (isLogEnabled) {
                                 DebugLog(
                                     unitId,
@@ -1804,11 +1808,11 @@ namespace TrafficManager.Custom.PathFinding {
                             unitId,
                             item,
                             "ProcessItemMain: vehicle -> vehicle: Custom routing\n" +
-                            $"\tOptions.advancedAI={Options.advancedAI}\n" +
+                            $"\tOptions.advancedAI={savedGameOptions_.advancedAI}\n" +
                             $"\tprevIsRouted={prevIsRouted}\n" +
                             $"\tm_isRoadVehicle={isRoadVehicle_}\n" +
                             $"\tprevIsCarLane={prevIsCarLane}\n" +
-                            $"\tm_stablePath={Options.advancedAI}");
+                            $"\tm_stablePath={savedGameOptions_.advancedAI}");
                     }
 
                     // NON-STOCK CODE START
@@ -1824,7 +1828,7 @@ namespace TrafficManager.Custom.PathFinding {
                      * Calculate Advanced Vehicle AI cost factors
                      * =============================================================================
                      */
-                    if (Options.advancedAI
+                    if (savedGameOptions_.advancedAI
                         && prevIsRouted
                         && isRoadVehicle_
                         && prevIsCarLane )
@@ -2698,7 +2702,7 @@ namespace TrafficManager.Custom.PathFinding {
                 globalConf_.PathFinding.PublicTransportTransitionMaxPenalty;
 
             bool applyTransportTransferPenalty =
-                    Options.realisticPublicTransport &&
+                    savedGameOptions_.realisticPublicTransport &&
                     !stablePath_ &&
                     (allowedLaneTypes &
                      (NetInfo.LaneType.PublicTransport | NetInfo.LaneType.Pedestrian)) ==
@@ -2714,7 +2718,7 @@ namespace TrafficManager.Custom.PathFinding {
                     nextSegmentId,
                     $"ProcessItemCosts: Shall apply transport transfer penalty?\n" +
                     $"\tapplyTransportTransferPenalty={applyTransportTransferPenalty}\n" +
-                    $"\tOptions.realisticPublicTransport={Options.realisticPublicTransport}\n" +
+                    $"\tOptions.realisticPublicTransport={savedGameOptions_.realisticPublicTransport}\n" +
                     $"\tallowedLaneTypes={allowedLaneTypes}\n" +
                     $"\tallowedVehicleTypes={allowedVehicleTypes}\n" +
                     $"\tconf.pf.PubTranspTransitionMinPenalty={pfPublicTransportTransitionMinPenalty}\n" +
@@ -3250,12 +3254,12 @@ namespace TrafficManager.Custom.PathFinding {
             // NON-STOCK CODE START
             bool mayCross = true;
 #if JUNCTIONRESTRICTIONS || CUSTOMTRAFFICLIGHTS
-            if (Options.junctionRestrictionsEnabled || Options.timedLightsEnabled) {
+            if (savedGameOptions_.junctionRestrictionsEnabled || savedGameOptions_.timedLightsEnabled) {
                 bool nextIsStartNode = nextNodeId == nextSegment.m_startNode;
 
                 if (nextIsStartNode || nextNodeId == nextSegment.m_endNode) {
 #if JUNCTIONRESTRICTIONS
-                    if (Options.junctionRestrictionsEnabled &&
+                    if (savedGameOptions_.junctionRestrictionsEnabled &&
                         item.Position.m_segment == nextSegmentId) {
                         // check if pedestrians are not allowed to cross here
                         if (!junctionManager.IsPedestrianCrossingAllowed(
@@ -3276,7 +3280,7 @@ namespace TrafficManager.Custom.PathFinding {
 #endif
 
 #if CUSTOMTRAFFICLIGHTS
-                    if (Options.timedLightsEnabled) {
+                    if (savedGameOptions_.timedLightsEnabled) {
                         // check if pedestrian light won't change to green
                         CustomSegmentLights lights = customTrafficLightsManager.GetSegmentLights(nextSegmentId, nextIsStartNode, false);
 
@@ -3617,7 +3621,7 @@ namespace TrafficManager.Custom.PathFinding {
              * =====================================================================================
              */
             bool canUseLane = CanUseLane(prevSegmentId, prevSegmentInfo, prevLaneIndex, prevLaneInfo, item.LaneId);
-            if (!canUseLane && Options.vehicleRestrictionsAggression ==
+            if (!canUseLane && savedGameOptions_.vehicleRestrictionsAggression ==
                 VehicleRestrictionsAggression.Strict) {
                 // vehicle is strictly prohibited to use this lane
                 if (isLogEnabled) {
@@ -3665,7 +3669,7 @@ namespace TrafficManager.Custom.PathFinding {
                 bool isStockUturnPoint = (nextNode.m_flags & (NetNode.Flags.End | NetNode.Flags.OneWayOut)) != NetNode.Flags.None;
 
 #if JUNCTIONRESTRICTIONS
-                if (Options.junctionRestrictionsEnabled) {
+                if (savedGameOptions_.junctionRestrictionsEnabled) {
                     bool nextIsStartNode = nextNodeId == prevSegment.m_startNode;
                     bool prevIsOutgoingOneWay =
                         nextIsStartNode
@@ -3723,7 +3727,7 @@ namespace TrafficManager.Custom.PathFinding {
             if (!canUseLane) {
                 laneSelectionCost *=
                     VehicleRestrictionsManager.PATHFIND_PENALTIES[
-                        (int)Options.vehicleRestrictionsAggression];
+                        (int)savedGameOptions_.vehicleRestrictionsAggression];
                 if (isLogEnabled) {
                     DebugLog(
                         unitId,
@@ -3738,7 +3742,7 @@ namespace TrafficManager.Custom.PathFinding {
              * Apply costs for large vehicles using inner lanes on highways
              * =======================================================================================================
              */
-            if (Options.preferOuterLane &&
+            if (savedGameOptions_.preferOuterLane &&
                 isHeavyVehicle_ &&
                 isRoadVehicle_ &&
                 prevIsCarLane &&
@@ -3756,7 +3760,7 @@ namespace TrafficManager.Custom.PathFinding {
                         item,
                         "ProcessItemRouted: Heavy trucks prefer outer lanes on highways: Applied lane costs\n"
                         + "\t" + $"laneSelectionCost={laneSelectionCost}\n"
-                        + "\t" + $"Options.preferOuterLane={Options.preferOuterLane}\n"
+                        + "\t" + $"savedGameOptions_.preferOuterLane={savedGameOptions_.preferOuterLane}\n"
                         + "\t" + $"m_isHeavyVehicle={isHeavyVehicle_}\n"
                         + "\t" + $"m_isRoadVehicle={isRoadVehicle_}\n"
                         + "\t" + $"prevIsCarLane={prevIsCarLane}\n"
@@ -4084,7 +4088,7 @@ namespace TrafficManager.Custom.PathFinding {
                                 int laneIndex,
                                 NetInfo.Lane laneInfo,
                                 uint laneId) {
-            if (!Options.vehicleRestrictionsEnabled ||
+            if (!savedGameOptions_.vehicleRestrictionsEnabled ||
                 queueItem_.vehicleType == ExtVehicleType.None ||
                 queueItem_.vehicleType == ExtVehicleType.Tram ||
                 queueItem_.vehicleType == ExtVehicleType.Trolleybus ||

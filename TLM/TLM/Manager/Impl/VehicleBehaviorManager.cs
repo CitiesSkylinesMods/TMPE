@@ -101,7 +101,7 @@ namespace TrafficManager.Manager.Impl {
             // NON-STOCK CODE END
 
             if (driverCitizenId != 0u) {
-                if (Options.parkingAI && driverCitizenInstanceId != 0) {
+                if (SavedGameOptions.Instance.parkingAI && driverCitizenInstanceId != 0) {
                     prohibitPocketCars = true;
                 }
 
@@ -635,7 +635,7 @@ namespace TrafficManager.Manager.Impl {
             ExtPathType extPathType = ExtPathType.None;
             ref Building targetBuilding = ref targetBuildingId.ToBuilding();
 
-            if (Options.parkingAI) {
+            if (SavedGameOptions.Instance.parkingAI) {
                 // if (driverExtInstance != null) {
                 if (logParkingAi) {
                     Log.WarningFormat(
@@ -840,14 +840,14 @@ namespace TrafficManager.Manager.Impl {
                         ref driverInstance,
                         ref driverExtInstance,
                         startPos);
-            } // end if Options.ParkingAi4
+            } // end if SavedGameOptions.Instance.ParkingAi4
 
             var laneTypes = NetInfo.LaneType.Vehicle;
 
             if (!movingToParkingPos) {
                 laneTypes |= NetInfo.LaneType.Pedestrian;
 
-                if (Options.parkingAI
+                if (SavedGameOptions.Instance.parkingAI
                     && (driverInstance.m_flags & CitizenInstance.Flags.CannotUseTransport)
                     == CitizenInstance.Flags.None)
                 {
@@ -907,7 +907,7 @@ namespace TrafficManager.Manager.Impl {
                                    driverInstanceId,
                                    ref driverInstance,
                                    endPos,
-                                   Options.parkingAI &&
+                                   SavedGameOptions.Instance.parkingAI &&
                                    (targetBuildingId == 0 ||
                                     (targetBuilding.m_flags & Building.Flags.IncomingOutgoing)
                                     == Building.Flags.None)
@@ -997,7 +997,7 @@ namespace TrafficManager.Manager.Impl {
                 }
             }
 
-            if (Options.parkingAI) {
+            if (SavedGameOptions.Instance.parkingAI) {
                 extCitizenInstanceManager.Reset(ref driverExtInstance);
             }
 
@@ -1008,7 +1008,7 @@ namespace TrafficManager.Manager.Impl {
                                               PathUnit.Position sourcePos,
                                               PathUnit.Position targetPos)
         {
-            if (!Options.timedLightsEnabled) {
+            if (!SavedGameOptions.Instance.timedLightsEnabled) {
                 return true;
             }
 
@@ -1211,7 +1211,7 @@ namespace TrafficManager.Manager.Impl {
             bool isRecklessDriver = extVehicle.recklessDriver;
             var netManager = Singleton<NetManager>.instance;
             // IExtVehicleManager extVehicleMan = Constants.ManagerFactory.ExtVehicleManager;
-            bool hasActiveTimedSimulation = (Options.timedLightsEnabled &&
+            bool hasActiveTimedSimulation = (SavedGameOptions.Instance.timedLightsEnabled &&
                                              TrafficLightSimulationManager
                                                  .Instance.HasActiveTimedSimulation(targetNodeId));
             NetNode.FlagsLong targetNodeFlagsLong = targetNode.flags;
@@ -1439,7 +1439,7 @@ namespace TrafficManager.Manager.Impl {
 #endif
 
                     // Turn-on-red: Check if turning in the preferred direction, and if turning while it's red is allowed
-                    if (Options.turnOnRedEnabled
+                    if (SavedGameOptions.Instance.turnOnRedEnabled
                         && stopCar
                         && (extVehicle.vehicleType & ExtVehicleType.RoadVehicle) != ExtVehicleType.None
                         && sqrVelocity <= GlobalConfig.Instance.PriorityRules.MaxYieldVelocity
@@ -1476,8 +1476,8 @@ namespace TrafficManager.Manager.Impl {
                     }
 
                     // check priority rules at unprotected traffic lights
-                    if (!stopCar && Options.prioritySignsEnabled &&
-                        Options.trafficLightPriorityRules && segLightsMan.IsSegmentLight(
+                    if (!stopCar && SavedGameOptions.Instance.prioritySignsEnabled &&
+                        SavedGameOptions.Instance.trafficLightPriorityRules && segLightsMan.IsSegmentLight(
                             prevPos.m_segment,
                             isTargetStartNode))
                     {
@@ -1537,7 +1537,7 @@ namespace TrafficManager.Manager.Impl {
                     return VehicleJunctionTransitState.Leave;
                 }
 
-                if (Options.prioritySignsEnabled && vehicleData.Info.m_vehicleType !=
+                if (SavedGameOptions.Instance.prioritySignsEnabled && vehicleData.Info.m_vehicleType !=
                     VehicleInfo.VehicleType.Monorail)
                 {
                     if (logPriority) {
@@ -1605,7 +1605,7 @@ namespace TrafficManager.Manager.Impl {
 
                         if (sqrVelocity <= GlobalConfig.Instance.PriorityRules.MaxYieldVelocity
                             * GlobalConfig.Instance.PriorityRules.MaxYieldVelocity ||
-                            Options.simulationAccuracy >= SimulationAccuracy.Medium) {
+                            SavedGameOptions.Instance.simulationAccuracy >= SimulationAccuracy.Medium) {
                             if (logPriority) {
                                 Log._DebugFormat(
                                     "VehicleBehaviorManager.MayChangeSegment({0}): {1} sign. waittime={2}",
@@ -1615,7 +1615,7 @@ namespace TrafficManager.Manager.Impl {
                             }
 
                             //skip checking of priority if simAccuracy on lowest settings
-                            if (Options.simulationAccuracy <= SimulationAccuracy.VeryLow) {
+                            if (SavedGameOptions.Instance.simulationAccuracy <= SimulationAccuracy.VeryLow) {
                                 return VehicleJunctionTransitState.Leave;
                             }
 
@@ -1706,7 +1706,7 @@ namespace TrafficManager.Manager.Impl {
             if (isRecklessDriver) {
                 checkSpace = (node.m_flags & NetNode.Flags.LevelCrossing) != NetNode.Flags.None;
             } else {
-                if (Options.junctionRestrictionsEnabled) {
+                if (SavedGameOptions.Instance.junctionRestrictionsEnabled) {
                     checkSpace =
                         !JunctionRestrictionsManager.Instance.IsEnteringBlockedJunctionAllowed(
                             segmentId,
@@ -1724,7 +1724,7 @@ namespace TrafficManager.Manager.Impl {
         }
 
         public bool MayDespawn(ushort vehicleId, ref Vehicle vehicleData) {
-            return !Options.disableDespawning
+            return !SavedGameOptions.Instance.disableDespawning
                    || ((vehicleData.m_flags2 & (Vehicle.Flags2.Blown
                                                 | Vehicle.Flags2.Floating)) != 0)
                    || (vehicleData.m_flags & Vehicle.Flags.Parking) != 0
@@ -1749,7 +1749,7 @@ namespace TrafficManager.Manager.Impl {
                 if ((cityPlanningPolicies & DistrictPolicies.CityPlanning.StuddedTires) !=
                     DistrictPolicies.CityPlanning.None)
                 {
-                    if (Options.strongerRoadConditionEffects) {
+                    if (SavedGameOptions.Instance.strongerRoadConditionEffects) {
                         if (maxSpeed > ICY_ROADS_STUDDED_MIN_SPEED)
                         {
                             maxSpeed = ICY_ROADS_STUDDED_MIN_SPEED + ((255 - segment.m_wetness) *
@@ -1762,7 +1762,7 @@ namespace TrafficManager.Manager.Impl {
                     districtManager.m_districts.m_buffer[district].m_cityPlanningPoliciesEffect
                         |= DistrictPolicies.CityPlanning.StuddedTires;
                 } else {
-                    if (Options.strongerRoadConditionEffects) {
+                    if (SavedGameOptions.Instance.strongerRoadConditionEffects) {
                         if (maxSpeed > ICY_ROADS_MIN_SPEED) {
                             maxSpeed = ICY_ROADS_MIN_SPEED + ((255 - segment.m_wetness) *
                                        0.0039215686f * (maxSpeed - ICY_ROADS_MIN_SPEED));
@@ -1772,7 +1772,7 @@ namespace TrafficManager.Manager.Impl {
                     }
                 }
             } else {
-                if (Options.strongerRoadConditionEffects) {
+                if (SavedGameOptions.Instance.strongerRoadConditionEffects) {
                     float minSpeed = Math.Min(maxSpeed * WET_ROADS_FACTOR, WET_ROADS_MAX_SPEED); // custom: -25% .. 0
                     if (maxSpeed > minSpeed) {
                         maxSpeed = minSpeed + ((255 - segment.m_wetness) * 0.0039215686f *
@@ -1783,7 +1783,7 @@ namespace TrafficManager.Manager.Impl {
                 }
             }
 
-            if (Options.strongerRoadConditionEffects) {
+            if (SavedGameOptions.Instance.strongerRoadConditionEffects) {
                 float minSpeed = Math.Min(maxSpeed * BROKEN_ROADS_FACTOR, BROKEN_ROADS_MAX_SPEED);
                 if (maxSpeed > minSpeed) {
                     maxSpeed = minSpeed + (segment.m_condition * (1f / 255f) * (maxSpeed - minSpeed));
@@ -1802,7 +1802,7 @@ namespace TrafficManager.Manager.Impl {
                                           ushort vehicleId,
                                           ref ExtVehicle extVehicle,
                                           VehicleInfo vehicleInfo) {
-            if (Options.individualDrivingStyle) {
+            if (SavedGameOptions.Instance.individualDrivingStyle) {
                 float vehicleRand =
                     0.01f * Constants.ManagerFactory.ExtVehicleManager.GetTimedVehicleRand(
                         vehicleId);
@@ -1825,12 +1825,12 @@ namespace TrafficManager.Manager.Impl {
                 return true;
             }
 
-            if (Options.evacBussesMayIgnoreRules &&
+            if (SavedGameOptions.Instance.evacBussesMayIgnoreRules &&
                 vehicleData.Info.GetService() == ItemClass.Service.Disaster) {
                 return true;
             }
 
-            if (Options.recklessDrivers == RecklessDrivers.HolyCity) {
+            if (SavedGameOptions.Instance.recklessDrivers == RecklessDrivers.HolyCity) {
                 return false;
             }
 
@@ -1839,7 +1839,7 @@ namespace TrafficManager.Manager.Impl {
                 return false;
             }
 
-            return (uint)vehicleId % Options.getRecklessDriverModulo() == 0;
+            return (uint)vehicleId % SavedGameOptions.Instance.getRecklessDriverModulo() == 0;
         }
 
         public int FindBestLane(ushort vehicleId,
@@ -3024,7 +3024,7 @@ namespace TrafficManager.Manager.Impl {
             const bool logLaneSelection = false;
 #endif
 
-            if (!Options.advancedAI) {
+            if (!SavedGameOptions.Instance.advancedAI) {
                 Log._DebugIf(
                     logLaneSelection,
                     () => $"VehicleBehaviorManager.MayFindBestLane({vehicleId}): Skipping lane checking. " +
@@ -3053,7 +3053,7 @@ namespace TrafficManager.Manager.Impl {
 
             uint vehicleRand = Constants.ManagerFactory.ExtVehicleManager.GetStaticVehicleRand(vehicleId);
 
-            if (vehicleRand < 100 - Options.altLaneSelectionRatio) {
+            if (vehicleRand < 100 - SavedGameOptions.Instance.altLaneSelectionRatio) {
                 Log._DebugIf(
                     logLaneSelection,
                     () => $"VehicleBehaviorManager.MayFindBestLane({vehicleId}): Skipping lane checking " +

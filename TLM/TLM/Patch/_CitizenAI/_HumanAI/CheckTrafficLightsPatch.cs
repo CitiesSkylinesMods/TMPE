@@ -32,7 +32,7 @@ namespace TrafficManager.Patch._CitizenAI._HumanAI {
             ref NetSegment netSegment = ref segment.ToSegment();
 
             // NON-STOCK CODE START
-            bool customSim = Options.timedLightsEnabled &&
+            bool customSim = SavedGameOptions.Instance.timedLightsEnabled &&
                              TrafficLightSimulationManager.Instance.HasActiveSimulation(node);
 
             RoadBaseAI.TrafficLightState pedestrianLightState;

@@ -431,7 +431,7 @@ namespace TrafficManager.Manager.Impl {
             var startsAtOutsideConnection = false;
             ParkingAI parkingAiConf = GlobalConfig.Instance.ParkingAI;
 
-            if (Options.parkingAI) {
+            if (SavedGameOptions.Instance.parkingAI) {
                 switch (extInstance.pathMode) {
                     case ExtPathMode.RequiresWalkingPathToParkedCar:
                     case ExtPathMode.CalculatingWalkingPathToParkedCar:
@@ -710,7 +710,7 @@ namespace TrafficManager.Manager.Impl {
                         }
                     }
                 }
-            } // if Options.ParkingAi
+            } // if SavedGameOptions.Instance.ParkingAi
 
             if (extendedLogParkingAi) {
                 Log.Info(
@@ -749,7 +749,7 @@ namespace TrafficManager.Manager.Impl {
                             vehicleCategory |= vehicleInfo.vehicleCategory;
                             extVehicleType = ExtVehicleType.Taxi; // NON-STOCK CODE
                             // NON-STOCK CODE START
-                            if (Options.parkingAI) {
+                            if (SavedGameOptions.Instance.parkingAI) {
                                 extInstance.pathMode = ExtPathMode.TaxiToTarget;
                             }
 
@@ -792,7 +792,7 @@ namespace TrafficManager.Manager.Impl {
             bool allowRandomParking = true;
             ref Building targetBuilding = ref instanceData.m_targetBuilding.ToBuilding();
 
-            if (Options.parkingAI) {
+            if (SavedGameOptions.Instance.parkingAI) {
                 // Parking AI
                 if (extInstance.pathMode == ExtPathMode.RequiresCarPath) {
                     if (logParkingAi) {
@@ -886,7 +886,7 @@ namespace TrafficManager.Manager.Impl {
                 // CalculatingWalkingPathToTarget, CalculatingCarPathToTarget,
                 // CalculatingCarPathToKnownParkPos or None.
                 //------------------------------------------
-            } // end if Options.ParkingAi
+            } // end if SavedGameOptions.Instance.ParkingAi
 
             /*
              * enable random parking if exact parking space was not calculated yet
@@ -951,7 +951,7 @@ namespace TrafficManager.Manager.Impl {
                                    instanceID,
                                    ref instanceData,
                                    endPos,
-                                   Options.parkingAI &&
+                                   SavedGameOptions.Instance.parkingAI &&
                                    (instanceData.m_targetBuilding == 0 ||
                                     (targetBuilding.m_flags &
                                      Building.Flags.IncomingOutgoing) == Building.Flags.None)
@@ -963,7 +963,7 @@ namespace TrafficManager.Manager.Impl {
             bool foundStartPos = false;
             PathUnit.Position startPosA;
 
-            if (Options.parkingAI &&
+            if (SavedGameOptions.Instance.parkingAI &&
                 (extInstance.pathMode == ExtPathMode.CalculatingCarPathToTarget ||
                  extInstance.pathMode == ExtPathMode.CalculatingCarPathToKnownParkPos)) {
                 // citizen will enter their car now
@@ -1007,7 +1007,7 @@ namespace TrafficManager.Manager.Impl {
                         if ((citizen.m_flags & Citizen.Flags.Evacuating) != Citizen.Flags.None) {
                             laneTypes |= NetInfo.LaneType.EvacuationTransport;
                         }
-                    } else if (Options.parkingAI) { // TODO check for incoming connection
+                    } else if (SavedGameOptions.Instance.parkingAI) { // TODO check for incoming connection
                         // citizen tried to use public transport but waiting time was too long
                         // -> add public transport demand for source building
                         if (instanceData.m_sourceBuilding != 0) {
@@ -1105,7 +1105,7 @@ namespace TrafficManager.Manager.Impl {
                 }
             }
 
-            if (logParkingAi && Options.parkingAI) {
+            if (logParkingAi && SavedGameOptions.Instance.parkingAI) {
                 Log.InfoFormat(
                     "CustomCitizenAI.ExtStartPathFind({0}): CustomCitizenAI.CustomStartPathFind: " +
                     "[PFFAIL] failed for citizen instance {1} (CurrentPathMode={2}). " +
@@ -1149,7 +1149,7 @@ namespace TrafficManager.Manager.Impl {
                     VehicleInfo.VehicleCategory.All,
                     allowUnderground,
                     false,
-                    Options.parkingAI
+                    SavedGameOptions.Instance.parkingAI
                         ? GlobalConfig.Instance.ParkingAI.MaxBuildingToPedestrianLaneDistance
                         : 32f,
                     out PathUnit.Position posA,
@@ -1168,7 +1168,7 @@ namespace TrafficManager.Manager.Impl {
                     VehicleInfo.VehicleCategory.All,
                     allowUnderground,
                     false,
-                    Options.parkingAI
+                    SavedGameOptions.Instance.parkingAI
                         ? GlobalConfig.Instance.ParkingAI.MaxBuildingToPedestrianLaneDistance
                         : 32f,
                     out posA,
@@ -1188,7 +1188,7 @@ namespace TrafficManager.Manager.Impl {
                     VehicleInfo.VehicleCategory.All,
                     allowUnderground,
                     false,
-                    Options.parkingAI
+                    SavedGameOptions.Instance.parkingAI
                         ? GlobalConfig.Instance.ParkingAI.MaxBuildingToPedestrianLaneDistance
                         : 32f,
                     out posA,

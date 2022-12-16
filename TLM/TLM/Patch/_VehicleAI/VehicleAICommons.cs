@@ -70,7 +70,7 @@ namespace TrafficManager.Patch._VehicleAI {
                                                       NetInfo info,
                                                       out float maxSpeed) {
             if (info.m_lanes != null && info.m_lanes.Length > position.m_lane) {
-                float laneSpeedLimit = Options.customSpeedLimitsEnabled
+                float laneSpeedLimit = SavedGameOptions.Instance.customSpeedLimitsEnabled
                                            ? SpeedLimitManager.Instance.GetGameSpeedLimit(
                                                position.m_segment,
                                                position.m_lane,
@@ -96,7 +96,7 @@ namespace TrafficManager.Patch._VehicleAI {
                                                       NetInfo info,
                                                       out float maxSpeed) {
             if (info.m_lanes != null && info.m_lanes.Length > position.m_lane) {
-                if (Options.customSpeedLimitsEnabled) {
+                if (SavedGameOptions.Instance.customSpeedLimitsEnabled) {
                     float laneSpeedLimit = SpeedLimitManager.Instance.GetGameSpeedLimit(
                                                    position.m_segment,
                                                    position.m_lane,

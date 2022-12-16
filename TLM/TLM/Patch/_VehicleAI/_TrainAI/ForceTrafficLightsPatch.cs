@@ -46,7 +46,7 @@ namespace TrafficManager.Patch._VehicleAI._TrainAI{
                                         ? positionSegment.m_startNode
                                         : positionSegment.m_endNode;
 
-                if (Options.timedLightsEnabled) {
+                if (SavedGameOptions.Instance.timedLightsEnabled) {
                     // when a TTL is active only reserve space if it shows green
                     if (pathMan.m_pathUnits.m_buffer[pathUnitId].GetNextPosition(pathPosIndex, out PathUnit.Position nextPos)) {
                         if (!VehicleBehaviorManager.Instance.IsSpaceReservationAllowed(

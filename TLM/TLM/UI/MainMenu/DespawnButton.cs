@@ -6,7 +6,7 @@ namespace TrafficManager.UI.MainMenu {
 
     public class DespawnButton : BaseMenuButton {
         protected override string U_OverrideTooltipText() =>
-            Options.disableDespawning
+            SavedGameOptions.Instance.disableDespawning
                 ? Translation.Menu.Get("Tooltip:Enable despawning")
                 : Translation.Menu.Get("Tooltip:Disable despawning");
 
@@ -16,7 +16,7 @@ namespace TrafficManager.UI.MainMenu {
         /// Button lights up on despawning enabled (easy mode).
         /// Button remains dark on despawning disabled (hard mode).
         /// </summary>
-        protected override bool IsActive() => !Options.disableDespawning;
+        protected override bool IsActive() => !SavedGameOptions.Instance.disableDespawning;
 
         public override void SetupButtonSkin(AtlasBuilder futureAtlas) {
             // Button background (from BackgroundPrefix) is provided by MainMenuPanel.Start
@@ -35,7 +35,7 @@ namespace TrafficManager.UI.MainMenu {
             ModUI.GetTrafficManagerTool()?.SetToolMode(ToolMode.None);
 
             // Toggle the despawning value
-            GameplayTab_VehicleBehaviourGroup.DisableDespawning.Value = !Options.disableDespawning;
+            GameplayTab_VehicleBehaviourGroup.DisableDespawning.Value = !SavedGameOptions.Instance.disableDespawning;
 
             // Update currently visible tooltip
             this.UpdateTooltip(refreshTooltip: true);
@@ -48,7 +48,7 @@ namespace TrafficManager.UI.MainMenu {
         /// </summary>
         /// <param name="p"></param>
         protected override void OnMouseDown(UIMouseEventParameter p) {
-            if ((p.buttons & UIMouseButton.Right) != 0 && Options.disableDespawning) {
+            if ((p.buttons & UIMouseButton.Right) != 0 && SavedGameOptions.Instance.disableDespawning) {
                 p.Use();
                 UIInput.MouseUsed();
                 AllowDespawn.AllowDespawningPanel.OpenModal();
