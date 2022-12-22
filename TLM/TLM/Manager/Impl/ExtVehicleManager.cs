@@ -936,6 +936,7 @@ namespace TrafficManager.Manager.Impl {
                         case PassengerCarAI _:
                             return ExtVehicleType.PassengerCar;
                         case AmbulanceAI _:
+                        case BankVanAI _:
                         case FireTruckAI _:
                         case PoliceCarAI _:
                         case HearseAI _:
