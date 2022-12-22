@@ -9,6 +9,7 @@ namespace TrafficManager.UI.Helpers {
     using TrafficManager.State;
     using JetBrains.Annotations;
     using TrafficManager.Lifecycle;
+    using TrafficManager.Util;
 
     public abstract class SerializableUIOptionBase<TVal, TUI, TComponent> : ILegacySerializableOption
         where TUI : UIComponent
@@ -38,7 +39,7 @@ namespace TrafficManager.UI.Helpers {
         /// </summary>
         public ValidatorDelegate Validator { get; set; }
 
-        protected Options.PersistTo _scope;
+        protected Scope _scope;
 
         [CanBeNull]
         private FieldInfo _fieldInfo;
@@ -48,12 +49,12 @@ namespace TrafficManager.UI.Helpers {
         // used as internal store of value if _fieldInfo is null
         private TVal _value = default;
 
-        public SerializableUIOptionBase(string fieldName, Options.PersistTo scope) {
+        public SerializableUIOptionBase(string fieldName, Scope scope) {
 
             _fieldName = fieldName;
             _scope = scope;
-            if (scope.IsFlagSet(Options.PersistTo.Savegame)) {
-                _fieldInfo = typeof(Options).GetField(fieldName, BindingFlags.Static | BindingFlags.Public);
+            if (scope.IsFlagSet(Scope.Savegame)) {
+                _fieldInfo = typeof(SavedGameOptions).GetField(fieldName);
 
                 if (_fieldInfo == null) {
                     throw new Exception($"SerializableUIOptionBase.ctor: `{fieldName}` does not exist");
@@ -73,7 +74,8 @@ namespace TrafficManager.UI.Helpers {
                     return _value;
                 }
 
-                var value = _fieldInfo.GetValue(null);
+                Shortcuts.AssertNotNull(SavedGameOptions.Instance, "SavedGameOptions.Instance");
+                var value = _fieldInfo.GetValue(SavedGameOptions.Instance);
                 if(value is IConvertible convertibleValue) {
                     return (TVal)ChangeType(convertibleValue, typeof(TVal));
                 } else {
@@ -85,10 +87,11 @@ namespace TrafficManager.UI.Helpers {
                     _value = value;
                 } else if (value is IConvertible convertibleValue) {
                     IConvertible val = ChangeType(convertibleValue, _fieldInfo.FieldType);
-                    _fieldInfo.SetValue(null, val);
+                    Shortcuts.AssertNotNull(SavedGameOptions.Instance, "SavedGameOptions.Instance");
+                    _fieldInfo.SetValue(SavedGameOptions.Instance, val);
                 } else {
-                    _fieldInfo.SetValue(null, value);
-
+                    Shortcuts.AssertNotNull(SavedGameOptions.Instance, "SavedGameOptions.Instance");
+                    _fieldInfo.SetValue(SavedGameOptions.Instance, value);
                 }
             }
         }
@@ -101,9 +104,9 @@ namespace TrafficManager.UI.Helpers {
         /// and <see cref="_tooltip"/> should be set to <see cref="INGAME_ONLY_SETTING"/>.
         /// </remarks>
         protected bool IsInScope =>
-            _scope.IsFlagSet(Options.PersistTo.Global) ||
-            (_scope.IsFlagSet(Options.PersistTo.Savegame) && TMPELifecycle.AppMode != null) ||
-            _scope == Options.PersistTo.None;
+            _scope.IsFlagSet(Scope.Global) ||
+            (_scope.IsFlagSet(Scope.Savegame) && TMPELifecycle.AppMode != null) ||
+            _scope == Scope.None;
 
         public static implicit operator TVal(SerializableUIOptionBase<TVal, TUI, TComponent> a) => a.Value;
 

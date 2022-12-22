@@ -10,43 +10,43 @@ namespace TrafficManager.State {
     public static class MaintenanceTab_FeaturesGroup {
 
         public static CheckboxOption PrioritySignsEnabled =
-            new (nameof(Options.prioritySignsEnabled), Options.PersistTo.Savegame) {
+            new (nameof(SavedGameOptions.prioritySignsEnabled), Scope.Savegame) {
                 Label = "Checkbox:Priority signs",
                 Handler = OnFeatureAvailabilityChanged,
             };
         public static CheckboxOption TimedLightsEnabled =
-            new (nameof(Options.timedLightsEnabled), Options.PersistTo.Savegame) {
+            new (nameof(SavedGameOptions.timedLightsEnabled), Scope.Savegame) {
                 Label = "Checkbox:Timed traffic lights",
                 Validator = TrafficLightsValidator,
                 Handler = OnFeatureAvailabilityChanged,
             };
         public static CheckboxOption CustomSpeedLimitsEnabled =
-            new (nameof(Options.customSpeedLimitsEnabled), Options.PersistTo.Savegame) {
+            new (nameof(SavedGameOptions.customSpeedLimitsEnabled), Scope.Savegame) {
                 Label = "Checkbox:Speed limits",
                 Handler = OnFeatureAvailabilityChanged,
             };
         public static CheckboxOption VehicleRestrictionsEnabled =
-            new (nameof(Options.vehicleRestrictionsEnabled), Options.PersistTo.Savegame) {
+            new (nameof(SavedGameOptions.vehicleRestrictionsEnabled), Scope.Savegame) {
                 Label = "Checkbox:Vehicle restrictions",
                 Handler = OnFeatureAvailabilityChanged,
             };
         public static CheckboxOption ParkingRestrictionsEnabled =
-            new (nameof(Options.parkingRestrictionsEnabled), Options.PersistTo.Savegame) {
+            new (nameof(SavedGameOptions.parkingRestrictionsEnabled), Scope.Savegame) {
                 Label = "Checkbox:Parking restrictions",
                 Handler = OnFeatureAvailabilityChanged,
             };
         public static CheckboxOption JunctionRestrictionsEnabled =
-            new (nameof(Options.junctionRestrictionsEnabled), Options.PersistTo.Savegame) {
+            new (nameof(SavedGameOptions.junctionRestrictionsEnabled), Scope.Savegame) {
                 Label = "Checkbox:Junction restrictions",
                 Handler = OnFeatureAvailabilityChanged,
             };
         public static CheckboxOption TurnOnRedEnabled =
-            new (nameof(Options.turnOnRedEnabled), Options.PersistTo.Savegame) {
+            new (nameof(SavedGameOptions.turnOnRedEnabled), Scope.Savegame) {
                 Label = "Maintenance.Checkbox:Turn on red",
                 Indent = true,
             };
         public static CheckboxOption LaneConnectorEnabled =
-            new (nameof(Options.laneConnectorEnabled), Options.PersistTo.Savegame) {
+            new (nameof(SavedGameOptions.laneConnectorEnabled), Scope.Savegame) {
                 Label = "Maintenance.Checkbox:Lane connector",
                 Handler = OnLaneConnectorEnabledChanged,
             };

@@ -467,7 +467,7 @@ namespace TrafficManager.Manager.Impl {
 
             // calculate approx. time after which the transit node will be reached
             float targetTimeToTransitNode = float.NaN;
-            if (Options.simulationAccuracy >= SimulationAccuracy.High) {
+            if (SavedGameOptions.Instance.simulationAccuracy >= SimulationAccuracy.High) {
                 Vector3 targetToNode = transitNode.m_position - vehicle.GetLastFramePosition();
                 Vector3 targetVel = vehicle.GetLastFrameVelocity();
                 float targetSpeed = targetVel.magnitude;
@@ -509,7 +509,7 @@ namespace TrafficManager.Manager.Impl {
                 // }
 
                 CustomSegmentLights otherLights = null;
-                if (Options.trafficLightPriorityRules) {
+                if (SavedGameOptions.Instance.trafficLightPriorityRules) {
                     otherLights = segLightsManager.GetSegmentLights(
                         otherSegmentId,
                         otherStartNode,

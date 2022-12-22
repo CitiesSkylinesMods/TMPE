@@ -27,7 +27,7 @@ namespace TrafficManager.Manager.Impl {
         private RoutingManager() { }
 
         public const NetInfo.LaneType ROUTED_LANE_TYPES =
-            NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle;
+            NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle | NetInfo.LaneType.CargoVehicle;
 
         public const VehicleInfo.VehicleType ROUTED_VEHICLE_TYPES =
             VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Metro |
@@ -454,7 +454,7 @@ namespace TrafficManager.Manager.Impl {
             bool nodeIsSimpleJunction = false;
             bool nodeIsSplitJunction = false;
 
-            if (Options.highwayRules && !nodeHasTrafficLights && !nodeHasPrioritySigns) {
+            if (SavedGameOptions.Instance.highwayRules && !nodeHasTrafficLights && !nodeHasPrioritySigns) {
                 // determine if junction is a simple junction (highway rules only apply to simple junctions)
                 int numOutgoing = 0;
                 int numIncoming = 0;
@@ -497,9 +497,9 @@ namespace TrafficManager.Manager.Impl {
             bool onOnewayHighway = nextAreOnlyOneWayHighways && prevEnd.outgoing && prevExtSegment.oneWay && prevExtSegment.highway;
 
             if (extendedLogRouting) {
-                Log._Debug($"Options.highwayMergingRules={Options.highwayMergingRules}, nodeHasTrafficLights={nodeHasTrafficLights} nodeHasPrioritySigns={nodeHasPrioritySigns}, nodeHasConnections={nodeHasConnections}, onOnewayHighway={onOnewayHighway}");
+                Log._Debug($"SavedGameOptions.Instance.highwayMergingRules={SavedGameOptions.Instance.highwayMergingRules}, nodeHasTrafficLights={nodeHasTrafficLights} nodeHasPrioritySigns={nodeHasPrioritySigns}, nodeHasConnections={nodeHasConnections}, onOnewayHighway={onOnewayHighway}");
             }
-            if (Options.highwayMergingRules && onOnewayHighway && !nodeHasTrafficLights && !nodeHasPrioritySigns && !nodeHasConnections) {
+            if (SavedGameOptions.Instance.highwayMergingRules && onOnewayHighway && !nodeHasTrafficLights && !nodeHasPrioritySigns && !nodeHasConnections) {
                 // determine if junction is a simple junction (highway rules only apply to simple junctions)
                 int numIncomingSegents = 0;
                 int numOutgoingSegments = 0;
@@ -555,19 +555,19 @@ namespace TrafficManager.Manager.Impl {
             }
 
             // determine if highway rules should be applied
-            bool onHighway = Options.highwayRules && onOnewayHighway;
+            bool onHighway = SavedGameOptions.Instance.highwayRules && onOnewayHighway;
             bool applyHighwayRules = onHighway && nodeIsSimpleJunction;
             bool applyHighwayRulesAtJunction = applyHighwayRules && nodeIsRealJunction;
-            bool iterateViaGeometry = (applyHighwayRulesAtJunction || applyHighwayMergingRules) && prevLaneInfo.MatchesRoad();
+            bool iterateViaGeometry = (applyHighwayRulesAtJunction || applyHighwayMergingRules) && prevLaneInfo.MatchesRoutedRoad();
 
             // start with u-turns at highway junctions
             ushort nextSegmentId = iterateViaGeometry ? prevSegmentId : (ushort)0;
 
             extendedLog?.Invoke(new { prevSegmentId, _ = "Starting exploration with ",
-                nextSegmentId, nodeId, __="--", onHighway, applyHighwayRules, applyHighwayRulesAtJunction, Options.highwayRules,
+                nextSegmentId, nodeId, __="--", onHighway, applyHighwayRules, applyHighwayRulesAtJunction, SavedGameOptions.Instance.highwayRules,
                 nodeIsSimpleJunction, nextAreOnlyOneWayHighways, prevEndOutgoingOneWay = prevEnd.outgoing && prevExtSegment.oneWay,
                 prevExtSegment.highway, iterateViaGeometry});
-            extendedLog?.Invoke(new { Options = new { Options.highwayMergingRules }, applyHighwayMergingRules });
+            extendedLog?.Invoke(new { Options = new { SavedGameOptions.Instance.highwayMergingRules }, applyHighwayMergingRules });
             extendedLog?.Invoke(new { prevSegIsInverted, Shortcuts.LHT });
             extendedLog?.Invoke(new { prevSimilarLaneCount, prevInnerSimilarLaneIndex, prevOuterSimilarLaneIndex, prevHasBusLane });
             extendedLog?.Invoke(new { nodeIsJunction, nodeIsEndOrOneWayOut, nodeHasTrafficLights, nodeIsSimpleJunction, nodeIsSplitJunction, nodeIsRealJunction });
@@ -759,7 +759,7 @@ namespace TrafficManager.Manager.Impl {
                                     }
                                 }
 
-                                if (nextLaneInfo.MatchesRoad() && prevLaneInfo.MatchesRoad()) {
+                                if (nextLaneInfo.MatchesRoutedRoad() && prevLaneInfo.MatchesRoutedRoad()) {
                                     // routing road vehicles (car, SOS, bus, trolleybus, ...)
                                     // lane may be mixed car+tram
                                     ++incomingCarLanes;
@@ -905,7 +905,7 @@ namespace TrafficManager.Manager.Impl {
                                     nextLaneInfo = new { nextLaneInfo.m_finalDirection }, nextExpectedDirection });
 
                                 bool outgoing = (nextLaneInfo.m_finalDirection & NetInfo.InvertDirection(nextExpectedDirection)) != NetInfo.Direction.None;
-                                if (outgoing && nextLaneInfo.MatchesRoad()) {
+                                if (outgoing && nextLaneInfo.MatchesRoutedRoad()) {
                                     ++outgoingCarLanes;
 
                                     extendedLog?.Invoke(new { _ = "increasing number of outgoing lanes at ",
@@ -927,7 +927,7 @@ namespace TrafficManager.Manager.Impl {
                     extendedLog?.Invoke(new { isNextSegmentValid, nextCompatibleTransitionDatas = nextCompatibleTransitionDataIndices?.ArrayToString() });
 
                     bool laneChangesAllowed
-                        = Options.junctionRestrictionsEnabled
+                        = SavedGameOptions.Instance.junctionRestrictionsEnabled
                           && JunctionRestrictionsManager.Instance.IsLaneChangingAllowedWhenGoingStraight(
                                  nextSegmentId, isNodeStartNodeOfNextSegment);
                     int nextCompatibleLaneCount = numNextCompatibleTransitionDatas;
@@ -1109,7 +1109,7 @@ namespace TrafficManager.Manager.Impl {
 #if DEBUGHWJUNCTIONROUTING
                                     extendedLog?.Invoke(new { _ = "highway junction iteration:", compatibleLaneDist });
 #endif
-                                    if (Options.highwayRules) {
+                                    if (SavedGameOptions.Instance.highwayRules) {
                                         UpdateHighwayLaneArrows(
                                             nextCompatibleTransitionDatas[nextTransitionIndex].laneId,
                                             isNodeStartNodeOfNextSegment,

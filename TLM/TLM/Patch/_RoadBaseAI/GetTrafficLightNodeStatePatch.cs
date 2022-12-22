@@ -20,7 +20,7 @@ namespace TrafficManager.Patch._RoadBaseAI {
                                   ref NetSegment segmentData,
                                   ref NetNode.Flags flags,
                                   ref Color color) {
-            if (!Options.timedLightsEnabled
+            if (!SavedGameOptions.Instance.timedLightsEnabled
                 || !TrafficLightSimulationManager
                              .Instance
                              .TrafficLightSimulations[nodeID]

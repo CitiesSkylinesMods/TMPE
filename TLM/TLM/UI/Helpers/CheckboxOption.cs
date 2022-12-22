@@ -17,7 +17,7 @@ namespace TrafficManager.UI.Helpers {
         private HashSet<IValuePropagator> _propagatesTrueTo = new();
         private HashSet<IValuePropagator> _propagatesFalseTo = new();
 
-        public CheckboxOption(string fieldName, Options.PersistTo scope = Options.PersistTo.Savegame)
+        public CheckboxOption(string fieldName, Scope scope = Scope.Savegame)
         : base(fieldName, scope) { }
 
         /// <summary>
@@ -67,12 +67,11 @@ namespace TrafficManager.UI.Helpers {
                     }
                 }
 
-                if (value == base.Value)
-                    return;
-
-                base.Value = value;
-                Log.Info($"CheckboxOption.Value: `{FieldName}` changed to {value}");
-                PropagateAll(value);
+                if (value != base.Value) {
+                    base.Value = value;
+                    Log.Info($"CheckboxOption.Value: `{FieldName}` changed to {value}");
+                    PropagateAll(value);
+                }
 
                 if (Shortcuts.IsMainThread()) {
                     if (HasUI) {

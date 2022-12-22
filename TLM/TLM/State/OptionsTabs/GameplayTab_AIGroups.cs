@@ -11,13 +11,13 @@ namespace TrafficManager.State {
         // Advanced AI group
 
         public static CheckboxOption AdvancedAI =
-            new (nameof(Options.advancedAI), Options.PersistTo.Savegame) {
+            new (nameof(SavedGameOptions.advancedAI), Scope.Savegame) {
                 Label = "Gameplay.Checkbox:Enable advanced vehicle AI",
                 Handler = OnAdvancedAIChanged,
             };
 
         public static SliderOption AltLaneSelectionRatio =
-            new(nameof(Options.altLaneSelectionRatio), Options.PersistTo.Savegame) {
+            new(nameof(SavedGameOptions.altLaneSelectionRatio), Scope.Savegame) {
                 Label = "Gameplay.Slider:Dynamic lane selection",
                 Tooltip = "%",
                 Min = 0,
@@ -28,7 +28,7 @@ namespace TrafficManager.State {
         // Parking AI group
 
         public static CheckboxOption ParkingAI =
-            new(nameof(Options.parkingAI), Options.PersistTo.Savegame) {
+            new(nameof(SavedGameOptions.parkingAI), Scope.Savegame) {
                 Label = "Gameplay.Checkbox:Enable more realistic parking",
                 Handler = OnParkingAIChanged,
             };
@@ -36,19 +36,19 @@ namespace TrafficManager.State {
         // Public Transport group
 
         public static CheckboxOption RealisticPublicTransport =
-            new(nameof(Options.realisticPublicTransport), Options.PersistTo.Savegame) {
+            new(nameof(SavedGameOptions.realisticPublicTransport), Scope.Savegame) {
                 Label = "Gameplay.Checkbox:No excessive transfers",
             };
 
         public static DLCRestrictedCheckboxOption AllowBusInOldTown =
-            new(nameof(GlobalConfig.Instance.PathFinding.AllowBusInOldTownDistricts), requiredDLC: SteamHelper.DLC.AfterDarkDLC, Options.PersistTo.Global) {
+            new(nameof(GlobalConfig.Instance.PathFinding.AllowBusInOldTownDistricts), requiredDLC: SteamHelper.DLC.AfterDarkDLC, Scope.Global) {
                 Label = "Gameplay.Checkbox:Allow Buses in Old Town districts",
                 Handler = OnAllowBusInOldTownChanged,
                 Validator = AfterDarkDlcValidator,
             };
 
         public static DLCRestrictedCheckboxOption AllowTaxiInOldTown =
-            new(nameof(GlobalConfig.Instance.PathFinding.AllowTaxiInOldTownDistricts), requiredDLC: SteamHelper.DLC.AfterDarkDLC, Options.PersistTo.Global) {
+            new(nameof(GlobalConfig.Instance.PathFinding.AllowTaxiInOldTownDistricts), requiredDLC: SteamHelper.DLC.AfterDarkDLC, Scope.Global) {
                 Label = "Gameplay.Checkbox:Allow Taxis in Old Town districts",
                 Handler = OnAllowTaxiInOldTownChanged,
                 Validator = AfterDarkDlcValidator,
@@ -84,23 +84,23 @@ namespace TrafficManager.State {
         private static void OnAdvancedAIChanged(bool _) {
             if (TMPELifecycle.Instance.Deserializing) return;
 
-            if (!Options.advancedAI)
+            if (!SavedGameOptions.Instance.advancedAI)
                 AltLaneSelectionRatio.Value = 0;
         }
 
         private static void OnAltLaneSelectionRatioChanged(float _) {
             if (TMPELifecycle.Instance.Deserializing) return;
 
-            Options.altLaneSelectionRatio = AltLaneSelectionRatio.Save();
+            SavedGameOptions.Instance.altLaneSelectionRatio = AltLaneSelectionRatio.Save();
 
-            if (Options.altLaneSelectionRatio > 0)
+            if (SavedGameOptions.Instance.altLaneSelectionRatio > 0)
                 AdvancedAI.Value = true;
         }
 
         private static void OnParkingAIChanged(bool _) {
             if (TMPELifecycle.Instance.Deserializing) return;
 
-            if (Options.parkingAI) {
+            if (SavedGameOptions.Instance.parkingAI) {
                 AdvancedParkingManager.Instance.OnEnableFeature();
             } else {
                 AdvancedParkingManager.Instance.OnDisableFeature();

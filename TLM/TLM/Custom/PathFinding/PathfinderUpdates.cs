@@ -38,13 +38,13 @@ namespace TrafficManager.Custom.PathFinding {
         public static ExtVehicleType DespawnVehiclesIfNecessary() {
             var filter = ExtVehicleType.None;
 
-            if (Options.SavegamePathfinderEdition == LatestPathfinderEdition) {
+            if (SavedGameOptions.Instance.SavegamePathfinderEdition == LatestPathfinderEdition) {
                 return filter; // nothing to do, everything is fine
             }
 
-            Log.Info($"Pathfinder update from {Options.SavegamePathfinderEdition} to {LatestPathfinderEdition}.");
+            Log.Info($"Pathfinder update from {SavedGameOptions.Instance.SavegamePathfinderEdition} to {LatestPathfinderEdition}.");
 
-            if (Options.SavegamePathfinderEdition < 1) {
+            if (SavedGameOptions.Instance.SavegamePathfinderEdition < 1) {
                 filter |= ExtVehicleType.Plane; // #1338
             }
 
@@ -60,7 +60,7 @@ namespace TrafficManager.Custom.PathFinding {
             }
 
             // this will be stored in savegame
-            Options.SavegamePathfinderEdition = LatestPathfinderEdition;
+            SavedGameOptions.Instance.SavegamePathfinderEdition = LatestPathfinderEdition;
 
             return filter;
         }

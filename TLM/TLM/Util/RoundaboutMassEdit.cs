@@ -23,11 +23,11 @@ namespace TrafficManager.Util {
         private List<ushort> segmentList_;
 
         private static void FixSegmentRoundabout(ushort segmentId, ushort nextSegmentId) {
-            if (Options.RoundAboutQuickFix_ParkingBanMainR) {
+            if (SavedGameOptions.Instance.RoundAboutQuickFix_ParkingBanMainR) {
                 ParkingRestrictionsManager.Instance.SetParkingAllowed(segmentId, false);
             }
 
-            if (Options.RoundAboutQuickFix_RealisticSpeedLimits) {
+            if (SavedGameOptions.Instance.RoundAboutQuickFix_RealisticSpeedLimits) {
                 SpeedValue? targetSpeed = CalculatePreferedSpeed(segmentId);
                 float defaultSpeed = SpeedLimitManager.Instance.CalculateCustomNetinfoSpeedLimit(segmentId.ToSegment().Info);
 
@@ -42,7 +42,7 @@ namespace TrafficManager.Util {
             ref NetNode node = ref nodeId.ToNode();
             bool isJunction = node.IsJunction();
 
-            if (Options.RoundAboutQuickFix_StayInLaneMainR && !isJunction) {
+            if (SavedGameOptions.Instance.RoundAboutQuickFix_StayInLaneMainR && !isJunction) {
                 StayInLane(nodeId, StayInLaneMode.Both);
             }
 
@@ -50,7 +50,7 @@ namespace TrafficManager.Util {
             // in which case the next segment should be straight ahead.
             bool isStraight = segEndMan.GetDirection(segmentId, nextSegmentId, nodeId) == ArrowDirection.Forward;
 
-            if (Options.RoundAboutQuickFix_DedicatedExitLanes &&
+            if (SavedGameOptions.Instance.RoundAboutQuickFix_DedicatedExitLanes &&
                 isJunction &&
                 SeparateTurningLanesUtil.CanChangeLanes(
                     segmentId, nodeId) == SetLaneArrow_Result.Success &&
@@ -114,14 +114,14 @@ namespace TrafficManager.Util {
         }
 
         private static void FixRulesRoundabout(ushort segmentId, bool startNode) {
-            if (Options.RoundAboutQuickFix_PrioritySigns) {
+            if (SavedGameOptions.Instance.RoundAboutQuickFix_PrioritySigns) {
                 TrafficPriorityManager.Instance.SetPrioritySign(
                     segmentId,
                     startNode,
                     PriorityType.Main);
             }
 
-            if (Options.RoundAboutQuickFix_NoCrossMainR) {
+            if (SavedGameOptions.Instance.RoundAboutQuickFix_NoCrossMainR) {
                 JunctionRestrictionsManager.Instance.SetPedestrianCrossingAllowed(
                     segmentId,
                     startNode,
@@ -137,13 +137,13 @@ namespace TrafficManager.Util {
             bool startNode = segmentId.ToSegment().IsStartNode(nodeId);
             bool isHighway = ExtNodeManager.JunctionHasOnlyHighwayRoads(nodeId);
 
-            if (Options.RoundAboutQuickFix_NoCrossYieldR) {
+            if (SavedGameOptions.Instance.RoundAboutQuickFix_NoCrossYieldR) {
                 JunctionRestrictionsManager.Instance.SetPedestrianCrossingAllowed(
                     segmentId,
                     startNode,
                     false);
             }
-            if (Options.RoundAboutQuickFix_PrioritySigns) {
+            if (SavedGameOptions.Instance.RoundAboutQuickFix_PrioritySigns) {
                 TrafficPriorityManager.Instance.SetPrioritySign(
                     segmentId,
                     startNode,
@@ -155,7 +155,7 @@ namespace TrafficManager.Util {
                 JunctionRestrictionsManager.Instance.SetLaneChangingAllowedWhenGoingStraight(segmentId, startNode, true);
             } // endif
 
-            if (Options.RoundAboutQuickFix_KeepClearYieldR) {
+            if (SavedGameOptions.Instance.RoundAboutQuickFix_KeepClearYieldR) {
                 JunctionRestrictionsManager.Instance.SetEnteringBlockedJunctionAllowed(
                     segmentId,
                     startNode,
@@ -164,14 +164,14 @@ namespace TrafficManager.Util {
         }
 
         private static void FixSegmentMinor(ushort segmentId, ushort nodeId) {
-            if (Options.RoundAboutQuickFix_ParkingBanYieldR) {
+            if (SavedGameOptions.Instance.RoundAboutQuickFix_ParkingBanYieldR) {
                 ParkingRestrictionsManager.Instance.SetParkingAllowed(segmentId, false);
             }
             int shortUnit = 4;
             int meterPerUnit = 8;
             ref NetSegment seg = ref segmentId.ToSegment();
             ushort otherNodeId = seg.GetOtherNode(nodeId);
-            if (Options.RoundAboutQuickFix_StayInLaneNearRabout &&
+            if (SavedGameOptions.Instance.RoundAboutQuickFix_StayInLaneNearRabout &&
                 !HasJunctionFlag(otherNodeId) &&
                 seg.m_averageLength < shortUnit * meterPerUnit) {
                 StayInLane(otherNodeId, StayInLaneMode.Both);

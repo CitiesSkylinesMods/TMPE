@@ -51,10 +51,10 @@ namespace TrafficManager.Patch._RoadBaseAI {
             lastSimulatedSegmentId = segmentID;
 
             bool doTrafficMeasurement = true;
-            if (Options.simulationAccuracy == SimulationAccuracy.High ||
-                Options.simulationAccuracy == SimulationAccuracy.Medium) {
+            if (SavedGameOptions.Instance.simulationAccuracy == SimulationAccuracy.High ||
+                SavedGameOptions.Instance.simulationAccuracy == SimulationAccuracy.Medium) {
                 doTrafficMeasurement = (segmentID & 1) == trafficMeasurementMod;
-            } else if (Options.simulationAccuracy <= SimulationAccuracy.Low) {
+            } else if (SavedGameOptions.Instance.simulationAccuracy <= SimulationAccuracy.Low) {
                 doTrafficMeasurement = (segmentID & 3) == trafficMeasurementMod;
             }
 

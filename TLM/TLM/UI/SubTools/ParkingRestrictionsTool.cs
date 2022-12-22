@@ -159,7 +159,7 @@ namespace TrafficManager.UI.SubTools {
         }
 
         public override void ShowGUIOverlay(ToolMode toolMode, bool viewOnly) {
-            if (viewOnly && !Options.parkingRestrictionsOverlay && !MassEditOverlay.IsActive) {
+            if (viewOnly && !SavedGameOptions.Instance.parkingRestrictionsOverlay && !MassEditOverlay.IsActive) {
                 return;
             }
 
@@ -252,7 +252,7 @@ namespace TrafficManager.UI.SubTools {
                                                    ref NetSegment segment,
                                                    bool viewOnly,
                                                    ref Vector3 camPos) {
-            if (viewOnly && !Options.parkingRestrictionsOverlay && !MassEditOverlay.IsActive) {
+            if (viewOnly && !SavedGameOptions.Instance.parkingRestrictionsOverlay && !MassEditOverlay.IsActive) {
                 return NetInfo.Direction.None;
             }
 
@@ -274,13 +274,17 @@ namespace TrafficManager.UI.SubTools {
             }
 
             foreach (KeyValuePair<NetInfo.Direction, Vector3> e in segCenter) {
+                bool configurable = parkingManager.MayHaveParkingRestriction(segmentId, e.Key);
+                if (!configurable) {
+                    continue;
+                }
+
                 bool allowed = parkingManager.IsParkingAllowed(segmentId, e.Key);
                 if (allowed && viewOnly) {
                     continue;
                 }
 
                 bool visible = GeometryUtil.WorldToScreenPoint(e.Value, out Vector3 screenPos);
-
                 if (!visible) {
                     continue;
                 }
@@ -294,7 +298,7 @@ namespace TrafficManager.UI.SubTools {
                     size,
                     size);
 
-                if (Options.speedLimitsOverlay || MassEditOverlay.IsActive) {
+                if (SavedGameOptions.Instance.speedLimitsOverlay || MassEditOverlay.IsActive) {
                     boundingBox.y -= size + 10f;
                 }
 

@@ -11,20 +11,20 @@ namespace TrafficManager.State {
     public static class PoliciesTab_OnRoadsGroup {
 
         public static CheckboxOption BanRegularTrafficOnBusLanes =
-            new (nameof(Options.banRegularTrafficOnBusLanes), Options.PersistTo.Savegame) {
+            new (nameof(SavedGameOptions.banRegularTrafficOnBusLanes), Scope.Savegame) {
                 Label = "VR.Checkbox:Ban private cars and trucks on bus lanes",
                 Handler = OnBanRegularTrafficOnBusLanesChanged,
             };
 
         // at a segment to segment transition, only the smaller segment gets crossings
         public static CheckboxOption NoDoubleCrossings =
-            new (nameof(Options.NoDoubleCrossings), Options.PersistTo.Savegame) {
+            new (nameof(SavedGameOptions.NoDoubleCrossings), Scope.Savegame) {
                 Label = "VR.Option:No double crossings",
                 Handler = JunctionRestrictionsUpdateHandler,
             };
 
         public static DropDownOption<VehicleRestrictionsAggression> VehicleRestrictionsAggression =
-            new(nameof(Options.vehicleRestrictionsAggression), Options.PersistTo.Savegame) {
+            new(nameof(SavedGameOptions.vehicleRestrictionsAggression), Scope.Savegame) {
                 Label = "VR.Dropdown:Vehicle restrictions aggression",
             };
 
@@ -57,7 +57,7 @@ namespace TrafficManager.State {
 
             OptionsManager.ReinitialiseSubTools();
 
-            if (Options.DedicatedTurningLanes)
+            if (SavedGameOptions.Instance.DedicatedTurningLanes)
                 LaneArrowManager.Instance.UpdateDedicatedTurningLanePolicy(false);
         }
 

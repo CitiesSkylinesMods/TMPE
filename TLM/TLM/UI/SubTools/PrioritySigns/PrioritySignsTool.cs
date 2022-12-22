@@ -282,7 +282,7 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
 
         public override void ShowGUIOverlay(ToolMode toolMode, bool viewOnly) {
             if (viewOnly
-                && !(Options.prioritySignsOverlay
+                && !(SavedGameOptions.Instance.prioritySignsOverlay
                      || UI.SubTools.PrioritySigns.MassEditOverlay.IsActive)) {
                 return;
             }
@@ -485,7 +485,7 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
             base.Initialize();
             Cleanup();
 
-            if (Options.prioritySignsOverlay
+            if (SavedGameOptions.Instance.prioritySignsOverlay
                 || UI.SubTools.PrioritySigns.MassEditOverlay.IsActive) {
                 RefreshCurrentPriorityNodeIds();
             } else {

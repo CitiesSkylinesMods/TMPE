@@ -77,7 +77,7 @@ namespace TrafficManager.Patch._VehicleAI._PassengerCarAI {
             }
 
             // NON-STOCK CODE START
-            if (Options.parkingAI) {
+            if (SavedGameOptions.Instance.parkingAI) {
                 ret = AdvancedParkingManager.Instance.EnrichLocalizedCarStatus(
                     ret,
                     ref ExtCitizenInstanceManager.Instance.ExtInstances[driverInstanceId]);

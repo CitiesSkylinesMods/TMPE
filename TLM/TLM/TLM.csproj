@@ -178,6 +178,7 @@
     <Compile Include="State\OptionsTabs\MaintenanceTab_ConfigGroup.cs" />
     <Compile Include="State\OptionsTabs\MaintenanceTab_DespawnGroup.cs" />
     <Compile Include="State\OptionsTabs\MaintenanceTab_ToolsGroup.cs" />
+    <Compile Include="State\TMPESettings.cs" />
     <Compile Include="State\VersionInfo.cs" />
     <Compile Include="TrafficLight\Impl\ITrafficLightContainer.cs" />
     <Compile Include="TrafficLight\Impl\TrafficLightSimulation.cs" />
@@ -195,6 +196,7 @@
     <Compile Include="UI\Helpers\OptionButtonBase.cs" />
     <Compile Include="UI\Helpers\UITriStateCheckbox.cs" />
     <Compile Include="UI\Helpers\UrlButton.cs" />
+    <Compile Include="UI\Helpers\Scope.cs" />
     <Compile Include="UI\Textures\RoadSignTheme.cs" />
     <Compile Include="UI\MainMenu\RoutingDetectorButton.cs" />
     <Compile Include="UI\SubTools\RoutingDetector\Connection.cs" />
@@ -467,7 +469,7 @@
     <Compile Include="UI\SubTools\VehicleRestrictionsTool.cs" />
     <Compile Include="UI\SubTools\ManualTrafficLightsTool.cs" />
     <Compile Include="UI\SubTools\ToggleTrafficLightsTool.cs" />
-    <Compile Include="State\Options.cs" />
+    <Compile Include="State\SavedGameOptions.cs" />
     <Compile Include="Manager\Impl\SpeedLimitManager.cs" />
     <Compile Include="State\Flags.cs" />
     <Compile Include="UI\TrafficManagerSubTool.cs" />

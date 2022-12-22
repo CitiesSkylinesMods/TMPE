@@ -23,6 +23,6 @@ namespace TrafficManager.UI.MainMenu {
 
         protected override bool IsVisible() => IsButtonEnabled();
 
-        public static bool IsButtonEnabled() => Options.vehicleRestrictionsEnabled;
+        public static bool IsButtonEnabled() => SavedGameOptions.Instance.vehicleRestrictionsEnabled;
     }
 }
