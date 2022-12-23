@@ -87,8 +87,7 @@ namespace TrafficManager.Patch {
                 Label label = il.DefineLabel();
                 List<Label> oldLabels = codes[target1].labels.ToList();
                 codes[target1].labels.Clear(); // clear labels -> they are moved to new instruction
-                codes[target1].labels.Add(label);//add label to next instruction (if() false jump)
-                List<CodeInstruction> newInstructions = GetUpdatePositionInstructions(label);
+                List<CodeInstruction> newInstructions = GetUpdatePositionInstructions();
                 newInstructions[0].labels.AddRange(oldLabels); // add old labels to redirect here
                 codes.InsertRange(target1, newInstructions); // insert new instructions
 
@@ -108,76 +107,31 @@ namespace TrafficManager.Patch {
             return codes;
         }
 
-        private static List<CodeInstruction> GetUpdatePositionInstructions(Label label) {
-            PropertyInfo getFactory = typeof(Constants).GetProperty(nameof(Constants.ManagerFactory));
-            PropertyInfo getExtVehMan = typeof(IManagerFactory).GetProperty(nameof(IManagerFactory.ExtVehicleManager));
-            MethodInfo updateVehPos = typeof(IExtVehicleManager).GetMethod( nameof(IExtVehicleManager.UpdateVehiclePosition));
-            FieldInfo advAIField = typeof(Options).GetField(nameof(Options.advancedAI));
-            FieldInfo vehFlags = typeof(Vehicle).GetField(nameof(Vehicle.m_flags));
-            MethodInfo logTraffic = typeof(IExtVehicleManager).GetMethod(nameof(IExtVehicleManager.LogTraffic));
-
-            return new List<CodeInstruction> {
-                new CodeInstruction(OpCodes.Call, getFactory.GetGetMethod()),
-                new CodeInstruction(OpCodes.Callvirt, getExtVehMan.GetGetMethod()),
-                new CodeInstruction(OpCodes.Ldarg_1),
-                new CodeInstruction(OpCodes.Ldarg_2),
-                new CodeInstruction(OpCodes.Callvirt, updateVehPos),
-                new CodeInstruction(OpCodes.Ldsfld, advAIField),
-                new CodeInstruction(OpCodes.Brfalse_S, label),
-                new CodeInstruction(OpCodes.Ldarg_2),
-                new CodeInstruction(OpCodes.Ldfld, vehFlags),
-                new CodeInstruction(OpCodes.Ldc_I4_4),
-                new CodeInstruction(OpCodes.And),
-                new CodeInstruction(OpCodes.Brfalse_S, label),
-                new CodeInstruction(OpCodes.Call, getFactory.GetGetMethod()),
-                new CodeInstruction(OpCodes.Callvirt, getExtVehMan.GetGetMethod()),
-                new CodeInstruction(OpCodes.Ldarg_1),
-                new CodeInstruction(OpCodes.Ldarg_2),
-                new CodeInstruction(OpCodes.Callvirt, logTraffic),
-            };
-
-            /*
-             --------------------------------------
-                Constants.ManagerFactory.ExtVehicleManager.UpdateVehiclePosition(vehicleId, ref vehicleData);
-                if (Options.advancedAI && (vehicleData.m_flags & Vehicle.Flags.Spawned) != 0)
-                {
-                    // Advanced AI traffic measurement
-                    Constants.ManagerFactory.ExtVehicleManager..LogTraffic(vehicleId, ref vehicleData);
-                }
-             --------------------------------------
-
-              call         class [TMPE.API]TrafficManager.API.Manager.IManagerFactory TrafficManager.Constants::get_ManagerFactory()
-              callvirt     instance class [TMPE.API]TrafficManager.API.Manager.IExtVehicleManager [TMPE.API]TrafficManager.API.Manager.IManagerFactory::get_ExtVehicleManager()
-              ldarg.1      // vehicleId
-              ldarg.2      // vehicleData
-              callvirt     instance void [TMPE.API]TrafficManager.API.Manager.IExtVehicleManager::UpdateVehiclePosition(unsigned int16, valuetype ['Assembly-CSharp']Vehicle&)
-
-              ldsfld       bool TrafficManager.State.Options::advancedAI
-              brfalse.s    IL_0129
-              ldarg.2      // vehicleData
-              ldfld        valuetype ['Assembly-CSharp']Vehicle/Flags ['Assembly-CSharp']Vehicle::m_flags
-              ldc.i4.4
-              and
-              brfalse.s    IL_0129
-
-              call         class [TMPE.API]TrafficManager.API.Manager.IManagerFactory TrafficManager.Constants::get_ManagerFactory()
-              callvirt     instance class [TMPE.API]TrafficManager.API.Manager.IExtVehicleManager [TMPE.API]TrafficManager.API.Manager.IManagerFactory::get_ExtVehicleManager()
-              ldarg.1      // vehicleId
-              ldarg.2      // vehicleData
-              callvirt     instance void [TMPE.API]TrafficManager.API.Manager.IExtVehicleManager::LogTraffic(unsigned int16, valuetype ['Assembly-CSharp']Vehicle&)
-
-             */
+        public static void UpdatePosition(ushort vehicleId, ref Vehicle vehicleData) {
+            Constants.ManagerFactory.ExtVehicleManager.UpdateVehiclePosition(vehicleId, ref vehicleData);
+            if (SavedGameOptions.Instance.advancedAI && (vehicleData.m_flags & Vehicle.Flags.Spawned) != 0) {
+                // Advanced AI traffic measurement
+                Constants.ManagerFactory.ExtVehicleManager.LogTraffic(vehicleId, ref vehicleData);
+            }
         }
 
-        private static List<CodeInstruction> GetModifiedBlockCounterInstructions(Label retLabel) {
+        internal static List<CodeInstruction> GetUpdatePositionInstructions() {
+            return new List<CodeInstruction> {
+                new CodeInstruction(OpCodes.Ldarg_1), // vehicleID
+                new CodeInstruction(OpCodes.Ldarg_2), // ref vehicleData
+                new CodeInstruction(OpCodes.Call, typeof(PatchCommons).GetMethod(nameof(UpdatePosition))),
+            };
+        }
+
+        public static List<CodeInstruction> GetModifiedBlockCounterInstructions(Label retLabel) {
             Type vbm = typeof(VehicleBehaviorManager);
             FieldInfo instance = vbm.GetField(nameof(VehicleBehaviorManager.Instance));
             MethodInfo mayDespawn = vbm.GetMethod(nameof(VehicleBehaviorManager.MayDespawn));
 
             return new List<CodeInstruction> {
                 new CodeInstruction(OpCodes.Ldsfld, instance),
-                new CodeInstruction(OpCodes.Ldarg_1),
-                new CodeInstruction(OpCodes.Ldarg_2),
+                new CodeInstruction(OpCodes.Ldarg_1), // vehicleID
+                new CodeInstruction(OpCodes.Ldarg_2), // ref vehicleData
                 new CodeInstruction(OpCodes.Callvirt, mayDespawn),
                 new CodeInstruction(OpCodes.Brfalse_S, retLabel)
             };
@@ -276,8 +230,8 @@ namespace TrafficManager.Patch {
             MethodInfo getSpeed = typeof(PatchCommons).GetMethod(nameof(GetCustomSpeed), BindingFlags.Static | BindingFlags.NonPublic);
             return new List<CodeInstruction> {
                 new CodeInstruction(OpCodes.Ldarg_0),
-                new CodeInstruction(OpCodes.Ldarg_1),
-                new CodeInstruction(OpCodes.Ldarg_2),
+                new CodeInstruction(OpCodes.Ldarg_1), // vehicleID
+                new CodeInstruction(OpCodes.Ldarg_2), // ref vehicleData
                 new CodeInstruction(OpCodes.Ldarg_3),
                 new CodeInstruction(OpCodes.Ldarg_S, 4), // laneID
                 new CodeInstruction(OpCodes.Ldloc_1),    //info variable

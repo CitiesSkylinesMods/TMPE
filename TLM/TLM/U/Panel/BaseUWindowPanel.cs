@@ -98,7 +98,7 @@ namespace TrafficManager.U.Panel {
             return dragHandler.AddComponent<UIDragHandle>();
         }
 
-        /// <summary>Make this panel use dark gray generic background and opacity from the GUI Options.</summary>
+        /// <summary>Make this panel use dark gray generic background and opacity from the GUI SavedGameOptions.Instance.</summary>
         internal void GenericBackgroundAndOpacity() {
             // the GenericPanel sprite is silver, make it dark
             this.backgroundSprite = "GenericPanel";

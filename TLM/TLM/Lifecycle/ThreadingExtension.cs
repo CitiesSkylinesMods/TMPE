@@ -16,7 +16,7 @@ namespace TrafficManager.Lifecycle {
         public override void OnBeforeSimulationFrame() {
             base.OnBeforeSimulationFrame();
 
-            if (Options.timedLightsEnabled) {
+            if (SavedGameOptions.Instance.timedLightsEnabled) {
                 TrafficLightSimulationManager.Instance.SimulationStep();
             }
         }

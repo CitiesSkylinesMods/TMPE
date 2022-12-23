@@ -221,7 +221,7 @@ namespace TrafficManager.UI.SubTools.TTL {
                             return;
                         }
 
-                        // bool mayEnterBlocked = Options.mayEnterBlockedJunctions;
+                        // bool mayEnterBlocked = SavedGameOptions.Instance.mayEnterBlockedJunctions;
                         TimedTrafficLights existingTimedLight = null;
                         foreach (ushort nodeId in selectedNodeIds) {
                             if (!tlsMan.HasTimedSimulation(nodeId)) {
@@ -927,7 +927,7 @@ namespace TrafficManager.UI.SubTools.TTL {
             base.Initialize();
             Cleanup();
 
-            if (Options.timedLightsOverlay) {
+            if (SavedGameOptions.Instance.timedLightsOverlay) {
                 RefreshCurrentTimedNodeIds();
             } else {
                 currentTimedNodeIds.Clear();
@@ -1396,7 +1396,7 @@ namespace TrafficManager.UI.SubTools.TTL {
                 return;
             }
 
-            if (viewOnly && !Options.timedLightsOverlay) {
+            if (viewOnly && !SavedGameOptions.Instance.timedLightsOverlay) {
                 return;
             }
 

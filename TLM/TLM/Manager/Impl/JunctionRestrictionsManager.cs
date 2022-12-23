@@ -353,7 +353,7 @@ namespace TrafficManager.Manager.Impl {
             bool ret = (node.m_flags & (NetNode.Flags.End | NetNode.Flags.OneWayOut)) != NetNode.Flags.None ||
                        ((node.m_flags2 & NetNode.Flags2.PedestrianStreetTransition) != 0 &&!HasOtherSegmentsWithCategories(segmentId, ref node));
 
-            if (!ret && Options.allowUTurns) {
+            if (!ret && SavedGameOptions.Instance.allowUTurns) {
                 ret = (node.m_flags & (NetNode.Flags.Junction | NetNode.Flags.Transition)) !=
                       NetNode.Flags.None;
             }
@@ -449,7 +449,7 @@ namespace TrafficManager.Manager.Impl {
                 return false;
             }
 
-            bool ret = near ? Options.allowNearTurnOnRed : Options.allowFarTurnOnRed;
+            bool ret = near ? SavedGameOptions.Instance.allowNearTurnOnRed : SavedGameOptions.Instance.allowFarTurnOnRed;
             if (logLogic) {
                 Log._Debug(
                     $"JunctionRestrictionsManager.GetTurnOnRedAllowed({near}, {segmentId}, " +
@@ -532,7 +532,7 @@ namespace TrafficManager.Manager.Impl {
                 return false;
             }
 
-            bool ret = Options.allowLaneChangesWhileGoingStraight;
+            bool ret = SavedGameOptions.Instance.allowLaneChangesWhileGoingStraight;
 
             if (logLogic) {
                 Log._Debug(
@@ -618,7 +618,7 @@ namespace TrafficManager.Manager.Impl {
             }
 
             bool ret;
-            if (Options.allowEnterBlockedJunctions) {
+            if (SavedGameOptions.Instance.allowEnterBlockedJunctions) {
                 ret = true;
             } else {
                 ushort nodeId = startNode ? netSegment.m_startNode : netSegment.m_endNode;
@@ -683,7 +683,7 @@ namespace TrafficManager.Manager.Impl {
                 return true;
             }
 
-            if (Options.NoDoubleCrossings &&
+            if (SavedGameOptions.Instance.NoDoubleCrossings &&
                 node.m_flags.IsFlagSet(NetNode.Flags.Junction) &&
                 !node.m_flags.IsFlagSet(NetNode.Flags.Untouchable) &&
                 node.CountSegments() == 2) {

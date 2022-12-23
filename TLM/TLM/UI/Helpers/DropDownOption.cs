@@ -12,7 +12,7 @@ namespace TrafficManager.UI.Helpers {
         where TEnum : struct, Enum, IConvertible {
         private UILabel _dropdownLabel;
 
-        public DropDownOption(string fieldName, Options.PersistTo scope = Options.PersistTo.Savegame)
+        public DropDownOption(string fieldName, Scope scope = Scope.Savegame)
         : base(fieldName, scope) { }
 
         /* Data */

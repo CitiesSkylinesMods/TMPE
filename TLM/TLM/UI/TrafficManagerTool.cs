@@ -642,20 +642,20 @@ namespace TrafficManager.UI {
                     ModUI.Instance.CloseMainMenu();
                 }
 
-                if (Options.nodesOverlay) {
+                if (SavedGameOptions.Instance.nodesOverlay) {
                     DebugGuiDisplaySegments();
                     DebugGuiDisplayNodes();
                 }
 
-                if (Options.vehicleOverlay) {
+                if (SavedGameOptions.Instance.vehicleOverlay) {
                     DebugGuiDisplayVehicles();
                 }
 
-                if (Options.citizenOverlay) {
+                if (SavedGameOptions.Instance.citizenOverlay) {
                     DebugGuiDisplayCitizens();
                 }
 
-                if (Options.buildingOverlay) {
+                if (SavedGameOptions.Instance.buildingOverlay) {
                     DebugGuiDisplayBuildings();
                 }
 
@@ -1262,7 +1262,7 @@ namespace TrafficManager.UI {
 
                 GUI.Label(labelRect, labelStr, counterStyle);
 
-                if (Options.showLanes) {
+                if (SavedGameOptions.Instance.showLanes) {
                     DebugGuiDisplayLanes(
                         (ushort)segmentId,
                         ref netSegment,
@@ -1683,10 +1683,10 @@ namespace TrafficManager.UI {
                 var hotkeys = new UUIHotKeys { ActivationKey = KeybindSettingsBase.ToggleMainMenu.Key };
                 hotkeys.AddInToolKey(KeybindSettingsBase.ToggleTrafficLightTool.Key);
                 hotkeys.AddInToolKey(KeybindSettingsBase.LaneArrowTool.Key);
-                hotkeys.AddInToolKey(KeybindSettingsBase.LaneConnectionsTool.Key, () => Options.laneConnectorEnabled);
-                hotkeys.AddInToolKey(KeybindSettingsBase.PrioritySignsTool.Key, () => Options.prioritySignsEnabled);
-                hotkeys.AddInToolKey(KeybindSettingsBase.JunctionRestrictionsTool.Key, () => Options.junctionRestrictionsEnabled);
-                hotkeys.AddInToolKey(KeybindSettingsBase.SpeedLimitsTool.Key, () => Options.customSpeedLimitsEnabled);
+                hotkeys.AddInToolKey(KeybindSettingsBase.LaneConnectionsTool.Key, () => SavedGameOptions.Instance.laneConnectorEnabled);
+                hotkeys.AddInToolKey(KeybindSettingsBase.PrioritySignsTool.Key, () => SavedGameOptions.Instance.prioritySignsEnabled);
+                hotkeys.AddInToolKey(KeybindSettingsBase.JunctionRestrictionsTool.Key, () => SavedGameOptions.Instance.junctionRestrictionsEnabled);
+                hotkeys.AddInToolKey(KeybindSettingsBase.SpeedLimitsTool.Key, () => SavedGameOptions.Instance.customSpeedLimitsEnabled);
                 hotkeys.AddInToolKey(KeybindSettingsBase.LaneConnectorStayInLane.Key, () => activeLegacySubTool_ is LaneConnectorTool);
 
                 UUIButton = UUIHelpers.RegisterToolButton(

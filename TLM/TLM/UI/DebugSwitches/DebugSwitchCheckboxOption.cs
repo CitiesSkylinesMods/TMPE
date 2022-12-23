@@ -12,7 +12,7 @@ namespace TrafficManager.UI.DebugSwitches {
     internal class DebugSwitchCheckboxOption : CheckboxOption {
         internal DebugSwitch DebugSwitch;
         public DebugSwitchCheckboxOption(DebugSwitch sw)
-            : base(sw.ToString(), Options.PersistTo.Global) {
+            : base(sw.ToString(), Scope.Global) {
             DebugSwitch = sw;
             Translator = val => val;
             Handler = val => DebugSettings.DebugSwitches = DebugSettings.DebugSwitches.SetFlags(DebugSwitch, val);

@@ -86,7 +86,7 @@ namespace TrafficManager.Util {
                 return;
             }
 
-            if (Options.highwayRules && ExtNodeManager.JunctionHasHighwayRules(nodeId)) {
+            if (SavedGameOptions.Instance.highwayRules && ExtNodeManager.JunctionHasHighwayRules(nodeId)) {
                 res = SetLaneArrow_Result.HighwayArrows;
                 return;
             }
@@ -117,7 +117,7 @@ namespace TrafficManager.Util {
                 builtIn: false,
                 alt2: alternativeMode,
                 alt3: alternativeMode,
-                altBus: !Options.banRegularTrafficOnBusLanes);
+                altBus: !SavedGameOptions.Instance.banRegularTrafficOnBusLanes);
         }
 
         internal static void SeparateSegmentLanesBuiltIn(
@@ -130,7 +130,7 @@ namespace TrafficManager.Util {
                 builtIn: true,
                 alt2: true,
                 alt3: true,
-                altBus: !Options.banRegularTrafficOnBusLanes);
+                altBus: !SavedGameOptions.Instance.banRegularTrafficOnBusLanes);
         }
 
         /// <summary>
@@ -476,7 +476,7 @@ namespace TrafficManager.Util {
                 return SetLaneArrow_Result.Success;
             }
 
-            if (Options.highwayRules && ExtNodeManager.JunctionHasHighwayRules(nodeId)) {
+            if (SavedGameOptions.Instance.highwayRules && ExtNodeManager.JunctionHasHighwayRules(nodeId)) {
                 return SetLaneArrow_Result.HighwayArrows;
             }
 

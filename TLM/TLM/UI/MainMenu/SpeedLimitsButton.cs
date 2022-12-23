@@ -26,6 +26,6 @@ namespace TrafficManager.UI.MainMenu {
 
         protected override bool IsVisible() => IsButtonEnabled();
 
-        public static bool IsButtonEnabled() => Options.customSpeedLimitsEnabled;
+        public static bool IsButtonEnabled() => SavedGameOptions.Instance.customSpeedLimitsEnabled;
     }
 }

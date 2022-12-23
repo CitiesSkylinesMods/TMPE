@@ -89,7 +89,7 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
         /// </summary>
         /// <param name="sourceStartNode">check at start node of source lane?</param>
         public bool AreLanesConnected(uint sourceLaneId, uint targetLaneId, bool sourceStartNode) {
-            if (!Options.laneConnectorEnabled) {
+            if (!SavedGameOptions.Instance.laneConnectorEnabled) {
                 return true;
             }
 
@@ -124,7 +124,7 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
         }
 
         public bool HasOutgoingConnections(uint sourceLaneId) {
-            if (!Options.laneConnectorEnabled) {
+            if (!SavedGameOptions.Instance.laneConnectorEnabled) {
                 return false;
             }
 
@@ -136,14 +136,14 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
         /// Performance note: This act as HasOutgoingConnections for uni-directional lanes but faster
         /// </summary>
         public bool HasConnections(uint laneId, bool startNode) =>
-            Options.laneConnectorEnabled && connectionDataBase_.ContainsKey(new LaneEnd(laneId, startNode));
+            SavedGameOptions.Instance.laneConnectorEnabled && connectionDataBase_.ContainsKey(new LaneEnd(laneId, startNode));
 
         /// <summary>
         /// Determines if the given lane has outgoing connections
         /// Performance note: This act as HasOutgoingConnections for uni-directional lanes but faster
         /// </summary>
         public bool HasOutgoingConnections(uint sourceLaneId, bool startNode) {
-            if (!Options.laneConnectorEnabled) {
+            if (!SavedGameOptions.Instance.laneConnectorEnabled) {
                 return false;
             }
 
@@ -162,7 +162,7 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
         /// Determines if there exist custom lane connections at the specified node
         /// </summary>
         public bool HasNodeConnections(ushort nodeId) {
-            if (!Options.laneConnectorEnabled) {
+            if (!SavedGameOptions.Instance.laneConnectorEnabled) {
                 return false;
             }
 
@@ -186,7 +186,7 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
 
         // Note: Not performance critical
         public bool HasUturnConnections(ushort segmentId, bool startNode) {
-            if (!Options.laneConnectorEnabled) {
+            if (!SavedGameOptions.Instance.laneConnectorEnabled) {
                 return false;
             }
 
@@ -213,7 +213,7 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
         /// Note: Not performance critical
         /// </summary>
         internal uint[] GetLaneConnections(uint laneId, bool startNode) {
-            if (!Options.laneConnectorEnabled) {
+            if (!SavedGameOptions.Instance.laneConnectorEnabled) {
                 return null;
             }
 
@@ -501,7 +501,7 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
                 Log._Debug($"LaneConnectionSubManager({Group}).RecalculateLaneArrows({laneId}, {nodeId}) called");
             }
 
-            if (!Options.laneConnectorEnabled) {
+            if (!SavedGameOptions.Instance.laneConnectorEnabled) {
                 return;
             }
 

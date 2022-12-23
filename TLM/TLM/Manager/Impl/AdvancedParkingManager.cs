@@ -2415,12 +2415,12 @@ namespace TrafficManager.Manager.Impl {
                         out _))
                     {
                         NetInfo.Lane laneInfo = segmentInfo.m_lanes[laneIndex];
-                        if (!Options.parkingRestrictionsEnabled ||
+                        if (!SavedGameOptions.Instance.parkingRestrictionsEnabled ||
                             ParkingRestrictionsManager.Instance.IsParkingAllowed(
                                 segmentId,
                                 laneInfo.m_finalDirection))
                         {
-                            if (!Options.vehicleRestrictionsEnabled ||
+                            if (!SavedGameOptions.Instance.vehicleRestrictionsEnabled ||
                                 (VehicleRestrictionsManager.Instance.GetAllowedVehicleTypes(
                                      segmentId,
                                      segmentInfo,
@@ -2658,7 +2658,7 @@ namespace TrafficManager.Manager.Impl {
             var result = false;
 
             if (buildingInfo.m_class.m_service == ItemClass.Service.Residential &&
-                buildingId != homeId && rng.Int32((uint)Options.getRecklessDriverModulo()) != 0) {
+                buildingId != homeId && rng.Int32((uint)SavedGameOptions.Instance.getRecklessDriverModulo()) != 0) {
                 // NON-STOCK CODE
                 return false;
             }
@@ -2830,7 +2830,7 @@ namespace TrafficManager.Manager.Impl {
                     out laneIndex,
                     out parkOffset))
                 {
-                    if (!Options.parkingRestrictionsEnabled ||
+                    if (!SavedGameOptions.Instance.parkingRestrictionsEnabled ||
                         ParkingRestrictionsManager.Instance.IsParkingAllowed(
                             segmentId,
                             netSegment.Info.m_lanes[laneIndex].m_finalDirection))
@@ -2936,7 +2936,7 @@ namespace TrafficManager.Manager.Impl {
             }
 
             // in vanilla parkOffset is always >= 0 for RoadSideParkingSpace
-            if (Options.parkingRestrictionsEnabled && parkOffset >= 0) {
+            if (SavedGameOptions.Instance.parkingRestrictionsEnabled && parkOffset >= 0) {
                 if (netSegment.GetClosestLanePosition(
                         refPos,
                         NetInfo.LaneType.Parking,

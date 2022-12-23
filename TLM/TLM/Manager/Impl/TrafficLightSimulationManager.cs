@@ -69,7 +69,7 @@ namespace TrafficManager.Manager.Impl {
             out TrafficLightState vehicleLightState,
             out TrafficLightState pedestrianLightState)
         {
-            bool callStockMethod = !Options.timedLightsEnabled
+            bool callStockMethod = !SavedGameOptions.Instance.timedLightsEnabled
                 || !Instance.TrafficLightSimulations[nodeId].IsSimulationRunning();
 
             if (callStockMethod) {
@@ -111,7 +111,7 @@ namespace TrafficManager.Manager.Impl {
             out bool vehicles,
             out bool pedestrians)
         {
-            bool callStockMethod = !Options.timedLightsEnabled
+            bool callStockMethod = !SavedGameOptions.Instance.timedLightsEnabled
                 || !Instance.TrafficLightSimulations[nodeId].IsSimulationRunning();
 
             if (callStockMethod) {

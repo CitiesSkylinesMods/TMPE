@@ -11,7 +11,7 @@ namespace TrafficManager.Patch._RoadBaseAI {
         /// </summary>
         [UsedImplicitly]
         public static bool Prefix(ushort nodeID, ref NetNode data) {
-            bool stockTrafficLights = !Options.timedLightsEnabled
+            bool stockTrafficLights = !SavedGameOptions.Instance.timedLightsEnabled
                      || !TrafficLightSimulationManager
                          .Instance
                          .TrafficLightSimulations[nodeID]

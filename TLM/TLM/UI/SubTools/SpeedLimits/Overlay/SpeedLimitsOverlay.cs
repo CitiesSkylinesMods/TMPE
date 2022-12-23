@@ -564,7 +564,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits.Overlay {
                     args.IsInteractive &&
                     drawSpeedlimit.HasValue &&
                     !isDefaultSpeed &&
-                    Options.showDefaultSpeedSubIcon) {
+                    SavedGameOptions.Instance.showDefaultSpeedSubIcon) {
                     signRenderer.DrawDefaultSpeedSubIcon(defaultSpeedLimit);
                 }
             }
@@ -719,7 +719,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits.Overlay {
                 if (args.IsInteractive &&
                     overrideSpeedlimit.OverrideValue.HasValue &&
                     !isDefaultSpeed &&
-                    Options.showDefaultSpeedSubIcon) {
+                    SavedGameOptions.Instance.showDefaultSpeedSubIcon) {
                     signRenderer.DrawDefaultSpeedSubIcon(overrideSpeedlimit.DefaultValue.Value);
                 }
 

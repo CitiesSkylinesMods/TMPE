@@ -174,7 +174,7 @@ namespace TrafficManager.UI.Helpers {
             //   * and is Junctions restrictions tool
             // TODO generalize for all tools.
             if (this.ViewOnly &&
-                !(Options.junctionRestrictionsOverlay ||
+                !(SavedGameOptions.Instance.junctionRestrictionsOverlay ||
                   MassEditOverlay.IsActive) &&
                 this.mainTool_.GetToolMode() != ToolMode.JunctionRestrictions) {
                 return false;
@@ -368,7 +368,7 @@ namespace TrafficManager.UI.Helpers {
                     }
                 }
 
-                if (!Options.turnOnRedEnabled) {
+                if (!SavedGameOptions.Instance.turnOnRedEnabled) {
                     continue;
                 }
 
