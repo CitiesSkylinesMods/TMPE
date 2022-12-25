@@ -1,12 +1,6 @@
-[Version] 11.7.3.0
-[Released] Dec 13th 2022
-[Link] tmpe-v11730-stable-13122022
+[Version] 11.7.3.1
+[Released] Dec 23th 2022
+[Link] tmpe-v11731-stable-23122022
 [Stable]
-[Meta] Compatibility patch for the game update 1.16.0-f3 (krzychu124)
-[New] Improved bus/trolleybus stop path (pull to side earlier and use more of available space) #1688, #1690 (kianzarrin)
-[Fixed] Cargo truck pathfinding via CargoVehicle networks (cargo stations/terminals) #1701, #1703 (krzychu124)
-[Fixed] Lane connector on overlapping lanes #1706 (kianzarrin)
-[Fixed] Parking signs on lanes with bus stop #1707 (kianzarrin)
-[Updated] Minor changes in debug tools #1696, #1697 (kianzarrin)
-[Updated] TMPE API Updates compatibility with other mods #1689 #1692 (kianzarrin)
+[Fixed] Partial detection of Bank vans as service vehicle
 [/Version]

@@ -161,6 +161,7 @@
     <Compile Include="Patch\_NetLane\CalculateStopPositionAndDirection.cs" />
     <Compile Include="Patch\_PedestrianZoneRoadAI\BollardSimulationStepPatch.cs" />
     <Compile Include="Patch\_VehicleAI\InvalidPathPatch.cs" />
+    <Compile Include="Patch\_VehicleAI\_BankVanAI\StartPathFindPatch.cs" />
     <Compile Include="Patch\_VehicleAI\_BusAI\CalculateSegmentPositionPatch.cs" />
     <Compile Include="State\OptionsTabs\GameplayTab_AIGroups.cs" />
     <Compile Include="State\OptionsTabs\GeneralTab_CompatibilityGroup.cs" />
