@@ -4,6 +4,8 @@ namespace TrafficManager.Manager.Impl {
     using System;
     using TrafficManager.API.Manager;
     using TrafficManager.API.Traffic.Data;
+    using TrafficManager.API.Traffic.Enums;
+    using TrafficManager.Lifecycle;
     using TrafficManager.State.ConfigData;
     using TrafficManager.Util;
     using TrafficManager.Util.Extensions;
@@ -71,7 +73,7 @@ namespace TrafficManager.Manager.Impl {
             Reset(ref ExtSegmentEnds[GetIndex(segmentId, false)]);
         }
 
-        private void Reset(ref ExtSegmentEnd extSegmentEnd) {
+        private void Reset(ref ExtSegmentEnd extSegmentEnd, bool retainLaneArrows = false) {
             IExtVehicleManager extVehicleMan = Constants.ManagerFactory.ExtVehicleManager;
             int numIter = 0;
 
@@ -92,6 +94,9 @@ namespace TrafficManager.Manager.Impl {
             extSegmentEnd.outgoing = false;
             extSegmentEnd.incoming = false;
             extSegmentEnd.firstVehicleId = 0;
+            if (!retainLaneArrows) {
+                extSegmentEnd.laneArrows = LaneArrows.None;
+            }
         }
 
         public ref ExtSegmentEnd GetEnd(ushort segmentId, bool startNode) => ref ExtSegmentEnds[GetIndex(segmentId, startNode)];
@@ -230,6 +235,17 @@ namespace TrafficManager.Manager.Impl {
             return startNode ? segment.m_startDirection : segment.m_endDirection;
         }
 
+        public LaneArrows? GetOutgoingAvailableLaneArrows(uint laneId) {
+            ref NetLane netLane = ref laneId.ToLane();
+            ushort segmentId = netLane.m_segment;
+            //todo fix segmentEnd detection
+            ref ExtSegmentEnd segmentEndStart = ref ExtSegmentEnds[GetIndex(segmentId, true)];
+            ref ExtSegmentEnd segmentEndEnd = ref ExtSegmentEnds[GetIndex(segmentId, false)];
+            return segmentEndStart.incoming
+                       ? segmentEndStart.laneArrows
+                       : segmentEndEnd.laneArrows;
+        }
+
         public void Recalculate(ushort segmentId) {
             Recalculate(ref ExtSegmentEnds[GetIndex(segmentId, true)]);
             Recalculate(ref ExtSegmentEnds[GetIndex(segmentId, false)]);
@@ -254,7 +270,8 @@ namespace TrafficManager.Manager.Impl {
             }
 
             ushort nodeIdBeforeRecalc = segEnd.nodeId;
-            Reset(ref segEnd);
+            LaneArrows laneArrowsBefore = segEnd.laneArrows;
+            Reset(ref segEnd, retainLaneArrows: true);
 
             ref NetSegment netSegment = ref segmentId.ToSegment();
 
@@ -283,6 +300,53 @@ namespace TrafficManager.Manager.Impl {
             if (logGeometry) {
                 Log.Info($"ExtSegmentEndManager.Recalculate({segmentId}, {startNode}): " +
                          $"Recalculated ext. segment end: {segEnd}");
+            }
+        }
+
+        internal void RecalculateAvailableLaneArrows(ushort segmentId) {
+            ref ExtSegmentEnd segmentEndStart = ref ExtSegmentEnds[GetIndex(segmentId, true)];
+            ref ExtSegmentEnd segmentEndEnd = ref ExtSegmentEnds[GetIndex(segmentId, false)];
+            RecalculateAvailableLaneArrows(ref segmentEndStart);
+            RecalculateAvailableLaneArrows(ref segmentEndEnd);
+        }
+
+        internal void RecalculateAvailableLaneArrows(ushort segmentId, bool startNode) {
+            ref ExtSegmentEnd segmentEnd = ref ExtSegmentEnds[GetIndex(segmentId, startNode)];
+            RecalculateAvailableLaneArrows(ref segmentEnd, segmentEnd.laneArrows);
+        }
+
+        private void RecalculateAvailableLaneArrows(ref ExtSegmentEnd segEnd,
+                                                    LaneArrows laneArrowsBefore = LaneArrows.None
+            ) {
+            if (segEnd.incoming) {
+#if DEBUG
+                bool logGeometry = DebugSwitch.GeometryDebug.Get();
+#else
+                const bool logGeometry = false;
+#endif
+                ref NetSegment netSegment = ref segEnd.segmentId.ToSegment();
+                ushort nodeId = segEnd.startNode ? netSegment.m_startNode : netSegment.m_endNode;
+                CalculateAvailableLaneArrowDirections(
+                    ref segEnd,
+                    ref nodeId.ToNode(),
+                    out segEnd.laneArrows);
+
+                if (logGeometry) {
+                    Log._Debug($"ExtSegmentEndManager.RecalculateAvailableLaneArrows({segEnd.segmentId},{segEnd.startNode}): " +
+                               $"Calculated Lane Arrows: {segEnd.laneArrows} Before: {laneArrowsBefore}");
+                }
+
+                // This method is called also by Recalculate(segmentId)
+                // which is called while loading data and later (e.g.: when segment was updated)
+                if (!TMPELifecycle.Instance.Deserializing) {
+                    if (laneArrowsBefore != segEnd.laneArrows) {
+                        if (logGeometry) {
+                            Log._Debug($"ExtSegmentEndManager.RecalculateAvailableLaneArrows({segEnd.segmentId},{segEnd.startNode}): " +
+                                       $"Different set of available lane arrows after recalculation! Resetting custom Lane Arrows! Before: [{laneArrowsBefore}] Now: [{segEnd.laneArrows}]. ");
+                        }
+                        LaneArrowManager.Instance.ResetLaneArrows(segEnd.segmentId, segEnd.startNode);
+                    }
+                }
             }
         }
 
@@ -439,6 +503,22 @@ namespace TrafficManager.Manager.Impl {
             }
 
             return hasOtherSegments;
+        }
+
+        public void CalculateAvailableLaneArrowDirections(ref ExtSegmentEnd segmentEnd,
+                                                          ref NetNode node,
+                                                          out LaneArrows directions) {
+            directions = LaneArrows.None;
+            CalculateOutgoingLeftStraightRightSegments(ref segmentEnd, ref node, out bool hasLeft, out bool hasStraight, out bool hasRight);
+            if (hasLeft) {
+                directions |= LaneArrows.Left;
+            }
+            if (hasStraight) {
+                directions |= LaneArrows.Forward;
+            }
+            if (hasRight) {
+                directions |= LaneArrows.Right;
+            }
         }
 
         public void CalculateOutgoingLeftStraightRightSegments(

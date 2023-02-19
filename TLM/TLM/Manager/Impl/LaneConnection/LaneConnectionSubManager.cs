@@ -550,10 +550,29 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
                 return;
             }
 
-            var targetLaneIds = this.GetLaneConnections(laneId, startNode);
-            if (targetLaneIds.IsNullOrEmpty()) {
+            LaneArrows? arrows = GetArrowsForConnection(laneId, startNode);
+            if (!arrows.HasValue) {
                 LaneArrowManager.Instance.ResetLaneArrows(laneId);
                 return;
+            }
+
+            if (verbose_) {
+                Log._Debug($"LaneConnectionSubManager({Group}).RecalculateLaneArrows({laneId}, {nodeId}): " +
+                            $"setting lane arrows to {arrows}");
+            }
+
+            LaneArrowManager.Instance.SetLaneArrows(laneId, arrows.Value, true);
+        }
+
+        private LaneArrows? GetArrowsForConnection(uint laneId, bool startNode) {
+            var targetLaneIds = this.GetLaneConnections(laneId, startNode);
+            if (targetLaneIds.IsNullOrEmpty()) {
+                return null;
+            }
+
+            ushort segmentId = laneId.ToLane().m_segment;
+            if (segmentId == 0) {
+                return null;
             }
 
             ref ExtSegmentEnd segEnd = ref ExtSegmentEndManager.Instance.ExtSegmentEnds[segEndMan.GetIndex(segmentId, startNode)];
@@ -566,12 +585,7 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
                 }
             }
 
-            if (verbose_) {
-                Log._Debug($"LaneConnectionSubManager({Group}).RecalculateLaneArrows({laneId}, {nodeId}): " +
-                            $"setting lane arrows to {arrows}");
-            }
-
-            LaneArrowManager.Instance.SetLaneArrows(laneId, arrows, true);
+            return arrows;
 
             static LaneArrows ToLaneArrows(ArrowDirection dir) {
                 switch (dir) {
@@ -587,6 +601,16 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
                         return LaneArrows.None;
                 }
             }
+        }
+
+        /// <summary>
+        /// Returns Arrows corresponding with outgoing lane connections
+        /// </summary>
+        /// <param name="laneId">source lane ID</param>
+        /// <param name="startNode">is start node lane side</param>
+        /// <returns>LaneArrows if valid and has outgoing connection(s), otherwise null</returns>
+        public LaneArrows? GetArrowsForOutgoingConnections(uint laneId) {
+            return GetArrowsForConnection(laneId, IsHeadingTowardsStartNode(laneId));
         }
 
         internal void ResetLaneConnections() {

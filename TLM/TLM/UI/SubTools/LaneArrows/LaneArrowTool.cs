@@ -172,8 +172,10 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                 reverse: true);
 
             CreateLaneArrowsWindow(sortedLanes.Count);
+            ref ExtSegmentEnd segmentEnd = ref ExtSegmentEndManager.Instance.GetEnd(SelectedSegmentId, startNode.Value);
             SetupLaneArrowsWindowButtons(laneList: sortedLanes,
-                                         startNode: startNode.Value);
+                                         startNode: startNode.Value,
+                                         segmentEnd.laneArrows);
             MainTool.RequestOnscreenDisplayUpdate();
         }
 
@@ -203,7 +205,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
         /// Given the tool window already created with its buttons set up,
         /// go through them and assign click events, disable some, activate some etc.
         /// </summary>
-        private void SetupLaneArrowsWindowButtons(IList<LanePos> laneList, bool startNode) {
+        private void SetupLaneArrowsWindowButtons(IList<LanePos> laneList, bool startNode, LaneArrows availableArrows) {
             // For all lanes, go through our buttons and update their onClick, etc.
             for (var i = 0; i < laneList.Count; i++) {
                 uint laneId = laneList[i].laneId;
@@ -215,6 +217,9 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                 buttonLeft.ToggleFlag = API.Traffic.Enums.LaneArrows.Left;
                 buttonLeft.UpdateButtonSkinAndTooltip();
                 buttonLeft.ParentTool = this; // to access error reporting function on click
+                bool leftAllowed =  (availableArrows & LaneArrows.Left) != 0;
+                buttonLeft.isEnabled = leftAllowed;
+                buttonLeft.tooltip = !leftAllowed ? T("LaneArrow: Direction not available") : string.Empty;
 
                 LaneArrowButton buttonForward = ToolWindow.Buttons[(i * 3) + 1];
                 buttonForward.LaneId = laneId;
@@ -223,6 +228,9 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                 buttonForward.ToggleFlag = API.Traffic.Enums.LaneArrows.Forward;
                 buttonForward.UpdateButtonSkinAndTooltip();
                 buttonForward.ParentTool = this; // to access error reporting function on click
+                bool forwardAllowed =  (availableArrows & LaneArrows.Forward) != 0;
+                buttonForward.isEnabled = forwardAllowed;
+                buttonForward.tooltip = !forwardAllowed ? T("LaneArrow: Direction not available") : string.Empty;
 
                 LaneArrowButton buttonRight = ToolWindow.Buttons[(i * 3) + 2];
                 buttonRight.LaneId = laneId;
@@ -231,6 +239,9 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                 buttonRight.ToggleFlag = API.Traffic.Enums.LaneArrows.Right;
                 buttonRight.UpdateButtonSkinAndTooltip();
                 buttonRight.ParentTool = this; // to access error reporting function on click
+                bool rightAllowed =  (availableArrows & LaneArrows.Right) != 0;
+                buttonRight.isEnabled = rightAllowed;
+                buttonRight.tooltip = !rightAllowed ? T("LaneArrow: Direction not available") : string.Empty;
             }
         }
 

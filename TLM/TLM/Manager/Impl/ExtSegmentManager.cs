@@ -3,6 +3,7 @@ namespace TrafficManager.Manager.Impl {
     using CSUtil.Commons;
     using System;
     using System.Collections.Generic;
+    using TrafficManager.API.Geometry;
     using TrafficManager.API.Manager;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.Patch;
@@ -12,7 +13,7 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.Util.Iterators;
 
     public class ExtSegmentManager
-        : AbstractCustomManager,
+        : AbstractGeometryObservingManager,
           IExtSegmentManager
     {
         static ExtSegmentManager() {
@@ -146,6 +147,15 @@ namespace TrafficManager.Manager.Impl {
             Constants.ManagerFactory.GeometryManager.OnUpdateSegment(ref extSegment);
         }
 
+        private void RecalculateAvailableLaneArrows(ref ExtSegment extSegment) {
+            if (extSegment.valid) {
+#if DEBUGFLAGS
+               Log._Debug($"Recalculating available lane arrows for segment {extSegment.segmentId} STARTED");
+#endif
+               ExtSegmentEndManager.Instance.RecalculateAvailableLaneArrows(extSegment.segmentId);
+            }
+        }
+
         public bool CalculateIsOneWay(ushort segmentId) {
             ref NetSegment netSegment = ref segmentId.ToSegment();
 
@@ -260,6 +270,25 @@ namespace TrafficManager.Manager.Impl {
                    && ((RoadBaseAI)segmentInfo.m_netAI).m_highwayRules;
         }
 
+        protected override void HandleValidNode(ushort nodeId, ref NetNode node) {
+            for (int i = 0; i < 8; i++) {
+                ushort segmentId = node.GetSegment(i);
+                if (segmentId == 0)
+                    continue;
+                ref NetSegment segment = ref segmentId.ToSegment();
+                if (!segment.IsValid()) {
+                    continue;
+                }
+
+                ref ExtSegment extSegment = ref ExtSegments[segmentId];
+                if (!extSegment.valid)
+                    continue;
+
+                bool isStartNode = segment.IsStartNode(nodeId);
+                ExtSegmentEndManager.Instance.RecalculateAvailableLaneArrows(segmentId, isStartNode);
+            }
+        }
+
         [Obsolete]
         public GetSegmentLaneIdsEnumerable GetSegmentLaneIdsAndLaneIndexes(ushort segmentId) =>
             segmentId.ToSegment().GetSegmentLaneIdsAndLaneIndexes();
@@ -298,6 +327,15 @@ namespace TrafficManager.Manager.Impl {
             }
 
             Log._Debug($"ExtSegmentManager.OnBeforeLoadData: Calculation finished.");
+        }
+
+        public override void OnAfterLoadData() {
+            base.OnAfterLoadData();
+            Log.Info($"ExtSegmentManager.OnAfterLoadData: Calculating Available lane arrows for {ExtSegments.Length} extended segments...");
+            for (int i = 0; i < ExtSegments.Length; i++) {
+                RecalculateAvailableLaneArrows(ref ExtSegments[i]);
+            }
+            Log.Info($"ExtSegmentManager.OnAfterLoadData: Calculation finished.");
         }
     }
 }
