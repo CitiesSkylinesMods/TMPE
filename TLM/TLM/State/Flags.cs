@@ -630,7 +630,7 @@ namespace TrafficManager.State {
 
             LaneArrows? outgoingAvailableLaneArrows = ExtSegmentEndManager.Instance.GetOutgoingAvailableLaneArrows(laneId);
             if (!outgoingAvailableLaneArrows.HasValue) {
-                ResetLaneArrowFlags(laneId);
+                LaneArrowManager.Instance.ResetLaneArrows(laneId);
                 return;
             }
 
@@ -639,7 +639,7 @@ namespace TrafficManager.State {
 #if DEBUGFLAGS
                 Log._Debug($"Invalid custom Lane Arrows. Resetting for lane {laneId}! Available: {outgoingAvailableLaneArrows.Value} Custom: {laneArrowFlag.Value}");
 #endif
-                ResetLaneArrowFlags(laneId);
+                LaneArrowManager.Instance.ResetLaneArrows(laneId);
             }
         }
 

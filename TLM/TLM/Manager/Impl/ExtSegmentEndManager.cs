@@ -236,14 +236,21 @@ namespace TrafficManager.Manager.Impl {
         }
 
         public LaneArrows? GetOutgoingAvailableLaneArrows(uint laneId) {
-            ref NetLane netLane = ref laneId.ToLane();
-            ushort segmentId = netLane.m_segment;
-            //todo fix segmentEnd detection
-            ref ExtSegmentEnd segmentEndStart = ref ExtSegmentEnds[GetIndex(segmentId, true)];
-            ref ExtSegmentEnd segmentEndEnd = ref ExtSegmentEnds[GetIndex(segmentId, false)];
-            return segmentEndStart.incoming
-                       ? segmentEndStart.laneArrows
-                       : segmentEndEnd.laneArrows;
+            NetInfo.Lane laneInfo = ExtLaneManager.Instance.GetLaneInfo(laneId);
+            if (laneInfo == null || !(laneInfo.m_finalDirection is NetInfo.Direction.Forward or NetInfo.Direction.Backward)) {
+                // bi-directional lanes are not supported anyways
+                return null;
+            }
+
+            ushort segmentId = laneId.ToLane().m_segment;
+            ref NetSegment segment = ref segmentId.ToSegment();
+            // code borrowed from LaneConnectionSubManager.IsHeadingTowardsStartNode(laneId)
+            bool inverted = (segment.m_flags & NetSegment.Flags.Invert) != 0;
+            bool isHeadingTowardsStartNode = (laneInfo.m_finalDirection == NetInfo.Direction.Forward) ^ !inverted;
+
+            // get allowed lane arrows for selected segment end
+            ref ExtSegmentEnd segmentEnd = ref ExtSegmentEnds[GetIndex(segmentId, isHeadingTowardsStartNode)];
+            return segmentEnd.laneArrows;
         }
 
         public void Recalculate(ushort segmentId) {
@@ -306,8 +313,8 @@ namespace TrafficManager.Manager.Impl {
         internal void RecalculateAvailableLaneArrows(ushort segmentId) {
             ref ExtSegmentEnd segmentEndStart = ref ExtSegmentEnds[GetIndex(segmentId, true)];
             ref ExtSegmentEnd segmentEndEnd = ref ExtSegmentEnds[GetIndex(segmentId, false)];
-            RecalculateAvailableLaneArrows(ref segmentEndStart);
-            RecalculateAvailableLaneArrows(ref segmentEndEnd);
+            RecalculateAvailableLaneArrows(ref segmentEndStart, LaneArrows.None, validate: false);
+            RecalculateAvailableLaneArrows(ref segmentEndEnd, LaneArrows.None, validate: false);
         }
 
         internal void RecalculateAvailableLaneArrows(ushort segmentId, bool startNode) {
@@ -315,8 +322,15 @@ namespace TrafficManager.Manager.Impl {
             RecalculateAvailableLaneArrows(ref segmentEnd, segmentEnd.laneArrows);
         }
 
+        /// <summary>
+        /// Recaclulates available lane arrows for selected segment end
+        /// </summary>
+        /// <param name="segEnd"></param>
+        /// <param name="laneArrowsBefore">optional previously set arrows for comparison</param>
+        /// <param name="validate">runs soft validation comparing previous are new lane arrows</param>
         private void RecalculateAvailableLaneArrows(ref ExtSegmentEnd segEnd,
-                                                    LaneArrows laneArrowsBefore = LaneArrows.None
+                                                    LaneArrows laneArrowsBefore = LaneArrows.None,
+                                                    bool validate = true
             ) {
             if (segEnd.incoming) {
 #if DEBUG
@@ -336,9 +350,7 @@ namespace TrafficManager.Manager.Impl {
                                $"Calculated Lane Arrows: {segEnd.laneArrows} Before: {laneArrowsBefore}");
                 }
 
-                // This method is called also by Recalculate(segmentId)
-                // which is called while loading data and later (e.g.: when segment was updated)
-                if (!TMPELifecycle.Instance.Deserializing) {
+                if (validate) {
                     if (laneArrowsBefore != segEnd.laneArrows) {
                         if (logGeometry) {
                             Log._Debug($"ExtSegmentEndManager.RecalculateAvailableLaneArrows({segEnd.segmentId},{segEnd.startNode}): " +
