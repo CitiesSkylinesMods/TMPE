@@ -67,16 +67,12 @@ namespace TrafficManager.Manager.Impl {
             extBuilding.parkingSpaceDemand = (byte)Math.Min(
                 100,
                 (int)extBuilding.parkingSpaceDemand + delta);
-
-            RequestColorUpdate(extBuilding.buildingId);
         }
 
         public void RemoveParkingSpaceDemand(ref ExtBuilding extBuilding, uint delta) {
             extBuilding.parkingSpaceDemand = (byte)Math.Max(
                 0,
                 (int)extBuilding.parkingSpaceDemand - delta);
-
-            RequestColorUpdate(extBuilding.buildingId);
         }
 
         public void ModifyParkingSpaceDemand(ref ExtBuilding extBuilding,
@@ -98,8 +94,6 @@ namespace TrafficManager.Manager.Impl {
                 extBuilding.parkingSpaceDemand + (int)Mathf.Round(delta),
                 0,
                 100);
-
-            RequestColorUpdate(extBuilding.buildingId);
         }
 
         public void
@@ -114,8 +108,6 @@ namespace TrafficManager.Manager.Impl {
             } else {
                 extBuilding.incomingPublicTransportDemand = newDemand;
             }
-
-            RequestColorUpdate(extBuilding.buildingId);
         }
 
         public void RemovePublicTransportDemand(ref ExtBuilding extBuilding,
@@ -131,12 +123,6 @@ namespace TrafficManager.Manager.Impl {
             } else {
                 extBuilding.incomingPublicTransportDemand = newDemand;
             }
-
-            RequestColorUpdate(extBuilding.buildingId);
-        }
-
-        private void RequestColorUpdate(ushort buildingId) {
-            Singleton<BuildingManager>.instance.UpdateBuildingColors(buildingId);
         }
 
         protected override void InternalPrintDebugInfo() {
