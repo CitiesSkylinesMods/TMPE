@@ -199,6 +199,7 @@ namespace TrafficManager.Custom.PathFinding {
         }
 
         private void OnDestroy() {
+            Log.Info("Destroing CustomPathFind");
             lock (queueLock_) {
                 terminated_ = true;
                 Monitor.PulseAll(queueLock_);
