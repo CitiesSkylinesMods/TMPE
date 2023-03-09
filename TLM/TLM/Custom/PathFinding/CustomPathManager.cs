@@ -80,18 +80,20 @@ namespace TrafficManager.Custom.PathFinding {
         /// and ensure that the mod will use patched methods, and process of patching might be dependant on order of loading mods
         /// </summary>
         [UsedImplicitly]
-        public static void Reinitialize() {
+        public static void Reinitialize(Array32<PathUnit> pathUnits) {
             try {
                 Log.Info("CustomPathManager.Reinitialize() called.");
                 var pathManager = PathManager.instance.gameObject.GetComponent<CustomPathManager>();
                 if (!pathManager) {
                     Log.Info("CustomPathManager.Reinitialize() CustomPathManager not found, creating new instance.");
                     PathManager.instance.gameObject.AddComponent<CustomPathManager>();
+                    _instance.UpdatePathUnitsReference(pathUnits);
                 } else {
                     Log.Warning("CustomPathManager.Reinitialize() CustomPathManager found, destroying old instance.");
                     DestroyImmediate(pathManager);
                     Log.Info("CustomPathManager.Reinitialize() Creating new instance...");
                     PathManager.instance.gameObject.AddComponent<CustomPathManager>();
+                    _instance.UpdatePathUnitsReference(pathUnits);
                     Log.Info("CustomPathManager.Reinitialize() Reinitialization finished.");
                 }
             } catch (Exception ex) {
@@ -206,6 +208,28 @@ namespace TrafficManager.Custom.PathFinding {
                                             BindingFlags.NonPublic | BindingFlags.Instance)
                                         ?? throw new Exception("f_pathFinds is null");
                 f_pathfinds?.SetValue(stockPathManager, stockPathFinds);
+            }
+        }
+
+        private void UpdatePathUnitsReference(Array32<PathUnit> pathUnits) {
+            if (_instance) {
+                lock (m_bufferLock) {
+                    // update array reference on cached vanilla(stock) PathManager
+                    if (stockPathManager_) {
+                        stockPathManager_.m_pathUnits = pathUnits;
+                    }
+
+                    _instance.m_pathUnits = pathUnits;
+                    // update path unit queue in case of different size
+                    if (_instance.QueueItems.Length != pathUnits.m_size) {
+                        _instance.QueueItems = new PathUnitQueueItem[pathUnits.m_size];
+                    }
+
+                    // update array reference for all custom pathfind threads
+                    for (var i = 0; i < _replacementPathFinds.Length; i++) {
+                       _replacementPathFinds[i].SetPathUnits(pathUnits);
+                   }
+                }
             }
         }
 

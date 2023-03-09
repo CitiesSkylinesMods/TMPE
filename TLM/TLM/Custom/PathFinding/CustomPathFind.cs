@@ -217,6 +217,14 @@ namespace TrafficManager.Custom.PathFinding {
             }
         }
 
+        /// <summary>
+        /// Used internally to overwrite pathUnits array reference
+        /// </summary>
+        /// <param name="pathUnits"></param>
+        internal void SetPathUnits(Array32<PathUnit> pathUnits) {
+            pathUnits_ = pathUnits;
+        }
+
         public new bool CalculatePath(uint unit, bool skipQueue) {
             return ExtCalculatePath(unit, skipQueue);
         }
