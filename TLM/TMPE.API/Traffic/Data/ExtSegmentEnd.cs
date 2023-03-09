@@ -1,6 +1,8 @@
 namespace TrafficManager.API.Traffic.Data
 {
     using System;
+    using CSUtil.Commons;
+    using TrafficManager.API.Traffic.Enums;
     using UnityEngine;
 
     public struct ExtSegmentEnd : IEquatable<ExtSegmentEnd>
@@ -36,6 +38,11 @@ namespace TrafficManager.API.Traffic.Data
         public Vector3 RightCornerDir;
 
         /// <summary>
+        /// All available Lane Arrows describing possible outgoing directions via this segment end
+        /// </summary>
+        public LaneArrows laneArrows;
+
+        /// <summary>
         /// First registered vehicle id on this segment end
         /// </summary>
         public ushort firstVehicleId;
@@ -51,6 +58,7 @@ namespace TrafficManager.API.Traffic.Data
             LeftCornerDir = Vector3.zero;
             RightCorner = Vector3.zero;
             RightCornerDir = Vector3.zero;
+            laneArrows = LaneArrows.None;
         }
 
         public override string ToString()
@@ -58,7 +66,8 @@ namespace TrafficManager.API.Traffic.Data
             return string.Format(
                 "[ExtSegmentEnd {0}\n\tsegmentId={1}\n\tstartNode={2}\n\tnodeId={3}\n" +
                 "\toutgoing={4}\n\tincoming={5}\n\tfirstVehicleId={6}\n" +
-                "\tLeftCorner={7}\n\tLeftCornerDir={8}\n\tRightCorner={9}\n\tRightCornerDir={10}" +
+                "\tLeftCorner={7}\n\tLeftCornerDir={8}\n\tRightCorner={9}\n\tRightCornerDir={10}\n" +
+                "\tLaneArrows={11}" +
                 "\nExtSegmentEnd]",
                 base.ToString(),
                 segmentId,
@@ -70,7 +79,8 @@ namespace TrafficManager.API.Traffic.Data
                 LeftCorner,
                 LeftCornerDir,
                 RightCorner,
-                RightCornerDir);
+                RightCornerDir,
+                laneArrows);
         }
 
         public bool Equals(ExtSegmentEnd otherSegEnd)

@@ -1176,13 +1176,14 @@ namespace TrafficManager.UI {
                 labelSb.AppendFormat(", flags: {0}", netSegment.m_flags);
                 labelSb.AppendFormat("\nsvc: {0}, sub: {1}", service, subService);
 
-                uint startVehicles = endMan.GetRegisteredVehicleCount(
-                    ref endMan.ExtSegmentEnds[endMan.GetIndex((ushort)segmentId, true)]);
+                ref ExtSegmentEnd startSegmentEnd = ref endMan.ExtSegmentEnds[endMan.GetIndex((ushort)segmentId, true)];
+                uint startVehicles = endMan.GetRegisteredVehicleCount(ref startSegmentEnd);
 
-                uint endVehicles = endMan.GetRegisteredVehicleCount(
-                    ref endMan.ExtSegmentEnds[endMan.GetIndex((ushort)segmentId, false)]);
+                ref ExtSegmentEnd endSegmentEnd = ref endMan.ExtSegmentEnds[endMan.GetIndex((ushort)segmentId, false)];
+                uint endVehicles = endMan.GetRegisteredVehicleCount(ref endSegmentEnd);
 
                 labelSb.AppendFormat( "\nstart veh.: {0}, end veh.: {1}", startVehicles, endVehicles);
+                labelSb.AppendFormat( "\nstart arrows: {0}, end arrows: {1}", startSegmentEnd.laneArrows, endSegmentEnd.laneArrows);
 #endif
                 labelSb.AppendFormat("\nTraffic: {0} %", netSegment.m_trafficDensity);
 

@@ -146,12 +146,12 @@ namespace TrafficManager.State {
             NetNode.Flags flags = node.m_flags | NetNode.Flags.CustomTrafficLights;
             if (flag) {
 #if DEBUGFLAGS
-                Log._Debug($"Adding traffic light @ node {nId}");
+                Log._Debug($"Adding traffic light @ node {nodeId}");
 #endif
                 flags |= NetNode.Flags.TrafficLights;
             } else {
 #if DEBUGFLAGS
-                Log._Debug($"Removing traffic light @ node {nId}");
+                Log._Debug($"Removing traffic light @ node {nodeId}");
 #endif
                 flags &= ~NetNode.Flags.TrafficLights;
             }
@@ -316,7 +316,12 @@ namespace TrafficManager.State {
             Log._Debug($"Flags.resetLaneArrowFlags: Resetting lane arrows of lane {laneId}.");
 #endif
             if (LaneConnectionManager.Instance.Road.HasOutgoingConnections(laneId)) {
-                return false;
+                LaneArrows? arrows = LaneConnectionManager.Instance.Road.GetArrowsForOutgoingConnections(laneId);
+#if DEBUGFLAGS
+                Log._Debug($"Flags.resetLaneArrowFlags: Lane {laneId} has outgoing connections. Calculated Arrows: {(arrows.HasValue ? arrows.Value : "<none>")}");
+#endif
+                laneArrowFlags[laneId] = arrows.HasValue ? arrows.Value : null;
+                return true;
             }
 
             laneArrowFlags[laneId] = null;
@@ -615,6 +620,26 @@ namespace TrafficManager.State {
             // uint laneFlags = netLane.m_flags;
             if (((NetLane.Flags)netLane.m_flags & (NetLane.Flags.Created | NetLane.Flags.Deleted)) == NetLane.Flags.Created) {
                 netLane.m_flags &= (ushort)~lfr;
+            }
+        }
+
+        public static void ValidateLaneCustomArrows(uint laneId) {
+            LaneArrows? laneArrowFlag = laneArrowFlags[laneId];
+            if (!laneArrowFlag.HasValue)
+                return;
+
+            LaneArrows? outgoingAvailableLaneArrows = ExtSegmentEndManager.Instance.GetOutgoingAvailableLaneArrows(laneId);
+            if (!outgoingAvailableLaneArrows.HasValue) {
+                LaneArrowManager.Instance.ResetLaneArrows(laneId);
+                return;
+            }
+
+            // check is laneArrowFlag is any different than available
+            if ((laneArrowFlag.Value & ~outgoingAvailableLaneArrows.Value) != LaneArrows.None) {
+#if DEBUGFLAGS
+                Log._Debug($"Invalid custom Lane Arrows. Resetting for lane {laneId}! Available: {outgoingAvailableLaneArrows.Value} Custom: {laneArrowFlag.Value}");
+#endif
+                LaneArrowManager.Instance.ResetLaneArrows(laneId);
             }
         }
 
