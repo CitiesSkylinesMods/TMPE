@@ -227,6 +227,12 @@ namespace TrafficManager.Manager.Impl {
             }
         }
 
+        private void ValidateCustomLaneArrows() {
+            for (uint laneId = 0; laneId < NetManager.MAX_LANE_COUNT; ++laneId) {
+                Flags.ValidateLaneCustomArrows(laneId);
+            }
+        }
+
         public override void OnLevelLoading() {
             base.OnLevelLoading();
             if (SavedGameOptions.Instance.DedicatedTurningLanes) {
@@ -243,6 +249,7 @@ namespace TrafficManager.Manager.Impl {
         public override void OnAfterLoadData() {
             base.OnAfterLoadData();
             Flags.ClearHighwayLaneArrows();
+            ValidateCustomLaneArrows();
             ApplyFlags();
         }
 

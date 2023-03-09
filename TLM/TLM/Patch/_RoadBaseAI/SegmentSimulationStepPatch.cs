@@ -27,20 +27,6 @@ namespace TrafficManager.Patch._RoadBaseAI {
         /// </summary>
         [UsedImplicitly]
         public static void Prefix(RoadBaseAI __instance, ushort segmentID, ref NetSegment data) {
-            // TODO check if this is required *START*
-            uint curLaneId = data.m_lanes;
-            int numLanes = data.Info.m_lanes.Length;
-            uint laneIndex = 0;
-
-            while (laneIndex < numLanes && curLaneId != 0u) {
-                Flags.ApplyLaneArrowFlags(curLaneId);
-
-                laneIndex++;
-                curLaneId = Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_nextLane;
-            }
-
-            // ↑↑↑↑
-            // TODO check if this is required *END*
             if (segmentID < lastSimulatedSegmentId) {
                 // segment simulation restart
                 ++trafficMeasurementMod;
