@@ -219,7 +219,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                 buttonLeft.ParentTool = this; // to access error reporting function on click
                 bool leftAllowed =  (availableArrows & LaneArrows.Left) != 0;
                 buttonLeft.isEnabled = leftAllowed;
-                buttonLeft.tooltip = !leftAllowed ? T("LaneArrow: Direction not available") : string.Empty;
+                buttonLeft.tooltip = !leftAllowed ? T("LaneArrows: Direction not available") : string.Empty;
 
                 LaneArrowButton buttonForward = ToolWindow.Buttons[(i * 3) + 1];
                 buttonForward.LaneId = laneId;
@@ -230,7 +230,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                 buttonForward.ParentTool = this; // to access error reporting function on click
                 bool forwardAllowed =  (availableArrows & LaneArrows.Forward) != 0;
                 buttonForward.isEnabled = forwardAllowed;
-                buttonForward.tooltip = !forwardAllowed ? T("LaneArrow: Direction not available") : string.Empty;
+                buttonForward.tooltip = !forwardAllowed ? T("LaneArrows: Direction not available") : string.Empty;
 
                 LaneArrowButton buttonRight = ToolWindow.Buttons[(i * 3) + 2];
                 buttonRight.LaneId = laneId;
@@ -241,7 +241,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                 buttonRight.ParentTool = this; // to access error reporting function on click
                 bool rightAllowed =  (availableArrows & LaneArrows.Right) != 0;
                 buttonRight.isEnabled = rightAllowed;
-                buttonRight.tooltip = !rightAllowed ? T("LaneArrow: Direction not available") : string.Empty;
+                buttonRight.tooltip = !rightAllowed ? T("LaneArrows: Direction not available") : string.Empty;
             }
         }
 
