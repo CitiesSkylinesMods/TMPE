@@ -1609,8 +1609,7 @@ namespace TrafficManager.Manager.Impl {
                         }
 
                         if (sqrVelocity <= GlobalConfig.Instance.PriorityRules.MaxYieldVelocity
-                            * GlobalConfig.Instance.PriorityRules.MaxYieldVelocity ||
-                            SavedGameOptions.Instance.simulationAccuracy >= SimulationAccuracy.Medium) {
+                            * GlobalConfig.Instance.PriorityRules.MaxYieldVelocity) {
                             if (logPriority) {
                                 Log._DebugFormat(
                                     "VehicleBehaviorManager.MayChangeSegment({0}): {1} sign. waittime={2}",
