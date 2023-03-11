@@ -425,9 +425,10 @@ namespace TrafficManager.Manager.Impl {
             }
 
             if ((vehicle.m_flags & Vehicle.Flags.Spawned) == 0) {
-                Log.WarningIf(
-                    logPriority,
-                    () => $"TrafficPriorityManager.HasPriority({vehicleId}): Vehicle is not spawned.");
+                if (logPriority) {
+                    ushort vehicleIdCopy = vehicleId;
+                    Log.Warning($"TrafficPriorityManager.HasPriority({vehicleIdCopy}): Vehicle is not spawned.");
+                }
                 return true;
             }
 
@@ -636,10 +637,10 @@ namespace TrafficManager.Manager.Impl {
             }
 
             if ((incomingState.flags & ExtVehicleFlags.Spawned) == ExtVehicleFlags.None) {
-                Log.WarningIf(
-                    logPriority,
-                    () => $"TrafficPriorityManager.IsConflictingVehicle({vehicleId}, " +
-                    $"{incomingVehicleId}): Incoming vehicle is not spawned.");
+                if (logPriority) {
+                    Log.Warning($"TrafficPriorityManager.IsConflictingVehicle({vehicleId}, " +
+                              $"{incomingVehicleId}): Incoming vehicle is not spawned.");
+                }
                 return false;
             }
 
@@ -1204,12 +1205,12 @@ namespace TrafficManager.Manager.Impl {
                                 default: // (should not happen)
                                 {
                                     wouldCollide = false;
-                                    Log.WarningIf(
-                                        logPriority,
-                                        () => $"  TrafficPriorityManager.DetectCollision({vehicleId}, " +
-                                        $"{incomingVehicleId}): Target is going {targetToDir} and " +
-                                        $"incoming is coming from {incomingFromDir} (SHOULD NOT HAPPEN). " +
-                                        $"would collide? {wouldCollide}");
+                                    if (logPriority) {
+                                        Log.Warning($"  TrafficPriorityManager.DetectCollision({vehicleId}, " +
+                                                    $"{incomingVehicleId}): Target is going {targetToDir} and " +
+                                                    $"incoming is coming from {incomingFromDir} (SHOULD NOT HAPPEN). " +
+                                                    $"would collide? {wouldCollide}");
+                                    }
                                     break;
                                 }
                             }

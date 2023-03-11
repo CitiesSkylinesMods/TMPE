@@ -154,31 +154,12 @@ namespace CSUtil.Commons {
             LogToFile(string.Format(format, args), LogLevel.Warning);
         }
 
-        /// <summary>
-        /// Log a warning only if cond is true
-        /// NOTE: If a lambda contains values from `out` and `ref` scope args,
-        /// then you can not use a lambda, instead use `if (cond) { Log.Warning() }`
-        /// </summary>
-        /// <param name="cond">The condition</param>
-        /// <param name="formatFn">The function which returns text to log</param>
-        public static void WarningIf(bool cond, Func<string> formatFn) {
-            if (cond) {
-                LogToFile(formatFn(), LogLevel.Warning);
-            }
-        }
-
         public static void Error(string s) {
             LogToFile(s, LogLevel.Error);
         }
 
         public static void ErrorFormat(string format, params object[] args) {
             LogToFile(string.Format(format, args), LogLevel.Error);
-        }
-
-        public static void ErrorIf(bool cond, Func<string> formatFn) {
-            if (cond) {
-                LogToFile(formatFn(), LogLevel.Error);
-            }
         }
 
         /// <summary>Log error only in debug mode.</summary>
