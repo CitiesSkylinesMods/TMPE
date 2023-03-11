@@ -899,13 +899,7 @@ namespace TrafficManager.Patch._VehicleAI {
                     // STOCK CODE END
 
                     if (debugOverlay) {
-                        Segment3 arrow1 = new(bezier.a, bezier.a + curSegDir);
-                        Segment3 arrow2 = new(bezier.d, bezier.d + nextSegDir);
-                        DebugOverlay.Actions[0] = () => bezier.RenderDebugOverlay(Color.yellow);
-                        Color color = Color.cyan;
-                        Color color2 = Color.Lerp(color, Color.black, 0.2f);
-                        DebugOverlay.Actions[1] = () => arrow1.RenderDebugArrowOverlay(color);
-                        DebugOverlay.Actions[2] = () => arrow2.RenderDebugArrowOverlay(color2);
+                        DebugArrowOverlay(bezier, curSegDir, nextSegDir);
                     }
 
                     if (dist > 1f) {
@@ -1164,6 +1158,16 @@ namespace TrafficManager.Patch._VehicleAI {
             } // end while true
 
             // Unreachable
+        }
+
+        private static void DebugArrowOverlay(Bezier3 bezier, Vector3 curSegDir, Vector3 nextSegDir) {
+            Segment3 arrow1 = new(bezier.a, bezier.a + curSegDir);
+            Segment3 arrow2 = new(bezier.d, bezier.d + nextSegDir);
+            DebugOverlay.Actions[0] = () => bezier.RenderDebugOverlay(Color.yellow);
+            Color color = Color.cyan;
+            Color color2 = Color.Lerp(color, Color.black, 0.2f);
+            DebugOverlay.Actions[1] = () => arrow1.RenderDebugArrowOverlay(color);
+            DebugOverlay.Actions[2] = () => arrow2.RenderDebugArrowOverlay(color2);
         }
     }
 }
