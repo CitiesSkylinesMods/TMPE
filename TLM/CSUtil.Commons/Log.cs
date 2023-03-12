@@ -26,7 +26,7 @@ namespace CSUtil.Commons {
     ///     Log.DebugFormat is optimized away, others are not, so is a good idea to wrap in if (boolValue)
     ///     ⚠ Expensive if not wrapped in a if () condition
     ///
-    /// Log.DebugIf, Log.WarningIf, ... - these first check a condition, and then call a lambda,
+    /// Log.DebugIf -- first check a condition, and then call a lambda,
     /// which provides a formatted string.
     ///     ✔ Lambda building is just as cheap as format args building
     ///     💲 The cost incurred: each captured value (pointer) is copied into lambda
