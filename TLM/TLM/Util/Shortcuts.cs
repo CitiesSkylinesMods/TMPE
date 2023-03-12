@@ -116,13 +116,13 @@ namespace TrafficManager.Util {
         internal static string ToSTR(this List<LanePos> laneList) =>
             (from lanePos in laneList select lanePos.laneId).ToSTR();
 
-        internal static void AssertEq<T>(T a, T b, string m = "") where T : IComparable {
+        internal static void AssertEq<T>(T a, T b, string m = "") where T : IComparable<T> {
             if (a.CompareTo(b) != 0) {
                 Log.Error($"Assertion failed. Expected {a} == {b} | " + m);
             }
         }
 
-        internal static void AssertNEq<T>(T a, T b, string m = "") where T : IComparable {
+        internal static void AssertNEq<T>(T a, T b, string m = "") where T : IComparable<T> {
             if (a.CompareTo(b) == 0) {
                 Log.Error($"Assertion failed. Expected {a} != {b} | " + m);
             }
@@ -146,7 +146,7 @@ namespace TrafficManager.Util {
         /// <exception cref="ArgumentException">
         /// Thrown if <typeparamref name="T"/> is not some kind of <see cref="Enum"/>.
         /// </exception>
-        internal static void AssertNotNone<T>(T value, string m = "") {
+        internal static void AssertNotNone<T>(T value, string m = "") where T: IEquatable<T> {
             if (!typeof(T).IsEnum)
                 throw new ArgumentException($"Type '{typeof(T).FullName}' is not an enum");
 
@@ -163,10 +163,12 @@ namespace TrafficManager.Util {
         }
 
         internal static void LogException(this Exception ex, bool showInPanel = false) {
-            if (ex is null)
+            if (ex is null) {
                 Log.Error("null argument ex was passed to Log.Exception()");
+                return;
+            }
             try {
-                Log.Error(ex.ToString() + "\n\t===================="); // stack trace is printed after this.
+                Log.Error(ex + "\n\t===================="); // stack trace is printed after this.
                 UnityEngine.Debug.LogException(ex);
                 if (showInPanel)
                     UIView.ForwardException(ex);

@@ -91,9 +91,9 @@ namespace TrafficManager.U.Autosize {
                         resizerConfig.onResize_(resizer);
                     }
                     catch (Exception e) {
-                        Log.ErrorIf(
-                            cond: logUEvents,
-                            formatFn: () => $"While calling OnResize on {control.name}: {e}");
+                        if (logUEvents) {
+                            Log.Error($"While calling OnResize on {control.name}: {e}");
+                        }
                     }
                 }
 
