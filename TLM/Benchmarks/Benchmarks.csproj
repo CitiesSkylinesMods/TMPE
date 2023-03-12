@@ -72,6 +72,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="LoopUtilPerfTests.cs" />
     <Compile Include="SpiralPerfTests.cs" />
+    <Compile Include="StructLayoutPerfTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -80,6 +81,10 @@
     <ProjectReference Include="..\TLM\TLM.csproj">
       <Project>{7422ae58-8b0a-401c-9404-f4a438effe10}</Project>
       <Name>TLM</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\TMPE.API\TMPE.API.csproj">
+      <Project>{c911d31c-c85d-42a8-a839-7b209a715495}</Project>
+      <Name>TMPE.API</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
