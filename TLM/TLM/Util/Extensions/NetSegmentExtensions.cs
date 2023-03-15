@@ -290,7 +290,11 @@ namespace TrafficManager.Util.Extensions {
 
             NetInfo segmentInfo = netSegment.Info;
 
-            byte numLanes = (byte)(segmentInfo?.m_lanes?.Length ?? 0);
+            if (!segmentInfo) {
+                return EmptyLaneList;
+            }
+
+            byte numLanes = (byte)(segmentInfo.m_lanes?.Length ?? 0);
             if (numLanes == 0)
                 return EmptyLaneList;
 
@@ -347,47 +351,47 @@ namespace TrafficManager.Util.Extensions {
                     sortDir = NetInfo.InvertDirection(sortDir);
 
                 bool forward = sortDir == NetInfo.Direction.Forward;
-
-                int CompareLanePositionsFun(LanePos x, LanePos y) {
-                    bool fwd = forward;
-                    if (Math.Abs(x.position - y.position) < 1e-12) {
-                        if (x.position > 0) {
-                            // mirror type-bound lanes (e.g. for coherent display of lane-wise speed limits)
-                            fwd = !fwd;
-                        }
-
-                        if (x.laneType == y.laneType) {
-                            if (x.vehicleType == y.vehicleType) {
-                                return 0;
-                            }
-
-                            if ((x.vehicleType < y.vehicleType) == fwd) {
-                                return -1;
-                            }
-
-                            return 1;
-                        }
-
-                        if ((x.laneType < y.laneType) == fwd) {
-                            return -1;
-                        }
-
-                        return 1;
-                    }
-
-                    if (x.position < y.position == fwd) {
-                        return -1;
-                    }
-
-                    return 1;
-                }
-
-                laneList.Sort(CompareLanePositionsFun);
+                laneList.Sort(forward ? CompareLanePositionsForward : CompareLanePositionsBackward);
             }
 
             return laneList;
         }
 
         private static readonly ReadOnlyCollection<LanePos> EmptyLaneList = new(new List<LanePos>(0));
+        private static Comparison<LanePos> CompareLanePositionsForward = (x, y) => CompareLanePositionsFun(x, y, true);
+        private static Comparison<LanePos> CompareLanePositionsBackward = (x, y) => CompareLanePositionsFun(x, y, false);
+
+        private static int CompareLanePositionsFun(LanePos x, LanePos y, bool fwd) {
+            if (Math.Abs(x.position - y.position) < 1e-12) {
+                if (x.position > 0) {
+                    // mirror type-bound lanes (e.g. for coherent display of lane-wise speed limits)
+                    fwd = !fwd;
+                }
+
+                if (x.laneType == y.laneType) {
+                    if (x.vehicleType == y.vehicleType) {
+                        return 0;
+                    }
+
+                    if ((x.vehicleType < y.vehicleType) == fwd) {
+                        return -1;
+                    }
+
+                    return 1;
+                }
+
+                if ((x.laneType < y.laneType) == fwd) {
+                    return -1;
+                }
+
+                return 1;
+            }
+
+            if (x.position < y.position == fwd) {
+                return -1;
+            }
+
+            return 1;
+        }
     }
 }

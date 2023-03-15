@@ -719,15 +719,7 @@ namespace TrafficManager.UI {
                         RoadSelectionUtil.SetRoad(HoveredSegmentId, segmentList);
                     }
 
-                    InstanceID instanceID = new InstanceID {
-                        NetSegment = HoveredSegmentId,
-                    };
-
-                    SimulationManager.instance.m_ThreadingWrapper.QueueMainThread(() => {
-                        OpenWorldInfoPanel(
-                            instanceID,
-                            HitPos);
-                    });
+                    OpenWorldInfoPanel(new InstanceID { NetSegment = HoveredSegmentId }, HitPos);
                 }
             } else if (SelectedNodeId != 0 && KeybindSettingsBase.RestoreDefaultsKey.KeyDown(e)) {
                 ushort nodeId = SelectedNodeId;
