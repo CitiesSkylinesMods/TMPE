@@ -1,4 +1,7 @@
 ﻿namespace TrafficManager.API.Traffic.Data {
+    using System.Runtime.InteropServices;
+
+    [StructLayout(LayoutKind.Auto)]
     public struct ExtBuilding {
         /// <summary>
         /// Building id

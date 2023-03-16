@@ -2,7 +2,7 @@ namespace TrafficManager.API.Traffic.Enums {
     /// <summary>
     /// Indicates the current state while approaching a private car
     /// </summary>
-    public enum ParkedCarApproachState {
+    public enum ParkedCarApproachState : byte {
         /// <summary>
         /// Citizen is not approaching their parked car
         /// </summary>
