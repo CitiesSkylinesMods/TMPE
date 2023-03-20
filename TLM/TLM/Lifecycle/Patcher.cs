@@ -26,6 +26,7 @@ namespace TrafficManager.Lifecycle {
             " - make sure harmony mod is deleted from the content folder\n" +
             " - resubscribe to harmony mod.\n" +
             " - run the game again.";
+        private static bool pathfindingPatchesInstalled;
 
         internal static void AssertCitiesHarmonyInstalled() {
             if (!HarmonyHelper.IsHarmonyInstalled) {
@@ -70,6 +71,7 @@ namespace TrafficManager.Lifecycle {
                     "continue playing but it's NOT recommended. Traffic Manager will " +
                     "not work as expected.");
             } else {
+                pathfindingPatchesInstalled = true;
                 Log.Info("TMPE Path-finding patches installed successfully");
             }
         }
@@ -136,6 +138,9 @@ namespace TrafficManager.Lifecycle {
         public static void Uninstall(string harmonyId) {
             try {
                 new Harmony(harmonyId).UnpatchAll(harmonyId);
+                if (harmonyId.Equals(API.Harmony.HARMONY_ID_PATHFINDING)) {
+                    pathfindingPatchesInstalled = false;
+                }
                 Log.Info($"TMPE patches in [{harmonyId}] uninstalled.");
             } catch(Exception ex) {
                 ex.LogException(true);

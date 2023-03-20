@@ -94,8 +94,9 @@ namespace TrafficManager.Manager.Impl {
 
             if (!flag || !parkingAllowed[segmentId][1 - dirIndex]) {
                 // force relocation of illegally parked vehicles
+                ushort tempSegmentId = segmentId;
                 Singleton<SimulationManager>.instance.AddAction(
-                    () => segmentId.ToSegment().UpdateSegment(segmentId));
+                    () => tempSegmentId.ToSegment().UpdateSegment(tempSegmentId));
             }
             Notifier.Instance.OnSegmentModified(segmentId, this);
             return true;

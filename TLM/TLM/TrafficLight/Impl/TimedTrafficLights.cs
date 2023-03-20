@@ -1030,10 +1030,11 @@ namespace TrafficManager.TrafficLight.Impl {
                             $"{segmentId} to node {NodeId} without reusing old segment");
 
                         if (!step.AddSegment(segmentId, startNode, true)) {
-                            Log.WarningIf(
-                                logTrafficLights,
-                                () => "TimedTrafficLights.HandleNewSegments: Failed to add segment " +
-                                $"{segmentId} @ start {startNode} to node {NodeId}");
+                            if (logTrafficLights) {
+                                Log.Warning(
+                                    "TimedTrafficLights.HandleNewSegments: Failed to add segment " +
+                                    $"{segmentId} @ start {startNode} to node {NodeId}");
+                            }
                         }
                     } else {
                         // reuse old lights
@@ -1085,9 +1086,9 @@ namespace TrafficManager.TrafficLight.Impl {
             ref NetSegment netSegment = ref segmentId.ToSegment();
 
             if (!netSegment.IsValid()) {
-                Log.ErrorIf(
-                    cond: logTrafficLights,
-                    formatFn: () => $"TimedTrafficLights.ChangeLightMode: Segment {segmentId} is invalid");
+                if (logTrafficLights) {
+                    Log.Error($"TimedTrafficLights.ChangeLightMode: Segment {segmentId} is invalid");
+                }
 
                 return;
             }
@@ -1317,10 +1318,11 @@ namespace TrafficManager.TrafficLight.Impl {
                 if (end != null) {
                     segmentEndIds.Add(end);
                 } else {
-                    Log.WarningIf(
-                        logTrafficLights,
-                        () => "TimedTrafficLights.UpdateSegmentEnds: Failed to add segment end " +
+                    if (logTrafficLights) {
+                    Log.Warning(
+                        "TimedTrafficLights.UpdateSegmentEnds: Failed to add segment end " +
                         $"{segmentId} @ {startNode} to node {NodeId}: GetOrAddSegmentEnd returned null.");
+                    }
                 }
             }
 

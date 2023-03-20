@@ -2,6 +2,7 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using ColossalFramework;
     using CSUtil.Commons;
     using TrafficManager.API.Manager;
     using TrafficManager.API.Traffic.Data;
@@ -223,10 +224,7 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
 
             LaneEnd key = new(laneId, startNode);
             if (connectionDataBase_.TryGetValue(key, out var targets)) {
-                return targets
-                .Where(item => item.Enabled)
-                .Select(item => item.LaneId)
-                .ToArray();
+                return FindEnabledLaneIds(targets);
             }
             return null;
         }
@@ -460,7 +458,7 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
             try {
                 Assert(laneId.ToLane().IsValidWithSegment(), $"IsValidWithSegment() failed for laneId:{laneId}");
                 if (connectionDataBase_.TryGetValue(new LaneEnd(laneId, startNode), out var connections) &&
-                    connections.Any(item => item.LaneId == laneId)) {
+                    ContainsLaneId(connections, laneId)) {
                     ushort nodeId = laneId.ToLane().GetNodeId(startNode);
                     Assert(connections.Length == 1,
                         $"dead end should only have one connection to itself. " +
@@ -691,6 +689,28 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
             }
 
             return ret;
+        }
+
+        private bool ContainsLaneId(LaneConnectionData[] laneData, uint laneId) {
+            foreach (LaneConnectionData connectionData in laneData) {
+                if (connectionData.LaneId == laneId) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private uint[] FindEnabledLaneIds(LaneConnectionData[] laneData) {
+            using (PoolList<uint> temp = PoolList<uint>.Obtain()) {
+                temp.EnsureCapacity(laneData.Length);
+                foreach (LaneConnectionData connectionData in laneData) {
+                    if (connectionData.Enabled) {
+                        temp.Add(connectionData.LaneId);
+                    }
+                }
+
+                return temp.ToArray();
+            }
         }
     }
 }
