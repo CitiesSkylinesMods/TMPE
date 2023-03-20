@@ -2971,7 +2971,7 @@ namespace TrafficManager.Manager.Impl {
                     color = Color.Lerp(
                         modeProperties[(int)infoMode].m_targetColor,
                         modeProperties[(int)infoMode].m_negativeColor,
-                        Mathf.Clamp01(extBuilding.parkingSpaceDemand * 0.01f));
+                        extBuilding.parkingSpaceDemand * 0.01f);
                     return true;
                 }
 
@@ -2981,11 +2981,10 @@ namespace TrafficManager.Manager.Impl {
                     color = Color.Lerp(
                         modeProperties[(int)InfoManager.InfoMode.Traffic].m_targetColor,
                         modeProperties[(int)InfoManager.InfoMode.Traffic].m_negativeColor,
-                        Mathf.Clamp01(
                             (TrafficManagerTool.CurrentTransportDemandViewMode ==
                              TransportDemandViewMode.Outgoing
                                  ? extBuilding.outgoingPublicTransportDemand
-                                 : extBuilding.incomingPublicTransportDemand) * 0.01f));
+                             : extBuilding.incomingPublicTransportDemand) * 0.01f);
                     return true;
                 }
 
