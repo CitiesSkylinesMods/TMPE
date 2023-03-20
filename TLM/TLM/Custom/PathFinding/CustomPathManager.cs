@@ -74,6 +74,39 @@ namespace TrafficManager.Custom.PathFinding {
             }
         }
 
+        /// <summary>
+        /// Either initializes the custom pathfinding or destroys already created and instantiates it again
+        /// The main use of this method is when other mods need to patch TM:PE pathfinding in some way
+        /// and ensure that the mod will use patched methods, and process of patching might be dependant on order of loading mods
+        /// </summary>
+        [UsedImplicitly]
+        public static void Reinitialize(Array32<PathUnit> pathUnits) {
+            try {
+                Log.Info("CustomPathManager.Reinitialize() called.");
+                var pathManager = PathManager.instance.gameObject.GetComponent<CustomPathManager>();
+                if (!pathManager) {
+                    Log.Info("CustomPathManager.Reinitialize() CustomPathManager not found, creating new instance.");
+                    PathManager.instance.gameObject.AddComponent<CustomPathManager>();
+                    _instance.UpdatePathUnitsReference(pathUnits);
+                } else {
+                    Log.Warning("CustomPathManager.Reinitialize() CustomPathManager found, destroying old instance.");
+                    DestroyImmediate(pathManager);
+                    Log.Info("CustomPathManager.Reinitialize() Creating new instance...");
+                    PathManager.instance.gameObject.AddComponent<CustomPathManager>();
+                    _instance.UpdatePathUnitsReference(pathUnits);
+                    Log.Info("CustomPathManager.Reinitialize() Reinitialization finished.");
+                }
+            } catch (Exception ex) {
+                string error =
+                    "Traffic Manager: President Edition failed to reinitialize custom pathfinding.\n" +
+                    "Traffic Manager will not work as expected.";
+                Log.Error(error);
+                Log.Error($"Path manager reinitialization error: {ex}");
+                UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel")
+                      .SetMessage("TM:PE failed to load", error, true);
+            }
+        }
+
         [UsedImplicitly]
         protected override void Awake() {
             // On waking up, replace the stock pathfinders with the custom one
@@ -85,7 +118,8 @@ namespace TrafficManager.Custom.PathFinding {
 
             stockPathManager_ = PathManager.instance
                                 ?? throw new Exception("stockPathManager is null");
-            Log._Debug($"Got stock PathManager instance {stockPathManager_?.GetName()}");
+            Log._Debug($"Got stock PathManager instance: {stockPathManager_?.GetType().FullName}");
+
             PathManagerInstance.SetValue(null, this);
             Log._Debug("Should be custom: " + PathManager.instance.GetType());
 
@@ -117,7 +151,7 @@ namespace TrafficManager.Custom.PathFinding {
                                          : SystemInfo.processorCount - 4;
             simSleepMultiplier_ = CalculateBestSimSleepMultiplier(numCustomPathFinds);
 
-            Log._Debug("Creating " + numCustomPathFinds + " custom PathFind objects.");
+            Log._Debug("Creating " + numCustomPathFinds + " custom PathFind objects. Number of stock Pathfinds " +numOfStockPathFinds);
             _replacementPathFinds = new CustomPathFind[numCustomPathFinds];
             FieldInfo f_pathfinds = typeof(PathManager).GetField(
                                         "m_pathfinds",
@@ -132,12 +166,13 @@ namespace TrafficManager.Custom.PathFinding {
 
                 f_pathfinds?.SetValue(this, _replacementPathFinds);
 
+                Log._Debug("Destroying " + numOfStockPathFinds + " PathFind objects.");
                 for (int i = 0; i < numOfStockPathFinds; i++) {
-                    Log._Debug($"PF {i}: {stockPathFinds[i].m_queuedPathFindCount} queued path-finds");
+                    Log._Debug($"PF {i}: {stockPathFinds[i].m_queuedPathFindCount} queued path-finds. PF: {stockPathFinds[i]?.GetType().FullName ?? "<null>"} active: ({(bool)stockPathFinds[i]})");
 
                     // would cause deadlock since we have a lock on m_bufferLock
                     // stockPathFinds[i].WaitForAllPaths();
-                    Destroy(stockPathFinds[i]);
+                    DestroyImmediate(stockPathFinds[i]);
                 }
             }
         }
@@ -149,31 +184,52 @@ namespace TrafficManager.Custom.PathFinding {
 
             int n = _replacementPathFinds.Length;
 
-            Log._Debug("Creating " + n + " stock PathFind objects.");
-            PathFind[] stockPathFinds = new PathFind[n];
-
-            FieldInfo f_pathfinds = typeof(PathManager).GetField(
-                                        "m_pathfinds",
-                                        BindingFlags.NonPublic | BindingFlags.Instance)
-                                    ?? throw new Exception("f_pathFinds is null");
-
             // both stock and custom PathMangers use the same lock object
             lock (m_bufferLock) {
+                Log._Debug("Destroying " + n + " PathFind objects.");
                 for (int i = 0; i < n; i++) {
-                    Log._Debug($"PF {i}: {_replacementPathFinds[i].m_queuedPathFindCount} queued path-finds");
+                    Log._Debug($"PF {i}: {_replacementPathFinds[i].m_queuedPathFindCount} queued path-finds.  PF: {_replacementPathFinds[i]?.GetType().FullName ?? "<null>"} active: ({(bool)_replacementPathFinds[i]})");
 
                     // would cause deadlock since we have a lock on m_bufferLock
                     // customPathFinds[i].WaitForAllPaths();
-                    Destroy(_replacementPathFinds[i]);
+                    DestroyImmediate(_replacementPathFinds[i]);
                 }
 
                 // revert to vanilla number of threads
                 n = Mathf.Clamp(SystemInfo.processorCount / 2, 1, 4);
+                Log._Debug("Creating " + n + " stock PathFind objects.");
+                PathFind[] stockPathFinds = new PathFind[n];
                 for (int i = 0; i < n; i++) {
                     stockPathFinds[i] = gameObject.AddComponent<PathFind>();
                 }
 
+                FieldInfo f_pathfinds = typeof(PathManager).GetField(
+                                            "m_pathfinds",
+                                            BindingFlags.NonPublic | BindingFlags.Instance)
+                                        ?? throw new Exception("f_pathFinds is null");
                 f_pathfinds?.SetValue(stockPathManager, stockPathFinds);
+            }
+        }
+
+        private void UpdatePathUnitsReference(Array32<PathUnit> pathUnits) {
+            if (_instance) {
+                lock (m_bufferLock) {
+                    // update array reference on cached vanilla(stock) PathManager
+                    if (stockPathManager_) {
+                        stockPathManager_.m_pathUnits = pathUnits;
+                    }
+
+                    _instance.m_pathUnits = pathUnits;
+                    // update path unit queue in case of different size
+                    if (_instance.QueueItems.Length != pathUnits.m_size) {
+                        _instance.QueueItems = new PathUnitQueueItem[pathUnits.m_size];
+                    }
+
+                    // update array reference for all custom pathfind threads
+                    for (var i = 0; i < _replacementPathFinds.Length; i++) {
+                       _replacementPathFinds[i].SetPathUnits(pathUnits);
+                   }
+                }
             }
         }
 
@@ -463,7 +519,7 @@ namespace TrafficManager.Custom.PathFinding {
             Patcher.Uninstall(API.Harmony.HARMONY_ID_PATHFINDING);
 
             PathManagerInstance.SetValue(null, stockPathManager_);
-            Log._Debug("Should be stock: " + PathManager.instance.GetType());
+            Log.Info("Should be stock: " + PathManager.instance.GetType().FullName);
 
             UpdateOldPathManagerValues(stockPathManager_);
             var simManagers = GetSimulationManagers();
@@ -473,6 +529,7 @@ namespace TrafficManager.Custom.PathFinding {
             simManagers.Add(stockPathManager_);
             terminated_ = true;
             _instance = null;
+            Log._Debug("CustomPathManager: Destroyed");
         }
     }
 }
