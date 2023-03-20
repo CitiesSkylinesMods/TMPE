@@ -391,10 +391,10 @@ namespace TrafficManager.TrafficLight.Impl {
                     if (!nextStep.CustomSegmentLights.TryGetValue(
                             segmentId,
                             out CustomSegmentLights nextStepSegmentLights)) {
-                        Log.WarningIf(
-                            logTrafficLights,
-                            () => "TimedTrafficLightsStep: nextStep does not contain lights for " +
-                            $"segment {segmentId}!");
+                        if (logTrafficLights) {
+                            Log.Warning("TimedTrafficLightsStep: nextStep does not contain lights for " +
+                                    $"segment {segmentId}!");
+                        }
                         continue;
                     }
 
@@ -770,9 +770,9 @@ namespace TrafficManager.TrafficLight.Impl {
 #else
             const bool logTrafficLights = false;
 #endif
-            Log.WarningIf(
-                logTrafficLights,
-                () => $"calcWaitFlow: called for node {timedNode.NodeId} @ step {stepRefIndex}");
+            if (logTrafficLights) {
+                Log.Warning($"calcWaitFlow: called for node {timedNode.NodeId} @ step {stepRefIndex}");
+            }
 
             // TODO checking against getCurrentFrame() is only valid if this is the current step
             // during start phase all vehicles on "green" segments are counted as flowing
