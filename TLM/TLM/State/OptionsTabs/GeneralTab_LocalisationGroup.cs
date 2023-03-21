@@ -10,6 +10,7 @@ namespace TrafficManager.State {
     using TrafficManager.UI;
     using TrafficManager.UI.Helpers;
     using TrafficManager.UI.Textures;
+    using TrafficManager.Util.Extensions;
 
     /// <summary>
     /// Adds localisation options to General options tab.
@@ -64,7 +65,7 @@ namespace TrafficManager.State {
                 }
             }
 
-            group.AddDropdown(
+            group.AddCustomDropDown(
                 text: T("General.Dropdown:Select language") + ":",
                 options: languageLabels,
                 defaultSelection: languageIndex,
@@ -84,7 +85,7 @@ namespace TrafficManager.State {
             int selectedThemeIndex = themeNames.FindIndex(x => x == mainConfig.RoadSignTheme);
             int defaultSignsThemeIndex = RoadSignThemeManager.Instance.FindDefaultThemeIndex(mainConfig.DisplaySpeedLimitsMph);
 
-            _roadSignsThemeDropdown = group.AddDropdown(
+            _roadSignsThemeDropdown = group.AddCustomDropDown(
                 text: TSpeedLimits("General.Dropdown:Road signs theme") + ":",
                 options: themeOptions,
                 defaultSelection: selectedThemeIndex >= 0 ? selectedThemeIndex : defaultSignsThemeIndex,

@@ -184,6 +184,7 @@
     <Compile Include="TrafficLight\Impl\ITrafficLightContainer.cs" />
     <Compile Include="TrafficLight\Impl\TrafficLightSimulation.cs" />
     <Compile Include="UI\AllowDespawn\AllowDespawnPanel.cs" />
+    <Compile Include="UI\Helpers\CustomDownDown.cs" />
     <Compile Include="UI\Helpers\DebugOverlay.cs" />
     <Compile Include="UI\DebugSwitches\DebugSwitchPanel.cs" />
     <Compile Include="UI\DebugSwitches\DebugSwitchCheckboxOption.cs" />

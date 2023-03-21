@@ -1,12 +1,12 @@
 namespace TrafficManager.UI.Helpers {
     using ICities;
     using ColossalFramework.UI;
-    using TrafficManager.State;
     using CSUtil.Commons;
     using System;
     using System.Linq;
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.Util;
+    using TrafficManager.Util.Extensions;
 
     public class DropDownOption<TEnum> : SerializableUIOptionBase<TEnum, UIDropDown, DropDownOption<TEnum>>
         where TEnum : struct, Enum, IConvertible {
@@ -71,7 +71,7 @@ namespace TrafficManager.UI.Helpers {
         }
 
         public override DropDownOption<TEnum> AddUI(UIHelperBase container) {
-            _ui = container.AddDropdown(
+            _ui = container.AddCustomDropDown(
                 text: Translate(Label) + ":",
                 options: GetTranslatedItems(),
                 defaultSelection: IndexOf(Value),
