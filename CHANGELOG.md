@@ -29,6 +29,30 @@ This changelog includes all versions and major variants of the mod going all the
 
 > Date format: dd/mm/yyyy
 
+#### TM:PE V[11.7.4.0](https://github.com/CitiesSkylinesMods/TMPE/compare/11.7.3.0...11.7.3.1) STABLE, 22/03/2022
+
+- [Meta] Compatibility patch for the game update 1.16.1-f2
+- [New] Prevent the user from setting invalid Lane Arrows, update arrows if lane connections exist #368, #1724 (krzychu124)
+- [Fixed] Mouse wheel scroll is changing values if dropdown popup is closed #1733 (krzychu124)
+- [Fixed] Building Color change performance improvements #1725 (krzychu124)
+- [Fixed] Reduced memory pressure/garbage generation in simulation critical paths #1731 (krzychu124)
+- [Updated] Translation update for Arabic, Czech, English, French, Indonesian Italian, Korean, Polish, Portuguese, Romanian, Spanish, Thai, Turkish and Ukrainian
+- [Updated] Minor improvements in storing mod default values #1702 (kianzarrin)
+- [Mod] Improved compatibility with More Path Units
+- [Steam] [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
+
+#### TM:PE V11.7.4.0 TEST, 22/03/2022
+
+- [Meta] Compatibility patch for the game update 1.16.1-f2
+- [New] Prevent the user from setting invalid Lane Arrows, update arrows if lane connections exist #368, #1724 (krzychu124)
+- [Fixed] Mouse wheel scroll is changing values if dropdown popup is closed #1733 (krzychu124)
+- [Fixed] Building Color change performance improvements #1725 (krzychu124)
+- [Fixed] Reduced memory pressure/garbage generation in simulation critical paths #1731 (krzychu124)
+- [Updated] Translation update for Arabic, Czech, English, French, Indonesian Italian, Korean, Polish, Portuguese, Romanian, Spanish, Thai, Turkish and Ukrainian
+- [Updated] Minor improvements in storing mod default values #1702 (kianzarrin)
+- [Mod] Improved compatibility with More Path Units
+- [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
+
 #### TM:PE V[11.7.3.1](https://github.com/CitiesSkylinesMods/TMPE/compare/11.7.3.0...11.7.3.1) STABLE, 23/12/2022
 
 - [Fixed] Partial detection of Bank vans as service vehicles (krzychu124)
