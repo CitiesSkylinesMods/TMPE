@@ -95,7 +95,7 @@ namespace TrafficManager.Patch._CitizenAI._TouristAI {
             } else {
                 carProb = GetCarProbability(__instance, citizenData.m_frame1.m_position);
                 bikeProb = GetBikeProbability(__instance);
-                taxiProb = GetTaxiProbability(__instance);
+                taxiProb = GetTaxiProbability(__instance, instanceID, ref citizenData);
             }
 
             Randomizer randomizer = new Randomizer(citizenData.m_citizen);

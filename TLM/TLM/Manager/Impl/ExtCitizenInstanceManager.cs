@@ -927,6 +927,7 @@ namespace TrafficManager.Manager.Impl {
                     false,
                     false,
                     parkingAiConf.MaxBuildingToPedestrianLaneDistance,
+                    false,
                     out parkedVehiclePathPos);
             }
 
@@ -977,6 +978,7 @@ namespace TrafficManager.Manager.Impl {
                     allowUnderground,
                     false,
                     parkingAiConf.MaxBuildingToPedestrianLaneDistance,
+                    false,
                     out startPosA);
             } else {
                 foundStartPos = FindPathPosition(
@@ -1152,6 +1154,7 @@ namespace TrafficManager.Manager.Impl {
                     SavedGameOptions.Instance.parkingAI
                         ? GlobalConfig.Instance.ParkingAI.MaxBuildingToPedestrianLaneDistance
                         : 32f,
+                    false,
                     out PathUnit.Position posA,
                     out PathUnit.Position posB,
                     out float distA,
@@ -1171,6 +1174,7 @@ namespace TrafficManager.Manager.Impl {
                     SavedGameOptions.Instance.parkingAI
                         ? GlobalConfig.Instance.ParkingAI.MaxBuildingToPedestrianLaneDistance
                         : 32f,
+                    false,
                     out posA,
                     out posB,
                     out distA,
@@ -1191,6 +1195,7 @@ namespace TrafficManager.Manager.Impl {
                     SavedGameOptions.Instance.parkingAI
                         ? GlobalConfig.Instance.ParkingAI.MaxBuildingToPedestrianLaneDistance
                         : 32f,
+                    false,
                     out posA,
                     out posB,
                     out distA,

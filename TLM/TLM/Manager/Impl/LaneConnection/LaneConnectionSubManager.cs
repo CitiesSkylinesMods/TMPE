@@ -303,6 +303,9 @@ namespace TrafficManager.Manager.Impl.LaneConnection {
 
             for (int i = 0; i < 8; ++i) {
                 ushort segmentId = node.GetSegment(i);
+                if (segmentId == 0)
+                    continue;
+
                 RoutingManager.Instance.RequestRecalculation(segmentId);
                 if (TMPELifecycle.Instance.MayPublishSegmentChanges()) {
                     ExtSegmentManager.Instance.PublishSegmentChanges(segmentId);

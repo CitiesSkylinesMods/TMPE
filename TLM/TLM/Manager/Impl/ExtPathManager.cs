@@ -58,6 +58,7 @@ namespace TrafficManager.Manager.Impl {
                     maxDistance: SavedGameOptions.Instance.parkingAI
                                      ? GlobalConfig.Instance.ParkingAI.MaxBuildingToPedestrianLaneDistance
                                      : 32f,
+                    excludeLaneWidth: false,
                     pathPosA: out PathUnit.Position posA,
                     pathPosB: out _,
                     distanceSqrA: out float distA,
@@ -78,6 +79,7 @@ namespace TrafficManager.Manager.Impl {
                     SavedGameOptions.Instance.parkingAI
                         ? GlobalConfig.Instance.ParkingAI.MaxBuildingToPedestrianLaneDistance
                         : 32f,
+                    false,
                     out posA,
                     out _,
                     out distA,
@@ -99,6 +101,7 @@ namespace TrafficManager.Manager.Impl {
                         ? GlobalConfig
                           .Instance.ParkingAI.MaxBuildingToPedestrianLaneDistance
                         : 32f,
+                    false,
                     out posA,
                     out _,
                     out distA,
@@ -118,6 +121,7 @@ namespace TrafficManager.Manager.Impl {
                                                    bool allowUnderground,
                                                    bool requireConnect,
                                                    float maxDistance,
+                                                   bool excludeLaneWidth,
                                                    out PathUnit.Position pathPos) {
             return FindPathPositionWithSpiralLoop(
                 position,
@@ -130,6 +134,7 @@ namespace TrafficManager.Manager.Impl {
                 allowUnderground,
                 requireConnect,
                 maxDistance,
+                excludeLaneWidth,
                 out pathPos);
         }
 
@@ -143,6 +148,7 @@ namespace TrafficManager.Manager.Impl {
                                                    bool allowUnderground,
                                                    bool requireConnect,
                                                    float maxDistance,
+                                                   bool excludeLaneWidth,
                                                    out PathUnit.Position pathPos) {
             return FindPathPositionWithSpiralLoop(
                 position,
@@ -156,6 +162,7 @@ namespace TrafficManager.Manager.Impl {
                 allowUnderground,
                 requireConnect,
                 maxDistance,
+                excludeLaneWidth,
                 out pathPos);
         }
 
@@ -169,6 +176,7 @@ namespace TrafficManager.Manager.Impl {
                                                    bool allowUnderground,
                                                    bool requireConnect,
                                                    float maxDistance,
+                                                   bool excludeLaneWidth,
                                                    out PathUnit.Position pathPos) {
             return FindPathPositionWithSpiralLoop(
                 position,
@@ -183,6 +191,7 @@ namespace TrafficManager.Manager.Impl {
                 allowUnderground,
                 requireConnect,
                 maxDistance,
+                excludeLaneWidth,
                 out pathPos,
                 out PathUnit.Position _,
                 out float _,
@@ -200,6 +209,7 @@ namespace TrafficManager.Manager.Impl {
                                                    bool allowUnderground,
                                                    bool requireConnect,
                                                    float maxDistance,
+                                                   bool excludeLaneWidth,
                                                    out PathUnit.Position pathPos
             ) {
             return FindPathPositionWithSpiralLoop(
@@ -215,6 +225,7 @@ namespace TrafficManager.Manager.Impl {
                 allowUnderground,
                 requireConnect,
                 maxDistance,
+                excludeLaneWidth,
                 out pathPos,
                 out PathUnit.Position _,
                 out float _,
@@ -230,6 +241,7 @@ namespace TrafficManager.Manager.Impl {
                                                    bool allowUnderground,
                                                    bool requireConnect,
                                                    float maxDistance,
+                                                   bool excludeLaneWidth,
                                                    out PathUnit.Position pathPosA,
                                                    out PathUnit.Position pathPosB,
                                                    out float distanceSqrA,
@@ -245,6 +257,7 @@ namespace TrafficManager.Manager.Impl {
                 allowUnderground,
                 requireConnect,
                 maxDistance,
+                excludeLaneWidth,
                 out pathPosA,
                 out pathPosB,
                 out distanceSqrA,
@@ -261,6 +274,7 @@ namespace TrafficManager.Manager.Impl {
                                                    bool allowUnderground,
                                                    bool requireConnect,
                                                    float maxDistance,
+                                                   bool excludeLaneWidth,
                                                    out PathUnit.Position pathPosA,
                                                    out PathUnit.Position pathPosB,
                                                    out float distanceSqrA,
@@ -278,6 +292,7 @@ namespace TrafficManager.Manager.Impl {
                 allowUnderground,
                 requireConnect,
                 maxDistance,
+                excludeLaneWidth,
                 out pathPosA,
                 out pathPosB,
                 out distanceSqrA,
@@ -294,6 +309,7 @@ namespace TrafficManager.Manager.Impl {
                                                    bool allowUnderground,
                                                    bool requireConnect,
                                                    float maxDistance,
+                                                   bool excludeLaneWidth,
                                                    out PathUnit.Position pathPosA,
                                                    out PathUnit.Position pathPosB,
                                                    out float distanceSqrA,
@@ -311,6 +327,7 @@ namespace TrafficManager.Manager.Impl {
                 allowUnderground,
                 requireConnect,
                 maxDistance,
+                excludeLaneWidth,
                 out pathPosA,
                 out pathPosB,
                 out distanceSqrA,
@@ -329,6 +346,7 @@ namespace TrafficManager.Manager.Impl {
                                                    bool allowUnderground,
                                                    bool requireConnect,
                                                    float maxDistance,
+                                                   bool excludeLaneWidth,
                                                    out PathUnit.Position pathPosA,
                                                    out PathUnit.Position pathPosB,
                                                    out float distanceSqrA,
@@ -456,6 +474,11 @@ namespace TrafficManager.Manager.Impl {
                                 out float laneOffsetB))
                             {
                                 float dist = Vector3.SqrMagnitude(position - posA);
+                                if (excludeLaneWidth)
+                                {
+                                    dist = Mathf.Max(0f, Mathf.Sqrt(dist) - segmentInfo.m_lanes[laneIndexA].m_width * 0.5f);
+                                    dist *= dist;
+                                }
                                 if (secondaryPosition.HasValue) {
                                     dist += Vector3.SqrMagnitude(secondaryPosition.Value - posA);
                                 }
@@ -473,6 +496,11 @@ namespace TrafficManager.Manager.Impl {
                                     myDistanceSqrA = dist;
 
                                     dist = Vector3.SqrMagnitude(position - posB);
+                                    if (excludeLaneWidth)
+                                    {
+                                        dist = Mathf.Max(0f, Mathf.Sqrt(dist) - segmentInfo.m_lanes[laneIndexA].m_width * 0.5f);
+                                        dist *= dist;
+                                    }
                                     if (secondaryPosition.HasValue) {
                                         dist += Vector3.SqrMagnitude(
                                             secondaryPosition.Value - posB);

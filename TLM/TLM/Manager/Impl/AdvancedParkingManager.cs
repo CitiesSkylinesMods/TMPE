@@ -1952,6 +1952,7 @@ namespace TrafficManager.Manager.Impl {
                         false,
                         false,
                         GlobalConfig.Instance.ParkingAI.MaxBuildingToPedestrianLaneDistance,
+                        false,
                         out endPathPos)) {
                         calculateEndPos = false;
                     }
