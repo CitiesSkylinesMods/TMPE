@@ -897,6 +897,7 @@ namespace TrafficManager.Manager.Impl {
                     allowUnderground,
                     false,
                     32f,
+                    false,
                     out startPosA,
                     out startPosB,
                     out sqrDistA,

@@ -9,7 +9,7 @@
     <a href="https://github.com/CitiesSkylinesMods/TMPE/wiki/Report-a-Bug">Report a Bug</a><br />
 </p>
 <p align="center">
-    <a href="https://store.steampowered.com/app/255710/Cities_Skylines/"><img src="https://img.shields.io/static/v1?label=cities:%20skylines&message=v1.16.0-f3&color=01ABF8&logo=unity" /></a>
+    <a href="https://store.steampowered.com/app/255710/Cities_Skylines/"><img src="https://img.shields.io/static/v1?label=cities:%20skylines&message=v1.16.1-f2&color=01ABF8&logo=unity" /></a>
     <a href="https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252"><img src="https://img.shields.io/github/v/release/CitiesSkylinesMods/TMPE?label=stable&color=7cc17b&logo=steam&logoColor=F5F5F5" /></a>
     <a href="https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785"><img src="https://img.shields.io/github/v/release/CitiesSkylinesMods/TMPE?include_prereleases&label=test&color=f7b73c&logo=steam&logoColor=F5F5F5" /></a>
     <a href="https://github.com/CitiesSkylinesMods/TMPE/releases/latest"><img src="https://img.shields.io/github/v/release/CitiesSkylinesMods/TMPE?label=origin&color=F56C2D&logo=origin&logoColor=F56C2D" /></a>
@@ -29,6 +29,7 @@
 * Other problems? See: [Troubleshooting Guide](https://github.com/CitiesSkylinesMods/TMPE/wiki/Troubleshooting)
 
 ## Releases
+
 
 - [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252) (fully tested releases)
 - [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785) (latest beta test releases)

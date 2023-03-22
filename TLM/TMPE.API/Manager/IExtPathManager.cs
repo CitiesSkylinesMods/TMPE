@@ -16,6 +16,7 @@
                                             bool allowUnderground,
                                             bool requireConnect,
                                             float maxDistance,
+                                            bool excludeLaneWidth,
                                             out PathUnit.Position pathPos);
         bool FindPathPositionWithSpiralLoop(Vector3 position,
                                             ItemClass.Service service,
@@ -27,6 +28,7 @@
                                             bool allowUnderground,
                                             bool requireConnect,
                                             float maxDistance,
+                                            bool excludeLaneWidth,
                                             out PathUnit.Position pathPos);
 
         bool FindPathPositionWithSpiralLoop(Vector3 position,
@@ -39,6 +41,7 @@
                                             bool allowUnderground,
                                             bool requireConnect,
                                             float maxDistance,
+                                            bool excludeLaneWidth,
                                             out PathUnit.Position pathPos);
 
         bool FindPathPositionWithSpiralLoop(Vector3 position,
@@ -52,6 +55,7 @@
                                             bool allowUnderground,
                                             bool requireConnect,
                                             float maxDistance,
+                                            bool excludeLaneWidth,
                                             out PathUnit.Position pathPos);
 
         bool FindPathPositionWithSpiralLoop(Vector3 position,
@@ -63,6 +67,7 @@
                                             bool allowUnderground,
                                             bool requireConnect,
                                             float maxDistance,
+                                            bool excludeLaneWidth,
                                             out PathUnit.Position pathPosA,
                                             out PathUnit.Position pathPosB,
                                             out float distanceSqrA,
@@ -78,6 +83,7 @@
                                             bool allowUnderground,
                                             bool requireConnect,
                                             float maxDistance,
+                                            bool excludeLaneWidth,
                                             out PathUnit.Position pathPosA,
                                             out PathUnit.Position pathPosB,
                                             out float distanceSqrA,
@@ -93,6 +99,7 @@
                                             bool allowUnderground,
                                             bool requireConnect,
                                             float maxDistance,
+                                            bool excludeLaneWidth,
                                             out PathUnit.Position pathPosA,
                                             out PathUnit.Position pathPosB,
                                             out float distanceSqrA,
@@ -110,6 +117,7 @@
                                             bool allowUnderground,
                                             bool requireConnect,
                                             float maxDistance,
+                                            bool excludeLaneWidth,
                                             out PathUnit.Position pathPosA,
                                             out PathUnit.Position pathPosB,
                                             out float distanceSqrA,
