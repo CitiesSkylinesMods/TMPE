@@ -141,18 +141,6 @@ namespace TrafficManager.Patch._CitizenAI._HumanAI {
                                                   | CitizenInstance.Flags.SittingDown
                                                   | CitizenInstance.Flags.Cheering);
 
-                        // NON-STOCK CODE START (transferred from ResidentAI.PathfindSuccess)
-                        const Citizen.Flags CTZ_MASK = Citizen.Flags.Tourist
-                                                       | Citizen.Flags.MovingIn
-                                                       | Citizen.Flags.DummyTraffic;
-                        if (citizenId != 0 && (citizen.m_flags & CTZ_MASK) == Citizen.Flags.MovingIn)
-                        {
-                            StatisticBase statisticBase = Singleton<StatisticsManager>
-                                                .instance.Acquire<StatisticInt32>(StatisticType.MoveRate);
-                            statisticBase.Add(1);
-                        }
-
-                        // NON-STOCK CODE END
                         PathfindSuccess(__instance, instanceID, ref data);
                         break;
                     }
