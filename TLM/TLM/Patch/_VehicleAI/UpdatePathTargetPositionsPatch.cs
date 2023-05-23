@@ -971,7 +971,9 @@ namespace TrafficManager.Patch._VehicleAI {
                                 Mathf.Min(targetPos.w, curMaxSpeed));
                             float sqrMagnitude2 = (bezierPos - refPos).sqrMagnitude;
 
-                            Log._Debug(
+                            Log._DebugIf(
+                                logLogic,
+                                () =>
                                 $"CustomVehicle.CustomUpdatePathTargetPositions({vehicleID}): " +
                                 "Preparing to update node target positions (2). " +
                                 $"pathOffset={pathOffset}, bezierPos={bezierPos}, " +
@@ -981,7 +983,9 @@ namespace TrafficManager.Patch._VehicleAI {
                                 continue;
                             }
 
-                            Log._Debug(
+                            Log._DebugIf(
+                                logLogic,
+                                () =>
                                 $"CustomVehicle.CustomUpdatePathTargetPositions({vehicleID}): " +
                                 $"sqrMagnitude2={sqrMagnitude2} >= minSqrDistA={minSqrDistA} and no need to stop at node");
 
@@ -1030,13 +1034,17 @@ namespace TrafficManager.Patch._VehicleAI {
                             refPos = targetPos;
                             targetPos.w = 1000f;
 
-                            Log._Debug(
+                            Log._DebugIf(
+                                logLogic,
+                                () =>
                                 $"CustomVehicle.CustomUpdatePathTargetPositions({vehicleID}): " +
                                 $"After updating node target positions. minSqrDistA={minSqrDistA}, " +
                                 $"refPos={refPos}");
 
                             if (index == max) {
-                                Log._Debug(
+                                Log._DebugIf(
+                                    logLogic,
+                                    () =>
                                     $"CustomVehicle.CustomUpdatePathTargetPositions({vehicleID}): " +
                                     $"index == max ({max}). " +
                                     "FINISH.");
@@ -1046,7 +1054,9 @@ namespace TrafficManager.Patch._VehicleAI {
                     }
                 } else {
                     PathUnit.CalculatePathPositionOffset(nextLaneId, targetPos, out nextSegOffset);
-                    Log._Debug(
+                    Log._DebugIf(
+                        logLogic,
+                        () =>
                         $"CustomVehicle.CustomUpdatePathTargetPositions({vehicleID}): " +
                         $"Same lane or cargo lane. curLaneId={curLaneId}, nextLaneId={nextLaneId}, " +
                         $"laneInfo.m_laneType={laneInfo.m_laneType}, targetPos={targetPos}, " +
@@ -1136,7 +1146,9 @@ namespace TrafficManager.Patch._VehicleAI {
                 laneInfo = nextLaneInfo;
                 firstIter = false; // NON-STOCK CODE
 
-                Log._Debug(
+                Log._DebugIf(
+                    logLogic,
+                    () =>
                     $"CustomVehicle.CustomUpdatePathTargetPositions({vehicleID}): " +
                     "Prepared next main loop iteration. currentPosition" +
                     $"=[seg={currentPosition.m_segment}, lane={currentPosition.m_lane}, " +
