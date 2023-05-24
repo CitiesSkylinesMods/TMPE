@@ -539,7 +539,7 @@ namespace TrafficManager.UI {
                 if (HoveredNodeId != SelectedNodeId && HoveredNodeId != 0) {
                     Highlight.DrawNodeCircle(cameraInfo, HoveredNodeId, color);
                 }
-            } else {
+            } else if (HoveredSegmentId != 0) {
                 NetTool.RenderOverlay(cameraInfo, ref segment, color, color);
             }
         }
@@ -1642,31 +1642,31 @@ namespace TrafficManager.UI {
                 shift: false,
                 ctrl: false,
                 alt: false,
-                localizedText: "Onscreen.Default:Select a road")); // select a road to set as main road.
+                localizedText: Translation.Menu.Get("Onscreen.Default:Select a road"))); // select a road to set as main road.
             items.Add(new MainMenu.OSD.HardcodedMouseShortcut(
                 button: ColossalFramework.UI.UIMouseButton.Left,
                 shift: false,
                 ctrl: false,
                 alt: true,
-                localizedText: "Onscreen.Default:Select a node")); // select a node to erase all traffic rules.
+                localizedText: Translation.Menu.Get("Onscreen.Default:Select a node"))); // select a node to erase all traffic rules.
 
             if (SelectedNodeId != 0) {
                 items.Add(new MainMenu.OSD.Shortcut(
                     keybindSetting: KeybindSettingsBase.RestoreDefaultsKey,
-                    localizedText: "Onscreen.Default:Erase")); // Erase all traffic rules from selected node.
+                    localizedText: Translation.Menu.Get("Onscreen.Default:Erase"))); // Erase all traffic rules from selected node.
                 items.Add(new MainMenu.OSD.HardcodedMouseShortcut(
                     button: ColossalFramework.UI.UIMouseButton.Right,
                     shift: false,
                     ctrl: false,
                     alt: false,
-                    localizedText: "Onscreen.Default:Deselect node"));
+                    localizedText: Translation.Menu.Get("Onscreen.Default:Deselect node")));
             }
 
             items.Add(new MainMenu.OSD.HoldModifier(
                 shift: false,
                 ctrl: true,
                 alt: false,
-                localizedText: "Onscreen.Default:Show traffic rules")); // show traffic rules for high priority roads
+                localizedText: Translation.Menu.Get("Onscreen.Default:Show traffic rules"))); // show traffic rules for high priority roads
 
             OnscreenDisplay.Display(items);
         }
