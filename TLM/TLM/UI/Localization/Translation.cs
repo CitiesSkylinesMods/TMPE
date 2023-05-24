@@ -115,6 +115,7 @@ namespace TrafficManager.UI {
                     { "Czech", "cz" },
                     { "Dutch", "nl" },
                     { "English, United Kingdom", "en-gb" },
+                    { "Finnish", "fi" },
                     { "French", "fr" },
                     { "German", "de" },
                     { "Hungarian", "hu" },
