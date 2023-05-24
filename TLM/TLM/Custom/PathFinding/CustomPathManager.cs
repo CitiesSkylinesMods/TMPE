@@ -146,12 +146,14 @@ namespace TrafficManager.Custom.PathFinding {
             PathFind[] stockPathFinds = GetComponents<PathFind>();
             int numOfStockPathFinds = stockPathFinds.Length;
             // utilize more threads if possible (systems with 8+) otherwise use vanilla calculation
-            int numCustomPathFinds = SystemInfo.processorCount < 8
-                                         ? Mathf.Max(SystemInfo.processorCount / 2, 1)
-                                         : SystemInfo.processorCount - 4;
+            // <=8t CPU -> 1..4 PT threads (vanilla)
+            // 10t CPU -> 5 PT threads
+            // 16t CPU -> 8 PT threads (2x vanilla)
+            // >=20t CPU -> 10 PT threads
+            int numCustomPathFinds = Mathf.Clamp(SystemInfo.processorCount / 2, 1, 10);
             simSleepMultiplier_ = CalculateBestSimSleepMultiplier(numCustomPathFinds);
 
-            Log._Debug("Creating " + numCustomPathFinds + " custom PathFind objects. Number of stock Pathfinds " +numOfStockPathFinds);
+            Log._Debug($"Detected {SystemInfo.processorCount} CPU thread(s). Creating {numCustomPathFinds} custom PathFind objects. Number of stock Pathfinds {numOfStockPathFinds}");
             _replacementPathFinds = new CustomPathFind[numCustomPathFinds];
             FieldInfo f_pathfinds = typeof(PathManager).GetField(
                                         "m_pathfinds",
