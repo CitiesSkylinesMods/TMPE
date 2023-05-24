@@ -315,7 +315,15 @@ namespace TrafficManager.State {
 #if DEBUGFLAGS
             Log._Debug($"Flags.resetLaneArrowFlags: Resetting lane arrows of lane {laneId}.");
 #endif
-            if (LaneConnectionManager.Instance.Road.HasOutgoingConnections(laneId)) {
+            bool? hasOutgoingConnections = null;
+            try {
+                hasOutgoingConnections = LaneConnectionManager.Instance.Road.HasOutgoingConnections(laneId);
+            } catch (Exception _) {
+                // temporary solution, HasOutgoingConnections may throw exception if some flag is incorrect
+                // It does not affect what it was, since we are performing action only on success
+            }
+
+            if (hasOutgoingConnections.HasValue && hasOutgoingConnections.Value) {
                 LaneArrows? arrows = LaneConnectionManager.Instance.Road.GetArrowsForOutgoingConnections(laneId);
 #if DEBUGFLAGS
                 Log._Debug($"Flags.resetLaneArrowFlags: Lane {laneId} has outgoing connections. Calculated Arrows: {(arrows.HasValue ? arrows.Value : "<none>")}");
