@@ -1994,51 +1994,84 @@ namespace TrafficManager.Manager.Impl {
                 () => $"Trying to spawn parked passenger car for citizen {citizenId}, " +
                 $"home {homeId} @ {refPos}");
 
-            bool roadParkSuccess = TrySpawnParkedPassengerCarRoadSide(
+            bool roadParkSuccess = TrySpawnParkedPassengerCarRoadSideInternal(
                 citizenId,
                 refPos,
                 vehicleInfo,
                 out Vector3 roadParkPos,
-                out ParkingError roadParkReason);
+                out ParkingError roadParkReason,
+                out ushort roadParkedVehicleId,
+                updateCitizenParkedVehicle: false);
 
-            bool buildingParkSuccess = TrySpawnParkedPassengerCarBuilding(
+            bool buildingParkSuccess = TrySpawnParkedPassengerCarBuildingInternal(
                 citizenId,
                 ref citizen,
                 homeId,
                 refPos,
                 vehicleInfo,
                 out Vector3 buildingParkPos,
-                out ParkingError buildingParkReason);
+                out ParkingError buildingParkReason,
+                out ushort buildingParkedVehicleId,
+                updateCitizenParkedVehicle: false);
 
-            if ((!roadParkSuccess && !buildingParkSuccess)
-                || (roadParkSuccess && !buildingParkSuccess)) {
+            if (!buildingParkSuccess) {
+                if (roadParkSuccess) {
+                    roadParkedVehicleId.AssignToCitizenAndMakeVisible(citizenId);
+                }
                 parkPos = roadParkPos;
                 reason = roadParkReason;
                 return roadParkSuccess;
             }
 
             if (!roadParkSuccess) {
+                buildingParkedVehicleId.AssignToCitizenAndMakeVisible(citizenId);
                 parkPos = buildingParkPos;
                 reason = buildingParkReason;
                 return true;
             }
 
+            /*
+             * Two parked vehicles available, assign the closer one, release the other
+             */
             if ((roadParkPos - refPos).sqrMagnitude < (buildingParkPos - refPos).sqrMagnitude) {
+                VehicleManager.instance.ReleaseParkedVehicle(buildingParkedVehicleId);
+                roadParkedVehicleId.AssignToCitizenAndMakeVisible(citizenId);
                 parkPos = roadParkPos;
                 reason = roadParkReason;
                 return true;
             }
 
+            VehicleManager.instance.ReleaseParkedVehicle(roadParkedVehicleId);
+            buildingParkedVehicleId.AssignToCitizenAndMakeVisible(citizenId);
             parkPos = buildingParkPos;
             reason = buildingParkReason;
             return true;
         }
 
+        [UsedImplicitly]
         public bool TrySpawnParkedPassengerCarRoadSide(uint citizenId,
                                                        Vector3 refPos,
                                                        VehicleInfo vehicleInfo,
                                                        out Vector3 parkPos,
                                                        out ParkingError reason) {
+            return TrySpawnParkedPassengerCarRoadSideInternal(
+                citizenId,
+                refPos,
+                vehicleInfo,
+                out parkPos,
+                out reason,
+                out _,
+                updateCitizenParkedVehicle: true);
+        }
+
+
+        private bool TrySpawnParkedPassengerCarRoadSideInternal(uint citizenId,
+                                                       Vector3 refPos,
+                                                       VehicleInfo vehicleInfo,
+                                                       out Vector3 parkPos,
+                                                       out ParkingError reason,
+                                                       out ushort roadParkVehicleId,
+                                                       bool updateCitizenParkedVehicle = true) {
 #if DEBUG
             bool citizenDebug = DebugSettings.CitizenId == 0 || DebugSettings.CitizenId == citizenId;
             bool logParkingAi = DebugSwitch.BasicParkingAILog.Get() && citizenDebug;
@@ -2054,6 +2087,7 @@ namespace TrafficManager.Manager.Impl {
                 () => $"Trying to spawn parked passenger car at road side for citizen {citizenId} @ {refPos}");
 
             parkPos = Vector3.zero;
+            roadParkVehicleId = 0;
 
             if (FindParkingSpaceRoadSide(
                 0,
@@ -2075,9 +2109,10 @@ namespace TrafficManager.Manager.Impl {
                     parkRot,
                     citizenId))
                 {
-                    CitizenManager.instance.m_citizens.m_buffer[citizenId].SetParkedVehicle(citizenId, parkedVehicleId);
-
-                    parkedVehicleId.ToParkedVehicle().m_flags &= (ushort)(VehicleParked.Flags.All & ~VehicleParked.Flags.Parking);
+                    roadParkVehicleId = parkedVehicleId;
+                    if (updateCitizenParkedVehicle) {
+                        parkedVehicleId.AssignToCitizenAndMakeVisible(citizenId);
+                    }
 
                     if (logParkingAi) {
                         Log._Debug(
@@ -2100,6 +2135,7 @@ namespace TrafficManager.Manager.Impl {
             return false;
         }
 
+        [UsedImplicitly]
         public bool TrySpawnParkedPassengerCarBuilding(uint citizenId,
                                                        ref Citizen citizen,
                                                        ushort homeId,
@@ -2107,6 +2143,27 @@ namespace TrafficManager.Manager.Impl {
                                                        VehicleInfo vehicleInfo,
                                                        out Vector3 parkPos,
                                                        out ParkingError reason) {
+            return TrySpawnParkedPassengerCarBuildingInternal(
+                citizenId,
+                ref citizen,
+                homeId,
+                refPos,
+                vehicleInfo,
+                out parkPos,
+                out reason,
+                out _,
+                updateCitizenParkedVehicle: true);
+        }
+
+        public bool TrySpawnParkedPassengerCarBuildingInternal(uint citizenId,
+                                                       ref Citizen citizen,
+                                                       ushort homeId,
+                                                       Vector3 refPos,
+                                                       VehicleInfo vehicleInfo,
+                                                       out Vector3 parkPos,
+                                                       out ParkingError reason,
+                                                       out ushort buildingParkVehicleId,
+                                                       bool updateCitizenParkedVehicle = true) {
 #if DEBUG
             bool citizenDebug = DebugSettings.CitizenId == 0 || DebugSettings.CitizenId == citizenId;
             bool logParkingAi = DebugSwitch.BasicParkingAILog.Get() && citizenDebug;
@@ -2122,6 +2179,7 @@ namespace TrafficManager.Manager.Impl {
                 $"{citizenId} @ {refPos}");
 
             parkPos = Vector3.zero;
+            buildingParkVehicleId = 0;
 
             if (FindParkingSpaceBuilding(
                 vehicleInfo,
@@ -2144,9 +2202,10 @@ namespace TrafficManager.Manager.Impl {
                     parkRot,
                     citizenId))
                 {
-                    citizen.SetParkedVehicle(citizenId, parkedVehicleId);
-
-                    parkedVehicleId.ToParkedVehicle().m_flags &= (ushort)(VehicleParked.Flags.All & ~VehicleParked.Flags.Parking);
+                    buildingParkVehicleId = parkedVehicleId;
+                    if (updateCitizenParkedVehicle) {
+                        parkedVehicleId.AssignToCitizenAndMakeVisible(citizenId);
+                    }
 
                     if (extendedLogParkingAi && homeId != 0) {
                         Log._Debug(
@@ -2274,7 +2333,7 @@ namespace TrafficManager.Manager.Impl {
                     Randomizer rng = Singleton<SimulationManager>.instance.m_randomizer;
 
                     // choose nearest parking position, after a bit of randomization
-                    if ((roadParkPos - targetPos).magnitude < (buildingParkPos - targetPos).magnitude
+                    if ((roadParkPos - targetPos).sqrMagnitude < (buildingParkPos - targetPos).sqrMagnitude
                         && rng.Int32(GlobalConfig.Instance.ParkingAI.VicinityParkingSpaceSelectionRand) != 0) {
                         // road parking space is closer
 

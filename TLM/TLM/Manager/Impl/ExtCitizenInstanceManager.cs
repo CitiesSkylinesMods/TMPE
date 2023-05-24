@@ -636,6 +636,8 @@ namespace TrafficManager.Manager.Impl {
                                 rotation: parkedVehicle.m_rotation,
                                 electricVehicleInfo: out VehicleInfo electricVehicleInfo)) {
                             vehicleInfo = electricVehicleInfo;
+                            parkedVehicleId = citizen.m_parkedVehicle;
+                            parkedVehicle = ref parkedVehicleId.ToParkedVehicle();
                         }
                     }
 
