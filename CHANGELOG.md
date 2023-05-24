@@ -32,23 +32,25 @@ This changelog includes all versions and major variants of the mod going all the
 #### TM:PE V[11.7.5.0](https://github.com/CitiesSkylinesMods/TMPE/compare/11.7.4.0...11.7.5.0) STABLE, 24/05/2022
 
 - [Meta] Minor fixes and improvements
+- [New] Finnish language support! Help us finish translation on Crowdin (link in the mod options and wiki)
 - [Fixed] Silent error on load breaks Lane arrow availability detector #1736 #1747 (krzychu124)
 - [Fixed] Parking AI bugfixing and reliability improvements #1746 (krzychu124)
 - [Fixed] Fixed incorrect Citizen Influx value displayed in the City Statistics window #1737 (krzychu124)
 - [Fixed] Optimized number of pathfinding threads #1744 (krzychu124)
 - [Updated] Support for game update version 1.17 in the trigger for message about incompatibility with the game
-- [Updated] Translation update
+  [Updated] Translation update for Romanian, French, Spanish, Arabic, Czech, Finnish, Italian, Polish, Slovak, Turkish, Ukrainian, English and Thai
 - [Steam] [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
 
 #### TM:PE V11.7.5.0 TEST, 24/05/2022
 
 - [Meta] Minor fixes and improvements
+- [New] Finnish language support! Help us finish translation on Crowdin (link in the mod options and wiki)
 - [Fixed] Silent error on load breaks Lane arrow availability detector #1736 #1747 (krzychu124)
 - [Fixed] Parking AI bugfixing and reliability improvements #1746 (krzychu124)
 - [Fixed] Fixed incorrect Citizen Influx value displayed in the City Statistics window #1737 (krzychu124)
 - [Fixed] Optimized number of pathfinding threads #1744 (krzychu124)
 - [Updated] Support for game update version 1.17 in the trigger for message about incompatibility with the game
-- [Updated] Translation update
+  [Updated] Translation update for Romanian, French, Spanish, Arabic, Czech, Finnish, Italian, Polish, Slovak, Turkish, Ukrainian, English and Thai
 - [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
 
 

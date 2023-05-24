@@ -3,10 +3,11 @@
 [Link] tmpe-v11750-stable-24052023
 [Stable]
 [Meta] Minor fixes and improvements
+[New] Finnish language support! Help us finish translation on Crowdin (link in the mod options)
 [Fixed] Silent error on load breaks Lane arrow availability detector #1736 #1747 (krzychu124)
 [Fixed] Parking AI bugfixing and reliability improvements #1746 (krzychu124)
 [Fixed] Fixed incorrect Citizen Influx value displayed in the City Statistics window #1737 (krzychu124)
 [Fixed] Optimized number of pathfinding threads #1744 (krzychu124)
 [Updated] Support for game update version 1.17 in the trigger for message about incompatibility with the game
-[Updated] Translation update
+[Updated] Translation update for Romanian, French, Spanish, Arabic, Czech, Finnish, Italian, Polish, Slovak, Turkish, Ukrainian, English and Thai
 [/Version]
