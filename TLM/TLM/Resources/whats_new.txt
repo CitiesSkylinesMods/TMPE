@@ -5,7 +5,7 @@
 [Meta] Minor fixes and improvements
 [New] Finnish language support! Help us finish translation on Crowdin (link in the mod options)
 [Fixed] Silent error on load breaks Lane arrow availability detector #1736 #1747 (krzychu124)
-[Fixed] Parking AI bugfixing and reliability improvements #1746 (krzychu124)
+[Fixed] Parking AI bugfixing and reliability improvements. Manually clear parked cars (maintenance tab in the options) in case of issues with parking vehicles in the past #1746 (krzychu124)
 [Fixed] Fixed incorrect Citizen Influx value displayed in the City Statistics window #1737 (krzychu124)
 [Fixed] Optimized number of pathfinding threads #1744 (krzychu124)
 [Updated] Support for game update version 1.17 in the trigger for message about incompatibility with the game
