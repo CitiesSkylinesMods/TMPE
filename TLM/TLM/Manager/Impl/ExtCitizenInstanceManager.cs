@@ -930,6 +930,7 @@ namespace TrafficManager.Manager.Impl {
                     false,
                     parkingAiConf.MaxBuildingToPedestrianLaneDistance,
                     false,
+                    false,
                     out parkedVehiclePathPos);
             }
 
@@ -980,6 +981,7 @@ namespace TrafficManager.Manager.Impl {
                     allowUnderground,
                     false,
                     parkingAiConf.MaxBuildingToPedestrianLaneDistance,
+                    false,
                     false,
                     out startPosA);
             } else {
@@ -1157,6 +1159,7 @@ namespace TrafficManager.Manager.Impl {
                         ? GlobalConfig.Instance.ParkingAI.MaxBuildingToPedestrianLaneDistance
                         : 32f,
                     false,
+                    true,
                     out PathUnit.Position posA,
                     out PathUnit.Position posB,
                     out float distA,
@@ -1177,6 +1180,7 @@ namespace TrafficManager.Manager.Impl {
                         ? GlobalConfig.Instance.ParkingAI.MaxBuildingToPedestrianLaneDistance
                         : 32f,
                     false,
+                    true,
                     out posA,
                     out posB,
                     out distA,
@@ -1198,6 +1202,7 @@ namespace TrafficManager.Manager.Impl {
                         ? GlobalConfig.Instance.ParkingAI.MaxBuildingToPedestrianLaneDistance
                         : 32f,
                     false,
+                    true,
                     out posA,
                     out posB,
                     out distA,

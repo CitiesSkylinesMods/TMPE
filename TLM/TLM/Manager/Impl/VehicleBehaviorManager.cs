@@ -898,6 +898,7 @@ namespace TrafficManager.Manager.Impl {
                     false,
                     32f,
                     false,
+                    false,
                     out startPosA,
                     out startPosB,
                     out sqrDistA,

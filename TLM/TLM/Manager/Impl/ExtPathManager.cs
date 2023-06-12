@@ -59,6 +59,7 @@ namespace TrafficManager.Manager.Impl {
                                      ? GlobalConfig.Instance.ParkingAI.MaxBuildingToPedestrianLaneDistance
                                      : 32f,
                     excludeLaneWidth: false,
+                    checkPedestrianStreet: false,
                     pathPosA: out PathUnit.Position posA,
                     pathPosB: out _,
                     distanceSqrA: out float distA,
@@ -80,6 +81,7 @@ namespace TrafficManager.Manager.Impl {
                         ? GlobalConfig.Instance.ParkingAI.MaxBuildingToPedestrianLaneDistance
                         : 32f,
                     false,
+                    checkPedestrianStreet: true,
                     out posA,
                     out _,
                     out distA,
@@ -102,6 +104,7 @@ namespace TrafficManager.Manager.Impl {
                           .Instance.ParkingAI.MaxBuildingToPedestrianLaneDistance
                         : 32f,
                     false,
+                    checkPedestrianStreet: true,
                     out posA,
                     out _,
                     out distA,
@@ -122,6 +125,7 @@ namespace TrafficManager.Manager.Impl {
                                                    bool requireConnect,
                                                    float maxDistance,
                                                    bool excludeLaneWidth,
+                                                   bool checkPedestrianStreet,
                                                    out PathUnit.Position pathPos) {
             return FindPathPositionWithSpiralLoop(
                 position,
@@ -135,6 +139,7 @@ namespace TrafficManager.Manager.Impl {
                 requireConnect,
                 maxDistance,
                 excludeLaneWidth,
+                checkPedestrianStreet,
                 out pathPos);
         }
 
@@ -149,6 +154,7 @@ namespace TrafficManager.Manager.Impl {
                                                    bool requireConnect,
                                                    float maxDistance,
                                                    bool excludeLaneWidth,
+                                                   bool checkPedestrianStreet,
                                                    out PathUnit.Position pathPos) {
             return FindPathPositionWithSpiralLoop(
                 position,
@@ -163,6 +169,7 @@ namespace TrafficManager.Manager.Impl {
                 requireConnect,
                 maxDistance,
                 excludeLaneWidth,
+                checkPedestrianStreet,
                 out pathPos);
         }
 
@@ -177,6 +184,7 @@ namespace TrafficManager.Manager.Impl {
                                                    bool requireConnect,
                                                    float maxDistance,
                                                    bool excludeLaneWidth,
+                                                   bool checkPedestrianStreet,
                                                    out PathUnit.Position pathPos) {
             return FindPathPositionWithSpiralLoop(
                 position,
@@ -192,6 +200,7 @@ namespace TrafficManager.Manager.Impl {
                 requireConnect,
                 maxDistance,
                 excludeLaneWidth,
+                checkPedestrianStreet,
                 out pathPos,
                 out PathUnit.Position _,
                 out float _,
@@ -210,6 +219,7 @@ namespace TrafficManager.Manager.Impl {
                                                    bool requireConnect,
                                                    float maxDistance,
                                                    bool excludeLaneWidth,
+                                                   bool checkPedestrianStreet,
                                                    out PathUnit.Position pathPos
             ) {
             return FindPathPositionWithSpiralLoop(
@@ -226,6 +236,7 @@ namespace TrafficManager.Manager.Impl {
                 requireConnect,
                 maxDistance,
                 excludeLaneWidth,
+                checkPedestrianStreet,
                 out pathPos,
                 out PathUnit.Position _,
                 out float _,
@@ -242,6 +253,7 @@ namespace TrafficManager.Manager.Impl {
                                                    bool requireConnect,
                                                    float maxDistance,
                                                    bool excludeLaneWidth,
+                                                   bool checkPedestrianStreet,
                                                    out PathUnit.Position pathPosA,
                                                    out PathUnit.Position pathPosB,
                                                    out float distanceSqrA,
@@ -258,6 +270,7 @@ namespace TrafficManager.Manager.Impl {
                 requireConnect,
                 maxDistance,
                 excludeLaneWidth,
+                checkPedestrianStreet,
                 out pathPosA,
                 out pathPosB,
                 out distanceSqrA,
@@ -275,6 +288,7 @@ namespace TrafficManager.Manager.Impl {
                                                    bool requireConnect,
                                                    float maxDistance,
                                                    bool excludeLaneWidth,
+                                                   bool checkPedestrianStreet,
                                                    out PathUnit.Position pathPosA,
                                                    out PathUnit.Position pathPosB,
                                                    out float distanceSqrA,
@@ -293,6 +307,7 @@ namespace TrafficManager.Manager.Impl {
                 requireConnect,
                 maxDistance,
                 excludeLaneWidth,
+                checkPedestrianStreet,
                 out pathPosA,
                 out pathPosB,
                 out distanceSqrA,
@@ -310,6 +325,7 @@ namespace TrafficManager.Manager.Impl {
                                                    bool requireConnect,
                                                    float maxDistance,
                                                    bool excludeLaneWidth,
+                                                   bool checkPedestrianStreet,
                                                    out PathUnit.Position pathPosA,
                                                    out PathUnit.Position pathPosB,
                                                    out float distanceSqrA,
@@ -328,6 +344,7 @@ namespace TrafficManager.Manager.Impl {
                 requireConnect,
                 maxDistance,
                 excludeLaneWidth,
+                checkPedestrianStreet,
                 out pathPosA,
                 out pathPosB,
                 out distanceSqrA,
@@ -347,6 +364,7 @@ namespace TrafficManager.Manager.Impl {
                                                    bool requireConnect,
                                                    float maxDistance,
                                                    bool excludeLaneWidth,
+                                                   bool checkPedestrianStreet,
                                                    out PathUnit.Position pathPosA,
                                                    out PathUnit.Position pathPosB,
                                                    out float distanceSqrA,
@@ -448,7 +466,7 @@ namespace TrafficManager.Manager.Impl {
 
                         if (otherPassed) {
                             // STOCK-CODE START
-                            if (segmentInfo.IsPedestrianZoneOrPublicTransportRoad())
+                            if (checkPedestrianStreet && segmentInfo.IsPedestrianZoneOrPublicTransportRoad())
                             {
                                 vehicleCategory &= ~segmentInfo.m_vehicleCategories;
                                 if ((laneType & NetInfo.LaneType.Pedestrian) != 0)

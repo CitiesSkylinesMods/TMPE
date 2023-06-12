@@ -21,8 +21,8 @@
         }
 
         public override string ToString() {
-            string ov = this.OverrideValue.HasValue ? $"Speed: {this.OverrideValue};" : string.Empty;
-            string dv = this.DefaultValue.HasValue ? $"Default: {this.DefaultValue}" : string.Empty;
+            string ov = this.OverrideValue.HasValue ? $"Speed: {this.OverrideValue};" : "NULL";
+            string dv = this.DefaultValue.HasValue ? $"Default: {this.DefaultValue}" : "NULL";
             return $"({ov} {dv})";
         }
     }

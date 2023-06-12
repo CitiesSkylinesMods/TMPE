@@ -29,6 +29,16 @@ This changelog includes all versions and major variants of the mod going all the
 
 > Date format: dd/mm/yyyy
 
+#### TM:PE V[11.8.0.0](https://github.com/CitiesSkylinesMods/TMPE/compare/11.7.5.0...11.8.0.0) STABLE, 12/06/2022
+
+- [Meta] Compatibility patch for the game update 1.17.1-f2
+- [Steam] [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
+
+#### TM:PE V11.8.0.0 TEST, 12/06/2022
+
+- [Meta] Compatibility patch for the game update 1.17.1-f2
+- [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
+
 #### TM:PE V[11.7.5.0](https://github.com/CitiesSkylinesMods/TMPE/compare/11.7.4.0...11.7.5.0) STABLE, 24/05/2022
 
 - [Meta] Minor fixes and improvements
