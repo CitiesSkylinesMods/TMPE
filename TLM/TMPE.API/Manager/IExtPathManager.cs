@@ -17,6 +17,7 @@
                                             bool requireConnect,
                                             float maxDistance,
                                             bool excludeLaneWidth,
+                                            bool checkPedestrianStreet,
                                             out PathUnit.Position pathPos);
         bool FindPathPositionWithSpiralLoop(Vector3 position,
                                             ItemClass.Service service,
@@ -29,6 +30,7 @@
                                             bool requireConnect,
                                             float maxDistance,
                                             bool excludeLaneWidth,
+                                            bool checkPedestrianStreet,
                                             out PathUnit.Position pathPos);
 
         bool FindPathPositionWithSpiralLoop(Vector3 position,
@@ -42,6 +44,7 @@
                                             bool requireConnect,
                                             float maxDistance,
                                             bool excludeLaneWidth,
+                                            bool checkPedestrianStreet,
                                             out PathUnit.Position pathPos);
 
         bool FindPathPositionWithSpiralLoop(Vector3 position,
@@ -56,6 +59,7 @@
                                             bool requireConnect,
                                             float maxDistance,
                                             bool excludeLaneWidth,
+                                            bool checkPedestrianStreet,
                                             out PathUnit.Position pathPos);
 
         bool FindPathPositionWithSpiralLoop(Vector3 position,
@@ -68,6 +72,7 @@
                                             bool requireConnect,
                                             float maxDistance,
                                             bool excludeLaneWidth,
+                                            bool checkPedestrianStreet,
                                             out PathUnit.Position pathPosA,
                                             out PathUnit.Position pathPosB,
                                             out float distanceSqrA,
@@ -84,6 +89,7 @@
                                             bool requireConnect,
                                             float maxDistance,
                                             bool excludeLaneWidth,
+                                            bool checkPedestrianStreet,
                                             out PathUnit.Position pathPosA,
                                             out PathUnit.Position pathPosB,
                                             out float distanceSqrA,
@@ -100,6 +106,7 @@
                                             bool requireConnect,
                                             float maxDistance,
                                             bool excludeLaneWidth,
+                                            bool checkPedestrianStreet,
                                             out PathUnit.Position pathPosA,
                                             out PathUnit.Position pathPosB,
                                             out float distanceSqrA,
@@ -118,6 +125,7 @@
                                             bool requireConnect,
                                             float maxDistance,
                                             bool excludeLaneWidth,
+                                            bool checkPedestrianStreet,
                                             out PathUnit.Position pathPosA,
                                             out PathUnit.Position pathPosB,
                                             out float distanceSqrA,
