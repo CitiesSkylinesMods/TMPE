@@ -1,7 +1,8 @@
 ﻿namespace TrafficManager.API.Traffic.Data {
-    using System;
+    using System.Runtime.InteropServices;
     using TrafficManager.API.Traffic.Enums;
 
+    [StructLayout(LayoutKind.Auto)]
     public struct ExtCitizenInstance {
         public ushort instanceId;
 
@@ -123,7 +124,7 @@
         /// <param name="state"></param>
         /// <returns></returns>
         public static ExtSoftPathState ConvertPathStateToSoftPathState(ExtPathState state) {
-            return (ExtSoftPathState)((int)state);
+            return (ExtSoftPathState)((byte)state);
         }
     }
 }

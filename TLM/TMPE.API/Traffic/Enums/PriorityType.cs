@@ -1,5 +1,5 @@
 namespace TrafficManager.API.Traffic.Enums {
-    public enum PriorityType {
+    public enum PriorityType : byte {
         None = 0,
 
         /// <summary>

@@ -1,9 +1,10 @@
 ﻿namespace TrafficManager.API.Traffic.Data {
-    using System;
+    using System.Runtime.InteropServices;
 
     /// <summary>
     /// Holds left/right turn-on-red candidate segments
     /// </summary>
+    [StructLayout(LayoutKind.Auto)]
     public struct TurnOnRedSegments {
         /// <summary>
         /// Left segment id (or 0 if no left turn-on-red candidate segment)
