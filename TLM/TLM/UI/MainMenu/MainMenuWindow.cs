@@ -258,10 +258,12 @@ namespace TrafficManager.UI.MainMenu {
             //-------------------------------------------------------
             // Mod name/version label (also serves as a drag handle)
             //-------------------------------------------------------
+            string titleText = "Traffic Manager : PE";
             UILabel versionLabel = builder.Label<U.ULabel>(
                 parent: this,
-                t: TrafficManagerMod.ModName,
-                stack: UStackMode.Below);
+                t: titleText,
+                stack: UStackMode.Below,
+                spacing: 6f);
             this.VersionLabel = versionLabel;
 
             //-------------------------------------------------------
@@ -271,7 +273,7 @@ namespace TrafficManager.UI.MainMenu {
                 parent: this,
                 text: string.Empty,
                 tooltip: Translation.Menu.Get("Tooltip:Toggle onscreen display panel"),
-                size: new Vector2(18f, 18f),
+                size: new Vector2(16f, 16f),
                 stack: UStackMode.None);
 
             this.toggleOsdButton_ = osdToggle;
@@ -296,7 +298,7 @@ namespace TrafficManager.UI.MainMenu {
                     r.Control.isVisible = true; // not sure why its hidden on create? TODO
                     r.Stack(
                         mode: UStackMode.ToTheRight,
-                        spacing: UConst.UIPADDING * 3f,
+                        spacing: toolPanel.size.x + rightPanel.size.x - versionLabel.size.x - 9f,
                         stackRef: versionLabel);
                 });
 
@@ -395,7 +397,8 @@ namespace TrafficManager.UI.MainMenu {
         /// <summary>Called by UResizer for every control to be 'resized'.</summary>
         public override void OnAfterResizerUpdate() {
             if (this.DragHandle != null) {
-                this.DragHandle.size = this.VersionLabel.size;
+                this.DragHandle.size = new Vector2(toolPanel.size.x + rightPanel.size.x - 9f,
+                    VersionLabel.size.y);
 
                 // Push the window back into screen if the label/draghandle are partially offscreen
                 U.UIUtil.ClampToScreen(
