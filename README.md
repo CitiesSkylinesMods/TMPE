@@ -3,9 +3,9 @@
 </p>
 <p align="center">A mod for <strong>Cities: Skylines</strong> that gives you more control over road and rail traffic in your city.<br /><br /></p>
 <p align="center">
+    <a href="https://doc.tmpe.me">Documentation</a><br /> •
     <a href="https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252">Steam Workshop</a> •
     <a href="https://discord.gg/faKUnST">Discord Chat</a> •
-    <a href="https://github.com/CitiesSkylinesMods/TMPE/wiki">User Guide</a> •
     <a href="https://github.com/CitiesSkylinesMods/TMPE/wiki/Report-a-Bug">Report a Bug</a><br />
 </p>
 <p align="center">
