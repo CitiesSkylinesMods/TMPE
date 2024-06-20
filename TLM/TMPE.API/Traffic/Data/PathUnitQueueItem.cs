@@ -1,7 +1,8 @@
 ﻿namespace TrafficManager.API.Traffic.Data {
-    using System;
+    using System.Runtime.InteropServices;
     using TrafficManager.API.Traffic.Enums;
 
+    [StructLayout(LayoutKind.Auto)]
     public struct PathUnitQueueItem {
         public uint nextPathUnitId; // access requires acquisition of CustomPathFind.QueueLock
         public ExtVehicleType vehicleType; // access requires acquisition of m_bufferLock

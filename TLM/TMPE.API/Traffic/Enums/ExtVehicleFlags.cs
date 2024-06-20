@@ -3,7 +3,7 @@ namespace TrafficManager.API.Traffic.Enums {
 
     // TODO why do we need this?
     [Flags]
-    public enum ExtVehicleFlags {
+    public enum ExtVehicleFlags : byte {
         None = 0,
         Created = 1,
         Spawned = 1 << 1,

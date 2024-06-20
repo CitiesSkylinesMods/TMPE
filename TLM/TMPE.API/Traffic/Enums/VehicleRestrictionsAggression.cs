@@ -4,7 +4,7 @@ namespace TrafficManager.API.Traffic.Enums {
     /// <summary>
     /// Represents vehicle restrictions effect strength
     /// </summary>
-    public enum VehicleRestrictionsAggression {
+    public enum VehicleRestrictionsAggression : byte {
         /// <summary>
         /// Low aggression
         /// </summary>
