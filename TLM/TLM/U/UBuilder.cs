@@ -89,6 +89,7 @@ namespace TrafficManager.U {
         public TLabel Label<TLabel>(UIComponent parent,
                                     string t,
                                     UStackMode stack = UStackMode.ToTheRight,
+                                    float spacing = 0f,
                                     bool processMarkup = false)
             where TLabel : UILabel, ISmartSizableControl {
             var label = parent.AddUIComponent(typeof(TLabel)) as TLabel;
@@ -110,7 +111,7 @@ namespace TrafficManager.U {
                              string t,
                              UStackMode stack = UStackMode.ToTheRight,
                              bool processMarkup = false) {
-            return Label<ULabel>(parent, t, stack, processMarkup);
+            return Label<ULabel>(parent, t, stack, 0f, processMarkup);
         }
 
         public TPanel Panel<TPanel>(UIComponent parent,
