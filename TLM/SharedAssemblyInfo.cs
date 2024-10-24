@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyCompany("CitiesSkylinesMods/TMPE")]
-[assembly: AssemblyCopyright("Copyright © 2023, CitiesSkylinesMods/TMPE")]
+[assembly: AssemblyCopyright("Copyright © 2024, CitiesSkylinesMods/TMPE")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -20,4 +20,4 @@ using System.Runtime.InteropServices;
 //      Minor Version
 //      Build Number
 //      Revision
-[assembly: AssemblyVersion("11.8.0.*")]
+[assembly: AssemblyVersion("11.9.0.*")]

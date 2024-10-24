@@ -29,17 +29,27 @@ This changelog includes all versions and major variants of the mod going all the
 
 > Date format: dd/mm/yyyy
 
-#### TM:PE V[11.8.0.0](https://github.com/CitiesSkylinesMods/TMPE/compare/11.7.5.0...11.8.0.0) STABLE, 12/06/2022
+#### TM:PE V[11.9.0.0](https://github.com/CitiesSkylinesMods/TMPE/compare/11.8.0.0...11.9.0.0) STABLE, 24/10/2024
+
+- [Meta] Compatibility patch for the game update 1.18.1-f3
+- [Steam] [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
+
+#### TM:PE V11.9.0.0 TEST, 24/10/2024
+
+- [Meta] Compatibility patch for the game update 1.18.1-f3
+- [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
+
+#### TM:PE V[11.8.0.0](https://github.com/CitiesSkylinesMods/TMPE/compare/11.7.5.0...11.8.0.0) STABLE, 12/06/2023
 
 - [Meta] Compatibility patch for the game update 1.17.1-f2
 - [Steam] [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
 
-#### TM:PE V11.8.0.0 TEST, 12/06/2022
+#### TM:PE V11.8.0.0 TEST, 12/06/2023
 
 - [Meta] Compatibility patch for the game update 1.17.1-f2
 - [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
 
-#### TM:PE V[11.7.5.0](https://github.com/CitiesSkylinesMods/TMPE/compare/11.7.4.0...11.7.5.0) STABLE, 24/05/2022
+#### TM:PE V[11.7.5.0](https://github.com/CitiesSkylinesMods/TMPE/compare/11.7.4.0...11.7.5.0) STABLE, 24/05/2023
 
 - [Meta] Minor fixes and improvements
 - [New] Finnish language support! Help us finish translation on Crowdin (link in the mod options and wiki)
@@ -51,7 +61,7 @@ This changelog includes all versions and major variants of the mod going all the
   [Updated] Translation update for Romanian, French, Spanish, Arabic, Czech, Finnish, Italian, Polish, Slovak, Turkish, Ukrainian, English and Thai
 - [Steam] [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
 
-#### TM:PE V11.7.5.0 TEST, 24/05/2022
+#### TM:PE V11.7.5.0 TEST, 24/05/2023
 
 - [Meta] Minor fixes and improvements
 - [New] Finnish language support! Help us finish translation on Crowdin (link in the mod options and wiki)
@@ -64,7 +74,7 @@ This changelog includes all versions and major variants of the mod going all the
 - [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
 
 
-#### TM:PE V[11.7.4.0](https://github.com/CitiesSkylinesMods/TMPE/compare/11.7.3.1...11.7.4.0) STABLE, 22/03/2022
+#### TM:PE V[11.7.4.0](https://github.com/CitiesSkylinesMods/TMPE/compare/11.7.3.1...11.7.4.0) STABLE, 22/03/2023
 
 - [Meta] Compatibility patch for the game update 1.16.1-f2
 - [New] Prevent the user from setting invalid Lane Arrows, update arrows if lane connections exist #368, #1724 (krzychu124)
@@ -76,7 +86,7 @@ This changelog includes all versions and major variants of the mod going all the
 - [Mod] Improved compatibility with More Path Units
 - [Steam] [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
 
-#### TM:PE V11.7.4.0 TEST, 22/03/2022
+#### TM:PE V11.7.4.0 TEST, 22/03/2023
 
 - [Meta] Compatibility patch for the game update 1.16.1-f2
 - [New] Prevent the user from setting invalid Lane Arrows, update arrows if lane connections exist #368, #1724 (krzychu124)
