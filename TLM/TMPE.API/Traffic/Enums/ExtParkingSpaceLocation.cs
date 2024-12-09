@@ -1,5 +1,5 @@
 namespace TrafficManager.API.Traffic.Enums {
-    public enum ExtParkingSpaceLocation {
+    public enum ExtParkingSpaceLocation : byte {
         /// <summary>
         /// No parking space location
         /// </summary>

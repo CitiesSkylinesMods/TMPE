@@ -4,7 +4,7 @@ namespace TrafficManager.API.Traffic.Enums {
     /// <summary>
     /// Represents accuracy of simulation
     /// </summary>
-    public enum SimulationAccuracy {
+    public enum SimulationAccuracy : byte {
         /// <summary>
         /// Very low accuracy
         /// </summary>
