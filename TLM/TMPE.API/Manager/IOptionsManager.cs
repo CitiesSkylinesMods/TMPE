@@ -4,7 +4,7 @@ namespace TrafficManager.API.Manager {
     /// <summary>
     /// Manages mod options
     /// </summary>
-    public interface IOptionsManager : ICustomDataManager<byte[]> {
+    public interface IOptionsManager {
         /// <summary>
         /// Determines if modifications to segments may be published in the current state.
         /// </summary>

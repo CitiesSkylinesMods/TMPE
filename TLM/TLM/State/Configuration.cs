@@ -8,13 +8,12 @@ namespace TrafficManager {
     using TrafficManager.Traffic;
     using System.Runtime.Serialization;
     using TrafficManager.Lifecycle;
-    using Util;
     using LaneEndTransitionGroup = TrafficManager.API.Traffic.Enums.LaneEndTransitionGroup;
 
     [Serializable]
     public class Configuration {
 
-        public const int CURRENT_VERSION = 3;
+        public const int CURRENT_VERSION = 4;
 
         /// <summary>
         /// version at which data was saved
