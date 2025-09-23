@@ -1,6 +1,6 @@
-[Version] 11.9.1.0
-[Released] Mar 25th 2025
-[Link] tmpe-v11910-stable-25032025
+[Version] 11.9.2.0
+[Released] Sep 24th 2025
+[Link] tmpe-v11920-stable-24092025
 [Stable]
-[Meta] Internal version check compatible with 1.19.2-f3
+[Meta] Internal version check compatible with 1.20.1-f1
 [/Version]
