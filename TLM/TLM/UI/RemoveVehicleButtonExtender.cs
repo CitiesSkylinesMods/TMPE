@@ -52,9 +52,15 @@ namespace TrafficManager.UI {
         protected UIButton AddRemoveVehicleButton(WorldInfoPanel panel) {
             UIButton button = new GameObject("RemoveVehicleInstanceButton")
                 .AddComponent<RemoveVehicleButton>();
+            UITextField textField = panel.Find<UITextField>("VehicleName");
+            if (textField && textField.size.x > 220f) {
+                // resize and move VehicleName text field to fit the mod despawn button in the row
+                textField.relativePosition += new Vector3(-12, 0);
+                textField.size += new Vector2(-20, 0);
+            }
 
             button.AlignTo(panel.component, UIAlignAnchor.TopRight);
-            button.relativePosition += new Vector3(-button.width - 55f, 50f);
+            button.relativePosition += new Vector3(-button.width - (4 * 33f), 5f);
 
             Log._Debug($"Added {button} to {panel}");
             return button;
@@ -80,7 +86,7 @@ namespace TrafficManager.UI {
                 this.atlas = futureAtlas.CreateAtlas();
 
                 UpdateButtonSkinAndTooltip();
-                width = height = 30f;
+                width = height = 28f;
             }
 
             public override void HandleClick(UIMouseEventParameter p) {
