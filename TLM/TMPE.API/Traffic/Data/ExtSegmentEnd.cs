@@ -1,10 +1,11 @@
 namespace TrafficManager.API.Traffic.Data
 {
     using System;
-    using CSUtil.Commons;
+    using System.Runtime.InteropServices;
     using TrafficManager.API.Traffic.Enums;
     using UnityEngine;
 
+    [StructLayout(LayoutKind.Auto)]
     public struct ExtSegmentEnd : IEquatable<ExtSegmentEnd>
     {
         /// <summary>

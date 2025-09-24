@@ -9,7 +9,7 @@ namespace TrafficManager.UI.Helpers {
     using TrafficManager.Util.Extensions;
 
     public class DropDownOption<TEnum> : SerializableUIOptionBase<TEnum, UIDropDown, DropDownOption<TEnum>>
-        where TEnum : struct, Enum, IConvertible {
+        where TEnum : Enum, IConvertible {
         private UILabel _dropdownLabel;
 
         public DropDownOption(string fieldName, Scope scope = Scope.Savegame)
@@ -38,9 +38,7 @@ namespace TrafficManager.UI.Helpers {
         }
 
         public override void Load(byte data) {
-            unchecked {
-                Value = (TEnum)(IConvertible)(int)data;
-            }
+            Value = (TEnum)((int)data as IConvertible);
         }
 
         public override byte Save() => Value.ToByte(null);

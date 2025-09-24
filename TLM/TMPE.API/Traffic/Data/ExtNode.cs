@@ -1,8 +1,10 @@
 ﻿namespace TrafficManager.API.Traffic.Data {
     using System;
     using System.Collections.Generic;
+    using System.Runtime.InteropServices;
     using CSUtil.Commons;
 
+    [StructLayout(LayoutKind.Auto)]
     public struct ExtNode : IEquatable<ExtNode> {
         /// <summary>
         /// Node id

@@ -1,7 +1,8 @@
 namespace TrafficManager.API.Traffic.Data {
-    using System;
+    using System.Runtime.InteropServices;
     using TrafficManager.API.Traffic.Enums;
 
+    [StructLayout(LayoutKind.Auto)]
     public struct ExtVehicle {
         public ushort vehicleId;
         public uint lastPathId;

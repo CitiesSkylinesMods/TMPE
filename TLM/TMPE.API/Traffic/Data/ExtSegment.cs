@@ -1,6 +1,8 @@
 namespace TrafficManager.API.Traffic.Data {
     using System;
+    using System.Runtime.InteropServices;
 
+    [StructLayout(LayoutKind.Auto)]
     public struct ExtSegment : IEquatable<ExtSegment> {
         /// <summary>
         /// Segment id

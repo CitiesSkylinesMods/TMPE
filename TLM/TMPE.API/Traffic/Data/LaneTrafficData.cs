@@ -1,6 +1,7 @@
 ﻿namespace TrafficManager.API.Traffic.Data {
-    using System;
+    using System.Runtime.InteropServices;
 
+    [StructLayout(LayoutKind.Auto)]
     public struct LaneTrafficData {
         /// <summary>
         /// Number of seen vehicles since last speed measurement

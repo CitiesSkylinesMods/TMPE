@@ -1,6 +1,8 @@
 ﻿namespace TrafficManager.API.Traffic.Data {
+    using System.Runtime.InteropServices;
     using TrafficManager.API.Traffic.Enums;
 
+    [StructLayout(LayoutKind.Auto)]
     public struct ExtCitizen {
         public uint citizenId;
 
