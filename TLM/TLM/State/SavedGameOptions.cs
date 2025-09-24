@@ -1,5 +1,7 @@
 namespace TrafficManager.State;
 using CSUtil.Commons;
+using System;
+using System.Text;
 using TrafficManager.API.Traffic.Enums;
 using TrafficManager.Custom.PathFinding;
 using TrafficManager.Util;
@@ -81,9 +83,6 @@ public class SavedGameOptions {
     public bool PriorityRoad_EnterBlockedYeild;
     public bool PriorityRoad_StopAtEntry;
 
-    // See PathfinderUpdates.cs
-    public byte SavegamePathfinderEdition = PathfinderUpdates.LatestPathfinderEdition;
-
     public bool showDefaultSpeedSubIcon;
 
     internal int getRecklessDriverModulo() => CalculateRecklessDriverModulo(recklessDrivers);
@@ -132,5 +131,27 @@ public class SavedGameOptions {
 
     private void Awake() {
         Log.Info("SavedGameOptions.Awake() called");
+    }
+
+    public string Serialize() {
+        try {
+            return XMLUtil.Serialize(this);
+        } catch (Exception ex) {
+            ex.LogException();
+            return null;
+        }
+    }
+
+    public static bool Deserialize(string xml) {
+        try {
+            if (!string.IsNullOrEmpty(xml)) {
+                Instance = XMLUtil.Deserialize<SavedGameOptions>(xml);
+                Instance.Awake();
+                return true;
+            }
+        } catch (Exception ex) {
+            ex.LogException();
+        }
+        return false;
     }
 }

@@ -17,6 +17,7 @@ namespace TrafficManager.Custom.PathFinding {
         // Edition History:
         // 0 - An old save, unknown pathfinder edition
         // 1 - #1338 Aircraft pathfinding fix
+        // TODO: This feature is not used and does not persist. if we increment this we need to also serialize this.
 
         /// <summary>
         /// Update this each time a despawn-requiring change is
@@ -26,6 +27,8 @@ namespace TrafficManager.Custom.PathFinding {
         /// </summary>
         [SuppressMessage("Usage", "RAS0002:Readonly field for a non-readonly struct", Justification = "Not performance critical.")]
         internal static readonly byte LatestPathfinderEdition = 1;
+
+        public static byte SavegamePathfinderEdition = LatestPathfinderEdition;
 
         /// <summary>
         /// Checks savegame pathfinder edition and, if necessary, despawns
@@ -38,13 +41,13 @@ namespace TrafficManager.Custom.PathFinding {
         public static ExtVehicleType DespawnVehiclesIfNecessary() {
             var filter = ExtVehicleType.None;
 
-            if (SavedGameOptions.Instance.SavegamePathfinderEdition == LatestPathfinderEdition) {
+            if (SavegamePathfinderEdition == LatestPathfinderEdition) {
                 return filter; // nothing to do, everything is fine
             }
 
-            Log.Info($"Pathfinder update from {SavedGameOptions.Instance.SavegamePathfinderEdition} to {LatestPathfinderEdition}.");
+            Log.Info($"Pathfinder update from {SavegamePathfinderEdition} to {LatestPathfinderEdition}.");
 
-            if (SavedGameOptions.Instance.SavegamePathfinderEdition < 1) {
+            if (SavegamePathfinderEdition < 1) {
                 filter |= ExtVehicleType.Plane; // #1338
             }
 
@@ -60,7 +63,7 @@ namespace TrafficManager.Custom.PathFinding {
             }
 
             // this will be stored in savegame
-            SavedGameOptions.Instance.SavegamePathfinderEdition = LatestPathfinderEdition;
+            SavegamePathfinderEdition = LatestPathfinderEdition;
 
             return filter;
         }
