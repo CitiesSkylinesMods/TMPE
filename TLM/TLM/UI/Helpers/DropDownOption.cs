@@ -38,7 +38,7 @@ namespace TrafficManager.UI.Helpers {
         }
 
         public override void Load(byte data) {
-            Value = (TEnum)(object)data;
+            Value = (TEnum)((int)data as IConvertible);
         }
 
         public override byte Save() => Value.ToByte(null);
