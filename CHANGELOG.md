@@ -29,6 +29,28 @@ This changelog includes all versions and major variants of the mod going all the
 
 > Date format: dd/mm/yyyy
 
+#### TM:PE V[11.9.2.0](https://github.com/CitiesSkylinesMods/TMPE/compare/11.9.1.0...11.9.2.0) STABLE, 24/09/2025
+
+- [Meta] Internal version check compatible with 1.20.1-f1
+- [Meta] Short segment detection improvements are available only at Very High Simulation Accuracy setting, since they may affect performance #1759, #1730, #1229
+- [Fixed] Detecting traffic light state when vehicle is approaching short segments with traffic lights #1759, #1730, #1229
+- [Fixed] Very inaccurate priority detection when vehicle is approaching short segments (current or adjacent) #1730, #1229
+- [Fixed] Slightly reduced memory footprint of API structs #1732
+- [Updated] Changed location of despawn button in vehicle info popup #1781
+- [Updated] Changed mod log file location on macOS to avoid TargetInvocationException. Mod log (TMPE.log) is saved in the same location as the game log (Player.log) #1780, #1776, #1741
+- [Steam] [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
+
+#### TM:PE V11.9.2.0 TEST, 24/09/2025
+
+- [Meta] Internal version check compatible with 1.20.1-f1
+- [Meta] Short segment detection improvements are available only at Very High Simulation Accuracy setting, since they may affect performance #1759, #1730, #1229
+- [Fixed] Detecting traffic light state when vehicle is approaching short segments with traffic lights #1759, #1730, #1229
+- [Fixed] Very inaccurate priority detection when vehicle is approaching short segments (current or adjacent) #1730, #1229
+- [Fixed] Slightly reduced memory footprint of API structs #1732
+- [Updated] Changed location of despawn button in vehicle info popup #1781
+- [Updated] Changed mod log file location on macOS to avoid TargetInvocationException. Mod log (TMPE.log) is saved in the same location as the game log (Player.log) #1780, #1776, #1741
+- [Steam] [TM:PE v11 TEST](https://steamcommunity.com/sharedfiles/filedetails/?id=2489276785)
+
 #### TM:PE V[11.9.1.0](https://github.com/CitiesSkylinesMods/TMPE/compare/11.9.0.0...11.9.1.0) STABLE, 25/03/2025
 
 - [Meta] Internal version check compatible with 1.19.2-f3

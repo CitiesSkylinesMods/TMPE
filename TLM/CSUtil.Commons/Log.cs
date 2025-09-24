@@ -55,7 +55,19 @@ namespace CSUtil.Commons {
 
         static Log() {
             try {
-                string dir = Application.dataPath;
+                string dir;
+                if (Application.platform != RuntimePlatform.OSXPlayer) {
+                    dir = Application.dataPath;
+                } else {
+                    dir = Path.Combine(
+                        Path.Combine(
+                            Path.Combine(
+                                Environment.GetFolderPath(Environment.SpecialFolder.Personal),
+                                "Library"),
+                            "Logs"),
+                        "Unity");
+                }
+
                 LogFilePath = Path.Combine(dir, LOG_FILE_NAME);
                 if (File.Exists(LogFilePath)) {
                     File.Delete(LogFilePath); // delete old file to avoid confusion.
