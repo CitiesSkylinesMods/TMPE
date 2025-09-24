@@ -2,7 +2,7 @@ namespace TrafficManager.API.Traffic.Enums {
     using System;
 
     [Flags]
-    public enum ExtTransportMode : byte  {
+    public enum ExtTransportMode {
         /// <summary>
         /// No information about which mode of transport is used
         /// </summary>

@@ -1,5 +1,5 @@
 namespace TrafficManager.API.Traffic.Enums {
-    public enum VehicleRestrictionsMode : byte {
+    public enum VehicleRestrictionsMode {
         /// <summary>
         /// Interpret bus lanes as "free for all"
         /// </summary>

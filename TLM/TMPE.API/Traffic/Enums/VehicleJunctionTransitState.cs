@@ -1,5 +1,5 @@
 namespace TrafficManager.API.Traffic.Enums {
-    public enum VehicleJunctionTransitState : byte {
+    public enum VehicleJunctionTransitState {
         /// <summary>
         /// Represents an unknown/ignored state
         /// </summary>

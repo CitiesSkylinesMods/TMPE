@@ -1,5 +1,5 @@
 namespace TrafficManager.API.Traffic.Enums {
-    public enum ExtSoftPathState : byte {
+    public enum ExtSoftPathState {
         /// <summary>
         /// No path
         /// </summary>

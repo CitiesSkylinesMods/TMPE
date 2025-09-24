@@ -2,7 +2,7 @@ namespace TrafficManager.API.Traffic.Enums {
     /// <summary>
     /// Indicates if a private car [may]/[shall]/[must not] be used
     /// </summary>
-    public enum CarUsagePolicy : byte {
+    public enum CarUsagePolicy {
         /// <summary>
         /// Citizens may use their own car
         /// </summary>

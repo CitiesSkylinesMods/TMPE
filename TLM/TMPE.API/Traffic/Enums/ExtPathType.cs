@@ -1,5 +1,5 @@
 namespace TrafficManager.API.Traffic.Enums {
-    public enum ExtPathType : byte {
+    public enum ExtPathType {
         /// <summary>
         /// Mixed path
         /// </summary>

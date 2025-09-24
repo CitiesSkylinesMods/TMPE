@@ -1,5 +1,5 @@
 namespace TrafficManager.API.Traffic.Enums {
-    public enum ExtPathMode : byte {
+    public enum ExtPathMode {
         None = 0,
 
         /// <summary>

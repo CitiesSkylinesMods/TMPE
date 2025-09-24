@@ -1,5 +1,5 @@
 namespace TrafficManager.API.Traffic.Enums {
-    public enum RecklessDrivers : byte {
+    public enum RecklessDrivers {
         [LocaleKey("Gameplay.Dropdown.Option:Path Of Evil (10%)")]
         PathOfEvil,
 

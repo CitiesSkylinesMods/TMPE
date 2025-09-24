@@ -1,5 +1,5 @@
 namespace TrafficManager.API.Traffic.Enums {
-    public enum LaneEndTransitionType : byte {
+    public enum LaneEndTransitionType {
         /// <summary>
         /// No connection
         /// </summary>
