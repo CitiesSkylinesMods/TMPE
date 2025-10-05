@@ -4,6 +4,7 @@ namespace TrafficManager.Patch._External._RTramAIModPatch {
     using System.Linq;
     using System.Reflection;
     using System.Reflection.Emit;
+    using CSUtil.Commons;
     using TrafficManager.API.Manager;
     using TrafficManager.Manager.Impl;
     using TrafficManager.Util;
@@ -39,7 +40,9 @@ namespace TrafficManager.Patch._External._RTramAIModPatch {
             int index = codes.FindIndex(instruction => TranspilerUtil.IsSameInstruction(instruction, searchInstruction));
             if (index > -1) {
                 int target1 = index + 2;
-                Label label = il.DefineLabel();
+                if (codes[target1].opcode == OpCodes.Nop && codes[target1 + 1].opcode == OpCodes.Ldarg_2) {
+                    target1++;
+                }
                 List<Label> oldLabels = codes[target1].labels.ToList();
                 codes[target1].labels.Clear(); // clear labels -> they are moved to new instruction
                 List<CodeInstruction> newInstructions = PatchCommons.GetUpdatePositionInstructions();

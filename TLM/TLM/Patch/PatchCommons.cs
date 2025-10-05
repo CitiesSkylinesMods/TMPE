@@ -84,7 +84,6 @@ namespace TrafficManager.Patch {
             int index = codes.FindIndex( instruction => TranspilerUtil.IsSameInstruction(instruction, searchInstruction));
             if (index > -1) {
                 int target1 = index + 2;
-                Label label = il.DefineLabel();
                 List<Label> oldLabels = codes[target1].labels.ToList();
                 codes[target1].labels.Clear(); // clear labels -> they are moved to new instruction
                 List<CodeInstruction> newInstructions = GetUpdatePositionInstructions();
