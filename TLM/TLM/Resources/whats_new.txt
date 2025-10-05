@@ -1,12 +1,7 @@
-[Version] 11.9.2.0
-[Released] Sep 24th 2025
-[Link] tmpe-v11920-stable-24092025
+[Version] 11.9.3.0
+[Released] Oct 05th 2025
+[Link] tmpe-v11930-stable-05102025
 [Stable]
-[Updated] Changed location of despawn button in vehicle info popup #1781
-[Updated] Changed mod log file location on macOS to avoid TargetInvocationException. Mod log (TMPE.log) is saved in the same location as the game log (Player.log) #1780, #1776, #1741
-[Fixed] Detecting traffic light state when vehicle is approaching short segments with traffic lights #1759, #1730, #1229
-[Fixed] Very inaccurate priority detection when vehicle is approaching short segments (current or adjacent) #1730, #1229
-[Fixed] Slightly reduced memory footprint of API structs #1732
-[Meta] Internal version check compatible with 1.20.1-f1
-[Meta] Short segment detection improvements are available only at Very High Simulation Accuracy setting, since they may affect performance #1759, #1730, #1229
+[Fixed] Reversible Tram AI compatibility - Timed Traffic Lights fail to detect waiting trams
+[Updated] Updated location of despawn button in vehicle info popup to reduce risk of misclick #1784
 [/Version]

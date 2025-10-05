@@ -30,7 +30,7 @@ namespace TrafficManager.Patch._VehicleAI._TramBaseAI {
         public static MethodBase TargetMethod() => TranspilerUtil.DeclaredMethod<CalculatePositionDelegate>(typeof(TramBaseAI), "CalculateSegmentPosition");
 
         [UsedImplicitly]
-        public static bool Prefix(TrolleybusAI __instance,
+        public static bool Prefix(TramBaseAI __instance,
                                   ushort vehicleID,
                                   ref Vehicle vehicleData,
                                   PathUnit.Position nextPosition,

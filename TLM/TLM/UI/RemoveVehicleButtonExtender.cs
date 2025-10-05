@@ -55,12 +55,25 @@ namespace TrafficManager.UI {
             UITextField textField = panel.Find<UITextField>("VehicleName");
             if (textField && textField.size.x > 220f) {
                 // resize and move VehicleName text field to fit the mod despawn button in the row
-                textField.relativePosition += new Vector3(-12, 0);
-                textField.size += new Vector2(-20, 0);
+                Vector3 posOffset;
+                Vector2 sizeOffset;
+                if (panel is CitizenVehicleWorldInfoPanel) {
+                    posOffset = new Vector3(12, 0);
+                    sizeOffset = new Vector2(-28, 0);
+                } else if (panel is CityServiceVehicleWorldInfoPanel) {
+                    posOffset = new Vector3(20, 0);
+                    sizeOffset = new Vector2(-22, 0);
+                } else {
+                    posOffset = new Vector3(17, 0);
+                    sizeOffset = new Vector2(-28, 0);
+                }
+
+                textField.relativePosition += posOffset;
+                textField.size += sizeOffset;
             }
 
-            button.AlignTo(panel.component, UIAlignAnchor.TopRight);
-            button.relativePosition += new Vector3(-button.width - (4 * 33f), 5f);
+            button.AlignTo(panel.component, UIAlignAnchor.TopLeft);
+            button.relativePosition = new Vector3(45, 7f);
 
             Log._Debug($"Added {button} to {panel}");
             return button;
