@@ -48,7 +48,6 @@
 1348361731;Traffic Manager: President Edition ALPHA/DEBUG
 1546870472;Traffic Manager: President Edition (Industries Compatible)
 1556669944;CSM
-1558438291;Cities Multiplayer Mod (CSM) [Beta]
 1581695572;Traffic Manager: President Edition
 1604291910;498363759 Traffic Manager + Improved AI
 1628112268;RightTurnNoStop
@@ -56,7 +55,6 @@
 1806963141;TM:PE LABS
 1841616225;CSM
 1957033250;Traffic Manager: President Edition (Industries Compatible)
-2021598295;1558438291 [Beta] CSM - Cities_ Skylines Multiplayer
 2027716634;CitiesSkylinesMultiplayer_2002.2.0
 2030131871;CSM
 2080356971;CSM
