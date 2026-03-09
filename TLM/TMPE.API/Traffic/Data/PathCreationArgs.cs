@@ -100,6 +100,11 @@
         public bool ignoreCosts;
 
         /// <summary>
+        /// Should closed path be ignored?
+        /// </summary>
+        public bool ignoreClosed;
+
+        /// <summary>
         /// Should random parking apply?
         /// </summary>
         public bool randomParking;

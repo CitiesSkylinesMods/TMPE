@@ -301,7 +301,7 @@ namespace TrafficManager.Custom.PathFinding {
                         return false;
                     }
 
-                    m_pathUnits.m_buffer[pathUnitId].m_simulationFlags = 1;
+                    m_pathUnits.m_buffer[pathUnitId].m_simulationFlags = PathUnit.SimulationFlags.FLAG_CREATED;
                     m_pathUnits.m_buffer[pathUnitId].m_referenceCount = 1;
                     m_pathUnits.m_buffer[pathUnitId].m_nextPathUnit = 0u;
 
@@ -333,31 +333,36 @@ namespace TrafficManager.Custom.PathFinding {
             unit = pathUnitId;
 
             if (args.isHeavyVehicle) {
-                m_pathUnits.m_buffer[unit].m_simulationFlags |= PathUnit.FLAG_IS_HEAVY;
+                m_pathUnits.m_buffer[unit].m_simulationFlags |= PathUnit.SimulationFlags.FLAG_IS_HEAVY;
             }
 
             if (args.ignoreBlocked || args.ignoreFlooded) {
-                m_pathUnits.m_buffer[unit].m_simulationFlags |= PathUnit.FLAG_IGNORE_BLOCKED;
+                m_pathUnits.m_buffer[unit].m_simulationFlags |= PathUnit.SimulationFlags.FLAG_IGNORE_BLOCKED;
             }
 
             if (args.stablePath) {
-                m_pathUnits.m_buffer[unit].m_simulationFlags |= PathUnit.FLAG_STABLE_PATH;
+                m_pathUnits.m_buffer[unit].m_simulationFlags |= PathUnit.SimulationFlags.FLAG_STABLE_PATH;
             }
 
             if (args.randomParking) {
-                m_pathUnits.m_buffer[unit].m_simulationFlags |= PathUnit.FLAG_RANDOM_PARKING;
+                m_pathUnits.m_buffer[unit].m_simulationFlags |= PathUnit.SimulationFlags.FLAG_RANDOM_PARKING;
             }
 
             if (args.ignoreFlooded) {
-                m_pathUnits.m_buffer[unit].m_simulationFlags |= PathUnit.FLAG_IGNORE_FLOODED;
+                m_pathUnits.m_buffer[unit].m_simulationFlags |= PathUnit.SimulationFlags.FLAG_IGNORE_FLOODED;
             }
 
             if (args.hasCombustionEngine) {
-                m_pathUnits.m_buffer[unit].m_simulationFlags |= PathUnit.FLAG_COMBUSTION;
+                m_pathUnits.m_buffer[unit].m_simulationFlags |= PathUnit.SimulationFlags.FLAG_COMBUSTION;
             }
 
             if (args.ignoreCosts) {
-                m_pathUnits.m_buffer[unit].m_simulationFlags |= PathUnit.FLAG_IGNORE_COST;
+                m_pathUnits.m_buffer[unit].m_simulationFlags |= PathUnit.SimulationFlags.FLAG_IGNORE_COST;
+            }
+
+            if (args.ignoreClosed)
+            {
+                m_pathUnits.m_buffer[unit].m_simulationFlags |= PathUnit.SimulationFlags.FLAG_IGNORE_CLOSED;
             }
 
             m_pathUnits.m_buffer[unit].m_pathFindFlags = 0;

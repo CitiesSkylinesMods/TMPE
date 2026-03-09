@@ -268,13 +268,19 @@ namespace TrafficManager.UI.SubTools {
                         continue;
                     }
 
+                    NetInfo netInfo = netNode.Info;
+                    if (netInfo.m_netAI is RaceRoadAI rr && !rr.m_allowTraffic) {
+                        continue;
+                    }
+
                     //---------------------------
                     // Check the connection class
                     //---------------------------
                     // TODO refactor connection class check
-                    ItemClass connectionClass = netNode.Info.GetConnectionClass();
+                    ItemClass connectionClass = netInfo.GetConnectionClass();
 
                     if ((connectionClass == null) ||
+                        connectionClass.m_service == ItemClass.Service.Race ||
                         !((connectionClass.m_service == ItemClass.Service.Road) ||
                           ((connectionClass.m_service == ItemClass.Service.PublicTransport) &&
                            ((connectionClass.m_subService == ItemClass.SubService.PublicTransportTrain) ||
@@ -312,7 +318,7 @@ namespace TrafficManager.UI.SubTools {
             if (!viewOnly) {
                 RenderLaneOverlays(cameraInfo); // render lane ends + dead end signs
                 RenderFloatingLaneCurve(cameraInfo);
-            } 
+            }
 
             RenderDeadEnds(cameraInfo);
         }

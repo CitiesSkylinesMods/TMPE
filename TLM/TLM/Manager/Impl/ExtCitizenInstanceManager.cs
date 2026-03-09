@@ -1058,6 +1058,7 @@ namespace TrafficManager.Manager.Impl {
                 args.ignoreBlocked = false;
                 args.ignoreFlooded = false;
                 args.ignoreCosts = ignoreCost;
+                args.ignoreClosed = false;
                 args.randomParking = randomParking;
                 args.stablePath = false;
                 args.skipQueue = false;
