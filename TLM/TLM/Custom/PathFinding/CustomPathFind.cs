@@ -3386,10 +3386,10 @@ namespace TrafficManager.Custom.PathFinding {
             {
                 return;
             }
-            NetInfo.Lane lane2 = prevSegmentInfo.m_lanes[nextLaneIndex];
-            bool nextIsClosed = (nodeBuffer_[nextNodeId].m_flags2 & NetNode.Flags2.EventClosed) != 0;
-            bool prevIsClosed = (prevSegment.m_flags2 & NetSegment.Flags2.EventClosed) != 0;
-            if (lane2.m_laneType == NetInfo.LaneType.Pedestrian && nextIsClosed && prevIsClosed)
+            NetInfo.Lane lane2 = nextSegmentInfo.m_lanes[nextLaneIndex];
+            bool nextNodeIsClosed = (nodeBuffer_[nextNodeId].m_flags2 & NetNode.Flags2.EventClosed) != 0;
+            bool nextSegmentIsClosed = (nextSegment.m_flags2 & NetSegment.Flags2.EventClosed) != 0;
+            if (lane2.m_laneType == NetInfo.LaneType.Pedestrian && nextNodeIsClosed && nextSegmentIsClosed)
             {
                 return;
             }
