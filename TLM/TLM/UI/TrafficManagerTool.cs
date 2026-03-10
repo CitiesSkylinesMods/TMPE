@@ -919,6 +919,21 @@ namespace TrafficManager.UI {
                 if (HoveredNodeId != 0 && HoveredSegmentId != 0 && raycastSegment) {
                     HoveredSegmentId = GetHoveredSegmentFromNode(segmentOutput.m_hitPos);
                 }
+
+                NetInfo netInfo = null;
+                if (!raycastSegment && HoveredNodeId != 0) {
+                    ref NetNode node = ref HoveredNodeId.ToNode();
+                    netInfo = node.Info;
+                }
+                if (raycastSegment && HoveredSegmentId != 0) {
+                    ref NetSegment segment = ref HoveredSegmentId.ToSegment();
+                    netInfo = segment.Info;
+                }
+                if (netInfo && netInfo.m_netAI is RaceRoadAI rr && !rr.m_allowTraffic) {
+                    HoveredNodeId = 0;
+                    HoveredSegmentId = 0;
+                    return false;
+                }
             }
 
             return HoveredNodeId != 0 || HoveredSegmentId != 0;

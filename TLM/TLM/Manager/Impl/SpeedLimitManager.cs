@@ -85,6 +85,14 @@ namespace TrafficManager.Manager.Impl {
                 return false;
             }
 
+            if (netinfo.m_netAI is RaceRoadAI rr && !rr.m_allowTraffic) {
+#if DEBUG
+                if (debugSpeedLimits)
+                    Log._Debug($"Skipped non-traffic RaceRoad NetInfo '{netinfo.name}'");
+#endif
+                return false;
+            }
+
             if (!netinfo.m_vehicleTypes.IsFlagSet(VEHICLE_TYPES) || !netinfo.m_laneTypes.IsFlagSet(LANE_TYPES)) {
 #if DEBUG
                 if (debugSpeedLimits)

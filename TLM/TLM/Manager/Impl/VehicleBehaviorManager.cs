@@ -905,6 +905,7 @@ namespace TrafficManager.Manager.Impl {
                     out float sqrDistB);
             }
 
+            bool ignoreClosed = (vehicleData.m_flags2 & Vehicle.Flags2.EventRoadPass) != 0;
             bool foundEndPos = !calculateEndPos || driverInstance.Info.m_citizenAI.FindPathPosition(
                                    driverInstanceId,
                                    ref driverInstance,
@@ -918,6 +919,7 @@ namespace TrafficManager.Manager.Impl {
                                    vehicleTypes,
                                    VehicleInfo.VehicleCategory.All,
                                    undergroundTarget,
+                                   ignoreClosed,
                                    out endPosA);
             // NON-STOCK CODE END
 
@@ -951,6 +953,7 @@ namespace TrafficManager.Manager.Impl {
                     ignoreBlocked = ignoreBlocked,
                     ignoreFlooded = false,
                     ignoreCosts = false,
+                    ignoreClosed = ignoreClosed,
                     randomParking = randomParking,
                     stablePath = false,
                     skipQueue = (vehicleData.m_flags & Vehicle.Flags.Spawned) != 0,

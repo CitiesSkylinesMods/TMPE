@@ -23,7 +23,7 @@ namespace TrafficManager.Patch._PathManager {
         //  PathUnit.Position startPosA, PathUnit.Position startPosB, PathUnit.Position endPosA, PathUnit.Position endPosB, PathUnit.Position vehiclePosition,
         //  NetInfo.LaneType laneTypes, VehicleInfo.VehicleType vehicleTypes, VehicleInfo.VehicleCategory vehicleCategories, float maxLength, bool isHeavyVehicle,
         //  bool ignoreBlocked, bool stablePath, bool skipQueue, bool randomParking, bool ignoreFlooded, bool combustionEngine, bool ignoreCost)
-        delegate bool TargetDelegate(out uint unit, ref Randomizer randomizer, uint buildIndex, PathUnit.Position startPosA, PathUnit.Position startPosB, PathUnit.Position endPosA, PathUnit.Position endPosB, PathUnit.Position vehiclePosition, NetInfo.LaneType laneTypes, VehicleInfo.VehicleType vehicleTypes, VehicleInfo.VehicleCategory vehicleCategories, float maxLength, bool isHeavyVehicle, bool ignoreBlocked, bool stablePath, bool skipQueue, bool randomParking, bool ignoreFlooded, bool combustionEngine, bool ignoreCost);
+        delegate bool TargetDelegate(out uint unit, ref Randomizer randomizer, uint buildIndex, PathUnit.Position startPosA, PathUnit.Position startPosB, PathUnit.Position endPosA, PathUnit.Position endPosB, PathUnit.Position vehiclePosition, NetInfo.LaneType laneTypes, VehicleInfo.VehicleType vehicleTypes, VehicleInfo.VehicleCategory vehicleCategories, float maxLength, bool isHeavyVehicle, bool ignoreBlocked, bool stablePath, bool skipQueue, bool randomParking, bool ignoreFlooded, bool combustionEngine, bool ignoreCost, bool ignoreClosed);
 
         [UsedImplicitly]
         public static MethodBase TargetMethod() =>
@@ -40,7 +40,7 @@ namespace TrafficManager.Patch._PathManager {
         public static bool Prefix(ref bool __result, ref uint unit, ref Randomizer randomizer, uint buildIndex,
             PathUnit.Position startPosA, PathUnit.Position startPosB, PathUnit.Position endPosA, PathUnit.Position endPosB, PathUnit.Position vehiclePosition,
             NetInfo.LaneType laneTypes, VehicleInfo.VehicleType vehicleTypes, VehicleInfo.VehicleCategory vehicleCategories, float maxLength, bool isHeavyVehicle,
-            bool ignoreBlocked, bool stablePath, bool skipQueue, bool randomParking, bool ignoreFlooded, bool combustionEngine, bool ignoreCost)
+            bool ignoreBlocked, bool stablePath, bool skipQueue, bool randomParking, bool ignoreFlooded, bool combustionEngine, bool ignoreCost, bool ignoreClosed)
         {
             PathCreationArgs args = default;
             VehicleInfo info = null;
@@ -71,6 +71,7 @@ namespace TrafficManager.Patch._PathManager {
             args.randomParking = randomParking;
             args.ignoreFlooded = ignoreFlooded;
             args.ignoreCosts = ignoreCost;
+            args.ignoreClosed = ignoreClosed;
 
             args.laneTypes = laneTypes;
             args.vehicleTypes = vehicleTypes;
