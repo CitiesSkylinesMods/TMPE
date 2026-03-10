@@ -1,6 +1,6 @@
-[Version] 11.9.4.0
+[Version] 11.9.4.1
 [Released] Mar 10th 2026
-[Link] tmpe-v11940-stable-10032026
+[Link] tmpe-v11941-stable-10032026
 [Stable]
-[Meta] Compatibility patch for 1.21.1-f5
+[Fixed] CustomPathFind.ProcessItemPedBicycle() - Array index is out of range
 [/Version]
