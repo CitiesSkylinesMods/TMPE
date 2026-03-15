@@ -25,6 +25,8 @@ namespace TrafficManager.Util {
         // parsed contents of incompatible_mods.txt
         private readonly Dictionary<ulong, string> knownIncompatibleMods;
         private readonly HashSet<string> gameBreaking;
+        private readonly HashSet<ulong> compatibilityWhitelistIds;
+        private readonly HashSet<string> compatibilityWhitelistNames;
 
         public ModsCompatibilityChecker() {
             knownIncompatibleMods = LoadListOfIncompatibleMods();
@@ -32,8 +34,14 @@ namespace TrafficManager.Util {
                 "Cities: Skylines Multiplayer",
                 "CSM",
                 "Cities Skylines Multiplayer (CSM)",
-                "Cities: Skylines Multiplayer (CSM) [Beta]",
                 "Harmony (redesigned)",
+            });
+            compatibilityWhitelistIds = new HashSet<ulong>(new[] {
+                1558438291uL,
+            });
+            compatibilityWhitelistNames = new HashSet<string>(new[] {
+                "CSM.TmpeSync",
+                "Cities: Skylines Multiplayer (CSM) [Beta]",
             });
         }
 
@@ -100,13 +108,16 @@ namespace TrafficManager.Util {
                     string strWorkshopId = isLocal ? "(local)" : workshopID.ToString();
                     string strIncompatible = " ";
 
-                    if (knownIncompatibleMods.ContainsKey(workshopID)) {
+                    bool isWhitelisted = compatibilityWhitelistIds.Contains(workshopID) ||
+                                          compatibilityWhitelistNames.Contains(strModName);
+
+                    if (!isWhitelisted && knownIncompatibleMods.ContainsKey(workshopID)) {
                         strIncompatible = "!";
                         if (checkKnown && (!filterToEnabled || mod.isEnabled)) {
                             Debug.Log("[TM:PE] Incompatible mod detected: " + strModName);
                             results.Add(mod, strModName);
                         }
-                    } else if (gameBreaking.Contains(strModName)) {
+                    } else if (!isWhitelisted && gameBreaking.Contains(strModName)) {
                         strIncompatible = "!";
                         Debug.Log("[TM:PE] Incompatible, potentially game breaking mod detected: " + strModName);
                         results.Add(mod, strModName);
