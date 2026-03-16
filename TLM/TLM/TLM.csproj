@@ -107,6 +107,9 @@
     <Reference Include="MoveItIntegration">
       <HintPath>..\libs\MoveItIntegration.dll</HintPath>
     </Reference>
+    <Reference Include="Portable.ConcurrentDictionary, Version=1.0.4.0, Culture=neutral, PublicKeyToken=8b3524163ea7a2b3, processorArchitecture=MSIL">
+      <HintPath>..\packages\Portable.ConcurrentDictionary.1.0.4\lib\net35\Portable.ConcurrentDictionary.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
       <HintPath>$(MangedDLLPath)\System.Core.dll</HintPath>
@@ -899,6 +902,10 @@
     <EmbeddedResource Include="Resources\incompatible_mods.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\CSModLib\CSModLib.csproj">
+      <Project>{5d3b2f48-3f16-424d-8c87-d59cdf420ea9}</Project>
+      <Name>CSModLib</Name>
+    </ProjectReference>
     <ProjectReference Include="..\CSUtil.CameraControl\CSUtil.CameraControl\CSUtil.CameraControl\CSUtil.CameraControl.csproj">
       <Project>{f8759084-df5b-4a54-b73c-824640a8fa3f}</Project>
       <Name>CSUtil.CameraControl</Name>
@@ -1289,6 +1296,8 @@ xcopy /y "$(TargetDir)CSUtil.Commons.dll" "%25DEPLOYDIR%25"
 xcopy /y "$(TargetDir)CitiesHarmony.API.dll" "%25DEPLOYDIR%25"
 xcopy /y "$(TargetDir)MoveItIntegration.dll" "%25DEPLOYDIR%25"
 xcopy /y "$(TargetDir)UnifiedUILib.dll" "%25DEPLOYDIR%25"
+xcopy /y "$(TargetDir)CSModLib.dll" "%25DEPLOYDIR%25"
+xcopy /y "$(TargetDir)Portable.ConcurrentDictionary.dll" "%25DEPLOYDIR%25"
 
 rem To avoid double hot reload, TrafficManager.dll must be replaced last and fast.
 rem Once TrafficManager.dll is re-loaded, all other dlls will be reloaded as well
